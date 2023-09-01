@@ -1,41 +1,38 @@
 function footer() {
   return (
-    <footer class=" shadow bg-gray-900 ">
-      <div class="w-full max-w-screen-xl mx-auto p-4 md:py-8">
-        <div class="sm:flex sm:items-center sm:justify-between">
-          <a
-            href="https://flowbite.com/"
-            class="flex items-center mb-4 sm:mb-0"
-          >
-            <img src="/img/logo.png" class="h-8 mr-3" alt="Logo" />
+    <footer className=" shadow bg-gray-900 ">
+      <div className="w-full max-w-screen-xl mx-auto p-4 md:py-8">
+        <div className="sm:flex sm:items-center sm:justify-between">
+          <a href="#" className="flex items-center mb-4 sm:mb-0">
+            <img src="/img/logo.png" className="h-8 mr-3" alt="Logo" />
           </a>
-          <ul class="flex flex-wrap items-center mb-6 text-sm font-medium text-gray-500 sm:mb-0 dark:text-gray-400">
+          {/* <ul className="flex flex-wrap items-center mb-6 text-sm font-medium  sm:mb-0 text-gray-400">
             <li>
-              <a href="#" class="mr-4  md:mr-6 ">
+              <a href="#" className="mr-4  md:mr-6 ">
                 About
               </a>
             </li>
             <li>
-              <a href="#" class="mr-4  md:mr-6">
+              <a href="#" className="mr-4  md:mr-6">
                 Privacy Policy
               </a>
             </li>
             <li>
-              <a href="#" class="mr-4  md:mr-6 ">
+              <a href="#" className="mr-4  md:mr-6 ">
                 Licensing
               </a>
             </li>
             <li>
-              <a href="#" class="">
+              <a href="#" className="">
                 Contact
               </a>
             </li>
-          </ul>
+          </ul> */}
         </div>
-        <hr class="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
-        <span class="block text-sm text-gray-500 sm:text-center dark:text-gray-400">
-          © 2023{" "}
-          <a href="https://flowbite.com/" class="hover:underline">
+        <hr className="my-6  sm:mx-auto border-gray-700 lg:my-8" />
+        <span className="block text-sm  sm:text-center text-gray-400">
+          © 2023
+          <a href="#" className="hover:underline">
             Upper™
           </a>
           . All Rights Reserved.
