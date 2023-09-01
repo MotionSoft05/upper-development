@@ -30,6 +30,40 @@ export default function Home() {
     };
   }, []);
 
+  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState(false);
+
+  // Función para alternar entre precios mensuales y anuales
+  const alternarPrecios = () => {
+    setMostrarPreciosAnuales(!mostrarPreciosAnuales);
+  };
+
+  // Función para obtener el texto del período (mensual o anual)
+  const obtenerTextoPeriodo = () => {
+    return mostrarPreciosAnuales ? "anual" : "mensual";
+  };
+
+  // Función para obtener el precio según el período
+  const obtenerPrecio = (categoria) => {
+    // Define los precios según la categoría y el período
+    const precios = {
+      gratis: {
+        mensual: "$0",
+        anual: "$0",
+      },
+      estandar: {
+        mensual: "$99",
+        anual: "$1200",
+      },
+      profesional: {
+        mensual: "$Contacto",
+        anual: "$Contacto", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
+      },
+    };
+
+    // Obtén el precio según la categoría y el período
+    return precios[categoria][obtenerTextoPeriodo()];
+  };
+
   return (
     <main>
       {/* Title */}
@@ -265,6 +299,14 @@ export default function Home() {
               tuya.
             </p>
           </div>
+          <div className="text-center">
+            <button
+              onClick={alternarPrecios}
+              className="bg-custom text-white font-semibold px-4 py-2 rounded-full focus:outline-none hover:bg-green-400"
+            >
+              Precio {obtenerTextoPeriodo()}
+            </button>
+          </div>
           <div className="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
             <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white ">
               <h3 className="mb-4 text-2xl font-semibold text-custom">
@@ -273,9 +315,14 @@ export default function Home() {
               <p className="font-light sm:text-lg text-gray-400">
                 La mejor opción para el uso personal o tu siguiente proyecto.
               </p>
-              <div className="flex justify-center items-baseline my-8">
-                <span className="mr-2 text-5xl font-extrabold">$0</span>
-                <span className=" text-gray-400">/month</span>
+              <div
+                id="precios1"
+                className="flex justify-center items-baseline my-8"
+              >
+                <span className="mr-2 text-5xl font-extrabold">
+                  {obtenerPrecio("gratis")}
+                </span>
+                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
@@ -302,9 +349,14 @@ export default function Home() {
               <p className="font-light sm:text-lg text-gray-400 ">
                 Ideal para múltiples usuarios con necesidades avanzadas.
               </p>
-              <div className="flex justify-center items-baseline my-8">
-                <span className="mr-2 text-5xl font-extrabold">$99</span>
-                <span className="text-gray-500 ">/month</span>
+              <div
+                id="precios2"
+                className="flex justify-center items-baseline my-8"
+              >
+                <span className="mr-2 text-5xl font-extrabold">
+                  {obtenerPrecio("estandar")}
+                </span>
+                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
@@ -327,9 +379,14 @@ export default function Home() {
                 Mejor para usos a gran escala y derechos extendidos de
                 redistribución.
               </p>
-              <div className="flex justify-center items-baseline my-8">
-                <span className="mr-2 text-5xl font-extrabold">$Contacto</span>
-                <span className="text-gray-500 ">/month</span>
+              <div
+                id="precios3"
+                className="flex justify-center items-baseline my-8"
+              >
+                <span className="mr-2 text-5xl font-extrabold">
+                  {obtenerPrecio("profesional")}
+                </span>
+                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
