@@ -1,12 +1,41 @@
+"use client";
 import Image from "next/image";
+import { useRef, useEffect, useState } from "react";
 
 export default function Home() {
+  const buttonRef = useRef(null);
+  const [showButton, setShowButton] = useState(false);
+
+  // Agrega un controlador de desplazamiento para verificar cuándo mostrar el botón.
+  useEffect(() => {
+    const handleScroll = () => {
+      // Define la distancia desde la parte superior de la página donde deseas mostrar el botón.
+      const threshold = 500; // Cambia esto según tu preferencia.
+
+      if (window.scrollY > threshold) {
+        // Si el desplazamiento vertical supera el umbral, muestra el botón.
+        setShowButton(true);
+      } else {
+        // De lo contrario, oculta el botón.
+        setShowButton(false);
+      }
+    };
+
+    // Agrega el controlador de desplazamiento al evento "scroll".
+    window.addEventListener("scroll", handleScroll);
+
+    // Limpia el controlador de desplazamiento al desmontar el componente.
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
     <main>
       {/* Title */}
       <section>
         <div className=" mt-20 mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-          <h1 className="mb-4 text-5xl   text-custom font-extrabold md:text-9xl">
+          <h1 className="mb-4 text-5xl text-custom font-extrabold md:text-9xl">
             Upper DS
           </h1>
           <p className="mb-5 font-light sm:text-xl text-gray-400">
@@ -30,9 +59,9 @@ export default function Home() {
         </div>
       </section>
       {/* Soluciones */}
-      <section>
-        <div className="bg-white">
-          <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <section id="soluciones">
+        <div className="py-24">
+          <div className="px-4 mx-auto max-w-screen-xl ">
             <div className="mx-auto max-w-screen-md text-center lg:mb-16 mb-8">
               <h2 className="mb-4 text-3xl lg:text-4xl tracking-tight font-extrabold text-custom ">
                 Soluciones de Señalización Digital
@@ -107,8 +136,8 @@ export default function Home() {
         </div>
       </section>
       {/* Recursos */}
-      <section className="">
-        <div className="bg-white py-24 sm:py-32">
+      <section id="recursos">
+        <div className="pt-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
               <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom">
@@ -181,8 +210,8 @@ export default function Home() {
         </div>
       </section>
       {/* Preguntas frecuentes */}
-      <section className="">
-        <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <section id="preguntas">
+        <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
           <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
             <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom">
               Preguntas frecuentes
@@ -225,8 +254,8 @@ export default function Home() {
         </div>
       </section>
       {/* Precios */}
-      <section className="">
-        <div className="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+      <section id="precios">
+        <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
           <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
             <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom ">
               Impulsa tu Éxito con Upper.
@@ -285,12 +314,6 @@ export default function Home() {
                     Digital
                   </span>
                 </li>
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    La licencia de evaluación se activara por 21 días.
-                  </span>
-                </li>
               </ul>
               <a href="#" className="text-white hover:text-green-400">
                 Comienza ya
@@ -324,10 +347,7 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-              <a
-                href="#"
-                className="text-white pt-2 pb-2 bg-black hover:text-green-400"
-              >
+              <a href="#" className="text-white pt-2 pb-2 hover:text-green-400">
                 Comienza ya
               </a>
             </div>
@@ -335,14 +355,14 @@ export default function Home() {
         </div>
       </section>
       {/* Contacto */}
-      <section className=" ">
-        <div className="py-8 lg:py-16 px-4 mx-auto max-w-screen-md">
-          <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-center text-gray-900 ">
-            Contact Us
+      <section id="contacto">
+        <div className="pt-24  px-4 mx-auto max-w-screen-md">
+          <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-center text-custom ">
+            Contáctanos
           </h2>
           <p className="mb-8 lg:mb-16 font-light text-center   sm:text-xl">
-            Got a technical issue? Want to send feedback about a beta feature?
-            Need details about our Business plan? Let us know.
+            Tienes un problema técnico? Necesitas información sobre alguno de
+            nuestros planes? Háznoslo saber.
           </p>
           <form action="#" className="space-y-8">
             <div>
@@ -350,13 +370,13 @@ export default function Home() {
                 for="email"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Your email
+                Tu email
               </label>
               <input
                 type="email"
                 id="email"
                 className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  "
-                placeholder="name@flowbite.com"
+                placeholder="Ejemplo@gmail.com"
                 required
               />
             </div>
@@ -365,11 +385,11 @@ export default function Home() {
                 for="subject"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Subject
+                Tema
               </label>
               <input
                 type="text"
-                id="subject"
+                id="Tema"
                 className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
                 placeholder="Let us know how we can help you"
                 required
@@ -380,20 +400,20 @@ export default function Home() {
                 for="message"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Your message
+                Tu mensaje
               </label>
               <textarea
                 id="message"
                 rows="6"
                 className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 "
-                placeholder="Leave a comment..."
+                placeholder="Deja un comentario..."
               ></textarea>
             </div>
             <button
               type="submit"
               className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second"
             >
-              Send message
+              Enviar mensaje
             </button>
           </form>
         </div>
@@ -448,6 +468,23 @@ export default function Home() {
             </a>
           </div>
         </div>
+      </section>
+      {/* Top button */}
+      <section>
+        {showButton && (
+          <button
+            ref={buttonRef}
+            className="fixed bottom-4 right-4 bg-custom text-white px-4 py-2 rounded-full shadow-lg hover:bg-teal-300 focus:outline-none focus:ring-2 focus:ring-teal-300"
+            onClick={() => {
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
+          >
+            <img src="/img/arrow.svg" />
+          </button>
+        )}
       </section>
     </main>
   );
