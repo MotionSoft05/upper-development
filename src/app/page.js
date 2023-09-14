@@ -1,6 +1,8 @@
 "use client";
 import Image from "next/image";
 import { useRef, useEffect, useState } from "react";
+import "keen-slider/keen-slider.min.css";
+import { useKeenSlider } from "keen-slider/react";
 
 export default function Home() {
   const buttonRef = useRef(null);
@@ -64,241 +66,253 @@ export default function Home() {
     return precios[categoria][obtenerTextoPeriodo()];
   };
 
+  // Slider
+  const [sliderRef] = useKeenSlider({
+    loop: true,
+  });
+
+  //  FAQ
+  const faqData = [
+    {
+      question: "¿Qué es el software de señalización digital y cómo funciona?",
+      answer:
+        "El software de señalización digital Upper DS es una plataforma que permite crear, programar y gestionar contenido multimedia (imágenes y videos.) en pantallas digitales. Funciona mediante la carga de contenido en la plataforma web, la programación de reproducción y la distribución a pantallas conectadas.",
+    },
+    // Agrega más preguntas y respuestas aquí
+    {
+      question:
+        "¿Cuáles son los beneficios de usar software de señalización digital?",
+      answer:
+        "Los beneficios incluyen la capacidad de transmitir información en tiempo real, la flexibilidad para cambiar contenido de forma remota, la mejora de la experiencia del cliente, el aumento de la visibilidad de la marca y la capacidad de medir el rendimiento del contenido.",
+    },
+    {
+      question:
+        "¿Qué tipo de contenido se puede mostrar con el software de señalización digital?",
+      answer:
+        "Se puede mostrar una amplia variedad de contenido, como anuncios publicitarios, promociones, información de productos, noticias, clima, horarios, contenido educativo, entretenimiento, y más. La versatilidad es una de las fortalezas de la señalización digital.",
+    },
+    {
+      question:
+        "¿Qué hardware se necesita para utilizar el software de señalización digital?",
+      answer:
+        "El hardware necesario incluye pantallas digitales (monitores, videowalls, etc.), reproductores de medios digitales (como reproductores multimedia, computadoras o TV Box) los cuales requieren estar conectados a Internet​",
+    },
+    {
+      question:
+        "¿Cómo se gestiona el contenido en el software de señalización digital en Upper DS?",
+      answer:
+        "El contenido se gestiona a través de una interfaz de usuario en una plataforma web. Los usuarios pueden cargar, organizar y programar contenido para que se reproduzca en las pantallas. ",
+    },
+    {
+      question:
+        "¿Es seguro el uso del software de señalización digital en términos de privacidad y seguridad?",
+      answer:
+        "La seguridad y privacidad son preocupaciones importantes. Upper DS ofrece características de seguridad, como autenticación de usuarios, certificado de seguridad y gestión de permisos para proteger la privacidad y prevenir el acceso no autorizado.",
+    },
+    {
+      question:
+        "¿Cuál es la diferencia entre señalización digital basada en la nube y en sitio?",
+      answer:
+        "La señalización digital basada en la nube almacena y gestiona contenido en servidores remotos, lo que permite un acceso más fácil y la gestión desde cualquier lugar con conexión a Internet. La señalización en sitio, en cambio, utiliza servidores locales y suele ser adecuada para redes cerradas.",
+    },
+    {
+      question:
+        "¿Cómo se pueden medir los resultados y el impacto del contenido de señalización digital?",
+      answer:
+        "Puedes medir el impacto mediante métricas como el número de reproducciones, la interacción del usuario (si es interactivo), el tiempo de visualización y el retorno de inversión (ROI) si estás utilizando la señalización digital con fines comerciales. ",
+    },
+  ];
+
+  const [openIndex, setOpenIndex] = useState(null);
+
+  const toggleAnswer = (index) => {
+    if (openIndex === index) {
+      setOpenIndex(null);
+    } else {
+      setOpenIndex(index);
+    }
+  };
+
   return (
-    <main>
+    <main className="bg-gray-50">
       {/* Title */}
       <section>
-        <div className=" mt-20 mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-          <h1 className="mb-4 text-5xl text-custom font-extrabold md:text-9xl">
-            Upper DS
-          </h1>
-          <p className="mb-5 font-light sm:text-xl text-gray-400">
-            Eleva Tu Impacto Visual, Impulsa Tu Negocio
-          </p>
-        </div>
+        <div className=" grid grid-cols-2">
+          <div>
+            <div ref={sliderRef} className="keen-slider">
+              <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+              <div className="keen-slider__slide number-slide2 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+              <div className="keen-slider__slide number-slide3 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+              <div className="keen-slider__slide number-slide4 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+              <div className="keen-slider__slide number-slide5 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+              <div className="keen-slider__slide number-slide6 flex items-center justify-center">
+                <img
+                  src="/img/sliderImage.png"
+                  className="mx-auto"
+                  alt="Logo"
+                />
+              </div>
+            </div>
+          </div>
 
-        <div className="max-w-7xl mx-auto mt-8 space-y-4 md:mt-16">
-          <div className="px-4 pb-5 sm:px-6 sm:pb-6">
-            <p>
-              Descubre UPPER DS, el poderoso sistema de Señalización Digital
-              diseñado para generar un impacto visual sin igual en tu negocio.
-              Con nuestra plataforma, podrás cautivar a tu audiencia, comunicar
-              mensajes efectivos y potenciar la presencia de tu marca de manera
-              innovadora y atractiva. No importa la industria en la que te
-              encuentres, UPPER DS te brinda las herramientas necesarias para
-              destacar y transmitir tu mensaje a las personas adecuadas, en el
-              momento justo.
-            </p>
+          <div>
+            <div className="mb-8">
+              <h1 className="text-6xl font-normal">
+                UPPER DS es el sistema de Señalización Digital que ayudara a
+                generar impacto visual en tu negocio
+              </h1>
+            </div>
+            <div className="">
+              <div className="">
+                <p className="text-lg">
+                  Es una plataforma de señalización digital fácil de
+                  personalizar, programar y diseñar contenido de forma
+                  profesional. La plataforma se encuentra basada en la nube para
+                  acceso desde cualquier dispositivo
+                </p>
+                <div>
+                  <button
+                    type="button"
+                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1 "
+                  >
+                    Registrarse
+                  </button>
+                  <button
+                    type="button"
+                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1"
+                  >
+                    Descargar folleto
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
-      <div
-        id="carouselExampleCaptions"
-        class="relative"
-        data-te-carousel-init
-        data-te-carousel-slide
-      >
-        <div
-          class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0"
-          data-te-carousel-indicators
-        >
-          <button
-            type="button"
-            data-te-target="#carouselExampleCaptions"
-            data-te-slide-to="0"
-            data-te-carousel-active
-            class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0 -indent-[999px] opacity-50 transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none"
-            aria-current="true"
-            aria-label="Slide 1"
-          ></button>
-          <button
-            type="button"
-            data-te-target="#carouselExampleCaptions"
-            data-te-slide-to="1"
-            class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0 -indent-[999px] opacity-50 transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none"
-            aria-label="Slide 2"
-          ></button>
-          <button
-            type="button"
-            data-te-target="#carouselExampleCaptions"
-            data-te-slide-to="2"
-            class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0 -indent-[999px] opacity-50 transition-opacity duration-[600ms] ease-[cubic-bezier(0.25,0.1,0.25,1.0)] motion-reduce:transition-none"
-            aria-label="Slide 3"
-          ></button>
-        </div>
-        <div class="relative w-full overflow-hidden after:clear-both after:block after:content-['']">
-          <div
-            class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
-            data-te-carousel-active
-            data-te-carousel-item
-            style={{ backfaceVisibility: "hidden" }}
-          >
-            <div
-              class="relative overflow-hidden bg-cover bg-no-repeat"
-              style={{ backgroundPosition: "50%" }}
-            >
-              <img
-                src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(123).jpg"
-                class="block w-full"
-              />
-              <div class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50"></div>
-            </div>
-            <div class="absolute inset-x-[15%] bottom-5 hidden py-5 text-center text-white md:block">
-              <h5 class="text-xl">First slide label</h5>
-              <p>
-                Some representative placeholder content for the first slide.
-              </p>
-            </div>
-          </div>
-          <div
-            class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
-            data-te-carousel-item
-            style={{ backfaceVisibility: "hidden" }}
-          >
-            <div
-              class="relative overflow-hidden bg-cover bg-no-repeat"
-              style={{ backgroundPosition: "50%" }}
-            >
-              <img
-                src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(124).jpg"
-                class="block w-full"
-              />
-              <div class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50"></div>
-            </div>
-            <div class="absolute inset-x-[15%] bottom-5 hidden py-5 text-center text-white md:block">
-              <h5 class="text-xl">Second slide label</h5>
-              <p>
-                Some representative placeholder content for the second slide.
-              </p>
-            </div>
-          </div>
-          <div
-            class="relative float-left -mr-[100%] hidden w-full transition-transform duration-[600ms] ease-in-out motion-reduce:transition-none"
-            data-te-carousel-item
-            style={{ backfaceVisibility: "hidden" }}
-          >
-            <div
-              class="relative overflow-hidden bg-cover bg-no-repeat"
-              style={{ backgroundPosition: "50%" }}
-            >
-              <img
-                src="https://tecdn.b-cdn.net/img/Photos/Slides/img%20(125).jpg"
-                class="block w-full"
-              />
-              <div class="absolute bottom-0 left-0 right-0 top-0 h-full w-full overflow-hidden bg-black bg-fixed opacity-50"></div>
-            </div>
-            <div class="absolute inset-x-[15%] bottom-5 hidden py-5 text-center text-white md:block">
-              <h5 class="text-xl">Third slide label</h5>
-              <p>
-                Some representative placeholder content for the third slide.
-              </p>
-            </div>
-          </div>
-        </div>
-        <button
-          class="absolute bottom-0 left-0 top-0 z-[1] flex w-[15%] items-center justify-center border-0 bg-none p-0 text-center text-white opacity-50 transition-opacity duration-150 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] hover:text-white hover:no-underline hover:opacity-90 hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none"
-          type="button"
-          data-te-target="#carouselExampleCaptions"
-          data-te-slide="prev"
-        >
-          <span class="inline-block h-8 w-8">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="h-6 w-6"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
-            </svg>
-          </span>
-          <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Previous
-          </span>
-        </button>
-        <button
-          class="absolute bottom-0 right-0 top-0 z-[1] flex w-[15%] items-center justify-center border-0 bg-none p-0 text-center text-white opacity-50 transition-opacity duration-150 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] hover:text-white hover:no-underline hover:opacity-90 hover:outline-none focus:text-white focus:no-underline focus:opacity-90 focus:outline-none motion-reduce:transition-none"
-          type="button"
-          data-te-target="#carouselExampleCaptions"
-          data-te-slide="next"
-        >
-          <span class="inline-block h-8 w-8">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="currentColor"
-              class="h-6 w-6"
-            >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </span>
-          <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
-            Next
-          </span>
-        </button>
-      </div>
       {/* Soluciones */}
       <section id="soluciones">
         <div className="py-24">
           <div className="px-4 mx-auto max-w-screen-xl ">
-            <div className="mx-auto max-w-screen-md text-center lg:mb-16 mb-8">
-              <h2 className="mb-4 text-3xl lg:text-4xl tracking-tight font-extrabold text-custom ">
-                Soluciones de Señalización Digital
-              </h2>
-              <p className="font-light text-gray-500 sm:text-xl">
-                Existe una diversidad de industrias para Soluciones de
-                Señalización Digital, donde Upper DS será tu mejor aliado para
-                transmitir su mensaje a las personas adecuadas y en el momento
-                adecuado.
-              </p>
-            </div>
+            <h1 className="text-2xl text-center font-bold  mb-16">
+              Existe una diversidad de industrias para Soluciones de
+              Señalización Digital, donde Upper DS será tu mejor aliado para
+              transmitir su mensaje a las personas adecuadas y en el momento
+              adecuado
+            </h1>
+
             <div className="grid grid-cols-3 gap-y-4 gap-x-2 md:gap-8 ">
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro1.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro1.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">
+                  Restaurantes y bares
+                </h1>
+                <p className="text-sm text-center text-gray-600">
+                  Ofrezca menús atractivos, programe promociones y actualice
+                  precios de forma sencilla
+                </p>
               </article>
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro2.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro2.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">Transporte</h1>
+                <p className="text-sm text-center text-gray-600">
+                  Informe a los viajeros con actualizaciones de transporte en
+                  tiempo real y con contenido útil.
+                </p>
               </article>
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro3.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro3.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">Oficinas</h1>
+                <p className="text-sm text-center text-gray-600">
+                  Promueva la comunicación hacia sus clientes de firma optima y
+                  ágil
+                </p>
               </article>
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro4.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro4.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">
+                  Salones de Eventos
+                </h1>
+                <p className="text-sm text-center text-gray-600">
+                  Brinde orientación e información oportuna de sus eventos
+                </p>
               </article>
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro5.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro5.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">Hoteles</h1>
+                <p className="text-sm text-center text-gray-600">
+                  Genere una experiencia de señalización digital para los
+                  huéspedes que le permita maximizar sus ingresos.
+                </p>
               </article>
-              <article className="w-32 md:w-64 p-4 bg-gray-50 rounded-lg border border-gray-300 shadow-md mx-auto">
+              <article>
                 <div>
-                  <img src="/img/centro6.jpeg" className="rounded-lg" />
+                  <img
+                    src="/img/centro6.jpeg"
+                    className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
+                  />
                 </div>
-                <p className="font-light text-center">Restaurantes y bares</p>
+                <h1 className="font-bold text-center mb-1">
+                  Minoristas y Centros Médicos​
+                </h1>
+                <p className="text-sm text-center text-gray-600">
+                  De a conocer las ofertas y novedades en su tienda para
+                  estimular las compras
+                </p>
               </article>
             </div>
           </div>
@@ -331,13 +345,9 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
               <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom">
-                Publique contenido de cualquier tipo en sus pantallas de forma
-                rápida, sencilla y profesional.
+                Publique contenido de alto impacto para sus ​ clientes de forma
+                rapida, sencilla y profesional
               </h2>
-              <p className="mb-5 font-light sm:text-xl text-gray-400">
-                Administre plantillas para Salones de Eventos, Publicidad y
-                Menús Digitales aprovechando el poder de videos y las imágenes.
-              </p>
             </div>
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
               <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
@@ -348,7 +358,7 @@ export default function Home() {
                     </div>
                     Personalice el diseño de sus pantallas
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600">
+                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
                     Muestre contenido interesante que sus clientes apreciarán
                     instantáneamente. Agréguelos a nuestras plantillas de diseño
                     de pantalla gratuitas y personalizables.
@@ -361,7 +371,7 @@ export default function Home() {
                     </div>
                     Fácil programación de contenido
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600">
+                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
                     Administre decenas de pantallas, cargue, edite y muestre
                     contenido de forma remota desde cualquier dispositivo,
                     utilizando nuestra plataforma en la nube.
@@ -374,7 +384,7 @@ export default function Home() {
                     </div>
                     Genera impacto por contenido versátil
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600">
+                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
                     Ofrece una versatilidad cuando se trate de generar
                     contenido. Las posibilidades son infinitas, desde anuncios
                     de eventos, promociones, actualizaciones meteorológicas y
@@ -388,7 +398,7 @@ export default function Home() {
                     </div>
                     Seguridad y alta disponibilidad de herramienta
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600">
+                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
                     Upper DS opera en plataformas que están certificadas con los
                     principales estándares de seguridad y privacidad
                     (Cumplimiento de ISO y SOC).
@@ -413,22 +423,45 @@ export default function Home() {
           </div>
 
           <div className="max-w-3xl mx-auto mt-8 space-y-4 md:mt-16">
-            <div className="">
-              <div className="flex items-center justify-between w-full px-4 py-5 sm:p-6">
-                <span className="flex text-lg font-semibold text-black">
-                  ¿Cómo funciona nuestro Sistema de Señalización Digital?
-                </span>
-              </div>
+            {faqData.map((item, index) => (
+              <div
+                key={index}
+                className="transition-all duration-200 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50"
+              >
+                <button
+                  type="button"
+                  onClick={() => toggleAnswer(index)}
+                  className="flex justify-between items-center w-full px-4 py-5 sm:p-6"
+                >
+                  <span className="text-sm font-semibold text-black">
+                    {item.question}
+                  </span>
 
-              <div className="px-4 pb-5 sm:px-6 sm:pb-6">
-                <p>
-                  Nuestro Sistema de Señalización Digital es una plataforma
-                  basada en la nube que permite crear y administrar diferentes
-                  señalizaciones para transmitir en pantallas con acceso a un
-                  navegador web
-                </p>
+                  <svg
+                    className={`w-6 h-6 text-gray-400 transform ${
+                      openIndex === index ? "rotate-180" : ""
+                    }`}
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M19 9l-7 7-7-7"
+                    />
+                  </svg>
+                </button>
+
+                {openIndex === index && (
+                  <div className="px-4 pb-5 sm:px-6 sm:pb-6">
+                    <p>{item.answer}</p>
+                  </div>
+                )}
               </div>
-            </div>
+            ))}
           </div>
 
           <p className="text-center text-gray-600 textbase mt-9">
@@ -448,37 +481,30 @@ export default function Home() {
         <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
           <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
             <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom ">
-              Impulsa tu Éxito con Upper.
+              Impulsa el éxito de tu negocio con Upper DS
             </h2>
             <p className="mb-5 font-light sm:text-xl text-gray-400">
-              Nuestros precios están diseñados pensando en empresas como la
-              tuya.
+              Encuentre el plan de señalización digital que te de mayores
+              beneficios​
             </p>
           </div>
-          <div className="text-center">
-            <button
-              onClick={alternarPrecios}
-              className="bg-custom text-white font-semibold px-4 py-2 rounded-full focus:outline-none hover:bg-green-400"
-            >
-              Precio {obtenerTextoPeriodo()}
-            </button>
-          </div>
+          <div className="text-center"></div>
           <div className="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white ">
+            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
               <h3 className="mb-4 text-2xl font-semibold text-custom">
                 Gratis
               </h3>
               <p className="font-light sm:text-lg text-gray-400">
-                La mejor opción para el uso personal o tu siguiente proyecto.
+                La mejor opción para comenzar tu siguiente proyecto de
+                digitalización
               </p>
               <div
                 id="precios1"
-                className="flex justify-center items-baseline my-8"
+                className="flex justify-center items-baseline my-8 mt-14"
               >
                 <span className="mr-2 text-5xl font-extrabold">
                   {obtenerPrecio("gratis")}
                 </span>
-                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
@@ -494,16 +520,20 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-              <a href="#" className="text-white hover:text-green-400 ">
+              <a
+                href="#"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
+              >
                 Comienza ya
               </a>
             </div>
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white ">
+            <div className="flex flex-col p-6 mx-auto max-w-lg text-center rounded-lg border shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
               <h3 className="mb-4 text-2xl font-semibold text-custom">
                 Estándar
               </h3>
               <p className="font-light sm:text-lg text-gray-400 ">
-                Ideal para múltiples usuarios con necesidades avanzadas.
+                Lo mejor para usuarios que buscan incorporar la señalización
+                digital como parte de su estrategia de negocio
               </p>
               <div
                 id="precios2"
@@ -512,7 +542,6 @@ export default function Home() {
                 <span className="mr-2 text-5xl font-extrabold">
                   {obtenerPrecio("estandar")}
                 </span>
-                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
@@ -523,26 +552,27 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-              <a href="#" className="text-white hover:text-green-400">
+              <a
+                href="#"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
+              >
                 Comienza ya
               </a>
             </div>
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white ">
+            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
               <h3 className="mb-4 text-2xl font-semibold text-custom">
                 Profesional
               </h3>
               <p className="font-light sm:text-lg text-gray-400 ">
-                Mejor para usos a gran escala y derechos extendidos de
-                redistribución.
+                La mejor opción para organizaciones con requerimientos avanzados
               </p>
               <div
                 id="precios3"
-                className="flex justify-center items-baseline my-8"
+                className="flex justify-center items-baseline my-8 mt-14"
               >
                 <span className="mr-2 text-5xl font-extrabold">
                   {obtenerPrecio("profesional")}
                 </span>
-                <span className="text-gray-400">/{obtenerTextoPeriodo()}</span>
               </div>
               <ul role="list" className="mb-8 space-y-4 text-left">
                 <li className="flex items-center space-x-3">
@@ -560,11 +590,18 @@ export default function Home() {
                   </span>
                 </li>
               </ul>
-              <a href="#" className="text-white pt-2 pb-2 hover:text-green-400">
+              <a
+                href="#"
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
+              >
                 Comienza ya
               </a>
             </div>
           </div>
+
+          <p className="mb-5 font-light  text-gray-400 text-center">
+            *Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos
+          </p>
         </div>
       </section>
       {/* Contacto */}
@@ -583,7 +620,7 @@ export default function Home() {
                 for="email"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Tu email
+                Correo electrónico ​
               </label>
               <input
                 type="email"
@@ -598,7 +635,22 @@ export default function Home() {
                 for="subject"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Tema
+                Teléfono
+              </label>
+              <input
+                type="text"
+                id="Tema"
+                className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
+                placeholder="(55) 1234-5678"
+                required
+              />
+            </div>
+            <div>
+              <label
+                for="subject"
+                className="block mb-2 text-sm font-medium text-gray-900 "
+              >
+                Asunto
               </label>
               <input
                 type="text"
@@ -613,7 +665,7 @@ export default function Home() {
                 for="message"
                 className="block mb-2 text-sm font-medium text-gray-900 "
               >
-                Tu mensaje
+                Mensaje
               </label>
               <textarea
                 id="message"
