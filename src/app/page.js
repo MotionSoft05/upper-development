@@ -220,7 +220,7 @@ export default function Home() {
                   </button>
                   <button
                     type="button"
-                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1"
+                    className="text-black border-2 border-custom hover:border-blue-400 font-medium rounded-lg text-sm px-4 py-2 mx-1"
                   >
                     Descargar folleto
                   </button>
