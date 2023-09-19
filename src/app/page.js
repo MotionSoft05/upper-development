@@ -4,6 +4,8 @@ import { useRef, useEffect, useState, Fragment } from "react";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import { Dialog, Transition } from "@headlessui/react";
+import { Disclosure } from "@headlessui/react";
+import { ChevronUpIcon } from "@heroicons/react/20/solid";
 
 export default function Home() {
   const buttonRef = useRef(null);
@@ -148,64 +150,38 @@ export default function Home() {
     <main className="bg-gray-50">
       {/* Title */}
       <section>
-        <div className=" grid grid-cols-2">
-          <div>
-            <div ref={sliderRef} className="keen-slider">
-              <div className="keen-slider__slide number-slide1 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
-              <div className="keen-slider__slide number-slide2 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
-              <div className="keen-slider__slide number-slide3 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
-              <div className="keen-slider__slide number-slide4 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
-              <div className="keen-slider__slide number-slide5 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
-              <div className="keen-slider__slide number-slide6 flex items-center justify-center">
-                <img
-                  src="/img/sliderImage.png"
-                  className="mx-auto"
-                  alt="Logo"
-                />
-              </div>
+        <div className=" grid grid-cols-1 md:grid-cols-2">
+          <div ref={sliderRef} className="keen-slider">
+            <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            </div>
+            <div className="keen-slider__slide number-slide2 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            </div>
+            <div className="keen-slider__slide number-slide3 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            </div>
+            <div className="keen-slider__slide number-slide4 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            </div>
+            <div className="keen-slider__slide number-slide5 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            </div>
+            <div className="keen-slider__slide number-slide6 flex items-center justify-center">
+              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
             </div>
           </div>
 
           <div>
             <div className="mb-8">
-              <h1 className="text-6xl font-normal">
+              <h1 className="md:text-6xl font-normal">
                 UPPER DS es el sistema de Señalización Digital que ayudara a
                 generar impacto visual en tu negocio
               </h1>
             </div>
             <div className="">
               <div className="">
-                <p className="text-lg">
+                <p className="md:text-lg">
                   Es una plataforma de señalización digital fácil de
                   personalizar, programar y diseñar contenido de forma
                   profesional. La plataforma se encuentra basada en la nube para
@@ -234,14 +210,14 @@ export default function Home() {
       <section id="soluciones">
         <div className="py-24">
           <div className="px-4 mx-auto max-w-screen-xl ">
-            <h1 className="text-2xl text-center font-bold  mb-16">
+            <h1 className="text-lg md:text-2xl text-center font-bold  mb-16">
               Existe una diversidad de industrias para Soluciones de
               Señalización Digital, donde Upper DS será tu mejor aliado para
               transmitir su mensaje a las personas adecuadas y en el momento
               adecuado
             </h1>
 
-            <div className="grid grid-cols-3 gap-y-4 gap-x-2 md:gap-8 ">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 md:gap-8 ">
               <article>
                 <div>
                   <img
@@ -355,61 +331,61 @@ export default function Home() {
         <div className="pt-24">
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-              <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom">
+              <h2 className="mb-4 text-xl md:text-4xl tracking-tight font-extrabold text-custom">
                 Publique contenido de alto impacto para sus ​ clientes de forma
                 rapida, sencilla y profesional
               </h2>
             </div>
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
-              <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-10 lg:max-w-none lg:grid-cols-2 lg:gap-y-16">
-                <div className="relative pl-16">
-                  <dt className="text-base font-semibold leading-7 text-gray-900">
-                    <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-                      <img src="/img/screens.svg" className="p-1" />
+              <dl className="grid max-w-xl gap-x-4 md:gap-x-8 gap-y-10 lg:max-w-none grid-cols-2 lg:gap-y-16">
+                <div className="relative pl-9 md:pl-16">
+                  <dt className="text-sm md:text-base font-semibold  text-gray-900">
+                    <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
+                      <img src="/img/screens.svg" className="p-1 h-8" />
                     </div>
                     Personalice el diseño de sus pantallas
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
+                  <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
                     Muestre contenido interesante que sus clientes apreciarán
                     instantáneamente. Agréguelos a nuestras plantillas de diseño
                     de pantalla gratuitas y personalizables.
                   </dd>
                 </div>
-                <div className="relative pl-16">
-                  <dt className="text-base font-semibold leading-7 text-gray-900">
-                    <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-                      <img src="/img/keyboard.svg" className="p-1" />
+                <div className="relative pl-9 md:pl-16">
+                  <dt className="text-sm md:text-base font-semibold  text-gray-900">
+                    <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
+                      <img src="/img/keyboard.svg" className="p-1 h-8" />
                     </div>
                     Fácil programación de contenido
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
+                  <dd className="mt-2  text-xs md:text-base  text-gray-600 text-justify">
                     Administre decenas de pantallas, cargue, edite y muestre
                     contenido de forma remota desde cualquier dispositivo,
                     utilizando nuestra plataforma en la nube.
                   </dd>
                 </div>
-                <div className="relative pl-16">
-                  <dt className="text-base font-semibold leading-7 text-gray-900">
-                    <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-                      <img src="/img/Posibility.svg" className="p-1" />
+                <div className="relative pl-9 md:pl-16">
+                  <dt className="text-sm md:text-base font-semibold  text-gray-900">
+                    <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
+                      <img src="/img/Posibility.svg" className="p-1 h-8" />
                     </div>
                     Genera impacto por contenido versátil
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
+                  <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
                     Ofrece una versatilidad cuando se trate de generar
                     contenido. Las posibilidades son infinitas, desde anuncios
                     de eventos, promociones, actualizaciones meteorológicas y
                     noticias.
                   </dd>
                 </div>
-                <div className="relative pl-16">
-                  <dt className="text-base font-semibold leading-7 text-gray-900">
-                    <div className="absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-600">
-                      <img src="/img/security2.svg" className="p-1" />
+                <div className="relative pl-9 md:pl-16">
+                  <dt className="text-sm md:text-base font-semibold  text-gray-900">
+                    <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
+                      <img src="/img/security2.svg" className="p-1 h-8" />
                     </div>
                     Seguridad y alta disponibilidad de herramienta
                   </dt>
-                  <dd className="mt-2 text-base leading-7 text-gray-600 text-justify">
+                  <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
                     Upper DS opera en plataformas que están certificadas con los
                     principales estándares de seguridad y privacidad
                     (Cumplimiento de ISO y SOC).
@@ -424,10 +400,10 @@ export default function Home() {
       <section id="preguntas">
         <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
           <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-            <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom">
+            <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom">
               Preguntas frecuentes
             </h2>
-            <p className="mb-5 font-light sm:text-xl text-gray-400">
+            <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
               Aquí encontrarás respuestas a las dudas más comunes que nuestros
               clientes suelen tener.
             </p>
@@ -475,8 +451,8 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="text-center text-gray-600 textbase mt-9">
-            No encontraste una respuesta para tus prenguntas?
+          <p className="text-center text-gray-600 text-sm md:text-base mt-9">
+            No encontraste una respuesta para tus preguntas?
             <a
               href="#"
               title=""
@@ -491,16 +467,16 @@ export default function Home() {
       <section id="precios">
         <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
           <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-            <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-custom ">
+            <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom ">
               Impulsa el éxito de tu negocio con Upper DS
             </h2>
-            <p className="mb-5 font-light sm:text-xl text-gray-400">
+            <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
               Encuentre el plan de señalización digital que te de mayores
               beneficios​
             </p>
           </div>
           <div className="text-center"></div>
-          <div className="space-y-8 lg:grid lg:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
+          <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
             <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
               <h3 className="mb-4 text-2xl font-semibold text-custom">
                 Gratis
@@ -618,10 +594,10 @@ export default function Home() {
       {/* Contacto */}
       <section id="contacto">
         <div className="pt-24  px-4 mx-auto max-w-screen-md">
-          <h2 className="mb-4 text-4xl tracking-tight font-extrabold text-center text-custom ">
-            Contáctanos
+          <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-center text-custom ">
+            Contáctenos
           </h2>
-          <p className="mb-8 lg:mb-16 font-light text-center   sm:text-xl">
+          <p className="mb-8 lg:mb-16 font-light text-center   md:text-xl">
             Nuestra sección de contacto es el canal directo para conectarte con
             Upper DS. A continuación, encontrarás las opciones para cotizar y
             contratar nuestros servicios​
@@ -753,7 +729,7 @@ export default function Home() {
         </div>
       </section>
       {/* Marcas */}
-      <section className=" ">
+      <section id="marcas">
         <div className="py-8 lg:py-16 mx-auto max-w-screen-xl px-4">
           <div className="grid grid-cols-3 gap-8 text-gray-500 sm:gap-12">
             <a href="#" className="flex justify-center items-center">
