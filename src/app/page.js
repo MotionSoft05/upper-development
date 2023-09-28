@@ -1,11 +1,12 @@
 "use client";
-import Image from "next/image";
-import { useRef, useEffect, useState, Fragment } from "react";
+import { useRef, useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
-import { Dialog, Transition } from "@headlessui/react";
-import { Disclosure } from "@headlessui/react";
-import { ChevronUpIcon } from "@heroicons/react/20/solid";
+import Precios from "@/components/homeComponents/precios";
+import Preguntas from "@/components/homeComponents/preguntas";
+import Contacto from "@/components/homeComponents/contacto";
+import Register from "./register/page";
+import Link from "next/link";
 
 export default function Home() {
   const buttonRef = useRef(null);
@@ -35,117 +36,11 @@ export default function Home() {
     };
   }, []);
 
-  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState(false);
-
-  // Función para alternar entre precios mensuales y anuales
-  const alternarPrecios = () => {
-    setMostrarPreciosAnuales(!mostrarPreciosAnuales);
-  };
-
-  // Función para obtener el texto del período (mensual o anual)
-  const obtenerTextoPeriodo = () => {
-    return mostrarPreciosAnuales ? "anual" : "mensual";
-  };
-
-  // Función para obtener el precio según el período
-  const obtenerPrecio = (categoria) => {
-    // Define los precios según la categoría y el período
-    const precios = {
-      gratis: {
-        mensual: "$0",
-        anual: "$0",
-      },
-      estandar: {
-        mensual: "$99",
-        anual: "$1200",
-      },
-      profesional: {
-        mensual: "$Contacto",
-        anual: "$Contacto", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
-      },
-    };
-
-    // Obtén el precio según la categoría y el período
-    return precios[categoria][obtenerTextoPeriodo()];
-  };
-
   // Slider
   const [sliderRef] = useKeenSlider({
     loop: true,
   });
 
-  //  FAQ
-  const faqData = [
-    {
-      question: "¿Qué es el software de señalización digital y cómo funciona?",
-      answer:
-        "El software de señalización digital Upper DS es una plataforma que permite crear, programar y gestionar contenido multimedia (imágenes y videos.) en pantallas digitales. Funciona mediante la carga de contenido en la plataforma web, la programación de reproducción y la distribución a pantallas conectadas.",
-    },
-    // Agrega más preguntas y respuestas aquí
-    {
-      question:
-        "¿Cuáles son los beneficios de usar software de señalización digital?",
-      answer:
-        "Los beneficios incluyen la capacidad de transmitir información en tiempo real, la flexibilidad para cambiar contenido de forma remota, la mejora de la experiencia del cliente, el aumento de la visibilidad de la marca y la capacidad de medir el rendimiento del contenido.",
-    },
-    {
-      question:
-        "¿Qué tipo de contenido se puede mostrar con el software de señalización digital?",
-      answer:
-        "Se puede mostrar una amplia variedad de contenido, como anuncios publicitarios, promociones, información de productos, noticias, clima, horarios, contenido educativo, entretenimiento, y más. La versatilidad es una de las fortalezas de la señalización digital.",
-    },
-    {
-      question:
-        "¿Qué hardware se necesita para utilizar el software de señalización digital?",
-      answer:
-        "El hardware necesario incluye pantallas digitales (monitores, videowalls, etc.), reproductores de medios digitales (como reproductores multimedia, computadoras o TV Box) los cuales requieren estar conectados a Internet​",
-    },
-    {
-      question:
-        "¿Cómo se gestiona el contenido en el software de señalización digital en Upper DS?",
-      answer:
-        "El contenido se gestiona a través de una interfaz de usuario en una plataforma web. Los usuarios pueden cargar, organizar y programar contenido para que se reproduzca en las pantallas. ",
-    },
-    {
-      question:
-        "¿Es seguro el uso del software de señalización digital en términos de privacidad y seguridad?",
-      answer:
-        "La seguridad y privacidad son preocupaciones importantes. Upper DS ofrece características de seguridad, como autenticación de usuarios, certificado de seguridad y gestión de permisos para proteger la privacidad y prevenir el acceso no autorizado.",
-    },
-    {
-      question:
-        "¿Cuál es la diferencia entre señalización digital basada en la nube y en sitio?",
-      answer:
-        "La señalización digital basada en la nube almacena y gestiona contenido en servidores remotos, lo que permite un acceso más fácil y la gestión desde cualquier lugar con conexión a Internet. La señalización en sitio, en cambio, utiliza servidores locales y suele ser adecuada para redes cerradas.",
-    },
-    {
-      question:
-        "¿Cómo se pueden medir los resultados y el impacto del contenido de señalización digital?",
-      answer:
-        "Puedes medir el impacto mediante métricas como el número de reproducciones, la interacción del usuario (si es interactivo), el tiempo de visualización y el retorno de inversión (ROI) si estás utilizando la señalización digital con fines comerciales. ",
-    },
-  ];
-
-  const [openIndex, setOpenIndex] = useState(null);
-
-  const toggleAnswer = (index) => {
-    if (openIndex === index) {
-      setOpenIndex(null);
-    } else {
-      setOpenIndex(index);
-    }
-  };
-
-  // Modal
-  let [isOpen, setIsOpen] = useState(false);
-
-  function closeModal() {
-    setIsOpen(false);
-  }
-
-  function openModal() {
-    setIsOpen(true);
-  }
   return (
     <main className="bg-gray-50">
       {/* Title */}
@@ -188,12 +83,15 @@ export default function Home() {
                   acceso desde cualquier dispositivo
                 </p>
                 <div>
-                  <button
-                    type="button"
-                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1 "
-                  >
-                    Registrarse
-                  </button>
+                  <Link href="/register">
+                    <button
+                      type="button"
+                      className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1 "
+                    >
+                      Registrarse
+                    </button>
+                  </Link>
+
                   <button
                     type="button"
                     className="text-black border-2 border-custom hover:border-blue-400 font-medium rounded-lg text-sm px-4 py-2 mx-1"
@@ -397,337 +295,11 @@ export default function Home() {
         </div>
       </section>
       {/* Preguntas frecuentes */}
-      <section id="preguntas">
-        <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
-          <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-            <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom">
-              Preguntas frecuentes
-            </h2>
-            <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
-              Aquí encontrarás respuestas a las dudas más comunes que nuestros
-              clientes suelen tener.
-            </p>
-          </div>
-
-          <div className="max-w-3xl mx-auto mt-8 space-y-4 md:mt-16">
-            {faqData.map((item, index) => (
-              <div
-                key={index}
-                className="transition-all duration-200 bg-white border border-gray-200 cursor-pointer hover:bg-gray-50"
-              >
-                <button
-                  type="button"
-                  onClick={() => toggleAnswer(index)}
-                  className="flex justify-between items-center w-full px-4 py-5 sm:p-6"
-                >
-                  <span className="text-sm font-semibold text-black">
-                    {item.question}
-                  </span>
-
-                  <svg
-                    className={`w-6 h-6 text-gray-400 transform ${
-                      openIndex === index ? "rotate-180" : ""
-                    }`}
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M19 9l-7 7-7-7"
-                    />
-                  </svg>
-                </button>
-
-                {openIndex === index && (
-                  <div className="px-4 pb-5 sm:px-6 sm:pb-6">
-                    <p>{item.answer}</p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-
-          <p className="text-center text-gray-600 text-sm md:text-base mt-9">
-            No encontraste una respuesta para tus preguntas?
-            <a
-              href="#"
-              title=""
-              className="font-medium text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
-            >
-              Contacta a el soporte
-            </a>
-          </p>
-        </div>
-      </section>
+      <Preguntas />
       {/* Precios */}
-      <section id="precios">
-        <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
-          <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-            <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom ">
-              Impulsa el éxito de tu negocio con Upper DS
-            </h2>
-            <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
-              Encuentre el plan de señalización digital que te de mayores
-              beneficios​
-            </p>
-          </div>
-          <div className="text-center"></div>
-          <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-              <h3 className="mb-4 text-2xl font-semibold text-custom">
-                Gratis
-              </h3>
-              <p className="font-light sm:text-lg text-gray-400">
-                La mejor opción para comenzar tu siguiente proyecto de
-                digitalización
-              </p>
-              <div
-                id="precios1"
-                className="flex justify-center items-baseline my-8 mt-14"
-              >
-                <span className="mr-2 text-5xl font-extrabold">
-                  {obtenerPrecio("gratis")}
-                </span>
-              </div>
-              <ul role="list" className="mb-8 space-y-4 text-left">
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    Solicita una licencia de evaluación para una pantalla.
-                  </span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    La licencia de evaluación se activara por 21 días.
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-              >
-                Comienza ya
-              </a>
-            </div>
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center rounded-lg border shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-              <h3 className="mb-4 text-2xl font-semibold text-custom">
-                Estándar
-              </h3>
-              <p className="font-light sm:text-lg text-gray-400 ">
-                Lo mejor para usuarios que buscan incorporar la señalización
-                digital como parte de su estrategia de negocio
-              </p>
-              <div
-                id="precios2"
-                className="flex justify-center items-baseline my-8"
-              >
-                <span className="mr-2 text-5xl font-extrabold">
-                  {obtenerPrecio("estandar")}
-                </span>
-              </div>
-              <ul role="list" className="mb-8 space-y-4 text-left">
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    Licencia para aquellos negocios que inician con Señalización
-                    Digital
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-              >
-                Comienza ya
-              </a>
-            </div>
-            <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-              <h3 className="mb-4 text-2xl font-semibold text-custom">
-                Profesional
-              </h3>
-              <p className="font-light sm:text-lg text-gray-400 ">
-                La mejor opción para organizaciones con requerimientos avanzados
-              </p>
-              <div
-                id="precios3"
-                className="flex justify-center items-baseline my-8 mt-14"
-              >
-                <span className="mr-2 text-5xl font-extrabold">
-                  {obtenerPrecio("profesional")}
-                </span>
-              </div>
-              <ul role="list" className="mb-8 space-y-4 text-left">
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    Licencia para aquellos negocios que requieren licencias y
-                    servicios de diseño personalizado
-                  </span>
-                </li>
-                <li className="flex items-center space-x-3">
-                  <img src="/img/tick.svg" />
-                  <span>
-                    Registrase para ser contactados y definir alcance de
-                    servicios
-                  </span>
-                </li>
-              </ul>
-              <a
-                href="#"
-                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-              >
-                Comienza ya
-              </a>
-            </div>
-          </div>
-
-          <p className="mb-5 font-light  text-gray-400 text-center">
-            *Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos
-          </p>
-        </div>
-      </section>
+      <Precios />
       {/* Contacto */}
-      <section id="contacto">
-        <div className="pt-24  px-4 mx-auto max-w-screen-md">
-          <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-center text-custom ">
-            Contáctenos
-          </h2>
-          <p className="mb-8 lg:mb-16 font-light text-center   md:text-xl">
-            Nuestra sección de contacto es el canal directo para conectarte con
-            Upper DS. A continuación, encontrarás las opciones para cotizar y
-            contratar nuestros servicios​
-          </p>
-          <form action="#" className="space-y-8">
-            <div>
-              <label
-                for="email"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Correo electrónico ​
-              </label>
-              <input
-                type="email"
-                id="email"
-                className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  "
-                placeholder="Ejemplo@gmail.com"
-                required
-              />
-            </div>
-            <div>
-              <label
-                for="subject"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Teléfono
-              </label>
-              <input
-                type="text"
-                id="Tema"
-                className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
-                placeholder="(55) 1234-5678"
-                required
-              />
-            </div>
-            <div>
-              <label
-                for="subject"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Asunto
-              </label>
-              <input
-                type="text"
-                id="Tema"
-                className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
-                placeholder="Déjanos saber como podemos ayudarte"
-                required
-              />
-            </div>
-            <div className="sm:col-span-2">
-              <label
-                for="message"
-                className="block mb-2 text-sm font-medium text-gray-900 "
-              >
-                Mensaje
-              </label>
-              <textarea
-                id="message"
-                rows="6"
-                className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 "
-                placeholder="Deja un comentario..."
-              ></textarea>
-            </div>
-            <button
-              type="button"
-              onClick={openModal}
-              className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second"
-            >
-              Enviar mensaje
-            </button>
-
-            <Transition appear show={isOpen} as={Fragment}>
-              <Dialog as="div" className="relative z-10" onClose={closeModal}>
-                <Transition.Child
-                  as={Fragment}
-                  enter="ease-out duration-300"
-                  enterFrom="opacity-0"
-                  enterTo="opacity-100"
-                  leave="ease-in duration-200"
-                  leaveFrom="opacity-100"
-                  leaveTo="opacity-0"
-                >
-                  <div className="fixed inset-0 bg-black bg-opacity-25" />
-                </Transition.Child>
-
-                <div className="fixed inset-0 overflow-y-auto">
-                  <div className="flex min-h-full items-center justify-center p-4 text-center">
-                    <Transition.Child
-                      as={Fragment}
-                      enter="ease-out duration-300"
-                      enterFrom="opacity-0 scale-95"
-                      enterTo="opacity-100 scale-100"
-                      leave="ease-in duration-200"
-                      leaveFrom="opacity-100 scale-100"
-                      leaveTo="opacity-0 scale-95"
-                    >
-                      <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                        <Dialog.Title
-                          as="h3"
-                          className="text-lg font-medium leading-6 text-gray-900"
-                        >
-                          Su pregunta a sido enviada
-                        </Dialog.Title>
-                        <div className="mt-2">
-                          <p className="text-sm text-gray-500">
-                            Gracias por elegir conectarte con nosotros. Estamos
-                            aquí para servirte y estarás escuchando de nosotros
-                            pronto
-                          </p>
-                        </div>
-
-                        <div className="mt-4">
-                          <button
-                            type="button"
-                            className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                            onClick={closeModal}
-                          >
-                            Gracias!
-                          </button>
-                        </div>
-                      </Dialog.Panel>
-                    </Transition.Child>
-                  </div>
-                </div>
-              </Dialog>
-            </Transition>
-          </form>
-        </div>
-      </section>
+      <Contacto />
       {/* Marcas */}
       <section id="marcas">
         <div className="py-8 lg:py-16 mx-auto max-w-screen-xl px-4">
