@@ -11,11 +11,13 @@ function Navigation() {
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex-shrink-0 flex items-center ">
-            <img
-              src="/img/logov2.png"
-              className="h-16 md:h-24 py-3 "
-              alt="Logo"
-            />
+            <Link href="/">
+              <img
+                src="/img/logov2.png"
+                className="h-16 md:h-24 py-3 "
+                alt="Logo"
+              />
+            </Link>
           </div>
           <div className="hidden md:block">
             <div className="ml-auto flex items-baseline space-x-4">
@@ -53,41 +55,49 @@ function Navigation() {
                 </li>
               </ul>
               <div className=" p-3">
-                <button
-                  type="button"
-                  className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
-                >
-                  Registrarse
-                </button>
+                <Link href="/register">
+                  <button
+                    type="button"
+                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
+                  >
+                    Registrarse
+                  </button>
+                </Link>
               </div>
               <div>
-                <button
-                  type="button"
-                  className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
-                >
-                  Acceso a usuarios
-                </button>
+                <Link href="/logIn">
+                  <button
+                    type="button"
+                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
+                  >
+                    inician sesión
+                  </button>
+                </Link>
               </div>
             </div>
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-auto flex items-center space-x-1">
-              <div className=" md:p-3">
-                <button
-                  type="button"
-                  className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-xs md:text-sm px-2 py-1"
-                >
-                  Registrarse
-                </button>
+              <div className=" p-3">
+                <Link href="/register">
+                  <button
+                    type="button"
+                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
+                  >
+                    Registrarse
+                  </button>
+                </Link>
               </div>
               <div>
-                <button
-                  type="button"
-                  className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-xs md:text-sm px-2 py-1"
-                >
-                  inician sesión
-                </button>
-              </div>{" "}
+                <Link href="/login">
+                  <button
+                    type="button"
+                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
+                  >
+                    inician sesión
+                  </button>
+                </Link>
+              </div>
               <Menu as="div" className=" ">
                 <div>
                   <Menu.Button className="p-2">
