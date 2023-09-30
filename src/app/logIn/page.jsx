@@ -1,31 +1,6 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable react/jsx-no-comment-textnodes */
-"use client";
-import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import React from "react";
 
 function LogIn() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
-  const history = useHistory();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-
-    try {
-      const auth = getAuth();
-      await signInWithEmailAndPassword(auth, email, password);
-
-      // Inicio de sesión exitoso, redirigir al home
-      history.push("/home"); // Reemplaza "/home" con la ruta a tu página de inicio
-    } catch (error) {
-      setError(error.message);
-      console.error("Error al iniciar sesión:", error.message);
-    }
-  };
-
   return (
     <section className="h-screen">
       <div className="h-full px-20">
@@ -39,7 +14,7 @@ function LogIn() {
           </div>
 
           <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
-            <form onSubmit={handleLogin}>
+            <form>
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
                 Inicio de Sesión
               </h2>
@@ -97,7 +72,6 @@ function LogIn() {
                 >
                   Login
                 </button>
-                {error && <p className="text-red-500">{error}</p>}
                 <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
                   Don't have an account?
                   <a
