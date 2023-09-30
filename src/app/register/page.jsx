@@ -1,8 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from "firebase/auth";
+import {
+  validateFirstName,
+  validateLastName,
+  validateEmail,
+  validatePhoneNumber,
+  validatePassword,
+} from "./validateregister.js";
 
+// Configura tu objeto de configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
   authDomain: "upper-a544e.firebaseapp.com",
@@ -13,29 +25,43 @@ const firebaseConfig = {
   measurementId: "G-QTFQ55YY5D",
 };
 
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
 function Register() {
-  const [auth, setAuth] = useState(null);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
 
-  useEffect(() => {
-    const app = initializeApp(firebaseConfig);
-    const authInstance = getAuth(app);
-
-    if (authInstance && typeof authInstance === "object") {
-      setAuth(authInstance);
-    }
-
-    return () => {
-      // Lógica para limpiar Firebase si es necesario
-    };
-  }, []);
-
-  const handleRegister = async (e) => {
+  const handleRegistration = async (e) => {
     e.preventDefault();
+
+    const firstNameError = validateFirstName(firstName);
+    const lastNameError = validateLastName(lastName);
+    const emailError = validateEmail(email);
+    const phoneNumberError = validatePhoneNumber(phoneNumber);
+    const passwordError = validatePassword(password);
+
+    if (
+      firstNameError ||
+      lastNameError ||
+      emailError ||
+      phoneNumberError ||
+      passwordError
+    ) {
+      setError(
+        firstNameError ||
+          lastNameError ||
+          emailError ||
+          phoneNumberError ||
+          passwordError
+      );
+      return;
+    }
 
     try {
       const userCredential = await createUserWithEmailAndPassword(
@@ -45,22 +71,21 @@ function Register() {
       );
       const user = userCredential.user;
 
-      const response = await fetch("http://localhost:3001/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          firstName,
-          lastName,
-          email,
-          phoneNumber,
-        }),
+      // Actualizar el perfil del usuario con nombre, apellido y teléfono
+      await updateProfile(user, {
+        displayName: `${firstName} ${lastName}`,
+        phoneNumber: phoneNumber,
       });
 
-      console.log("Usuario registrado con éxito:", user);
+      setSuccessMessage("Usuario registrado correctamente");
+      setFirstName("");
+      setLastName("");
+      setPhoneNumber("");
+      setEmail("");
+      setPassword("");
     } catch (error) {
-      console.error("Error al registrar el usuario:", error);
+      setError(error.message);
+      console.error("Error al registrar el usuario:", error.message);
     }
   };
 
@@ -78,7 +103,17 @@ function Register() {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
               Create an account
             </h1>
-            <form className="space-y-4" onSubmit={handleRegister}>
+            {error && (
+              <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
+                {error}
+              </div>
+            )}
+            {successMessage && (
+              <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
+                {successMessage}
+              </div>
+            )}
+            <form className="space-y-4" onSubmit={handleRegistration}>
               <div className="mb-6 flex space-x-4">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
@@ -86,6 +121,8 @@ function Register() {
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="firstName"
                     placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
                   />
                 </div>
                 <div className="relative" data-te-input-wrapper-init>
@@ -94,6 +131,8 @@ function Register() {
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="lastName"
                     placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
                   />
                 </div>
               </div>
@@ -104,6 +143,8 @@ function Register() {
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="email"
                     placeholder="Email address"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                   />
                 </div>
               </div>
@@ -114,6 +155,8 @@ function Register() {
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="phoneNumber"
                     placeholder="Phone Number"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
                   />
                 </div>
               </div>
