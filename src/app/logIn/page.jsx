@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import Link from "next/link";
+import { useRouter } from "react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -32,6 +32,9 @@ function LogIn() {
       // Limpiar campos del formulario
       setEmail("");
       setPassword("");
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const router = useRouter();
+      router.push("/");
     } catch (error) {
       console.error("Error al iniciar sesión:", error.message);
       setError(error.message);
@@ -107,14 +110,13 @@ function LogIn() {
               </div>
 
               <div className="text-center lg:text-left">
-                <Link href="/">
-                  <button
-                    type="submit"
-                    className="inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
-                  >
-                    Login
-                  </button>
-                </Link>
+                <button
+                  type="submit"
+                  className="inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
+                >
+                  Login
+                </button>
+
                 <p className="mb-0 mt-2 pt-1 text-sm font-semibold">
                   Don't have an account?
                   <a
