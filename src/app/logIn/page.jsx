@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useRouter } from "react";
+import validateLogin from "./validatelogin";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -25,19 +25,23 @@ function LogIn() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log("Usuario ha iniciado sesión exitosamente");
-      window.alert("Inicio de sesión correcto");
-      // Limpiar campos del formulario
-      setEmail("");
-      setPassword("");
-      // eslint-disable-next-line react-hooks/rules-of-hooks
-      const router = useRouter();
-      router.push("/");
-    } catch (error) {
-      console.error("Error al iniciar sesión:", error.message);
-      setError(error.message);
+    const validationErrors = validateLogin(email, password);
+    if (Object.keys(validationErrors).length > 0) {
+      // Si hay errores de validación, establece los errores en el estado y no envíes la solicitud de inicio de sesión.
+      setError(validationErrors);
+    } else {
+      // No hay errores de validación, intenta iniciar sesión.
+      try {
+        await signInWithEmailAndPassword(auth, email, password);
+        console.log("Usuario ha iniciado sesión exitosamente");
+        // Limpiar campos del formulario y redirigir al usuario.
+        setEmail("");
+        setPassword("");
+        window.location.href = "/";
+      } catch (error) {
+        console.error("Error al iniciar sesión:", error.message);
+        setError(error.message);
+      }
     }
   };
 
