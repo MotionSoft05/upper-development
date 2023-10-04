@@ -79,11 +79,15 @@ function Register() {
       });
 
       setSuccessMessage("Usuario registrado correctamente");
-      setFirstName("");
-      setLastName("");
-      setPhoneNumber("");
-      setEmail("");
-      setPassword("");
+      // Espera 2 segundos antes de redirigir al usuario a /login
+      setTimeout(() => {
+        setFirstName("");
+        setLastName("");
+        setPhoneNumber("");
+        setEmail("");
+        setPassword("");
+        window.location.href = "/login";
+      }, 2300); // 2000 milisegundos = 2 segundos
     } catch (error) {
       setError(error.message);
       console.error("Error al registrar el usuario:", error.message);
