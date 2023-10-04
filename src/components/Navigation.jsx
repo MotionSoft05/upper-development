@@ -65,7 +65,7 @@ function Navigation() {
                 </Link>
               </div>
               <div>
-                <Link href="/logIn">
+                <Link href="/login">
                   <button
                     type="button"
                     className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
