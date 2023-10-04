@@ -35,8 +35,47 @@ function Register() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errors, setErrors] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+  });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    let errorMessage = "";
+
+    switch (name) {
+      case "firstName":
+        errorMessage = validateFirstName(value);
+        break;
+      case "lastName":
+        errorMessage = validateLastName(value);
+        break;
+      case "email":
+        errorMessage = validateEmail(value);
+        break;
+      case "phoneNumber":
+        errorMessage = validatePhoneNumber(value);
+        break;
+      case "password":
+        errorMessage = validatePassword(value);
+        break;
+      default:
+        break;
+    }
+
+    setErrors((prevErrors) => ({
+      ...prevErrors,
+      [name]: errorMessage,
+    }));
+  };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -108,11 +147,6 @@ function Register() {
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
               Create an account
             </h1>
-            {error && (
-              <div className="mt-4 p-3 bg-red-100 text-red-700 rounded">
-                {error}
-              </div>
-            )}
             {successMessage && (
               <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
                 {successMessage}
@@ -129,6 +163,9 @@ function Register() {
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
                   />
+                  {errors.firstName && (
+                    <span className="text-red-500">{errors.firstName}</span>
+                  )}
                 </div>
                 <div className="relative" data-te-input-wrapper-init>
                   <input
@@ -139,6 +176,9 @@ function Register() {
                     value={lastName}
                     onChange={(e) => setLastName(e.target.value)}
                   />
+                  {errors.lastName && (
+                    <span className="text-red-500">{errors.lastName}</span>
+                  )}
                 </div>
               </div>
               <div className="mb-6">
@@ -151,6 +191,9 @@ function Register() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                   />
+                  {errors.email && (
+                    <span className="text-red-500">{errors.email}</span>
+                  )}
                 </div>
               </div>
               <div className="mb-6">
@@ -163,18 +206,78 @@ function Register() {
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
                   />
+                  {errors.phoneNumber && (
+                    <span className="text-red-500">{errors.phoneNumber}</span>
+                  )}
                 </div>
               </div>
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                   />
+                  {errors.password && (
+                    <span className="text-red-500">{errors.password}</span>
+                  )}
+
+                  <button
+                    className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? (
+                      <img
+                        src="/img/eye-open.svg"
+                        alt="Hide password"
+                        className="w-5 h-5"
+                      />
+                    ) : (
+                      <img
+                        src="/img/eye-closed.svg"
+                        alt="Show password"
+                        className="w-5 h-5"
+                      />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <div className="mb-6">
+                <div className="relative" data-te-input-wrapper-init>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                    id="confirmPassword"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                  {errors.confirmPassword && (
+                    <span className="text-red-500">
+                      {errors.confirmPassword}
+                    </span>
+                  )}
+                  <button
+                    className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  >
+                    {showConfirmPassword ? (
+                      <img
+                        src="/img/eye-open.svg"
+                        alt="Hide password"
+                        className="w-5 h-5"
+                      />
+                    ) : (
+                      <img
+                        src="/img/eye-closed.svg"
+                        alt="Show password"
+                        className="w-5 h-5"
+                      />
+                    )}
+                  </button>
                 </div>
               </div>
               <div className="flex items-start flex-col">
