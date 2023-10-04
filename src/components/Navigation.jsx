@@ -2,7 +2,7 @@
 
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { Bars3Icon } from "@heroicons/react/20/solid";
+import { Bars3Icon, UserCircleIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
 
 function Navigation() {
@@ -10,7 +10,7 @@ function Navigation() {
     <nav className="bg-white">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex-shrink-0 flex items-center ">
+          <div className=" hidden md:block flex-shrink-0  items-center ">
             <Link href="/">
               <img
                 src="/img/logov2.png"
@@ -78,26 +78,6 @@ function Navigation() {
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-auto flex items-center space-x-1">
-              <div className=" p-3">
-                <Link href="/register">
-                  <button
-                    type="button"
-                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
-                  >
-                    Registrarse
-                  </button>
-                </Link>
-              </div>
-              <div>
-                <Link href="/login">
-                  <button
-                    type="button"
-                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
-                  >
-                    inician sesión
-                  </button>
-                </Link>
-              </div>
               <Menu as="div" className=" ">
                 <div>
                   <Menu.Button className="p-2">
@@ -113,7 +93,7 @@ function Navigation() {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div>
                       <Menu.Item>
                         <a
@@ -155,6 +135,59 @@ function Navigation() {
                           className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                         >
                           Contact
+                        </Link>
+                      </Menu.Item>
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            </div>
+          </div>
+          <div className="  md:hidden flex-shrink-0  items-center ">
+            <Link href="/">
+              <img
+                src="/img/logov2.png"
+                className="h-16 md:h-24 py-3 "
+                alt="Logo"
+              />
+            </Link>
+          </div>
+          <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
+            <div className="ml-auto flex items-center space-x-1">
+              <Menu as="div" className=" ">
+                <div>
+                  <Menu.Button className="p-2">
+                    <UserCircleIcon
+                      className="h-6 text-black"
+                      aria-hidden="true"
+                    />
+                  </Menu.Button>
+                </div>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-100"
+                  enterFrom="transform opacity-0 scale-95"
+                  enterTo="transform opacity-100 scale-100"
+                  leave="transition ease-in duration-75"
+                  leaveFrom="transform opacity-100 scale-100"
+                  leaveTo="transform opacity-0 scale-95"
+                >
+                  <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div>
+                      <Menu.Item>
+                        <a
+                          href="/register"
+                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                        >
+                          Registrarse
+                        </a>
+                      </Menu.Item>
+                      <Menu.Item>
+                        <Link
+                          href="/login"
+                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                        >
+                          inician sesión
                         </Link>
                       </Menu.Item>
                     </div>
