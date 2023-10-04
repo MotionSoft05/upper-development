@@ -230,17 +230,9 @@ function Register() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <img
-                        src="/img/eye-open.svg"
-                        alt="Hide password"
-                        className="w-5 h-5"
-                      />
+                      <img src="/password.png" alt="" className="" />
                     ) : (
-                      <img
-                        src="/img/eye-closed.svg"
-                        alt="Show password"
-                        className="w-5 h-5"
-                      />
+                      <img src="/password.png" alt="" className="w-5 h-5" />
                     )}
                   </button>
                 </div>
