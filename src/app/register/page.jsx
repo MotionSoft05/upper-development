@@ -55,16 +55,6 @@ function Register() {
     confirmPassword: "",
   });
 
-  useEffect(() => {
-    const handleDocumentClick = () => {
-      setShowConfirmPassword(false);
-    };
-    document.addEventListener("click", handleDocumentClick);
-    return () => {
-      document.removeEventListener("click", handleDocumentClick);
-    };
-  }, []);
-
   const handleShowPasswordClick = (e) => {
     e.preventDefault(); // Evita que el formulario se envíe
     setShowPassword((prev) => !prev);
