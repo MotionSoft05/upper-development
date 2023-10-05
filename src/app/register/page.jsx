@@ -93,7 +93,7 @@ function Register() {
       phoneNumberError ||
       passwordError
     ) {
-      setError(
+      setErrors(
         firstNameError ||
           lastNameError ||
           emailError ||
@@ -230,9 +230,13 @@ function Register() {
                     onClick={() => setShowPassword(!showPassword)}
                   >
                     {showPassword ? (
-                      <img src="/password.png" alt="" className="" />
+                      <img src="/img/ojo.png" alt="logo" className="w-7 h-7" />
                     ) : (
-                      <img src="/password.png" alt="" className="w-5 h-5" />
+                      <img
+                        src="/img/ojosno.png"
+                        alt="logo"
+                        className="w-7 h-7"
+                      />
                     )}
                   </button>
                 </div>
@@ -257,17 +261,9 @@ function Register() {
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   >
                     {showConfirmPassword ? (
-                      <img
-                        src="/img/eye-open.svg"
-                        alt="Hide password"
-                        className="w-5 h-5"
-                      />
+                      <img src="/img/ojo.png" alt="" className="w-7 h-7" />
                     ) : (
-                      <img
-                        src="/img/eye-closed.svg"
-                        alt="Show password"
-                        className="w-5 h-5"
-                      />
+                      <img src="/img/ojosno.png" alt="" className="w-7 h-7" />
                     )}
                   </button>
                 </div>
