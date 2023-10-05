@@ -64,9 +64,16 @@ function Register() {
       document.removeEventListener("click", handleDocumentClick);
     };
   }, []);
-  const handleShowConfirmPasswordClick = useCallback(() => {
+
+  const handleShowPasswordClick = (e) => {
+    e.preventDefault(); // Evita que el formulario se envíe
+    setShowPassword((prev) => !prev);
+  };
+
+  const handleShowConfirmPasswordClick = (e) => {
+    e.preventDefault(); // Evita que el formulario se envíe
     setShowConfirmPassword((prev) => !prev);
-  }, []);
+  };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -316,17 +323,20 @@ function Register() {
                       {passwordError}
                     </span>
                   )}
-
                   <button
                     className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={(e) => handleShowPasswordClick(e)} // Agrega el evento y pasa el evento como argumento
                   >
                     {showPassword ? (
-                      <img src="/img/ojo.png" alt="logo" className="w-7 h-7" />
+                      <img
+                        src="/img/ojo.png"
+                        alt="Hide password"
+                        className="w-7 h-7"
+                      />
                     ) : (
                       <img
                         src="/img/ojosno.png"
-                        alt="logo"
+                        alt="Show password"
                         className="w-7 h-7"
                       />
                     )}
@@ -350,6 +360,7 @@ function Register() {
                       setConfirmPasswordError(error);
                     }}
                   />
+
                   {errors.confirmPassword && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
                       {errors.confirmPassword}
@@ -360,9 +371,17 @@ function Register() {
                     onClick={handleShowConfirmPasswordClick}
                   >
                     {showConfirmPassword ? (
-                      <img src="/img/ojo.png" alt="" className="w-7 h-7" />
+                      <img
+                        src="/img/ojo.png"
+                        alt="Hide password"
+                        className="w-7 h-7"
+                      />
                     ) : (
-                      <img src="/img/ojosno.png" alt="" className="w-7 h-7" />
+                      <img
+                        src="/img/ojosno.png"
+                        alt="Show password"
+                        className="w-7 h-7"
+                      />
                     )}
                   </button>
                 </div>
