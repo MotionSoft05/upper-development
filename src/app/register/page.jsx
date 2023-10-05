@@ -7,13 +7,6 @@ import {
   updateProfile,
 } from "firebase/auth";
 import Link from "next/link";
-import {
-  validateFirstName,
-  validateLastName,
-  validateEmail,
-  validatePhoneNumber,
-  validatePassword,
-} from "./validateregister.js";
 
 // Configura tu objeto de configuración de Firebase
 const firebaseConfig = {
@@ -46,42 +39,8 @@ function Register() {
     email: "",
     phoneNumber: "",
     password: "",
+    confirmPassword: "",
   });
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    let errorMessage = "";
-
-    switch (name) {
-      case "firstName":
-        errorMessage = validateFirstName(value);
-        break;
-      case "lastName":
-        errorMessage = validateLastName(value);
-        break;
-      case "email":
-        errorMessage = validateEmail(value);
-        break;
-      case "phoneNumber":
-        errorMessage = validatePhoneNumber(value);
-        break;
-      case "password":
-        errorMessage = validatePassword(value);
-        break;
-      case "confirmPassword":
-        errorMessage =
-          value === password ? null : "Las contraseñas no coinciden";
-        break;
-
-      default:
-        break;
-    }
-
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [name]: errorMessage,
-    }));
-  };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -124,15 +83,12 @@ function Register() {
         password
       );
       const user = userCredential.user;
-
-      // Actualizar el perfil del usuario con nombre, apellido y teléfono
       await updateProfile(user, {
         displayName: `${firstName} ${lastName}`,
         phoneNumber: phoneNumber,
       });
 
       setSuccessMessage("Usuario registrado correctamente");
-      // Espera 2 segundos antes de redirigir al usuario a /login
       setTimeout(() => {
         setFirstName("");
         setLastName("");
@@ -140,11 +96,49 @@ function Register() {
         setEmail("");
         setPassword("");
         window.location.href = "/login";
-      }, 2300); // 2000 milisegundos = 2 segundos
+      }, 2300);
     } catch (error) {
-      setError(error.message);
+      setErrors(error.message);
       console.error("Error al registrar el usuario:", error.message);
     }
+  };
+
+  const validateFirstName = (value) => {
+    if (!value) {
+      return "El primer nombre es obligatorio";
+    }
+    return null;
+  };
+
+  const validateLastName = (value) => {
+    if (!value) {
+      return "El apellido es obligatorio";
+    }
+    return null;
+  };
+
+  const validateEmail = (value) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!value) {
+      return "El correo electrónico es obligatorio";
+    } else if (!emailRegex.test(value)) {
+      return "El correo electrónico no es válido";
+    }
+    return null;
+  };
+
+  const validatePhoneNumber = (value) => {
+    if (!value) {
+      return "El número de teléfono es obligatorio";
+    }
+    return null;
+  };
+
+  const validatePassword = (value) => {
+    if (!value) {
+      return "La contraseña es obligatoria";
+    }
+    return null;
   };
 
   return (
@@ -175,10 +169,19 @@ function Register() {
                     id="firstName"
                     placeholder="First Name"
                     value={firstName}
-                    onChange={(e) => setFirstName(e.target.value)}
+                    onChange={(e) => {
+                      setFirstName(e.target.value);
+                      const error = validateFirstName(e.target.value);
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        firstName: error,
+                      }));
+                    }}
                   />
                   {errors.firstName && (
-                    <span className="text-red-500">{errors.firstName}</span>
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {errors.firstName}
+                    </span>
                   )}
                 </div>
                 <div className="relative" data-te-input-wrapper-init>
@@ -188,14 +191,23 @@ function Register() {
                     id="lastName"
                     placeholder="Last Name"
                     value={lastName}
-                    onChange={(e) => setLastName(e.target.value)}
+                    onChange={(e) => {
+                      setLastName(e.target.value);
+                      const error = validateLastName(e.target.value);
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        lastName: error,
+                      }));
+                    }}
                   />
                   {errors.lastName && (
-                    <span className="text-red-500">{errors.lastName}</span>
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {errors.lastName}
+                    </span>
                   )}
                 </div>
               </div>
-              <div className="mb-6">
+              <div className="mb-6 flex flex-col relative">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
                     type="text"
@@ -203,13 +215,23 @@ function Register() {
                     id="email"
                     placeholder="Email address"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      const error = validateEmail(e.target.value);
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        email: error,
+                      }));
+                    }}
                   />
                   {errors.email && (
-                    <span className="text-red-500">{errors.email}</span>
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {errors.email}
+                    </span>
                   )}
                 </div>
               </div>
+
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
@@ -218,10 +240,19 @@ function Register() {
                     id="phoneNumber"
                     placeholder="Phone Number"
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value);
+                      const error = validatePhoneNumber(e.target.value);
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        phoneNumber: error,
+                      }));
+                    }}
                   />
                   {errors.phoneNumber && (
-                    <span className="text-red-500">{errors.phoneNumber}</span>
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {errors.phoneNumber}
+                    </span>
                   )}
                 </div>
               </div>
@@ -233,10 +264,19 @@ function Register() {
                     id="password"
                     placeholder="Password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      const error = validatePassword(e.target.value);
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        password: error,
+                      }));
+                    }}
                   />
                   {errors.password && (
-                    <span className="text-red-500">{errors.password}</span>
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {errors.password}
+                    </span>
                   )}
 
                   <button
@@ -263,10 +303,20 @@ function Register() {
                     id="confirmPassword"
                     placeholder="Confirm Password"
                     value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onChange={(e) => {
+                      setConfirmPassword(e.target.value);
+                      const error =
+                        confirmPassword === password
+                          ? null
+                          : "Las contraseñas no coinciden";
+                      setErrors((prevState) => ({
+                        ...prevState,
+                        confirmPassword: error,
+                      }));
+                    }}
                   />
                   {errors.confirmPassword && (
-                    <span className="text-red-500">
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
                       {errors.confirmPassword}
                     </span>
                   )}
