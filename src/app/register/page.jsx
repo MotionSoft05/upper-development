@@ -39,6 +39,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const [errors, setErrors] = useState({
     firstName: "",
     lastName: "",
@@ -67,6 +68,11 @@ function Register() {
       case "password":
         errorMessage = validatePassword(value);
         break;
+      case "confirmPassword":
+        errorMessage =
+          value === password ? null : "Las contraseñas no coinciden";
+        break;
+
       default:
         break;
     }
@@ -100,6 +106,14 @@ function Register() {
           phoneNumberError ||
           passwordError
       );
+      return;
+    }
+
+    const confirmPasswordError =
+      confirmPassword === password ? null : "Las contraseñas no coinciden";
+
+    if (confirmPasswordError) {
+      setErrors({ confirmPassword: confirmPasswordError });
       return;
     }
 
