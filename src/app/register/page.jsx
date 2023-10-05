@@ -28,12 +28,26 @@ function Register() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState(null);
+  const [confirmPasswordError, setConfirmPasswordError] = useState(null);
+  const [emailError, setEmailError] = useState(null);
+  const [firstNameError, setFirstNameError] = useState(null);
+  const [lastNameError, setLastNameError] = useState(null);
+  const [phoneNumberError, setPhoneNumberError] = useState(null);
+  const [isFirstNameTouched, setIsFirstNameTouched] = useState(false);
+  const [isLastNameTouched, setIsLastNameTouched] = useState(false);
+  const [isEmailTouched, setIsEmailTouched] = useState(false);
+  const [isPhoneNumberTouched, setIsPhoneNumberTouched] = useState(false);
+  const [isPasswordTouched, setIsPasswordTouched] = useState(false);
+  const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] =
+    useState(false);
 
-  const [errors, setErrors] = useState({
+  const [fieldErrors, setFieldErrors] = useState({
     firstName: "",
     lastName: "",
     email: "",
@@ -41,15 +55,81 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+  const [touchedFields, setTouchedFields] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    phoneNumber: false,
+    password: false,
+    confirmPassword: false,
+  });
+  const [formValues, setFormValues] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [errors, setErrors] = useState({
+    firstName: null,
+    lastName: null,
+    phoneNumber: null,
+    email: null,
+    password: null,
+    confirmPassword: null,
+  });
+
+  const handleFieldChange = (field, value) => {
+    // Actualiza los estados tocados y sus errores
+    setTouchedFields((prevTouchedFields) => ({
+      ...prevTouchedFields,
+      [field]: true,
+    }));
+
+    // Set field errors using setFieldErrors
+    setFieldErrors((prevFieldErrors) => ({
+      ...prevFieldErrors,
+      [field]: validateField(field, value),
+    }));
+  };
 
   const handleRegistration = async (e) => {
     e.preventDefault();
 
-    const firstNameError = validateFirstName(firstName);
-    const lastNameError = validateLastName(lastName);
-    const emailError = validateEmail(email);
-    const phoneNumberError = validatePhoneNumber(phoneNumber);
-    const passwordError = validatePassword(password);
+    setIsFirstNameTouched(true);
+    setIsLastNameTouched(true);
+    setIsEmailTouched(true);
+    setIsPhoneNumberTouched(true);
+    setIsPasswordTouched(true);
+    setIsConfirmPasswordTouched(true);
+
+    // Validar campos y actualizar los estados de error
+    const firstNameError = isFirstNameTouched
+      ? validateFirstName(firstName)
+      : null;
+    setFirstNameError(firstNameError);
+
+    const lastNameError = isLastNameTouched ? validateLastName(lastName) : null;
+    setLastNameError(lastNameError);
+
+    const emailError = isEmailTouched ? validateEmail(email) : null;
+    setEmailError(emailError);
+
+    const phoneNumberError = isPhoneNumberTouched
+      ? validatePhoneNumber(phoneNumber)
+      : null;
+    setPhoneNumberError(phoneNumberError);
+
+    const passwordError = isPasswordTouched ? validatePassword(password) : null;
+    setPasswordError(passwordError);
+
+    const confirmPasswordError =
+      isConfirmPasswordTouched && confirmPassword !== password
+        ? "Las contraseñas no coinciden"
+        : null;
+    setConfirmPasswordError(confirmPasswordError);
 
     if (
       firstNameError ||
@@ -65,14 +145,6 @@ function Register() {
           phoneNumberError ||
           passwordError
       );
-      return;
-    }
-
-    const confirmPasswordError =
-      confirmPassword === password ? null : "Las contraseñas no coinciden";
-
-    if (confirmPasswordError) {
-      setErrors({ confirmPassword: confirmPasswordError });
       return;
     }
 
@@ -105,7 +177,7 @@ function Register() {
 
   const validateFirstName = (value) => {
     if (!value) {
-      return "El primer nombre es obligatorio";
+      return "El nombre es obligatorio";
     }
     return null;
   };
@@ -141,6 +213,28 @@ function Register() {
     return null;
   };
 
+  const validateField = (field, value) => {
+    switch (field) {
+      case "firstName":
+        return !value ? "El nombre es obligatorio" : null;
+      case "lastName":
+        return !value ? "El apellido es obligatorio" : null;
+      case "email":
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !value
+          ? "El correo electrónico es obligatorio"
+          : !emailRegex.test(value)
+          ? "El correo electrónico no es válido"
+          : null;
+      case "phoneNumber":
+        return !value ? "El número de teléfono es obligatorio" : null;
+      case "password":
+        return !value ? "La contraseña es obligatoria" : null;
+      default:
+        return null;
+    }
+  };
+
   return (
     <section className="">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -171,16 +265,15 @@ function Register() {
                     value={firstName}
                     onChange={(e) => {
                       setFirstName(e.target.value);
-                      const error = validateFirstName(e.target.value);
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        firstName: error,
-                      }));
+                      handleFieldChange("firstName");
+                      if (touchedFields.firstName) {
+                        setFirstNameError(validateFirstName(e.target.value));
+                      }
                     }}
                   />
-                  {errors.firstName && (
+                  {firstNameError && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.firstName}
+                      {firstNameError}
                     </span>
                   )}
                 </div>
@@ -193,16 +286,15 @@ function Register() {
                     value={lastName}
                     onChange={(e) => {
                       setLastName(e.target.value);
-                      const error = validateLastName(e.target.value);
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        lastName: error,
-                      }));
+                      handleFieldChange("lastName");
+                      if (touchedFields.lastName) {
+                        setLastNameError(validateLastName(e.target.value));
+                      }
                     }}
                   />
-                  {errors.lastName && (
+                  {lastNameError && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.lastName}
+                      {lastNameError}
                     </span>
                   )}
                 </div>
@@ -217,16 +309,15 @@ function Register() {
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      const error = validateEmail(e.target.value);
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        email: error,
-                      }));
+                      handleFieldChange("email");
+                      if (touchedFields.email) {
+                        setEmailError(validateEmail(e.target.value));
+                      }
                     }}
                   />
-                  {errors.email && (
+                  {emailError && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.email}
+                      {emailError}
                     </span>
                   )}
                 </div>
@@ -242,16 +333,17 @@ function Register() {
                     value={phoneNumber}
                     onChange={(e) => {
                       setPhoneNumber(e.target.value);
-                      const error = validatePhoneNumber(e.target.value);
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        phoneNumber: error,
-                      }));
+                      handleFieldChange("phoneNumber");
+                      if (touchedFields.phoneNumber) {
+                        setPhoneNumberError(
+                          validatePhoneNumber(e.target.value)
+                        );
+                      }
                     }}
                   />
-                  {errors.phoneNumber && (
+                  {phoneNumberError && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.phoneNumber}
+                      {phoneNumberError}
                     </span>
                   )}
                 </div>
@@ -259,31 +351,30 @@ function Register() {
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
-                    type={showPassword ? "text" : "password"}
+                    type={isPasswordVisible ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      const error = validatePassword(e.target.value);
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        password: error,
-                      }));
+                      handleFieldChange("password");
+                      if (touchedFields.password) {
+                        setPasswordError(validatePassword(e.target.value));
+                      }
                     }}
                   />
-                  {errors.password && (
+                  {passwordError && (
                     <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.password}
+                      {passwordError}
                     </span>
                   )}
 
                   <button
                     className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
                   >
-                    {showPassword ? (
+                    {isPasswordVisible ? (
                       <img src="/img/ojo.png" alt="logo" className="w-7 h-7" />
                     ) : (
                       <img
@@ -305,14 +396,12 @@ function Register() {
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
-                      const error =
-                        confirmPassword === password
-                          ? null
-                          : "Las contraseñas no coinciden";
-                      setErrors((prevState) => ({
-                        ...prevState,
-                        confirmPassword: error,
-                      }));
+                      handleFieldChange("confirmPassword");
+                      if (touchedFields.confirmPassword) {
+                        setConfirmPasswordError(
+                          validatePassword(e.target.value)
+                        );
+                      }
                     }}
                   />
                   {errors.confirmPassword && (
