@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -28,7 +28,6 @@ function Register() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -47,53 +46,27 @@ function Register() {
   const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] =
     useState(false);
 
-  const [fieldErrors, setFieldErrors] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const [touchedFields, setTouchedFields] = useState({
-    firstName: false,
-    lastName: false,
-    email: false,
-    phoneNumber: false,
-    password: false,
-    confirmPassword: false,
-  });
-  const [formValues, setFormValues] = useState({
-    firstName: "",
-    lastName: "",
-    phoneNumber: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-
   const [errors, setErrors] = useState({
-    firstName: null,
-    lastName: null,
-    phoneNumber: null,
-    email: null,
-    password: null,
-    confirmPassword: null,
+    firstName: "",
+    lastName: "",
+    email: "",
+    phoneNumber: "",
+    password: "",
+    confirmPassword: "",
   });
 
-  const handleFieldChange = (field, value) => {
-    // Actualiza los estados tocados y sus errores
-    setTouchedFields((prevTouchedFields) => ({
-      ...prevTouchedFields,
-      [field]: true,
-    }));
-
-    // Set field errors using setFieldErrors
-    setFieldErrors((prevFieldErrors) => ({
-      ...prevFieldErrors,
-      [field]: validateField(field, value),
-    }));
-  };
+  useEffect(() => {
+    const handleDocumentClick = () => {
+      setShowConfirmPassword(false);
+    };
+    document.addEventListener("click", handleDocumentClick);
+    return () => {
+      document.removeEventListener("click", handleDocumentClick);
+    };
+  }, []);
+  const handleShowConfirmPasswordClick = useCallback(() => {
+    setShowConfirmPassword((prev) => !prev);
+  }, []);
 
   const handleRegistration = async (e) => {
     e.preventDefault();
@@ -203,6 +176,7 @@ function Register() {
     if (!value) {
       return "El número de teléfono es obligatorio";
     }
+
     return null;
   };
 
@@ -211,28 +185,6 @@ function Register() {
       return "La contraseña es obligatoria";
     }
     return null;
-  };
-
-  const validateField = (field, value) => {
-    switch (field) {
-      case "firstName":
-        return !value ? "El nombre es obligatorio" : null;
-      case "lastName":
-        return !value ? "El apellido es obligatorio" : null;
-      case "email":
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return !value
-          ? "El correo electrónico es obligatorio"
-          : !emailRegex.test(value)
-          ? "El correo electrónico no es válido"
-          : null;
-      case "phoneNumber":
-        return !value ? "El número de teléfono es obligatorio" : null;
-      case "password":
-        return !value ? "La contraseña es obligatoria" : null;
-      default:
-        return null;
-    }
   };
 
   return (
@@ -265,8 +217,7 @@ function Register() {
                     value={firstName}
                     onChange={(e) => {
                       setFirstName(e.target.value);
-                      handleFieldChange("firstName");
-                      if (touchedFields.firstName) {
+                      if (isFirstNameTouched) {
                         setFirstNameError(validateFirstName(e.target.value));
                       }
                     }}
@@ -286,8 +237,7 @@ function Register() {
                     value={lastName}
                     onChange={(e) => {
                       setLastName(e.target.value);
-                      handleFieldChange("lastName");
-                      if (touchedFields.lastName) {
+                      if (isLastNameTouched) {
                         setLastNameError(validateLastName(e.target.value));
                       }
                     }}
@@ -309,10 +259,8 @@ function Register() {
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
-                      handleFieldChange("email");
-                      if (touchedFields.email) {
-                        setEmailError(validateEmail(e.target.value));
-                      }
+                      const error = validateEmail(e.target.value);
+                      setEmailError(error);
                     }}
                   />
                   {emailError && (
@@ -332,13 +280,14 @@ function Register() {
                     placeholder="Phone Number"
                     value={phoneNumber}
                     onChange={(e) => {
-                      setPhoneNumber(e.target.value);
-                      handleFieldChange("phoneNumber");
-                      if (touchedFields.phoneNumber) {
-                        setPhoneNumberError(
-                          validatePhoneNumber(e.target.value)
-                        );
-                      }
+                      const inputValue = e.target.value;
+                      const filteredValue = inputValue.replace(
+                        /[^0-9+\s-]/g,
+                        ""
+                      );
+                      setPhoneNumber(filteredValue);
+                      const error = validatePhoneNumber(filteredValue);
+                      setPhoneNumberError(error);
                     }}
                   />
                   {phoneNumberError && (
@@ -351,17 +300,15 @@ function Register() {
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
-                    type={isPasswordVisible ? "text" : "password"}
+                    type={showPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
-                      handleFieldChange("password");
-                      if (touchedFields.password) {
-                        setPasswordError(validatePassword(e.target.value));
-                      }
+                      const error = validatePassword(e.target.value);
+                      setPasswordError(error);
                     }}
                   />
                   {passwordError && (
@@ -372,9 +319,9 @@ function Register() {
 
                   <button
                     className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
-                    onClick={() => setIsPasswordVisible(!isPasswordVisible)}
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    {isPasswordVisible ? (
+                    {showPassword ? (
                       <img src="/img/ojo.png" alt="logo" className="w-7 h-7" />
                     ) : (
                       <img
@@ -396,12 +343,11 @@ function Register() {
                     value={confirmPassword}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
-                      handleFieldChange("confirmPassword");
-                      if (touchedFields.confirmPassword) {
-                        setConfirmPasswordError(
-                          validatePassword(e.target.value)
-                        );
-                      }
+                      const error =
+                        confirmPassword !== password
+                          ? "Las contraseñas no coinciden"
+                          : null;
+                      setConfirmPasswordError(error);
                     }}
                   />
                   {errors.confirmPassword && (
@@ -411,7 +357,7 @@ function Register() {
                   )}
                   <button
                     className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
-                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    onClick={handleShowConfirmPasswordClick}
                   >
                     {showConfirmPassword ? (
                       <img src="/img/ojo.png" alt="" className="w-7 h-7" />
