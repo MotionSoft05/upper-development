@@ -54,7 +54,7 @@ function Navigation() {
                   </a>
                 </li>
               </ul>
-              <div>
+              <div className="hidden">
                 <Link href="/dashboard">
                   <button
                     type="button"
