@@ -45,6 +45,7 @@ function Register() {
   const [isPasswordTouched, setIsPasswordTouched] = useState(false);
   const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] =
     useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(true);
 
   const [errors, setErrors] = useState({
     firstName: "",
@@ -54,6 +55,34 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    const hasErrors =
+      firstNameError ||
+      lastNameError ||
+      emailError ||
+      phoneNumberError ||
+      passwordError ||
+      confirmPasswordError;
+
+    const isFieldsCompleted =
+      firstName &&
+      lastName &&
+      email &&
+      phoneNumber &&
+      password &&
+      confirmPassword;
+
+    setIsButtonDisabled(hasErrors || !isFieldsCompleted);
+  }, [
+    firstName,
+    lastName,
+    email,
+    phoneNumber,
+    password,
+    confirmPassword,
+    errors,
+  ]);
 
   const handleShowPasswordClick = (e) => {
     e.preventDefault(); // Evita que el formulario se envíe
@@ -379,10 +408,14 @@ function Register() {
               <div className="flex items-start flex-col">
                 <button
                   type="submit"
-                  className="w-full bg-gray-300 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                  className={`w-full bg-gray-300 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${
+                    isButtonDisabled ? "cursor-not-allowed" : ""
+                  }`}
+                  disabled={isButtonDisabled} // Deshabilita el botón si isButtonDisabled es true
                 >
                   Create an account
                 </button>
+
                 <div className="mt-3 text-sm font-light text-gray-500">
                   Already have an account?
                   <strong>
