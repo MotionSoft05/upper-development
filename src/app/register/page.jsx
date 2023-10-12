@@ -411,7 +411,6 @@ function Register() {
                   className={`w-full bg-gray-300 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${
                     isButtonDisabled ? "cursor-not-allowed" : ""
                   }`}
-                  disabled={isButtonDisabled} // Deshabilita el botón si isButtonDisabled es true
                 >
                   Create an account
                 </button>
