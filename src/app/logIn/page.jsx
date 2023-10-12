@@ -22,26 +22,25 @@ function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const isFormValid = email && password;
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    const validationErrors = validateLogin(email, password);
-    if (Object.keys(validationErrors).length > 0) {
-      // Si hay errores de validación, establece los errores en el estado y no envíes la solicitud de inicio de sesión.
-      setError(validationErrors);
-    } else {
-      // No hay errores de validación, intenta iniciar sesión.
+    if (isFormValid) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
         console.log("Usuario ha iniciado sesión exitosamente");
         // Limpiar campos del formulario y redirigir al usuario.
         setEmail("");
         setPassword("");
+        setError(null); // Limpiar cualquier mensaje de error existente
         window.location.href = "/";
       } catch (error) {
         console.error("Error al iniciar sesión:", error.message);
-        setError(error.message);
+        setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
       }
+    } else {
+      setError("Por favor, completa todos los campos."); // Muestra un mensaje de error si los campos no están completos
     }
   };
 
@@ -62,32 +61,37 @@ function LogIn() {
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
                 Inicio de Sesión
               </h2>
+              {error && <div className="text-red-500 mb-4">{error}</div>}{" "}
+              {/* Mostrar mensaje de error si existe */}
               <div className="mb-6 relative" data-te-input-wrapper-init>
                 <input
                   type="text"
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                   id="exampleFormControlInput2"
                   placeholder="Email"
-                  value={email} // Vincula el valor del input al estado email
-                  onChange={(e) => setEmail(e.target.value)} // Actualiza el estado email cuando el usuario escribe
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-
               <div className="mb-6 relative" data-te-input-wrapper-init>
                 <input
                   type="password"
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                   id="exampleFormControlInput22"
-                  placeholder="Password"
-                  value={password} // Vincula el valor del input al estado password
-                  onChange={(e) => setPassword(e.target.value)} // Actualiza el estado password cuando el usuario escribe
+                  placeholder="Contraseña"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-
               <div className="text-center lg:text-left">
                 <button
                   type="submit"
-                  className="inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
+                  disabled={!isFormValid}
+                  className={`inline-block rounded bg-primary px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out ${
+                    isFormValid
+                      ? "hover:bg-primary-600 hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
+                      : "cursor-not-allowed bg-gray-400 text-gray-200"
+                  }`}
                 >
                   Login
                 </button>
