@@ -231,6 +231,8 @@ function Register() {
   const validatePassword = (value) => {
     if (!value) {
       return "La contraseña es obligatoria";
+    } else if (value.length < 8) {
+      return "La contraseña debe tener al menos 8 caracteres";
     }
     return null;
   };
@@ -255,44 +257,43 @@ function Register() {
               </div>
             )}
             <form className="space-y-4" onSubmit={handleRegistration}>
-              <div className="mb-6 flex space-x-4">
-                <div className="relative" data-te-input-wrapper-init>
-                  <input
-                    type="text"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
-                    id="firstName"
-                    placeholder="Nombre"
-                    value={firstName}
-                    onChange={(e) => {
-                      setFirstName(e.target.value);
-                      setFirstNameError(validateFirstName(e.target.value));
-                    }}
-                  />
-                  {firstNameError && (
-                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {firstNameError}
-                    </span>
-                  )}
-                </div>
-                <div className="relative" data-te-input-wrapper-init>
-                  <input
-                    type="text"
-                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
-                    id="lastName"
-                    placeholder="Apellido"
-                    value={lastName}
-                    onChange={(e) => {
-                      setLastName(e.target.value);
-                      setLastNameError(validateLastName(e.target.value));
-                    }}
-                  />
-                  {lastNameError && (
-                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {lastNameError}
-                    </span>
-                  )}
-                </div>
+              <div className="relative" data-te-input-wrapper-init>
+                <input
+                  type="text"
+                  className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                  id="firstName"
+                  placeholder="Nombre"
+                  value={firstName}
+                  onChange={(e) => {
+                    setFirstName(e.target.value);
+                    setFirstNameError(validateFirstName(e.target.value));
+                  }}
+                />
+                {firstNameError && (
+                  <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                    {firstNameError}
+                  </span>
+                )}
               </div>
+              <div className="relative" data-te-input-wrapper-init>
+                <input
+                  type="text"
+                  className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                  id="lastName"
+                  placeholder="Apellido"
+                  value={lastName}
+                  onChange={(e) => {
+                    setLastName(e.target.value);
+                    setLastNameError(validateLastName(e.target.value));
+                  }}
+                />
+                {lastNameError && (
+                  <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                    {lastNameError}
+                  </span>
+                )}
+              </div>
+
               <div className="mb-6 flex flex-col relative">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
