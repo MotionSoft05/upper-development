@@ -261,7 +261,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="firstName"
-                    placeholder="First Name"
+                    placeholder="Nombre"
                     value={firstName}
                     onChange={(e) => {
                       setFirstName(e.target.value);
@@ -279,7 +279,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="lastName"
-                    placeholder="Last Name"
+                    placeholder="Apellido"
                     value={lastName}
                     onChange={(e) => {
                       setLastName(e.target.value);
@@ -299,7 +299,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="email"
-                    placeholder="Email address"
+                    placeholder="Email"
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -321,7 +321,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="phoneNumber"
-                    placeholder="Phone Number"
+                    placeholder="Teléfono"
                     value={phoneNumber}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -347,7 +347,7 @@ function Register() {
                     type={showPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="password"
-                    placeholder="Password"
+                    placeholder="Contraseña"
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -386,7 +386,7 @@ function Register() {
                     type={showConfirmPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="confirmPassword"
-                    placeholder="Confirm Password"
+                    placeholder="Confirmar contraseña"
                     value={confirmPassword}
                     onFocus={() => setIsConfirmPasswordTouched(true)}
                     onChange={(e) => {
