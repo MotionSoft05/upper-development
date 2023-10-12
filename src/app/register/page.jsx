@@ -441,13 +441,13 @@ function Register() {
                   }`}
                   disabled={isButtonDisabled || !passwordsMatch}
                 >
-                  Create an account
+                  Crear cuenta
                 </button>
 
                 <div className="mt-3 text-sm font-light text-gray-500">
-                  Already have an account?
+                  ¿Ya tienes una cuenta?
                   <strong>
-                    <Link href="/login">Login here</Link>
+                    <Link href="/login">Ingresa aquí</Link>
                   </strong>
                 </div>
               </div>
