@@ -34,6 +34,8 @@ function Register() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState(null);
   const [confirmPasswordError, setConfirmPasswordError] = useState(null);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [passwordsMatchError, setPasswordsMatchError] = useState("");
   const [emailError, setEmailError] = useState(null);
   const [firstNameError, setFirstNameError] = useState(null);
   const [lastNameError, setLastNameError] = useState(null);
@@ -55,6 +57,21 @@ function Register() {
     password: "",
     confirmPassword: "",
   });
+
+  useEffect(() => {
+    setIsConfirmPasswordTouched(true); // Asegúrate de que isConfirmPasswordTouched sea true cuando se dispare este efecto
+    setPasswordsMatch(password === confirmPassword);
+
+    if (confirmPassword && isConfirmPasswordTouched) {
+      const matchError =
+        password !== confirmPassword
+          ? "Las contraseñas no coinciden"
+          : "Las contraseñas coinciden";
+      setPasswordsMatchError(matchError);
+    } else {
+      setPasswordsMatchError("");
+    }
+  }, [password, confirmPassword, isConfirmPasswordTouched]);
 
   useEffect(() => {
     const hasErrors =
@@ -81,7 +98,12 @@ function Register() {
     phoneNumber,
     password,
     confirmPassword,
-    errors,
+    firstNameError,
+    lastNameError,
+    emailError,
+    phoneNumberError,
+    passwordError,
+    confirmPasswordError,
   ]);
 
   const handleShowPasswordClick = (e) => {
@@ -243,9 +265,7 @@ function Register() {
                     value={firstName}
                     onChange={(e) => {
                       setFirstName(e.target.value);
-                      if (isFirstNameTouched) {
-                        setFirstNameError(validateFirstName(e.target.value));
-                      }
+                      setFirstNameError(validateFirstName(e.target.value));
                     }}
                   />
                   {firstNameError && (
@@ -263,9 +283,7 @@ function Register() {
                     value={lastName}
                     onChange={(e) => {
                       setLastName(e.target.value);
-                      if (isLastNameTouched) {
-                        setLastNameError(validateLastName(e.target.value));
-                      }
+                      setLastNameError(validateLastName(e.target.value));
                     }}
                   />
                   {lastNameError && (
@@ -370,19 +388,26 @@ function Register() {
                     id="confirmPassword"
                     placeholder="Confirm Password"
                     value={confirmPassword}
+                    onFocus={() => setIsConfirmPasswordTouched(true)}
                     onChange={(e) => {
                       setConfirmPassword(e.target.value);
                       const error =
-                        confirmPassword !== password
+                        isConfirmPasswordTouched && e.target.value !== password
                           ? "Las contraseñas no coinciden"
                           : null;
                       setConfirmPasswordError(error);
                     }}
                   />
 
-                  {errors.confirmPassword && (
-                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
-                      {errors.confirmPassword}
+                  {passwordsMatchError && (
+                    <span
+                      className={`text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3 ${
+                        passwordsMatchError === "Las contraseñas coinciden"
+                          ? "text-green-500"
+                          : ""
+                      }`}
+                    >
+                      {passwordsMatchError}
                     </span>
                   )}
                   <button
@@ -409,8 +434,11 @@ function Register() {
                 <button
                   type="submit"
                   className={`w-full bg-gray-300 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center ${
-                    isButtonDisabled ? "cursor-not-allowed" : ""
+                    isButtonDisabled || !passwordsMatch
+                      ? "cursor-not-allowed"
+                      : ""
                   }`}
+                  disabled={isButtonDisabled || !passwordsMatch}
                 >
                   Create an account
                 </button>
