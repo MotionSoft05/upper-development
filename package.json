@@ -9,6 +9,13 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "antd": "^5.9.0",
+    "dayjs": "^1.11.9",
+    "html2canvas": "^1.4.1",
+    "react-color": "^2.19.3",
+    "react-image-crop": "^10.1.8",
+    "react-select": "^5.7.4",
+    "react-tailwindcss-datepicker": "^1.6.6",
     "@fortawesome/free-solid-svg-icons": "^6.4.2",
     "@fortawesome/react-fontawesome": "^0.2.0",
     "@headlessui/react": "^1.7.17",

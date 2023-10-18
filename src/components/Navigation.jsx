@@ -56,6 +56,14 @@ function Navigation() {
               </ul>
 
               <div className=" px-3">
+                <Link href="/dasboard">
+                  <button
+                    type="button"
+                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
+                  >
+                    Dashboard
+                  </button>
+                </Link>
                 <Link href="/register">
                   <button
                     type="button"
