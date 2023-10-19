@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
+
+const obtenerHora = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
 
 function PantallasSalon() {
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
@@ -11,6 +19,7 @@ function PantallasSalon() {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [selectedFontStyle, setSelectedFontStyle] = useState(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [currentHour, setCurrentHour] = useState(obtenerHora());
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -25,23 +34,51 @@ function PantallasSalon() {
     { value: "Palatino", label: "Palatino" },
   ];
 
-  // Función para obtener la fecha actual en formato dd/mm/yyyy
   const obtenerFecha = () => {
+    const diasSemana = [
+      "DOMINGO",
+      "LUNES",
+      "MARTES",
+      "MIÉRCOLES",
+      "JUEVES",
+      "VIERNES",
+      "SÁBADO",
+    ];
+
+    const meses = [
+      "ENERO",
+      "FEBRERO",
+      "MARZO",
+      "ABRIL",
+      "MAYO",
+      "JUNIO",
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ];
+
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    return `${day}/${month}/${year}`;
+    const diaSemana = diasSemana[now.getDay()];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
+    const año = now.getFullYear();
+
+    return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
-  // Función para obtener la hora actual en formato hh:mm:ss
-  const obtenerHora = () => {
-    const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(obtenerHora());
+    }, 1000);
+
+    // Limpia el intervalo cuando el componente se desmonta para evitar posibles fugas de memoria
+    return () => {
+      clearInterval(interval);
+    };
+  }, []); // El array vacío asegura que este efecto se ejecute solo una vez, similar a componentDidMount
 
   const handleScreen1Default = () => {
     setScreen1AspectRatio("16:9");
@@ -90,7 +127,6 @@ function PantallasSalon() {
         </div>
 
         <div className="flex justify-center space-x-44">
-          {/* Pantalla 1 */}
           <div>
             <div
               className={`border border-black px-40 py-28 aspect-ratio-${screen1AspectRatio}`}
@@ -112,7 +148,6 @@ function PantallasSalon() {
             </button>
           </div>
 
-          {/* Pantalla 2 */}
           <div>
             <div
               className={`border border-black px-20 py-40 aspect-ratio-${screen2AspectRatio}`}
@@ -135,7 +170,6 @@ function PantallasSalon() {
           </div>
         </div>
 
-        {/* Sección de personalización */}
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-20">
           <h1 className="text-xl font-bold text-white capitalize dark:text-white">
             Personalización del Template
@@ -225,7 +259,6 @@ function PantallasSalon() {
             </div>
           </div>
 
-          {/* Sección para definir nombre de monitor de salones */}
           <div className="mt-6">
             <label className="text-white dark:text-gray-200">
               Definir nombre de monitor de salones:
@@ -255,15 +288,13 @@ function PantallasSalon() {
             </div>
           </div>
 
-          {/* Sección de vista previa */}
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
               <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
                 <div className="flex justify-between items-baseline">
-                  {/* Logo en la esquina superior izquierda */}
                   <div className="">
                     <img
-                      src="/img/fiestamericana.png" // Reemplaza con la ruta de tu logo
+                      src="/img/fiestamericana.png"
                       alt="Logo"
                       className="h-15"
                     />
@@ -295,23 +326,15 @@ function PantallasSalon() {
                           </div>
                         </div>
                       </div>
-
-                      {/* Div solo para que la imagen este a la derecha */}
                       <div></div>
                     </div>
                     <div>
-                      {/* Fecha y hora en la esquina inferior */}
                       <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
-                        <p>Fecha: {obtenerFecha()}</p>{" "}
-                        {/* Reemplaza con la lógica para obtener la fecha */}
-                        <p>Hora: {obtenerHora()}</p>{" "}
-                        {/* Reemplaza con la lógica para obtener la hora */}
+                        <p>{obtenerFecha()}</p> <p>{currentHour}</p>{" "}
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Botón para volver atrás */}
                 <button
                   onClick={handleClosePreview}
                   className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
