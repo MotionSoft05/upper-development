@@ -42,6 +42,8 @@ function PantallasSalon() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [descripcion, setDescripcion] = useState("");
+  const [caracteresRestantes, setCaracteresRestantes] = useState(130);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -166,6 +168,27 @@ function PantallasSalon() {
       // Lee el archivo como un blob y dispara el evento `onloadend`
       reader.readAsDataURL(file);
     }
+  };
+
+  const dividirTexto = (texto, caracteresPorLinea) => {
+    const lineas = [];
+    let inicio = 0;
+    while (inicio < texto.length) {
+      let fin = inicio + caracteresPorLinea;
+      if (fin >= texto.length) {
+        fin = texto.length;
+      } else {
+        while (fin > inicio && texto[fin] !== " ") {
+          fin--;
+        }
+        if (fin === inicio) {
+          fin = inicio + caracteresPorLinea;
+        }
+      }
+      lineas.push(texto.slice(inicio, fin));
+      inicio = fin + 1;
+    }
+    return lineas;
   };
 
   return (
@@ -323,6 +346,26 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
+                Descripción del Evento
+              </label>
+              <textarea
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                value={descripcion}
+                onChange={(e) => {
+                  const texto = e.target.value;
+                  if (texto.length <= 130) {
+                    setDescripcion(texto);
+                    setCaracteresRestantes(130 - texto.length);
+                  }
+                }}
+                placeholder="Ingrese la descripción del evento"
+              />
+              <p className="text-gray-300 text-sm mt-2">
+                Caracteres restantes: {caracteresRestantes}
+              </p>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Estilo de texto
               </label>
               <Select
@@ -394,14 +437,38 @@ function PantallasSalon() {
                           alt="imgTemplate"
                           className="h-15"
                         />
-                        <div className=" space-y-5 pl-5 ">
+                        <div className="space-y-5 pl-5">
                           <div>
                             <h1>Sesión:</h1>
-                            <p>14:00 hrs</p>
+                            {/* Mostrar la hora inicial real del evento */}
+                            <p>
+                              {selectedEvent
+                                ? selectedEvent.horaInicialReal
+                                : "Hora Inicial"}
+                              hrs.
+                            </p>
                           </div>
-                          <div>
-                            <h1>Conferencia:</h1>
-                            <p>Impartido por el profesor Alejandro Grinberg</p>
+                          <div className="max-w-xs">
+                            {" "}
+                            {/* Ajusta el ancho máximo según tus necesidades */}
+                            <h1>
+                              {selectedEvent
+                                ? selectedEvent.tipoEvento
+                                : "Tipo de Evento Desconocido"}
+                            </h1>
+                            <div className="text-center flex px-0">
+                              {descripcion && (
+                                <div>
+                                  {dividirTexto(descripcion, 40).map(
+                                    (linea, index) => (
+                                      <p key={index} className="text-left">
+                                        {linea}
+                                      </p>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
