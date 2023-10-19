@@ -1,6 +1,24 @@
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = getFirestore();
 
 const obtenerHora = () => {
   const now = new Date();
@@ -20,6 +38,35 @@ function PantallasSalon() {
   const [selectedFontStyle, setSelectedFontStyle] = useState(null);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
+  const [selectedLogo, setSelectedLogo] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(obtenerHora());
+    }, 1000);
+
+    // Limpia el intervalo cuando el componente se desmonta para evitar posibles fugas de memoria
+    return () => {
+      clearInterval(interval);
+    };
+  }, []); // El array vacío asegura que este efecto se ejecute solo una vez, similar a componentDidMount
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "eventos"), (snapshot) => {
+      const eventsData = [];
+      snapshot.forEach((doc) => {
+        eventsData.push({ id: doc.id, ...doc.data() });
+      });
+      setEvents(eventsData);
+      setLoading(false);
+    });
+
+    // Limpiar el listener cuando el componente se desmonta
+    return () => unsubscribe();
+  }, []);
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -69,17 +116,6 @@ function PantallasSalon() {
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHour(obtenerHora());
-    }, 1000);
-
-    // Limpia el intervalo cuando el componente se desmonta para evitar posibles fugas de memoria
-    return () => {
-      clearInterval(interval);
-    };
-  }, []); // El array vacío asegura que este efecto se ejecute solo una vez, similar a componentDidMount
-
   const handleScreen1Default = () => {
     setScreen1AspectRatio("16:9");
   };
@@ -115,6 +151,21 @@ function PantallasSalon() {
 
   const handleClosePreview = () => {
     setPreviewVisible(false);
+  };
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      // `reader.result` contiene la URL de la imagen seleccionada
+      const imageUrl = reader.result;
+      setSelectedLogo(imageUrl);
+    };
+
+    if (file) {
+      // Lee el archivo como un blob y dispara el evento `onloadend`
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -171,83 +222,107 @@ function PantallasSalon() {
         </div>
 
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-20">
-          <h1 className="text-xl font-bold text-white capitalize dark:text-white">
+          <h1 className="text-2xl font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
-          <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div>
-              <label className="text-white dark:text-gray-200">
-                Color de la plantilla
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Seleccionar Evento
+              </label>
+              <select
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
+                value={selectedEvent ? selectedEvent.id : ""}
+                onChange={(e) => {
+                  const eventId = e.target.value;
+                  const event = events.find((event) => event.id === eventId);
+                  setSelectedEvent(event);
+                }}
+              >
+                <option value="">Seleccionar Evento</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.nombreEvento}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Logo
               </label>
               <div className="flex items-center">
-                <button
-                  onClick={handleTemplateColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  Seleccionar Color
-                </button>
-                {showColorPicker && (
-                  <div className="absolute z-10">
-                    <ChromePicker
-                      color={templateColor}
-                      onChange={handleColorChange}
-                    />
-                    <button
-                      onClick={handleTemplateColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                    >
-                      Listo
-                    </button>
-                  </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full ml-4"
-                  style={{ backgroundColor: templateColor }}
-                ></div>
+                <input
+                  onChange={handleImageChange}
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
+                />
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Color de letra
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleFontColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
                 >
                   Seleccionar Color
                 </button>
                 {showFontColorPicker && (
-                  <div className="absolute z-10">
+                  <div className="relative">
                     <ChromePicker
                       color={fontColor}
                       onChange={handleColorChange}
                     />
                     <button
                       onClick={handleFontColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
                     >
                       Listo
                     </button>
                   </div>
                 )}
                 <div
-                  className="w-8 h-8 rounded-full ml-4"
+                  className="w-8 h-8 rounded-full"
                   style={{ backgroundColor: fontColor }}
                 ></div>
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">Logo</label>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Color de la plantilla
+              </label>
               <div className="flex items-center">
-                <input
-                  className="block w-full text-sm  border rounded-lg cursor-pointer  text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="file"
-                />
+                <button
+                  onClick={handleTemplateColorChange}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
+                >
+                  Seleccionar Color
+                </button>
+                {showColorPicker && (
+                  <div className="relative">
+                    <ChromePicker
+                      color={templateColor}
+                      onChange={handleColorChange}
+                    />
+                    <button
+                      onClick={handleTemplateColorChange}
+                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                )}
+                <div
+                  className="w-8 h-8 rounded-full"
+                  style={{ backgroundColor: templateColor }}
+                ></div>
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Estilo de texto
               </label>
               <Select
@@ -260,28 +335,28 @@ function PantallasSalon() {
           </div>
 
           <div className="mt-6">
-            <label className="text-white dark:text-gray-200">
+            <label className="text-white dark:text-gray-200 block mb-1">
               Definir nombre de monitor de salones:
             </label>
             <div className="flex mt-2">
               <div className="mr-4">
-                <p>SALON A</p>
+                <p className="text-white mb-1">SALON A</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
               <div className="mr-4">
-                <p>SALON B</p>
+                <p className="text-white mb-1">SALON B</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
               <div>
-                <p>SALON C</p>
+                <p className="text-white mb-1">SALON C</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
@@ -290,22 +365,26 @@ function PantallasSalon() {
 
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
-              <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
+              <div className="bg-white w-2/4 p-6 rounded-md shadow-lg text-black">
                 <div className="flex justify-between items-baseline">
-                  <div className="">
+                  {selectedLogo && (
                     <img
-                      src="/img/fiestamericana.png"
+                      src={selectedLogo}
                       alt="Logo"
-                      className="h-15"
+                      className="h-20 max-w-full mr-4"
                     />
-                  </div>
+                  )}
                   <h1 className=" text-4xl font-bold">Salon ejemplo</h1>
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
-                    <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
+                    <div className="text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20">
                       {/* Título */}
-                      <h2 className=" text-white">Título del template</h2>
+                      <h2 className="text-white">
+                        {selectedEvent
+                          ? selectedEvent.nombreEvento.toUpperCase()
+                          : "TÍTULO DEL EVENTO"}
+                      </h2>
                     </div>
                     <div className="flex justify-between text-black">
                       {/* Imagen a la izquierda */}
