@@ -366,7 +366,7 @@ function PantallasSalon() {
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
               <div className="bg-white w-2/4 p-6 rounded-md shadow-lg text-black">
-                <div className="flex justify-between items-baseline">
+                <div className="flex items-center justify-between">
                   {selectedLogo && (
                     <img
                       src={selectedLogo}
