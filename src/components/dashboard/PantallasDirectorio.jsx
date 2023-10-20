@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
+import axios from "axios";
 
 function PantallasDirectorio() {
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
@@ -13,6 +14,38 @@ function PantallasDirectorio() {
   const [calendarEventURL, setCalendarEventURL] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(obtenerHora());
+  const [weatherData, setWeatherData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [cityOptions, setCityOptions] = useState([
+    { value: "New York", label: "New York" },
+    { value: "Los Angeles", label: "Los Angeles" },
+  ]);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [ciudad, setCiudad] = useState("");
+
+  useEffect(() => {
+    if (selectedCity) {
+      setIsLoading(true);
+      setError(null);
+
+      const apiKey = "d6bfb64ec94a413cabc181954232010";
+      const baseUrl = "http://api.weatherapi.com/v1";
+
+      axios
+        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
+        .then((response) => {
+          console.log("Datos del clima:", response.data);
+          setWeatherData(response.data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error al obtener datos del clima:", error);
+          setError("No se pudo obtener la información del clima");
+          setIsLoading(false);
+        });
+    }
+  }, [selectedCity]);
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -278,14 +311,13 @@ function PantallasDirectorio() {
             <div className="mt-4">
               <div className="mb-4">
                 <label className="text-white dark:text-gray-200">
-                  URL del Clima
+                  Seleccionar Ciudad
                 </label>
-                <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="url"
-                  value={weatherURL}
-                  onChange={(e) => setWeatherURL(e.target.value)}
-                  placeholder="Ingrese la URL del clima"
+                <Select
+                  options={cityOptions}
+                  value={selectedCity}
+                  onChange={setSelectedCity}
+                  placeholder="Seleccione una ciudad"
                 />
               </div>
               <div className="mb-4">
@@ -339,8 +371,16 @@ function PantallasDirectorio() {
                     <h1 className="text-4xl font-bold">Eventos del día</h1>
                   </div>
 
-                  <div>
-                    <h1 className=" text-4xl font-bold">fecha</h1>
+                  <div className="flex flex-col">
+                    {isLoading ? (
+                      <p>Cargando datos del clima...</p>
+                    ) : weatherData &&
+                      weatherData.current &&
+                      weatherData.current.temp_c ? (
+                      <p>Temperatura: {weatherData.current.temp_c} °C</p>
+                    ) : (
+                      <p>No se pudo obtener la información del clima</p>
+                    )}
                   </div>
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
