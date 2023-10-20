@@ -1,6 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+const db = getFirestore();
+
+const obtenerHora = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
 
 function PantallasSalon() {
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
@@ -11,6 +37,38 @@ function PantallasSalon() {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [selectedFontStyle, setSelectedFontStyle] = useState(null);
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [currentHour, setCurrentHour] = useState(obtenerHora());
+  const [selectedLogo, setSelectedLogo] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [descripcion, setDescripcion] = useState("");
+  const [caracteresRestantes, setCaracteresRestantes] = useState(130);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(obtenerHora());
+    }, 1000);
+
+    // Limpia el intervalo cuando el componente se desmonta para evitar posibles fugas de memoria
+    return () => {
+      clearInterval(interval);
+    };
+  }, []); // El array vacío asegura que este efecto se ejecute solo una vez, similar a componentDidMount
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(collection(db, "eventos"), (snapshot) => {
+      const eventsData = [];
+      snapshot.forEach((doc) => {
+        eventsData.push({ id: doc.id, ...doc.data() });
+      });
+      setEvents(eventsData);
+      setLoading(false);
+    });
+
+    // Limpiar el listener cuando el componente se desmonta
+    return () => unsubscribe();
+  }, []);
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -25,22 +83,39 @@ function PantallasSalon() {
     { value: "Palatino", label: "Palatino" },
   ];
 
-  // Función para obtener la fecha actual en formato dd/mm/yyyy
   const obtenerFecha = () => {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
+    const diasSemana = [
+      "DOMINGO",
+      "LUNES",
+      "MARTES",
+      "MIÉRCOLES",
+      "JUEVES",
+      "VIERNES",
+      "SÁBADO",
+    ];
 
-  // Función para obtener la hora actual en formato hh:mm:ss
-  const obtenerHora = () => {
+    const meses = [
+      "ENERO",
+      "FEBRERO",
+      "MARZO",
+      "ABRIL",
+      "MAYO",
+      "JUNIO",
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ];
+
     const now = new Date();
-    const hours = String(now.getHours()).padStart(2, "0");
-    const minutes = String(now.getMinutes()).padStart(2, "0");
-    const seconds = String(now.getSeconds()).padStart(2, "0");
-    return `${hours}:${minutes}:${seconds}`;
+    const diaSemana = diasSemana[now.getDay()];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
+    const año = now.getFullYear();
+
+    return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
   const handleScreen1Default = () => {
@@ -70,6 +145,10 @@ function PantallasSalon() {
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
+    const textoEjemplo = "Texto de ejemplo"; // Puedes reemplazar esto con el texto real que deseas medir
+    const font = `${selectedOption.value}, sans-serif`;
+    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`); // Establece el tamaño y el estilo del texto según tus necesidades
+    console.log("Ancho del texto medido:", textoAncho);
   };
 
   const handlePreviewClick = () => {
@@ -79,6 +158,53 @@ function PantallasSalon() {
   const handleClosePreview = () => {
     setPreviewVisible(false);
   };
+  const handleImageChange = (event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
+
+    reader.onloadend = () => {
+      // `reader.result` contiene la URL de la imagen seleccionada
+      const imageUrl = reader.result;
+      setSelectedLogo(imageUrl);
+    };
+
+    if (file) {
+      // Lee el archivo como un blob y dispara el evento `onloadend`
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const dividirTexto = (texto, caracteresPorLinea) => {
+    const lineas = [];
+    let inicio = 0;
+    while (inicio < texto.length) {
+      let fin = inicio + caracteresPorLinea;
+      if (fin >= texto.length) {
+        fin = texto.length;
+      } else {
+        while (fin > inicio && texto[fin] !== " ") {
+          fin--;
+        }
+        if (fin === inicio) {
+          fin = inicio + caracteresPorLinea;
+        }
+      }
+      lineas.push(texto.slice(inicio, fin));
+      inicio = fin + 1;
+    }
+    return lineas;
+  };
+
+  function getTextWidth(text, font) {
+    // Crea un canvas temporal para medir el texto
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = font;
+
+    // Usa measureText para obtener el ancho del texto
+    const metrics = context.measureText(text);
+    return metrics.width;
+  }
 
   return (
     <section className="px-8 py-12">
@@ -90,7 +216,6 @@ function PantallasSalon() {
         </div>
 
         <div className="flex justify-center space-x-44">
-          {/* Pantalla 1 */}
           <div>
             <div
               className={`border border-black px-40 py-28 aspect-ratio-${screen1AspectRatio}`}
@@ -112,7 +237,6 @@ function PantallasSalon() {
             </button>
           </div>
 
-          {/* Pantalla 2 */}
           <div>
             <div
               className={`border border-black px-20 py-40 aspect-ratio-${screen2AspectRatio}`}
@@ -135,85 +259,128 @@ function PantallasSalon() {
           </div>
         </div>
 
-        {/* Sección de personalización */}
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-20">
-          <h1 className="text-xl font-bold text-white capitalize dark:text-white">
+          <h1 className="text-2xl font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
-          <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div>
-              <label className="text-white dark:text-gray-200">
-                Color de la plantilla
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Seleccionar Evento
+              </label>
+              <select
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
+                value={selectedEvent ? selectedEvent.id : ""}
+                onChange={(e) => {
+                  const eventId = e.target.value;
+                  const event = events.find((event) => event.id === eventId);
+                  setSelectedEvent(event);
+                }}
+              >
+                <option value="">Seleccionar Evento</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.nombreEvento}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Logo
               </label>
               <div className="flex items-center">
-                <button
-                  onClick={handleTemplateColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  Seleccionar Color
-                </button>
-                {showColorPicker && (
-                  <div className="absolute z-10">
-                    <ChromePicker
-                      color={templateColor}
-                      onChange={handleColorChange}
-                    />
-                    <button
-                      onClick={handleTemplateColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                    >
-                      Listo
-                    </button>
-                  </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full ml-4"
-                  style={{ backgroundColor: templateColor }}
-                ></div>
+                <input
+                  onChange={handleImageChange}
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
+                />
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Color de letra
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleFontColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
                 >
                   Seleccionar Color
                 </button>
                 {showFontColorPicker && (
-                  <div className="absolute z-10">
+                  <div className="relative">
                     <ChromePicker
                       color={fontColor}
                       onChange={handleColorChange}
                     />
                     <button
                       onClick={handleFontColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
                     >
                       Listo
                     </button>
                   </div>
                 )}
                 <div
-                  className="w-8 h-8 rounded-full ml-4"
+                  className="w-8 h-8 rounded-full"
                   style={{ backgroundColor: fontColor }}
                 ></div>
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">Logo</label>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Color de la plantilla
+              </label>
               <div className="flex items-center">
-                <input
-                  className="block w-full text-sm  border rounded-lg cursor-pointer  text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="file"
-                />
+                <button
+                  onClick={handleTemplateColorChange}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
+                >
+                  Seleccionar Color
+                </button>
+                {showColorPicker && (
+                  <div className="relative">
+                    <ChromePicker
+                      color={templateColor}
+                      onChange={handleColorChange}
+                    />
+                    <button
+                      onClick={handleTemplateColorChange}
+                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                )}
+                <div
+                  className="w-8 h-8 rounded-full"
+                  style={{ backgroundColor: templateColor }}
+                ></div>
               </div>
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Descripción del Evento
+              </label>
+              <textarea
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                value={descripcion}
+                onChange={(e) => {
+                  const texto = e.target.value;
+                  if (texto.length <= 130) {
+                    setDescripcion(texto);
+                    setCaracteresRestantes(130 - texto.length);
+                  }
+                }}
+                placeholder="Ingrese la descripción del evento"
+              />
+              <p className="text-gray-300 text-sm mt-2">
+                Caracteres restantes: {caracteresRestantes}
+              </p>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Estilo de texto
               </label>
               <Select
@@ -225,56 +392,71 @@ function PantallasSalon() {
             </div>
           </div>
 
-          {/* Sección para definir nombre de monitor de salones */}
           <div className="mt-6">
-            <label className="text-white dark:text-gray-200">
+            <label className="text-white dark:text-gray-200 block mb-1">
               Definir nombre de monitor de salones:
             </label>
             <div className="flex mt-2">
               <div className="mr-4">
-                <p>SALON A</p>
+                <p className="text-white mb-1">SALON A</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
               <div className="mr-4">
-                <p>SALON B</p>
+                <p className="text-white mb-1">SALON B</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
               <div>
-                <p>SALON C</p>
+                <p className="text-white mb-1">SALON C</p>
                 <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="text"
                 />
               </div>
             </div>
           </div>
 
-          {/* Sección de vista previa */}
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
-              <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
-                <div className="flex justify-between items-baseline">
-                  {/* Logo en la esquina superior izquierda */}
-                  <div className="">
+              <div className="bg-white w-2/4 p-6 rounded-md shadow-lg text-black">
+                <div className="flex items-center justify-between">
+                  {selectedLogo && (
                     <img
-                      src="/img/fiestamericana.png" // Reemplaza con la ruta de tu logo
+                      src={selectedLogo}
                       alt="Logo"
-                      className="h-15"
+                      className="h-20 max-w-full mr-4"
                     />
-                  </div>
-                  <h1 className=" text-4xl font-bold">Salon ejemplo</h1>
+                  )}
+                  <h1
+                    style={{
+                      fontFamily: selectedFontStyle
+                        ? selectedFontStyle.value
+                        : "Arial",
+                    }}
+                  >
+                    SALON EJEMPLO
+                  </h1>
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
-                    <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
-                      {/* Título */}
-                      <h2 className=" text-white">Título del template</h2>
+                    <div
+                      className={`text-white text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20`}
+                      style={{
+                        fontFamily: selectedFontStyle
+                          ? selectedFontStyle.value
+                          : "Arial",
+                      }}
+                    >
+                      <h2>
+                        {selectedEvent
+                          ? selectedEvent.nombreEvento.toUpperCase()
+                          : "TÍTULO DEL EVENTO"}
+                      </h2>
                     </div>
                     <div className="flex justify-between text-black">
                       {/* Imagen a la izquierda */}
@@ -284,34 +466,67 @@ function PantallasSalon() {
                           alt="imgTemplate"
                           className="h-15"
                         />
-                        <div className=" space-y-5 pl-5 ">
+                        <div
+                          className="space-y-5 pl-5"
+                          style={{
+                            fontFamily: selectedFontStyle
+                              ? selectedFontStyle.value
+                              : "Arial",
+                          }}
+                        >
                           <div>
                             <h1>Sesión:</h1>
-                            <p>14:00 hrs</p>
+                            {/* Mostrar la hora inicial real del evento */}
+                            <p>
+                              {selectedEvent ? (
+                                <span className="text-2xl font-bold">
+                                  {selectedEvent.horaInicialReal}
+                                </span>
+                              ) : (
+                                "Hora Inicial"
+                              )}{" "}
+                              <span className="text-2x1">hrs.</span>
+                            </p>
                           </div>
-                          <div>
-                            <h1>Conferencia:</h1>
-                            <p>Impartido por el profesor Alejandro Grinberg</p>
+                          <div
+                            className="max-w-xs"
+                            style={{
+                              fontFamily: selectedFontStyle
+                                ? selectedFontStyle.value
+                                : "Arial",
+                            }}
+                          >
+                            {/* Tipo de evento y descripción */}
+                            <h1>
+                              {selectedEvent
+                                ? selectedEvent.tipoEvento
+                                : "Tipo de Evento Desconocido"}
+                            </h1>
+                            <div className="text-center flex px-0">
+                              {descripcion && (
+                                <div>
+                                  {dividirTexto(descripcion, 40).map(
+                                    (linea, index) => (
+                                      <p key={index} className="text-left">
+                                        {linea}
+                                      </p>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-
-                      {/* Div solo para que la imagen este a la derecha */}
                       <div></div>
                     </div>
                     <div>
-                      {/* Fecha y hora en la esquina inferior */}
                       <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
-                        <p>Fecha: {obtenerFecha()}</p>{" "}
-                        {/* Reemplaza con la lógica para obtener la fecha */}
-                        <p>Hora: {obtenerHora()}</p>{" "}
-                        {/* Reemplaza con la lógica para obtener la hora */}
+                        <p>{obtenerFecha()}</p> <p>{currentHour}</p>{" "}
                       </div>
                     </div>
                   </div>
                 </div>
-
-                {/* Botón para volver atrás */}
                 <button
                   onClick={handleClosePreview}
                   className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"

@@ -104,17 +104,8 @@ function AltaEventos() {
       horaFinalReal.split(":")[0],
       horaFinalReal.split(":")[1]
     );
-    const formattedFechaInicio = fechaInicio.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-
-    const formattedFechaFinal = fechaFinal.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    const formattedFechaInicio = fechaInicio.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
+    const formattedFechaFinal = fechaFinal.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
     const diasSeleccionados = Object.keys(repeatingDays).filter(
       (day) => repeatingDays[day]
     );

@@ -402,10 +402,10 @@ function Register() {
 
                   {passwordsMatchError && (
                     <span
-                      className={`text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3 ${
+                      className={`text-sm mt-1 absolute bottom-[-0.8rem] left-3 ${
                         passwordsMatchError === "Las contraseñas coinciden"
                           ? "text-green-500"
-                          : ""
+                          : "text-red-500"
                       }`}
                     >
                       {passwordsMatchError}
