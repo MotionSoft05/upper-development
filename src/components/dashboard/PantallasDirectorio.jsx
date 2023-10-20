@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
 
@@ -12,6 +12,7 @@ function PantallasDirectorio() {
   const [weatherURL, setWeatherURL] = useState("");
   const [calendarEventURL, setCalendarEventURL] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
+  const [currentTime, setCurrentTime] = useState(obtenerHora());
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -83,24 +84,47 @@ function PantallasDirectorio() {
   const handleClosePreview = () => {
     setPreviewVisible(false);
   };
+  const obtenerDia = () => {
+    const diasSemana = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    const now = new Date();
+    const diaSemana = diasSemana[now.getDay()];
+    return diaSemana;
+  };
 
   // Función para obtener la fecha actual en formato dd/mm/yyyy
   const obtenerFecha = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${day}/${month}`;
   };
 
   // Función para obtener la hora actual en formato hh:mm:ss
-  const obtenerHora = () => {
+  function obtenerHora() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
     const minutes = String(now.getMinutes()).padStart(2, "0");
     const seconds = String(now.getSeconds()).padStart(2, "0");
     return `${hours}:${minutes}:${seconds}`;
-  };
+  }
+
+  // UseEffect para actualizar la hora cada segundo
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(obtenerHora());
+    }, 1000);
+
+    // Limpiar el intervalo cuando el componente se desmonta
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <section className="px-8 py-12">
@@ -309,8 +333,10 @@ function PantallasDirectorio() {
                     />
                   </div>
                   <div className="flex flex-col items-center">
-                    <p>Jueves 06/05 - 18:00</p>
-                    <h1 className="text-4xl font-bold">Evento del día</h1>
+                    <p className="text-2xl text-center font-semibold mb-2">
+                      {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
+                    </p>
+                    <h1 className="text-4xl font-bold">Eventos del día</h1>
                   </div>
 
                   <div>
