@@ -1,3 +1,5 @@
+/* eslint-disable @next/next/no-img-element */
+/* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
@@ -44,6 +46,18 @@ function PantallasSalon() {
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [descripcion, setDescripcion] = useState("");
   const [caracteresRestantes, setCaracteresRestantes] = useState(130);
+  const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+
+  useEffect(() => {
+    if (selectedEvent && selectedEvent.imagenUrl) {
+      // Si hay una URL de imagen en el evento seleccionado, úsala
+      setSelectedEventImageUrl(selectedEvent.imagenUrl);
+    } else {
+      // Si no hay URL de imagen en el evento seleccionado, muestra una imagen predeterminada o un marcador de posición
+      setSelectedEventImageUrl("/img/defaultEventImage.png"); // Reemplaza con la ruta de tu imagen predeterminada
+    }
+  }, [selectedEvent]);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -423,13 +437,13 @@ function PantallasSalon() {
 
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
-              <div className="bg-white w-2/4 p-6 rounded-md shadow-lg text-black">
+              <div className="bg-white w-2/4 p-3 rounded-md shadow-lg text-black">
                 <div className="flex items-center justify-between">
                   {selectedLogo && (
                     <img
                       src={selectedLogo}
                       alt="Logo"
-                      className="h-20 max-w-full mr-4"
+                      className="h-20 max-w-full mb-5"
                     />
                   )}
                   <h1
@@ -461,13 +475,39 @@ function PantallasSalon() {
                     <div className="flex justify-between text-black">
                       {/* Imagen a la izquierda */}
                       <div className="flex items-center">
-                        <img
-                          src="/img/imgTemplate.png" // Reemplaza con la ruta de tu imagen
-                          alt="imgTemplate"
-                          className="h-15"
-                        />
+                        {selectedEvent && selectedEvent.images.length > 0 ? (
+                          <>
+                            <div className="mr-4">
+                              {/* Muestra miniaturas de imágenes */}
+                              {selectedEvent.images.map((image, index) => (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img
+                                  key={index}
+                                  src={image}
+                                  alt={`Imagen ${index + 1}`}
+                                  className={`h-16 w-auto cursor-pointer ${
+                                    index === selectedImageIndex
+                                      ? "border-2 border-blue-500"
+                                      : ""
+                                  }`}
+                                  onClick={() => setSelectedImageIndex(index)}
+                                />
+                              ))}
+                            </div>
+                            {/* Muestra la imagen seleccionada en el área de vista previa */}
+
+                            <img
+                              src={selectedEvent.images[selectedImageIndex]}
+                              alt="Evento"
+                              className="h-15 w-auto" // Añade la clase w-auto para hacer la imagen responsiva (ajustar su ancho automáticamente)
+                              style={{ maxWidth: "20rem" }} // También puedes establecer el ancho máximo usando el estilo en línea
+                            />
+                          </>
+                        ) : (
+                          <p>No hay imágenes disponibles</p>
+                        )}
                         <div
-                          className="space-y-5 pl-5"
+                          className="space-y-8 pl-10 mb-12"
                           style={{
                             fontFamily: selectedFontStyle
                               ? selectedFontStyle.value
