@@ -145,6 +145,10 @@ function PantallasSalon() {
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
+    const textoEjemplo = "Texto de ejemplo"; // Puedes reemplazar esto con el texto real que deseas medir
+    const font = `${selectedOption.value}, sans-serif`;
+    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`); // Establece el tamaño y el estilo del texto según tus necesidades
+    console.log("Ancho del texto medido:", textoAncho);
   };
 
   const handlePreviewClick = () => {
@@ -190,6 +194,17 @@ function PantallasSalon() {
     }
     return lineas;
   };
+
+  function getTextWidth(text, font) {
+    // Crea un canvas temporal para medir el texto
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = font;
+
+    // Usa measureText para obtener el ancho del texto
+    const metrics = context.measureText(text);
+    return metrics.width;
+  }
 
   return (
     <section className="px-8 py-12">
@@ -417,13 +432,27 @@ function PantallasSalon() {
                       className="h-20 max-w-full mr-4"
                     />
                   )}
-                  <h1 className=" text-4xl font-bold">Salon ejemplo</h1>
+                  <h1
+                    style={{
+                      fontFamily: selectedFontStyle
+                        ? selectedFontStyle.value
+                        : "Arial",
+                    }}
+                  >
+                    SALON EJEMPLO
+                  </h1>
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
-                    <div className="text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20">
-                      {/* Título */}
-                      <h2 className="text-white">
+                    <div
+                      className={`text-white text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20`}
+                      style={{
+                        fontFamily: selectedFontStyle
+                          ? selectedFontStyle.value
+                          : "Arial",
+                      }}
+                    >
+                      <h2>
                         {selectedEvent
                           ? selectedEvent.nombreEvento.toUpperCase()
                           : "TÍTULO DEL EVENTO"}
@@ -437,20 +466,37 @@ function PantallasSalon() {
                           alt="imgTemplate"
                           className="h-15"
                         />
-                        <div className="space-y-5 pl-5">
+                        <div
+                          className="space-y-5 pl-5"
+                          style={{
+                            fontFamily: selectedFontStyle
+                              ? selectedFontStyle.value
+                              : "Arial",
+                          }}
+                        >
                           <div>
                             <h1>Sesión:</h1>
                             {/* Mostrar la hora inicial real del evento */}
                             <p>
-                              {selectedEvent
-                                ? selectedEvent.horaInicialReal
-                                : "Hora Inicial"}
-                              hrs.
+                              {selectedEvent ? (
+                                <span className="text-2xl font-bold">
+                                  {selectedEvent.horaInicialReal}
+                                </span>
+                              ) : (
+                                "Hora Inicial"
+                              )}{" "}
+                              <span className="text-2x1">hrs.</span>
                             </p>
                           </div>
-                          <div className="max-w-xs">
-                            {" "}
-                            {/* Ajusta el ancho máximo según tus necesidades */}
+                          <div
+                            className="max-w-xs"
+                            style={{
+                              fontFamily: selectedFontStyle
+                                ? selectedFontStyle.value
+                                : "Arial",
+                            }}
+                          >
+                            {/* Tipo de evento y descripción */}
                             <h1>
                               {selectedEvent
                                 ? selectedEvent.tipoEvento
