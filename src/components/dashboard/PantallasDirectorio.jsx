@@ -11,6 +11,7 @@ function PantallasDirectorio() {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [weatherURL, setWeatherURL] = useState("");
   const [calendarEventURL, setCalendarEventURL] = useState("");
+  const [previewVisible, setPreviewVisible] = useState(false);
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -76,7 +77,29 @@ function PantallasDirectorio() {
   };
 
   const handlePreviewClick = () => {
-    // Lógica para la vista previa del diseño con las opciones seleccionadas.
+    setPreviewVisible(true);
+  };
+
+  const handleClosePreview = () => {
+    setPreviewVisible(false);
+  };
+
+  // Función para obtener la fecha actual en formato dd/mm/yyyy
+  const obtenerFecha = () => {
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    return `${day}/${month}/${year}`;
+  };
+
+  // Función para obtener la hora actual en formato hh:mm:ss
+  const obtenerHora = () => {
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const seconds = String(now.getSeconds()).padStart(2, "0");
+    return `${hours}:${minutes}:${seconds}`;
   };
 
   return (
@@ -223,6 +246,167 @@ function PantallasDirectorio() {
               />
             </div>
           </div>
+          {/* Sección para URL del clima y eventos del calendario */}
+          <div className="">
+            <h1 className="text-xl font-bold text-white capitalize dark:text-white">
+              Directorio de Eventos
+            </h1>
+            <div className="mt-4">
+              <div className="mb-4">
+                <label className="text-white dark:text-gray-200">
+                  URL del Clima
+                </label>
+                <input
+                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  type="url"
+                  value={weatherURL}
+                  onChange={(e) => setWeatherURL(e.target.value)}
+                  placeholder="Ingrese la URL del clima"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="text-white dark:text-gray-200">
+                  Directorio de Eventos | URL
+                </label>
+                <input
+                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  type="url"
+                  value={calendarEventURL}
+                  onChange={(e) => setCalendarEventURL(e.target.value)}
+                  placeholder="Ingrese la URL del Directorio de Eventos"
+                />
+              </div>
+              <div className="mb-4">
+                <label className="text-white dark:text-gray-200">
+                  Agregar Evento al Calendario Personal
+                </label>
+                <input
+                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  type="text"
+                  placeholder="Descripción del evento"
+                />
+                <button
+                  onClick={handleAddToCalendar}
+                  className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                >
+                  Agregar al Calendario
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Sección de vista previa */}
+          {previewVisible && (
+            <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
+              <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
+                <div className="flex justify-between items-center">
+                  {/* Logo en la esquina superior izquierda */}
+                  <div className="">
+                    <img
+                      src="/img/fiestamericana.png" // Reemplaza con la ruta de tu logo
+                      alt="Logo"
+                      className="h-15"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center">
+                    <p>Jueves 06/05 - 18:00</p>
+                    <h1 className="text-4xl font-bold">Evento del día</h1>
+                  </div>
+
+                  <div>
+                    <h1 className=" text-4xl font-bold">fecha</h1>
+                  </div>
+                </div>
+                <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+                  <div className="">
+                    <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
+                      {/* Título */}
+                      <h2 className=" text-white"> </h2>
+                    </div>
+                    <div className=" text-black">
+                      {/* Imagen a la izquierda */}
+                      <div
+                        className="flex flex-col
+                      "
+                      >
+                        <div className="flex items-center border-b border-black w-full">
+                          <img
+                            src="/img/imgTemplate.png" // Reemplaza con la ruta de tu imagen
+                            alt="imgTemplate"
+                            className="h-14"
+                          />
+                          <div className="space-y-2 pl-5 flex-1">
+                            <div>
+                              <h1>Sesión:</h1>
+                              <p>14:00 hrs</p>
+                            </div>
+                            <div>
+                              <h1>Conferencia:</h1>
+                              <div className="flex justify-between">
+                                <p className="">
+                                  Impartido por el profesor Alejandro Grinberg
+                                </p>
+                                <p className="">planta baja</p>
+                                <p className="">12:00</p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center">
+                          <img
+                            src="/img/imgTemplate.png" // Reemplaza con la ruta de tu imagen
+                            alt="imgTemplate"
+                            className="h-14"
+                          />
+                          <div className=" space-y-5 pl-5 ">
+                            <div>
+                              <h1>Sesión:</h1>
+                              <p>14:00 hrs</p>
+                            </div>
+                            <div>
+                              <h1>Conferencia:</h1>
+                              <p>
+                                Impartido por el profesor Alejandro Grinberg
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Div solo para que la imagen este a la derecha */}
+                      <div></div>
+                    </div>
+                    <div>
+                      {/* Fecha y hora en la esquina inferior */}
+                      <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
+                        <p> </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="">
+                    Grupo renueca el mejor programa de recompensa para
+                    asistentes ejec
+                  </p>
+                  <img
+                    src="/img/licensed-image.jpeg" // Reemplaza con la ruta de tu logo
+                    alt="Logo"
+                    className="h-12"
+                  />
+                </div>
+
+                {/* Botón para volver atrás */}
+                <button
+                  onClick={handleClosePreview}
+                  className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
+                >
+                  Volver atrás
+                </button>
+              </div>
+            </div>
+          )}
 
           <div className="flex justify-end mt-6">
             <button
@@ -237,55 +421,6 @@ function PantallasDirectorio() {
             >
               Guardar
             </button>
-          </div>
-        </section>
-
-        {/* Sección para URL del clima y eventos del calendario */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-8">
-          <h1 className="text-xl font-bold text-white capitalize dark:text-white">
-            Directorio de Eventos
-          </h1>
-          <div className="mt-4">
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                URL del Clima
-              </label>
-              <input
-                className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                type="url"
-                value={weatherURL}
-                onChange={(e) => setWeatherURL(e.target.value)}
-                placeholder="Ingrese la URL del clima"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                Directorio de Eventos | URL
-              </label>
-              <input
-                className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                type="url"
-                value={calendarEventURL}
-                onChange={(e) => setCalendarEventURL(e.target.value)}
-                placeholder="Ingrese la URL del Directorio de Eventos"
-              />
-            </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                Agregar Evento al Calendario Personal
-              </label>
-              <input
-                className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                type="text"
-                placeholder="Descripción del evento"
-              />
-              <button
-                onClick={handleAddToCalendar}
-                className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-              >
-                Agregar al Calendario
-              </button>
-            </div>
           </div>
         </section>
       </div>
