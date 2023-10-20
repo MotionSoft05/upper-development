@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-/* eslint-disable react/jsx-no-comment-textnodes */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
@@ -51,11 +50,9 @@ function PantallasSalon() {
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
-      // Si hay una URL de imagen en el evento seleccionado, úsala
       setSelectedEventImageUrl(selectedEvent.imagenUrl);
     } else {
-      // Si no hay URL de imagen en el evento seleccionado, muestra una imagen predeterminada o un marcador de posición
-      setSelectedEventImageUrl("/img/defaultEventImage.png"); // Reemplaza con la ruta de tu imagen predeterminada
+      setSelectedEventImageUrl("/img/defaultEventImage.png");
     }
   }, [selectedEvent]);
 
@@ -63,12 +60,10 @@ function PantallasSalon() {
     const interval = setInterval(() => {
       setCurrentHour(obtenerHora());
     }, 1000);
-
-    // Limpia el intervalo cuando el componente se desmonta para evitar posibles fugas de memoria
     return () => {
       clearInterval(interval);
     };
-  }, []); // El array vacío asegura que este efecto se ejecute solo una vez, similar a componentDidMount
+  }, []);
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "eventos"), (snapshot) => {
@@ -80,7 +75,6 @@ function PantallasSalon() {
       setLoading(false);
     });
 
-    // Limpiar el listener cuando el componente se desmonta
     return () => unsubscribe();
   }, []);
 
@@ -159,9 +153,9 @@ function PantallasSalon() {
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
-    const textoEjemplo = "Texto de ejemplo"; // Puedes reemplazar esto con el texto real que deseas medir
+    const textoEjemplo = "Texto de ejemplo";
     const font = `${selectedOption.value}, sans-serif`;
-    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`); // Establece el tamaño y el estilo del texto según tus necesidades
+    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
     console.log("Ancho del texto medido:", textoAncho);
   };
 
@@ -177,13 +171,11 @@ function PantallasSalon() {
     const reader = new FileReader();
 
     reader.onloadend = () => {
-      // `reader.result` contiene la URL de la imagen seleccionada
       const imageUrl = reader.result;
       setSelectedLogo(imageUrl);
     };
 
     if (file) {
-      // Lee el archivo como un blob y dispara el evento `onloadend`
       reader.readAsDataURL(file);
     }
   };
@@ -210,12 +202,10 @@ function PantallasSalon() {
   };
 
   function getTextWidth(text, font) {
-    // Crea un canvas temporal para medir el texto
     const canvas = document.createElement("canvas");
     const context = canvas.getContext("2d");
     context.font = font;
 
-    // Usa measureText para obtener el ancho del texto
     const metrics = context.measureText(text);
     return metrics.width;
   }
@@ -440,6 +430,7 @@ function PantallasSalon() {
               <div className="bg-white w-2/4 p-3 rounded-md shadow-lg text-black">
                 <div className="flex items-center justify-between">
                   {selectedLogo && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={selectedLogo}
                       alt="Logo"
@@ -473,12 +464,10 @@ function PantallasSalon() {
                       </h2>
                     </div>
                     <div className="flex justify-between text-black">
-                      {/* Imagen a la izquierda */}
                       <div className="flex items-center">
                         {selectedEvent && selectedEvent.images.length > 0 ? (
                           <>
                             <div className="mr-4">
-                              {/* Muestra miniaturas de imágenes */}
                               {selectedEvent.images.map((image, index) => (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -494,13 +483,11 @@ function PantallasSalon() {
                                 />
                               ))}
                             </div>
-                            {/* Muestra la imagen seleccionada en el área de vista previa */}
-
                             <img
                               src={selectedEvent.images[selectedImageIndex]}
                               alt="Evento"
-                              className="h-15 w-auto" // Añade la clase w-auto para hacer la imagen responsiva (ajustar su ancho automáticamente)
-                              style={{ maxWidth: "20rem" }} // También puedes establecer el ancho máximo usando el estilo en línea
+                              className="h-15 w-auto"
+                              style={{ maxWidth: "20rem" }}
                             />
                           </>
                         ) : (
@@ -516,7 +503,6 @@ function PantallasSalon() {
                         >
                           <div>
                             <h1>Sesión:</h1>
-                            {/* Mostrar la hora inicial real del evento */}
                             <p>
                               {selectedEvent ? (
                                 <span className="text-2xl font-bold">
