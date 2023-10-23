@@ -66,34 +66,19 @@ function PantallasDirectorio() {
     const eventDescription = document.querySelector(
       'input[placeholder="Descripción del evento"]'
     ).value;
-    // Aquí puedes implementar la lógica para agregar el evento al calendario personal,
-    // ya sea para Outlook, Google Calendar u otros servicios de calendario.
-    // Por ejemplo, podrías abrir una ventana emergente o redirigir al usuario a una URL específica
-    // para agregar el evento a su calendario personal, utilizando los datos proporcionados.
-    // Esto dependerá de la API o servicio que estés utilizando para gestionar los calendarios.
-    // Después de agregar el evento con éxito, podrías mostrar un mensaje de confirmación al usuario.
   };
 
   const handleScreen1Default = () => {
     setScreen1AspectRatio("16:9");
   };
-
-  const handleScreen1UseThis = () => {
-    // Lógica para aplicar la relación de aspecto de pantalla 1 al diseño.
-  };
-
+  const handleScreen1UseThis = () => {};
   const handleScreen2Default = () => {
     setScreen2AspectRatio("9:16");
   };
-
-  const handleScreen2UseThis = () => {
-    // Lógica para aplicar la relación de aspecto de pantalla 2 al diseño.
-  };
-
+  const handleScreen2UseThis = () => {};
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
   };
-
   const handleFontColorChange = () => {
     setShowFontColorPicker(!showFontColorPicker);
   };
@@ -132,7 +117,6 @@ function PantallasDirectorio() {
     return diaSemana;
   };
 
-  // Función para obtener la fecha actual en formato dd/mm/yyyy
   const obtenerFecha = () => {
     const now = new Date();
     const day = String(now.getDate()).padStart(2, "0");
@@ -140,7 +124,6 @@ function PantallasDirectorio() {
     return `${day}/${month}`;
   };
 
-  // Función para obtener la hora actual en formato hh:mm:ss
   function obtenerHora() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, "0");
@@ -149,13 +132,11 @@ function PantallasDirectorio() {
     return `${hours}:${minutes}:${seconds}`;
   }
 
-  // UseEffect para actualizar la hora cada segundo
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(obtenerHora());
     }, 1000);
 
-    // Limpiar el intervalo cuando el componente se desmonta
     return () => clearInterval(interval);
   }, []);
 
@@ -359,7 +340,7 @@ function PantallasDirectorio() {
                   {/* Logo en la esquina superior izquierda */}
                   <div className="">
                     <img
-                      src="/img/fiestamericana.png" // Reemplaza con la ruta de tu logo
+                      src="/img/fiestamericana.png"
                       alt="Logo"
                       className="h-15"
                     />
@@ -397,7 +378,7 @@ function PantallasDirectorio() {
                       >
                         <div className="flex items-center border-b border-black w-full">
                           <img
-                            src="/img/imgTemplate.png" // Reemplaza con la ruta de tu imagen
+                            src="/img/imgTemplate.png"
                             alt="imgTemplate"
                             className="h-14"
                           />
@@ -421,7 +402,7 @@ function PantallasDirectorio() {
 
                         <div className="flex items-center">
                           <img
-                            src="/img/imgTemplate.png" // Reemplaza con la ruta de tu imagen
+                            src="/img/imgTemplate.png"
                             alt="imgTemplate"
                             className="h-14"
                           />
@@ -457,7 +438,7 @@ function PantallasDirectorio() {
                     asistentes ejec
                   </p>
                   <img
-                    src="/img/licensed-image.jpeg" // Reemplaza con la ruta de tu logo
+                    src="/img/licensed-image.jpeg"
                     alt="Logo"
                     className="h-12"
                   />
