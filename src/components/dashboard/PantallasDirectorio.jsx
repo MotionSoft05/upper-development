@@ -358,7 +358,9 @@ function PantallasDirectorio() {
                     ) : weatherData &&
                       weatherData.current &&
                       weatherData.current.temp_c ? (
-                      <p>Temperatura: {weatherData.current.temp_c} °C</p>
+                      <p className="text-3xl font-bold">
+                        {weatherData.current.temp_c} °C
+                      </p>
                     ) : (
                       <p>No se pudo obtener la información del clima</p>
                     )}
