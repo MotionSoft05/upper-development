@@ -1,7 +1,25 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
 import axios from "axios";
+import firebase from "firebase/compat/app";
+import "firebase/compat/firestore";
+import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.firestore();
 
 function PantallasDirectorio() {
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
@@ -17,12 +35,49 @@ function PantallasDirectorio() {
   const [weatherData, setWeatherData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [events, setEvents] = useState([]);
+  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [logo, setLogo] = useState(null);
+
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
     { value: "Los Angeles", label: "Los Angeles" },
   ]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const [ciudad, setCiudad] = useState("");
+
+  useEffect(() => {
+    db.collection("eventos")
+      .get()
+      .then((querySnapshot) => {
+        const eventos = [];
+        querySnapshot.forEach((doc) => {
+          const evento = doc.data();
+          eventos.push(evento);
+        });
+        // Update the events state variable with the fetched events
+        setEvents(eventos);
+      })
+      .catch((error) => {
+        console.error("Error al obtener eventos:", error);
+      });
+  }, []);
+
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "eventos"),
+      (querySnapshot) => {
+        const eventos = [];
+        querySnapshot.forEach((doc) => {
+          const evento = doc.data();
+          eventos.push(evento);
+        });
+        setEvents(eventos);
+      }
+    );
+
+    // Limpieza del efecto al desmontar el componente
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (selectedCity) {
@@ -201,35 +256,36 @@ function PantallasDirectorio() {
             Personalización del Template
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div>
-              <label className="text-white dark:text-gray-200">
-                Color de la plantilla
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Seleccionar Evento
               </label>
+              <select
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
+                value={selectedEvent ? selectedEvent.id : ""}
+                onChange={(e) => {
+                  const eventId = e.target.value;
+                  const event = events.find((event) => event.id === eventId);
+                  setSelectedEvent(event);
+                }}
+              >
+                <option value="">Seleccionar Evento</option>
+                {events.map((event) => (
+                  <option key={event.id} value={event.id}>
+                    {event.nombreEvento}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-white dark:text-gray-200">Logo</label>
               <div className="flex items-center">
-                <button
-                  onClick={handleTemplateColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  Seleccionar Color
-                </button>
-                {showColorPicker && (
-                  <div className="absolute z-10">
-                    <ChromePicker
-                      color={templateColor}
-                      onChange={handleColorChange}
-                    />
-                    <button
-                      onClick={handleTemplateColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                    >
-                      Listo
-                    </button>
-                  </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full ml-4"
-                  style={{ backgroundColor: templateColor }}
-                ></div>
+                <input
+                  type="file"
+                  onChange={(e) => setLogo(e.target.files[0])}
+                  accept="image/*"
+                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                />
               </div>
             </div>
             <div>
@@ -264,14 +320,37 @@ function PantallasDirectorio() {
               </div>
             </div>
             <div>
-              <label className="text-white dark:text-gray-200">Logo</label>
+              <label className="text-white dark:text-gray-200">
+                Color de la plantilla
+              </label>
               <div className="flex items-center">
-                <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="file"
-                />
+                <button
+                  onClick={handleTemplateColorChange}
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                >
+                  Seleccionar Color
+                </button>
+                {showColorPicker && (
+                  <div className="absolute z-10">
+                    <ChromePicker
+                      color={templateColor}
+                      onChange={handleColorChange}
+                    />
+                    <button
+                      onClick={handleTemplateColorChange}
+                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                    >
+                      Listo
+                    </button>
+                  </div>
+                )}
+                <div
+                  className="w-8 h-8 rounded-full ml-4"
+                  style={{ backgroundColor: templateColor }}
+                ></div>
               </div>
             </div>
+
             <div>
               <label className="text-white dark:text-gray-200">
                 Estilo de texto
@@ -339,12 +418,23 @@ function PantallasDirectorio() {
                 <div className="flex justify-between items-center">
                   {/* Logo en la esquina superior izquierda */}
                   <div className="">
-                    <img
-                      src="/img/fiestamericana.png"
-                      alt="Logo"
-                      className="h-15"
-                    />
+                    {logo ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={URL.createObjectURL(logo)}
+                        alt="Logo"
+                        className="h-28 mb-2"
+                      />
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src="/img/fiestamericana.png"
+                        alt="Logo"
+                        className="h-15"
+                      />
+                    )}
                   </div>
+
                   <div className="flex flex-col items-center">
                     <p className="text-2xl text-center font-semibold mb-2">
                       {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
@@ -380,52 +470,43 @@ function PantallasDirectorio() {
                       >
                         <div className="flex items-center border-b border-black w-full">
                           <img
-                            src="/img/imgTemplate.png"
-                            alt="imgTemplate"
-                            className="h-14"
+                            src={
+                              selectedEvent &&
+                              selectedEvent.images &&
+                              selectedEvent.images.length > 0
+                                ? selectedEvent.images[0]
+                                : "/img/imgTemplate.png"
+                            }
+                            alt="Imagen del evento"
+                            className="h-28"
                           />
-                          <div className="space-y-2 pl-5 flex-1">
+                          <div className="space-y-5 pl-5 flex-grow">
                             <div>
-                              <h1>Sesión:</h1>
-                              <p>14:00 hrs</p>
+                              <p>
+                                {selectedEvent && (
+                                  <p>{selectedEvent.nombreEvento}</p>
+                                )}
+                              </p>
                             </div>
-                            <div>
-                              <h1>Conferencia:</h1>
-                              <div className="flex justify-between">
-                                <p className="">
-                                  Impartido por el profesor Alejandro Grinberg
+                            <div className="flex items-center justify-between w-full">
+                              <div className="flex flex-col">
+                                <p>
+                                  {selectedEvent && selectedEvent.tipoEvento}
                                 </p>
-                                <p className="">planta baja</p>
-                                <p className="">12:00</p>
+                                <p>{selectedEvent && selectedEvent.lugar}</p>
+                              </div>
+                              <div className="text-right">
+                                <p>
+                                  {selectedEvent &&
+                                    selectedEvent.horaInicialReal}
+                                </p>
                               </div>
                             </div>
                           </div>
                         </div>
-
-                        <div className="flex items-center">
-                          <img
-                            src="/img/imgTemplate.png"
-                            alt="imgTemplate"
-                            className="h-14"
-                          />
-                          <div className=" space-y-5 pl-5 ">
-                            <div>
-                              <h1>Sesión:</h1>
-                              <p>14:00 hrs</p>
-                            </div>
-                            <div>
-                              <h1>Conferencia:</h1>
-                              <p>
-                                Impartido por el profesor Alejandro Grinberg
-                              </p>
-                            </div>
-                          </div>
-                        </div>
                       </div>
-
-                      {/* Div solo para que la imagen este a la derecha */}
-                      <div></div>
                     </div>
+
                     <div>
                       {/* Fecha y hora en la esquina inferior */}
                       <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
@@ -445,7 +526,6 @@ function PantallasDirectorio() {
                     className="h-12"
                   />
                 </div>
-
                 {/* Botón para volver atrás */}
                 <button
                   onClick={handleClosePreview}
