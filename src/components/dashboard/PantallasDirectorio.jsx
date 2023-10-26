@@ -38,7 +38,7 @@ function PantallasDirectorio() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [logo, setLogo] = useState(null);
-
+  const [selectedEvents, setSelectedEvents] = useState([]);
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
     { value: "Los Angeles", label: "Los Angeles" },
@@ -195,6 +195,19 @@ function PantallasDirectorio() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleEventCheckboxChange = (eventId) => {
+    setSelectedEvents((prevSelectedEvents) => {
+      if (prevSelectedEvents.some((event) => event.id === eventId)) {
+        // Si el evento ya estaba seleccionado, quítalo de la lista de seleccionados
+        return prevSelectedEvents.filter((event) => event.id !== eventId);
+      } else {
+        // Si el evento no estaba seleccionado, agrégalo a la lista de seleccionados
+        const eventToAdd = events.find((event) => event.id === eventId);
+        return [...prevSelectedEvents, eventToAdd];
+      }
+    });
+  };
+
   return (
     <section className="px-8 py-12">
       <div>
@@ -258,25 +271,22 @@ function PantallasDirectorio() {
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Seleccionar Evento
+                Seleccionar Eventos
               </label>
-              <select
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
-                value={selectedEvent ? selectedEvent.id : ""}
-                onChange={(e) => {
-                  const eventId = e.target.value;
-                  const event = events.find((event) => event.id === eventId);
-                  setSelectedEvent(event);
-                }}
-              >
-                <option value="">Seleccionar Evento</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.nombreEvento}
-                  </option>
-                ))}
-              </select>
+              {/* Lista de eventos con checkboxes */}
+              {events.map((event) => (
+                <label key={event.id} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    checked={selectedEvents.some((e) => e.id === event.id)}
+                    onChange={() => handleEventCheckboxChange(event.id)}
+                    className="mr-2"
+                  />
+                  <span className="text-white">{event.nombreEvento}</span>
+                </label>
+              ))}
             </div>
+
             <div>
               <label className="text-white dark:text-gray-200">Logo</label>
               <div className="flex items-center">
@@ -459,54 +469,43 @@ function PantallasDirectorio() {
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
                     <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
-                      {/* Título */}
                       <h2 className=" text-white"> </h2>
                     </div>
                     <div className=" text-black">
-                      {/* Imagen a la izquierda */}
-                      <div
-                        className="flex flex-col
-                      "
-                      >
-                        <div className="flex items-center border-b border-black w-full">
-                          <img
-                            src={
-                              selectedEvent &&
-                              selectedEvent.images &&
-                              selectedEvent.images.length > 0
-                                ? selectedEvent.images[0]
-                                : "/img/imgTemplate.png"
-                            }
-                            alt="Imagen del evento"
-                            className="h-28"
-                          />
-                          <div className="space-y-5 pl-5 flex-grow">
-                            <div>
-                              <p>
-                                {selectedEvent && (
+                      <div className="flex flex-col">
+                        {/* Muestra cada evento seleccionado uno debajo del otro */}
+                        {selectedEvents.slice(0, 4).map((selectedEvent) => (
+                          <div key={selectedEvent.id}>
+                            <div className="flex items-center border-b border-black w-full">
+                              <img
+                                src={
+                                  selectedEvent.images &&
+                                  selectedEvent.images.length > 0
+                                    ? selectedEvent.images[0]
+                                    : "/img/imgTemplate.png"
+                                }
+                                alt="Imagen del evento"
+                                className="h-28"
+                              />
+                              <div className="space-y-5 pl-5 flex-grow">
+                                <div>
                                   <p>{selectedEvent.nombreEvento}</p>
-                                )}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex flex-col">
-                                <p>
-                                  {selectedEvent && selectedEvent.tipoEvento}
-                                </p>
-                                <p>{selectedEvent && selectedEvent.lugar}</p>
-                              </div>
-                              <div className="text-right">
-                                <p>
-                                  {selectedEvent &&
-                                    selectedEvent.horaInicialReal}
-                                </p>
+                                </div>
+                                <div className="flex items-center justify-between w-full">
+                                  <div className="flex flex-col">
+                                    <p>{selectedEvent.tipoEvento}</p>
+                                    <p>{selectedEvent.lugar}</p>
+                                  </div>
+                                  <div className="text-right">
+                                    <p>{selectedEvent.horaInicialReal}</p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
+                        ))}
                       </div>
                     </div>
-
                     <div>
                       {/* Fecha y hora en la esquina inferior */}
                       <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
