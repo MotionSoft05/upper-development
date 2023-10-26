@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
@@ -38,7 +37,6 @@ function PantallasDirectorio() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [logo, setLogo] = useState(null);
-
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
     { value: "Los Angeles", label: "Los Angeles" },
@@ -54,8 +52,8 @@ function PantallasDirectorio() {
           const evento = doc.data();
           eventos.push(evento);
         });
-        // Update the events state variable with the fetched events
         setEvents(eventos);
+        console.log("Eventos cargados:", eventos); // Add this line
       })
       .catch((error) => {
         console.error("Error al obtener eventos:", error);
@@ -72,10 +70,9 @@ function PantallasDirectorio() {
           eventos.push(evento);
         });
         setEvents(eventos);
+        console.log("Eventos actualizados:", eventos); // Add this line
       }
     );
-
-    // Limpieza del efecto al desmontar el componente
     return () => unsubscribe();
   }, []);
 
@@ -195,6 +192,15 @@ function PantallasDirectorio() {
     return () => clearInterval(interval);
   }, []);
 
+  const handleEventSelectionChange = (e) => {
+    const eventName = e.target.value;
+    console.log("Selected Event Name:", eventName);
+    const event = events.find((event) => event.nombreEvento === eventName);
+    console.log("Selected Event Object:", event);
+    setSelectedEvent(event);
+    console.log("Selected Event:", selectedEvent);
+  };
+
   return (
     <section className="px-8 py-12">
       <div>
@@ -258,16 +264,12 @@ function PantallasDirectorio() {
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Seleccionar Evento
+                Seleccionar Eventos
               </label>
               <select
                 className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
                 value={selectedEvent ? selectedEvent.id : ""}
-                onChange={(e) => {
-                  const eventId = e.target.value;
-                  const event = events.find((event) => event.id === eventId);
-                  setSelectedEvent(event);
-                }}
+                onChange={handleEventSelectionChange} // Aquí se define la función de manejo del cambio de selección
               >
                 <option value="">Seleccionar Evento</option>
                 {events.map((event) => (
