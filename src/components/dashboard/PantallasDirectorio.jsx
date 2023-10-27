@@ -37,7 +37,7 @@ function PantallasDirectorio() {
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [selectedEvents, setSelectedEvents] = useState(events);
+  const [selectedEvents, setSelectedEvents] = useState([]);
   const [isChecked, setIsChecked] = useState(false);
   const [eventCheckboxStates, setEventCheckboxStates] = useState({});
 
@@ -497,36 +497,33 @@ function PantallasDirectorio() {
                       "
                       >
                         <div className="flex items-center border-b border-black w-full">
-                          <img
-                            src={
-                              selectedEvent &&
-                              selectedEvent.images &&
-                              selectedEvent.images.length > 0
-                                ? selectedEvent.images[0]
-                                : "/img/imgTemplate.png"
-                            }
-                            alt="Imagen del evento"
-                            className="h-28"
-                          />
                           <div className="space-y-5 pl-5 flex-grow">
                             {selectedEvents &&
                               selectedEvents.map((event) => {
-                                console.log(
-                                  `Mostrando evento: ${event.nombreEvento}`
-                                );
-                                console.log(
-                                  `Estado del checkbox: ${
-                                    eventCheckboxStates[event.id]
-                                  }`
-                                );
                                 return (
-                                  <div key={event.id}>
-                                    <h3>{event.nombreEvento}</h3>
-                                    <p>{event.tipoEvento}</p>
-                                    <p>{event.lugar}</p>
-                                    {/* Agrega más detalles según sea necesario */}
-                                    <div className="text-right">
-                                      <p>{event.horaInicialReal}</p>
+                                  <div
+                                    key={event.id}
+                                    className="flex items-center space-x-4"
+                                  >
+                                    {/* Imagen a la izquierda */}
+                                    <img
+                                      src={event.images[0]}
+                                      alt={event.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                      }}
+                                    />
+
+                                    {/* Detalles del evento */}
+                                    <div>
+                                      <h3>{event.nombreEvento}</h3>
+                                      <p>{event.tipoEvento}</p>
+                                      <p>{event.lugar}</p>
+                                      {/* Agrega más detalles según sea necesario */}
+                                      <div className="text-right">
+                                        <p>{event.horaInicialReal}</p>
+                                      </div>
                                     </div>
                                   </div>
                                 );
