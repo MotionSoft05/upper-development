@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
@@ -36,6 +37,10 @@ function PantallasDirectorio() {
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEvents, setSelectedEvents] = useState(events);
+  const [isChecked, setIsChecked] = useState(false);
+  const [eventCheckboxStates, setEventCheckboxStates] = useState({});
+
   const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
@@ -48,33 +53,58 @@ function PantallasDirectorio() {
       .get()
       .then((querySnapshot) => {
         const eventos = [];
+        const checkboxStates = {};
         querySnapshot.forEach((doc) => {
-          const evento = doc.data();
+          const evento = {
+            id: doc.id,
+            ...doc.data(),
+          };
+          checkboxStates[evento.id] = evento.isChecked || false;
           eventos.push(evento);
         });
         setEvents(eventos);
-        console.log("Eventos cargados:", eventos); // Add this line
+        setEventCheckboxStates(checkboxStates);
       })
       .catch((error) => {
         console.error("Error al obtener eventos:", error);
       });
-  }, []);
 
-  useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "eventos"),
       (querySnapshot) => {
         const eventos = [];
+        const checkboxStates = { ...eventCheckboxStates };
         querySnapshot.forEach((doc) => {
-          const evento = doc.data();
+          const evento = {
+            id: doc.id,
+            ...doc.data(),
+          };
           eventos.push(evento);
+          checkboxStates[evento.id] =
+            checkboxStates[evento.id] !== undefined
+              ? checkboxStates[evento.id]
+              : false;
         });
         setEvents(eventos);
-        console.log("Eventos actualizados:", eventos); // Add this line
+        setEventCheckboxStates(checkboxStates);
       }
     );
+
     return () => unsubscribe();
-  }, []);
+  }, [eventCheckboxStates]);
+
+  const handleCheckboxChange = (eventId) => {
+    setEventCheckboxStates((prevState) => ({
+      ...prevState,
+      [eventId]: !prevState[eventId],
+    }));
+  };
+  useEffect(() => {
+    const filteredEvents = events.filter((event) => {
+      return eventCheckboxStates[event.id];
+    });
+    setSelectedEvents(filteredEvents);
+  }, [eventCheckboxStates, events]);
 
   useEffect(() => {
     if (selectedCity) {
@@ -192,15 +222,6 @@ function PantallasDirectorio() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleEventSelectionChange = (e) => {
-    const eventName = e.target.value;
-    console.log("Selected Event Name:", eventName);
-    const event = events.find((event) => event.nombreEvento === eventName);
-    console.log("Selected Event Object:", event);
-    setSelectedEvent(event);
-    console.log("Selected Event:", selectedEvent);
-  };
-
   return (
     <section className="px-8 py-12">
       <div>
@@ -266,19 +287,24 @@ function PantallasDirectorio() {
               <label className="text-white dark:text-gray-200 block mb-1">
                 Seleccionar Eventos
               </label>
-              <select
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
-                value={selectedEvent ? selectedEvent.id : ""}
-                onChange={handleEventSelectionChange} // Aquí se define la función de manejo del cambio de selección
-              >
-                <option value="">Seleccionar Evento</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.nombreEvento}
-                  </option>
-                ))}
-              </select>
+              {events.map((event) => (
+                <div key={event.id}>
+                  <input
+                    type="checkbox"
+                    checked={eventCheckboxStates[event.id]}
+                    onChange={() => handleCheckboxChange(event.id)}
+                  />
+                  <span
+                    className={`text-white ${
+                      !event.nombreEvento && "text-opacity-0"
+                    }`}
+                  >
+                    {event.nombreEvento || "Nombre del Evento"}
+                  </span>
+                </div>
+              ))}
             </div>
+
             <div>
               <label className="text-white dark:text-gray-200">Logo</label>
               <div className="flex items-center">
@@ -483,27 +509,28 @@ function PantallasDirectorio() {
                             className="h-28"
                           />
                           <div className="space-y-5 pl-5 flex-grow">
-                            <div>
-                              <p>
-                                {selectedEvent && (
-                                  <p>{selectedEvent.nombreEvento}</p>
-                                )}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex flex-col">
-                                <p>
-                                  {selectedEvent && selectedEvent.tipoEvento}
-                                </p>
-                                <p>{selectedEvent && selectedEvent.lugar}</p>
-                              </div>
-                              <div className="text-right">
-                                <p>
-                                  {selectedEvent &&
-                                    selectedEvent.horaInicialReal}
-                                </p>
-                              </div>
-                            </div>
+                            {selectedEvents &&
+                              selectedEvents.map((event) => {
+                                console.log(
+                                  `Mostrando evento: ${event.nombreEvento}`
+                                );
+                                console.log(
+                                  `Estado del checkbox: ${
+                                    eventCheckboxStates[event.id]
+                                  }`
+                                );
+                                return (
+                                  <div key={event.id}>
+                                    <h3>{event.nombreEvento}</h3>
+                                    <p>{event.tipoEvento}</p>
+                                    <p>{event.lugar}</p>
+                                    {/* Agrega más detalles según sea necesario */}
+                                    <div className="text-right">
+                                      <p>{event.horaInicialReal}</p>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                           </div>
                         </div>
                       </div>
