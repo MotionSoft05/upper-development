@@ -6,6 +6,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import { getFirestore, collection, onSnapshot } from "firebase/firestore";
 import "keen-slider/keen-slider.min.css";
+import { useKeenSlider } from "keen-slider/react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -211,6 +212,10 @@ function PantallasSalon() {
     return metrics.width;
   }
 
+  // Slider
+  const [sliderRef] = useKeenSlider({
+    loop: true,
+  });
   return (
     <section className="px-8 py-12">
       <div>
@@ -464,97 +469,77 @@ function PantallasSalon() {
                           : "TÍTULO DEL EVENTO"}
                       </h2>
                     </div>
-                    <div className="flex justify-between text-black">
-                      <div className="flex items-center">
-                        {selectedEvent && selectedEvent.images.length > 0 ? (
-                          <>
-                            {/* <div className="mr-4">
-                              {selectedEvent.images.map((image, index) => (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                  key={index}
-                                  src={image}
-                                  alt={`Imagen ${index + 1}`}
-                                  className={`h-16 w-auto cursor-pointer ${
-                                    index === selectedImageIndex
-                                      ? "border-2 border-blue-500"
-                                      : ""
-                                  }`}
-                                  onClick={() => setSelectedImageIndex(index)}
-                                />
-                              ))}
-                            </div> */}
+                    <div className="grid grid-cols-2 text-black">
+                      {selectedEvent && selectedEvent.images.length > 0 ? (
+                        <>
+                          <div className="mr-4">
                             <div ref={sliderRef} className="keen-slider">
-                              <div className="keen-slider__slide number-slide1 flex items-center justify-center">
-                                <img
-                                  src="/img/sliderImage.png"
-                                  className="mx-auto"
-                                  alt="Logo"
-                                />
-                              </div>
+                              {selectedEvent.images.map((image, index) => (
+                                <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+                                  <img
+                                    key={index}
+                                    src={image}
+                                    alt={`Imagen ${index + 1}`}
+                                    className="h-10"
+                                  />
+                                </div>
+                              ))}
                             </div>
-                            <img
-                              src={selectedEvent.images[selectedImageIndex]}
-                              alt="Evento"
-                              className="h-15 w-auto"
-                              style={{ maxWidth: "20rem" }}
-                            />
-                          </>
-                        ) : (
-                          <p>No hay imágenes disponibles</p>
-                        )}
+                          </div>
+                        </>
+                      ) : (
+                        <p>No hay imágenes disponibles</p>
+                      )}
+                      <div
+                        className=" space-y-8 pl-10 mb-12"
+                        style={{
+                          fontFamily: selectedFontStyle
+                            ? selectedFontStyle.value
+                            : "Arial",
+                        }}
+                      >
+                        <div>
+                          <h1>Sesión:</h1>
+                          <p>
+                            {selectedEvent ? (
+                              <span className="text-2xl font-bold">
+                                {selectedEvent.horaInicialReal}
+                              </span>
+                            ) : (
+                              "Hora Inicial"
+                            )}{" "}
+                            <span className="text-2x1">hrs.</span>
+                          </p>
+                        </div>
                         <div
-                          className="space-y-8 pl-10 mb-12"
+                          className="max-w-xs"
                           style={{
                             fontFamily: selectedFontStyle
                               ? selectedFontStyle.value
                               : "Arial",
                           }}
                         >
-                          <div>
-                            <h1>Sesión:</h1>
-                            <p>
-                              {selectedEvent ? (
-                                <span className="text-2xl font-bold">
-                                  {selectedEvent.horaInicialReal}
-                                </span>
-                              ) : (
-                                "Hora Inicial"
-                              )}{" "}
-                              <span className="text-2x1">hrs.</span>
-                            </p>
-                          </div>
-                          <div
-                            className="max-w-xs"
-                            style={{
-                              fontFamily: selectedFontStyle
-                                ? selectedFontStyle.value
-                                : "Arial",
-                            }}
-                          >
-                            {/* Tipo de evento y descripción */}
-                            <h1>
-                              {selectedEvent
-                                ? selectedEvent.tipoEvento
-                                : "Tipo de Evento Desconocido"}
-                            </h1>
-                            <div className="text-center flex px-0">
-                              {descripcion && (
-                                <div>
-                                  {dividirTexto(descripcion, 40).map(
-                                    (linea, index) => (
-                                      <p key={index} className="text-left">
-                                        {linea}
-                                      </p>
-                                    )
-                                  )}
-                                </div>
-                              )}
-                            </div>
+                          {/* Tipo de evento y descripción */}
+                          <h1>
+                            {selectedEvent
+                              ? selectedEvent.tipoEvento
+                              : "Tipo de Evento Desconocido"}
+                          </h1>
+                          <div className="text-center flex px-0">
+                            {descripcion && (
+                              <div>
+                                {dividirTexto(descripcion, 40).map(
+                                  (linea, index) => (
+                                    <p key={index} className="text-left">
+                                      {linea}
+                                    </p>
+                                  )
+                                )}
+                              </div>
+                            )}
                           </div>
                         </div>
                       </div>
-                      <div></div>
                     </div>
                     <div>
                       <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
