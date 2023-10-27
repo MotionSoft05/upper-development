@@ -5,6 +5,7 @@ import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import "keen-slider/keen-slider.min.css";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -467,7 +468,7 @@ function PantallasSalon() {
                       <div className="flex items-center">
                         {selectedEvent && selectedEvent.images.length > 0 ? (
                           <>
-                            <div className="mr-4">
+                            {/* <div className="mr-4">
                               {selectedEvent.images.map((image, index) => (
                                 // eslint-disable-next-line @next/next/no-img-element
                                 <img
@@ -482,6 +483,15 @@ function PantallasSalon() {
                                   onClick={() => setSelectedImageIndex(index)}
                                 />
                               ))}
+                            </div> */}
+                            <div ref={sliderRef} className="keen-slider">
+                              <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+                                <img
+                                  src="/img/sliderImage.png"
+                                  className="mx-auto"
+                                  alt="Logo"
+                                />
+                              </div>
                             </div>
                             <img
                               src={selectedEvent.images[selectedImageIndex]}

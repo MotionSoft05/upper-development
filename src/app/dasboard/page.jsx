@@ -14,7 +14,7 @@ import { useState } from "react";
 
 function DashBoard() {
   const [showAdmin, setShowAdmin] = useState(true);
-  const [showAltaEvento, setShowAltaEvento] = useState(true);
+  const [showAltaEvento, setShowAltaEvento] = useState(false);
   const [showConsultaEvento, setShowConsultaEvento] = useState(false);
 
   const [showPantallaSalon, setShowPantallaSalon] = useState(false);
