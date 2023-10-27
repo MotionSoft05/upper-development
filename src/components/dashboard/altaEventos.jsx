@@ -28,6 +28,14 @@ function AltaEventos() {
   });
   const [alertaEnviada, setAlertaEnviada] = useState(false);
   const [images, setImages] = useState([]);
+  const [description, setDescription] = useState("");
+  const [charCount, setCharCount] = useState(0);
+
+  const handleDescriptionChange = (e) => {
+    const inputText = e.target.value;
+    setDescription(inputText);
+    setCharCount(inputText.length);
+  };
 
   const handleImageUpload = async (e) => {
     const files = e.target.files;
@@ -111,11 +119,13 @@ function AltaEventos() {
     );
     const devices = selectedDevices;
     setImages([]);
+    setDescription("");
 
     const eventoData = {
       nombreEvento,
       tipoEvento,
       lugar,
+      description,
       horaInicialReal,
       horaFinalReal,
       horaInicialSalon,
@@ -135,6 +145,7 @@ function AltaEventos() {
         document.getElementById("floating_name").value = "";
         document.getElementById("floating_event").value = "";
         document.getElementById("floating_floor").value = "";
+        document.getElementById("description").value = "";
         document.getElementById("hourSelectorInicio").value = "00";
         document.getElementById("minuteSelectorInicio").value = "00";
         document.getElementById("hourSelectorFinal").value = "00";
@@ -161,6 +172,7 @@ function AltaEventos() {
         setSelectedImages([]);
         setImages([]);
         resetForm();
+        setDescription("");
 
         setTimeout(() => {
           setAlertaEnviada(false);
@@ -252,6 +264,27 @@ function AltaEventos() {
                 >
                   Lugar
                 </label>
+              </div>
+              <div className="relative z-0 w-full mb-6 group">
+                <textarea
+                  name="description"
+                  id="description"
+                  className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2  appearance-none  border-gray-600  focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                  placeholder=" "
+                  rows="1"
+                  maxLength="255"
+                  value={description}
+                  onChange={handleDescriptionChange}
+                />
+                <label
+                  for="description"
+                  className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
+                >
+                  Descripción
+                </label>
+                <span id="charCount" className="text-sm text-gray-500">
+                  {charCount}/255 caracteres
+                </span>
               </div>
               <div className="bg-gray-300 p-4">
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900 ">

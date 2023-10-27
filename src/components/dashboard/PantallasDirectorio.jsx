@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
@@ -36,6 +37,10 @@ function PantallasDirectorio() {
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [selectedEvents, setSelectedEvents] = useState([]);
+  const [isChecked, setIsChecked] = useState(false);
+  const [eventCheckboxStates, setEventCheckboxStates] = useState({});
+
   const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
@@ -48,33 +53,58 @@ function PantallasDirectorio() {
       .get()
       .then((querySnapshot) => {
         const eventos = [];
+        const checkboxStates = {};
         querySnapshot.forEach((doc) => {
-          const evento = doc.data();
+          const evento = {
+            id: doc.id,
+            ...doc.data(),
+          };
+          checkboxStates[evento.id] = evento.isChecked || false;
           eventos.push(evento);
         });
         setEvents(eventos);
-        console.log("Eventos cargados:", eventos); // Add this line
+        setEventCheckboxStates(checkboxStates);
       })
       .catch((error) => {
         console.error("Error al obtener eventos:", error);
       });
-  }, []);
 
-  useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "eventos"),
       (querySnapshot) => {
         const eventos = [];
+        const checkboxStates = { ...eventCheckboxStates };
         querySnapshot.forEach((doc) => {
-          const evento = doc.data();
+          const evento = {
+            id: doc.id,
+            ...doc.data(),
+          };
           eventos.push(evento);
+          checkboxStates[evento.id] =
+            checkboxStates[evento.id] !== undefined
+              ? checkboxStates[evento.id]
+              : false;
         });
         setEvents(eventos);
-        console.log("Eventos actualizados:", eventos); // Add this line
+        setEventCheckboxStates(checkboxStates);
       }
     );
+
     return () => unsubscribe();
-  }, []);
+  }, [eventCheckboxStates]);
+
+  const handleCheckboxChange = (eventId) => {
+    setEventCheckboxStates((prevState) => ({
+      ...prevState,
+      [eventId]: !prevState[eventId],
+    }));
+  };
+  useEffect(() => {
+    const filteredEvents = events.filter((event) => {
+      return eventCheckboxStates[event.id];
+    });
+    setSelectedEvents(filteredEvents);
+  }, [eventCheckboxStates, events]);
 
   useEffect(() => {
     if (selectedCity) {
@@ -192,15 +222,6 @@ function PantallasDirectorio() {
     return () => clearInterval(interval);
   }, []);
 
-  const handleEventSelectionChange = (e) => {
-    const eventName = e.target.value;
-    console.log("Selected Event Name:", eventName);
-    const event = events.find((event) => event.nombreEvento === eventName);
-    console.log("Selected Event Object:", event);
-    setSelectedEvent(event);
-    console.log("Selected Event:", selectedEvent);
-  };
-
   return (
     <section className="px-8 py-12">
       <div>
@@ -266,27 +287,33 @@ function PantallasDirectorio() {
               <label className="text-white dark:text-gray-200 block mb-1">
                 Seleccionar Eventos
               </label>
-              <select
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
-                value={selectedEvent ? selectedEvent.id : ""}
-                onChange={handleEventSelectionChange} // Aquí se define la función de manejo del cambio de selección
-              >
-                <option value="">Seleccionar Evento</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.nombreEvento}
-                  </option>
-                ))}
-              </select>
+              {events.map((event) => (
+                <div key={event.id}>
+                  <input
+                    type="checkbox"
+                    checked={eventCheckboxStates[event.id]}
+                    onChange={() => handleCheckboxChange(event.id)}
+                  />
+                  <span
+                    className={`text-white ${
+                      !event.nombreEvento && "text-opacity-0"
+                    }`}
+                  >
+                    {event.nombreEvento || "Nombre del Evento"}
+                  </span>
+                </div>
+              ))}
             </div>
-            <div>
-              <label className="text-white dark:text-gray-200">Logo</label>
+
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Logo
+              </label>
               <div className="flex items-center">
                 <input
-                  type="file"
                   onChange={(e) => setLogo(e.target.files[0])}
-                  accept="image/*"
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
                 />
               </div>
             </div>
@@ -437,14 +464,17 @@ function PantallasDirectorio() {
                     )}
                   </div>
 
-                  <div className="flex flex-col items-center">
+                  <div
+                    className="flex flex-col items-center"
+                    style={{ color: fontColor }}
+                  >
                     <p className="text-2xl text-center font-semibold mb-2">
                       {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
                     </p>
                     <h1 className="text-4xl font-bold">Eventos del día</h1>
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col" style={{ color: fontColor }}>
                     {isLoading ? (
                       <p>Cargando datos del clima...</p>
                     ) : weatherData &&
@@ -460,7 +490,13 @@ function PantallasDirectorio() {
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
-                    <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
+                    <div
+                      className="text-2xl font-semibold mt-1 text-center justify-between flex px-20 mb-4"
+                      style={{
+                        background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
+                        color: `${templateColor}`,
+                      }}
+                    >
                       {/* Título */}
                       <h2 className=" text-white"> </h2>
                     </div>
@@ -471,39 +507,39 @@ function PantallasDirectorio() {
                       "
                       >
                         <div className="flex items-center border-b border-black w-full">
-                          <img
-                            src={
-                              selectedEvent &&
-                              selectedEvent.images &&
-                              selectedEvent.images.length > 0
-                                ? selectedEvent.images[0]
-                                : "/img/imgTemplate.png"
-                            }
-                            alt="Imagen del evento"
-                            className="h-28"
-                          />
                           <div className="space-y-5 pl-5 flex-grow">
-                            <div>
-                              <p>
-                                {selectedEvent && (
-                                  <p>{selectedEvent.nombreEvento}</p>
-                                )}
-                              </p>
-                            </div>
-                            <div className="flex items-center justify-between w-full">
-                              <div className="flex flex-col">
-                                <p>
-                                  {selectedEvent && selectedEvent.tipoEvento}
-                                </p>
-                                <p>{selectedEvent && selectedEvent.lugar}</p>
-                              </div>
-                              <div className="text-right">
-                                <p>
-                                  {selectedEvent &&
-                                    selectedEvent.horaInicialReal}
-                                </p>
-                              </div>
-                            </div>
+                            {selectedEvents &&
+                              selectedEvents.map((event) => {
+                                return (
+                                  <div
+                                    key={event.id}
+                                    className="flex items-center space-x-4"
+                                  >
+                                    {/* Imagen a la izquierda */}
+                                    <img
+                                      src={event.images[0]}
+                                      alt={event.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                      }}
+                                    />
+
+                                    {/* Detalles del evento */}
+                                    <div style={{ color: fontColor }}>
+                                      {" "}
+                                      {/* Aplicando el color seleccionado */}
+                                      <h3>{event.nombreEvento}</h3>
+                                      <p>{event.tipoEvento}</p>
+                                      <p>{event.lugar}</p>
+                                      {/* Agrega más detalles según sea necesario */}
+                                      <div className="text-right">
+                                        <p>{event.horaInicialReal}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
                           </div>
                         </div>
                       </div>
@@ -511,14 +547,20 @@ function PantallasDirectorio() {
 
                     <div>
                       {/* Fecha y hora en la esquina inferior */}
-                      <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
+                      <div
+                        className="text-2xl font-semibold mt-1 text-center justify-between flex px-20"
+                        style={{
+                          background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
+                          color: `${templateColor}`,
+                        }}
+                      >
                         <p> </p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="">
+                  <p className="" style={{ color: fontColor }}>
                     Grupo renueca el mejor programa de recompensa para
                     asistentes ejec
                   </p>

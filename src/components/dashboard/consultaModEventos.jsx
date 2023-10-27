@@ -25,6 +25,7 @@ function ConsultaModEvento() {
   const [horaInicialReal, setHoraInicialReal] = useState("");
   const [horaFinalReal, setHoraFinalReal] = useState("");
   const [diasSeleccionados, setDiasSeleccionados] = useState([]);
+  const [description, setDescription] = useState("");
 
   useEffect(() => {
     const consultarEventos = async () => {
@@ -71,6 +72,7 @@ function ConsultaModEvento() {
 
   const guardarCambios = async () => {
     try {
+      console.log(description);
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
       await firebase
@@ -84,6 +86,7 @@ function ConsultaModEvento() {
           diasSeleccionados,
           fechaInicio: fechaInicioFormateada,
           fechaFinal: fechaFinalFormateada,
+          description: description,
         });
 
       setModalAbierto(false);
@@ -91,6 +94,7 @@ function ConsultaModEvento() {
       setHoraInicialReal("");
       setHoraFinalReal("");
       setDiasSeleccionados([]);
+      setDescription("");
     } catch (error) {
       console.error("Error al guardar cambios:", error);
     }
@@ -371,6 +375,21 @@ function ConsultaModEvento() {
                               handleFieldEdit("lugar", e.target.value)
                             }
                             className="w-full px-2 py-1 border rounded-lg text-center"
+                          />
+                        </div>
+                        <div className="mb-4 relative">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Descripción del Evento ({255 - description.length})
+                          </label>
+                          <textarea
+                            value={eventoEditado?.description || ""}
+                            onChange={(e) => {
+                              handleFieldEdit("description", e.target.value);
+                              setDescription(e.target.value);
+                            }}
+                            className="w-full px-2 py-1 border rounded-lg text-center"
+                            rows={4}
+                            maxLength={255}
                           />
                         </div>
                         <div className="mb-4">
