@@ -305,14 +305,15 @@ function PantallasDirectorio() {
               ))}
             </div>
 
-            <div>
-              <label className="text-white dark:text-gray-200">Logo</label>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Logo
+              </label>
               <div className="flex items-center">
                 <input
-                  type="file"
                   onChange={(e) => setLogo(e.target.files[0])}
-                  accept="image/*"
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
                 />
               </div>
             </div>
@@ -463,14 +464,17 @@ function PantallasDirectorio() {
                     )}
                   </div>
 
-                  <div className="flex flex-col items-center">
+                  <div
+                    className="flex flex-col items-center"
+                    style={{ color: fontColor }}
+                  >
                     <p className="text-2xl text-center font-semibold mb-2">
                       {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
                     </p>
                     <h1 className="text-4xl font-bold">Eventos del día</h1>
                   </div>
 
-                  <div className="flex flex-col">
+                  <div className="flex flex-col" style={{ color: fontColor }}>
                     {isLoading ? (
                       <p>Cargando datos del clima...</p>
                     ) : weatherData &&
@@ -486,7 +490,13 @@ function PantallasDirectorio() {
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
-                    <div className="text-3xl font-extrabold    bg-gradient-to-r from-custom  to-Second px-20">
+                    <div
+                      className="text-2xl font-semibold mt-1 text-center justify-between flex px-20 mb-4"
+                      style={{
+                        background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
+                        color: `${templateColor}`,
+                      }}
+                    >
                       {/* Título */}
                       <h2 className=" text-white"> </h2>
                     </div>
@@ -516,7 +526,9 @@ function PantallasDirectorio() {
                                     />
 
                                     {/* Detalles del evento */}
-                                    <div>
+                                    <div style={{ color: fontColor }}>
+                                      {" "}
+                                      {/* Aplicando el color seleccionado */}
                                       <h3>{event.nombreEvento}</h3>
                                       <p>{event.tipoEvento}</p>
                                       <p>{event.lugar}</p>
@@ -535,14 +547,20 @@ function PantallasDirectorio() {
 
                     <div>
                       {/* Fecha y hora en la esquina inferior */}
-                      <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
+                      <div
+                        className="text-2xl font-semibold mt-1 text-center justify-between flex px-20"
+                        style={{
+                          background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
+                          color: `${templateColor}`,
+                        }}
+                      >
                         <p> </p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="">
+                  <p className="" style={{ color: fontColor }}>
                     Grupo renueca el mejor programa de recompensa para
                     asistentes ejec
                   </p>
