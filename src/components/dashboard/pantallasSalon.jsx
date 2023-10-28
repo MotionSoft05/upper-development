@@ -475,6 +475,7 @@ function PantallasSalon() {
                           <div className="mr-4">
                             <div ref={sliderRef} className="keen-slider">
                               {selectedEvent.images.map((image, index) => (
+                                // eslint-disable-next-line react/jsx-key
                                 <div className="keen-slider__slide number-slide1 flex items-center justify-center">
                                   <img
                                     key={index}
