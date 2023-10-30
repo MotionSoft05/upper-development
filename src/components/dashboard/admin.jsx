@@ -20,6 +20,8 @@ const db = getFirestore(app);
 
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
+  const [usuarioEditando, setUsuarioEditando] = useState(null);
+
   useEffect(() => {
     const obtenerUsuarios = async () => {
       const usuariosCollection = collection(db, "usuarios");
@@ -33,6 +35,17 @@ function Admin() {
 
     obtenerUsuarios();
   }, []);
+
+  const handleEditarUsuario = (usuario) => {
+    setUsuarioEditando({ ...usuario }); // Inicializa el estado usuarioEditando con los datos del usuario a editar
+  };
+
+  const handleGuardarCambios = () => {
+    // Lógica para guardar los cambios en Firebase
+    // Aquí puedes utilizar las funciones de Firebase para actualizar los datos del usuario
+    // Una vez que hayas guardado los cambios, puedes resetear el estado de usuarioEditando a null
+    // para cerrar el formulario de edición.
+  };
 
   return (
     <div class="flex flex-col  bg-gray-100">
@@ -66,19 +79,84 @@ function Admin() {
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Teléfono
                   </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Acciones
+                  </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Plan
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {usuarios.map((usuario) => (
                   <tr className="hover:bg-grey-lighter" key={usuario.id}>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuario.nombre} {usuario.apellido}
+                      {usuarioEditando === usuario ? (
+                        <input
+                          type="text"
+                          value={usuarioEditando.nombre}
+                          onChange={(e) =>
+                            setUsuarioEditando({
+                              ...usuarioEditando,
+                              nombre: e.target.value,
+                            })
+                          }
+                          placeholder="Nombre"
+                        />
+                      ) : (
+                        `${usuario.nombre} ${usuario.apellido}`
+                      )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuario.email}
+                      {usuarioEditando === usuario ? (
+                        <input
+                          type="text"
+                          value={usuarioEditando.email}
+                          onChange={(e) =>
+                            setUsuarioEditando({
+                              ...usuarioEditando,
+                              email: e.target.value,
+                            })
+                          }
+                          placeholder="Email"
+                        />
+                      ) : (
+                        usuario.email
+                      )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuario.telefono}
+                      {usuarioEditando === usuario ? (
+                        <input
+                          type="text"
+                          value={usuarioEditando.telefono}
+                          onChange={(e) =>
+                            setUsuarioEditando({
+                              ...usuarioEditando,
+                              telefono: e.target.value,
+                            })
+                          }
+                          placeholder="Teléfono"
+                        />
+                      ) : (
+                        usuario.telefono
+                      )}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {usuarioEditando === usuario ? (
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                          onClick={handleGuardarCambios}
+                        >
+                          Guardar Cambios
+                        </button>
+                      ) : (
+                        <button
+                          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+                          onClick={() => handleEditarUsuario(usuario)}
+                        >
+                          Editar
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
