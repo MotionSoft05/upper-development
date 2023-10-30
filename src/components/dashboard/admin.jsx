@@ -1,15 +1,8 @@
 function Admin() {
   return (
     <div class="flex flex-col  bg-gray-100">
-      {/* <!-- Barra de navegación superior --> */}
-
-      {/* <!-- Contenido principal --> */}
       <div class="flex-1 flex flex-wrap">
-        {/* <!-- Barra lateral de navegación (oculta en dispositivos pequeños) --> */}
-
-        {/* <!-- Área de contenido principal --> */}
         <div class="flex-1 p-4 ">
-          {/* <!-- Campo de búsqueda --> */}
           <div class="relative max-w-md w-full">
             <div class="absolute top-1 left-2 inline-flex items-center p-2">
               <i class="fas fa-search text-gray-400"></i>
@@ -20,17 +13,12 @@ function Admin() {
               placeholder="Buscar..."
             />
           </div>
-
-          {/* <!-- Tercer contenedor debajo de los dos anteriores --> */}
-          {/* <!-- Sección 3 - Tabla de Autorizaciones Pendientes --> */}
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
               Autorizaciones Pendientes
             </h2>
             <div class="my-1"></div>
-            {/* <!-- Espacio de separación --> */}
             <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
-            {/* <!-- Línea con gradiente --> */}
             <table class="w-full table-auto text-sm">
               <thead>
                 <tr class="text-sm leading-normal">
@@ -59,7 +47,6 @@ function Admin() {
                   </td>
                   <td class="py-2 px-4 border-b border-grey-light">Comercio</td>
                 </tr>
-                {/* <!-- Añade más filas aquí como la anterior para cada autorización pendiente --> */}
                 <tr class="hover:bg-grey-lighter">
                   <td class="py-2 px-4 border-b border-grey-light">
                     <img
@@ -115,25 +102,19 @@ function Admin() {
                 </tr>
               </tbody>
             </table>
-            {/* <!-- Botón "Ver más" para la tabla de Autorizaciones Pendientes --> */}
             <div class="text-right mt-4">
               <button class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded">
                 Ver más
               </button>
             </div>
           </div>
-
-          {/* <!-- Cuarto contenedor --> */}
-          {/* <!-- Sección 4 - Tabla de Transacciones --> */}
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <div class="bg-white p-4 rounded-md mt-4">
               <h2 class="text-gray-500 text-lg font-semibold pb-4">
                 Transacciones
               </h2>
               <div class="my-1"></div>
-              {/* <!-- Espacio de separación --> */}
               <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
-              {/* <!-- Línea con gradiente --> */}
               <table class="w-full table-auto text-sm">
                 <thead>
                   <tr class="text-sm leading-normal">
@@ -195,7 +176,6 @@ function Admin() {
                   </tr>
                 </tbody>
               </table>
-              {/* <!-- Botón "Ver más" para la tabla de Transacciones --> */}
             </div>
           </div>
         </div>
