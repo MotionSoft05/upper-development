@@ -7,6 +7,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import Link from "next/link";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -179,6 +180,16 @@ function Register() {
         phoneNumber: phoneNumber,
       });
 
+      const userUid = userCredential.user.uid;
+      const db = getFirestore();
+      const userRef = doc(db, "usuarios", userUid);
+      await setDoc(userRef, {
+        nombre: firstName,
+        apellido: lastName,
+        email: email,
+        telefono: phoneNumber,
+      });
+
       setSuccessMessage("Usuario registrado correctamente");
       setTimeout(() => {
         setFirstName("");
@@ -247,7 +258,7 @@ function Register() {
         <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 ">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
-              Create an account
+              Registrate aquí
             </h1>
             {successMessage && (
               <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
