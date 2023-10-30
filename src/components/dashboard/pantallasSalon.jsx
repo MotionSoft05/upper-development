@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
@@ -216,6 +216,7 @@ function PantallasSalon() {
   const [sliderRef] = useKeenSlider({
     loop: true,
   });
+
   return (
     <section className="px-8 py-12">
       <div>
@@ -308,63 +309,65 @@ function PantallasSalon() {
               </div>
             </div>
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Color de letra
-              </label>
-              <div className="flex items-center">
-                <button
-                  onClick={handleFontColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
-                >
-                  Seleccionar Color
-                </button>
-                {showFontColorPicker && (
-                  <div className="relative">
-                    <ChromePicker
-                      color={fontColor}
-                      onChange={handleColorChange}
-                    />
-                    <button
-                      onClick={handleFontColorChange}
-                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
-                    >
-                      Listo
-                    </button>
-                  </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full"
-                  style={{ backgroundColor: fontColor }}
-                ></div>
+              <div>
+                <label className="text-white dark:text-gray-200">
+                  Color de letra
+                </label>
+                <div className="flex items-center">
+                  <button
+                    onClick={handleFontColorChange}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                  >
+                    Seleccionar Color
+                  </button>
+                  {showFontColorPicker && (
+                    <div className="absolute z-10">
+                      <ChromePicker
+                        color={fontColor}
+                        onChange={handleColorChange}
+                      />
+                      <button
+                        onClick={handleFontColorChange}
+                        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                      >
+                        Listo
+                      </button>
+                    </div>
+                  )}
+                  <div
+                    className="w-8 h-8 rounded-full ml-4"
+                    style={{ backgroundColor: fontColor }}
+                  ></div>
+                </div>
               </div>
             </div>
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
+              <label className="text-white dark:text-gray-200">
                 Color de la plantilla
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleTemplateColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mr-4"
+                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                 >
                   Seleccionar Color
                 </button>
                 {showColorPicker && (
-                  <div className="relative">
+                  <div className="absolute z-10">
                     <ChromePicker
                       color={templateColor}
                       onChange={handleColorChange}
                     />
                     <button
                       onClick={handleTemplateColorChange}
-                      className="absolute bottom-0 right-0 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md mt-2"
+                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                     >
                       Listo
                     </button>
                   </div>
                 )}
                 <div
-                  className="w-8 h-8 rounded-full"
+                  className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
               </div>
@@ -445,6 +448,7 @@ function PantallasSalon() {
                   )}
                   <h1
                     style={{
+                      color: fontColor,
                       fontFamily: selectedFontStyle
                         ? selectedFontStyle.value
                         : "Arial",
@@ -458,6 +462,7 @@ function PantallasSalon() {
                     <div
                       className={`text-white text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20`}
                       style={{
+                        color: fontColor,
                         fontFamily: selectedFontStyle
                           ? selectedFontStyle.value
                           : "Arial",
@@ -494,6 +499,7 @@ function PantallasSalon() {
                       <div
                         className=" space-y-8 pl-10 mb-12"
                         style={{
+                          color: fontColor,
                           fontFamily: selectedFontStyle
                             ? selectedFontStyle.value
                             : "Arial",
@@ -543,8 +549,9 @@ function PantallasSalon() {
                       </div>
                     </div>
                     <div>
-                      <div className=" text-2xl font-semibold mt-1  text-center bg-gradient-to-r from-custom  to-Second text-white justify-between flex px-20 ">
-                        <p>{obtenerFecha()}</p> <p>{currentHour}</p>{" "}
+                      <div className="text-2xl font-semibold mt-1 text-center bg-gradient-to-r from-custom to-Second justify-between flex px-20 ">
+                        <p style={{ color: fontColor }}>{obtenerFecha()}</p>
+                        <p style={{ color: fontColor }}>{currentHour}</p>
                       </div>
                     </div>
                   </div>
