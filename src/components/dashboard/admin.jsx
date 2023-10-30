@@ -1,4 +1,39 @@
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
+import { useEffect, useState } from "react";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
 function Admin() {
+  const [usuarios, setUsuarios] = useState([]);
+  useEffect(() => {
+    const obtenerUsuarios = async () => {
+      const usuariosCollection = collection(db, "usuarios");
+      const usuariosSnapshot = await getDocs(usuariosCollection);
+      const usuariosData = usuariosSnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUsuarios(usuariosData);
+    };
+
+    obtenerUsuarios();
+  }, []);
+
   return (
     <div class="flex flex-col  bg-gray-100">
       <div class="flex-1 flex flex-wrap">
@@ -15,91 +50,38 @@ function Admin() {
           </div>
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
-              Autorizaciones Pendientes
+              Datos de Usuarios
             </h2>
             <div class="my-1"></div>
             <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
             <table class="w-full table-auto text-sm">
               <thead>
                 <tr class="text-sm leading-normal">
-                  <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
-                    Foto
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Nombre y Apellido
                   </th>
-                  <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
-                    Nombre
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Email
                   </th>
-                  <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
-                    Rol
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Teléfono
                   </th>
                 </tr>
               </thead>
               <tbody>
-                <tr class="hover:bg-grey-lighter">
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    <img
-                      src="https://via.placeholder.com/40"
-                      alt="Foto Perfil"
-                      class="rounded-full h-10 w-10"
-                    />
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    Juan Pérez
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">Comercio</td>
-                </tr>
-                <tr class="hover:bg-grey-lighter">
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    <img
-                      src="https://via.placeholder.com/40"
-                      alt="Foto Perfil"
-                      class="rounded-full h-10 w-10"
-                    />
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    María Gómez
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">Usuario</td>
-                </tr>
-
-                <tr class="hover:bg-grey-lighter">
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    <img
-                      src="https://via.placeholder.com/40"
-                      alt="Foto Perfil"
-                      class="rounded-full h-10 w-10"
-                    />
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    Carlos López
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">Usuario</td>
-                </tr>
-                <tr class="hover:bg-grey-lighter">
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    <img
-                      src="https://via.placeholder.com/40"
-                      alt="Foto Perfil"
-                      class="rounded-full h-10 w-10"
-                    />
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    Laura Torres
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">Comercio</td>
-                </tr>
-                <tr class="hover:bg-grey-lighter">
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    <img
-                      src="https://via.placeholder.com/40"
-                      alt="Foto Perfil"
-                      class="rounded-full h-10 w-10"
-                    />
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">
-                    Ana Ramírez
-                  </td>
-                  <td class="py-2 px-4 border-b border-grey-light">Usuario</td>
-                </tr>
+                {usuarios.map((usuario) => (
+                  <tr className="hover:bg-grey-lighter" key={usuario.id}>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {usuario.nombre} {usuario.apellido}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {usuario.email}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {usuario.telefono}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
             <div class="text-right mt-4">
