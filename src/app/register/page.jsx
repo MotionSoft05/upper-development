@@ -8,7 +8,6 @@ import {
 } from "firebase/auth";
 import Link from "next/link";
 
-// Configura tu objeto de configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
   authDomain: "upper-a544e.firebaseapp.com",
@@ -59,7 +58,7 @@ function Register() {
   });
 
   useEffect(() => {
-    setIsConfirmPasswordTouched(true); // Asegúrate de que isConfirmPasswordTouched sea true cuando se dispare este efecto
+    setIsConfirmPasswordTouched(true);
     setPasswordsMatch(password === confirmPassword);
 
     if (confirmPassword && isConfirmPasswordTouched) {
@@ -107,12 +106,12 @@ function Register() {
   ]);
 
   const handleShowPasswordClick = (e) => {
-    e.preventDefault(); // Evita que el formulario se envíe
+    e.preventDefault();
     setShowPassword((prev) => !prev);
   };
 
   const handleShowConfirmPasswordClick = (e) => {
-    e.preventDefault(); // Evita que el formulario se envíe
+    e.preventDefault();
     setShowConfirmPassword((prev) => !prev);
   };
 
@@ -126,7 +125,6 @@ function Register() {
     setIsPasswordTouched(true);
     setIsConfirmPasswordTouched(true);
 
-    // Validar campos y actualizar los estados de error
     const firstNameError = isFirstNameTouched
       ? validateFirstName(firstName)
       : null;
