@@ -45,10 +45,10 @@ function PantallasSalon() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [descripcion, setDescripcion] = useState("");
   const [caracteresRestantes, setCaracteresRestantes] = useState(130);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [descripcion, setDescripcion] = useState("");
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -372,26 +372,7 @@ function PantallasSalon() {
                 ></div>
               </div>
             </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Descripción del Evento
-              </label>
-              <textarea
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                value={descripcion}
-                onChange={(e) => {
-                  const texto = e.target.value;
-                  if (texto.length <= 130) {
-                    setDescripcion(texto);
-                    setCaracteresRestantes(130 - texto.length);
-                  }
-                }}
-                placeholder="Ingrese la descripción del evento"
-              />
-              <p className="text-gray-300 text-sm mt-2">
-                Caracteres restantes: {caracteresRestantes}
-              </p>
-            </div>
+
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
                 Estilo de texto
@@ -533,15 +514,16 @@ function PantallasSalon() {
                               : "Tipo de Evento Desconocido"}
                           </h1>
                           <div className="text-center flex px-0">
-                            {descripcion && (
+                            {selectedEvent && selectedEvent.description && (
                               <div>
-                                {dividirTexto(descripcion, 40).map(
-                                  (linea, index) => (
-                                    <p key={index} className="text-left">
-                                      {linea}
-                                    </p>
-                                  )
-                                )}
+                                {dividirTexto(
+                                  selectedEvent.description,
+                                  40
+                                ).map((linea, index) => (
+                                  <p key={index} className="text-left">
+                                    {linea}
+                                  </p>
+                                ))}
                               </div>
                             )}
                           </div>
