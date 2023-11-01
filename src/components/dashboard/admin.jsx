@@ -33,6 +33,25 @@ function Admin() {
   });
   const [transacciones, setTransacciones] = useState([]);
 
+  const handleGuardarTransaccion = () => {
+    if (
+      !nuevaTransaccion.nombre ||
+      !nuevaTransaccion.fecha ||
+      !nuevaTransaccion.monto
+    ) {
+      alert("Por favor, completa todos los campos de la transacción.");
+      return;
+    }
+
+    setTransacciones([...transacciones, nuevaTransaccion]);
+
+    setNuevaTransaccion({
+      nombre: "",
+      fecha: "",
+      monto: "",
+    });
+  };
+
   const handleEditar = (usuario) => {
     setModoEdicion(true);
     setUsuarioEditado(usuario);
@@ -207,18 +226,62 @@ function Admin() {
               </tbody>
             </table>
           </div>
-          <div class="mt-8 bg-white p-4 shadow rounded-lg">
-            <div class="bg-white p-4 rounded-md mt-4">
-              <h2 class="text-gray-500 text-lg font-semibold pb-4">
+          <div className="mt-8 bg-white p-4 shadow rounded-lg">
+            <div className="bg-white p-4 rounded-md mt-4">
+              <h2 className="text-gray-500 text-lg font-semibold pb-4">
                 Transacciones
               </h2>
-              <div class="my-1"></div>
-              <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
-              <table class="w-full table-auto text-sm">
+              <div className="my-1"></div>
+              <div className="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
+              <div className="flex items-center mb-4">
+                <input
+                  className="w-38 h-10 mr-4 pl-2 border rounded focus:outline-none"
+                  type="text"
+                  placeholder="Nombre y Apellido"
+                  value={nuevaTransaccion.nombre}
+                  onChange={(e) =>
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      nombre: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
+                  type="text"
+                  placeholder="Fecha"
+                  value={nuevaTransaccion.fecha}
+                  onChange={(e) =>
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      fecha: e.target.value,
+                    })
+                  }
+                />
+                <input
+                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
+                  type="text"
+                  placeholder="Monto"
+                  value={nuevaTransaccion.monto}
+                  onChange={(e) =>
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      monto: e.target.value,
+                    })
+                  }
+                />
+                <button
+                  onClick={handleGuardarTransaccion}
+                  className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
+                >
+                  Guardar Transacción
+                </button>
+              </div>
+              <table className="w-full table-auto text-sm">
                 <thead>
-                  <tr class="text-sm leading-normal">
+                  <tr className="text-sm leading-normal">
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Nombre
+                      Nombre y Apellido
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Fecha
@@ -229,15 +292,19 @@ function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr class="hover:bg-grey-lighter">
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      Carlos Sánchez
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      27/07/2023
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light">$1500</td>
-                  </tr>
+                  {transacciones.map((transaccion, index) => (
+                    <tr className="hover:bg-grey-lighter" key={index}>
+                      <td className="py-2 px-4 border-b border-grey-light">
+                        {transaccion.nombre}
+                      </td>
+                      <td className="py-2 px-4 border-b border-grey-light">
+                        {transaccion.fecha}
+                      </td>
+                      <td className="py-2 px-4 border-b border-grey-light">
+                        {transaccion.monto}
+                      </td>
+                    </tr>
+                  ))}
                 </tbody>
               </table>
             </div>
