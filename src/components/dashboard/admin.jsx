@@ -1,6 +1,13 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
-import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  updateDoc,
+  addDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 const firebaseConfig = {
@@ -30,26 +37,122 @@ function Admin() {
     nombre: "",
     fecha: "",
     monto: "",
+    plan: "",
+  });
+  const [transaccionEditada, setTransaccionEditada] = useState({
+    id: "",
+    nombre: "",
+    fecha: "",
+    monto: "",
+    plan: "",
   });
   const [transacciones, setTransacciones] = useState([]);
 
-  const handleGuardarTransaccion = () => {
+  useEffect(() => {
+    const obtenerTransacciones = async () => {
+      try {
+        const transaccionesCollection = collection(db, "transacciones");
+        const transaccionesSnapshot = await getDocs(transaccionesCollection);
+        const transaccionesData = transaccionesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTransacciones(transaccionesData);
+      } catch (error) {
+        console.error("Error al obtener las transacciones de Firebase:", error);
+      }
+    };
+
+    obtenerTransacciones();
+  }, []);
+
+  const handleGuardarTransaccion = async () => {
     if (
       !nuevaTransaccion.nombre ||
       !nuevaTransaccion.fecha ||
-      !nuevaTransaccion.monto
+      !nuevaTransaccion.monto ||
+      !nuevaTransaccion.plan
     ) {
       alert("Por favor, completa todos los campos de la transacción.");
       return;
     }
 
-    setTransacciones([...transacciones, nuevaTransaccion]);
+    try {
+      const transaccionRef = await addDoc(collection(db, "transacciones"), {
+        nombre: nuevaTransaccion.nombre,
+        fecha: nuevaTransaccion.fecha,
+        monto: nuevaTransaccion.monto,
+        plan: nuevaTransaccion.plan,
+      });
+      setTransacciones([
+        ...transacciones,
+        { id: transaccionRef.id, ...nuevaTransaccion },
+      ]);
+      setNuevaTransaccion({
+        nombre: "",
+        fecha: "",
+        monto: "",
+        plan: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar la transacción en Firebase:", error);
+    }
+  };
 
-    setNuevaTransaccion({
-      nombre: "",
-      fecha: "",
-      monto: "",
-    });
+  const handleEditarTransaccion = (transaccion) => {
+    setModoEdicion(true);
+    setNuevaTransaccion(transaccion);
+  };
+
+  const handleGuardarCambiosTransaccion = async () => {
+    console.log("ID del documento a actualizar:", transaccionEditada.id);
+    try {
+      console.log("ID del documento a actualizar:", transaccionEditada.id);
+      const transaccionDocRef = doc(db, "transacciones", transaccionEditada.id);
+
+      await updateDoc(transaccionDocRef, {
+        nombre: transaccionEditada.nombre,
+        fecha: transaccionEditada.fecha,
+        monto: transaccionEditada.monto,
+        plan: transaccionEditada.plan,
+      });
+      setTransacciones((prevTransacciones) =>
+        prevTransacciones.map((transaccion) =>
+          transaccion.id === transaccionEditada.id
+            ? {
+                ...transaccion,
+                nombre: transaccionEditada.nombre,
+                fecha: transaccionEditada.fecha,
+                monto: transaccionEditada.monto,
+                plan: transaccionEditada.plan,
+              }
+            : transaccion
+        )
+      );
+      setModoEdicion(false);
+      setTransaccionEditada({
+        id: "",
+        nombre: "",
+        fecha: "",
+        monto: "",
+        plan: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar los cambios en Firebase:", error);
+    }
+  };
+
+  const handleEliminarTransaccion = async (transaccionId) => {
+    try {
+      await deleteDoc(doc(db, "transacciones", transaccionId));
+      setTransacciones((prevTransacciones) =>
+        prevTransacciones.filter(
+          (transaccion) => transaccion.id !== transaccionId
+        )
+      );
+    } catch (error) {
+      console.error("Error al eliminar la transacción de Firebase:", error);
+    }
   };
 
   const handleEditar = (usuario) => {
@@ -67,7 +170,6 @@ function Admin() {
         telefono: usuarioEditado.telefono,
       });
 
-      // Actualiza el estado local con los datos editados
       setUsuarios((prevUsuarios) =>
         prevUsuarios.map((usuario) =>
           usuario.id === usuarioEditado.id
@@ -82,7 +184,6 @@ function Admin() {
         )
       );
 
-      // Después de guardar los cambios, resetea el modo de edición y el usuario editado.
       setModoEdicion(false);
       setUsuarioEditado({
         id: "",
@@ -93,6 +194,17 @@ function Admin() {
       });
     } catch (error) {
       console.error("Error al guardar los cambios en Firebase:", error);
+    }
+  };
+
+  const handleEliminarUsuario = async (usuarioId) => {
+    try {
+      await deleteDoc(doc(db, "usuarios", usuarioId));
+      setUsuarios((prevUsuarios) =>
+        prevUsuarios.filter((usuario) => usuario.id !== usuarioId)
+      );
+    } catch (error) {
+      console.error("Error al eliminar el usuario de Firebase:", error);
     }
   };
 
@@ -206,19 +318,35 @@ function Admin() {
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
-                        <button
-                          onClick={handleGuardarCambios}
-                          className="bg-green-500 hover-bg-green-700 text-white font-semibold py-2 px-4 rounded"
-                        >
-                          Guardar
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={handleGuardarCambios}
+                            className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => setModoEdicion(false)}
+                            className="bg-gray-500 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
                       ) : (
-                        <button
-                          onClick={() => handleEditar(usuario)}
-                          className="bg-blue-500 hover-bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-                        >
-                          Editar
-                        </button>
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleEditar(usuario)}
+                            className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
+                          >
+                            Editar
+                          </button>
+                          <button
+                            onClick={() => handleEliminarUsuario(usuario.id)}
+                            className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
+                          >
+                            Eliminar
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -231,9 +359,9 @@ function Admin() {
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
                 Transacciones
               </h2>
-              <div className="my-1"></div>
-              <div className="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
+              <div className="mb-6 border-b border-gray-300"></div>
               <div className="flex items-center mb-4">
+                {/* Campos de entrada para nueva transacción */}
                 <input
                   className="w-38 h-10 mr-4 pl-2 border rounded focus:outline-none"
                   type="text"
@@ -270,6 +398,18 @@ function Admin() {
                     })
                   }
                 />
+                <input
+                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
+                  type="text"
+                  placeholder="Plan"
+                  value={nuevaTransaccion.plan}
+                  onChange={(e) =>
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      plan: e.target.value,
+                    })
+                  }
+                />
                 <button
                   onClick={handleGuardarTransaccion}
                   className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
@@ -289,19 +429,124 @@ function Admin() {
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Monto
                     </th>
+                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                      Plan
+                    </th>
+                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                      Acciones
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
-                  {transacciones.map((transaccion, index) => (
-                    <tr className="hover:bg-grey-lighter" key={index}>
+                  {transacciones.map((transaccion) => (
+                    <tr className="hover:bg-grey-lighter" key={transaccion.id}>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {transaccion.nombre}
+                        {modoEdicion &&
+                        nuevaTransaccion.id === transaccion.id ? (
+                          <input
+                            type="text"
+                            value={nuevaTransaccion.nombre}
+                            onChange={(e) =>
+                              setNuevaTransaccion({
+                                ...nuevaTransaccion,
+                                nombre: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          transaccion.nombre
+                        )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {transaccion.fecha}
+                        {modoEdicion &&
+                        nuevaTransaccion.id === transaccion.id ? (
+                          <input
+                            type="text"
+                            value={nuevaTransaccion.fecha}
+                            onChange={(e) =>
+                              setNuevaTransaccion({
+                                ...nuevaTransaccion,
+                                fecha: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          transaccion.fecha
+                        )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {transaccion.monto}
+                        {modoEdicion &&
+                        nuevaTransaccion.id === transaccion.id ? (
+                          <input
+                            type="text"
+                            value={nuevaTransaccion.monto}
+                            onChange={(e) =>
+                              setNuevaTransaccion({
+                                ...nuevaTransaccion,
+                                monto: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          transaccion.monto
+                        )}
+                      </td>
+                      <td className="py-2 px-4 border-b border-grey-light">
+                        {modoEdicion &&
+                        nuevaTransaccion.id === transaccion.id ? (
+                          <input
+                            type="text"
+                            value={nuevaTransaccion.plan}
+                            onChange={(e) =>
+                              setNuevaTransaccion({
+                                ...nuevaTransaccion,
+                                plan: e.target.value,
+                              })
+                            }
+                          />
+                        ) : (
+                          transaccion.plan
+                        )}
+                      </td>
+                      <td className="py-2 px-4 border-b border-grey-light">
+                        {modoEdicion &&
+                        nuevaTransaccion.id === transaccion.id ? (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() =>
+                                handleGuardarCambiosTransaccion(transaccion.id)
+                              }
+                              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              Guardar
+                            </button>
+                            <button
+                              onClick={() => setModoEdicion(false)}
+                              className="bg-gray-500 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              Cancelar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() =>
+                                handleEditarTransaccion(transaccion)
+                              }
+                              className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              Editar
+                            </button>
+                            <button
+                              onClick={() =>
+                                handleEliminarTransaccion(transaccion.id)
+                              }
+                              className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              Eliminar
+                            </button>
+                          </div>
+                        )}
                       </td>
                     </tr>
                   ))}
