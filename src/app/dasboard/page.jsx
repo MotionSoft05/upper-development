@@ -9,6 +9,7 @@ import PantallasSalon from "@/components/dashboard/pantallasSalon";
 import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin";
+import Pantallas from "@/components/dashboard/pantallas";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -17,6 +18,7 @@ function DashBoard() {
   const [showAltaEvento, setShowAltaEvento] = useState(false);
   const [showConsultaEvento, setShowConsultaEvento] = useState(false);
 
+  const [showPantallas, setShowPantallas] = useState(false);
   const [showPantallaSalon, setShowPantallaSalon] = useState(false);
   const [showPantallaDirectorio, setShowPantallaDirectorio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
@@ -27,12 +29,13 @@ function DashBoard() {
 
   return (
     // <!-- component -->
-    <div className="flex flex-row min-h-screen bg-gray-100 text-gray-800 pt-16">
+    <div className="flex flex-row min-h-screen  ">
       <aside className="sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500">
         <Sidebar
           setShowAdmin={setShowAdmin}
           setShowAltaEvento={setShowAltaEvento}
           setShowConsultaEvento={setShowConsultaEvento}
+          setShowPantallas={setShowPantallas}
           setShowPantallaSalon={setShowPantallaSalon}
           setShowPantallaDirectorio={setShowPantallaDirectorio}
           setShowPublicidad={setShowPublicidad}
@@ -47,6 +50,7 @@ function DashBoard() {
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
 
+          {showPantallas && <Pantallas />}
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPublicidad && <Publicidad />}
