@@ -1,7 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, doc, updateDoc } from "firebase/firestore";
 import { useEffect, useState } from "react";
 
 const firebaseConfig = {
@@ -15,12 +14,68 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
 
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
-  const [usuarioEditando, setUsuarioEditando] = useState(null);
+  const [modoEdicion, setModoEdicion] = useState(false);
+  const [usuarioEditado, setUsuarioEditado] = useState({
+    id: "",
+    nombre: "",
+    apellido: "",
+    email: "",
+    telefono: "",
+  });
+  const [nuevaTransaccion, setNuevaTransaccion] = useState({
+    nombre: "",
+    fecha: "",
+    monto: "",
+  });
+  const [transacciones, setTransacciones] = useState([]);
+
+  const handleEditar = (usuario) => {
+    setModoEdicion(true);
+    setUsuarioEditado(usuario);
+  };
+
+  const handleGuardarCambios = async () => {
+    try {
+      const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
+      await updateDoc(usuarioDocRef, {
+        nombre: usuarioEditado.nombre,
+        apellido: usuarioEditado.apellido,
+        email: usuarioEditado.email,
+        telefono: usuarioEditado.telefono,
+      });
+
+      // Actualiza el estado local con los datos editados
+      setUsuarios((prevUsuarios) =>
+        prevUsuarios.map((usuario) =>
+          usuario.id === usuarioEditado.id
+            ? {
+                ...usuario,
+                nombre: usuarioEditado.nombre,
+                apellido: usuarioEditado.apellido,
+                email: usuarioEditado.email,
+                telefono: usuarioEditado.telefono,
+              }
+            : usuario
+        )
+      );
+
+      // Después de guardar los cambios, resetea el modo de edición y el usuario editado.
+      setModoEdicion(false);
+      setUsuarioEditado({
+        id: "",
+        nombre: "",
+        apellido: "",
+        email: "",
+        telefono: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar los cambios en Firebase:", error);
+    }
+  };
 
   useEffect(() => {
     const obtenerUsuarios = async () => {
@@ -35,17 +90,6 @@ function Admin() {
 
     obtenerUsuarios();
   }, []);
-
-  const handleEditarUsuario = (usuario) => {
-    setUsuarioEditando({ ...usuario }); // Inicializa el estado usuarioEditando con los datos del usuario a editar
-  };
-
-  const handleGuardarCambios = () => {
-    // Lógica para guardar los cambios en Firebase
-    // Aquí puedes utilizar las funciones de Firebase para actualizar los datos del usuario
-    // Una vez que hayas guardado los cambios, puedes resetear el estado de usuarioEditando a null
-    // para cerrar el formulario de edición.
-  };
 
   return (
     <div class="flex flex-col  bg-gray-100">
@@ -91,68 +135,68 @@ function Admin() {
                 {usuarios.map((usuario) => (
                   <tr className="hover:bg-grey-lighter" key={usuario.id}>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuarioEditando === usuario ? (
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
-                          value={usuarioEditando.nombre}
-                          onChange={(e) =>
-                            setUsuarioEditando({
-                              ...usuarioEditando,
-                              nombre: e.target.value,
-                            })
-                          }
-                          placeholder="Nombre"
+                          value={`${usuarioEditado.nombre} ${usuarioEditado.apellido}`}
+                          onChange={(e) => {
+                            const [nombre, apellido] =
+                              e.target.value.split(" ");
+                            setUsuarioEditado({
+                              ...usuarioEditado,
+                              nombre: nombre,
+                              apellido: apellido,
+                            });
+                          }}
                         />
                       ) : (
                         `${usuario.nombre} ${usuario.apellido}`
                       )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuarioEditando === usuario ? (
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
-                          value={usuarioEditando.email}
+                          value={usuarioEditado.email}
                           onChange={(e) =>
-                            setUsuarioEditando({
-                              ...usuarioEditando,
+                            setUsuarioEditado({
+                              ...usuarioEditado,
                               email: e.target.value,
                             })
                           }
-                          placeholder="Email"
                         />
                       ) : (
                         usuario.email
                       )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuarioEditando === usuario ? (
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
-                          value={usuarioEditando.telefono}
+                          value={usuarioEditado.telefono}
                           onChange={(e) =>
-                            setUsuarioEditando({
-                              ...usuarioEditando,
+                            setUsuarioEditado({
+                              ...usuarioEditado,
                               telefono: e.target.value,
                             })
                           }
-                          placeholder="Teléfono"
                         />
                       ) : (
                         usuario.telefono
                       )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
-                      {usuarioEditando === usuario ? (
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
                           onClick={handleGuardarCambios}
+                          className="bg-green-500 hover-bg-green-700 text-white font-semibold py-2 px-4 rounded"
                         >
-                          Guardar Cambios
+                          Guardar
                         </button>
                       ) : (
                         <button
-                          className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
-                          onClick={() => handleEditarUsuario(usuario)}
+                          onClick={() => handleEditar(usuario)}
+                          className="bg-blue-500 hover-bg-blue-700 text-white font-semibold py-2 px-4 rounded"
                         >
                           Editar
                         </button>
@@ -162,11 +206,6 @@ function Admin() {
                 ))}
               </tbody>
             </table>
-            <div class="text-right mt-4">
-              <button class="bg-cyan-500 hover:bg-cyan-600 text-white font-semibold py-2 px-4 rounded">
-                Ver más
-              </button>
-            </div>
           </div>
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <div class="bg-white p-4 rounded-md mt-4">
@@ -178,13 +217,13 @@ function Admin() {
               <table class="w-full table-auto text-sm">
                 <thead>
                   <tr class="text-sm leading-normal">
-                    <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
+                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Nombre
                     </th>
-                    <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light">
+                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Fecha
                     </th>
-                    <th class="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-right">
+                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Monto
                     </th>
                   </tr>
@@ -197,42 +236,7 @@ function Admin() {
                     <td class="py-2 px-4 border-b border-grey-light">
                       27/07/2023
                     </td>
-                    <td class="py-2 px-4 border-b border-grey-light text-right">
-                      $1500
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-grey-lighter">
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      Pedro Hernández
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      02/08/2023
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light text-right">
-                      $1950
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-grey-lighter">
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      Sara Ramírez
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      03/08/2023
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light text-right">
-                      $1850
-                    </td>
-                  </tr>
-                  <tr class="hover:bg-grey-lighter">
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      Daniel Torres
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light">
-                      04/08/2023
-                    </td>
-                    <td class="py-2 px-4 border-b border-grey-light text-right">
-                      $2300
-                    </td>
+                    <td class="py-2 px-4 border-b border-grey-light">$1500</td>
                   </tr>
                 </tbody>
               </table>
