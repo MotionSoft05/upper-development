@@ -26,6 +26,7 @@ const db = getFirestore(app);
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
+  const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
     nombre: "",
@@ -98,7 +99,7 @@ function Admin() {
   };
 
   const handleEditarTransaccion = (transaccion) => {
-    setModoEdicion(true);
+    setModoEdiciontransaccion(true);
     setTransaccionEditada({ ...transaccion });
   };
 
@@ -111,7 +112,7 @@ function Admin() {
           transaccion.id === id ? { id, ...restoTransaccion } : transaccion
         )
       );
-      setModoEdicion(false);
+      setModoEdiciontransaccion(false);
       setTransaccionEditada({
         id: "",
         nombre: "",
@@ -422,7 +423,7 @@ function Admin() {
                   {transacciones.map((transaccion) => (
                     <tr className="hover:bg-grey-lighter" key={transaccion.id}>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {modoEdicion &&
+                        {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
@@ -439,7 +440,7 @@ function Admin() {
                         )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {modoEdicion &&
+                        {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
@@ -456,7 +457,7 @@ function Admin() {
                         )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {modoEdicion &&
+                        {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
@@ -473,7 +474,7 @@ function Admin() {
                         )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {modoEdicion &&
+                        {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
@@ -490,7 +491,7 @@ function Admin() {
                         )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
-                        {modoEdicion &&
+                        {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <div className="flex space-x-2">
                             <button
@@ -501,7 +502,7 @@ function Admin() {
                             </button>
                             <button
                               onClick={() => {
-                                setModoEdicion(false);
+                                setModoEdiciontransaccion(false);
                                 setTransaccionEditada({
                                   id: "",
                                   nombre: "",
