@@ -101,34 +101,43 @@ function Admin() {
 
   const handleEditarTransaccion = (transaccion) => {
     setModoEdicion(true);
-    setNuevaTransaccion(transaccion);
+    setTransaccionEditada({
+      id: transaccion.id,
+      nombre: transaccion.nombre,
+      fecha: transaccion.fecha,
+      monto: transaccion.monto,
+      plan: transaccion.plan,
+    });
   };
 
   const handleGuardarCambiosTransaccion = async () => {
-    console.log("ID del documento a actualizar:", transaccionEditada.id);
-    try {
-      console.log("ID del documento a actualizar:", transaccionEditada.id);
-      const transaccionDocRef = doc(db, "transacciones", transaccionEditada.id);
+    const { id, nombre, fecha, monto, plan } = transaccionEditada;
 
+    try {
+      const transaccionDocRef = doc(db, "transacciones", id);
       await updateDoc(transaccionDocRef, {
-        nombre: transaccionEditada.nombre,
-        fecha: transaccionEditada.fecha,
-        monto: transaccionEditada.monto,
-        plan: transaccionEditada.plan,
+        nombre: nombre,
+        fecha: fecha,
+        monto: monto,
+        plan: plan,
       });
+
+      console.log("Transacción actualizada en Firebase:", {
+        id,
+        nombre,
+        fecha,
+        monto,
+        plan,
+      });
+
       setTransacciones((prevTransacciones) =>
         prevTransacciones.map((transaccion) =>
-          transaccion.id === transaccionEditada.id
-            ? {
-                ...transaccion,
-                nombre: transaccionEditada.nombre,
-                fecha: transaccionEditada.fecha,
-                monto: transaccionEditada.monto,
-                plan: transaccionEditada.plan,
-              }
+          transaccion.id === id
+            ? { id, nombre, fecha, monto, plan }
             : transaccion
         )
       );
+
       setModoEdicion(false);
       setTransaccionEditada({
         id: "",
@@ -363,51 +372,79 @@ function Admin() {
               <div className="flex items-center mb-4">
                 {/* Campos de entrada para nueva transacción */}
                 <input
-                  className="w-38 h-10 mr-4 pl-2 border rounded focus:outline-none"
                   type="text"
-                  placeholder="Nombre y Apellido"
-                  value={nuevaTransaccion.nombre}
+                  value={
+                    modoEdicion
+                      ? transaccionEditada.nombre
+                      : nuevaTransaccion.nombre
+                  }
                   onChange={(e) =>
-                    setNuevaTransaccion({
-                      ...nuevaTransaccion,
-                      nombre: e.target.value,
-                    })
+                    setModoEdicion
+                      ? setTransaccionEditada({
+                          ...transaccionEditada,
+                          nombre: e.target.value,
+                        })
+                      : setNuevaTransaccion({
+                          ...nuevaTransaccion,
+                          nombre: e.target.value,
+                        })
                   }
                 />
                 <input
-                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
                   type="text"
-                  placeholder="Fecha"
-                  value={nuevaTransaccion.fecha}
+                  value={
+                    modoEdicion
+                      ? transaccionEditada.fecha
+                      : nuevaTransaccion.fecha
+                  }
                   onChange={(e) =>
-                    setNuevaTransaccion({
-                      ...nuevaTransaccion,
-                      fecha: e.target.value,
-                    })
+                    setModoEdicion
+                      ? setTransaccionEditada({
+                          ...transaccionEditada,
+                          fecha: e.target.value,
+                        })
+                      : setNuevaTransaccion({
+                          ...nuevaTransaccion,
+                          fecha: e.target.value,
+                        })
                   }
                 />
                 <input
-                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
                   type="text"
-                  placeholder="Monto"
-                  value={nuevaTransaccion.monto}
+                  value={
+                    modoEdicion
+                      ? transaccionEditada.monto
+                      : nuevaTransaccion.monto
+                  }
                   onChange={(e) =>
-                    setNuevaTransaccion({
-                      ...nuevaTransaccion,
-                      monto: e.target.value,
-                    })
+                    setModoEdicion
+                      ? setTransaccionEditada({
+                          ...transaccionEditada,
+                          monto: e.target.value,
+                        })
+                      : setNuevaTransaccion({
+                          ...nuevaTransaccion,
+                          monto: e.target.value,
+                        })
                   }
                 />
                 <input
-                  className="w-32 h-10 mr-4 pl-2 border rounded focus:outline-none"
                   type="text"
-                  placeholder="Plan"
-                  value={nuevaTransaccion.plan}
+                  value={
+                    modoEdicion
+                      ? transaccionEditada.plan
+                      : nuevaTransaccion.plan
+                  }
                   onChange={(e) =>
-                    setNuevaTransaccion({
-                      ...nuevaTransaccion,
-                      plan: e.target.value,
-                    })
+                    setModoEdicion
+                      ? setTransaccionEditada({
+                          ...transaccionEditada,
+                          plan: e.target.value,
+                        })
+                      : setNuevaTransaccion({
+                          ...nuevaTransaccion,
+                          plan: e.target.value,
+                        })
                   }
                 />
                 <button
@@ -445,12 +482,21 @@ function Admin() {
                         nuevaTransaccion.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={nuevaTransaccion.nombre}
+                            value={
+                              modoEdicion
+                                ? transaccionEditada.nombre
+                                : nuevaTransaccion.nombre
+                            }
                             onChange={(e) =>
-                              setNuevaTransaccion({
-                                ...nuevaTransaccion,
-                                nombre: e.target.value,
-                              })
+                              modoEdicion
+                                ? setTransaccionEditada({
+                                    ...transaccionEditada,
+                                    nombre: e.target.value,
+                                  })
+                                : setNuevaTransaccion({
+                                    ...nuevaTransaccion,
+                                    nombre: e.target.value,
+                                  })
                             }
                           />
                         ) : (
@@ -462,12 +508,21 @@ function Admin() {
                         nuevaTransaccion.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={nuevaTransaccion.fecha}
+                            value={
+                              modoEdicion
+                                ? transaccionEditada.fecha
+                                : nuevaTransaccion.fecha
+                            }
                             onChange={(e) =>
-                              setNuevaTransaccion({
-                                ...nuevaTransaccion,
-                                fecha: e.target.value,
-                              })
+                              modoEdicion
+                                ? setTransaccionEditada({
+                                    ...transaccionEditada,
+                                    fecha: e.target.value,
+                                  })
+                                : setNuevaTransaccion({
+                                    ...nuevaTransaccion,
+                                    fecha: e.target.value,
+                                  })
                             }
                           />
                         ) : (
@@ -479,12 +534,21 @@ function Admin() {
                         nuevaTransaccion.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={nuevaTransaccion.monto}
+                            value={
+                              modoEdicion
+                                ? transaccionEditada.monto
+                                : nuevaTransaccion.monto
+                            }
                             onChange={(e) =>
-                              setNuevaTransaccion({
-                                ...nuevaTransaccion,
-                                monto: e.target.value,
-                              })
+                              modoEdicion
+                                ? setTransaccionEditada({
+                                    ...transaccionEditada,
+                                    monto: e.target.value,
+                                  })
+                                : setNuevaTransaccion({
+                                    ...nuevaTransaccion,
+                                    monto: e.target.value,
+                                  })
                             }
                           />
                         ) : (
@@ -496,12 +560,21 @@ function Admin() {
                         nuevaTransaccion.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={nuevaTransaccion.plan}
+                            value={
+                              modoEdicion
+                                ? transaccionEditada.plan
+                                : nuevaTransaccion.plan
+                            }
                             onChange={(e) =>
-                              setNuevaTransaccion({
-                                ...nuevaTransaccion,
-                                plan: e.target.value,
-                              })
+                              modoEdicion
+                                ? setTransaccionEditada({
+                                    ...transaccionEditada,
+                                    plan: e.target.value,
+                                  })
+                                : setNuevaTransaccion({
+                                    ...nuevaTransaccion,
+                                    plan: e.target.value,
+                                  })
                             }
                           />
                         ) : (
