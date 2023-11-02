@@ -26,7 +26,7 @@ const db = getFirestore(app);
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
-  //  const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
+  const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
     nombre: "",
@@ -34,109 +34,109 @@ function Admin() {
     email: "",
     telefono: "",
   });
-  //  const [nuevaTransaccion, setNuevaTransaccion] = useState({
-  //    nombre: "",
-  //    fecha: "",
-  //    monto: "",
-  //    plan: "",
-  //  });
-  //  const [transaccionEditada, setTransaccionEditada] = useState({
-  //    id: "",
-  //    nombre: "",
-  //    fecha: "",
-  //    monto: "",
-  //    plan: "",
-  //  });
-  //  const [transacciones, setTransacciones] = useState([]);
-  //
-  //  useEffect(() => {
-  //    const obtenerTransacciones = async () => {
-  //      try {
-  //        const transaccionesCollection = collection(db, "transacciones");
-  //        const transaccionesSnapshot = await getDocs(transaccionesCollection);
-  //        const transaccionesData = transaccionesSnapshot.docs.map((doc) => ({
-  //          id: doc.id,
-  //          ...doc.data(),
-  //        }));
-  //        setTransacciones(transaccionesData);
-  //      } catch (error) {
-  //        console.error("Error al obtener las transacciones de Firebase:", error);
-  //      }
-  //    };
-  //
-  //    obtenerTransacciones();
-  //  }, []);
-  //
-  //  const handleGuardarTransaccion = async () => {
-  //    try {
-  //      if (
-  //        !nuevaTransaccion.nombre ||
-  //        !nuevaTransaccion.fecha ||
-  //        !nuevaTransaccion.monto ||
-  //        !nuevaTransaccion.plan
-  //      ) {
-  //        alert("Por favor, completa todos los campos de la transacción.");
-  //        return;
-  //      }
-  //
-  //      const transaccionRef = await addDoc(
-  //        collection(db, "transacciones"),
-  //        nuevaTransaccion
-  //      );
-  //      setTransacciones([
-  //        ...transacciones,
-  //        { id: transaccionRef.id, ...nuevaTransaccion },
-  //      ]);
-  //      setNuevaTransaccion({
-  //        nombre: "",
-  //        fecha: "",
-  //        monto: "",
-  //        plan: "",
-  //      });
-  //    } catch (error) {
-  //      console.error("Error al guardar la transacción en Firebase:", error);
-  //    }
-  //  };
-  //
-  //  const handleEditarTransaccion = (transaccion) => {
-  //    setModoEdiciontransaccion(true);
-  //    setTransaccionEditada({ ...transaccion });
-  //  };
-  //
-  //  const handleGuardarCambiosTransaccion = async () => {
-  //    try {
-  //      const { id, ...restoTransaccion } = transaccionEditada;
-  //      await updateDoc(doc(db, "transacciones", id), restoTransaccion);
-  //      setTransacciones((prevTransacciones) =>
-  //        prevTransacciones.map((transaccion) =>
-  //          transaccion.id === id ? { id, ...restoTransaccion } : transaccion
-  //        )
-  //      );
-  //      setModoEdiciontransaccion(false);
-  //      setTransaccionEditada({
-  //        id: "",
-  //        nombre: "",
-  //        fecha: "",
-  //        monto: "",
-  //        plan: "",
-  //      });
-  //    } catch (error) {
-  //      console.error("Error al guardar los cambios en Firebase:", error);
-  //    }
-  //  };
-  //
-  //  const handleEliminarTransaccion = async (transaccionId) => {
-  //    try {
-  //      await deleteDoc(doc(db, "transacciones", transaccionId));
-  //      setTransacciones((prevTransacciones) =>
-  //        prevTransacciones.filter(
-  //          (transaccion) => transaccion.id !== transaccionId
-  //        )
-  //      );
-  //    } catch (error) {
-  //      console.error("Error al eliminar la transacción de Firebase:", error);
-  //    }
-  //  };
+  const [nuevaTransaccion, setNuevaTransaccion] = useState({
+    nombre: "",
+    fecha: "",
+    monto: "",
+    plan: "",
+  });
+  const [transaccionEditada, setTransaccionEditada] = useState({
+    id: "",
+    nombre: "",
+    fecha: "",
+    monto: "",
+    plan: "",
+  });
+  const [transacciones, setTransacciones] = useState([]);
+
+  useEffect(() => {
+    const obtenerTransacciones = async () => {
+      try {
+        const transaccionesCollection = collection(db, "transacciones");
+        const transaccionesSnapshot = await getDocs(transaccionesCollection);
+        const transaccionesData = transaccionesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setTransacciones(transaccionesData);
+      } catch (error) {
+        console.error("Error al obtener las transacciones de Firebase:", error);
+      }
+    };
+
+    obtenerTransacciones();
+  }, []);
+
+  const handleGuardarTransaccion = async () => {
+    try {
+      if (
+        !nuevaTransaccion.nombre ||
+        !nuevaTransaccion.fecha ||
+        !nuevaTransaccion.monto ||
+        !nuevaTransaccion.plan
+      ) {
+        alert("Por favor, completa todos los campos de la transacción.");
+        return;
+      }
+
+      const transaccionRef = await addDoc(
+        collection(db, "transacciones"),
+        nuevaTransaccion
+      );
+      setTransacciones([
+        ...transacciones,
+        { id: transaccionRef.id, ...nuevaTransaccion },
+      ]);
+      setNuevaTransaccion({
+        nombre: "",
+        fecha: "",
+        monto: "",
+        plan: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar la transacción en Firebase:", error);
+    }
+  };
+
+  const handleEditarTransaccion = (transaccion) => {
+    setModoEdiciontransaccion(true);
+    setTransaccionEditada({ ...transaccion });
+  };
+
+  const handleGuardarCambiosTransaccion = async () => {
+    try {
+      const { id, ...restoTransaccion } = transaccionEditada;
+      await updateDoc(doc(db, "transacciones", id), restoTransaccion);
+      setTransacciones((prevTransacciones) =>
+        prevTransacciones.map((transaccion) =>
+          transaccion.id === id ? { id, ...restoTransaccion } : transaccion
+        )
+      );
+      setModoEdiciontransaccion(false);
+      setTransaccionEditada({
+        id: "",
+        nombre: "",
+        fecha: "",
+        monto: "",
+        plan: "",
+      });
+    } catch (error) {
+      console.error("Error al guardar los cambios en Firebase:", error);
+    }
+  };
+
+  const handleEliminarTransaccion = async (transaccionId) => {
+    try {
+      await deleteDoc(doc(db, "transacciones", transaccionId));
+      setTransacciones((prevTransacciones) =>
+        prevTransacciones.filter(
+          (transaccion) => transaccion.id !== transaccionId
+        )
+      );
+    } catch (error) {
+      console.error("Error al eliminar la transacción de Firebase:", error);
+    }
+  };
 
   const handleEditar = (usuario) => {
     setModoEdicion(true);
@@ -336,7 +336,6 @@ function Admin() {
               </tbody>
             </table>
           </div>
-          {/*
 
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
@@ -544,7 +543,6 @@ function Admin() {
               </table>
             </div>
           </div>
-          */}
         </div>
       </div>
     </div>
