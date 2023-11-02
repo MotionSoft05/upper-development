@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
 import {
+  getFirestore,
   collection,
   getDocs,
   doc,
@@ -67,23 +67,21 @@ function Admin() {
   }, []);
 
   const handleGuardarTransaccion = async () => {
-    if (
-      !nuevaTransaccion.nombre ||
-      !nuevaTransaccion.fecha ||
-      !nuevaTransaccion.monto ||
-      !nuevaTransaccion.plan
-    ) {
-      alert("Por favor, completa todos los campos de la transacción.");
-      return;
-    }
-
     try {
-      const transaccionRef = await addDoc(collection(db, "transacciones"), {
-        nombre: nuevaTransaccion.nombre,
-        fecha: nuevaTransaccion.fecha,
-        monto: nuevaTransaccion.monto,
-        plan: nuevaTransaccion.plan,
-      });
+      if (
+        !nuevaTransaccion.nombre ||
+        !nuevaTransaccion.fecha ||
+        !nuevaTransaccion.monto ||
+        !nuevaTransaccion.plan
+      ) {
+        alert("Por favor, completa todos los campos de la transacción.");
+        return;
+      }
+
+      const transaccionRef = await addDoc(
+        collection(db, "transacciones"),
+        nuevaTransaccion
+      );
       setTransacciones([
         ...transacciones,
         { id: transaccionRef.id, ...nuevaTransaccion },
@@ -101,43 +99,18 @@ function Admin() {
 
   const handleEditarTransaccion = (transaccion) => {
     setModoEdicion(true);
-    setTransaccionEditada({
-      id: transaccion.id,
-      nombre: transaccion.nombre,
-      fecha: transaccion.fecha,
-      monto: transaccion.monto,
-      plan: transaccion.plan,
-    });
+    setTransaccionEditada({ ...transaccion });
   };
 
   const handleGuardarCambiosTransaccion = async () => {
-    const { id, nombre, fecha, monto, plan } = transaccionEditada;
-
     try {
-      const transaccionDocRef = doc(db, "transacciones", id);
-      await updateDoc(transaccionDocRef, {
-        nombre: nombre,
-        fecha: fecha,
-        monto: monto,
-        plan: plan,
-      });
-
-      console.log("Transacción actualizada en Firebase:", {
-        id,
-        nombre,
-        fecha,
-        monto,
-        plan,
-      });
-
+      const { id, ...restoTransaccion } = transaccionEditada;
+      await updateDoc(doc(db, "transacciones", id), restoTransaccion);
       setTransacciones((prevTransacciones) =>
         prevTransacciones.map((transaccion) =>
-          transaccion.id === id
-            ? { id, nombre, fecha, monto, plan }
-            : transaccion
+          transaccion.id === id ? { id, ...restoTransaccion } : transaccion
         )
       );
-
       setModoEdicion(false);
       setTransaccionEditada({
         id: "",
@@ -216,7 +189,6 @@ function Admin() {
       console.error("Error al eliminar el usuario de Firebase:", error);
     }
   };
-
   useEffect(() => {
     const obtenerUsuarios = async () => {
       const usuariosCollection = collection(db, "usuarios");
@@ -227,7 +199,6 @@ function Admin() {
       }));
       setUsuarios(usuariosData);
     };
-
     obtenerUsuarios();
   }, []);
 
@@ -245,6 +216,7 @@ function Admin() {
               placeholder="Buscar..."
             />
           </div>
+
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
               Datos de Usuarios
@@ -363,95 +335,67 @@ function Admin() {
               </tbody>
             </table>
           </div>
+
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
                 Transacciones
               </h2>
               <div className="mb-6 border-b border-gray-300"></div>
-              <div className="flex items-center mb-4">
-                {/* Campos de entrada para nueva transacción */}
+              <div className="flex items-center mb-4 space-x-2">
                 <input
+                  className="p-2 rounded border border-gray-300"
                   type="text"
-                  value={
-                    modoEdicion
-                      ? transaccionEditada.nombre
-                      : nuevaTransaccion.nombre
-                  }
+                  value={nuevaTransaccion.nombre}
                   onChange={(e) =>
-                    setModoEdicion
-                      ? setTransaccionEditada({
-                          ...transaccionEditada,
-                          nombre: e.target.value,
-                        })
-                      : setNuevaTransaccion({
-                          ...nuevaTransaccion,
-                          nombre: e.target.value,
-                        })
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      nombre: e.target.value,
+                    })
                   }
+                  placeholder="Nombre y Apellido"
                 />
                 <input
+                  className="p-2 rounded border border-gray-300"
                   type="text"
-                  value={
-                    modoEdicion
-                      ? transaccionEditada.fecha
-                      : nuevaTransaccion.fecha
-                  }
+                  value={nuevaTransaccion.fecha}
                   onChange={(e) =>
-                    setModoEdicion
-                      ? setTransaccionEditada({
-                          ...transaccionEditada,
-                          fecha: e.target.value,
-                        })
-                      : setNuevaTransaccion({
-                          ...nuevaTransaccion,
-                          fecha: e.target.value,
-                        })
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      fecha: e.target.value,
+                    })
                   }
+                  placeholder="Fecha"
                 />
                 <input
+                  className="p-2 rounded border border-gray-300"
                   type="text"
-                  value={
-                    modoEdicion
-                      ? transaccionEditada.monto
-                      : nuevaTransaccion.monto
-                  }
+                  value={nuevaTransaccion.monto}
                   onChange={(e) =>
-                    setModoEdicion
-                      ? setTransaccionEditada({
-                          ...transaccionEditada,
-                          monto: e.target.value,
-                        })
-                      : setNuevaTransaccion({
-                          ...nuevaTransaccion,
-                          monto: e.target.value,
-                        })
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      monto: e.target.value,
+                    })
                   }
+                  placeholder="Monto"
                 />
                 <input
+                  className="p-2 rounded border border-gray-300"
                   type="text"
-                  value={
-                    modoEdicion
-                      ? transaccionEditada.plan
-                      : nuevaTransaccion.plan
-                  }
+                  value={nuevaTransaccion.plan}
                   onChange={(e) =>
-                    setModoEdicion
-                      ? setTransaccionEditada({
-                          ...transaccionEditada,
-                          plan: e.target.value,
-                        })
-                      : setNuevaTransaccion({
-                          ...nuevaTransaccion,
-                          plan: e.target.value,
-                        })
+                    setNuevaTransaccion({
+                      ...nuevaTransaccion,
+                      plan: e.target.value,
+                    })
                   }
+                  placeholder="Plan"
                 />
                 <button
                   onClick={handleGuardarTransaccion}
                   className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
                 >
-                  Guardar Transacción
+                  Guardar
                 </button>
               </div>
               <table className="w-full table-auto text-sm">
@@ -479,24 +423,15 @@ function Admin() {
                     <tr className="hover:bg-grey-lighter" key={transaccion.id}>
                       <td className="py-2 px-4 border-b border-grey-light">
                         {modoEdicion &&
-                        nuevaTransaccion.id === transaccion.id ? (
+                        transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={
-                              modoEdicion
-                                ? transaccionEditada.nombre
-                                : nuevaTransaccion.nombre
-                            }
+                            value={transaccionEditada.nombre}
                             onChange={(e) =>
-                              modoEdicion
-                                ? setTransaccionEditada({
-                                    ...transaccionEditada,
-                                    nombre: e.target.value,
-                                  })
-                                : setNuevaTransaccion({
-                                    ...nuevaTransaccion,
-                                    nombre: e.target.value,
-                                  })
+                              setTransaccionEditada({
+                                ...transaccionEditada,
+                                nombre: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -505,24 +440,15 @@ function Admin() {
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
                         {modoEdicion &&
-                        nuevaTransaccion.id === transaccion.id ? (
+                        transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={
-                              modoEdicion
-                                ? transaccionEditada.fecha
-                                : nuevaTransaccion.fecha
-                            }
+                            value={transaccionEditada.fecha}
                             onChange={(e) =>
-                              modoEdicion
-                                ? setTransaccionEditada({
-                                    ...transaccionEditada,
-                                    fecha: e.target.value,
-                                  })
-                                : setNuevaTransaccion({
-                                    ...nuevaTransaccion,
-                                    fecha: e.target.value,
-                                  })
+                              setTransaccionEditada({
+                                ...transaccionEditada,
+                                fecha: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -531,24 +457,15 @@ function Admin() {
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
                         {modoEdicion &&
-                        nuevaTransaccion.id === transaccion.id ? (
+                        transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={
-                              modoEdicion
-                                ? transaccionEditada.monto
-                                : nuevaTransaccion.monto
-                            }
+                            value={transaccionEditada.monto}
                             onChange={(e) =>
-                              modoEdicion
-                                ? setTransaccionEditada({
-                                    ...transaccionEditada,
-                                    monto: e.target.value,
-                                  })
-                                : setNuevaTransaccion({
-                                    ...nuevaTransaccion,
-                                    monto: e.target.value,
-                                  })
+                              setTransaccionEditada({
+                                ...transaccionEditada,
+                                monto: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -557,24 +474,15 @@ function Admin() {
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
                         {modoEdicion &&
-                        nuevaTransaccion.id === transaccion.id ? (
+                        transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={
-                              modoEdicion
-                                ? transaccionEditada.plan
-                                : nuevaTransaccion.plan
-                            }
+                            value={transaccionEditada.plan}
                             onChange={(e) =>
-                              modoEdicion
-                                ? setTransaccionEditada({
-                                    ...transaccionEditada,
-                                    plan: e.target.value,
-                                  })
-                                : setNuevaTransaccion({
-                                    ...nuevaTransaccion,
-                                    plan: e.target.value,
-                                  })
+                              setTransaccionEditada({
+                                ...transaccionEditada,
+                                plan: e.target.value,
+                              })
                             }
                           />
                         ) : (
@@ -583,18 +491,25 @@ function Admin() {
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">
                         {modoEdicion &&
-                        nuevaTransaccion.id === transaccion.id ? (
+                        transaccionEditada.id === transaccion.id ? (
                           <div className="flex space-x-2">
                             <button
-                              onClick={() =>
-                                handleGuardarCambiosTransaccion(transaccion.id)
-                              }
+                              onClick={handleGuardarCambiosTransaccion}
                               className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                             >
                               Guardar
                             </button>
                             <button
-                              onClick={() => setModoEdicion(false)}
+                              onClick={() => {
+                                setModoEdicion(false);
+                                setTransaccionEditada({
+                                  id: "",
+                                  nombre: "",
+                                  fecha: "",
+                                  monto: "",
+                                  plan: "",
+                                });
+                              }}
                               className="bg-gray-500 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded"
                             >
                               Cancelar
