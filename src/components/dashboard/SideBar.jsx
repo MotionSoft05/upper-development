@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 function Sidebar({
+  userEmail,
   setShowAltaEvento,
   setShowConsultaEvento,
   setShowPantallas,
@@ -12,6 +13,7 @@ function Sidebar({
   setShowSoporte,
   setShowAdmin,
 }) {
+  console.log("Valor de userEmail:", userEmail);
   return (
     <div className="sidebar-content  ">
       <ul className="flex flex-col w-full">
@@ -20,30 +22,31 @@ function Sidebar({
             Principal
           </span>
         </div>
-
-        <li className="my-px">
-          <button
-            onClick={() => {
-              setShowAdmin(true);
-              setShowAltaEvento(false);
-              setShowConsultaEvento(false);
-              setShowPantallas(false);
-              setShowPantallaSalon(false);
-              setShowPantallaDirectorio(false);
-              setShowPublicidad(false);
-              setShowlicencia(false);
-              setShowGuia(false);
-              setShowSoporte(false);
-            }}
-          >
-            <a
-              href="#"
-              className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+        {userEmail === "uppermex10@gmail.com" && (
+          <li className="my-px">
+            <button
+              onClick={() => {
+                setShowAdmin(true);
+                setShowAltaEvento(false);
+                setShowConsultaEvento(false);
+                setShowPantallas(false);
+                setShowPantallaSalon(false);
+                setShowPantallaDirectorio(false);
+                setShowPublicidad(false);
+                setShowlicencia(false);
+                setShowGuia(false);
+                setShowSoporte(false);
+              }}
             >
-              <span className="ml-3">Admin</span>
-            </a>
-          </button>
-        </li>
+              <a
+                href="#"
+                className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+              >
+                <span className="ml-3">Admin</span>
+              </a>
+            </button>
+          </li>
+        )}
 
         <li className="my-px">
           <button

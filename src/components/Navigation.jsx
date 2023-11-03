@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import Router from "next/router";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -23,17 +24,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function Navigation() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setIsLoggedIn(true);
-        setUserEmail(user.email);
+        setUser(user);
       } else {
-        setIsLoggedIn(false);
-        setUserEmail("");
+        setUser(null);
       }
     });
 
@@ -44,8 +42,6 @@ function Navigation() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setIsLoggedIn(false);
-      setUserEmail("");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -99,15 +95,23 @@ function Navigation() {
               </ul>
               <div className="px-3">
                 <div className="ml-auto flex items-baseline space-x-4">
-                  {isLoggedIn ? (
+                  {user ? (
                     <div className="flex items-center space-x-2">
-                      <span>Hola, {userEmail}</span>
-                      <button onClick={handleLogout}>Cerrar sesión</button>
+                      <span>Hola, {user.email}</span>
                       <Link href="/dashboard">
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Dashboard
                         </button>
                       </Link>
+                      <button
+                        onClick={async () => {
+                          await handleLogout();
+                          window.location.href = "/";
+                        }}
+                        className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
+                      >
+                        Cerrar sesión
+                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">

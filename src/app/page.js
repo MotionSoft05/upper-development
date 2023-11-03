@@ -83,15 +83,6 @@ export default function Home() {
                   acceso desde cualquier dispositivo
                 </p>
                 <div>
-                  <Link href="/register">
-                    <button
-                      type="button"
-                      className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 mx-1 "
-                    >
-                      Registrarse
-                    </button>
-                  </Link>
-
                   <button
                     type="button"
                     className="text-black border-2 border-custom hover:border-blue-400 font-medium rounded-lg text-sm px-4 py-2 mx-1"
