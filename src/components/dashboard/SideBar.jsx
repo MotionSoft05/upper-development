@@ -305,7 +305,7 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Información licencia</span>
+              <span className="ml-3">Mis datos</span>
             </a>
           </button>
         </li>
@@ -399,7 +399,7 @@ function Sidebar({
                 <path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </span>
-            <span className="ml-3">Logout</span>
+            <span className="ml-3">Salir</span>
           </Link>
         </li>
       </ul>
