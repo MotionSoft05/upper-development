@@ -3,16 +3,6 @@ function DatosNegocio() {
     <section className="px-8 py-12">
       <div class="relative overflow-x-auto">
         <table class="w-full text-sm text-left text-gray-500 ">
-          <thead class="text-xs text-gray-700 uppercase bg-gray-50 ">
-            <tr>
-              <th scope="col" class="px-6 py-3">
-                Product name
-              </th>
-              <th scope="col" class="px-6 py-3">
-                Color
-              </th>
-            </tr>
-          </thead>
           <tbody>
             <tr class="bg-white border-b ">
               <th scope="row" class="px-6 py-4 font-extrabold text-gray-900  ">
