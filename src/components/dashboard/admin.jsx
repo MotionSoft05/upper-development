@@ -9,6 +9,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -22,6 +23,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
@@ -48,6 +50,7 @@ function Admin() {
     plan: "",
   });
   const [transacciones, setTransacciones] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
     const obtenerTransacciones = async () => {
@@ -191,6 +194,9 @@ function Admin() {
     }
   };
   useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setCurrentUser(user);
+    });
     const obtenerUsuarios = async () => {
       const usuariosCollection = collection(db, "usuarios");
       const usuariosSnapshot = await getDocs(usuariosCollection);
@@ -201,7 +207,13 @@ function Admin() {
       setUsuarios(usuariosData);
     };
     obtenerUsuarios();
+    return () => unsubscribe();
   }, []);
+  if (currentUser && currentUser.email !== "uppermex10@gmail.com") {
+    // Si el usuario no tiene permitido el acceso, puedes redirigirlo a otra página
+    // o mostrar un mensaje de error
+    return <p>No tienes permiso para acceder a esta página.</p>;
+  }
 
   return (
     <div class="flex flex-col  bg-gray-100">
