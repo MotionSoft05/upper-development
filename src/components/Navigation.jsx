@@ -23,17 +23,14 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function Navigation() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [userEmail, setUserEmail] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
-        setIsLoggedIn(true);
-        setUserEmail(user.email);
+        setUser(user);
       } else {
-        setIsLoggedIn(false);
-        setUserEmail("");
+        setUser(null);
       }
     });
 
@@ -44,8 +41,6 @@ function Navigation() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-      setIsLoggedIn(false);
-      setUserEmail("");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
     }
@@ -99,9 +94,9 @@ function Navigation() {
               </ul>
               <div className="px-3">
                 <div className="ml-auto flex items-baseline space-x-4">
-                  {isLoggedIn ? (
+                  {user ? (
                     <div className="flex items-center space-x-2">
-                      <span>Hola, {userEmail}</span>
+                      <span>Hola, {user.email}</span>
                       <button onClick={handleLogout}>Cerrar sesión</button>
                       <Link href="/dashboard">
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
