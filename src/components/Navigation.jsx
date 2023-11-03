@@ -97,12 +97,17 @@ function Navigation() {
                   {user ? (
                     <div className="flex items-center space-x-2">
                       <span>Hola, {user.email}</span>
-                      <button onClick={handleLogout}>Cerrar sesión</button>
                       <Link href="/dashboard">
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Dashboard
                         </button>
                       </Link>
+                      <button
+                        onClick={handleLogout}
+                        className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
+                      >
+                        Cerrar sesión
+                      </button>
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
