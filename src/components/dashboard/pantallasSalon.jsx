@@ -280,7 +280,7 @@ function PantallasSalon() {
                 Seleccionar Evento
               </label>
               <select
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white text-red-500"
+                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white "
                 value={selectedEvent ? selectedEvent.id : ""}
                 onChange={(e) => {
                   const eventId = e.target.value;
