@@ -197,7 +197,7 @@ function Register() {
         setPhoneNumber("");
         setEmail("");
         setPassword("");
-        window.location.href = "/login";
+        window.location.href = "/";
       }, 2300);
     } catch (error) {
       setErrors(error.message);
