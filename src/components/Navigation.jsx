@@ -4,24 +4,69 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { Bars3Icon, UserCircleIcon } from "@heroicons/react/20/solid";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 
 function Navigation() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true);
+        setUserEmail(user.email);
+      } else {
+        setIsLoggedIn(false);
+        setUserEmail("");
+      }
+    });
+
+    // Cleanup subscription on unmount
+    return () => unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setIsLoggedIn(false);
+      setUserEmail("");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+    }
+  };
+
   return (
     <nav className="bg-white">
       <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className=" hidden md:block flex-shrink-0  items-center ">
+          <div className="hidden md:block flex-shrink-0 items-center">
             <Link href="/">
               <img
                 src="/img/logov2.png"
-                className="h-16 md:h-24 py-3 "
+                className="h-16 md:h-24 py-3"
                 alt="Logo"
               />
             </Link>
           </div>
           <div className="hidden md:block">
             <div className="ml-auto flex items-baseline space-x-4">
-              <ul className="flex font-bold rounded-lg flex-row space-x-8  ">
+              <ul className="flex font-bold rounded-lg flex-row space-x-8">
                 <li>
                   <a
                     href="#"
@@ -37,51 +82,48 @@ function Navigation() {
                   </a>
                 </li>
                 <li>
-                  <a href="#recursos" className=" hover:text-custom md:p-0">
+                  <a href="#recursos" className="hover:text-custom md:p-0">
                     Recursos
                   </a>
                 </li>
-
                 <li>
                   <a href="#precios" className="hover:text-custom md:p-0">
                     Precios
                   </a>
                 </li>
-
                 <li>
                   <a href="#preguntas" className="hover:text-custom md:p-0">
                     FAQ
                   </a>
                 </li>
               </ul>
-
-              <div className=" px-3">
-                <Link href="/dasboard">
-                  <button
-                    type="button"
-                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
-                  >
-                    Dashboard
-                  </button>
-                </Link>
-                <Link href="/register">
-                  <button
-                    type="button"
-                    className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2  "
-                  >
-                    Registrarse
-                  </button>
-                </Link>
-              </div>
-              <div>
-                <Link href="/login">
-                  <button
-                    type="button"
-                    className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2 "
-                  >
-                    inician sesión
-                  </button>
-                </Link>
+              <div className="px-3">
+                <div className="ml-auto flex items-baseline space-x-4">
+                  {isLoggedIn ? (
+                    <div className="flex items-center space-x-2">
+                      <span>Hola, {userEmail}</span>
+                      <button onClick={handleLogout}>Cerrar sesión</button>
+                      <Link href="/dashboard">
+                        <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
+                          Dashboard
+                        </button>
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Link href="/register">
+                        <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
+                          Registrarse
+                        </button>
+                      </Link>
+                      <Link href="/login">
+                        <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
+                          Iniciar sesión
+                        </button>
+                      </Link>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
