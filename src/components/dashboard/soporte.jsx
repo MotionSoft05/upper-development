@@ -69,14 +69,14 @@ function Soporte() {
                   type="text"
                   className="w-full rounded bg-transparent py-[0.32rem] text-neutral-200 border border-sky-100 "
                   id="exampleInput90"
-                  placeholder="Name"
+                  placeholder="Nombre"
                 />
               </div>
               <div className="relative mb-6" data-te-input-wrapper-init>
                 <input
                   type="email"
                   className="w-full rounded bg-transparent py-[0.32rem] text-neutral-200 border border-sky-100 "
-                  placeholder="Email address"
+                  placeholder="Correo electrónico"
                 />
               </div>
               <div className="relative mb-6" data-te-input-wrapper-init>
@@ -84,7 +84,7 @@ function Soporte() {
                   className="w-full rounded bg-transparent py-[0.32rem] text-neutral-200 border border-sky-100 "
                   id="exampleFormControlTextarea1"
                   rows="3"
-                  placeholder="Your message"
+                  placeholder="Su mensaje"
                 ></textarea>
               </div>
 
@@ -92,7 +92,7 @@ function Soporte() {
                 type="button"
                 className="block w-full bg-indigo-600 mt-4 py-2 rounded-2xl text-white font-semibold mb-2"
               >
-                Send
+                Enviar
               </button>
             </form>
           </div>
