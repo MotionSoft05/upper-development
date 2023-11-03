@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import Router from "next/router";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -103,7 +104,10 @@ function Navigation() {
                         </button>
                       </Link>
                       <button
-                        onClick={handleLogout}
+                        onClick={async () => {
+                          await handleLogout();
+                          window.location.href = "/";
+                        }}
                         className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
                       >
                         Cerrar sesión
