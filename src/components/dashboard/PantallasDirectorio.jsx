@@ -5,7 +5,13 @@ import Select from "react-select";
 import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
-import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  where,
+  query,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -22,6 +28,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
 function PantallasDirectorio() {
+  const [user, setUser] = useState(null);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -49,48 +56,49 @@ function PantallasDirectorio() {
   const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
-    db.collection("eventos")
-      .get()
-      .then((querySnapshot) => {
-        const eventos = [];
-        const checkboxStates = {};
-        querySnapshot.forEach((doc) => {
-          const evento = {
-            id: doc.id,
-            ...doc.data(),
-          };
-          checkboxStates[evento.id] = evento.isChecked || false;
-          eventos.push(evento);
-        });
-        setEvents(eventos);
-        setEventCheckboxStates(checkboxStates);
-      })
-      .catch((error) => {
-        console.error("Error al obtener eventos:", error);
-      });
+    // Observador de cambios en la autenticación del usuario
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // Si el usuario está autenticado, establece el usuario en el estado
+        setUser(user);
 
-    const unsubscribe = onSnapshot(
-      collection(db, "eventos"),
-      (querySnapshot) => {
-        const eventos = [];
-        const checkboxStates = { ...eventCheckboxStates };
-        querySnapshot.forEach((doc) => {
-          const evento = {
-            id: doc.id,
-            ...doc.data(),
-          };
-          eventos.push(evento);
-          checkboxStates[evento.id] =
-            checkboxStates[evento.id] !== undefined
-              ? checkboxStates[evento.id]
-              : false;
+        // Realizar la consulta a la base de datos para obtener los eventos del usuario autenticado
+        const eventosRef = collection(db, "eventos");
+        const q = query(eventosRef, where("userId", "==", user.uid));
+        const unsubscribeEvents = onSnapshot(q, (snapshot) => {
+          const eventos = [];
+          const checkboxStates = { ...eventCheckboxStates };
+          snapshot.forEach((doc) => {
+            const evento = {
+              id: doc.id,
+              ...doc.data(),
+            };
+            checkboxStates[evento.id] =
+              checkboxStates[evento.id] !== undefined
+                ? checkboxStates[evento.id]
+                : false;
+            eventos.push(evento);
+          });
+          setEvents(eventos);
+          setEventCheckboxStates(checkboxStates);
         });
-        setEvents(eventos);
-        setEventCheckboxStates(checkboxStates);
+
+        // Limpiar eventos al desmontar el componente
+        return () => {
+          unsubscribeEvents();
+        };
+      } else {
+        // Si el usuario no está autenticado, establece el usuario en null y eventos vacíos
+        setUser(null);
+        setEvents([]);
+        setEventCheckboxStates({});
       }
-    );
+    });
 
-    return () => unsubscribe();
+    return () => {
+      // Desinscribirse del observador de cambios en la autenticación
+      unsubscribe();
+    };
   }, [eventCheckboxStates]);
 
   const handleCheckboxChange = (eventId) => {
