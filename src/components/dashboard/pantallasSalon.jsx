@@ -3,8 +3,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 import "firebase/compat/firestore";
-import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import {
+  getFirestore,
+  collection,
+  onSnapshot,
+  query,
+  where,
+} from "firebase/firestore";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 
@@ -32,6 +39,8 @@ const obtenerHora = () => {
 };
 
 function PantallasSalon() {
+  const [user, setUser] = useState(null);
+  const [unsubscribeEvents, setUnsubscribeEvents] = useState(null);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -68,16 +77,44 @@ function PantallasSalon() {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "eventos"), (snapshot) => {
-      const eventsData = [];
-      snapshot.forEach((doc) => {
-        eventsData.push({ id: doc.id, ...doc.data() });
-      });
-      setEvents(eventsData);
-      setLoading(false);
+    // Observador de cambios en la autenticación del usuario
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // Si el usuario está autenticado
+        setUser(user);
+
+        // Consultar eventos del usuario autenticado
+        const eventosRef = collection(db, "eventos");
+        const q = query(eventosRef, where("userId", "==", user.uid));
+        const unsubscribeEvents = onSnapshot(q, (snapshot) => {
+          const eventsData = [];
+          snapshot.forEach((doc) => {
+            eventsData.push({ id: doc.id, ...doc.data() });
+          });
+          setEvents(eventsData);
+          setLoading(false);
+        });
+
+        // Establecer el unsubscribe para detener la escucha de eventos cuando sea necesario
+        setUnsubscribeEvents(() => unsubscribeEvents);
+      } else {
+        // Si el usuario no está autenticado
+        setUser(null);
+        setEvents([]);
+        setLoading(false);
+        setUnsubscribeEvents(null); // Limpiar la función de desinscripción
+      }
     });
 
-    return () => unsubscribe();
+    return () => {
+      // Desinscribirse del observador de cambios en la autenticación
+      unsubscribe();
+
+      // Desinscribirse del observador de eventos si existe
+      if (unsubscribeEvents) {
+        unsubscribeEvents();
+      }
+    };
   }, []);
 
   const fontStyleOptions = [
