@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
+import "firebase/compat/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -17,6 +18,7 @@ if (!firebase.apps.length) {
 }
 
 function ConsultaModEvento() {
+  const [user, setUser] = useState(null);
   const [eventos, setEventos] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [eventoEditado, setEventoEditado] = useState(null);
@@ -28,22 +30,38 @@ function ConsultaModEvento() {
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    const consultarEventos = async () => {
-      try {
-        const eventosRef = firebase.firestore().collection("eventos");
-        eventosRef.onSnapshot((snapshot) => {
-          const eventosData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setEventos(eventosData);
-        });
-      } catch (error) {
-        console.error("Error al consultar eventos:", error);
+    // Observador de cambios en la autenticación del usuario
+    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        // Si el usuario está autenticado
+        setUser(user);
+        consultarEventos(user.uid); // Pass the userId to fetch events for the authenticated user
+      } else {
+        // Si el usuario no está autenticado
+        setUser(null);
+        setEventos([]); // Establecer eventos como vacío
       }
-    };
-    consultarEventos();
+    });
+    return () => unsubscribe();
   }, []);
+
+  const consultarEventos = async (userId) => {
+    try {
+      const eventosRef = firebase
+        .firestore()
+        .collection("eventos")
+        .where("userId", "==", userId); // Filter events based on userId
+      eventosRef.onSnapshot((snapshot) => {
+        const eventosData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setEventos(eventosData);
+      });
+    } catch (error) {
+      console.error("Error al consultar eventos:", error);
+    }
+  };
 
   const eliminarEvento = async (id) => {
     try {
