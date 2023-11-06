@@ -54,10 +54,7 @@ function PantallasSalon() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
-  const [caracteresRestantes, setCaracteresRestantes] = useState(130);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [descripcion, setDescripcion] = useState("");
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -77,13 +74,10 @@ function PantallasSalon() {
   }, []);
 
   useEffect(() => {
-    // Observador de cambios en la autenticación del usuario
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Si el usuario está autenticado
         setUser(user);
 
-        // Consultar eventos del usuario autenticado
         const eventosRef = collection(db, "eventos");
         const q = query(eventosRef, where("userId", "==", user.uid));
         const unsubscribeEvents = onSnapshot(q, (snapshot) => {
@@ -95,22 +89,18 @@ function PantallasSalon() {
           setLoading(false);
         });
 
-        // Establecer el unsubscribe para detener la escucha de eventos cuando sea necesario
         setUnsubscribeEvents(() => unsubscribeEvents);
       } else {
-        // Si el usuario no está autenticado
         setUser(null);
         setEvents([]);
         setLoading(false);
-        setUnsubscribeEvents(null); // Limpiar la función de desinscripción
+        setUnsubscribeEvents(null);
       }
     });
 
     return () => {
-      // Desinscribirse del observador de cambios en la autenticación
       unsubscribe();
 
-      // Desinscribirse del observador de eventos si existe
       if (unsubscribeEvents) {
         unsubscribeEvents();
       }
