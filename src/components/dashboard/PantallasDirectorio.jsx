@@ -43,9 +43,7 @@ function PantallasDirectorio() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEvents, setSelectedEvents] = useState([]);
-  const [isChecked, setIsChecked] = useState(false);
   const [eventCheckboxStates, setEventCheckboxStates] = useState({});
 
   const [logo, setLogo] = useState(null);
@@ -56,13 +54,9 @@ function PantallasDirectorio() {
   const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
-    // Observador de cambios en la autenticación del usuario
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Si el usuario está autenticado, establece el usuario en el estado
         setUser(user);
-
-        // Realizar la consulta a la base de datos para obtener los eventos del usuario autenticado
         const eventosRef = collection(db, "eventos");
         const q = query(eventosRef, where("userId", "==", user.uid));
         const unsubscribeEvents = onSnapshot(q, (snapshot) => {
@@ -83,12 +77,10 @@ function PantallasDirectorio() {
           setEventCheckboxStates(checkboxStates);
         });
 
-        // Limpiar eventos al desmontar el componente
         return () => {
           unsubscribeEvents();
         };
       } else {
-        // Si el usuario no está autenticado, establece el usuario en null y eventos vacíos
         setUser(null);
         setEvents([]);
         setEventCheckboxStates({});
@@ -96,7 +88,6 @@ function PantallasDirectorio() {
     });
 
     return () => {
-      // Desinscribirse del observador de cambios en la autenticación
       unsubscribe();
     };
   }, [eventCheckboxStates]);
