@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Datepicker from "react-tailwindcss-datepicker";
 import "keen-slider/keen-slider.min.css";
 import "keen-slider/keen-slider.min.css";
@@ -7,6 +7,8 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { getAuth, currentUser, onAuthStateChanged } from "firebase/auth";
+import { collection, addDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -20,8 +22,11 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
+const auth = getAuth(app);
 
 function AltaEventos() {
+  const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
   const [value, setValue] = useState({
     startDate: new Date(),
     endDate: new Date().setMonth(11),
@@ -30,6 +35,21 @@ function AltaEventos() {
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
   const [charCount, setCharCount] = useState(0);
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+        setUserId(user.uid);
+      } else {
+        setUser(null);
+        setUserId(null);
+      }
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
   const handleDescriptionChange = (e) => {
     const inputText = e.target.value;
@@ -135,7 +155,9 @@ function AltaEventos() {
       diasSeleccionados,
       images,
       devices,
+      userId: userId,
     };
+    console.log("userId:", userId);
 
     firebase
       .firestore()
