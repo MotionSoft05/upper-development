@@ -468,9 +468,10 @@ function PantallasSalon() {
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
                     <div
-                      className={`text-white text-3xl font-extrabold bg-gradient-to-r from-custom to-Second px-20`}
+                      className={`text-white text-3xl font-bold  px-20 rounded-t-xl`}
                       style={{
                         color: fontColor,
+                        backgroundColor: templateColor,
                         fontFamily: selectedFontStyle
                           ? selectedFontStyle.value
                           : "Arial",
@@ -558,7 +559,16 @@ function PantallasSalon() {
                       </div>
                     </div>
                     <div>
-                      <div className="text-2xl font-semibold mt-1 text-center bg-gradient-to-r from-custom to-Second justify-between flex px-20 ">
+                      <div
+                        className={`text-2xl font-semibold mt-1 text-center bg-Second rounded-b-xl justify-between flex px-20`}
+                        style={{
+                          color: fontColor,
+                          backgroundColor: templateColor,
+                          fontFamily: selectedFontStyle
+                            ? selectedFontStyle.value
+                            : "Arial",
+                        }}
+                      >
                         <p style={{ color: fontColor }}>{obtenerFecha()}</p>
                         <p style={{ color: fontColor }}>{currentHour}</p>
                       </div>
