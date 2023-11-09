@@ -174,6 +174,10 @@ function PantallasDirectorio() {
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
+    const textoEjemplo = "Texto de ejemplo";
+    const font = `${selectedOption.value}, sans-serif`;
+    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
+    console.log("Ancho del texto medido:", textoAncho);
   };
 
   const handlePreviewClick = () => {
@@ -465,7 +469,12 @@ function PantallasDirectorio() {
 
                   <div
                     className="flex flex-col items-center"
-                    style={{ color: fontColor }}
+                    style={{
+                      color: fontColor,
+                      fontFamily: selectedFontStyle
+                        ? selectedFontStyle.value
+                        : "Arial",
+                    }}
                   >
                     <p className="text-2xl text-center font-semibold mb-2">
                       {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
@@ -490,10 +499,13 @@ function PantallasDirectorio() {
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
                   <div className="">
                     <div
-                      className="text-2xl font-semibold mt-1 text-center justify-between flex px-20 mb-4"
+                      className={` text-white text-2xl font-semibold mt-1 text-center justify-between flex px-20 mb-4 rounded-t-xl`}
                       style={{
-                        background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
-                        color: `${templateColor}`,
+                        color: fontColor,
+                        backgroundColor: templateColor,
+                        fontFamily: selectedFontStyle
+                          ? selectedFontStyle.value
+                          : "Arial",
                       }}
                     >
                       {/* Título */}
@@ -525,8 +537,14 @@ function PantallasDirectorio() {
                                     />
 
                                     {/* Detalles del evento */}
-                                    <div style={{ color: fontColor }}>
-                                      {" "}
+                                    <div
+                                      style={{
+                                        color: fontColor,
+                                        fontFamily: selectedFontStyle
+                                          ? selectedFontStyle.value
+                                          : "Arial",
+                                      }}
+                                    >
                                       {/* Aplicando el color seleccionado */}
                                       <h3>{event.nombreEvento}</h3>
                                       <p>{event.tipoEvento}</p>
@@ -546,11 +564,15 @@ function PantallasDirectorio() {
 
                     <div>
                       {/* Fecha y hora en la esquina inferior */}
+
                       <div
-                        className="text-2xl font-semibold mt-1 text-center justify-between flex px-20"
+                        className={`text-2xl font-semibold mt-1 text-center text-white bg-black justify-between flex px-20 rounded-b-xl`}
                         style={{
-                          background: `linear-gradient(to right, ${templateColor}, ${templateColor})`,
-                          color: `${templateColor}`,
+                          color: fontColor,
+                          backgroundColor: templateColor,
+                          fontFamily: selectedFontStyle
+                            ? selectedFontStyle.value
+                            : "Arial",
                         }}
                       >
                         <p> </p>
@@ -559,7 +581,15 @@ function PantallasDirectorio() {
                   </div>
                 </div>
                 <div className="flex justify-between items-center">
-                  <p className="" style={{ color: fontColor }}>
+                  <p
+                    className=""
+                    style={{
+                      color: fontColor,
+                      fontFamily: selectedFontStyle
+                        ? selectedFontStyle.value
+                        : "Arial",
+                    }}
+                  >
                     Grupo renueca el mejor programa de recompensa para
                     asistentes ejec
                   </p>
