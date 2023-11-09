@@ -10,38 +10,113 @@ function Pantallas() {
       <h1 className="text-3xl font-extrabold text-gray-900">
         Ajuste de pantallas
       </h1>
-      <div className="grid grid-cols-2 pt-9">
-        <div>
-          <div className="border border-black py-28 ">
-            <h2>pantalla 1</h2>
-            <p>Relación de aspecto: 16:9</p>
-          </div>
-          <div className="flex justify-center">
-            <Link
-              href="/pantalla1"
-              className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500"
-            >
-              pantalla completa
-            </Link>
-            <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
-              Editar
-            </button>
-          </div>
-        </div>
-        <div>
-          <div className="border border-black mx-14 py-44 ">
-            <h2>pantalla 2</h2>
-            <p>Relación de aspecto: 9:16</p>
-          </div>
-          <div className="flex justify-center">
-            <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
-              pantalla completa
-            </button>
-            <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
-              Editar
-            </button>
-          </div>
-        </div>
+
+      <div class="relative overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+          <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <tr>
+              <th scope="col" class="px-6 py-3">
+                Nombre
+              </th>
+              <th scope="col" class="px-6 py-3">
+                Editar
+              </th>
+              <th scope="col" class="px-6 py-3">
+                Ver pantalla
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                pantalla1
+              </th>
+
+              <td class="px-6 py-4">
+                <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
+                  Editar
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <Link
+                  href="/pantalla1"
+                  className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500"
+                >
+                  pantalla completa
+                </Link>
+              </td>
+            </tr>
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                pantalla2
+              </th>
+
+              <td class="px-6 py-4">
+                <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
+                  Editar
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <Link
+                  href="/pantalla2"
+                  className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500"
+                >
+                  pantalla completa
+                </Link>
+              </td>
+            </tr>
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                pantalla3
+              </th>
+
+              <td class="px-6 py-4">
+                <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
+                  Editar
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <Link
+                  href="/pantalla3"
+                  className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500"
+                >
+                  pantalla completa
+                </Link>
+              </td>
+            </tr>
+            <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+              <th
+                scope="row"
+                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+              >
+                pantalla4
+              </th>
+
+              <td class="px-6 py-4">
+                <button className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500">
+                  Editar
+                </button>
+              </td>
+              <td class="px-6 py-4">
+                <Link
+                  href="/pantalla4"
+                  className=" bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full active:bg-gray-500"
+                >
+                  pantalla completa
+                </Link>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </section>
   );
