@@ -1,9 +1,9 @@
 function Pantalla1() {
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black">
+      <div className="bg-white  text-black h-full flex flex-col justify-center">
         <div className="flex items-center justify-between">
-          <img src="/img/fiestamericana.png" alt="Logo" className="mb-5 w-80" />
+          <img src="/img/fiestamericana.png" alt="Logo" className="  w-96" />
           <h1 className="font-bold text-5xl mr-16">SALON LAUREL</h1>
         </div>
         <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
