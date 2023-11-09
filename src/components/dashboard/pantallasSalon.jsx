@@ -11,7 +11,11 @@ import {
   onSnapshot,
   query,
   where,
+  updateDoc,
+  doc,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
+
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 
@@ -29,6 +33,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 const db = getFirestore();
+const storage = getStorage();
 
 const obtenerHora = () => {
   const now = new Date();
@@ -188,25 +193,95 @@ function PantallasSalon() {
     console.log("Ancho del texto medido:", textoAncho);
   };
 
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    const storageRef = ref(storage, `pantallaSalonLogos/${file.name}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const logoUrl = await getDownloadURL(storageRef);
+
+      setSelectedLogo(logoUrl);
+      guardarInformacionPersonalizacion(logoUrl);
+    } catch (error) {
+      console.error("Error al subir el logo a Firebase Storage:", error);
+    }
+  };
+
+  const guardarInformacionPersonalizacion = (logoUrl) => {
+    if (selectedLogo) {
+      const personalizacionTemplate = {
+        fontColor: fontColor,
+        templateColor: templateColor,
+        fontStyle: selectedFontStyle ? selectedFontStyle.value : "Arial",
+        logo: selectedLogo,
+      };
+
+      if (selectedEvent) {
+        const eventoRef = doc(db, "eventos", selectedEvent.id);
+
+        updateDoc(eventoRef, {
+          personalizacionTemplate: personalizacionTemplate,
+          userId: user.uid,
+        })
+          .then(() => {
+            console.log(
+              "Información de personalización del template y URL del logo guardadas en Firebase."
+            );
+          })
+          .catch((error) => {
+            console.error(
+              "Error al guardar la información de personalización del template y URL del logo:",
+              error
+            );
+          });
+      } else {
+        console.error(
+          "No hay un evento seleccionado para guardar la información de personalización del template y URL del logo."
+        );
+      }
+    } else {
+      console.error("selectedLogo es null. No se puede enviar a Firestore.");
+    }
+  };
+
   const handlePreviewClick = () => {
     setPreviewVisible(true);
+
+    const personalizacionTemplate = {
+      fontColor: fontColor,
+      templateColor: templateColor,
+      fontStyle: selectedFontStyle ? selectedFontStyle.value : "Arial",
+      logo: selectedLogo,
+    };
+
+    if (selectedEvent) {
+      const eventoRef = doc(db, "eventos", selectedEvent.id);
+
+      updateDoc(eventoRef, {
+        personalizacionTemplate: personalizacionTemplate,
+        userId: user.uid,
+      })
+        .then(() => {
+          console.log(
+            "Información de personalización del template y URL del logo guardadas en Firebase."
+          );
+        })
+        .catch((error) => {
+          console.error(
+            "Error al guardar la información de personalización del template y URL del logo:",
+            error
+          );
+        });
+    } else {
+      console.error(
+        "No hay un evento seleccionado para guardar la información de personalización del template y URL del logo."
+      );
+    }
   };
 
   const handleClosePreview = () => {
     setPreviewVisible(false);
-  };
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      const imageUrl = reader.result;
-      setSelectedLogo(imageUrl);
-    };
-
-    if (file) {
-      reader.readAsDataURL(file);
-    }
   };
 
   const dividirTexto = (texto, caracteresPorLinea) => {
@@ -462,7 +537,7 @@ function PantallasSalon() {
                         : "Arial",
                     }}
                   >
-                    SALON EJEMPLO
+                    {selectedEvent ? selectedEvent.lugar : "SALON EJEMPLO"}
                   </h1>
                 </div>
                 <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
