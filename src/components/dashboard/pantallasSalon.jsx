@@ -214,7 +214,7 @@ function PantallasSalon() {
         fontColor: fontColor,
         templateColor: templateColor,
         fontStyle: selectedFontStyle ? selectedFontStyle.value : "Arial",
-        logo: selectedLogo,
+        logo: logoUrl,
       };
 
       if (selectedEvent) {
@@ -225,8 +225,8 @@ function PantallasSalon() {
           userId: user.uid,
         })
           .then(() => {
-            console.log(
-              "Información de personalización del template y URL del logo guardadas en Firebase."
+            alert(
+              "Información de personalización del template guardada con éxito!"
             );
           })
           .catch((error) => {
@@ -247,37 +247,6 @@ function PantallasSalon() {
 
   const handlePreviewClick = () => {
     setPreviewVisible(true);
-
-    const personalizacionTemplate = {
-      fontColor: fontColor,
-      templateColor: templateColor,
-      fontStyle: selectedFontStyle ? selectedFontStyle.value : "Arial",
-      logo: selectedLogo,
-    };
-
-    if (selectedEvent) {
-      const eventoRef = doc(db, "eventos", selectedEvent.id);
-
-      updateDoc(eventoRef, {
-        personalizacionTemplate: personalizacionTemplate,
-        userId: user.uid,
-      })
-        .then(() => {
-          console.log(
-            "Información de personalización del template y URL del logo guardadas en Firebase."
-          );
-        })
-        .catch((error) => {
-          console.error(
-            "Error al guardar la información de personalización del template y URL del logo:",
-            error
-          );
-        });
-    } else {
-      console.error(
-        "No hay un evento seleccionado para guardar la información de personalización del template y URL del logo."
-      );
-    }
   };
 
   const handleClosePreview = () => {
@@ -668,7 +637,9 @@ function PantallasSalon() {
               Vista Previa
             </button>
             <button
-              onClick={handlePreviewClick}
+              onClick={() => {
+                guardarInformacionPersonalizacion(selectedLogo);
+              }}
               className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
               Guardar
