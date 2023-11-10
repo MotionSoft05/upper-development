@@ -457,46 +457,6 @@ function PantallasSalon() {
             </div>
           </div>
 
-          <div className="mt-6">
-            <label className="text-white dark:text-gray-200 block mb-1">
-              Definir nombre de monitor de salones:
-            </label>
-            <div className="flex mt-2">
-              {events.map((event, index) => (
-                <div key={index} className="mr-4">
-                  <p className="text-white mb-1">Elegir Pantalla</p>
-                  <select
-                    className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                    value={event.screenChoice || ""}
-                    onChange={(e) => {
-                      const choice = e.target.value;
-                      // Actualiza el estado o realiza otras acciones según sea necesario
-                      // Por ejemplo, puedes almacenar la elección en el objeto de evento
-                      const eventosActualizados = [...events];
-                      eventosActualizados[index] = {
-                        ...event,
-                        screenChoice: choice,
-                      };
-                      setEvents(eventosActualizados);
-                    }}
-                  >
-                    <option value="">Seleccionar Pantalla</option>
-                    {Array.from({ length: 4 }, (_, i) => i + 1).map(
-                      (numeroPantalla) => (
-                        <option
-                          key={numeroPantalla}
-                          value={`pantalla${numeroPantalla}`}
-                        >
-                          Pantalla {numeroPantalla}
-                        </option>
-                      )
-                    )}
-                  </select>
-                </div>
-              ))}
-            </div>
-          </div>
-
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
               <div className="bg-white w-2/4 p-3 rounded-md shadow-lg text-black">
