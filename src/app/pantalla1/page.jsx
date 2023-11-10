@@ -81,18 +81,6 @@ function Pantalla1() {
     return <p>Cargando...</p>;
   }
 
-  const {
-    fontColor,
-    fontStyle,
-    logo,
-    templateColor,
-    lugar,
-    nombreEvento,
-    horaInicialReal,
-    eventoTipo,
-    description,
-  } = eventData;
-
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -130,20 +118,19 @@ function Pantalla1() {
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black h-full flex flex-col justify-center">
+      <div className="bg-white text-black h-full flex flex-col justify-center">
         <div className="flex items-center justify-between">
           {/* Reemplaza el logo con el valor de 'logo' del evento */}
-          <img src={logo} alt="Logo" className="w-96" />
-          {/* Reemplaza 'SALON LAUREL' con el valor de 'lugar' del evento */}
-          <h1 className="font-bold text-5xl mr-16">{lugar}</h1>
+          <img src={eventData.logo} alt="Logo" className="w-96" />
+          <h1 className="font-bold text-5xl mr-16">{eventData.lugar}</h1>
         </div>
-        <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+        <div className="bg-gradient-to-t from-gray-50 to-white text-gray-50">
           <div className="mx-2">
             <div
               className={`text-white py-5 text-5xl font-bold bg-gradient-to-r from-black to-black px-20 rounded-t-xl`}
             >
               {/* Reemplaza 'REUNION DE FIN DE CURSO' con el valor de 'nombreEvento' del evento */}
-              <h2>{nombreEvento}</h2>
+              <h2>{eventData.nombreEvento}</h2>
             </div>
             <div className="grid grid-cols-[max-content_1fr] gap-x-4 text-black">
               <div className="mr-4 my-4">
@@ -155,23 +142,23 @@ function Pantalla1() {
                 <div>
                   <h1 className="text-4xl font-bold">Sesión:</h1>
                   {/* Reemplaza 'Hora Inicial hrs.' con el valor de 'horaInicialReal' del evento */}
-                  <p className="text-4xl font-bold">{`Hora Inicial ${horaInicialReal}hrs.`}</p>
+                  <p className="text-4xl font-bold">{`Hora Inicial ${eventData.horaInicialReal}hrs.`}</p>
                 </div>
                 <div className="max-w-xs">
                   {/* Tipo de evento y descripción */}
                   {/* Reemplaza 'Tipo de Evento Desconocido' con el valor adecuado del evento */}
-                  <h1 className="text-4xl font-bold">{eventoTipo}</h1>
+                  <h1 className="text-4xl font-bold">{eventData.eventoTipo}</h1>
                   <div className="text-center flex px-0">
                     {/* Reemplaza 'EJEMPLO' con el valor adecuado del evento */}
-                    <p className=" text-4xl font-bold text-left">
-                      {description}
+                    <p className="text-4xl font-bold text-left">
+                      {eventData.description}
                     </p>
                   </div>
                 </div>
               </div>
             </div>
             <div>
-              <div className="text-4xl py-4 font-semibold mt-1 text-center bg-gradient-to-r from-black to-black justify-between flex px-20 rounded-b-xl ">
+              <div className="text-4xl py-4 font-semibold mt-1 text-center bg-gradient-to-r from-black to-black justify-between flex px-20 rounded-b-xl">
                 {/* Agrega la fecha actual o la fecha del evento si es relevante */}
                 <p>{obtenerFecha()}</p>
                 {/* Reemplaza '01:12:13' con el valor de 'currentHour' del estado si es relevante */}
