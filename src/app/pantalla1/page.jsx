@@ -1,4 +1,95 @@
+"use client";
+import { useEffect, useState } from "react";
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+
+const obtenerHora = () => {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, "0");
+  const minutes = String(now.getMinutes()).padStart(2, "0");
+  const seconds = String(now.getSeconds()).padStart(2, "0");
+  return `${hours}:${minutes}:${seconds}`;
+};
+
 function Pantalla1() {
+  const [eventData, setEventData] = useState(null);
+  const [currentHour, setCurrentHour] = useState(obtenerHora());
+
+  useEffect(() => {
+    // Importar Firebase solo en el lado del cliente
+    const firebaseConfig = {
+      apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+      authDomain: "upper-a544e.firebaseapp.com",
+      projectId: "upper-a544e",
+      storageBucket: "upper-a544e.appspot.com",
+      messagingSenderId: "665713417470",
+      appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+      measurementId: "G-QTFQ55YY5D",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    // Consultar la colección 'eventos' en Firebase
+    const eventosRef = collection(firestore, "eventos");
+    getDocs(eventosRef).then((snapshot) => {
+      if (!snapshot.empty) {
+        const primerEvento = snapshot.docs[0].data().personalizacionTemplate;
+        setEventData(primerEvento);
+      }
+    });
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentHour(obtenerHora());
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  if (!eventData) {
+    return <p>Cargando...</p>;
+  }
+
+  const { fontColor, fontStyle, logo, templateColor } = eventData;
+
+  const obtenerFecha = () => {
+    const diasSemana = [
+      "DOMINGO",
+      "LUNES",
+      "MARTES",
+      "MIÉRCOLES",
+      "JUEVES",
+      "VIERNES",
+      "SÁBADO",
+    ];
+
+    const meses = [
+      "ENERO",
+      "FEBRERO",
+      "MARZO",
+      "ABRIL",
+      "MAYO",
+      "JUNIO",
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ];
+
+    const now = new Date();
+    const diaSemana = diasSemana[now.getDay()];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
+    const año = now.getFullYear();
+
+    return `${diaSemana} ${dia} DE ${mes} ${año}`;
+  };
+
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div className="bg-white  text-black h-full flex flex-col justify-center">
