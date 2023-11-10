@@ -462,27 +462,38 @@ function PantallasSalon() {
               Definir nombre de monitor de salones:
             </label>
             <div className="flex mt-2">
-              <div className="mr-4">
-                <p className="text-white mb-1">SALON A</p>
-                <input
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="text"
-                />
-              </div>
-              <div className="mr-4">
-                <p className="text-white mb-1">SALON B</p>
-                <input
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="text"
-                />
-              </div>
-              <div>
-                <p className="text-white mb-1">SALON C</p>
-                <input
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="text"
-                />
-              </div>
+              {events.map((event, index) => (
+                <div key={index} className="mr-4">
+                  <p className="text-white mb-1">Elegir Pantalla</p>
+                  <select
+                    className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                    value={event.screenChoice || ""}
+                    onChange={(e) => {
+                      const choice = e.target.value;
+                      // Actualiza el estado o realiza otras acciones según sea necesario
+                      // Por ejemplo, puedes almacenar la elección en el objeto de evento
+                      const eventosActualizados = [...events];
+                      eventosActualizados[index] = {
+                        ...event,
+                        screenChoice: choice,
+                      };
+                      setEvents(eventosActualizados);
+                    }}
+                  >
+                    <option value="">Seleccionar Pantalla</option>
+                    {Array.from({ length: 4 }, (_, i) => i + 1).map(
+                      (numeroPantalla) => (
+                        <option
+                          key={numeroPantalla}
+                          value={`pantalla${numeroPantalla}`}
+                        >
+                          Pantalla {numeroPantalla}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </div>
+              ))}
             </div>
           </div>
 
