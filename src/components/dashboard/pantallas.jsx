@@ -34,21 +34,16 @@ function Pantallas() {
   const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       setUser(user);
-    });
 
-    return () => unsubscribe(); // Cleanup function
-  }, [auth]);
-
-  useEffect(() => {
-    const fetchEvents = async () => {
       if (user) {
+        const userId = user.uid;
+        // Resto del código para obtener eventos usando el userId
         try {
           const eventosRef = collection(db, "eventos");
           const q = query(
             eventosRef,
-
             where("personalizacionTemplate", "!=", null)
           );
           const querySnapshot = await getDocs(q);
@@ -58,17 +53,20 @@ function Pantallas() {
             ...doc.data(),
           }));
 
-          console.log("eventsData", eventsData); // Verifica si se están recibiendo datos
+          // Filtrar los eventos por userId
+          const userEvents = eventsData.filter(
+            (event) => event.userId === userId
+          );
 
-          setEvents(eventsData);
+          setEvents(userEvents);
         } catch (error) {
           console.error("Error al obtener eventos:", error);
         }
       }
-    };
+    });
 
-    fetchEvents();
-  }, [user, db]);
+    return () => unsubscribe(); // Cleanup function
+  }, [auth]);
 
   const handleGuardar = async () => {
     // Update Firebase document with the selected event
