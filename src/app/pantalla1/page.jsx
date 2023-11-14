@@ -1,9 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
+import {
+  getFirestore,
+  collection,
+  getDocs,
+  where,
+  query as firestoreQuery,
+} from "firebase/firestore";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
-import "keen-slider/keen-slider.min.css";
+import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
+import { useEffect, useState } from "react";
+import "keen-slider/keen-slider.min.css";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -14,8 +21,10 @@ const obtenerHora = () => {
 };
 
 function Pantalla1() {
+  const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
+  const [firestore, setFirestore] = useState(null);
 
   // Slider
   const [sliderRef] = useKeenSlider({
@@ -34,21 +43,43 @@ function Pantalla1() {
     };
 
     const app = initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
+    const firestoreInstance = getFirestore(app); // Save the reference to firestore
+    setFirestore(firestoreInstance); // Set the firestore variable
 
-    // Consultar la colección 'eventos' en Firebase
-    const eventosRef = collection(firestore, "eventos");
-    getDocs(eventosRef).then((snapshot) => {
-      if (!snapshot.empty) {
-        const primerEvento = snapshot.docs[0].data();
-
-        // Agregar un log para verificar si eventData tiene información
-        console.log("eventData:", primerEvento);
-
-        setEventData(primerEvento);
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
       }
     });
+
+    return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (user && firestore) {
+      // Check if firestore is defined
+      const eventosRef = collection(firestore, "eventos");
+
+      const assignedScreenValue = "pantalla1";
+      const q = firestoreQuery(
+        eventosRef,
+        where("assignedScreen", "==", assignedScreenValue),
+        where("userId", "==", user.uid)
+      );
+
+      getDocs(q).then((snapshot) => {
+        if (!snapshot.empty) {
+          const primerEvento = snapshot.docs[0].data();
+          console.log("eventData:", primerEvento);
+          setEventData(primerEvento);
+        }
+      });
+    }
+  }, [user, firestore]);
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentHour(obtenerHora());
