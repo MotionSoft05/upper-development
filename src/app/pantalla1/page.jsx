@@ -79,7 +79,7 @@ function Pantalla1() {
       });
     }
   }, [user, firestore]);
-  //
+
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentHour(obtenerHora());
