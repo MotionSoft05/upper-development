@@ -104,16 +104,29 @@ function PantallasSalon() {
               console.log("Usuario autenticado:", authUser);
               setUser(authUser);
 
-              const batch = writeBatch(db);
+              // Obtener eventos asociados al usuario
+              const eventosRef = collection(db, "eventos");
+              const eventosQuery = query(
+                eventosRef,
+                where("userId", "==", authUser.uid)
+              );
+              const eventosSnapshot = await getDocs(eventosQuery);
 
-              const personalizacionTemplate = {
-                fontColor: fontColor,
-                templateColor: templateColor,
-                fontStyle: selectedFontStyle.value,
-                logo: selectedLogo,
-              };
-
-              await batch.commit();
+              if (!eventosSnapshot.empty) {
+                // Tomar el primer evento (puedes ajustar esto según tus necesidades)
+                const primerEvento = eventosSnapshot.docs[0].data();
+                // Actualizar el estado con los datos del evento
+                // Asegúrate de que tu estado refleje la estructura de tu evento
+                setSelectedLogo(primerEvento.personalizacionTemplate.logo);
+                setSelectedFontStyle({
+                  label: primerEvento.personalizacionTemplate.fontStyle,
+                  value: primerEvento.personalizacionTemplate.fontStyle,
+                });
+                setFontColor(primerEvento.personalizacionTemplate.fontColor);
+                setTemplateColor(
+                  primerEvento.personalizacionTemplate.templateColor
+                );
+              }
             }
           }
         );
@@ -125,7 +138,7 @@ function PantallasSalon() {
     };
 
     fetchData();
-  }, [selectedLogo, selectedFontStyle, fontColor, templateColor]);
+  }, []);
 
   const obtenerFecha = () => {
     const diasSemana = [
