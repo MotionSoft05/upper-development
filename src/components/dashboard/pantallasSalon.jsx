@@ -4,6 +4,7 @@ import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
+import { onAuthStateChanged } from "firebase/auth";
 import "firebase/compat/firestore";
 import {
   getFirestore,
@@ -11,7 +12,9 @@ import {
   query,
   where,
   updateDoc,
+  doc,
   getDocs,
+  writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 
@@ -94,34 +97,82 @@ function PantallasSalon() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = firebase.auth().currentUser;
-        console.log("Usuario autenticado:", user);
+        const unsubscribe = onAuthStateChanged(
+          firebase.auth(),
+          async (user) => {
+            if (user) {
+              console.log("Usuario autenticado:", user);
+              const usuariosRef = collection(db, "usuarios");
+              const usuariosQuery = query(
+                usuariosRef,
+                where("email", "==", user.email)
+              );
+              const usuariosSnapshot = await getDocs(usuariosQuery);
 
-        if (user) {
-          const eventosRef = collection(db, "eventos");
-          const eventosQuery = query(eventosRef, where("uid", "==", user.uid));
-          const eventosSnapshot = await getDocs(eventosQuery);
+              if (usuariosSnapshot.empty) {
+                console.error(
+                  "No se encontró usuario en la colección con el email autenticado."
+                );
+                return;
+              }
 
-          if (eventosSnapshot.empty) {
-            console.error("No se encontraron eventos asociados al usuario.");
-          } else {
-            const primerEvento = eventosSnapshot.docs[0].data();
-            const userFromCollection = primerEvento.user;
-            console.log("Usuario de la colección:", userFromCollection);
-            console.log(
-              "Personalización del primer evento:",
-              primerEvento.personalizacionTemplate
-            );
-            console.log("Lugar:", primerEvento.lugar);
-            console.log("Nombre del evento:", primerEvento.nombreEvento);
-            console.log("Hora inicial real:", primerEvento.horaInicialReal);
-            console.log("Tipo de evento:", primerEvento.tipoEvento);
-            console.log("Descripción:", primerEvento.description);
-            console.log("Imágenes:", primerEvento.images);
+              const usuarioColeccion = usuariosSnapshot.docs[0].data();
+              console.log("Usuario en la colección:", usuarioColeccion);
+
+              const eventosRef = collection(db, "eventos");
+              const eventosQuery = query(
+                eventosRef,
+                where("userId", "==", user.uid)
+              );
+              const eventosSnapshot = await getDocs(eventosQuery);
+
+              if (eventosSnapshot.empty) {
+                console.error(
+                  "No se encontraron eventos asociados al usuario."
+                );
+                return;
+              }
+
+              const batch = writeBatch(db);
+
+              const personalizacionTemplate = {
+                fontColor: fontColor,
+                templateColor: templateColor,
+                fontStyle: selectedFontStyle.value,
+                logo: selectedLogo,
+              };
+
+              eventosSnapshot.forEach((doc) => {
+                const eventoRef = doc.ref;
+                const eventoData = doc.data();
+
+                if (eventoData && eventoData.personalizacionTemplate) {
+                  batch.update(eventoRef, {
+                    personalizacionTemplate: personalizacionTemplate,
+                  });
+                } else {
+                  batch.set(
+                    eventoRef,
+                    {
+                      personalizacionTemplate: personalizacionTemplate,
+                    },
+                    { merge: true }
+                  );
+                }
+              });
+
+              await batch.commit();
+
+              console.log(
+                "Información de personalización del template guardada con éxito en todos los eventos."
+              );
+            } else {
+              console.error("El usuario no está autenticado.");
+            }
           }
-        } else {
-          console.error("El usuario no está autenticado.");
-        }
+        );
+
+        return () => unsubscribe();
       } catch (error) {
         console.error("Error al obtener y procesar datos:", error);
       }
@@ -231,8 +282,10 @@ function PantallasSalon() {
     };
 
     try {
+      // Obtener eventos asociados al usuario
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
+
       const eventosSnapshot = await getDocs(eventosQuery);
 
       if (eventosSnapshot.empty) {
@@ -240,6 +293,7 @@ function PantallasSalon() {
         return;
       }
 
+      // Crear un array de promesas para las actualizaciones
       const updatePromises = [];
 
       eventosSnapshot.forEach((doc) => {
@@ -247,13 +301,16 @@ function PantallasSalon() {
         const eventoData = doc.data();
 
         if (eventoRef) {
+          // Verificar si el documento tiene la propiedad personalizacionTemplate
           if (eventoData && eventoData.personalizacionTemplate) {
+            // Actualizar solo si personalizacionTemplate ya existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
               })
             );
           } else {
+            // Crear personalizacionTemplate si aún no existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
@@ -265,6 +322,7 @@ function PantallasSalon() {
         }
       });
 
+      // Ejecutar todas las actualizaciones
       await Promise.all(updatePromises);
 
       alert(
@@ -316,6 +374,7 @@ function PantallasSalon() {
     return metrics.width;
   }
 
+  // Slider
   const [sliderRef] = useKeenSlider({
     loop: true,
   });
