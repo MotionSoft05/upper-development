@@ -99,39 +99,10 @@ function PantallasSalon() {
       try {
         const unsubscribe = onAuthStateChanged(
           firebase.auth(),
-          async (user) => {
-            if (user) {
-              console.log("Usuario autenticado:", user);
-              const usuariosRef = collection(db, "usuarios");
-              const usuariosQuery = query(
-                usuariosRef,
-                where("email", "==", user.email)
-              );
-              const usuariosSnapshot = await getDocs(usuariosQuery);
-
-              if (usuariosSnapshot.empty) {
-                console.error(
-                  "No se encontró usuario en la colección con el email autenticado."
-                );
-                return;
-              }
-
-              const usuarioColeccion = usuariosSnapshot.docs[0].data();
-              console.log("Usuario en la colección:", usuarioColeccion);
-
-              const eventosRef = collection(db, "eventos");
-              const eventosQuery = query(
-                eventosRef,
-                where("userId", "==", user.uid)
-              );
-              const eventosSnapshot = await getDocs(eventosQuery);
-
-              if (eventosSnapshot.empty) {
-                console.error(
-                  "No se encontraron eventos asociados al usuario."
-                );
-                return;
-              }
+          async (authUser) => {
+            if (authUser) {
+              console.log("Usuario autenticado:", authUser);
+              setUser(authUser);
 
               const batch = writeBatch(db);
 
@@ -142,32 +113,7 @@ function PantallasSalon() {
                 logo: selectedLogo,
               };
 
-              eventosSnapshot.forEach((doc) => {
-                const eventoRef = doc.ref;
-                const eventoData = doc.data();
-
-                if (eventoData && eventoData.personalizacionTemplate) {
-                  batch.update(eventoRef, {
-                    personalizacionTemplate: personalizacionTemplate,
-                  });
-                } else {
-                  batch.set(
-                    eventoRef,
-                    {
-                      personalizacionTemplate: personalizacionTemplate,
-                    },
-                    { merge: true }
-                  );
-                }
-              });
-
               await batch.commit();
-
-              console.log(
-                "Información de personalización del template guardada con éxito en todos los eventos."
-              );
-            } else {
-              console.error("El usuario no está autenticado.");
             }
           }
         );
@@ -264,11 +210,12 @@ function PantallasSalon() {
   };
 
   const guardarInformacionPersonalizacion = async () => {
-    if (!user || !user.uid) {
-      console.error("El usuario no está autenticado.");
+    console.log("Entrando en la función guardarInformacionPersonalizacion");
+    if (!user) {
+      console.error("Usuario no autenticado. No se puede enviar a Firestore.");
       return;
     }
-
+    console.log("Usuario autenticado:", user);
     if (!selectedLogo) {
       console.error("selectedLogo es null. No se puede enviar a Firestore.");
       return;
@@ -323,7 +270,10 @@ function PantallasSalon() {
       });
 
       // Ejecutar todas las actualizaciones
+      console.log("Antes de la actualización");
       await Promise.all(updatePromises);
+      console.log("Actualización exitosa. Antes de la alerta.");
+      console.log("Después de la actualización");
 
       alert(
         "Información de personalización del template guardada con éxito en todos los eventos."
