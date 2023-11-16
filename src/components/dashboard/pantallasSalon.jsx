@@ -11,9 +11,7 @@ import {
   query,
   where,
   updateDoc,
-  doc,
   getDocs,
-  writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 
@@ -107,12 +105,9 @@ function PantallasSalon() {
           if (eventosSnapshot.empty) {
             console.error("No se encontraron eventos asociados al usuario.");
           } else {
-            // 2. Console log del usuario de la colección si encontró con el mail igual al autenticado
             const primerEvento = eventosSnapshot.docs[0].data();
-            const userFromCollection = primerEvento.user; // Ajusta esto según la estructura real de tu colección
+            const userFromCollection = primerEvento.user;
             console.log("Usuario de la colección:", userFromCollection);
-
-            // 3. Console log de los PS
             console.log(
               "Personalización del primer evento:",
               primerEvento.personalizacionTemplate
@@ -236,7 +231,6 @@ function PantallasSalon() {
     };
 
     try {
-      // Obtener eventos asociados al usuario
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
       const eventosSnapshot = await getDocs(eventosQuery);
@@ -246,7 +240,6 @@ function PantallasSalon() {
         return;
       }
 
-      // Crear un array de promesas para las actualizaciones
       const updatePromises = [];
 
       eventosSnapshot.forEach((doc) => {
@@ -254,16 +247,13 @@ function PantallasSalon() {
         const eventoData = doc.data();
 
         if (eventoRef) {
-          // Verificar si el documento tiene la propiedad personalizacionTemplate
           if (eventoData && eventoData.personalizacionTemplate) {
-            // Actualizar solo si personalizacionTemplate ya existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
               })
             );
           } else {
-            // Crear personalizacionTemplate si aún no existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
@@ -275,7 +265,6 @@ function PantallasSalon() {
         }
       });
 
-      // Ejecutar todas las actualizaciones
       await Promise.all(updatePromises);
 
       alert(
@@ -327,7 +316,6 @@ function PantallasSalon() {
     return metrics.width;
   }
 
-  // Slider
   const [sliderRef] = useKeenSlider({
     loop: true,
   });
