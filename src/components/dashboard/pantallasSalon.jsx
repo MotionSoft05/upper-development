@@ -47,6 +47,7 @@ const obtenerHora = () => {
 
 function PantallasSalon() {
   const [user, setUser] = useState(null);
+  const [userNames, setUserNames] = useState([]);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -93,6 +94,39 @@ function PantallasSalon() {
   const [selectedFontStyle, setSelectedFontStyle] = useState(
     fontStyleOptions[0]
   );
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser) {
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosQuery = query(
+            usuariosRef,
+            where("email", "==", authUser.email)
+          );
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+
+          if (!usuariosSnapshot.empty) {
+            const user = usuariosSnapshot.docs[0].data();
+            const numberOfPs = user.ps || 0;
+
+            // Generar un array de nombres para usar en los campos de relleno
+            const namesArray = Array.from(
+              { length: numberOfPs },
+              (_, index) => `Usuario ${index + 1}`
+            );
+            setUserNames(namesArray);
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del usuario:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -485,6 +519,26 @@ function PantallasSalon() {
                   className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
+              </div>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Nombres de usuarios
+              </label>
+              <div>
+                {userNames.map((userName, index) => (
+                  <input
+                    key={index}
+                    type="text"
+                    placeholder={userName}
+                    className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                    value={userName}
+                    onChange={(e) => {
+                      // Manejar la entrada del usuario si es necesario
+                      // Puedes actualizar el estado según sea necesario
+                    }}
+                  />
+                ))}
               </div>
             </div>
           </div>
