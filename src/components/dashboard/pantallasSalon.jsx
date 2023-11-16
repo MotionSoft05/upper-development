@@ -8,11 +8,12 @@ import "firebase/compat/firestore";
 import {
   getFirestore,
   collection,
-  onSnapshot,
   query,
   where,
   updateDoc,
   doc,
+  getDocs,
+  writeBatch,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 
@@ -45,19 +46,16 @@ const obtenerHora = () => {
 
 function PantallasSalon() {
   const [user, setUser] = useState(null);
-  const [unsubscribeEvents, setUnsubscribeEvents] = useState(null);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
   const [fontColor, setFontColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
-  const [selectedFontStyle, setSelectedFontStyle] = useState(null);
+
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [selectedLogo, setSelectedLogo] = useState(null);
-  const [events, setEvents] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
 
@@ -78,40 +76,6 @@ function PantallasSalon() {
     };
   }, []);
 
-  useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
-
-        const eventosRef = collection(db, "eventos");
-        const q = query(eventosRef, where("userId", "==", user.uid));
-        const unsubscribeEvents = onSnapshot(q, (snapshot) => {
-          const eventsData = [];
-          snapshot.forEach((doc) => {
-            eventsData.push({ id: doc.id, ...doc.data() });
-          });
-          setEvents(eventsData);
-          setLoading(false);
-        });
-
-        setUnsubscribeEvents(() => unsubscribeEvents);
-      } else {
-        setUser(null);
-        setEvents([]);
-        setLoading(false);
-        setUnsubscribeEvents(null);
-      }
-    });
-
-    return () => {
-      unsubscribe();
-
-      if (unsubscribeEvents) {
-        unsubscribeEvents();
-      }
-    };
-  }, []);
-
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
     { value: "Times New Roman", label: "Times New Roman" },
@@ -124,6 +88,52 @@ function PantallasSalon() {
     { value: "Trebuchet MS", label: "Trebuchet MS" },
     { value: "Palatino", label: "Palatino" },
   ];
+
+  const [selectedFontStyle, setSelectedFontStyle] = useState(
+    fontStyleOptions[0]
+  );
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = firebase.auth().currentUser;
+        console.log("Usuario autenticado:", user);
+
+        if (user) {
+          const eventosRef = collection(db, "eventos");
+          const eventosQuery = query(eventosRef, where("uid", "==", user.uid));
+          const eventosSnapshot = await getDocs(eventosQuery);
+
+          if (eventosSnapshot.empty) {
+            console.error("No se encontraron eventos asociados al usuario.");
+          } else {
+            // 2. Console log del usuario de la colección si encontró con el mail igual al autenticado
+            const primerEvento = eventosSnapshot.docs[0].data();
+            const userFromCollection = primerEvento.user; // Ajusta esto según la estructura real de tu colección
+            console.log("Usuario de la colección:", userFromCollection);
+
+            // 3. Console log de los PS
+            console.log(
+              "Personalización del primer evento:",
+              primerEvento.personalizacionTemplate
+            );
+            console.log("Lugar:", primerEvento.lugar);
+            console.log("Nombre del evento:", primerEvento.nombreEvento);
+            console.log("Hora inicial real:", primerEvento.horaInicialReal);
+            console.log("Tipo de evento:", primerEvento.tipoEvento);
+            console.log("Descripción:", primerEvento.description);
+            console.log("Imágenes:", primerEvento.images);
+          }
+        } else {
+          console.error("El usuario no está autenticado.");
+        }
+      } catch (error) {
+        console.error("Error al obtener y procesar datos:", error);
+      }
+    };
+
+    fetchData();
+  }, [selectedLogo, selectedFontStyle, fontColor, templateColor]);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -202,46 +212,80 @@ function PantallasSalon() {
       const logoUrl = await getDownloadURL(storageRef);
 
       setSelectedLogo(logoUrl);
-      guardarInformacionPersonalizacion(logoUrl);
     } catch (error) {
       console.error("Error al subir el logo a Firebase Storage:", error);
     }
   };
 
-  const guardarInformacionPersonalizacion = (logoUrl) => {
-    if (selectedLogo) {
-      const personalizacionTemplate = {
-        fontColor: fontColor,
-        templateColor: templateColor,
-        fontStyle: selectedFontStyle ? selectedFontStyle.value : "Arial",
-        logo: logoUrl,
-      };
+  const guardarInformacionPersonalizacion = async () => {
+    if (!user || !user.uid) {
+      console.error("El usuario no está autenticado.");
+      return;
+    }
 
-      if (selectedEvent) {
-        const eventoRef = doc(db, "eventos", selectedEvent.id);
-
-        updateDoc(eventoRef, {
-          personalizacionTemplate: personalizacionTemplate,
-          userId: user.uid,
-        })
-          .then(() => {
-            alert(
-              "Información de personalización del template guardada con éxito!"
-            );
-          })
-          .catch((error) => {
-            console.error(
-              "Error al guardar la información de personalización del template y URL del logo:",
-              error
-            );
-          });
-      } else {
-        console.error(
-          "No hay un evento seleccionado para guardar la información de personalización del template y URL del logo."
-        );
-      }
-    } else {
+    if (!selectedLogo) {
       console.error("selectedLogo es null. No se puede enviar a Firestore.");
+      return;
+    }
+
+    const personalizacionTemplate = {
+      fontColor: fontColor,
+      templateColor: templateColor,
+      fontStyle: selectedFontStyle.value,
+      logo: selectedLogo,
+    };
+
+    try {
+      // Obtener eventos asociados al usuario
+      const eventosRef = collection(db, "eventos");
+      const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
+      const eventosSnapshot = await getDocs(eventosQuery);
+
+      if (eventosSnapshot.empty) {
+        console.error("No se encontraron eventos asociados al usuario.");
+        return;
+      }
+
+      // Crear un array de promesas para las actualizaciones
+      const updatePromises = [];
+
+      eventosSnapshot.forEach((doc) => {
+        const eventoRef = doc.ref;
+        const eventoData = doc.data();
+
+        if (eventoRef) {
+          // Verificar si el documento tiene la propiedad personalizacionTemplate
+          if (eventoData && eventoData.personalizacionTemplate) {
+            // Actualizar solo si personalizacionTemplate ya existe
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          } else {
+            // Crear personalizacionTemplate si aún no existe
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          }
+        } else {
+          console.error("Referencia de evento no válida:", doc.id);
+        }
+      });
+
+      // Ejecutar todas las actualizaciones
+      await Promise.all(updatePromises);
+
+      alert(
+        "Información de personalización del template guardada con éxito en todos los eventos."
+      );
+    } catch (error) {
+      console.error(
+        "Error al guardar la información de personalización del template y URL del logo en todos los eventos:",
+        error
+      );
     }
   };
 
@@ -347,28 +391,7 @@ function PantallasSalon() {
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Seleccionar Evento
-              </label>
-              <select
-                className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white "
-                value={selectedEvent ? selectedEvent.id : ""}
-                onChange={(e) => {
-                  const eventId = e.target.value;
-                  const event = events.find((event) => event.id === eventId);
-                  setSelectedEvent(event);
-                }}
-              >
-                <option value="">Seleccionar Evento</option>
-                {events.map((event) => (
-                  <option key={event.id} value={event.id}>
-                    {event.nombreEvento}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
                 Logo
               </label>
               <div className="flex items-center">
@@ -378,6 +401,17 @@ function PantallasSalon() {
                   type="file"
                 />
               </div>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Estilo de texto
+              </label>
+              <Select
+                options={fontStyleOptions}
+                value={selectedFontStyle}
+                onChange={handleFontStyleChange}
+                placeholder="Seleccionar estilo de texto"
+              />
             </div>
             <div className="mb-4">
               <div>
@@ -442,18 +476,6 @@ function PantallasSalon() {
                   style={{ backgroundColor: templateColor }}
                 ></div>
               </div>
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Estilo de texto
-              </label>
-              <Select
-                options={fontStyleOptions}
-                value={selectedFontStyle}
-                onChange={handleFontStyleChange}
-                placeholder="Seleccionar estilo de texto"
-              />
             </div>
           </div>
 
