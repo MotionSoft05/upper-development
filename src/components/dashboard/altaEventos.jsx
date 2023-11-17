@@ -8,7 +8,13 @@ import "firebase/compat/firestore";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, currentUser, onAuthStateChanged } from "firebase/auth";
-import { collection, addDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  doc,
+  getFirestore,
+  getDoc,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -23,10 +29,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const storage = getStorage(app);
 const auth = getAuth(app);
+const db = getFirestore(app);
 
 function AltaEventos() {
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
+  const [nombrePantallas, setNombrePantallas] = useState([]);
   const [value, setValue] = useState({
     startDate: new Date(),
     endDate: new Date().setMonth(11),
@@ -37,15 +45,26 @@ function AltaEventos() {
   const [charCount, setCharCount] = useState(0);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         setUser(user);
         setUserId(user.uid);
+
+        // Obtener datos del usuario desde Firestore
+        const usuarioRef = doc(db, "usuarios", user.uid);
+        const usuarioDoc = await getDoc(usuarioRef);
+
+        if (usuarioDoc.exists()) {
+          const userData = usuarioDoc.data();
+          setNombrePantallas(userData.nombrePantallas || []);
+        }
       } else {
         setUser(null);
         setUserId(null);
+        setNombrePantallas([]);
       }
     });
+
     return () => {
       unsubscribe();
     };
@@ -207,24 +226,16 @@ function AltaEventos() {
   const [] = useKeenSlider();
 
   const [selectedDevices, setSelectedDevices] = useState([]);
-  const deviceOptions = [
-    "Dispositivo 1",
-    "Dispositivo 2",
-    "Dispositivo 3",
-    "Dispositivo 4",
-    "Dispositivo 5",
-    "Dispositivo 6",
-    "Dispositivo 7",
-  ];
 
   const handleDeviceChange = (e) => {
     const selectedDevice = e.target.value;
     setSelectedDevices((prevDevices) => {
-      if (prevDevices.includes(selectedDevice)) {
-        return prevDevices.filter((device) => device !== selectedDevice);
-      } else {
-        return [...prevDevices, selectedDevice];
-      }
+      const updatedDevices = prevDevices.includes(selectedDevice)
+        ? prevDevices.filter((device) => device !== selectedDevice)
+        : [...prevDevices, selectedDevice];
+
+      console.log("Dispositivos seleccionados:", updatedDevices);
+      return updatedDevices;
     });
   };
 
@@ -591,18 +602,34 @@ function AltaEventos() {
                   Seleccionar Dispositivos:
                 </h4>
                 <div className="mb-4">
-                  {deviceOptions.map((device, index) => (
-                    <label key={index} className="block mb-2">
-                      <input
-                        type="checkbox"
-                        value={device}
-                        checked={selectedDevices.includes(device)}
-                        onChange={handleDeviceChange}
-                        className="mr-2"
-                      />
-                      {device}
-                    </label>
-                  ))}
+                  {console.log("nombrePantallas:", nombrePantallas)}
+                  {Array.isArray(nombrePantallas)
+                    ? nombrePantallas.map((nombrePantalla, index) => (
+                        <label key={index} className="block mb-2">
+                          <input
+                            type="checkbox"
+                            value={nombrePantalla}
+                            checked={selectedDevices.includes(nombrePantalla)}
+                            onChange={handleDeviceChange}
+                            className="mr-2"
+                          />
+                          {nombrePantalla}
+                        </label>
+                      ))
+                    : Object.values(nombrePantallas).map(
+                        (nombrePantalla, index) => (
+                          <label key={index} className="block mb-2">
+                            <input
+                              type="checkbox"
+                              value={nombrePantalla}
+                              checked={selectedDevices.includes(nombrePantalla)}
+                              onChange={handleDeviceChange}
+                              className="mr-2"
+                            />
+                            {nombrePantalla}
+                          </label>
+                        )
+                      )}
                 </div>
               </div>
             </div>
