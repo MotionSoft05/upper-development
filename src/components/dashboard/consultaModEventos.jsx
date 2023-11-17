@@ -164,8 +164,8 @@ function ConsultaModEvento() {
             Consulta de Eventos
           </h1>
         </div>
-        <div className=" mt-6 overflow-hidden bg-white shadow-md rounded-lg">
-          <table className=" divide-gray-200">
+        <div className=" ">
+          <table className=" ">
             <thead className="bg-gray-50">
               <tr>
                 <th

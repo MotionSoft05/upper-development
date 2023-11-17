@@ -575,12 +575,14 @@ function AltaEventos() {
                     </div>
                   </div>
                 </div>
-                <button
-                  onClick={enviarDatosAFirebase}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
-                >
-                  Enviar
-                </button>
+                <div className="hidden md:block">
+                  <button
+                    onClick={enviarDatosAFirebase}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
+                  >
+                    Enviar
+                  </button>
+                </div>
                 {alertaEnviada && (
                   <div className="mt-4 text-green-500">
                     Los datos se enviaron correctamente.
@@ -686,6 +688,14 @@ function AltaEventos() {
                   <li key={index}>{device}</li>
                 ))}
               </ul>
+            </div>
+            <div className=" md:hidden">
+              <button
+                onClick={enviarDatosAFirebase}
+                className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
+              >
+                Enviar
+              </button>
             </div>
           </section>
         </section>
