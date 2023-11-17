@@ -232,54 +232,8 @@ function PantallasDirectorio() {
           </h1>
         </div>
 
-        <div className="flex justify-center space-x-44">
-          {/* Pantalla 1 */}
-          <div>
-            <div
-              className={`border border-black px-40 py-28 aspect-ratio-${screen1AspectRatio}`}
-            >
-              <h2>Tipo pantalla 1</h2>
-              <p>Relación de aspecto: {screen1AspectRatio}</p>
-            </div>
-            <button
-              onClick={handleScreen1Default}
-              className="mb-2 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-            >
-              Set Default
-            </button>
-            <button
-              onClick={handleScreen1UseThis}
-              className="mt-2 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-            >
-              Use This
-            </button>
-          </div>
-
-          {/* Pantalla 2 */}
-          <div>
-            <div
-              className={`border border-black px-20 py-40 aspect-ratio-${screen2AspectRatio}`}
-            >
-              <h2>Tipo pantalla 2</h2>
-              <p>Relación de aspecto: {screen2AspectRatio}</p>
-            </div>
-            <button
-              onClick={handleScreen2Default}
-              className="mb-2 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-            >
-              Set Default
-            </button>
-            <button
-              onClick={handleScreen2UseThis}
-              className="mt-2 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-            >
-              Use This
-            </button>
-          </div>
-        </div>
-
         {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-20">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 ">
           <h1 className="text-xl font-bold text-white capitalize dark:text-white">
             Personalización del Template
           </h1>
