@@ -14,7 +14,9 @@ import {
   updateDoc,
   doc,
   getDocs,
+  getDoc,
   writeBatch,
+  FieldValue,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 
@@ -47,6 +49,9 @@ const obtenerHora = () => {
 
 function PantallasSalon() {
   const [user, setUser] = useState(null);
+  const [nombrePantallas, setNombrePantallas] = useState([]);
+  const [ps, setPs] = useState(0);
+  const [screenNames, setScreenNames] = useState([]);
   const [userNames, setUserNames] = useState([]);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
@@ -54,7 +59,6 @@ function PantallasSalon() {
   const [fontColor, setFontColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
-
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [selectedLogo, setSelectedLogo] = useState(null);
@@ -110,12 +114,14 @@ function PantallasSalon() {
 
           if (!usuariosSnapshot.empty) {
             const user = usuariosSnapshot.docs[0].data();
-            const numberOfPs = user.ps || 0;
+            const numberOfScreens = user.ps || 0;
             const namesArray = Array.from(
-              { length: numberOfPs },
-              (_, index) => `Usuario ${index + 1}`
+              { length: numberOfScreens },
+              (_, index) => `Pantalla ${index + 1}`
             );
-            setUserNames(namesArray);
+
+            setNombrePantallas(namesArray);
+            setPs(numberOfScreens);
           }
         }
       } catch (error) {
@@ -126,46 +132,36 @@ function PantallasSalon() {
     fetchUserData();
   }, []);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const unsubscribe = onAuthStateChanged(
-          firebase.auth(),
-          async (authUser) => {
-            if (authUser) {
-              console.log("Usuario autenticado:", authUser);
-              setUser(authUser);
-              const eventosRef = collection(db, "eventos");
-              const eventosQuery = query(
-                eventosRef,
-                where("userId", "==", authUser.uid)
-              );
-              const eventosSnapshot = await getDocs(eventosQuery);
+  const fetchUserData = async () => {
+    try {
+      const authUser = firebase.auth().currentUser;
 
-              if (!eventosSnapshot.empty) {
-                const primerEvento = eventosSnapshot.docs[0].data();
-                setSelectedLogo(primerEvento.personalizacionTemplate.logo);
-                setSelectedFontStyle({
-                  label: primerEvento.personalizacionTemplate.fontStyle,
-                  value: primerEvento.personalizacionTemplate.fontStyle,
-                });
-                setFontColor(primerEvento.personalizacionTemplate.fontColor);
-                setTemplateColor(
-                  primerEvento.personalizacionTemplate.templateColor
-                );
-              }
-            }
-          }
+      if (authUser) {
+        const usuariosRef = collection(db, "usuarios");
+        const usuariosQuery = query(
+          usuariosRef,
+          where("email", "==", authUser.email)
         );
+        const usuariosSnapshot = await getDocs(usuariosQuery);
 
-        return () => unsubscribe();
-      } catch (error) {
-        console.error("Error al obtener y procesar datos:", error);
+        if (!usuariosSnapshot.empty) {
+          const user = usuariosSnapshot.docs[0].data();
+          const numberOfScreens = user.ps || 0;
+          const namesArray = Array.from(
+            { length: numberOfScreens },
+            (_, index) => ({
+              number: index + 1,
+              name: `Pantalla ${index + 1}`,
+            })
+          );
+
+          setScreenNames(namesArray);
+        }
       }
-    };
-
-    fetchData();
-  }, []);
+    } catch (error) {
+      console.error("Error al obtener datos del usuario:", error);
+    }
+  };
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -250,28 +246,35 @@ function PantallasSalon() {
   };
 
   const guardarInformacionPersonalizacion = async () => {
-    console.log("Entrando en la función guardarInformacionPersonalizacion");
-    if (!user) {
-      console.error("Usuario no autenticado. No se puede enviar a Firestore.");
-      return;
-    }
-    console.log("Usuario autenticado:", user);
-    if (!selectedLogo) {
-      console.error("selectedLogo es null. No se puede enviar a Firestore.");
-      return;
-    }
-
-    const personalizacionTemplate = {
-      fontColor: fontColor,
-      templateColor: templateColor,
-      fontStyle: selectedFontStyle.value,
-      logo: selectedLogo,
-    };
-
     try {
-      const eventosRef = collection(db, "eventos");
-      const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
+      const authUser = firebase.auth().currentUser;
 
+      if (!authUser) {
+        console.error(
+          "Usuario no autenticado. No se puede enviar a Firestore."
+        );
+        return;
+      }
+
+      console.log("Usuario autenticado:", authUser);
+
+      if (!selectedLogo) {
+        console.error("selectedLogo es null. No se puede enviar a Firestore.");
+        return;
+      }
+
+      const personalizacionTemplate = {
+        fontColor: fontColor,
+        templateColor: templateColor,
+        fontStyle: selectedFontStyle.value,
+        logo: selectedLogo,
+      };
+
+      const eventosRef = collection(db, "eventos");
+      const eventosQuery = query(
+        eventosRef,
+        where("userId", "==", authUser.uid)
+      );
       const eventosSnapshot = await getDocs(eventosQuery);
 
       if (eventosSnapshot.empty) {
@@ -304,10 +307,23 @@ function PantallasSalon() {
         }
       });
 
-      console.log("Antes de la actualización");
+      const usuarioRef = doc(db, "usuarios", authUser.uid);
+      const usuarioDoc = await getDoc(usuarioRef);
+
+      if (usuarioDoc.exists()) {
+        const currentPs = usuarioDoc.data().ps || 0; // Obtener el valor actual de ps
+        await updateDoc(usuarioRef, { ps: currentPs });
+      }
+
+      // Update nombrePantallas field
+      const nombresPantallasObject = {};
+      nombrePantallas.forEach((nombre, index) => {
+        nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
+      });
+
+      await updateDoc(usuarioRef, nombresPantallasObject);
+
       await Promise.all(updatePromises);
-      console.log("Actualización exitosa. Antes de la alerta.");
-      console.log("Después de la actualización");
 
       alert(
         "Información de personalización del template guardada con éxito en todos los eventos."
@@ -510,19 +526,20 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Nombres de usuarios
+                Nombres de pantallas
               </label>
               <div>
-                {userNames.map((userName, index) => (
+                {Array.from({ length: ps }, (_, index) => (
                   <input
                     key={index}
                     type="text"
-                    placeholder={userName}
+                    placeholder={`Pantalla ${index + 1}`}
                     className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
-                    value={userName}
+                    value={nombrePantallas[index] || ""}
                     onChange={(e) => {
-                      // Manejar la entrada del usuario si es necesario
-                      // Puedes actualizar el estado según sea necesario
+                      const updatedNombres = [...nombrePantallas];
+                      updatedNombres[index] = e.target.value;
+                      setNombrePantallas(updatedNombres);
                     }}
                   />
                 ))}
