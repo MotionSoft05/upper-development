@@ -4,7 +4,7 @@ import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, currentUser } from "firebase/auth";
 import "firebase/compat/firestore";
 import {
   getFirestore,
@@ -15,6 +15,9 @@ import {
   doc,
   getDocs,
   getDoc,
+  addDoc,
+  collection as firestoreCollection,
+  serverTimestamp,
   writeBatch,
   FieldValue,
 } from "firebase/firestore";
@@ -324,6 +327,35 @@ function PantallasSalon() {
       await updateDoc(usuarioRef, nombresPantallasObject);
 
       await Promise.all(updatePromises);
+
+      const templateSalonesRef = collection(db, "TemplateSalones");
+      const templateSalonesQuery = query(
+        templateSalonesRef,
+        where("userId", "==", authUser.uid)
+      );
+      const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
+
+      if (!templateSalonesSnapshot.empty) {
+        // Si ya existe un documento para el usuario, actualizar sus estilos
+        const templateSalonesDocRef = templateSalonesSnapshot.docs[0].ref;
+        await updateDoc(templateSalonesDocRef, {
+          fontColor: fontColor,
+          templateColor: templateColor,
+          fontStyle: selectedFontStyle.value,
+          logo: selectedLogo,
+          timestamp: serverTimestamp(),
+        });
+      } else {
+        // Si no existe un documento para el usuario, agregar uno nuevo
+        await addDoc(templateSalonesRef, {
+          userId: authUser.uid,
+          fontColor: fontColor,
+          templateColor: templateColor,
+          fontStyle: selectedFontStyle.value,
+          logo: selectedLogo,
+          timestamp: serverTimestamp(),
+        });
+      }
 
       alert(
         "Información de personalización del template guardada con éxito en todos los eventos."
