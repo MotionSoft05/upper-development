@@ -208,7 +208,7 @@ function Navigation() {
             </Link>
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
-            <div className="ml-auto flex items-center space-x-1">
+            <div className="">
               <Menu as="div" className=" ">
                 <div>
                   <Menu.Button className="p-2">

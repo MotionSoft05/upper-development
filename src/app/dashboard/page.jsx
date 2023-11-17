@@ -35,14 +35,7 @@ function DashBoard() {
   const [userEmail, setUserEmail] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showConsultaEvento, setShowConsultaEvento] = useState(true);
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
-      setShowConsultaEvento(true); // Muestra ConsultaModEvento por defecto
-    });
 
-    return () => unsubscribe();
-  }, []);
   const [showAltaEvento, setShowAltaEvento] = useState(false);
 
   const [showPantallas, setShowPantallas] = useState(false);
@@ -54,10 +47,32 @@ function DashBoard() {
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
 
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
+      setShowConsultaEvento(true); // Muestra ConsultaModEvento por defecto
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const [sidebarClasses, setSidebarClasses] = useState(
+    "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 z-50"
+  );
+
+  const toggleSidebar = () => {
+    // Cambia las clases del sidebar al hacer clic en el botón
+    setSidebarClasses((prevClasses) => {
+      // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
+      return prevClasses.includes("-translate-x-full")
+        ? "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 z-50"
+        : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 z-50";
+    });
+  };
   return (
     // <!-- component -->
     <div className="flex flex-row min-h-screen  ">
-      <aside className="sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500">
+      <aside className={sidebarClasses}>
         <Sidebar
           userEmail={userEmail}
           setShowAdmin={setShowAdmin}
@@ -73,7 +88,7 @@ function DashBoard() {
         />
       </aside>
       <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
-        <div className="main-content flex flex-col flex-grow p-4">
+        <div className="">
           {showAdmin && userEmail === "uppermex10@gmail.com" && <Admin />}
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
@@ -88,6 +103,12 @@ function DashBoard() {
           {showSoporte && <Soporte />}
         </div>
       </main>
+      <button
+        className="fixed bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-3xl shadow"
+        onClick={toggleSidebar}
+      >
+        <img src="/img/sidebar.svg" alt="Logo" className="w-8" />
+      </button>
     </div>
   );
 }
