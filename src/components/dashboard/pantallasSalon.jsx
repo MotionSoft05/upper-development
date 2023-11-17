@@ -111,8 +111,6 @@ function PantallasSalon() {
           if (!usuariosSnapshot.empty) {
             const user = usuariosSnapshot.docs[0].data();
             const numberOfPs = user.ps || 0;
-
-            // Generar un array de nombres para usar en los campos de relleno
             const namesArray = Array.from(
               { length: numberOfPs },
               (_, index) => `Usuario ${index + 1}`
@@ -137,8 +135,6 @@ function PantallasSalon() {
             if (authUser) {
               console.log("Usuario autenticado:", authUser);
               setUser(authUser);
-
-              // Obtener eventos asociados al usuario
               const eventosRef = collection(db, "eventos");
               const eventosQuery = query(
                 eventosRef,
@@ -147,10 +143,7 @@ function PantallasSalon() {
               const eventosSnapshot = await getDocs(eventosQuery);
 
               if (!eventosSnapshot.empty) {
-                // Tomar el primer evento (puedes ajustar esto según tus necesidades)
                 const primerEvento = eventosSnapshot.docs[0].data();
-                // Actualizar el estado con los datos del evento
-                // Asegúrate de que tu estado refleje la estructura de tu evento
                 setSelectedLogo(primerEvento.personalizacionTemplate.logo);
                 setSelectedFontStyle({
                   label: primerEvento.personalizacionTemplate.fontStyle,
@@ -276,7 +269,6 @@ function PantallasSalon() {
     };
 
     try {
-      // Obtener eventos asociados al usuario
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
 
@@ -287,7 +279,6 @@ function PantallasSalon() {
         return;
       }
 
-      // Crear un array de promesas para las actualizaciones
       const updatePromises = [];
 
       eventosSnapshot.forEach((doc) => {
@@ -295,16 +286,13 @@ function PantallasSalon() {
         const eventoData = doc.data();
 
         if (eventoRef) {
-          // Verificar si el documento tiene la propiedad personalizacionTemplate
           if (eventoData && eventoData.personalizacionTemplate) {
-            // Actualizar solo si personalizacionTemplate ya existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
               })
             );
           } else {
-            // Crear personalizacionTemplate si aún no existe
             updatePromises.push(
               updateDoc(eventoRef, {
                 personalizacionTemplate: personalizacionTemplate,
@@ -316,7 +304,6 @@ function PantallasSalon() {
         }
       });
 
-      // Ejecutar todas las actualizaciones
       console.log("Antes de la actualización");
       await Promise.all(updatePromises);
       console.log("Actualización exitosa. Antes de la alerta.");
