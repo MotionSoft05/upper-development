@@ -14,6 +14,9 @@ import {
   doc,
   getFirestore,
   getDoc,
+  query,
+  where,
+  getDocs,
 } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -123,7 +126,33 @@ function AltaEventos() {
     });
   };
 
-  const enviarDatosAFirebase = () => {
+  const obtenerInformacionPersonalizacion = async (userId) => {
+    try {
+      const templateSalonesRef = collection(db, "TemplateSalones");
+      const templateSalonesQuery = query(
+        templateSalonesRef,
+        where("userId", "==", userId)
+      );
+      const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
+
+      if (!templateSalonesSnapshot.empty) {
+        // Si se encuentra un documento, devuelve la información de personalización
+        const templateSalonesDoc = templateSalonesSnapshot.docs[0].data();
+        return templateSalonesDoc;
+      } else {
+        // Si no hay información de personalización, puedes devolver un valor por defecto o null
+        return null;
+      }
+    } catch (error) {
+      console.error(
+        "Error al obtener la información de personalización del template:",
+        error
+      );
+      return null;
+    }
+  };
+
+  const enviarDatosAFirebase = async () => {
     event.preventDefault();
     const nombreEvento = document.getElementById("floating_name").value;
     const tipoEvento = document.getElementById("floating_event").value;
@@ -177,6 +206,20 @@ function AltaEventos() {
       userId: userId,
     };
     console.log("userId:", userId);
+
+    const personalizacionTemplate = await obtenerInformacionPersonalizacion(
+      userId
+    );
+
+    // Aplicar la información de personalización al evento
+    if (personalizacionTemplate) {
+      eventoData.personalizacionTemplate = {
+        fontColor: personalizacionTemplate.fontColor,
+        templateColor: personalizacionTemplate.templateColor,
+        fontStyle: personalizacionTemplate.fontStyle,
+        logo: personalizacionTemplate.logo,
+      };
+    }
 
     firebase
       .firestore()
