@@ -248,6 +248,8 @@ function PantallasSalon() {
     }
   };
 
+  // ...
+
   const guardarInformacionPersonalizacion = async () => {
     try {
       const authUser = firebase.auth().currentUser;
@@ -273,61 +275,7 @@ function PantallasSalon() {
         logo: selectedLogo,
       };
 
-      const eventosRef = collection(db, "eventos");
-      const eventosQuery = query(
-        eventosRef,
-        where("userId", "==", authUser.uid)
-      );
-      const eventosSnapshot = await getDocs(eventosQuery);
-
-      if (eventosSnapshot.empty) {
-        console.error("No se encontraron eventos asociados al usuario.");
-        return;
-      }
-
-      const updatePromises = [];
-
-      eventosSnapshot.forEach((doc) => {
-        const eventoRef = doc.ref;
-        const eventoData = doc.data();
-
-        if (eventoRef) {
-          if (eventoData && eventoData.personalizacionTemplate) {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          } else {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          }
-        } else {
-          console.error("Referencia de evento no válida:", doc.id);
-        }
-      });
-
-      const usuarioRef = doc(db, "usuarios", authUser.uid);
-      const usuarioDoc = await getDoc(usuarioRef);
-
-      if (usuarioDoc.exists()) {
-        const currentPs = usuarioDoc.data().ps || 0; // Obtener el valor actual de ps
-        await updateDoc(usuarioRef, { ps: currentPs });
-      }
-
-      // Update nombrePantallas field
-      const nombresPantallasObject = {};
-      nombrePantallas.forEach((nombre, index) => {
-        nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
-      });
-
-      await updateDoc(usuarioRef, nombresPantallasObject);
-
-      await Promise.all(updatePromises);
-
+      // Actualizar o agregar a TemplateSalones directamente
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
         templateSalonesRef,
@@ -357,16 +305,60 @@ function PantallasSalon() {
         });
       }
 
-      alert(
-        "Información de personalización del template guardada con éxito en todos los eventos."
+      // Actualizar nombrePantallas field
+      const usuarioRef = doc(db, "usuarios", authUser.uid);
+      const nombresPantallasObject = {};
+      nombrePantallas.forEach((nombre, index) => {
+        nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
+      });
+      await updateDoc(usuarioRef, nombresPantallasObject);
+
+      // Actualizar estilos en eventos existentes
+      const eventosRef = collection(db, "eventos");
+      const eventosQuery = query(
+        eventosRef,
+        where("userId", "==", authUser.uid)
       );
+      const eventosSnapshot = await getDocs(eventosQuery);
+
+      const updatePromises = [];
+
+      eventosSnapshot.forEach((doc) => {
+        const eventoRef = doc.ref;
+        const eventoData = doc.data();
+
+        if (eventoRef && eventoData) {
+          if (eventoData.personalizacionTemplate) {
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          } else {
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          }
+        } else {
+          console.error("Referencia de evento no válida:", doc.id);
+        }
+      });
+
+      // Ejecutar todas las actualizaciones en paralelo
+      await Promise.all(updatePromises);
+
+      alert("Información de personalización guardada con éxito.");
     } catch (error) {
       console.error(
-        "Error al guardar la información de personalización del template y URL del logo en todos los eventos:",
+        "Error al guardar la información de personalización y URL del logo:",
         error
       );
     }
   };
+
+  // ...
 
   const handlePreviewClick = () => {
     setPreviewVisible(true);
