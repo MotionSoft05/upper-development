@@ -12,7 +12,12 @@ function Licencia() {
     useState(false);
 
   return (
-    <section className="px-8 py-12">
+    <section className="px-5 md:px-32">
+      <div className="p-5">
+        <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
+          Mis datos
+        </h1>
+      </div>
       <div className="text-lg font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
         <ul className="flex flex-wrap -mb-px">
           <li className="mr-2">

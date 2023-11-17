@@ -1,8 +1,12 @@
 function Soporte() {
   return (
-    <section className="mb-32">
-      <div className="relative h-[300px] overflow-hidden bg-cover bg-[50%] bg-no-repeat bg-[url('https://mdbcdn.b-cdn.net/img/new/textures/full/171.jpg')]"></div>
-      <div className="container px-6 md:px-12">
+    <section className="px-5 md:px-32">
+      <div className="p-5">
+        <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
+          Contacto soporte
+        </h1>
+      </div>
+      <div className="container px-6 md:px-12 mt-10">
         <div className="block rounded-lg px-6 py-12 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.07),0_10px_20px_-2px_rgba(0,0,0,0.04)]  shadow-black/20 md:py-16 md:px-12 -mt-[50px] backdrop-blur-[30px]">
           <div className="mb-12 grid gap-x-6 md:grid-cols-3 lg:grid-cols-3">
             <div className="mx-auto mb-12 text-center lg:mb-0">

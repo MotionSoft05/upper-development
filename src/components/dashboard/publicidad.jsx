@@ -68,87 +68,95 @@ function Publicidad() {
 
   const renderCamposImagenes = (imagenes, tiempos, tipo, titulo) => {
     return (
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold text-gray-800">{titulo}</h3>
-        {imagenes.map((imagen, index) => (
-          <div key={index} className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800">
-              {tipo === "directorio" ? "Directorio" : "Salón de Eventos"} -
-              Imagen {index + 1}
-            </h3>
-            <div className="mt-4">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id={`imagen${tipo}-${index}`}
-                onChange={(event) => handleImagenSelect(event, tipo)}
-              />
-              <label
-                htmlFor={`imagen${tipo}-${index}`}
-                className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2"
-              >
-                Seleccionar Imagen
-              </label>
+      <section>
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold text-gray-800">{titulo}</h3>
+          {imagenes.map((imagen, index) => (
+            <div key={index} className="mb-8">
+              <h3 className="text-xl font-semibold text-gray-800">
+                {tipo === "directorio" ? "Directorio" : "Salón de Eventos"} -
+                Imagen {index + 1}
+              </h3>
+              <div className="mt-4">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id={`imagen${tipo}-${index}`}
+                  onChange={(event) => handleImagenSelect(event, tipo)}
+                />
+                <label
+                  htmlFor={`imagen${tipo}-${index}`}
+                  className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2"
+                >
+                  Seleccionar Imagen
+                </label>
 
-              {imagen && (
-                <div className="flex items-center mt-2">
-                  <span className="block">{imagen.name}</span>
-                  <button
-                    onClick={() => eliminarImagen(index, tipo)}
-                    className="ml-2 text-red-500 hover:text-red-700"
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              )}
-            </div>
+                {imagen && (
+                  <div className="flex items-center mt-2">
+                    <span className="block">{imagen.name}</span>
+                    <button
+                      onClick={() => eliminarImagen(index, tipo)}
+                      className="ml-2 text-red-500 hover:text-red-700"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                )}
+              </div>
 
-            <div className="mt-4">
-              <label className="text-gray-800">Tiempo de visualización:</label>
-              <div className="flex mt-2">
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    name="horas"
-                    min="0"
-                    max="24"
-                    value={tiempos[index].horas || 0}
-                    onChange={(event) => handleTiempoChange(event, index, tipo)}
-                    className="w-16 px-2 py-1 mr-2 border rounded-md border-gray-300 focus:outline-none"
-                  />
-                  <span className="text-gray-600">horas</span>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    name="minutos"
-                    min="0"
-                    max="59"
-                    value={tiempos[index].minutos || 0}
-                    onChange={(event) => handleTiempoChange(event, index, tipo)}
-                    className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
-                  />
-                  <span className="text-gray-600">minutos</span>
+              <div className="mt-4">
+                <label className="text-gray-800">
+                  Tiempo de visualización:
+                </label>
+                <div className="flex mt-2">
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      name="horas"
+                      min="0"
+                      max="24"
+                      value={tiempos[index].horas || 0}
+                      onChange={(event) =>
+                        handleTiempoChange(event, index, tipo)
+                      }
+                      className="w-16 px-2 py-1 mr-2 border rounded-md border-gray-300 focus:outline-none"
+                    />
+                    <span className="text-gray-600">horas</span>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      name="minutos"
+                      min="0"
+                      max="59"
+                      value={tiempos[index].minutos || 0}
+                      onChange={(event) =>
+                        handleTiempoChange(event, index, tipo)
+                      }
+                      className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
+                    />
+                    <span className="text-gray-600">minutos</span>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Botón de eliminar campo */}
-            <button
-              onClick={() => handleEliminarCampo(index, tipo)}
-              className="mt-4 px-2 py-1 text-red-500 hover:text-red-700"
-            >
-              Eliminar Campo
-            </button>
-          </div>
-        ))}
-      </div>
+              {/* Botón de eliminar campo */}
+              <button
+                onClick={() => handleEliminarCampo(index, tipo)}
+                className="mt-4 px-2 py-1 text-red-500 hover:text-red-700"
+              >
+                Eliminar Campo
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
     );
   };
 
   return (
-    <section className="px-16 md:px-32">
+    <section className="px-5 md:px-32">
       <div>
         <section className="">
           {/* Selección de pantallas */}
