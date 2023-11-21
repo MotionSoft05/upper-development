@@ -4,7 +4,6 @@ import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import { onAuthStateChanged, currentUser } from "firebase/auth";
 import "firebase/compat/firestore";
 import {
   getFirestore,
@@ -14,12 +13,9 @@ import {
   updateDoc,
   doc,
   getDocs,
-  getDoc,
   addDoc,
   collection as firestoreCollection,
   serverTimestamp,
-  writeBatch,
-  FieldValue,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 
@@ -51,11 +47,9 @@ const obtenerHora = () => {
 };
 
 function PantallasSalon() {
-  const [user, setUser] = useState(null);
   const [nombrePantallas, setNombrePantallas] = useState([]);
   const [ps, setPs] = useState(0);
   const [screenNames, setScreenNames] = useState([]);
-  const [userNames, setUserNames] = useState([]);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -201,16 +195,6 @@ function PantallasSalon() {
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
-  const handleScreen1Default = () => {
-    setScreen1AspectRatio("16:9");
-  };
-
-  const handleScreen1UseThis = () => {};
-  const handleScreen2UseThis = () => {};
-
-  const handleScreen2Default = () => {
-    setScreen2AspectRatio("9:16");
-  };
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
   };
@@ -248,8 +232,6 @@ function PantallasSalon() {
     }
   };
 
-  // ...
-
   const guardarInformacionPersonalizacion = async () => {
     try {
       const authUser = firebase.auth().currentUser;
@@ -275,7 +257,6 @@ function PantallasSalon() {
         logo: selectedLogo,
       };
 
-      // Actualizar o agregar a TemplateSalones directamente
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
         templateSalonesRef,
@@ -284,7 +265,6 @@ function PantallasSalon() {
       const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
       if (!templateSalonesSnapshot.empty) {
-        // Si ya existe un documento para el usuario, actualizar sus estilos
         const templateSalonesDocRef = templateSalonesSnapshot.docs[0].ref;
         await updateDoc(templateSalonesDocRef, {
           fontColor: fontColor,
@@ -294,7 +274,6 @@ function PantallasSalon() {
           timestamp: serverTimestamp(),
         });
       } else {
-        // Si no existe un documento para el usuario, agregar uno nuevo
         await addDoc(templateSalonesRef, {
           userId: authUser.uid,
           fontColor: fontColor,
@@ -305,7 +284,6 @@ function PantallasSalon() {
         });
       }
 
-      // Actualizar nombrePantallas field
       const usuarioRef = doc(db, "usuarios", authUser.uid);
       const nombresPantallasObject = {};
       nombrePantallas.forEach((nombre, index) => {
@@ -313,7 +291,6 @@ function PantallasSalon() {
       });
       await updateDoc(usuarioRef, nombresPantallasObject);
 
-      // Actualizar estilos en eventos existentes
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(
         eventosRef,
@@ -346,7 +323,6 @@ function PantallasSalon() {
         }
       });
 
-      // Ejecutar todas las actualizaciones en paralelo
       await Promise.all(updatePromises);
 
       alert("Información de personalización guardada con éxito.");
@@ -357,8 +333,6 @@ function PantallasSalon() {
       );
     }
   };
-
-  // ...
 
   const handlePreviewClick = () => {
     setPreviewVisible(true);
@@ -398,23 +372,18 @@ function PantallasSalon() {
     return metrics.width;
   }
 
-  // Slider
   const [sliderRef] = useKeenSlider({
     loop: true,
   });
 
-  // Portrait o Landscape
   const [isPortrait, setIsPortrait] = useState(true);
   useEffect(() => {
     const mediaQuery = window.matchMedia("(orientation: portrait)");
     const handleOrientationChange = (event) => {
       setIsPortrait(event.matches);
     };
-    // Verificar la orientación inicialmente
     handleOrientationChange(mediaQuery);
-    // Escuchar cambios en la orientación
     mediaQuery.addListener(handleOrientationChange);
-    // Limpiar el listener al desmontar el componente
     return () => {
       mediaQuery.removeListener(handleOrientationChange);
     };
