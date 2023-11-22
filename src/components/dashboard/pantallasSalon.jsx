@@ -129,37 +129,6 @@ function PantallasSalon() {
     fetchUserData();
   }, []);
 
-  const fetchUserData = async () => {
-    try {
-      const authUser = firebase.auth().currentUser;
-
-      if (authUser) {
-        const usuariosRef = collection(db, "usuarios");
-        const usuariosQuery = query(
-          usuariosRef,
-          where("email", "==", authUser.email)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-
-        if (!usuariosSnapshot.empty) {
-          const user = usuariosSnapshot.docs[0].data();
-          const numberOfScreens = user.ps || 0;
-          const namesArray = Array.from(
-            { length: numberOfScreens },
-            (_, index) => ({
-              number: index + 1,
-              name: `Pantalla ${index + 1}`,
-            })
-          );
-
-          setScreenNames(namesArray);
-        }
-      }
-    } catch (error) {
-      console.error("Error al obtener datos del usuario:", error);
-    }
-  };
-
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -285,6 +254,11 @@ function PantallasSalon() {
       }
 
       const usuarioRef = doc(db, "usuarios", authUser.uid);
+
+      await updateDoc(usuarioRef, {
+        nombrePantallas: firebase.firestore.FieldValue.delete(),
+      });
+
       const nombresPantallasObject = {};
       nombrePantallas.forEach((nombre, index) => {
         nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
