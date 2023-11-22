@@ -30,16 +30,13 @@ function ConsultaModEvento() {
   const [description, setDescription] = useState("");
 
   useEffect(() => {
-    // Observador de cambios en la autenticación del usuario
     const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        // Si el usuario está autenticado
         setUser(user);
-        consultarEventos(user.uid); // Pass the userId to fetch events for the authenticated user
+        consultarEventos(user.uid);
       } else {
-        // Si el usuario no está autenticado
         setUser(null);
-        setEventos([]); // Establecer eventos como vacío
+        setEventos([]);
       }
     });
     return () => unsubscribe();
@@ -50,7 +47,7 @@ function ConsultaModEvento() {
       const eventosRef = firebase
         .firestore()
         .collection("eventos")
-        .where("userId", "==", userId); // Filter events based on userId
+        .where("userId", "==", userId);
       eventosRef.onSnapshot((snapshot) => {
         const eventosData = snapshot.docs.map((doc) => ({
           id: doc.id,
