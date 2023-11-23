@@ -18,9 +18,9 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
-
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
+import Link from "next/link";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -468,20 +468,28 @@ function PantallasSalon() {
               <label className="text-white dark:text-gray-200 block mb-1">
                 Nombres de pantallas
               </label>
-              <div>
+              <div className="flex flex-col">
                 {Array.from({ length: ps }, (_, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    placeholder={`Pantalla ${index + 1}`}
-                    className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
-                    value={nombrePantallas[index] || ""}
-                    onChange={(e) => {
-                      const updatedNombres = [...nombrePantallas];
-                      updatedNombres[index] = e.target.value;
-                      setNombrePantallas(updatedNombres);
-                    }}
-                  />
+                  <div className="flex">
+                    <input
+                      key={index}
+                      type="text"
+                      placeholder={`Pantalla ${index + 1}`}
+                      className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                      value={nombrePantallas[index] || ""}
+                      onChange={(e) => {
+                        const updatedNombres = [...nombrePantallas];
+                        updatedNombres[index] = e.target.value;
+                        setNombrePantallas(updatedNombres);
+                      }}
+                    />
+                    <Link
+                      href={`/pantalla${index + 1}`}
+                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
+                    >
+                      URL
+                    </Link>
+                  </div>
                 ))}
               </div>
             </div>

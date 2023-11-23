@@ -20,7 +20,7 @@ const obtenerHora = () => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-function Pantalla1() {
+function Pantalla2() {
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -63,7 +63,7 @@ function Pantalla1() {
       // Check if firestore is defined
       const eventosRef = collection(firestore, "eventos");
 
-      const assignedScreenValue = "pantalla1";
+      const assignedScreenValue = "pantalla2";
       const q = firestoreQuery(
         eventosRef,
         where("assignedScreen", "==", assignedScreenValue),
@@ -75,31 +75,6 @@ function Pantalla1() {
           const primerEvento = snapshot.docs[0].data();
           console.log("eventData:", primerEvento);
           setEventData(primerEvento);
-        }
-      });
-      getDocs(q).then((snapshot) => {
-        if (!snapshot.empty) {
-          const filteredEvents = snapshot.docs
-            .map((doc) => doc.data())
-            .filter((event) => {
-              const eventStartTime = event.horaInicialReal; // Obtener la hora inicial del evento
-              const [eventHour, eventMinute] = eventStartTime.split(":"); // Separar la hora y los minutos del evento
-              const now = new Date(); // Obtener la hora actual
-              const currentHour = now.getHours(); // Obtener la hora actual
-              const currentMinute = now.getMinutes(); // Obtener los minutos actuales
-
-              // Comparar la hora actual con la hora inicial del evento
-              return (
-                parseInt(eventHour) === currentHour &&
-                parseInt(eventMinute) === currentMinute
-              );
-            });
-
-          if (filteredEvents.length > 0) {
-            const primerEvento = filteredEvents[0];
-            console.log("eventData:", primerEvento);
-            setEventData(primerEvento);
-          }
         }
       });
     }
@@ -279,4 +254,4 @@ function Pantalla1() {
   );
 }
 
-export default Pantalla1;
+export default Pantalla2;
