@@ -43,8 +43,6 @@ function PantallasDirectorio() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
-  const [selectedEvents, setSelectedEvents] = useState([]);
-  const [eventCheckboxStates, setEventCheckboxStates] = useState({});
 
   const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
@@ -52,58 +50,6 @@ function PantallasDirectorio() {
     { value: "Los Angeles", label: "Los Angeles" },
   ]);
   const [selectedCity, setSelectedCity] = useState(null);
-
-  useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        setUser(user);
-        const eventosRef = collection(db, "eventos");
-        const q = query(eventosRef, where("userId", "==", user.uid));
-        const unsubscribeEvents = onSnapshot(q, (snapshot) => {
-          const eventos = [];
-          const checkboxStates = { ...eventCheckboxStates };
-          snapshot.forEach((doc) => {
-            const evento = {
-              id: doc.id,
-              ...doc.data(),
-            };
-            checkboxStates[evento.id] =
-              checkboxStates[evento.id] !== undefined
-                ? checkboxStates[evento.id]
-                : false;
-            eventos.push(evento);
-          });
-          setEvents(eventos);
-          setEventCheckboxStates(checkboxStates);
-        });
-
-        return () => {
-          unsubscribeEvents();
-        };
-      } else {
-        setUser(null);
-        setEvents([]);
-        setEventCheckboxStates({});
-      }
-    });
-
-    return () => {
-      unsubscribe();
-    };
-  }, [eventCheckboxStates]);
-
-  const handleCheckboxChange = (eventId) => {
-    setEventCheckboxStates((prevState) => ({
-      ...prevState,
-      [eventId]: !prevState[eventId],
-    }));
-  };
-  useEffect(() => {
-    const filteredEvents = events.filter((event) => {
-      return eventCheckboxStates[event.id];
-    });
-    setSelectedEvents(filteredEvents);
-  }, [eventCheckboxStates, events]);
 
   useEffect(() => {
     if (selectedCity) {
@@ -239,29 +185,7 @@ function PantallasDirectorio() {
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Seleccionar Eventos
-              </label>
-              {events.map((event) => (
-                <div key={event.id}>
-                  <input
-                    type="checkbox"
-                    checked={eventCheckboxStates[event.id]}
-                    onChange={() => handleCheckboxChange(event.id)}
-                  />
-                  <span
-                    className={`text-white ${
-                      !event.nombreEvento && "text-opacity-0"
-                    }`}
-                  >
-                    {event.nombreEvento || "Nombre del Evento"}
-                  </span>
-                </div>
-              ))}
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
+              <label className="text-white dark:text-gray-200 block">
                 Logo
               </label>
               <div className="flex items-center">
@@ -271,6 +195,17 @@ function PantallasDirectorio() {
                   type="file"
                 />
               </div>
+            </div>
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200">
+                Estilo de texto
+              </label>
+              <Select
+                options={fontStyleOptions}
+                value={selectedFontStyle}
+                onChange={handleFontStyleChange}
+                placeholder="Seleccionar estilo de texto"
+              />
             </div>
             <div>
               <label className="text-white dark:text-gray-200">
@@ -333,18 +268,6 @@ function PantallasDirectorio() {
                   style={{ backgroundColor: templateColor }}
                 ></div>
               </div>
-            </div>
-
-            <div>
-              <label className="text-white dark:text-gray-200">
-                Estilo de texto
-              </label>
-              <Select
-                options={fontStyleOptions}
-                value={selectedFontStyle}
-                onChange={handleFontStyleChange}
-                placeholder="Seleccionar estilo de texto"
-              />
             </div>
           </div>
           {/* Sección para URL del clima y eventos del calendario */}
