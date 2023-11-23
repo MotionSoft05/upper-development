@@ -470,6 +470,7 @@ function PantallasSalon() {
               </label>
               <div className="flex flex-col">
                 {Array.from({ length: ps }, (_, index) => (
+                  // eslint-disable-next-line react/jsx-key
                   <div className="flex">
                     <input
                       key={index}
