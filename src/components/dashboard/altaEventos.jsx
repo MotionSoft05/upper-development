@@ -38,6 +38,9 @@ function AltaEventos() {
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
   const [nombrePantallas, setNombrePantallas] = useState([]);
+  const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
+    []
+  );
   const [value, setValue] = useState({
     startDate: new Date(),
     endDate: new Date().setMonth(11),
@@ -59,12 +62,17 @@ function AltaEventos() {
 
         if (usuarioDoc.exists()) {
           const userData = usuarioDoc.data();
+          console.log("UserData:", userData);
           setNombrePantallas(userData.nombrePantallas || []);
+          setNombrePantallasDirectorio(
+            userData.nombrePantallasDirectorio || []
+          );
         }
       } else {
         setUser(null);
         setUserId(null);
         setNombrePantallas([]);
+        setNombrePantallasDirectorio([]);
       }
     });
 
@@ -662,6 +670,34 @@ function AltaEventos() {
                         </label>
                       ))
                     : Object.values(nombrePantallas).map(
+                        (nombrePantalla, index) => (
+                          <label key={index} className="block mb-2">
+                            <input
+                              type="checkbox"
+                              value={nombrePantalla}
+                              checked={selectedDevices.includes(nombrePantalla)}
+                              onChange={handleDeviceChange}
+                              className="mr-2"
+                            />
+                            {nombrePantalla}
+                          </label>
+                        )
+                      )}
+                  {/* Adding the devices from nombrePantallasDirectorio */}
+                  {Array.isArray(nombrePantallasDirectorio)
+                    ? nombrePantallasDirectorio.map((nombrePantalla, index) => (
+                        <label key={index} className="block mb-2">
+                          <input
+                            type="checkbox"
+                            value={nombrePantalla}
+                            checked={selectedDevices.includes(nombrePantalla)}
+                            onChange={handleDeviceChange}
+                            className="mr-2"
+                          />
+                          {nombrePantalla}
+                        </label>
+                      ))
+                    : Object.values(nombrePantallasDirectorio).map(
                         (nombrePantalla, index) => (
                           <label key={index} className="block mb-2">
                             <input
