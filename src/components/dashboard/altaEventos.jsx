@@ -190,9 +190,7 @@ function AltaEventos() {
     );
     const formattedFechaInicio = fechaInicio.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
     const formattedFechaFinal = fechaFinal.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
-    const diasSeleccionados = Object.keys(repeatingDays).filter(
-      (day) => repeatingDays[day]
-    );
+
     const devices = selectedDevices;
     setImages([]);
     setDescription("");
@@ -208,7 +206,7 @@ function AltaEventos() {
       horaFinalSalon,
       fechaInicio: formattedFechaInicio,
       fechaFinal: formattedFechaFinal,
-      diasSeleccionados,
+
       images,
       devices,
       userId: userId,
@@ -379,26 +377,7 @@ function AltaEventos() {
                   value={value}
                   onChange={handleValueChange}
                 />
-                <div className="mb-4"></div>{" "}
-                <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900 ">
-                  Seleccione los días:
-                </h4>
-                <div className="grid grid-cols-4 gap-4">
-                  {Object.keys(repeatingDays).map((day, index) => (
-                    <div key={index} className="text-center">
-                      <input
-                        type="checkbox"
-                        className="w-5 h-5 text-blue-500 form-checkbox focus:ring-blue-500"
-                        checked={repeatingDays[day]}
-                        onChange={() => handleRepeatingDayChange(day)}
-                      />
-                      <label className="block text-xs text-gray-700">
-                        {day.charAt(0).toUpperCase() + day.slice(1)}
-                      </label>
-                    </div>
-                  ))}
-                </div>
-                <div className="mb-4"></div>{" "}
+                <div className="mb-4"></div> <div className="mb-4"></div>{" "}
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900 ">
                   Seleccione las horas:
                 </h4>
