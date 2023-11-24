@@ -36,7 +36,9 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
-  const [nombrePantallas, setNombrePantallas] = useState([]);
+  const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
+    []
+  );
   const [pd, setPd] = useState(0);
   const [user, setUser] = useState(null);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
@@ -83,7 +85,7 @@ function PantallasDirectorio() {
               (_, index) => `Pantalla ${index + 1}`
             );
 
-            setNombrePantallas(namesArray);
+            setNombrePantallasDirectorio(namesArray);
             setPd(numberOfScreens);
           }
         }
@@ -284,12 +286,12 @@ function PantallasDirectorio() {
       const usuarioRef = doc(db, "usuarios", authUser.uid);
 
       await updateDoc(usuarioRef, {
-        nombrePantallas: firebase.firestore.FieldValue.delete(),
+        nombrePantallasDirectorio: firebase.firestore.FieldValue.delete(),
       });
 
       const nombresPantallasObject = {};
-      nombrePantallas.forEach((nombre, index) => {
-        nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
+      nombrePantallasDirectorio.forEach((nombre, index) => {
+        nombresPantallasObject[`nombrePantallasDirectorio.${index}`] = nombre;
       });
       await updateDoc(usuarioRef, nombresPantallasObject);
 
@@ -469,11 +471,11 @@ function PantallasDirectorio() {
                     type="text"
                     placeholder={`Pantalla ${index + 1}`}
                     className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
-                    value={nombrePantallas[index] || ""}
+                    value={nombrePantallasDirectorio[index] || ""}
                     onChange={(e) => {
-                      const updatedNombres = [...nombrePantallas];
+                      const updatedNombres = [...nombrePantallasDirectorio];
                       updatedNombres[index] = e.target.value;
-                      setNombrePantallas(updatedNombres);
+                      setNombrePantallasDirectorio(updatedNombres);
                     }}
                   />
                   <Link
