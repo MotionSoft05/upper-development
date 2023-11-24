@@ -287,34 +287,6 @@ function PantallasDirectorio() {
                   placeholder="Seleccione una ciudad"
                 />
               </div>
-              <div className="mb-4">
-                <label className="text-white dark:text-gray-200">
-                  Directorio de Eventos | URL
-                </label>
-                <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="url"
-                  value={calendarEventURL}
-                  onChange={(e) => setCalendarEventURL(e.target.value)}
-                  placeholder="Ingrese la URL del Directorio de Eventos"
-                />
-              </div>
-              <div className="mb-4">
-                <label className="text-white dark:text-gray-200">
-                  Agregar Evento al Calendario Personal
-                </label>
-                <input
-                  className="block w-full text-sm border rounded-lg cursor-pointer text-gray-400 focus:outline-none bg-gray-700 border-gray-600 placeholder-gray-400"
-                  type="text"
-                  placeholder="Descripción del evento"
-                />
-                <button
-                  onClick={handleAddToCalendar}
-                  className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  Agregar al Calendario
-                </button>
-              </div>
             </div>
           </div>
 
