@@ -27,9 +27,41 @@ function Pantalla1() {
   const [firestore, setFirestore] = useState(null);
 
   // Slider
-  const [sliderRef] = useKeenSlider({
-    loop: true,
-  });
+  const [sliderRef] = useKeenSlider(
+    {
+      loop: true,
+    },
+    [
+      (slider) => {
+        let timeout;
+        let mouseOver = false;
+        function clearNextTimeout() {
+          clearTimeout(timeout);
+        }
+        function nextTimeout() {
+          clearTimeout(timeout);
+          if (mouseOver) return;
+          timeout = setTimeout(() => {
+            slider.next();
+          }, 4000);
+        }
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
+        slider.on("dragStarted", clearNextTimeout);
+        slider.on("animationEnded", nextTimeout);
+        slider.on("updated", nextTimeout);
+      },
+    ]
+  );
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -58,6 +90,20 @@ function Pantalla1() {
     return () => unsubscribe();
   }, []);
 
+  const obtenerDiaActual = () => {
+    const diasSemana = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    const now = new Date();
+    return diasSemana[now.getDay()];
+  };
+
   useEffect(() => {
     if (user && firestore) {
       const eventosRef = collection(firestore, "eventos");
@@ -71,14 +117,26 @@ function Pantalla1() {
           const querySnapshot = await getDocs(eventosQuery);
           const eventos = querySnapshot.docs.map((doc) => doc.data());
 
-          // Comparar la hora actual con las horas de los eventos
+          // Obtener fecha y hora actual
+          const fechaActual = new Date();
           const horaActual = obtenerHora();
+
+          // Filtrar eventos en función de la fecha y hora actual
           const eventosEnCurso = eventos.filter((evento) => {
+            const fechaInicio = new Date(evento.fechaInicio);
+            const fechaFinal = new Date(evento.fechaFinal);
             const horaInicial = evento.horaInicialReal;
             const horaFinal = evento.horaFinalReal;
 
-            // Comparar la hora actual con las horas del evento
-            return horaActual >= horaInicial && horaActual <= horaFinal;
+            // Comparar si la fecha actual está dentro del rango de fechas del evento
+            const fechaActualEnRango =
+              fechaActual >= fechaInicio && fechaActual <= fechaFinal;
+
+            // Comparar si la hora actual está dentro del rango horario del evento
+            const horaActualEnRango =
+              horaActual >= horaInicial && horaActual <= horaFinal;
+
+            return fechaActualEnRango && horaActualEnRango;
           });
 
           // Actualizar el estado con los eventos en curso
@@ -157,39 +215,42 @@ function Pantalla1() {
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black h-full flex flex-col justify-center">
-        <div className="flex items-center justify-between">
-          {personalizacionTemplate.logo && (
-            <img
-              src={personalizacionTemplate.logo}
-              alt="Logo"
-              className="w-96"
-            />
-          )}
-          <h1
-            className={`font-bold text-5xl mr-16`}
-            style={{ color: personalizacionTemplate.fontColor }}
-          >
-            {lugar}
-          </h1>
-        </div>
-        <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-          <div className=" mx-2">
-            <div
-              className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
-              style={{
-                backgroundColor: personalizacionTemplate.templateColor,
-                color: personalizacionTemplate.fontColor,
-                fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
-              }}
+      <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
+        <div id="Content" className="flex-grow flex flex-col justify-center ">
+          {/* Header */}
+          <div className="flex items-center justify-between ">
+            {personalizacionTemplate.logo && (
+              <img
+                src={personalizacionTemplate.logo}
+                alt="Logo"
+                className="w-44"
+              />
+            )}
+            <h1
+              className={`font-bold text-5xl mr-16`}
+              style={{ color: personalizacionTemplate.fontColor }}
             >
-              <h2>{nombreEvento}</h2>
-            </div>
-            <div className="grid grid-cols-2 gap-x-4 text-black">
-              <div className="mr-4 my-4">
+              {lugar}
+            </h1>
+          </div>
+          {/* Linea arriba */}
+          <div
+            className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
+            style={{
+              backgroundColor: personalizacionTemplate.templateColor,
+              color: personalizacionTemplate.fontColor,
+              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+            }}
+          >
+            <h2>{nombreEvento}</h2>
+          </div>
+          {/* contenido principal */}
+          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+            <div className="grid grid-cols-3 gap-x-4 text-black">
+              <div className="col-span-1  mr-4 my-auto">
                 {images && images.length > 0 ? (
                   <>
-                    <div className="mr-4">
+                    <div className="">
                       <div ref={sliderRef} className="keen-slider">
                         {images.map((image, index) => (
                           // eslint-disable-next-line react/jsx-key
@@ -198,7 +259,8 @@ function Pantalla1() {
                               key={index}
                               src={image}
                               alt={`Imagen ${index + 1}`}
-                              className="h-10"
+                              className=""
+                              style={{ maxWidth: "100%", maxHeight: "600px" }}
                             />
                           </div>
                         ))}
@@ -212,7 +274,7 @@ function Pantalla1() {
                 )}
               </div>
 
-              <div className=" space-y-8 pl-10 mb-12 my-4">
+              <div className="col-span-2 space-y-8  my-4">
                 <div>
                   <h1
                     className={`text-4xl font-bold`}
@@ -228,7 +290,7 @@ function Pantalla1() {
                     <span className="text-2x1">hrs.</span>
                   </p>
                 </div>
-                <div className="max-w-xs">
+                <div className="">
                   {/* Tipo de evento y descripción */}
                   <h1
                     className={`text-4xl font-bold`}
@@ -247,23 +309,23 @@ function Pantalla1() {
                 </div>
               </div>
             </div>
-            <div>
-              <div
-                className={`text-4xl py-4 font-semibold mt-1 text-center  justify-between flex px-20 rounded-b-xl`}
-                style={{
-                  backgroundColor: personalizacionTemplate.templateColor,
-                  color: personalizacionTemplate.fontColor,
-                  fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
-                }}
-              >
-                <p style={{ color: personalizacionTemplate.fontColor }}>
-                  {obtenerFecha()}
-                </p>
-                <p style={{ color: personalizacionTemplate.fontColor }}>
-                  {currentHour}
-                </p>
-              </div>
-            </div>
+          </div>
+          {/* Linea abajo */}
+          <div
+            id="Abajo"
+            className={`text-4xl py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            style={{
+              backgroundColor: personalizacionTemplate.templateColor,
+              color: personalizacionTemplate.fontColor,
+              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+            }}
+          >
+            <p style={{ color: personalizacionTemplate.fontColor }}>
+              {obtenerFecha()}
+            </p>
+            <p style={{ color: personalizacionTemplate.fontColor }}>
+              {currentHour}
+            </p>
           </div>
         </div>
       </div>
