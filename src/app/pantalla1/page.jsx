@@ -60,59 +60,43 @@ function Pantalla1() {
 
   useEffect(() => {
     if (user && firestore) {
-      // Check if firestore is defined
       const eventosRef = collection(firestore, "eventos");
-
-      const assignedScreenValue = "pantalla1";
-      const q = firestoreQuery(
+      const eventosQuery = firestoreQuery(
         eventosRef,
-        where("assignedScreen", "==", assignedScreenValue),
         where("userId", "==", user.uid)
       );
 
-      getDocs(q).then((snapshot) => {
-        if (!snapshot.empty) {
-          const primerEvento = snapshot.docs[0].data();
-          console.log("eventData:", primerEvento);
-          setEventData(primerEvento);
-        }
-      });
-      getDocs(q).then((snapshot) => {
-        if (!snapshot.empty) {
-          const filteredEvents = snapshot.docs
-            .map((doc) => doc.data())
-            .filter((event) => {
-              const eventStartTime = event.horaInicialReal; // Obtener la hora inicial del evento
-              const [eventHour, eventMinute] = eventStartTime.split(":"); // Separar la hora y los minutos del evento
-              const now = new Date(); // Obtener la hora actual
-              const currentHour = now.getHours(); // Obtener la hora actual
-              const currentMinute = now.getMinutes(); // Obtener los minutos actuales
+      const obtenerEventos = async () => {
+        try {
+          const querySnapshot = await getDocs(eventosQuery);
+          const eventos = querySnapshot.docs.map((doc) => doc.data());
 
-              // Comparar la hora actual con la hora inicial del evento
-              return (
-                parseInt(eventHour) === currentHour &&
-                parseInt(eventMinute) === currentMinute
-              );
-            });
+          // Comparar la hora actual con las horas de los eventos
+          const horaActual = obtenerHora();
+          const eventosEnCurso = eventos.filter((evento) => {
+            const horaInicial = evento.horaInicialReal;
+            const horaFinal = evento.horaFinalReal;
 
-          if (filteredEvents.length > 0) {
-            const primerEvento = filteredEvents[0];
-            console.log("eventData:", primerEvento);
-            setEventData(primerEvento);
-          }
+            // Comparar la hora actual con las horas del evento
+            return horaActual >= horaInicial && horaActual <= horaFinal;
+          });
+
+          // Actualizar el estado con los eventos en curso
+          setEventData(eventosEnCurso);
+        } catch (error) {
+          console.error("Error al obtener eventos:", error);
         }
-      });
+      };
+
+      obtenerEventos();
+
+      const interval = setInterval(() => {
+        obtenerEventos(); // Llamar a la función cada 5 segundos
+      }, 5000);
+
+      return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentHour(obtenerHora());
-    }, 1000);
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
 
   if (!eventData) {
     return <p>Cargando...</p>;
@@ -153,6 +137,14 @@ function Pantalla1() {
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
+  console.log(eventData);
+
+  if (!eventData || eventData.length === 0) {
+    return <p>No hay eventos disponibles en este momento.</p>;
+  }
+
+  const eventoActual = eventData[0]; // Obtener el primer evento de la lista
+
   const {
     personalizacionTemplate,
     lugar,
@@ -161,7 +153,7 @@ function Pantalla1() {
     horaInicialReal,
     tipoEvento,
     description,
-  } = eventData;
+  } = eventoActual;
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
