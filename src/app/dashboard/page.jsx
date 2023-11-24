@@ -57,7 +57,7 @@ function DashBoard() {
   }, []);
 
   const [sidebarClasses, setSidebarClasses] = useState(
-    "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 "
+    "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 "
   );
 
   const toggleSidebar = () => {
@@ -65,8 +65,8 @@ function DashBoard() {
     setSidebarClasses((prevClasses) => {
       // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
       return prevClasses.includes("-translate-x-full")
-        ? "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 z-50"
-        : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-indigo-500 ";
+        ? "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 z-50"
+        : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
     });
   };
   return (
