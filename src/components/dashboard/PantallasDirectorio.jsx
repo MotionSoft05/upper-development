@@ -11,7 +11,14 @@ import {
   onSnapshot,
   where,
   query,
+  getDocs,
+  addDoc,
+  serverTimestamp,
+  doc,
+  updateDoc,
 } from "firebase/firestore";
+import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
+import Link from "next/link";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -26,8 +33,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.firestore();
+const storage = getStorage();
 
 function PantallasDirectorio() {
+  const [nombrePantallas, setNombrePantallas] = useState([]);
+  const [pd, setPd] = useState(0);
   const [user, setUser] = useState(null);
   const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
   const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
@@ -43,6 +53,7 @@ function PantallasDirectorio() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [events, setEvents] = useState([]);
+  const [selectedLogo, setSelectedLogo] = useState(null);
 
   const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
@@ -50,6 +61,39 @@ function PantallasDirectorio() {
     { value: "Los Angeles", label: "Los Angeles" },
   ]);
   const [selectedCity, setSelectedCity] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser) {
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosQuery = query(
+            usuariosRef,
+            where("email", "==", authUser.email)
+          );
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+
+          if (!usuariosSnapshot.empty) {
+            const user = usuariosSnapshot.docs[0].data();
+            const numberOfScreens = user.pd || 0;
+            const namesArray = Array.from(
+              { length: numberOfScreens },
+              (_, index) => `Pantalla ${index + 1}`
+            );
+
+            setNombrePantallas(namesArray);
+            setPd(numberOfScreens);
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del usuario:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   useEffect(() => {
     if (selectedCity) {
@@ -87,22 +131,10 @@ function PantallasDirectorio() {
     { value: "Palatino", label: "Palatino" },
   ];
 
-  const [selectedFontStyle, setSelectedFontStyle] = useState(null);
+  const [selectedFontStyle, setSelectedFontStyle] = useState(
+    fontStyleOptions[0]
+  );
 
-  const handleAddToCalendar = () => {
-    const eventDescription = document.querySelector(
-      'input[placeholder="Descripción del evento"]'
-    ).value;
-  };
-
-  const handleScreen1Default = () => {
-    setScreen1AspectRatio("16:9");
-  };
-  const handleScreen1UseThis = () => {};
-  const handleScreen2Default = () => {
-    setScreen2AspectRatio("9:16");
-  };
-  const handleScreen2UseThis = () => {};
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
   };
@@ -122,6 +154,8 @@ function PantallasDirectorio() {
     setSelectedFontStyle(selectedOption);
     const textoEjemplo = "Texto de ejemplo";
     const font = `${selectedOption.value}, sans-serif`;
+    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
+    console.log("Ancho del texto medido:", textoAncho);
   };
 
   const handlePreviewClick = () => {
@@ -169,6 +203,139 @@ function PantallasDirectorio() {
     return () => clearInterval(interval);
   }, []);
 
+  function getTextWidth(text, font) {
+    const canvas = document.createElement("canvas");
+    const context = canvas.getContext("2d");
+    context.font = font;
+
+    const metrics = context.measureText(text);
+    return metrics.width;
+  }
+
+  const handleImageChange = async (event) => {
+    const file = event.target.files[0];
+    const storageRef = ref(storage, `pantallaDirectorioLogos/${file.name}`);
+
+    try {
+      await uploadBytes(storageRef, file);
+      const logoUrl = await getDownloadURL(storageRef);
+
+      setSelectedLogo(logoUrl);
+    } catch (error) {
+      console.error("Error al subir el logo a Firebase Storage:", error);
+    }
+  };
+
+  const guardarInformacionPersonalizacion = async () => {
+    try {
+      const authUser = firebase.auth().currentUser;
+
+      if (!authUser) {
+        console.error(
+          "Usuario no autenticado. No se puede enviar a Firestore."
+        );
+        return;
+      }
+
+      console.log("Usuario autenticado:", authUser);
+
+      if (!selectedLogo) {
+        console.error("selectedLogo es null. No se puede enviar a Firestore.");
+        return;
+      }
+
+      const personalizacionTemplate = {
+        fontColor: fontColor,
+        templateColor: templateColor,
+        fontStyle: selectedFontStyle.value,
+        logo: selectedLogo,
+      };
+
+      const templateDirectoriosRef = collection(db, "TemplateDirectorios");
+      const templateDirectoriosQuery = query(
+        templateDirectoriosRef,
+        where("userId", "==", authUser.uid)
+      );
+      const templateDirectoriosSnapshot = await getDocs(
+        templateDirectoriosQuery
+      );
+
+      if (!templateDirectoriosSnapshot.empty) {
+        const templateDirectoriosDocRef =
+          templateDirectoriosSnapshot.docs[0].ref;
+        await updateDoc(templateDirectoriosDocRef, {
+          fontColor: fontColor,
+          templateColor: templateColor,
+          fontStyle: selectedFontStyle.value,
+          logo: selectedLogo,
+          timestamp: serverTimestamp(),
+        });
+      } else {
+        await addDoc(templateDirectoriosRef, {
+          userId: authUser.uid,
+          fontColor: fontColor,
+          templateColor: templateColor,
+          fontStyle: selectedFontStyle.value,
+          logo: selectedLogo,
+          timestamp: serverTimestamp(),
+        });
+      }
+
+      const usuarioRef = doc(db, "usuarios", authUser.uid);
+
+      await updateDoc(usuarioRef, {
+        nombrePantallas: firebase.firestore.FieldValue.delete(),
+      });
+
+      const nombresPantallasObject = {};
+      nombrePantallas.forEach((nombre, index) => {
+        nombresPantallasObject[`nombrePantallas.${index}`] = nombre;
+      });
+      await updateDoc(usuarioRef, nombresPantallasObject);
+
+      const eventosRef = collection(db, "eventos");
+      const eventosQuery = query(
+        eventosRef,
+        where("userId", "==", authUser.uid)
+      );
+      const eventosSnapshot = await getDocs(eventosQuery);
+
+      const updatePromises = [];
+
+      eventosSnapshot.forEach((doc) => {
+        const eventoRef = doc.ref;
+        const eventoData = doc.data();
+
+        if (eventoRef && eventoData) {
+          if (eventoData.personalizacionTemplate) {
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          } else {
+            updatePromises.push(
+              updateDoc(eventoRef, {
+                personalizacionTemplate: personalizacionTemplate,
+              })
+            );
+          }
+        } else {
+          console.error("Referencia de evento no válida:", doc.id);
+        }
+      });
+
+      await Promise.all(updatePromises);
+
+      alert("Información de personalización guardada con éxito.");
+    } catch (error) {
+      console.error(
+        "Error al guardar la información de personalización y URL del logo:",
+        error
+      );
+    }
+  };
+
   return (
     <section className="px-5 md:px-32">
       <div>
@@ -190,7 +357,7 @@ function PantallasDirectorio() {
               </label>
               <div className="flex items-center">
                 <input
-                  onChange={(e) => setLogo(e.target.files[0])}
+                  onChange={handleImageChange}
                   className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   type="file"
                 />
@@ -289,8 +456,37 @@ function PantallasDirectorio() {
               </div>
             </div>
           </div>
-
-          {/* Sección de vista previa */}
+          <div className="mb-4">
+            <label className="text-white dark:text-gray-200 block mb-1">
+              Nombres de pantallas
+            </label>
+            <div className="flex flex-col">
+              {Array.from({ length: pd }, (_, index) => (
+                // eslint-disable-next-line react/jsx-key
+                <div className="flex">
+                  <input
+                    key={index}
+                    type="text"
+                    placeholder={`Pantalla ${index + 1}`}
+                    className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                    value={nombrePantallas[index] || ""}
+                    onChange={(e) => {
+                      const updatedNombres = [...nombrePantallas];
+                      updatedNombres[index] = e.target.value;
+                      setNombrePantallas(updatedNombres);
+                    }}
+                  />
+                  <Link
+                    href={`/pantalla${index + 1}`}
+                    className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
+                  >
+                    URL
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+          ;{/* Sección de vista previa */}
           {previewVisible && (
             <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
               <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
@@ -456,7 +652,6 @@ function PantallasDirectorio() {
               </div>
             </div>
           )}
-
           <div className="flex justify-end mt-6">
             <button
               onClick={handlePreviewClick}
@@ -465,8 +660,10 @@ function PantallasDirectorio() {
               Vista Previa
             </button>
             <button
-              onClick={handlePreviewClick}
-              className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
+              onClick={() => {
+                guardarInformacionPersonalizacion(selectedLogo);
+              }}
+              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
               Guardar
             </button>
