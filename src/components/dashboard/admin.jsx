@@ -9,12 +9,7 @@ import {
   deleteDoc,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
-import {
-  getAuth,
-  onAuthStateChanged,
-  updateEmail,
-  sendEmailVerification,
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -177,17 +172,8 @@ function Admin() {
         telefono: usuarioEditado.telefono,
         ps: psNumber,
         pd: pdNumber,
-        total: psNumber + pdNumber,
+        total: psNumber + pdNumber, // Suma correctamente los valores
       });
-
-      // Actualiza el correo electrónico en la autenticación de Firebase
-      const user = auth.currentUser;
-      try {
-        await updateEmail(user, usuarioEditado.email);
-      } catch (emailError) {
-        // Maneja el error de correo electrónico aquí
-        console.error("Error al actualizar el correo electrónico:", emailError);
-      }
 
       setUsuarios((prevUsuarios) =>
         prevUsuarios.map((usuario) =>
