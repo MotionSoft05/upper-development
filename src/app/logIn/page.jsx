@@ -29,11 +29,14 @@ function LogIn() {
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
 
   const isFormValid = email && password;
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setIsFormSubmitted(true);
+
     if (isFormValid) {
       try {
         await signInWithEmailAndPassword(auth, email, password);
@@ -70,7 +73,8 @@ function LogIn() {
     }
   };
 
-  const handleShowPasswordClick = () => {
+  const handleShowPasswordClick = (e) => {
+    e.preventDefault(); // Evita el comportamiento predeterminado del botón
     setShowPassword(!showPassword);
   };
 
@@ -91,22 +95,35 @@ function LogIn() {
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
                 Inicio de Sesión
               </h2>
-              {error && <div className="text-red-500 mb-4">{error}</div>}{" "}
-              {/* Mostrar mensaje de error si existe */}
-              <div className="mb-6 relative" data-te-input-wrapper-init>
+              {error && <div className="text-red-500 mb-4">{error}</div>}
+              <div
+                className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
+                  isFormSubmitted && !email ? "border-red-500" : ""
+                }`}
+                data-te-input-wrapper-init
+              >
                 <input
                   type="text"
-                  className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                  className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
+                    isFormSubmitted && !email ? "ring ring-red-500" : ""
+                  }`}
                   id="exampleFormControlInput2"
                   placeholder="Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div className="mb-6 relative" data-te-input-wrapper-init>
+              <div
+                className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
+                  isFormSubmitted && !password ? "border-red-500" : ""
+                }`}
+                data-te-input-wrapper-init
+              >
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                  className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
+                    isFormSubmitted && !password ? "ring ring-red-500" : ""
+                  }`}
                   id="exampleFormControlInput22"
                   placeholder="Contraseña"
                   value={password}
