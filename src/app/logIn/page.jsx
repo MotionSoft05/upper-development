@@ -2,7 +2,11 @@
 "use client";
 import React, { useState } from "react";
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  sendPasswordResetEmail,
+} from "firebase/auth";
 import Link from "next/link";
 
 const firebaseConfig = {
@@ -22,6 +26,10 @@ function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState(null);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
+    useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const isFormValid = email && password;
 
   const handleLogin = async (e) => {
@@ -42,6 +50,28 @@ function LogIn() {
     } else {
       setError("Por favor, completa todos los campos."); // Muestra un mensaje de error si los campos no están completos
     }
+  };
+
+  const handleForgotPassword = async () => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      // Mostrar un mensaje al usuario indicando que se ha enviado un correo electrónico de restablecimiento de contraseña
+      console.log(
+        "Correo electrónico de restablecimiento de contraseña enviado"
+      );
+    } catch (error) {
+      console.error(
+        "Error al enviar el correo electrónico de restablecimiento de contraseña:",
+        error.message
+      );
+    } finally {
+      // Cerrar el modal de recuperación de contraseña
+      setIsForgotPasswordModalOpen(false);
+    }
+  };
+
+  const handleShowPasswordClick = () => {
+    setShowPassword(!showPassword);
   };
 
   return (
@@ -75,13 +105,31 @@ function LogIn() {
               </div>
               <div className="mb-6 relative" data-te-input-wrapper-init>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                   id="exampleFormControlInput22"
                   placeholder="Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
+                  onClick={handleShowPasswordClick}
+                >
+                  {showPassword ? (
+                    <img
+                      src="/img/ojo.png"
+                      alt="Hide password"
+                      className="w-7 h-7"
+                    />
+                  ) : (
+                    <img
+                      src="/img/ojosno.png"
+                      alt="Show password"
+                      className="w-7 h-7"
+                    />
+                  )}
+                </button>
               </div>
               <div className="text-center lg:text-left">
                 <button
@@ -102,6 +150,48 @@ function LogIn() {
                     <Link href="/register">Register here</Link>
                   </strong>
                 </div>
+                <button
+                  onClick={() => setIsForgotPasswordModalOpen(true)}
+                  className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+                {isForgotPasswordModalOpen && (
+                  <div className="fixed inset-0 flex items-center justify-center">
+                    <div
+                      className="absolute inset-0 bg-gray-800 opacity-75"
+                      onClick={() => setIsForgotPasswordModalOpen(false)}
+                    ></div>
+                    <div className="bg-white p-8 rounded-md shadow-lg z-10">
+                      <h2 className="text-2xl font-semibold mb-4">
+                        Recuperar Contraseña
+                      </h2>
+                      <p className="text-gray-600 mb-6">
+                        Ingresa tu correo electrónico para restablecer tu
+                        contraseña.
+                      </p>
+                      <input
+                        type="email"
+                        className="w-full p-2 border rounded mb-4"
+                        placeholder="Correo electrónico"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                      <button
+                        onClick={handleForgotPassword}
+                        className="w-full bg-primary text-black py-2 rounded hover:bg-primary-600 focus:outline-none"
+                      >
+                        Enviar Correo de Recuperación
+                      </button>
+                      <button
+                        onClick={() => setIsForgotPasswordModalOpen(false)}
+                        className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           </div>
