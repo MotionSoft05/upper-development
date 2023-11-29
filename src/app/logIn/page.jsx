@@ -162,9 +162,9 @@ function LogIn() {
                 </button>
 
                 <div className="mt-3 text-sm font-light text-gray-500">
-                  Don't have an account?
+                  ¿No tienes una cuenta?
                   <strong>
-                    <Link href="/register">Register here</Link>
+                    <Link href="/register"> Registrate aquí</Link>
                   </strong>
                 </div>
                 <button
@@ -196,7 +196,7 @@ function LogIn() {
                       />
                       <button
                         onClick={handleForgotPassword}
-                        className="w-full bg-primary text-black py-2 rounded hover:bg-primary-600 focus:outline-none"
+                        className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
                       >
                         Enviar Correo de Recuperación
                       </button>
