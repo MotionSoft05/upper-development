@@ -150,7 +150,7 @@ function Pantalla1() {
               }
             });
 
-            console.log("Eventos filtrados por pantalla:", eventosData);
+            console.log("Eventos filtrados por ppantalla:", eventosData);
 
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
