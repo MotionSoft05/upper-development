@@ -39,13 +39,26 @@ function LogIn() {
 
     if (isFormValid) {
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        console.log("Usuario ha iniciado sesión exitosamente");
-        // Limpiar campos del formulario y redirigir al usuario.
-        setEmail("");
-        setPassword("");
-        setError(null); // Limpiar cualquier mensaje de error existente
-        window.location.href = "/";
+        const userCredential = await signInWithEmailAndPassword(
+          auth,
+          email,
+          password
+        );
+
+        const user = userCredential.user;
+
+        if (user && user.emailVerified) {
+          console.log("Usuario ha iniciado sesión exitosamente");
+          // Limpiar campos del formulario y redirigir al usuario.
+          setEmail("");
+          setPassword("");
+          setError(null); // Limpiar cualquier mensaje de error existente
+          window.location.href = "/";
+        } else {
+          setError(
+            "Por favor, verifica tu correo electrónico antes de iniciar sesión."
+          );
+        }
       } catch (error) {
         console.error("Error al iniciar sesión:", error.message);
         setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
