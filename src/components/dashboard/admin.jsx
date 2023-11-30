@@ -7,6 +7,7 @@ import {
   updateDoc,
   addDoc,
   deleteDoc,
+  updateData,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -28,6 +29,7 @@ const auth = getAuth(app);
 function Admin() {
   const [usuarios, setUsuarios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
+  const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
   const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
@@ -163,50 +165,59 @@ function Admin() {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
 
       // Convierte los valores de cadena a números antes de la actualización
-      const psNumber = parseInt(usuarioEditado.ps);
-      const pdNumber = parseInt(usuarioEditado.pd);
+      const psNumber = parseInt(usuarioEditado.ps || 0); // Usa 0 si es nulo o vacío
+      const pdNumber = parseInt(usuarioEditado.pd || 0);
 
-      await updateDoc(usuarioDocRef, {
+      const isPsValid = !isNaN(psNumber);
+      const isPdValid = !isNaN(pdNumber);
+
+      const updateData = {
         nombre: usuarioEditado.nombre,
         apellido: usuarioEditado.apellido,
         email: usuarioEditado.email,
         telefono: usuarioEditado.telefono,
-        ps: psNumber,
-        pd: pdNumber,
-        total: psNumber + pdNumber, // Suma correctamente los valores
-        tipoPlan: usuarioEditado.tipoPlan,
-      });
+        ...(isPsValid && { ps: psNumber }),
+        ...(isPdValid && { pd: pdNumber }),
+        ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
+        ...(usuarioEditado.tipoPlan && { tipoPlan: usuarioEditado.tipoPlan }),
+      };
 
-      setUsuarios((prevUsuarios) =>
-        prevUsuarios.map((usuario) =>
-          usuario.id === usuarioEditado.id
-            ? {
-                ...usuario,
-                nombre: usuarioEditado.nombre,
-                apellido: usuarioEditado.apellido,
-                email: usuarioEditado.email,
-                telefono: usuarioEditado.telefono,
-                ps: psNumber,
-                pd: pdNumber,
-                total: psNumber + pdNumber,
-                tipoPlan: usuarioEditado.tipoPlan,
-              }
-            : usuario
-        )
-      );
+      if (Object.keys(updateData).length > 0) {
+        await updateDoc(usuarioDocRef, updateData);
 
-      setModoEdicion(false);
-      setUsuarioEditado({
-        id: "",
-        nombre: "",
-        apellido: "",
-        email: "",
-        telefono: "",
-        ps: "",
-        pd: "",
-        total: "",
-        tipoPlan: "",
-      });
+        setUsuarios((prevUsuarios) =>
+          prevUsuarios.map((usuario) =>
+            usuario.id === usuarioEditado.id
+              ? {
+                  ...usuario,
+                  nombre: usuarioEditado.nombre,
+                  apellido: usuarioEditado.apellido,
+                  email: usuarioEditado.email,
+                  telefono: usuarioEditado.telefono,
+                  ...(isPsValid && { ps: psNumber }),
+                  ...(isPdValid && { pd: pdNumber }),
+                  ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
+                  tipoPlan: usuarioEditado.tipoPlan,
+                }
+              : usuario
+          )
+        );
+
+        setModoEdicion(false);
+        setUsuarioEditado({
+          id: "",
+          nombre: "",
+          apellido: "",
+          email: "",
+          telefono: "",
+          ps: "",
+          pd: "",
+          total: "",
+          tipoPlan: "",
+        });
+      } else {
+        console.warn("No hay campos válidos para actualizar.");
+      }
     } catch (error) {
       console.error("Error al guardar los cambios en Firebase:", error);
     }
@@ -245,6 +256,23 @@ function Admin() {
     return <p>No tienes permiso para acceder a esta página.</p>;
   }
 
+  const aplicarFiltro = () => {
+    if (filtroSeleccionado === "conNumero") {
+      return usuarios.filter(
+        (usuario) => usuario.ps !== "" && usuario.ps !== 0
+      );
+    } else if (filtroSeleccionado === "sinNumero") {
+      return usuarios.filter(
+        (usuario) =>
+          (usuario.ps === "" || usuario.ps === 0) &&
+          (usuario.pd === "" || usuario.pd === 0) &&
+          (usuario.total === "" || usuario.total === 0)
+      );
+    } else {
+      return usuarios;
+    }
+  };
+
   return (
     <div class="flex flex-col  bg-gray-100">
       <div class="flex-1 flex flex-wrap">
@@ -253,17 +281,42 @@ function Admin() {
             <div class="absolute top-1 left-2 inline-flex items-center p-2">
               <i class="fas fa-search text-gray-400"></i>
             </div>
-            <input
-              class="w-full h-10 pl-10 pr-4 py-1 text-base placeholder-gray-500 border rounded-full focus:shadow-outline"
-              type="search"
-              placeholder="Buscar..."
-            />
           </div>
-
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
               Datos de Usuarios
             </h2>
+            <div className="flex space-x-4 mt-4">
+              <button
+                onClick={() => setFiltroSeleccionado("todos")}
+                className={`${
+                  filtroSeleccionado === "todos" ? "bg-blue-500" : "bg-gray-300"
+                } text-white font-semibold py-2 px-4 rounded`}
+              >
+                Todos
+              </button>
+              <button
+                onClick={() => setFiltroSeleccionado("conNumero")}
+                className={`${
+                  filtroSeleccionado === "conNumero"
+                    ? "bg-blue-500"
+                    : "bg-gray-300"
+                } text-white font-semibold py-2 px-4 rounded`}
+              >
+                Licencias
+              </button>
+              <button
+                onClick={() => setFiltroSeleccionado("sinNumero")}
+                className={`${
+                  filtroSeleccionado === "sinNumero"
+                    ? "bg-blue-500"
+                    : "bg-gray-300"
+                } text-white font-semibold py-2 px-4 rounded`}
+              >
+                Sin Licencias
+              </button>
+            </div>
+
             <div class="my-1"></div>
             <div class="bg-gradient-to-r from-cyan-300 to-cyan-500 h-px mb-6"></div>
             <table class="w-full table-auto text-sm">
@@ -297,7 +350,7 @@ function Admin() {
                 </tr>
               </thead>
               <tbody>
-                {usuarios.map((usuario) => (
+                {aplicarFiltro().map((usuario) => (
                   <tr className="hover:bg-grey-lighter" key={usuario.id}>
                     <td className="py-2 px-4 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
