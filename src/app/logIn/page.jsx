@@ -6,6 +6,7 @@ import {
   getAuth,
   signInWithEmailAndPassword,
   sendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import Link from "next/link";
 
@@ -30,6 +31,10 @@ function LogIn() {
     useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+  const [isResendingVerificationEmail, setIsResendingVerificationEmail] =
+    useState(false);
+
+  const [successMessage, setSuccessMessage] = useState(null);
 
   const isFormValid = email && password;
 
@@ -58,6 +63,24 @@ function LogIn() {
           setError(
             "Por favor, verifica tu correo electrónico antes de iniciar sesión."
           );
+
+          // Agrega la opción de reenviar el correo de verificación
+          const resendVerificationOption = (
+            <button
+              className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
+              onClick={handleResendVerificationEmail}
+            >
+              ¿No has recibido el correo de verificación? Haz clic aquí para
+              reenviar.
+            </button>
+          );
+
+          setError((prevError) => (
+            <>
+              {prevError}
+              {resendVerificationOption}
+            </>
+          ));
         }
       } catch (error) {
         console.error("Error al iniciar sesión:", error.message);
@@ -65,6 +88,25 @@ function LogIn() {
       }
     } else {
       setError("Por favor, completa todos los campos."); // Muestra un mensaje de error si los campos no están completos
+    }
+  };
+
+  const handleResendVerificationEmail = async () => {
+    try {
+      setIsResendingVerificationEmail(true);
+      const user = auth.currentUser;
+      await sendEmailVerification(user);
+      console.log("Correo de verificación reenviado exitosamente");
+      setSuccessMessage("Correo de verificación reenviado exitosamente");
+      setIsResendingVerificationEmail(false);
+
+      // Limpiar el mensaje después de 3 segundos
+    } catch (error) {
+      console.error(
+        "Error al reenviar el correo de verificación:",
+        error.message
+      );
+      setIsResendingVerificationEmail(false);
     }
   };
 
@@ -109,6 +151,9 @@ function LogIn() {
                 Inicio de Sesión
               </h2>
               {error && <div className="text-red-500 mb-4">{error}</div>}
+              {successMessage && (
+                <p className="text-green-500 mb-4">{successMessage}</p>
+              )}
               <div
                 className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
                   isFormSubmitted && !email ? "border-red-500" : ""
