@@ -516,6 +516,7 @@ function Admin() {
                   }
                   placeholder="PS"
                 />
+                //
                 <input
                   className="p-2 rounded border border-gray-300"
                   type="text"
@@ -540,7 +541,6 @@ function Admin() {
                   }
                   placeholder="Total"
                 />
-
                 <button
                   onClick={handleGuardarTransaccion}
                   className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
