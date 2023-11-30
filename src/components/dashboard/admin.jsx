@@ -43,6 +43,7 @@ function Admin() {
     ps: "", // Cambiado de "plan" a "ps"
     pd: "", // Nuevo campo "pd"
     total: "", // Nuevo campo "numero"
+    tipoPlan: "",
   });
 
   const [transaccionEditada, setTransaccionEditada] = useState({
@@ -173,6 +174,7 @@ function Admin() {
         ps: psNumber,
         pd: pdNumber,
         total: psNumber + pdNumber, // Suma correctamente los valores
+        tipoPlan: usuarioEditado.tipoPlan,
       });
 
       setUsuarios((prevUsuarios) =>
@@ -187,6 +189,7 @@ function Admin() {
                 ps: psNumber,
                 pd: pdNumber,
                 total: psNumber + pdNumber,
+                tipoPlan: usuarioEditado.tipoPlan,
               }
             : usuario
         )
@@ -202,6 +205,7 @@ function Admin() {
         ps: "",
         pd: "",
         total: "",
+        tipoPlan: "",
       });
     } catch (error) {
       console.error("Error al guardar los cambios en Firebase:", error);
@@ -285,6 +289,9 @@ function Admin() {
                     Total
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Tipo de Plan
+                  </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Acciones
                   </th>
                 </tr>
@@ -362,6 +369,7 @@ function Admin() {
                         usuario.ps
                       )}
                     </td>
+
                     <td className="py-2 px-4 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
@@ -395,6 +403,22 @@ function Admin() {
                         />
                       ) : (
                         usuario.total
+                      )}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
+                        <input
+                          type="text"
+                          value={usuarioEditado.tipoPlan}
+                          onChange={(e) =>
+                            setUsuarioEditado({
+                              ...usuarioEditado,
+                              tipoPlan: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        usuario.tipoPlan
                       )}
                     </td>
 
