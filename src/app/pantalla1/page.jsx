@@ -4,7 +4,9 @@ import {
   collection,
   getDocs,
   where,
-  query as firestoreQuery,
+  query,
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
@@ -25,6 +27,8 @@ function Pantalla1() {
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
+
+  const numeroPantallaActual = "1";
 
   // Slider
   const [sliderRef] = useKeenSlider(
@@ -106,43 +110,121 @@ function Pantalla1() {
 
   useEffect(() => {
     if (user && firestore) {
+      const userRef = doc(firestore, "usuarios", user.uid);
+      const obtenerUsuario = async () => {
+        try {
+          const docSnap = await getDoc(userRef);
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            const nombrePantallasUsuario = userData.nombrePantallas || {};
+            const pantallasNumeradas = {};
+
+            Object.keys(nombrePantallasUsuario).forEach((key, index) => {
+              pantallasNumeradas[nombrePantallasUsuario[key]] = index + 1;
+            });
+
+            const eventosRef = collection(firestore, "eventos");
+            const eventosQuery = query(
+              eventosRef,
+              where("userId", "==", user.uid)
+            );
+            const querySnapshot = await getDocs(eventosQuery);
+
+            const eventosData = [];
+            querySnapshot.forEach((doc) => {
+              const evento = { id: doc.id, ...doc.data() };
+              const devicesEvento = evento.devices || [];
+
+              const pantallaCoincidente = devicesEvento.find((device) =>
+                Object.keys(pantallasNumeradas).includes(device)
+              );
+
+              if (pantallaCoincidente) {
+                const posicionPantalla =
+                  pantallasNumeradas[pantallaCoincidente];
+                const posicionActual = parseInt(numeroPantallaActual, 10);
+
+                if (posicionPantalla === posicionActual) {
+                  eventosData.push(evento);
+                }
+              }
+            });
+
+            console.log("Eventos filtrados por pantalla:", eventosData);
+
+            // Filtrar por fecha y hora los eventos filtrados por pantalla
+            const eventosEnCurso = eventosData.filter((evento) => {
+              const fechaActual = new Date();
+              const fechaInicioEvento = new Date(evento.fechaInicio);
+              const fechaFinalEvento = new Date(evento.fechaFinal);
+              const horaActual = obtenerHora();
+              const horaInicialEvento = evento.horaInicialReal;
+              const horaFinalEvento = evento.horaFinalReal;
+
+              const fechaActualEnRango =
+                fechaActual >= fechaInicioEvento &&
+                fechaActual <= fechaFinalEvento;
+
+              const horaActualEnRango =
+                horaActual >= horaInicialEvento &&
+                horaActual <= horaFinalEvento;
+              console.log("evento", evento);
+              console.log("fechaActual", fechaActual);
+              console.log("fechaInicioEvento", fechaInicioEvento);
+              console.log("fechaFinalEvento", fechaFinalEvento);
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("fechaActualEnRango", fechaActualEnRango);
+
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("horaActual", horaActual);
+              console.log("horaInicialEvento", horaInicialEvento);
+              console.log("horaFinalEvento", horaFinalEvento);
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("horaActualEnRango", horaActualEnRango);
+              console.log(
+                "---------------------------------------------------"
+              );
+              return fechaActualEnRango && horaActualEnRango;
+            });
+
+            console.log("Eventos filtrados por fecha y hora:", eventosEnCurso);
+
+            // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
+            // setEventData(eventosEnCurso);
+          } else {
+            console.log("No se encontraron datos para este usuario.");
+          }
+        } catch (error) {
+          console.error("Error al obtener datos del usuario:", error);
+        }
+      };
+      obtenerUsuario();
+    }
+  }, [user, firestore]);
+
+  useEffect(() => {
+    if (user && firestore) {
       const eventosRef = collection(firestore, "eventos");
-      const eventosQuery = firestoreQuery(
-        eventosRef,
-        where("userId", "==", user.uid)
-      );
+      const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
 
       const obtenerEventos = async () => {
         try {
           const querySnapshot = await getDocs(eventosQuery);
-          const eventos = querySnapshot.docs.map((doc) => doc.data());
-
-          // Obtener fecha y hora actual
-          const fechaActual = new Date();
-          const horaActual = obtenerHora();
-
-          // Filtrar eventos en función de la fecha y hora actual
-          const eventosEnCurso = eventos.filter((evento) => {
-            const fechaInicio = new Date(evento.fechaInicio);
-            const fechaFinal = new Date(evento.fechaFinal);
-            const horaInicial = evento.horaInicialReal;
-            const horaFinal = evento.horaFinalReal;
-
-            // Comparar si la fecha actual está dentro del rango de fechas del evento
-            const fechaActualEnRango =
-              fechaActual >= fechaInicio && fechaActual <= fechaFinal;
-
-            // Comparar si la hora actual está dentro del rango horario del evento
-            const horaActualEnRango =
-              horaActual >= horaInicial && horaActual <= horaFinal;
-
-            return fechaActualEnRango && horaActualEnRango;
+          const eventosData = [];
+          querySnapshot.forEach((doc) => {
+            eventosData.push({ id: doc.id, ...doc.data() });
           });
-
-          // Actualizar el estado con los eventos en curso
-          setEventData(eventosEnCurso);
+          // console.log("Datos de eventos del usuario:", eventosData);
+          // Aquí puedes hacer algo con los datos de los eventos, como setearlos en el estado
+          // setEventData(eventosData);
         } catch (error) {
-          console.error("Error al obtener eventos:", error);
+          console.error("Error al obtener datos de eventos:", error);
         }
       };
 
