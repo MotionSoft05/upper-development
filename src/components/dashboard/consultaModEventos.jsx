@@ -41,19 +41,37 @@ function ConsultaModEvento() {
     return () => unsubscribe();
   }, []);
 
-  const consultarEventos = async (userId) => {
+  const consultarEventos = async () => {
     try {
-      const eventosRef = firebase
-        .firestore()
-        .collection("eventos")
-        .where("userId", "==", userId);
-      eventosRef.onSnapshot((snapshot) => {
-        const eventosData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setEventos(eventosData);
-      });
+      const user = firebase.auth().currentUser;
+
+      if (user && user.email === "uppermex10@gmail.com") {
+        // Si el usuario es uppermex10@gmail.com, muestra todos los eventos
+        const eventosRef = firebase.firestore().collection("eventos");
+        eventosRef.onSnapshot((snapshot) => {
+          const eventosData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log("Eventos recibidos:", eventosData);
+          setEventos(eventosData);
+        });
+      } else if (user) {
+        // Si es otro usuario, muestra solo sus propios eventos
+        const eventosRef = firebase
+          .firestore()
+          .collection("eventos")
+          .where("userId", "==", user.uid);
+
+        eventosRef.onSnapshot((snapshot) => {
+          const eventosData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          console.log("Eventos recibidos:", eventosData);
+          setEventos(eventosData);
+        });
+      }
     } catch (error) {
       console.error("Error al consultar eventos:", error);
     }
