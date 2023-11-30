@@ -4,7 +4,7 @@ function Sidebar({
   userEmail,
   setShowAltaEvento,
   setShowConsultaEvento,
-  setShowPantallas,
+
   setShowPantallaSalon,
   setShowPantallaDirectorio,
   setShowPublicidad,
@@ -29,7 +29,6 @@ function Sidebar({
                 setShowAdmin(true);
                 setShowAltaEvento(false);
                 setShowConsultaEvento(false);
-                setShowPantallas(false);
                 setShowPantallaSalon(false);
                 setShowPantallaDirectorio(false);
                 setShowPublicidad(false);
@@ -54,7 +53,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(true);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -90,7 +88,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(true);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -132,7 +129,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(true);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -168,7 +164,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(true);
               setShowPublicidad(false);
@@ -204,7 +199,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(true);
@@ -236,42 +230,6 @@ function Sidebar({
         </li>
 
         <li className="my-px">
-          <button
-            onClick={() => {
-              setShowAdmin(false);
-              setShowAltaEvento(false);
-              setShowConsultaEvento(false);
-              setShowPantallas(true);
-              setShowPantallaSalon(false);
-              setShowPantallaDirectorio(false);
-              setShowPublicidad(false);
-              setShowlicencia(false);
-              setShowGuia(false);
-              setShowSoporte(false);
-            }}
-          >
-            <a
-              href="#"
-              className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
-            >
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  height="24"
-                  viewBox="0 -960 960 960"
-                  width="24"
-                >
-                  <path
-                    d="M320-120v-80H160q-33 0-56.5-23.5T80-280v-480q0-33 23.5-56.5T160-840h640q33 0 56.5 23.5T880-760v480q0 33-23.5 56.5T800-200H640v80H320ZM160-280h640v-480H160v480Zm0 0v-480 480Z"
-                    fill="#9ca3af"
-                  />
-                </svg>
-              </span>
-              <span className="ml-3">Pantallas</span>
-            </a>
-          </button>
-        </li>
-        <li className="my-px">
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
             Mas información
           </span>
@@ -282,7 +240,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
+
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -318,7 +276,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -354,7 +311,6 @@ function Sidebar({
               setShowAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-              setShowPantallas(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
