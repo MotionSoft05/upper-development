@@ -24,7 +24,7 @@ function footer() {
           </a>
         </div>
 
-        <div className="sdsd">
+        <div className="">
           <span className="block text-sm sm:text-center text-gray-400">
             © 2023
             <a href="#" className="hover:underline">
