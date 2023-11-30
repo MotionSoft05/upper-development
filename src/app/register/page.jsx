@@ -5,6 +5,7 @@ import {
   getAuth,
   createUserWithEmailAndPassword,
   updateProfile,
+  sendEmailVerification,
 } from "firebase/auth";
 import Link from "next/link";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
@@ -48,6 +49,7 @@ function Register() {
   const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] =
     useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+  const [showVerificationModal, setShowVerificationModal] = useState(false);
 
   const [errors, setErrors] = useState({
     firstName: "",
@@ -180,6 +182,8 @@ function Register() {
         phoneNumber: phoneNumber,
       });
 
+      await sendEmailVerification(userCredential.user);
+
       const userUid = userCredential.user.uid;
       const db = getFirestore();
       const userRef = doc(db, "usuarios", userUid);
@@ -190,18 +194,23 @@ function Register() {
         telefono: phoneNumber,
       });
 
-      setSuccessMessage("Usuario registrado correctamente");
+      setShowVerificationModal(true);
+
       setTimeout(() => {
         setFirstName("");
         setLastName("");
         setPhoneNumber("");
         setEmail("");
         setPassword("");
-        window.location.href = "/";
+        //window.location.href = "/login";
       }, 2300);
     } catch (error) {
-      setErrors(error.message);
-      console.error("Error al registrar el usuario:", error.message);
+      if (error.code === "auth/email-already-in-use") {
+        setEmailError("El correo electrónico ya está en uso");
+      } else {
+        setErrors(error.message);
+        console.error("Error al registrar el usuario:", error.message);
+      }
     }
   };
 
@@ -459,6 +468,24 @@ function Register() {
                     <Link href="/login">Ingresa aquí</Link>
                   </strong>
                 </div>
+                {showVerificationModal && (
+                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-8 rounded-lg">
+                      <p className="text-xl font-semibold mb-4">
+                        Usuario registrado correctamente.
+                      </p>
+                      <p className="mb-4">
+                        Por favor, verifica tu correo electrónico. Se ha enviado
+                        un correo de verificación.
+                      </p>
+                      <Link href="/login" passHref>
+                        <p className="text-blue-500 hover:underline">
+                          Ir a iniciar sesión
+                        </p>
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
             </form>
           </div>
