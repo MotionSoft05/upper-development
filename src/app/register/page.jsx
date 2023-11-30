@@ -465,7 +465,7 @@ function Register() {
                 <div className="mt-3 text-sm font-light text-gray-500">
                   ¿Ya tienes una cuenta?
                   <strong>
-                    <Link href="/login">Ingresa aquí</Link>
+                    <Link href="/login"> Ingresa aquí</Link>
                   </strong>
                 </div>
                 {showVerificationModal && (
