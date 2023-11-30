@@ -150,8 +150,6 @@ function Pantalla1() {
               }
             });
 
-            console.log("Eventos filtrados por ppantalla:", eventosData);
-
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
               const fechaActual = new Date();
@@ -168,28 +166,28 @@ function Pantalla1() {
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
-              console.log("evento", evento);
-              console.log("fechaActual", fechaActual);
-              console.log("fechaInicioEvento", fechaInicioEvento);
-              console.log("fechaFinalEvento", fechaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("fechaActualEnRango", fechaActualEnRango);
+              // console.log("evento", evento);
+              // console.log("fechaActual", fechaActual);
+              // console.log("fechaInicioEvento", fechaInicioEvento);
+              // console.log("fechaFinalEvento", fechaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("fechaActualEnRango", fechaActualEnRango);
 
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActual", horaActual);
-              console.log("horaInicialEvento", horaInicialEvento);
-              console.log("horaFinalEvento", horaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActualEnRango", horaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("horaActual", horaActual);
+              // console.log("horaInicialEvento", horaInicialEvento);
+              // console.log("horaFinalEvento", horaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("horaActualEnRango", horaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
               return fechaActualEnRango && horaActualEnRango;
             });
 
@@ -204,7 +202,14 @@ function Pantalla1() {
           console.error("Error al obtener datos del usuario:", error);
         }
       };
+
       obtenerUsuario();
+
+      const interval = setInterval(() => {
+        obtenerUsuario(); // Llamar a la función cada 5 segundos
+      }, 5000);
+
+      return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
 
@@ -277,13 +282,11 @@ function Pantalla1() {
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
-  console.log(eventData);
-
   if (!eventData || eventData.length === 0) {
     return <p>No hay eventos disponibles en este momento.</p>;
   }
 
-  const eventoActual = eventData[0]; // Obtener el primer evento de la lista
+  const eventoActual = obtenerUsuario[0]; // Obtener el primer evento de la lista
 
   const {
     personalizacionTemplate,

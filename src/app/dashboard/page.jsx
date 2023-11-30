@@ -9,12 +9,11 @@ import PantallasSalon from "@/components/dashboard/pantallasSalon";
 import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin";
-import Pantallas from "@/components/dashboard/pantallas";
-import Link from "next/link";
+
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -38,7 +37,6 @@ function DashBoard() {
 
   const [showAltaEvento, setShowAltaEvento] = useState(false);
 
-  const [showPantallas, setShowPantallas] = useState(false);
   const [showPantallaSalon, setShowPantallaSalon] = useState(false);
   const [showPantallaDirectorio, setShowPantallaDirectorio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
@@ -78,7 +76,6 @@ function DashBoard() {
           setShowAdmin={setShowAdmin}
           setShowAltaEvento={setShowAltaEvento}
           setShowConsultaEvento={setShowConsultaEvento}
-          setShowPantallas={setShowPantallas}
           setShowPantallaSalon={setShowPantallaSalon}
           setShowPantallaDirectorio={setShowPantallaDirectorio}
           setShowPublicidad={setShowPublicidad}
@@ -93,7 +90,6 @@ function DashBoard() {
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
 
-          {showPantallas && <Pantallas />}
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPublicidad && <Publicidad />}
