@@ -516,7 +516,6 @@ function Admin() {
                   }
                   placeholder="PS"
                 />
-                //
                 <input
                   className="p-2 rounded border border-gray-300"
                   type="text"
