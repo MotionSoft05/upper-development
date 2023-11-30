@@ -28,7 +28,7 @@ function Navigation() {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
+      if (user && user.emailVerified) {
         setUser(user);
       } else {
         setUser(null);
@@ -95,25 +95,30 @@ function Navigation() {
               </ul>
               <div className="px-3">
                 <div className="ml-auto flex items-baseline space-x-4">
-                  {user ? (
+                  {user && (
                     <div className="flex items-center space-x-2">
                       <span>Hola, {user.email}</span>
-                      <Link href="/dashboard">
-                        <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                          Dashboard
-                        </button>
-                      </Link>
-                      <button
-                        onClick={async () => {
-                          await handleLogout();
-                          window.location.href = "/";
-                        }}
-                        className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
-                      >
-                        Cerrar sesión
-                      </button>
+                      {user.emailVerified && ( // Verificar si el correo electrónico está verificado
+                        <>
+                          <Link href="/dashboard">
+                            <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
+                              Dashboard
+                            </button>
+                          </Link>
+                          <button
+                            onClick={async () => {
+                              await handleLogout();
+                              window.location.href = "/";
+                            }}
+                            className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
+                          >
+                            Cerrar sesión
+                          </button>
+                        </>
+                      )}
                     </div>
-                  ) : (
+                  )}
+                  {!user && (
                     <div className="flex items-center space-x-2">
                       <Link href="/register">
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
