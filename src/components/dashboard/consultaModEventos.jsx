@@ -480,9 +480,10 @@ function ConsultaModEvento() {
                                     <label className="block text-sm font-medium text-gray-700">
                                       Id del evento
                                     </label>
-                                    <td className="w-full px-2 py-1 rounded-lg text-center">
-                                      {evento.id}
-                                    </td>
+                                    <input
+                                      value={eventoEditado?.id}
+                                      className="w-full px-2 py-1 text-center"
+                                    />
                                   </div>
                                 </div>
 
