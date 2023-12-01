@@ -22,14 +22,14 @@ const obtenerHora = () => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-function Pantalla3() {
+function PantallaDirec1() {
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
 
-  const numeroPantallaActual = "3";
+  const numeroPantallaDirecActual = "1";
 
   // Slider
   const [sliderRef] = useKeenSlider(
@@ -143,7 +143,7 @@ function Pantalla3() {
               if (pantallaCoincidente) {
                 const posicionPantalla =
                   pantallasNumeradas[pantallaCoincidente];
-                const posicionActual = parseInt(numeroPantallaActual, 10);
+                const posicionActual = parseInt(numeroPantallaDirecActual, 10);
 
                 if (posicionPantalla === posicionActual) {
                   eventosData.push(evento);
@@ -390,4 +390,4 @@ function Pantalla3() {
   );
 }
 
-export default Pantalla3;
+export default PantallaDirec1;

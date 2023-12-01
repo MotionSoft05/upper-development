@@ -27,6 +27,7 @@ function Pantalla1() {
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
+  const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
 
   const numeroPantallaActual = "1";
 
@@ -166,33 +167,33 @@ function Pantalla1() {
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
-              // console.log("evento", evento);
-              // console.log("fechaActual", fechaActual);
-              // console.log("fechaInicioEvento", fechaInicioEvento);
-              // console.log("fechaFinalEvento", fechaFinalEvento);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              // console.log("fechaActualEnRango", fechaActualEnRango);
+              console.log("evento", evento);
+              console.log("fechaActual", fechaActual);
+              console.log("fechaInicioEvento", fechaInicioEvento);
+              console.log("fechaFinalEvento", fechaFinalEvento);
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("fechaActualEnRango", fechaActualEnRango);
 
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              // console.log("horaActual", horaActual);
-              // console.log("horaInicialEvento", horaInicialEvento);
-              // console.log("horaFinalEvento", horaFinalEvento);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              // console.log("horaActualEnRango", horaActualEnRango);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("horaActual", horaActual);
+              console.log("horaInicialEvento", horaInicialEvento);
+              console.log("horaFinalEvento", horaFinalEvento);
+              console.log(
+                "---------------------------------------------------"
+              );
+              console.log("horaActualEnRango", horaActualEnRango);
+              console.log(
+                "---------------------------------------------------"
+              );
               return fechaActualEnRango && horaActualEnRango;
             });
 
             console.log("Eventos filtrados por fecha y hora:", eventosEnCurso);
-
+            setEventosEnCurso(eventosEnCurso);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -213,37 +214,7 @@ function Pantalla1() {
     }
   }, [user, firestore]);
 
-  useEffect(() => {
-    if (user && firestore) {
-      const eventosRef = collection(firestore, "eventos");
-      const eventosQuery = query(eventosRef, where("userId", "==", user.uid));
-
-      const obtenerEventos = async () => {
-        try {
-          const querySnapshot = await getDocs(eventosQuery);
-          const eventosData = [];
-          querySnapshot.forEach((doc) => {
-            eventosData.push({ id: doc.id, ...doc.data() });
-          });
-          // console.log("Datos de eventos del usuario:", eventosData);
-          // Aquí puedes hacer algo con los datos de los eventos, como setearlos en el estado
-          // setEventData(eventosData);
-        } catch (error) {
-          console.error("Error al obtener datos de eventos:", error);
-        }
-      };
-
-      obtenerEventos();
-
-      const interval = setInterval(() => {
-        obtenerEventos(); // Llamar a la función cada 5 segundos
-      }, 5000);
-
-      return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-    }
-  }, [user, firestore]);
-
-  if (!eventData) {
+  if (!eventosEnCurso) {
     return <p>Cargando...</p>;
   }
 
@@ -282,11 +253,11 @@ function Pantalla1() {
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
 
-  if (!eventData || eventData.length === 0) {
+  if (!eventosEnCurso || eventosEnCurso.length === 0) {
     return <p>No hay eventos disponibles en este momento.</p>;
   }
 
-  const eventoActual = obtenerUsuario[0]; // Obtener el primer evento de la lista
+  const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
   const {
     personalizacionTemplate,
@@ -296,6 +267,7 @@ function Pantalla1() {
     horaInicialReal,
     tipoEvento,
     description,
+    devices,
   } = eventoActual;
 
   return (
@@ -315,7 +287,7 @@ function Pantalla1() {
               className={`font-bold text-5xl mr-16`}
               style={{ color: personalizacionTemplate.fontColor }}
             >
-              {lugar}
+              {devices[0]}
             </h1>
           </div>
           {/* Linea arriba */}
