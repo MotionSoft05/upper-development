@@ -713,67 +713,149 @@ function AltaEventos() {
                   Seleccionar Dispositivos:
                 </h4>
                 <div className="mb-4">
-                  {console.log("nombrePantallas:", nombrePantallas)}
-                  {Array.isArray(selectedUserPantallas)
-                    ? selectedUserPantallas.map((nombrePantalla, index) => (
-                        <label key={index} className="block mb-2">
-                          <input
-                            type="checkbox"
-                            value={nombrePantalla}
-                            checked={selectedDevices.includes(nombrePantalla)}
-                            onChange={handleDeviceChange}
-                            className="mr-2"
-                          />
-                          {nombrePantalla}
-                        </label>
-                      ))
-                    : Object.values(selectedUserPantallas).map(
-                        (nombrePantalla, index) => (
-                          <label key={index} className="block mb-2">
-                            <input
-                              type="checkbox"
-                              value={nombrePantalla}
-                              checked={selectedDevices.includes(nombrePantalla)}
-                              onChange={handleDeviceChange}
-                              className="mr-2"
-                            />
-                            {nombrePantalla}
-                          </label>
-                        )
-                      )}
-                  {/* Adding the devices from nombrePantallasDirectorio */}
-                  {Array.isArray(selectedUserPantallasDirectorio)
-                    ? selectedUserPantallasDirectorio.map(
-                        (nombrePantalla, index) => (
-                          <label key={index} className="block mb-2">
-                            <input
-                              type="checkbox"
-                              value={nombrePantalla}
-                              checked={selectedDevices.includes(nombrePantalla)}
-                              onChange={handleDeviceChange}
-                              className="mr-2"
-                            />
-                            {nombrePantalla}
-                          </label>
-                        )
-                      )
-                    : Object.values(selectedUserPantallasDirectorio).map(
-                        (nombrePantalla, index) => (
-                          <label key={index} className="block mb-2">
-                            <input
-                              type="checkbox"
-                              value={nombrePantalla}
-                              checked={selectedDevices.includes(nombrePantalla)}
-                              onChange={handleDeviceChange}
-                              className="mr-2"
-                            />
-                            {nombrePantalla}
-                          </label>
-                        )
-                      )}
+                  {user && user.email !== "uppermex10@gmail.com" ? (
+                    // Renderizar pantallas del usuario logeado particular
+                    <>
+                      {Array.isArray(nombrePantallas)
+                        ? nombrePantallas.map((nombrePantalla, index) => (
+                            <label key={index} className="block mb-2">
+                              <input
+                                type="checkbox"
+                                value={nombrePantalla}
+                                checked={selectedDevices.includes(
+                                  nombrePantalla
+                                )}
+                                onChange={handleDeviceChange}
+                                className="mr-2"
+                              />
+                              {nombrePantalla}
+                            </label>
+                          ))
+                        : Object.values(nombrePantallas).map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )}
+                      {/* Adding the devices from nombrePantallasDirectorio */}
+                      {Array.isArray(nombrePantallasDirectorio)
+                        ? nombrePantallasDirectorio.map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )
+                        : Object.values(nombrePantallasDirectorio).map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )}
+                    </>
+                  ) : (
+                    // Renderizar pantallas del usuario "uppermex10@gmail.com"
+                    <>
+                      {Array.isArray(selectedUserPantallas)
+                        ? selectedUserPantallas.map((nombrePantalla, index) => (
+                            <label key={index} className="block mb-2">
+                              <input
+                                type="checkbox"
+                                value={nombrePantalla}
+                                checked={selectedDevices.includes(
+                                  nombrePantalla
+                                )}
+                                onChange={handleDeviceChange}
+                                className="mr-2"
+                              />
+                              {nombrePantalla}
+                            </label>
+                          ))
+                        : Object.values(selectedUserPantallas).map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )}
+                      {/* Adding the devices from selectedUserPantallasDirectorio */}
+                      {Array.isArray(selectedUserPantallasDirectorio)
+                        ? selectedUserPantallasDirectorio.map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )
+                        : Object.values(selectedUserPantallasDirectorio).map(
+                            (nombrePantalla, index) => (
+                              <label key={index} className="block mb-2">
+                                <input
+                                  type="checkbox"
+                                  value={nombrePantalla}
+                                  checked={selectedDevices.includes(
+                                    nombrePantalla
+                                  )}
+                                  onChange={handleDeviceChange}
+                                  className="mr-2"
+                                />
+                                {nombrePantalla}
+                              </label>
+                            )
+                          )}
+                    </>
+                  )}
                 </div>
               </div>
             </div>
+
             <div className="bg-gray-300 p-4 col-span-2">
               {" "}
               <h4 className="mb-2 text-2xl leading-none tracking-tight text-gray-900">
