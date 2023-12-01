@@ -51,6 +51,9 @@ function AltaEventos() {
   const [charCount, setCharCount] = useState(0);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserPantallas, setSelectedUserPantallas] = useState([]);
+  const [selectedUserPantallasDirectorio, setSelectedUserPantallasDirectorio] =
+    useState([]);
 
   useEffect(() => {
     // Obtener la lista de usuarios solo si el usuario logueado es "uppermex10@gmail.com"
@@ -69,7 +72,31 @@ function AltaEventos() {
   }, [user]);
 
   const handleUserSelect = (e) => {
-    setSelectedUser(e.target.value);
+    const selectedUserId = e.target.value;
+
+    // Obtener las pantallas del usuario seleccionado
+    const selectedUserPantallas =
+      allUsers.find((user) => user.id === selectedUserId)?.nombrePantallas ||
+      [];
+
+    // Obtener las pantallas del directorio del usuario seleccionado
+    const selectedUserPantallasDirectorio =
+      allUsers.find((user) => user.id === selectedUserId)
+        ?.nombrePantallasDirectorio || [];
+
+    // Establecer las pantallas del usuario seleccionado en el estado
+    setSelectedUserPantallas(selectedUserPantallas);
+
+    // Establecer las pantallas del directorio del usuario seleccionado en el estado
+    setSelectedUserPantallasDirectorio(selectedUserPantallasDirectorio);
+
+    // Restablecer las pantallas seleccionadas al cambiar de usuario
+    setSelectedDevices([]);
+    setImages([]);
+    // Otros restablecimientos que puedas necesitar...
+
+    // Finalmente, establecer el usuario seleccionado en el estado
+    setSelectedUser(selectedUserId);
   };
 
   useEffect(() => {
@@ -687,8 +714,8 @@ function AltaEventos() {
                 </h4>
                 <div className="mb-4">
                   {console.log("nombrePantallas:", nombrePantallas)}
-                  {Array.isArray(nombrePantallas)
-                    ? nombrePantallas.map((nombrePantalla, index) => (
+                  {Array.isArray(selectedUserPantallas)
+                    ? selectedUserPantallas.map((nombrePantalla, index) => (
                         <label key={index} className="block mb-2">
                           <input
                             type="checkbox"
@@ -700,7 +727,7 @@ function AltaEventos() {
                           {nombrePantalla}
                         </label>
                       ))
-                    : Object.values(nombrePantallas).map(
+                    : Object.values(selectedUserPantallas).map(
                         (nombrePantalla, index) => (
                           <label key={index} className="block mb-2">
                             <input
@@ -715,20 +742,22 @@ function AltaEventos() {
                         )
                       )}
                   {/* Adding the devices from nombrePantallasDirectorio */}
-                  {Array.isArray(nombrePantallasDirectorio)
-                    ? nombrePantallasDirectorio.map((nombrePantalla, index) => (
-                        <label key={index} className="block mb-2">
-                          <input
-                            type="checkbox"
-                            value={nombrePantalla}
-                            checked={selectedDevices.includes(nombrePantalla)}
-                            onChange={handleDeviceChange}
-                            className="mr-2"
-                          />
-                          {nombrePantalla}
-                        </label>
-                      ))
-                    : Object.values(nombrePantallasDirectorio).map(
+                  {Array.isArray(selectedUserPantallasDirectorio)
+                    ? selectedUserPantallasDirectorio.map(
+                        (nombrePantalla, index) => (
+                          <label key={index} className="block mb-2">
+                            <input
+                              type="checkbox"
+                              value={nombrePantalla}
+                              checked={selectedDevices.includes(nombrePantalla)}
+                              onChange={handleDeviceChange}
+                              className="mr-2"
+                            />
+                            {nombrePantalla}
+                          </label>
+                        )
+                      )
+                    : Object.values(selectedUserPantallasDirectorio).map(
                         (nombrePantalla, index) => (
                           <label key={index} className="block mb-2">
                             <input
