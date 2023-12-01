@@ -50,6 +50,9 @@ function Register() {
     useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
+  const [companyName, setCompanyName] = useState("");
+  const [companyNameError, setCompanyNameError] = useState(null);
+  const [registeredCompanyName, setRegisteredCompanyName] = useState("");
 
   const [errors, setErrors] = useState({
     firstName: "",
@@ -58,6 +61,7 @@ function Register() {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
+    companyName: "",
   });
 
   useEffect(() => {
@@ -82,7 +86,8 @@ function Register() {
       emailError ||
       phoneNumberError ||
       passwordError ||
-      confirmPasswordError;
+      confirmPasswordError ||
+      companyNameError;
 
     const isFieldsCompleted =
       firstName &&
@@ -90,7 +95,8 @@ function Register() {
       email &&
       phoneNumber &&
       password &&
-      confirmPassword;
+      confirmPassword &&
+      companyName;
 
     setIsButtonDisabled(hasErrors || !isFieldsCompleted);
   }, [
@@ -106,6 +112,7 @@ function Register() {
     phoneNumberError,
     passwordError,
     confirmPasswordError,
+    companyNameError,
   ]);
 
   const handleShowPasswordClick = (e) => {
@@ -192,9 +199,11 @@ function Register() {
         apellido: lastName,
         email: email,
         telefono: phoneNumber,
+        empresa: companyName,
       });
 
       setShowVerificationModal(true);
+      setRegisteredCompanyName(companyName);
 
       setTimeout(() => {
         setFirstName("");
@@ -202,6 +211,7 @@ function Register() {
         setPhoneNumber("");
         setEmail("");
         setPassword("");
+        setCompanyName("");
         //window.location.href = "/login";
       }, 2300);
     } catch (error) {
@@ -251,6 +261,13 @@ function Register() {
       return "La contraseña es obligatoria";
     } else if (value.length < 8) {
       return "La contraseña debe tener al menos 8 caracteres";
+    }
+    return null;
+  };
+
+  const validateCompanyName = (value) => {
+    if (!value) {
+      return "El nombre de empresa es obligatorio";
     }
     return null;
   };
@@ -360,6 +377,28 @@ function Register() {
                   )}
                 </div>
               </div>
+
+              <div className="mb-6">
+                <div className="relative" data-te-input-wrapper-init>
+                  <input
+                    type="text"
+                    className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
+                    id="companyName"
+                    placeholder="Nombre de empresa"
+                    value={companyName}
+                    onChange={(e) => {
+                      setCompanyName(e.target.value);
+                      setCompanyNameError(validateCompanyName(e.target.value));
+                    }}
+                  />
+                  {companyNameError && (
+                    <span className="text-sm text-red-500 mt-1 absolute bottom-[-0.8rem] left-3">
+                      {companyNameError}
+                    </span>
+                  )}
+                </div>
+              </div>
+
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
