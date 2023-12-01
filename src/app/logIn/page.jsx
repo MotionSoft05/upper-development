@@ -133,6 +133,15 @@ function LogIn() {
     setShowPassword(!showPassword);
   };
 
+  const handleFormKeyDown = (e) => {
+    // Verificar si la tecla presionada es "Enter"
+    if (e.key === "Enter") {
+      // Prevenir el envío del formulario
+      e.preventDefault();
+      handleLogin(e);
+    }
+  };
+
   return (
     <section className="h-screen">
       <div className="h-full px-20">
@@ -146,7 +155,7 @@ function LogIn() {
           </div>
 
           <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
-            <form onSubmit={handleLogin}>
+            <form onSubmit={handleLogin} onKeyDown={handleFormKeyDown}>
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
                 Inicio de Sesión
               </h2>
