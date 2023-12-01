@@ -200,6 +200,9 @@ function Register() {
         email: email,
         telefono: phoneNumber,
         empresa: companyName,
+        pd: 0,
+        ps: 0,
+        total: 0,
       });
 
       setShowVerificationModal(true);
