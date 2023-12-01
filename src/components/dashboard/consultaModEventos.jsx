@@ -28,15 +28,18 @@ function ConsultaModEvento() {
   const [horaInicialReal, setHoraInicialReal] = useState("");
   const [horaFinalReal, setHoraFinalReal] = useState("");
   const [description, setDescription] = useState("");
+  const [usuarioLogeado, setUsuarioLogeado] = useState("");
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         setUser(user);
+        setUsuarioLogeado(user.email);
         consultarEventos(user.uid);
       } else {
         setUser(null);
         setEventos([]);
+        setUsuarioLogeado("");
       }
     });
 
@@ -163,12 +166,14 @@ function ConsultaModEvento() {
           <table className=" ">
             <thead className="bg-gray-50">
               <tr>
-                <th
-                  scope="col"
-                  className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
-                >
-                  USUARIO
-                </th>
+                {usuarioLogeado === "uppermex10@gmail.com" && (
+                  <th
+                    scope="col"
+                    className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  >
+                    USUARIO
+                  </th>
+                )}
                 <th
                   scope="col"
                   className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
@@ -251,11 +256,13 @@ function ConsultaModEvento() {
 
                   return (
                     <tr key={evento.id} className="text-xs md:text-base">
-                      <td className="md:px-6 md:py-4 ">
-                        {usuario
-                          ? `${usuario.nombre} ${usuario.apellido}`
-                          : "N/A"}
-                      </td>
+                      {usuarioLogeado === "uppermex10@gmail.com" && (
+                        <td className="md:px-6 md:py-4 ">
+                          {usuario
+                            ? `${usuario.nombre} ${usuario.apellido}`
+                            : "N/A"}
+                        </td>
+                      )}
                       {/* Contador */}
                       <td className="md:px-6 md:py-4 ">{index + 1}</td>
                       {/* Nombre */}
@@ -275,6 +282,7 @@ function ConsultaModEvento() {
                           evento.nombreEvento
                         )}
                       </td>
+
                       {/* Tipo  */}
                       <td className="md:px-6 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
@@ -467,6 +475,14 @@ function ConsultaModEvento() {
                                       rows={4}
                                       maxLength={255}
                                     />
+                                  </div>
+                                  <div className="mb-4 ">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Id del evento
+                                    </label>
+                                    <td className="w-full px-2 py-1 rounded-lg text-center">
+                                      {evento.id}
+                                    </td>
                                   </div>
                                 </div>
 
