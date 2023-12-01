@@ -277,14 +277,25 @@ function Pantalla3() {
           {/* Header */}
           <div className="flex items-center justify-between ">
             {personalizacionTemplate.logo && (
-              <img
-                src={personalizacionTemplate.logo}
-                alt="Logo"
-                className="w-44"
-              />
+              <>
+                {" "}
+                <div
+                  style={{
+                    width: "18vw",
+                    height: "10vw",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={personalizacionTemplate.logo}
+                    alt="Logo"
+                    className="w-72"
+                  />
+                </div>{" "}
+              </>
             )}
             <h1
-              className={`font-bold text-5xl mr-16`}
+              className={`font-bold uppercase text-7xl  mr-16`}
               style={{ color: personalizacionTemplate.fontColor }}
             >
               {devices[0]}
@@ -292,7 +303,7 @@ function Pantalla3() {
           </div>
           {/* Linea arriba */}
           <div
-            className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-5 uppercase text-7xl font-bold px-20 rounded-t-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
@@ -302,22 +313,40 @@ function Pantalla3() {
             <h2>{nombreEvento}</h2>
           </div>
           {/* contenido principal */}
-          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+          <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
                 {images && images.length > 0 ? (
                   <>
-                    <div className="">
+                    <div
+                      className="slider-container"
+                      style={{
+                        width: "30vw",
+                        height: "30vw",
+                        overflow: "hidden",
+                      }}
+                    >
                       <div ref={sliderRef} className="keen-slider">
                         {images.map((image, index) => (
-                          // eslint-disable-next-line react/jsx-key
-                          <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+                          <div
+                            key={index}
+                            className="keen-slider__slide number-slide1"
+                            style={{
+                              display: "flex",
+                              justifyContent: "center",
+                              alignItems: "center",
+                              width: "100%",
+                              height: "100%",
+                            }}
+                          >
                             <img
-                              key={index}
                               src={image}
                               alt={`Imagen ${index + 1}`}
-                              className=""
-                              style={{ maxWidth: "100%", maxHeight: "600px" }}
+                              style={{
+                                maxWidth: "100%",
+                                maxHeight: "100%",
+                                objectFit: "contain",
+                              }}
                             />
                           </div>
                         ))}
@@ -377,11 +406,11 @@ function Pantalla3() {
               fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
             }}
           >
-            <p style={{ color: personalizacionTemplate.fontColor }}>
+            <p
+              className="font-bold uppercase"
+              style={{ color: personalizacionTemplate.fontColor }}
+            >
               {obtenerFecha()}
-            </p>
-            <p style={{ color: personalizacionTemplate.fontColor }}>
-              {currentHour}
             </p>
           </div>
         </div>
