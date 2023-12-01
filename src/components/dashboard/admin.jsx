@@ -180,6 +180,7 @@ function Admin() {
         ...(isPdValid && { pd: pdNumber }),
         ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
         ...(usuarioEditado.tipoPlan && { tipoPlan: usuarioEditado.tipoPlan }),
+        empresa: usuarioEditado.empresa,
       };
 
       if (Object.keys(updateData).length > 0) {
@@ -198,6 +199,7 @@ function Admin() {
                   ...(isPdValid && { pd: pdNumber }),
                   ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
                   tipoPlan: usuarioEditado.tipoPlan,
+                  empresa: usuarioEditado.empresa,
                 }
               : usuario
           )
@@ -214,6 +216,7 @@ function Admin() {
           pd: "",
           total: "",
           tipoPlan: "",
+          empresa: "",
         });
       } else {
         console.warn("No hay campos válidos para actualizar.");
@@ -329,6 +332,9 @@ function Admin() {
                     Email
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Empresa
+                  </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Teléfono
                   </th>
 
@@ -385,6 +391,22 @@ function Admin() {
                         />
                       ) : (
                         usuario.email
+                      )}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
+                        <input
+                          type="text"
+                          value={usuarioEditado.empresa}
+                          onChange={(e) =>
+                            setUsuarioEditado({
+                              ...usuarioEditado,
+                              empresa: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        usuario.empresa
                       )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
