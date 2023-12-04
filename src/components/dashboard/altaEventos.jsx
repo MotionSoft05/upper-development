@@ -45,6 +45,9 @@ function AltaEventos() {
     startDate: new Date(),
     endDate: new Date().setMonth(11),
   });
+
+  console.log("Initial value:", value);
+
   const [alertaEnviada, setAlertaEnviada] = useState(false);
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
@@ -111,7 +114,7 @@ function AltaEventos() {
 
         if (usuarioDoc.exists()) {
           const userData = usuarioDoc.data();
-          console.log("UserData:", userData);
+          // console.log("UserData:", userData);
           setNombrePantallas(userData.nombrePantallas || []);
           setNombrePantallasDirectorio(
             userData.nombrePantallasDirectorio || []
@@ -163,6 +166,7 @@ function AltaEventos() {
   };
 
   const handleValueChange = (newValue) => {
+    // console.log("WDAAWAWDAWDWADAWA", newValue);
     setValue(newValue);
   };
 
@@ -228,18 +232,21 @@ function AltaEventos() {
     }:${document.getElementById("minuteSelectorFinalSalon").value}`;
 
     const fechaInicio = new Date(value.startDate);
+    fechaInicio.setDate(fechaInicio.getDate() + 1); // Agregar un día a la fecha de inicio
     fechaInicio.setHours(
       horaInicialReal.split(":")[0],
       horaInicialReal.split(":")[1]
     );
+    console.log("DALEEEEEEEEEEE", fechaInicio);
     const fechaFinal = new Date(value.endDate);
+    fechaFinal.setDate(fechaFinal.getDate() + 1); // Agregar un día a la fecha final
     fechaFinal.setHours(
       horaFinalReal.split(":")[0],
       horaFinalReal.split(":")[1]
     );
-    const formattedFechaInicio = fechaInicio.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
-    const formattedFechaFinal = fechaFinal.toISOString().split("T")[0]; // Convierte la fecha al formato AAAA-MM-DD
 
+    const formattedFechaInicio = fechaInicio.toISOString().split("T")[0];
+    const formattedFechaFinal = fechaFinal.toISOString().split("T")[0];
     const devices = selectedDevices;
     setImages([]);
     setDescription("");
@@ -261,8 +268,8 @@ function AltaEventos() {
       userId: userId,
       userId: user.uid,
     };
-    console.log("userId:", userId);
-
+    // console.log("userId:", userId);
+    console.log("awwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", eventoData);
     if (selectedUser) {
       // Asignar el evento al usuario seleccionado (solo si está seleccionado)
       eventoData.userId = selectedUser;
@@ -338,7 +345,7 @@ function AltaEventos() {
         ? prevDevices.filter((device) => device !== selectedDevice)
         : [...prevDevices, selectedDevice];
 
-      console.log("Dispositivos seleccionados:", updatedDevices);
+      // console.log("Dispositivos seleccionados:", updatedDevices);
       return updatedDevices;
     });
   };
