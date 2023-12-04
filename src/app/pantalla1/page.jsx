@@ -153,13 +153,19 @@ function Pantalla1() {
 
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
+              // Obtener fecha actual (solo día)
               const fechaActual = new Date();
+              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
+              // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
+              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
               const fechaFinalEvento = new Date(evento.fechaFinal);
+              fechaFinalEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
               const horaActual = obtenerHora();
               const horaInicialEvento = evento.horaInicialReal;
               const horaFinalEvento = evento.horaFinalReal;
-
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
@@ -295,7 +301,7 @@ function Pantalla1() {
               </>
             )}
             <h1
-              className={`font-bold uppercase text-7xl  mr-16`}
+              className={`font-bold uppercase text-7xl md:text-5xl  mr-16`}
               style={{ color: personalizacionTemplate.fontColor }}
             >
               {devices[0]}
@@ -303,7 +309,7 @@ function Pantalla1() {
           </div>
           {/* Linea arriba */}
           <div
-            className={`text-white py-5 uppercase text-7xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-5 uppercase text-7xl md:text-5xl font-bold px-20 rounded-t-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
@@ -349,13 +355,13 @@ function Pantalla1() {
               <div className="col-span-2 space-y-8  my-4">
                 <div>
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-4xl md:text-3xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     Sesión:
                   </h1>
                   <p
-                    className={`text-4xl font-bold`}
+                    className={`text-4xl md:text-3xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {horaInicialReal}
@@ -365,14 +371,14 @@ function Pantalla1() {
                 <div className="">
                   {/* Tipo de evento y descripción */}
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-4xl md:text-3xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0">
                     <p
-                      className={` text-4xl font-bold text-left`}
+                      className={`text-4xl md:text-3xl`}
                       style={{ color: personalizacionTemplate.fontColor }}
                     >
                       {description}
@@ -385,7 +391,7 @@ function Pantalla1() {
           {/* Linea abajo */}
           <div
             id="Abajo"
-            className={`text-4xl py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            className={`text-4xl md:text-3xl py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
