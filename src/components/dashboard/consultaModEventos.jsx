@@ -457,20 +457,22 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4 ">
+                                  <div className="mb-4">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Descripción del Evento (
-                                      {255 - description.length})
+                                      {255 -
+                                        (eventoEditado.description || "")
+                                          .length}
+                                      )
                                     </label>
                                     <textarea
                                       value={eventoEditado?.description || ""}
-                                      onChange={(e) => {
+                                      onChange={(e) =>
                                         handleFieldEdit(
                                           "description",
                                           e.target.value
-                                        );
-                                        setDescription(e.target.value);
-                                      }}
+                                        )
+                                      }
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                       rows={4}
                                       maxLength={255}

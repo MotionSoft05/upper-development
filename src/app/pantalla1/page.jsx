@@ -417,7 +417,13 @@ function Pantalla1() {
             >
               {obtenerFecha()}
             </p>
-            <p>{currentHour}</p> {/* Mostrar la hora actual */}
+            <p
+              className=" uppercase"
+              style={{ color: personalizacionTemplate.fontColor }}
+            >
+              {currentHour}
+            </p>{" "}
+            {/* Mostrar la hora actual */}
           </div>
         </div>
       </div>

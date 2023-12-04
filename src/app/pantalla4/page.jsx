@@ -31,6 +31,19 @@ function Pantalla4() {
 
   const numeroPantallaActual = "4";
 
+  // Función para obtener la hora actual
+  function obtenerHoraActual() {
+    setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
+    }, 1000);
+
+    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, []);
+
   // Slider
   const [sliderRef] = useKeenSlider(
     {
@@ -153,13 +166,19 @@ function Pantalla4() {
 
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
+              // Obtener fecha actual (solo día)
               const fechaActual = new Date();
+              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
+              // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
+              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
               const fechaFinalEvento = new Date(evento.fechaFinal);
+              fechaFinalEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
               const horaActual = obtenerHora();
               const horaInicialEvento = evento.horaInicialReal;
               const horaFinalEvento = evento.horaFinalReal;
-
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
@@ -295,7 +314,7 @@ function Pantalla4() {
               </>
             )}
             <h1
-              className={`font-bold uppercase text-7xl  mr-16`}
+              className={`font-bold uppercase text-5xl md:text-7xl  mr-16`}
               style={{ color: personalizacionTemplate.fontColor }}
             >
               {devices[0]}
@@ -303,7 +322,7 @@ function Pantalla4() {
           </div>
           {/* Linea arriba */}
           <div
-            className={`text-white py-5 uppercase text-7xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
@@ -349,13 +368,13 @@ function Pantalla4() {
               <div className="col-span-2 space-y-8  my-4">
                 <div>
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     Sesión:
                   </h1>
                   <p
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {horaInicialReal}
@@ -365,14 +384,14 @@ function Pantalla4() {
                 <div className="">
                   {/* Tipo de evento y descripción */}
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0">
                     <p
-                      className={` text-4xl font-bold text-left`}
+                      className={`text-3xl md:text-4xl`}
                       style={{ color: personalizacionTemplate.fontColor }}
                     >
                       {description}
@@ -385,11 +404,11 @@ function Pantalla4() {
           {/* Linea abajo */}
           <div
             id="Abajo"
-            className={`text-4xl py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+              fontStyle: personalizacionTemplate.fontStyle,
             }}
           >
             <p
@@ -398,6 +417,13 @@ function Pantalla4() {
             >
               {obtenerFecha()}
             </p>
+            <p
+              className=" uppercase"
+              style={{ color: personalizacionTemplate.fontColor }}
+            >
+              {currentHour}
+            </p>{" "}
+            {/* Mostrar la hora actual */}
           </div>
         </div>
       </div>

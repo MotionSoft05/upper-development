@@ -22,14 +22,14 @@ const obtenerHora = () => {
   return `${hours}:${minutes}:${seconds}`;
 };
 
-function Pantalla2() {
+function Pantalla9() {
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
 
-  const numeroPantallaActual = "2";
+  const numeroPantallaActual = "9";
 
   // Función para obtener la hora actual
   function obtenerHoraActual() {
@@ -431,4 +431,4 @@ function Pantalla2() {
   );
 }
 
-export default Pantalla2;
+export default Pantalla9;
