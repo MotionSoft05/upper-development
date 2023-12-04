@@ -318,35 +318,21 @@ function Pantalla2() {
               <div className="col-span-1  mr-4 my-auto">
                 {images && images.length > 0 ? (
                   <>
-                    <div
-                      className="slider-container"
-                      style={{
-                        width: "30vw",
-                        height: "30vw",
-                        overflow: "hidden",
-                      }}
-                    >
+                    <div className="slider-container">
                       <div ref={sliderRef} className="keen-slider">
                         {images.map((image, index) => (
                           <div
                             key={index}
-                            className="keen-slider__slide number-slide1"
+                            className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
                             style={{
-                              display: "flex",
-                              justifyContent: "center",
-                              alignItems: "center",
-                              width: "100%",
-                              height: "100%",
+                              width: "30vw",
+                              height: "30vw",
                             }}
                           >
                             <img
                               src={image}
                               alt={`Imagen ${index + 1}`}
-                              style={{
-                                maxWidth: "100%",
-                                maxHeight: "100%",
-                                objectFit: "contain",
-                              }}
+                              className="w-full h-full object-cover"
                             />
                           </div>
                         ))}
