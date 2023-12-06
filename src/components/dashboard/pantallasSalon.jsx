@@ -61,6 +61,7 @@ function PantallasSalon() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
+  const [pantallasUsuario, setPantallasUsuario] = useState([]);
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -112,9 +113,15 @@ function PantallasSalon() {
           if (!usuariosSnapshot.empty) {
             const user = usuariosSnapshot.docs[0].data();
             const numberOfScreens = user.ps || 0;
+
+            // Cambio aquí: Usar los nombres de pantallas de la colección
+            const nombresPantallasColeccion = user.nombrePantallas || [];
+
+            // Asegurarnos de que tengamos suficientes nombres para el número de pantallas
             const namesArray = Array.from(
               { length: numberOfScreens },
-              (_, index) => `Pantalla ${index + 1}`
+              (_, index) =>
+                nombresPantallasColeccion[index] || `Pantalla ${index + 1}`
             );
 
             setNombrePantallas(namesArray);
@@ -470,10 +477,8 @@ function PantallasSalon() {
               </label>
               <div className="flex flex-col">
                 {Array.from({ length: ps }, (_, index) => (
-                  // eslint-disable-next-line react/jsx-key
-                  <div className="flex">
+                  <div className="flex" key={index}>
                     <input
-                      key={index}
                       type="text"
                       placeholder={`Pantalla ${index + 1}`}
                       className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
