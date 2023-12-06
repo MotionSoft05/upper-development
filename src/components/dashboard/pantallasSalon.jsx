@@ -486,7 +486,7 @@ function PantallasSalon() {
                 <label className="text-white dark:text-gray-200">
                   Color de letra
                 </label>
-                <div className="flex items-center">
+                <div className="flex items-center relative">
                   <button
                     onClick={handleFontColorChange}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
@@ -494,7 +494,7 @@ function PantallasSalon() {
                     Seleccionar Color
                   </button>
                   {showFontColorPicker && (
-                    <div className="absolute z-10">
+                    <div className="absolute z-10 -top-40">
                       <ChromePicker
                         color={fontColor}
                         onChange={handleColorChange}
