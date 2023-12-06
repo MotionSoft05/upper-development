@@ -163,8 +163,6 @@ function Admin() {
   const handleGuardarCambios = async () => {
     try {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
-
-      // Convierte los valores de cadena a números antes de la actualización
       const psNumber = parseInt(usuarioEditado.ps || 0); // Usa 0 si es nulo o vacío
       const pdNumber = parseInt(usuarioEditado.pd || 0);
 
@@ -254,8 +252,6 @@ function Admin() {
     obtenerUsuarios();
   }, []);
   if (currentUser && currentUser.email !== "uppermex10@gmail.com") {
-    // Si el usuario no tiene permitido el acceso, puedes redirigirlo a otra página
-    // o mostrar un mensaje de error
     return <p>No tienes permiso para acceder a esta página.</p>;
   }
 
