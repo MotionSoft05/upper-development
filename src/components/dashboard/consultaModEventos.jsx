@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
+import "firebase/compat/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -16,6 +17,7 @@ const firebaseConfig = {
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
+const storage = firebase.storage();
 
 function ConsultaModEvento() {
   const [usuarios, setUsuarios] = useState([]);
@@ -29,6 +31,7 @@ function ConsultaModEvento() {
   const [horaFinalReal, setHoraFinalReal] = useState("");
   const [description, setDescription] = useState("");
   const [usuarioLogeado, setUsuarioLogeado] = useState("");
+  const [imagenesEvento, setImagenesEvento] = useState([]);
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
@@ -110,6 +113,7 @@ function ConsultaModEvento() {
     setHoraFinalReal(evento.horaFinalReal || "");
     setModalAbierto(true);
     setEdicionFechas(false);
+    setImagenesEvento(evento.images || []);
   };
 
   const cerrarModal = () => {
@@ -121,7 +125,13 @@ function ConsultaModEvento() {
 
   const guardarCambios = async () => {
     try {
-      console.log(description);
+      const imagenesAntiguas = eventos.images || [];
+      imagenesAntiguas.forEach((imagen) => {
+        const imagenRef = storage.refFromURL(imagen);
+        imagenRef
+          .delete()
+          .catch((error) => console.error("Error al eliminar imagen:", error));
+      });
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
       await firebase
@@ -135,6 +145,7 @@ function ConsultaModEvento() {
           fechaInicio: fechaInicioFormateada,
           fechaFinal: fechaFinalFormateada,
           description: description,
+          images: imagenesEvento,
         });
 
       setModalAbierto(false);
@@ -152,6 +163,30 @@ function ConsultaModEvento() {
       ...prevEventoEditado,
       [field]: value,
     }));
+  };
+
+  const handleImagenChange = async (e) => {
+    const nuevaImagen = e.target.files[0];
+
+    if (nuevaImagen) {
+      // Crea una referencia en Storage usando el nombre de archivo único
+      const storageRef = storage.ref(`imagenes/${nuevaImagen.name}`);
+
+      // Sube la imagen a Storage
+      const snapshot = await storageRef.put(nuevaImagen);
+
+      // Obtiene la URL de descarga de la imagen
+      const url = await snapshot.ref.getDownloadURL();
+
+      // Actualiza el estado de las imágenes con la nueva URL
+      setImagenesEvento([...imagenesEvento, url]);
+    }
+  };
+
+  const eliminarImagen = (index) => {
+    const nuevasImagenes = [...imagenesEvento];
+    nuevasImagenes.splice(index, 1);
+    setImagenesEvento(nuevasImagenes);
   };
 
   return (
@@ -477,6 +512,38 @@ function ConsultaModEvento() {
                                       rows={4}
                                       maxLength={255}
                                     />
+                                  </div>
+                                  <div className="mb-4">
+                                    <label className="block text-sm font-medium text-gray-700">
+                                      Imágenes del Evento (Máximo 3)
+                                    </label>
+                                    <div className="flex items-center">
+                                      {imagenesEvento.map((imagen, index) => (
+                                        <div key={index} className="mr-2">
+                                          <img
+                                            src={imagen}
+                                            alt={`Imagen ${index + 1}`}
+                                            className="w-16 h-16 object-cover rounded-lg"
+                                          />
+                                          <button
+                                            onClick={() =>
+                                              eliminarImagen(index)
+                                            }
+                                            className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg mt-2"
+                                          >
+                                            Eliminar
+                                          </button>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    {imagenesEvento.length < 3 && (
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        onChange={handleImagenChange}
+                                        className="mt-2"
+                                      />
+                                    )}
                                   </div>
                                   <div className="mb-4 ">
                                     <label className="block text-sm font-medium text-gray-700">
