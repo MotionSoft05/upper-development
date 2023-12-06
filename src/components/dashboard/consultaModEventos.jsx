@@ -441,13 +441,13 @@ function ConsultaModEvento() {
                         {modalAbierto && (
                           <div className="fixed inset-0 flex items-center justify-center z-50">
                             <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-                            <div className="bg-white p-1 md:p-6 rounded shadow-lg z-50 md:w-1/2 mt-2 mb-2">
+                            <div className="bg-white p-1 md:p-4 rounded shadow-lg z-50 w-full max-w-screen-md overflow-y-auto">
                               <h2 className="text-xl font-bold mb-4">
                                 Editar Evento
                               </h2>
                               <div className="grid grid-cols-2 space-x-3">
                                 <div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Nombre del Evento
                                     </label>
@@ -463,7 +463,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Tipo del Evento
                                     </label>
@@ -479,7 +479,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Lugar del Evento
                                     </label>
@@ -492,7 +492,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Descripción del Evento (
                                       {255 -
@@ -513,7 +513,7 @@ function ConsultaModEvento() {
                                       maxLength={255}
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Imágenes del Evento (Máximo 3)
                                     </label>
@@ -548,7 +548,7 @@ function ConsultaModEvento() {
                                 </div>
 
                                 <div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Fecha de Inicio
                                     </label>
@@ -564,7 +564,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Fecha de Finalización
                                     </label>
@@ -580,7 +580,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Hora Inicial Salon
                                     </label>
@@ -598,7 +598,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Hora Final Salon
                                     </label>
@@ -616,7 +616,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Hora Inicial Real
                                     </label>
@@ -629,7 +629,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Hora Final Real
                                     </label>
@@ -642,7 +642,7 @@ function ConsultaModEvento() {
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                     />
                                   </div>
-                                  <div className="mb-4 ">
+                                  <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Id del evento
                                     </label>
@@ -654,7 +654,7 @@ function ConsultaModEvento() {
                                 </div>
                               </div>
 
-                              <div className="mb-4">
+                              <div className="mb-2">
                                 <label className="block text-sm font-medium text-gray-700">
                                   Dispositivos Seleccionados
                                 </label>
