@@ -163,7 +163,7 @@ function Pantalla1() {
                 }
               }
             });
-//
+
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
               // Obtener fecha actual (solo día)
