@@ -136,6 +136,48 @@ function PantallasSalon() {
     fetchUserData();
   }, []);
 
+  useEffect(() => {
+    const cargarDatosPersonalizacion = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser) {
+          const templateSalonesRef = collection(db, "TemplateSalones");
+          const templateSalonesQuery = query(
+            templateSalonesRef,
+            where("userId", "==", authUser.uid)
+          );
+          const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
+
+          if (!templateSalonesSnapshot.empty) {
+            const templateSalonesDocData =
+              templateSalonesSnapshot.docs[0].data();
+
+            // Establecer datos de personalización en el estado
+            setFontColor(templateSalonesDocData.fontColor || "#000000");
+            setTemplateColor(templateSalonesDocData.templateColor || "#D1D5DB");
+
+            // Manejar la lógica para establecer la fuente, si es necesario
+            // Puedes modificar esto según tus necesidades específicas
+            const selectedFontStyleOption = fontStyleOptions.find(
+              (option) => option.value === templateSalonesDocData.fontStyle
+            );
+            setSelectedFontStyle(
+              selectedFontStyleOption || fontStyleOptions[0]
+            );
+
+            // Establecer el logo
+            setSelectedLogo(templateSalonesDocData.logo || null);
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de personalización:", error);
+      }
+    };
+
+    cargarDatosPersonalizacion();
+  }, []);
+
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -219,7 +261,30 @@ function PantallasSalon() {
         return;
       }
 
-      console.log("Usuario autenticado:", authUser);
+      if (!selectedLogo) {
+        alert("Por favor, selecciona un logo.");
+        return;
+      }
+
+      if (!selectedFontStyle) {
+        alert("Por favor, selecciona un estilo de texto.");
+        return;
+      }
+
+      if (!templateColor) {
+        alert("Por favor, selecciona un color de plantilla.");
+        return;
+      }
+
+      if (!fontColor) {
+        alert("Por favor, selecciona un color de letra.");
+        return;
+      }
+
+      if (nombrePantallas.some((nombre) => !nombre)) {
+        alert("Por favor, completa todos los nombres de pantallas.");
+        return;
+      }
 
       if (!selectedLogo) {
         console.error("selectedLogo es null. No se puede enviar a Firestore.");
@@ -408,6 +473,15 @@ function PantallasSalon() {
               />
             </div>
             <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Logo Actual
+              </label>
+              {selectedLogo && (
+                <img src={selectedLogo} alt="Logo Actual" className="w-48" />
+              )}
+            </div>
+
+            <div className="mb-4">
               <div>
                 <label className="text-white dark:text-gray-200">
                   Color de letra
@@ -440,6 +514,36 @@ function PantallasSalon() {
                 </div>
               </div>
             </div>
+
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Nombres de pantallas
+              </label>
+              <div className="flex flex-col">
+                {Array.from({ length: ps }, (_, index) => (
+                  <div className="flex" key={index}>
+                    <input
+                      type="text"
+                      placeholder={`Pantalla ${index + 1}`}
+                      className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                      value={nombrePantallas[index] || ""}
+                      onChange={(e) => {
+                        const updatedNombres = [...nombrePantallas];
+                        updatedNombres[index] = e.target.value;
+                        setNombrePantallas(updatedNombres);
+                      }}
+                    />
+                    <Link
+                      href={`/pantalla${index + 1}.html`}
+                      target="_blank"
+                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
+                    >
+                      URL
+                    </Link>
+                  </div>
+                ))}
+              </div>
+            </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 Color de la plantilla
@@ -469,35 +573,6 @@ function PantallasSalon() {
                   className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                Nombres de pantallas
-              </label>
-              <div className="flex flex-col">
-                {Array.from({ length: ps }, (_, index) => (
-                  <div className="flex" key={index}>
-                    <input
-                      type="text"
-                      placeholder={`Pantalla ${index + 1}`}
-                      className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
-                      value={nombrePantallas[index] || ""}
-                      onChange={(e) => {
-                        const updatedNombres = [...nombrePantallas];
-                        updatedNombres[index] = e.target.value;
-                        setNombrePantallas(updatedNombres);
-                      }}
-                    />
-                    <Link
-                      href={`/pantalla${index + 1}.html`}
-                      target="_blank"
-                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
-                    >
-                      URL
-                    </Link>
-                  </div>
-                ))}
               </div>
             </div>
           </div>
