@@ -144,7 +144,7 @@ function ConsultaModEvento() {
           horaFinalReal,
           fechaInicio: fechaInicioFormateada,
           fechaFinal: fechaFinalFormateada,
-          description: description,
+          description: eventoEditado.description,
           images: imagenesEvento,
         });
 
@@ -502,12 +502,13 @@ function ConsultaModEvento() {
                                     </label>
                                     <textarea
                                       value={eventoEditado?.description || ""}
-                                      onChange={(e) =>
+                                      onChange={(e) => {
                                         handleFieldEdit(
                                           "description",
                                           e.target.value
-                                        )
-                                      }
+                                        );
+                                        setDescription(e.target.value); // Agrega esta línea
+                                      }}
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                       rows={4}
                                       maxLength={255}
