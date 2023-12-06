@@ -441,7 +441,7 @@ function ConsultaModEvento() {
                         {modalAbierto && (
                           <div className="fixed inset-0 flex items-center justify-center z-50">
                             <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-                            <div className="bg-white p-4 md:p-8 rounded shadow-lg z-50 w-full md:w-7/12">
+                            <div className="bg-white p-1 md:p-6 rounded shadow-lg z-50 md:w-1/2 mt-2 mb-2">
                               <h2 className="text-xl font-bold mb-4">
                                 Editar Evento
                               </h2>
