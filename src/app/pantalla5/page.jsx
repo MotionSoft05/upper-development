@@ -168,13 +168,15 @@ function Pantalla5() {
             const eventosEnCurso = eventosData.filter((evento) => {
               // Obtener fecha actual (solo día)
               const fechaActual = new Date();
-              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
               // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
+              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1); // Sumar un día
               fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
               const fechaFinalEvento = new Date(evento.fechaFinal);
-              fechaFinalEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
+              fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
               const horaActual = obtenerHora();
               const horaInicialEvento = evento.horaInicialReal;
@@ -182,7 +184,6 @@ function Pantalla5() {
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
-
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
@@ -194,20 +195,20 @@ function Pantalla5() {
                 "---------------------------------------------------"
               );
               console.log("fechaActualEnRango", fechaActualEnRango);
+              console.log(
+                "---------------------------------------------------"
+              );
 
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActual", horaActual);
-              console.log("horaInicialEvento", horaInicialEvento);
-              console.log("horaFinalEvento", horaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActualEnRango", horaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
+              // console.log("horaActual", horaActual);
+              // console.log("horaInicialEvento", horaInicialEvento);
+              // console.log("horaFinalEvento", horaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("horaActualEnRango", horaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
               return fechaActualEnRango && horaActualEnRango;
             });
 

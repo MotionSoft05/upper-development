@@ -29,7 +29,20 @@ function PantallaDirec1() {
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
 
-  const numeroPantallaDirecActual = "1";
+  const numeroPantallaActual = "1";
+
+  // Función para obtener la hora actual
+  function obtenerHoraActual() {
+    setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
+  }
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
+    }, 1000);
+
+    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, []);
 
   // Slider
   const [sliderRef] = useKeenSlider(
@@ -143,7 +156,7 @@ function PantallaDirec1() {
               if (pantallaCoincidente) {
                 const posicionPantalla =
                   pantallasNumeradas[pantallaCoincidente];
-                const posicionActual = parseInt(numeroPantallaDirecActual, 10);
+                const posicionActual = parseInt(numeroPantallaActual, 10);
 
                 if (posicionPantalla === posicionActual) {
                   eventosData.push(evento);
@@ -153,17 +166,24 @@ function PantallaDirec1() {
 
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
+              // Obtener fecha actual (solo día)
               const fechaActual = new Date();
+
+              // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
+              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1); // Sumar un día
+              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
               const fechaFinalEvento = new Date(evento.fechaFinal);
+              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
+              fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
               const horaActual = obtenerHora();
               const horaInicialEvento = evento.horaInicialReal;
               const horaFinalEvento = evento.horaFinalReal;
-
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
-
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
@@ -175,20 +195,20 @@ function PantallaDirec1() {
                 "---------------------------------------------------"
               );
               console.log("fechaActualEnRango", fechaActualEnRango);
+              console.log(
+                "---------------------------------------------------"
+              );
 
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActual", horaActual);
-              console.log("horaInicialEvento", horaInicialEvento);
-              console.log("horaFinalEvento", horaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("horaActualEnRango", horaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
+              // console.log("horaActual", horaActual);
+              // console.log("horaInicialEvento", horaInicialEvento);
+              // console.log("horaFinalEvento", horaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("horaActualEnRango", horaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
               return fechaActualEnRango && horaActualEnRango;
             });
 
@@ -277,14 +297,25 @@ function PantallaDirec1() {
           {/* Header */}
           <div className="flex items-center justify-between ">
             {personalizacionTemplate.logo && (
-              <img
-                src={personalizacionTemplate.logo}
-                alt="Logo"
-                className="w-44"
-              />
+              <>
+                {" "}
+                <div
+                  style={{
+                    width: "18vw",
+                    height: "10vw",
+                    overflow: "hidden",
+                  }}
+                >
+                  <img
+                    src={personalizacionTemplate.logo}
+                    alt="Logo"
+                    className="w-72"
+                  />
+                </div>{" "}
+              </>
             )}
             <h1
-              className={`font-bold text-5xl mr-16`}
+              className={`font-bold uppercase text-5xl md:text-7xl  mr-16`}
               style={{ color: personalizacionTemplate.fontColor }}
             >
               {devices[0]}
@@ -292,7 +323,7 @@ function PantallaDirec1() {
           </div>
           {/* Linea arriba */}
           <div
-            className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
@@ -302,22 +333,26 @@ function PantallaDirec1() {
             <h2>{nombreEvento}</h2>
           </div>
           {/* contenido principal */}
-          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+          <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
                 {images && images.length > 0 ? (
                   <>
-                    <div className="">
+                    <div className="slider-container">
                       <div ref={sliderRef} className="keen-slider">
                         {images.map((image, index) => (
-                          // eslint-disable-next-line react/jsx-key
-                          <div className="keen-slider__slide number-slide1 flex items-center justify-center">
+                          <div
+                            key={index}
+                            className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
+                            style={{
+                              width: "30vw",
+                              height: "30vw",
+                            }}
+                          >
                             <img
-                              key={index}
                               src={image}
                               alt={`Imagen ${index + 1}`}
-                              className=""
-                              style={{ maxWidth: "100%", maxHeight: "600px" }}
+                              className="w-full h-full object-cover"
                             />
                           </div>
                         ))}
@@ -334,13 +369,13 @@ function PantallaDirec1() {
               <div className="col-span-2 space-y-8  my-4">
                 <div>
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     Sesión:
                   </h1>
                   <p
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {horaInicialReal}
@@ -350,14 +385,14 @@ function PantallaDirec1() {
                 <div className="">
                   {/* Tipo de evento y descripción */}
                   <h1
-                    className={`text-4xl font-bold`}
+                    className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0">
                     <p
-                      className={` text-4xl font-bold text-left`}
+                      className={`text-3xl md:text-4xl`}
                       style={{ color: personalizacionTemplate.fontColor }}
                     >
                       {description}
@@ -370,19 +405,26 @@ function PantallaDirec1() {
           {/* Linea abajo */}
           <div
             id="Abajo"
-            className={`text-4xl py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+              fontStyle: personalizacionTemplate.fontStyle,
             }}
           >
-            <p style={{ color: personalizacionTemplate.fontColor }}>
+            <p
+              className="font-bold uppercase"
+              style={{ color: personalizacionTemplate.fontColor }}
+            >
               {obtenerFecha()}
             </p>
-            <p style={{ color: personalizacionTemplate.fontColor }}>
+            <p
+              className=" uppercase"
+              style={{ color: personalizacionTemplate.fontColor }}
+            >
               {currentHour}
-            </p>
+            </p>{" "}
+            {/* Mostrar la hora actual */}
           </div>
         </div>
       </div>
