@@ -28,7 +28,10 @@ function PantallaDirec1() {
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
-
+  const [weatherData, setWeatherData] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "1";
 
   // Función para obtener la hora actual
@@ -39,7 +42,7 @@ function PantallaDirec1() {
   useEffect(() => {
     const interval = setInterval(() => {
       obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
-    }, 1000);
+    }, 50000);
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
@@ -123,6 +126,29 @@ function PantallaDirec1() {
   };
 
   useEffect(() => {
+    if (selectedCity) {
+      setIsLoading(true);
+      setError(null);
+
+      const apiKey = "d6bfb64ec94a413cabc181954232010";
+      const baseUrl = "http://api.weatherapi.com/v1";
+
+      axios
+        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
+        .then((response) => {
+          console.log("Datos del clima:", response.data);
+          setWeatherData(response.data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error al obtener datos del clima:", error);
+          setError("No se pudo obtener la información del clima");
+          setIsLoading(false);
+        });
+    }
+  }, [selectedCity]);
+
+  useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user.uid);
       const obtenerUsuario = async () => {
@@ -130,7 +156,8 @@ function PantallaDirec1() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            const nombrePantallasUsuario = userData.nombrePantallas || {};
+            const nombrePantallasUsuario =
+              userData.nombrePantallasDirectorio || {};
             const pantallasNumeradas = {};
 
             Object.keys(nombrePantallasUsuario).forEach((key, index) => {
@@ -163,57 +190,69 @@ function PantallaDirec1() {
                 }
               }
             });
-
-            // Filtrar por fecha y hora los eventos filtrados por pantalla
-            const eventosEnCurso = eventosData.filter((evento) => {
-              // Obtener fecha actual (solo día)
+            console.log("eventosData:", eventosData);
+            const eventosFiltrados = eventosData.filter((evento) => {
+              const fechaFinalEvento = new Date(evento.fechaFinal);
               const fechaActual = new Date();
 
-              // Obtener fechas de inicio y finalización del evento (solo día)
-              const fechaInicioEvento = new Date(evento.fechaInicio);
-              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1); // Sumar un día
-              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              // Si la fecha final del evento es anterior a la fecha actual, se filtra
+              return fechaActual <= fechaFinalEvento;
+            });
+            console.log("eventosFiltrados:", eventosFiltrados);
+            // Ordenar los eventos por fecha y hora más cercanas a la actual
+            // Suponiendo que tienes eventos ordenados en eventosEnCurso
+            const eventosOrdenados = eventosFiltrados.slice().sort((a, b) => {
+              const fechaFinalA = new Date(a.fechaFinal);
+              const fechaFinalB = new Date(b.fechaFinal);
 
-              const fechaFinalEvento = new Date(evento.fechaFinal);
-              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
-              fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              // Ordenar por fechaFinal más cercana a la actual
+              if (fechaFinalA > fechaFinalB) return 1;
+              if (fechaFinalA < fechaFinalB) return -1;
 
-              const horaActual = obtenerHora();
-              const horaInicialEvento = evento.horaInicialReal;
-              const horaFinalEvento = evento.horaFinalReal;
-              const fechaActualEnRango =
-                fechaActual >= fechaInicioEvento &&
-                fechaActual <= fechaFinalEvento;
-              const horaActualEnRango =
-                horaActual >= horaInicialEvento &&
-                horaActual <= horaFinalEvento;
-              console.log("evento", evento);
-              console.log("fechaActual", fechaActual);
-              console.log("fechaInicioEvento", fechaInicioEvento);
-              console.log("fechaFinalEvento", fechaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("fechaActualEnRango", fechaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
+              // Si la fecha final es la misma, ordenar por horaInicialSalon
+              const horaInicioA = new Date(`2000-01-01T${a.horaInicialSalon}`);
+              const horaInicioB = new Date(`2000-01-01T${b.horaInicialSalon}`);
 
-              // console.log("horaActual", horaActual);
-              // console.log("horaInicialEvento", horaInicialEvento);
-              // console.log("horaFinalEvento", horaFinalEvento);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              // console.log("horaActualEnRango", horaActualEnRango);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              return fechaActualEnRango && horaActualEnRango;
+              return horaInicioA - horaInicioB;
             });
 
-            console.log("Eventos filtrados por fecha y hora:", eventosEnCurso);
-            setEventosEnCurso(eventosEnCurso);
+            // Filtrar por eventos cuya horaInicialSalon sea mayor que la hora actual
+            // const horaActual = new Date();
+            // const eventosFiltradosv1 = eventosOrdenados.filter((evento) => {
+            //   const horaInicioEvento = new Date(
+            //     `2000-01-01T${evento.horaInicialSalon}`
+            //   );
+            //   return horaInicioEvento > horaActual;
+            // });
+
+            // Usar eventosFiltrados en tu componente
+            // setEventosEnCurso(eventosFiltradosv1);
+
+            console.log("Eventos ordenados:", eventosOrdenados);
+
+            const templateRef = collection(firestore, "TemplateDirectorios");
+            const templateQuery = query(
+              templateRef,
+              where("userId", "==", user.uid)
+            );
+            const templateSnapshot = await getDocs(templateQuery);
+
+            if (!templateSnapshot.empty) {
+              const templateData = [];
+              templateSnapshot.forEach((doc) => {
+                const template = { id: doc.id, ...doc.data() };
+                templateData.push(template);
+              });
+              setTemplateData(templateData);
+              // Aquí puedes hacer algo con la información obtenida de TemplateDirectorios
+            } else {
+              // console.log(
+              //   "No se encontró información en TemplateDirectorios para este usuario."
+              // );
+            }
+            // Filtrar por fecha y hora los eventos filtrados por pantalla
+
+            setEventosEnCurso(eventosFiltrados);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -228,7 +267,7 @@ function PantallaDirec1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 5000);
+      }, 50000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -276,22 +315,167 @@ function PantallaDirec1() {
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     return <p>No hay eventos disponibles en este momento.</p>;
   }
-
-  const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
-
-  const {
-    personalizacionTemplate,
-    lugar,
-    nombreEvento,
-    images,
-    horaInicialReal,
-    tipoEvento,
-    description,
-    devices,
-  } = eventoActual;
+  console.log("EVENTOSSSS", eventosEnCurso);
+  // console.log("templateData", templateData);
+  const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white"></section>
+    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+      {" "}
+      <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
+        <div id="Content" className="flex-grow flex flex-col justify-center ">
+          {/* Header */}
+          <div className="flex items-center justify-between ">
+            {/* Logo en la esquina superior izquierda */}
+            <div className="">
+              {templateActual.logo && (
+                <>
+                  {" "}
+                  <div
+                    style={{
+                      width: "18vw",
+                      height: "10vw",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={templateActual.logo}
+                      alt="Logo"
+                      className="w-72"
+                    />
+                  </div>{" "}
+                </>
+              )}
+            </div>
+
+            <div
+              className="flex flex-col items-center"
+              style={{ color: templateActual.fontColor }}
+            >
+              <p className="text-2xl text-center font-semibold mb-2">
+                {obtenerFecha()}
+              </p>
+              <h1 className="text-4xl font-bold">Eventos del día</h1>
+            </div>
+
+            <div
+              className="flex flex-col"
+              style={{ color: templateActual.fontColor }}
+            >
+              {isLoading ? (
+                <p>Cargando datos del clima...</p>
+              ) : weatherData &&
+                weatherData.current &&
+                weatherData.current.temp_c ? (
+                <p className="text-3xl font-bold">
+                  {weatherData.current.temp_c} °C
+                </p>
+              ) : (
+                <p>No se pudo obtener la información del clima</p>
+              )}
+            </div>
+          </div>
+          {/* Linea arriba */}
+          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+            <div className="">
+              <div
+                className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+                style={{
+                  backgroundColor: templateActual.templateColor,
+                  color: templateActual.fontColor,
+                  fontStyle: templateActual.fontStyle, //! NO FUNCIONA
+                }}
+              >
+                {/* Título */}
+                <h2 className=" text-white"> </h2>
+              </div>
+              <div className=" text-black">
+                {/* Imagen a la izquierda */}
+                <div
+                  className="flex flex-col
+              "
+                >
+                  <div className="flex items-center border-b border-black w-full">
+                    <div className="space-y-5 pl-5 flex-grow">
+                      {eventosEnCurso.map((event) => {
+                        return (
+                          <div
+                            key={event.id}
+                            className="flex items-center space-x-4"
+                          >
+                            {/* Imagen a la izquierda */}
+                            <img
+                              src={event.images[0]}
+                              alt={event.nombreEvento}
+                              style={{
+                                width: "130px",
+                                height: "110px",
+                              }}
+                            />
+
+                            {/* Detalles del evento */}
+                            <div
+                            // style={{
+                            //   color: fontColor,
+                            //   fontFamily: selectedFontStyle
+                            //     ? selectedFontStyle.value
+                            //     : "Arial",
+                            // }}
+                            >
+                              {/* Aplicando el color seleccionado */}
+                              <h3>{event.nombreEvento}</h3>
+                              <p>{event.tipoEvento}</p>
+                              <p>{event.lugar}</p>
+                              {/* Agrega más detalles según sea necesario */}
+                              <div className="text-right">
+                                <p>{event.horaInicialReal}</p>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                {/* Fecha y hora en la esquina inferior */}
+
+                <div
+                  className={`text-2xl font-semibold mt-1 text-center text-white bg-black justify-between flex px-20 rounded-b-xl`}
+                  // style={{
+                  //   color: fontColor,
+                  //   backgroundColor: templateColor,
+                  //   fontFamily: selectedFontStyle
+                  //     ? selectedFontStyle.value
+                  //     : "Arial",
+                  // }}
+                >
+                  <p> </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          {/* contenido principal */}
+          <div className="flex justify-between items-center">
+            <p
+              className=""
+              // style={{
+              //   color: fontColor,
+              //   fontFamily: selectedFontStyle
+              //     ? selectedFontStyle.value
+              //     : "Arial",
+              // }}
+            >
+              Grupo renueca el mejor programa de recompensa para asistentes ejec
+            </p>
+            <img src="/img/licensed-image.jpeg" alt="Logo" className="h-12" />
+          </div>
+          {/* Linea abajo */}
+        </div>
+      </div>
+    </section>
   );
 }
 

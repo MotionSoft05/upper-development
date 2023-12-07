@@ -288,6 +288,7 @@ function Pantalla1() {
     tipoEvento,
     description,
     devices,
+    horaInicialSalon,
   } = eventoActual;
 
   return (
@@ -378,7 +379,7 @@ function Pantalla1() {
                     className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
-                    {horaInicialReal}
+                    {horaInicialSalon}
                     <span className="text-2x1">hrs.</span>
                   </p>
                 </div>
