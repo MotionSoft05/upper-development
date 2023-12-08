@@ -196,7 +196,7 @@ function PantallaDirec1() {
               const fechaActual = new Date();
 
               // Si la fecha final del evento es anterior a la fecha actual, se filtra
-              return fechaActual <= fechaFinalEvento;
+              return fechaActual < fechaFinalEvento;
             });
             console.log("eventosFiltrados:", eventosFiltrados);
             // Ordenar los eventos por fecha y hora más cercanas a la actual
