@@ -112,6 +112,23 @@ function ConsultaModEvento() {
     }
   };
 
+  const handleCheckboxChange = (device) => {
+    setEventoEditado((prevEventoEditado) => {
+      const devices = prevEventoEditado.devices || [];
+      const index = devices.indexOf(device);
+
+      if (index === -1) {
+        // Si el dispositivo no está en la lista, agrégalo
+        return { ...prevEventoEditado, devices: [...devices, device] };
+      } else {
+        // Si el dispositivo está en la lista, quítalo
+        const newDevices = [...devices];
+        newDevices.splice(index, 1);
+        return { ...prevEventoEditado, devices: newDevices };
+      }
+    });
+  };
+
   const eliminarEvento = async (id) => {
     try {
       await firebase.firestore().collection("eventos").doc(id).delete();
@@ -714,10 +731,8 @@ function ConsultaModEvento() {
                                                 checked={eventoEditado?.devices.includes(
                                                   pantalla
                                                 )}
-                                                onChange={(e) =>
-                                                  handleCheckboxChange(
-                                                    e.target.value
-                                                  )
+                                                onChange={() =>
+                                                  handleCheckboxChange(pantalla)
                                                 }
                                                 className="mr-2"
                                               />
@@ -741,9 +756,9 @@ function ConsultaModEvento() {
                                                   checked={eventoEditado?.devices.includes(
                                                     pantallaDir
                                                   )}
-                                                  onChange={(e) =>
+                                                  onChange={() =>
                                                     handleCheckboxChange(
-                                                      e.target.value
+                                                      pantallaDir
                                                     )
                                                   }
                                                   className="mr-2"
@@ -759,10 +774,6 @@ function ConsultaModEvento() {
                                         </>
                                       );
                                     })}
-                                  {console.log(
-                                    "Pantallas en el select:",
-                                    pantallas
-                                  )}
                                 </div>
                               </div>
 
