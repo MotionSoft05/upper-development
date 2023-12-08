@@ -18,8 +18,7 @@ const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
+  return `${hours}:${minutes}`;
 };
 
 function PantallaDirec2() {
@@ -28,7 +27,10 @@ function PantallaDirec2() {
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
-
+  const [weatherData, setWeatherData] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "2";
 
   // Función para obtener la hora actual
@@ -45,41 +47,18 @@ function PantallaDirec2() {
   }, []);
 
   // Slider
-  const [sliderRef] = useKeenSlider(
-    {
-      loop: true,
-    },
-    [
-      (slider) => {
-        let timeout;
-        let mouseOver = false;
-        function clearNextTimeout() {
-          clearTimeout(timeout);
-        }
-        function nextTimeout() {
-          clearTimeout(timeout);
-          if (mouseOver) return;
-          timeout = setTimeout(() => {
-            slider.next();
-          }, 4000);
-        }
-        slider.on("created", () => {
-          slider.container.addEventListener("mouseover", () => {
-            mouseOver = true;
-            clearNextTimeout();
-          });
-          slider.container.addEventListener("mouseout", () => {
-            mouseOver = false;
-            nextTimeout();
-          });
-          nextTimeout();
-        });
-        slider.on("dragStarted", clearNextTimeout);
-        slider.on("animationEnded", nextTimeout);
-        slider.on("updated", nextTimeout);
-      },
-    ]
-  );
+  const chunkArray = (arr, chunkSize) => {
+    const result = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      result.push(arr.slice(i, i + chunkSize));
+    }
+    return result;
+  };
+  const eventosPorSlide = chunkArray(eventosEnCurso, 5);
+  const [sliderRef] = useKeenSlider({
+    slides: eventosPorSlide.length,
+    loop: true,
+  });
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -123,6 +102,29 @@ function PantallaDirec2() {
   };
 
   useEffect(() => {
+    if (selectedCity) {
+      setIsLoading(true);
+      setError(null);
+
+      const apiKey = "d6bfb64ec94a413cabc181954232010";
+      const baseUrl = "http://api.weatherapi.com/v1";
+
+      axios
+        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
+        .then((response) => {
+          console.log("Datos del clima:", response.data);
+          setWeatherData(response.data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error al obtener datos del clima:", error);
+          setError("No se pudo obtener la información del clima");
+          setIsLoading(false);
+        });
+    }
+  }, [selectedCity]);
+
+  useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user.uid);
       const obtenerUsuario = async () => {
@@ -130,7 +132,8 @@ function PantallaDirec2() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            const nombrePantallasUsuario = userData.nombrePantallas || {};
+            const nombrePantallasUsuario =
+              userData.nombrePantallasDirectorio || {};
             const pantallasNumeradas = {};
 
             Object.keys(nombrePantallasUsuario).forEach((key, index) => {
@@ -163,57 +166,69 @@ function PantallaDirec2() {
                 }
               }
             });
+            console.log("eventosData:", eventosData);
+            // const eventosFiltrados = eventosData.filter((evento) => {
+            //   const fechaFinalEvento = new Date(evento.fechaFinal);
+            //   const fechaActual = new Date();
 
-            // Filtrar por fecha y hora los eventos filtrados por pantalla
-            const eventosEnCurso = eventosData.filter((evento) => {
-              // Obtener fecha actual (solo día)
-              const fechaActual = new Date();
+            // Si la fecha final del evento es anterior a la fecha actual, se filtra
+            //   return fechaActual <= fechaFinalEvento;
+            // });
+            // console.log("eventosFiltrados:", eventosFiltrados);
+            // Ordenar los eventos por fecha y hora más cercanas a la actual
+            // Suponiendo que tienes eventos ordenados en eventosEnCurso
+            const eventosOrdenados = eventosData.slice().sort((a, b) => {
+              const fechaFinalA = new Date(a.fechaFinal);
+              const fechaFinalB = new Date(b.fechaFinal);
 
-              // Obtener fechas de inicio y finalización del evento (solo día)
-              const fechaInicioEvento = new Date(evento.fechaInicio);
-              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1); // Sumar un día
-              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              // Ordenar por fechaFinal más cercana a la actual
+              if (fechaFinalA > fechaFinalB) return 1;
+              if (fechaFinalA < fechaFinalB) return -1;
 
-              const fechaFinalEvento = new Date(evento.fechaFinal);
-              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
-              fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              // Si la fecha final es la misma, ordenar por horaInicialSalon
+              const horaInicioA = new Date(`2000-01-01T${a.horaInicialSalon}`);
+              const horaInicioB = new Date(`2000-01-01T${b.horaInicialSalon}`);
 
-              const horaActual = obtenerHora();
-              const horaInicialEvento = evento.horaInicialReal;
-              const horaFinalEvento = evento.horaFinalReal;
-              const fechaActualEnRango =
-                fechaActual >= fechaInicioEvento &&
-                fechaActual <= fechaFinalEvento;
-              const horaActualEnRango =
-                horaActual >= horaInicialEvento &&
-                horaActual <= horaFinalEvento;
-              console.log("evento", evento);
-              console.log("fechaActual", fechaActual);
-              console.log("fechaInicioEvento", fechaInicioEvento);
-              console.log("fechaFinalEvento", fechaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("fechaActualEnRango", fechaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
-
-              // console.log("horaActual", horaActual);
-              // console.log("horaInicialEvento", horaInicialEvento);
-              // console.log("horaFinalEvento", horaFinalEvento);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              // console.log("horaActualEnRango", horaActualEnRango);
-              // console.log(
-              //   "---------------------------------------------------"
-              // );
-              return fechaActualEnRango && horaActualEnRango;
+              return horaInicioA - horaInicioB;
             });
 
-            console.log("Eventos filtrados por fecha y hora:", eventosEnCurso);
-            setEventosEnCurso(eventosEnCurso);
+            // Filtrar por eventos cuya horaInicialSalon sea mayor que la hora actual
+            // const horaActual = new Date();
+            // const eventosFiltradosv1 = eventosOrdenados.filter((evento) => {
+            //   const horaInicioEvento = new Date(
+            //     `2000-01-01T${evento.horaInicialSalon}`
+            //   );
+            //   return horaInicioEvento > horaActual;
+            // });
+
+            // Usar eventosFiltrados en tu componente
+            // setEventosEnCurso(eventosFiltradosv1);
+
+            console.log("Eventos ordenados:", eventosOrdenados);
+
+            const templateRef = collection(firestore, "TemplateDirectorios");
+            const templateQuery = query(
+              templateRef,
+              where("userId", "==", user.uid)
+            );
+            const templateSnapshot = await getDocs(templateQuery);
+
+            if (!templateSnapshot.empty) {
+              const templateData = [];
+              templateSnapshot.forEach((doc) => {
+                const template = { id: doc.id, ...doc.data() };
+                templateData.push(template);
+              });
+              setTemplateData(templateData);
+              // Aquí puedes hacer algo con la información obtenida de TemplateDirectorios
+            } else {
+              // console.log(
+              //   "No se encontró información en TemplateDirectorios para este usuario."
+              // );
+            }
+            // Filtrar por fecha y hora los eventos filtrados por pantalla
+
+            setEventosEnCurso(eventosOrdenados);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -228,7 +243,7 @@ function PantallaDirec2() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 5000);
+      }, 50000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -250,45 +265,34 @@ function PantallaDirec2() {
     ];
 
     const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
     ];
 
     const now = new Date();
     const diaSemana = diasSemana[now.getDay()];
     const dia = now.getDate();
     const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
 
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
+    return `${diaSemana} ${dia}/${mes} `;
   };
 
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     return <p>No hay eventos disponibles en este momento.</p>;
   }
-
-  const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
-
-  const {
-    personalizacionTemplate,
-    lugar,
-    nombreEvento,
-    images,
-    horaInicialReal,
-    tipoEvento,
-    description,
-    devices,
-  } = eventoActual;
+  console.log("EVENTOSSSS", eventosEnCurso);
+  // console.log("templateData", templateData);
+  const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
@@ -296,107 +300,137 @@ function PantallaDirec2() {
         <div id="Content" className="flex-grow flex flex-col justify-center ">
           {/* Header */}
           <div className="flex items-center justify-between ">
-            {personalizacionTemplate.logo && (
-              <>
-                {" "}
-                <div
-                  style={{
-                    width: "18vw",
-                    height: "10vw",
-                    overflow: "hidden",
-                  }}
-                >
-                  <img
-                    src={personalizacionTemplate.logo}
-                    alt="Logo"
-                    className="w-72"
-                  />
-                </div>{" "}
-              </>
-            )}
-            <h1
-              className={`font-bold uppercase text-5xl md:text-7xl  mr-16`}
-              style={{ color: personalizacionTemplate.fontColor }}
+            {/* Logo en la esquina superior izquierda */}
+            <div className="">
+              {templateActual.logo && (
+                <>
+                  {" "}
+                  <div
+                    style={{
+                      width: "18vw",
+                      height: "10vw",
+                      overflow: "hidden",
+                    }}
+                  >
+                    <img
+                      src={templateActual.logo}
+                      alt="Logo"
+                      className="w-72"
+                    />
+                  </div>{" "}
+                </>
+              )}
+            </div>
+
+            <div
+              className="flex flex-col items-center"
+              style={{ color: templateActual.fontColor }}
             >
-              {devices[0]}
-            </h1>
+              <p className="text-2xl text-center font-semibold mb-2">
+                {obtenerFecha()}-{currentHour}
+              </p>
+              <h1 className="text-4xl font-bold">Eventos del día</h1>
+            </div>
+
+            <div
+              className="flex flex-col"
+              style={{ color: templateActual.fontColor }}
+            >
+              {isLoading ? (
+                <p>Cargando datos del clima...</p>
+              ) : weatherData &&
+                weatherData.current &&
+                weatherData.current.temp_c ? (
+                <p className="text-3xl font-bold">
+                  {weatherData.current.temp_c} °C
+                </p>
+              ) : (
+                <p>No se pudo obtener la información del clima</p>
+              )}
+            </div>
           </div>
-          {/* Linea arriba */}
+          {/* Linea arriba */}{" "}
           <div
-            className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
             }}
           >
-            <h2>{nombreEvento}</h2>
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
           </div>
           {/* contenido principal */}
-          <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
-            <div className="grid grid-cols-3 gap-x-4 text-black">
-              <div className="col-span-1  mr-4 my-auto">
-                {images && images.length > 0 ? (
-                  <>
-                    <div className="slider-container">
-                      <div ref={sliderRef} className="keen-slider">
-                        {images.map((image, index) => (
-                          <div
-                            key={index}
-                            className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
-                            style={{
-                              width: "30vw",
-                              height: "30vw",
-                            }}
-                          >
-                            <img
-                              src={image}
-                              alt={`Imagen ${index + 1}`}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <p style={{ color: personalizacionTemplate.fontColor }}>
-                    No hay imágenes disponibles
-                  </p>
-                )}
-              </div>
-
-              <div className="col-span-2 space-y-8  my-4">
-                <div>
-                  <h1
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
-                  >
-                    Sesión:
-                  </h1>
-                  <p
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
-                  >
-                    {horaInicialReal}
-                    <span className="text-2x1">hrs.</span>
-                  </p>
-                </div>
+          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+            <div className=" text-black">
+              {/* Imagen a la izquierda */}
+              <div
+                className="flex flex-col
+              "
+              >
                 <div className="">
-                  {/* Tipo de evento y descripción */}
-                  <h1
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
-                  >
-                    {tipoEvento}
-                  </h1>
-                  <div className="text-center flex px-0">
-                    <p
-                      className={`text-3xl md:text-4xl`}
-                      style={{ color: personalizacionTemplate.fontColor }}
-                    >
-                      {description}
-                    </p>
+                  <div className="space-y-5 pl-5 flex-grow">
+                    {/* Slots predeterminados */}
+                    <div ref={sliderRef} className="keen-slider">
+                      {/* Renderizar bloques de eventos por slide */}
+                      {eventosPorSlide.map((bloqueEventos, index) => (
+                        <div key={index} className="keen-slider__slide my-2">
+                          {/* Renderizar casillas o slots */}
+                          {[...Array(5)].map((_, slotIndex) => {
+                            const event = bloqueEventos[slotIndex];
+                            return (
+                              <div key={slotIndex} className="mb-4">
+                                {event ? ( // Si hay un evento en este slot
+                                  <div className="flex items-center space-x-4 space-y-5 border-b border-black">
+                                    {/* Imagen a la izquierda */}
+                                    <img
+                                      src={event.images[0]}
+                                      alt={event.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                        margin: "0",
+                                      }}
+                                    />
+                                    {/* Detalles del evento */}
+                                    <div className="grid grid-cols-2">
+                                      {/* Aplicando el color seleccionado */}
+                                      <div className="min-w-5">
+                                        <h3 className="font-bold mb-4">
+                                          {event.nombreEvento}
+                                        </h3>
+                                        <p>{event.tipoEvento}</p>
+                                        <p>{event.lugar}</p>
+                                      </div>
+                                      {/* Agrega más detalles según sea necesario */}
+                                      <div className="text-right">
+                                        <p>{event.horaInicialSalon} HRS</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  // Si no hay evento en este slot, mostrar espacio vacío con dimensiones fijas
+                                  <div className="flex items-center space-x-4 space-y-5 border-b border-black">
+                                    <div
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                        backgroundColor: "#f0f0f0", // Color de fondo para espacios vacíos (puedes ajustar esto)
+                                      }}
+                                    ></div>
+                                    <div className="grid grid-cols-2">
+                                      <div className="min-w-5"></div>
+                                      <div className="text-right"></div>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -404,27 +438,30 @@ function PantallaDirec2() {
           </div>
           {/* Linea abajo */}
           <div
-            id="Abajo"
-            className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle,
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
             }}
           >
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
+          </div>
+          {/* texto de abajo */}
+          <div className="flex justify-between items-center">
             <p
-              className="font-bold uppercase"
-              style={{ color: personalizacionTemplate.fontColor }}
+              className=""
+              // style={{
+              //   color: fontColor,
+              //   fontFamily: selectedFontStyle
+              //     ? selectedFontStyle.value
+              //     : "Arial",
+              // }}
             >
-              {obtenerFecha()}
+              Grupo renueca el mejor programa de recompensa para asistentes ejec
             </p>
-            <p
-              className=" uppercase"
-              style={{ color: personalizacionTemplate.fontColor }}
-            >
-              {currentHour}
-            </p>{" "}
-            {/* Mostrar la hora actual */}
+            <img src="/img/licensed-image.jpeg" alt="Logo" className="h-12" />
           </div>
         </div>
       </div>
