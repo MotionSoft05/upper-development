@@ -191,17 +191,17 @@ function PantallaDirec1() {
               }
             });
             console.log("eventosData:", eventosData);
-            const eventosFiltrados = eventosData.filter((evento) => {
-              const fechaFinalEvento = new Date(evento.fechaFinal);
-              const fechaActual = new Date();
+            // const eventosFiltrados = eventosData.filter((evento) => {
+            //   const fechaFinalEvento = new Date(evento.fechaFinal);
+            //   const fechaActual = new Date();
 
-              // Si la fecha final del evento es anterior a la fecha actual, se filtra
-              return fechaActual < fechaFinalEvento;
-            });
-            console.log("eventosFiltrados:", eventosFiltrados);
+            // Si la fecha final del evento es anterior a la fecha actual, se filtra
+            //   return fechaActual < fechaFinalEvento;
+            // });
+            // console.log("eventosFiltrados:", eventosFiltrados);
             // Ordenar los eventos por fecha y hora más cercanas a la actual
             // Suponiendo que tienes eventos ordenados en eventosEnCurso
-            const eventosOrdenados = eventosFiltrados.slice().sort((a, b) => {
+            const eventosOrdenados = eventosData.slice().sort((a, b) => {
               const fechaFinalA = new Date(a.fechaFinal);
               const fechaFinalB = new Date(b.fechaFinal);
 
