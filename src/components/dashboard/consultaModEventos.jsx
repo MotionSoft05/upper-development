@@ -683,7 +683,7 @@ function ConsultaModEvento() {
                                 <label className="block text-sm font-medium text-gray-700">
                                   Dispositivos Seleccionados
                                 </label>
-                                <div className="text-center">
+                                <div className="flex flex-wrap justify-start items-start">
                                   {pantallas
                                     .filter(
                                       (usuario) =>
@@ -722,7 +722,7 @@ function ConsultaModEvento() {
                                           {nombrePantallas.map((pantalla) => (
                                             <div
                                               key={`pantalla-${pantalla}`}
-                                              className="flex items-center mb-2"
+                                              className="flex items-center mb-2 mr-4"
                                             >
                                               <input
                                                 type="checkbox"
@@ -747,7 +747,7 @@ function ConsultaModEvento() {
                                             (pantallaDir) => (
                                               <div
                                                 key={`pantallaDir-${pantallaDir}`}
-                                                className="flex items-center mb-2"
+                                                className="flex items-center mb-2 mr-4"
                                               >
                                                 <input
                                                   type="checkbox"
