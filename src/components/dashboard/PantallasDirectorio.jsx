@@ -16,6 +16,7 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  getDoc,
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
@@ -70,15 +71,12 @@ function PantallasDirectorio() {
         const authUser = firebase.auth().currentUser;
 
         if (authUser) {
-          const usuariosRef = collection(db, "usuarios");
-          const usuariosQuery = query(
-            usuariosRef,
-            where("email", "==", authUser.email)
-          );
-          const usuariosSnapshot = await getDocs(usuariosQuery);
+          // Obtener información del usuario desde Firestore
+          const usuarioRef = doc(db, "usuarios", authUser.uid);
+          const usuarioSnapshot = await getDoc(usuarioRef);
 
-          if (!usuariosSnapshot.empty) {
-            const user = usuariosSnapshot.docs[0].data();
+          if (usuarioSnapshot.exists()) {
+            const user = usuarioSnapshot.data();
             const numberOfScreens = user.pd || 0;
             const namesArray = Array.from(
               { length: numberOfScreens },
@@ -87,6 +85,18 @@ function PantallasDirectorio() {
 
             setNombrePantallasDirectorio(namesArray);
             setPd(numberOfScreens);
+
+            // Escuchar cambios en los nombres de las pantallas
+            const unsubscribe = onSnapshot(usuarioRef, (doc) => {
+              const data = doc.data();
+              if (data && data.nombrePantallasDirectorio) {
+                const nombres = Object.values(data.nombrePantallasDirectorio);
+                setNombrePantallasDirectorio(nombres);
+              }
+            });
+
+            // Importante: Detener la escucha cuando el componente se desmonta
+            return () => unsubscribe();
           }
         }
       } catch (error) {
