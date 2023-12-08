@@ -32,6 +32,7 @@ function ConsultaModEvento() {
   const [description, setDescription] = useState("");
   const [usuarioLogeado, setUsuarioLogeado] = useState("");
   const [imagenesEvento, setImagenesEvento] = useState([]);
+  const [pantallas, setPantallas] = useState([]);
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
@@ -57,9 +58,23 @@ function ConsultaModEvento() {
         setUsuarios(usuariosData);
       });
 
+    const unsubscribePantallas = firebase
+      .firestore()
+      .collection("usuarios")
+      .onSnapshot((snapshot) => {
+        const pantallasData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          nombrePantallas: doc.data().nombrePantallas || [],
+          nombrePantallasDirectorio: doc.data().nombrePantallasDirectorio || [],
+        }));
+        console.log("Pantallas recibidas:", pantallasData);
+        setPantallas(pantallasData);
+      });
+
     return () => {
       unsubscribeEventos();
       unsubscribeUsuarios();
+      unsubscribePantallas();
     };
   }, []);
 
@@ -75,7 +90,6 @@ function ConsultaModEvento() {
             id: doc.id,
             ...doc.data(),
           }));
-          console.log("Eventos recibidos:", eventosData);
           setEventos(eventosData);
         });
       } else if (user) {
@@ -90,7 +104,6 @@ function ConsultaModEvento() {
             id: doc.id,
             ...doc.data(),
           }));
-          console.log("Eventos recibidos:", eventosData);
           setEventos(eventosData);
         });
       }
@@ -146,6 +159,7 @@ function ConsultaModEvento() {
           fechaFinal: fechaFinalFormateada,
           description: eventoEditado.description,
           images: imagenesEvento,
+          devices: eventoEditado.devices || [],
         });
 
       setModalAbierto(false);
@@ -280,13 +294,6 @@ function ConsultaModEvento() {
                   // Buscar el usuario correspondiente
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
-                  );
-
-                  console.log(`Nombre del evento: ${evento.nombreEvento}`);
-                  console.log(
-                    `Nombre del creador: ${
-                      usuario ? `${usuario.nombre} ${usuario.apellido}` : "N/A"
-                    }`
                   );
 
                   return (
@@ -660,14 +667,105 @@ function ConsultaModEvento() {
                                   Dispositivos Seleccionados
                                 </label>
                                 <div className="text-center">
-                                  {/* Render devices as a comma-separated list */}
-                                  {
-                                    evento.devices && evento.devices.length > 0
-                                      ? evento.devices.join(", ")
-                                      : "N/A" // Display "N/A" if no devices are available
-                                  }
+                                  {pantallas
+                                    .filter(
+                                      (usuario) =>
+                                        eventoEditado?.userId === usuario.id
+                                    )
+                                    .map((usuario) => {
+                                      console.log("Usuario:", usuario);
+
+                                      const nombrePantallas =
+                                        Array.isArray(
+                                          usuario.nombrePantallas
+                                        ) && usuario.nombrePantallas.length
+                                          ? usuario.nombrePantallas
+                                          : typeof usuario.nombrePantallas ===
+                                            "object"
+                                          ? Object.values(
+                                              usuario.nombrePantallas
+                                            )
+                                          : ["N/A"];
+
+                                      const nombrePantallasDirectorio =
+                                        Array.isArray(
+                                          usuario.nombrePantallasDirectorio
+                                        ) &&
+                                        usuario.nombrePantallasDirectorio.length
+                                          ? usuario.nombrePantallasDirectorio
+                                          : typeof usuario.nombrePantallasDirectorio ===
+                                            "object"
+                                          ? Object.values(
+                                              usuario.nombrePantallasDirectorio
+                                            )
+                                          : ["N/A"];
+
+                                      return (
+                                        <>
+                                          {nombrePantallas.map((pantalla) => (
+                                            <div
+                                              key={`pantalla-${pantalla}`}
+                                              className="flex items-center mb-2"
+                                            >
+                                              <input
+                                                type="checkbox"
+                                                id={`checkbox-${pantalla}`}
+                                                value={pantalla}
+                                                checked={eventoEditado?.devices.includes(
+                                                  pantalla
+                                                )}
+                                                onChange={(e) =>
+                                                  handleCheckboxChange(
+                                                    e.target.value
+                                                  )
+                                                }
+                                                className="mr-2"
+                                              />
+                                              <label
+                                                htmlFor={`checkbox-${pantalla}`}
+                                              >
+                                                {pantalla}
+                                              </label>
+                                            </div>
+                                          ))}
+                                          {nombrePantallasDirectorio.map(
+                                            (pantallaDir) => (
+                                              <div
+                                                key={`pantallaDir-${pantallaDir}`}
+                                                className="flex items-center mb-2"
+                                              >
+                                                <input
+                                                  type="checkbox"
+                                                  id={`checkbox-${pantallaDir}`}
+                                                  value={pantallaDir}
+                                                  checked={eventoEditado?.devices.includes(
+                                                    pantallaDir
+                                                  )}
+                                                  onChange={(e) =>
+                                                    handleCheckboxChange(
+                                                      e.target.value
+                                                    )
+                                                  }
+                                                  className="mr-2"
+                                                />
+                                                <label
+                                                  htmlFor={`checkbox-${pantallaDir}`}
+                                                >
+                                                  {pantallaDir}
+                                                </label>
+                                              </div>
+                                            )
+                                          )}
+                                        </>
+                                      );
+                                    })}
+                                  {console.log(
+                                    "Pantallas en el select:",
+                                    pantallas
+                                  )}
                                 </div>
                               </div>
+
                               <div className="flex justify-end">
                                 <button
                                   onClick={guardarCambios}
