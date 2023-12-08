@@ -104,7 +104,42 @@ function PantallasDirectorio() {
       }
     };
 
+    const fetchTemplateData = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser) {
+          const templateDirectoriosRef = collection(db, "TemplateDirectorios");
+          const templateDirectoriosQuery = query(
+            templateDirectoriosRef,
+            where("userId", "==", authUser.uid)
+          );
+          const templateDirectoriosSnapshot = await getDocs(
+            templateDirectoriosQuery
+          );
+
+          if (!templateDirectoriosSnapshot.empty) {
+            const templateDirectoriosDoc =
+              templateDirectoriosSnapshot.docs[0].data();
+            const { fontColor, fontStyle, logo, templateColor } =
+              templateDirectoriosDoc;
+
+            setFontColor(fontColor || "#000000");
+            setSelectedFontStyle({
+              value: fontStyle || "Arial",
+              label: fontStyle || "Arial",
+            });
+            setSelectedLogo(logo || null);
+            setTemplateColor(templateColor || "#D1D5DB");
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del template:", error);
+      }
+    };
+
     fetchUserData();
+    fetchTemplateData();
   }, []);
 
   useEffect(() => {
@@ -672,12 +707,14 @@ function PantallasDirectorio() {
             </div>
           )}
           <div className="flex justify-end mt-6">
+            {/*
             <button
               onClick={handlePreviewClick}
               className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
               Vista Previa
             </button>
+            */}
             <button
               onClick={() => {
                 guardarInformacionPersonalizacion(selectedLogo);
