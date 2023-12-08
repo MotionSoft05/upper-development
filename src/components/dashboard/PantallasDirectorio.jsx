@@ -358,7 +358,7 @@ function PantallasDirectorio() {
         </div>
 
         {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 ">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800">
           <h1 className="text-xl font-bold text-white capitalize dark:text-white">
             Personalización del Template
           </h1>
@@ -375,6 +375,7 @@ function PantallasDirectorio() {
                 />
               </div>
             </div>
+
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 Estilo de texto
@@ -386,7 +387,17 @@ function PantallasDirectorio() {
                 placeholder="Seleccionar estilo de texto"
               />
             </div>
-            <div>
+
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Logo Actual
+              </label>
+              {selectedLogo && (
+                <img src={selectedLogo} alt="Logo Actual" className="w-48" />
+              )}
+            </div>
+
+            <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 Color de letra
               </label>
@@ -417,7 +428,23 @@ function PantallasDirectorio() {
                 ></div>
               </div>
             </div>
-            <div>
+          </div>
+          {/* Sección para URL del clima y eventos del calendario */}
+          <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
+            <div className="mb-4 flex flex-col">
+              <label className="text-white dark:text-gray-200">
+                Seleccionar Ciudad
+              </label>
+              <Select
+                options={cityOptions}
+                value={selectedCity}
+                onChange={setSelectedCity}
+                placeholder="Seleccione una ciudad"
+                className="w-full"
+              />
+            </div>
+
+            <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 Color de la plantilla
               </label>
@@ -449,38 +476,17 @@ function PantallasDirectorio() {
               </div>
             </div>
           </div>
-          {/* Sección para URL del clima y eventos del calendario */}
-          <div className="">
-            <h1 className="text-xl font-bold text-white capitalize dark:text-white">
-              Directorio de Eventos
-            </h1>
-            <div className="mt-4">
-              <div className="mb-4">
-                <label className="text-white dark:text-gray-200">
-                  Seleccionar Ciudad
-                </label>
-                <Select
-                  options={cityOptions}
-                  value={selectedCity}
-                  onChange={setSelectedCity}
-                  placeholder="Seleccione una ciudad"
-                />
-              </div>
-            </div>
-          </div>
           <div className="mb-4">
             <label className="text-white dark:text-gray-200 block mb-1">
               Nombres de pantallas
             </label>
             <div className="flex flex-col">
               {Array.from({ length: pd }, (_, index) => (
-                // eslint-disable-next-line react/jsx-key
-                <div className="flex">
+                <div className="flex items-center mb-2" key={index}>
                   <input
-                    key={index}
                     type="text"
                     placeholder={`Pantalla ${index + 1}`}
-                    className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                    className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
                     value={nombrePantallasDirectorio[index] || ""}
                     onChange={(e) => {
                       const updatedNombres = [...nombrePantallasDirectorio];
@@ -491,7 +497,7 @@ function PantallasDirectorio() {
                   <Link
                     href={`/pantallaDirec${index + 1}.html`}
                     target="_blank"
-                    className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
+                    className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >
                     URL
                   </Link>
