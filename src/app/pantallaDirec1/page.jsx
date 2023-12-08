@@ -18,8 +18,7 @@ const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
+  return `${hours}:${minutes}`;
 };
 
 function PantallaDirec1() {
@@ -42,47 +41,24 @@ function PantallaDirec1() {
   useEffect(() => {
     const interval = setInterval(() => {
       obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
-    }, 50000);
+    }, 1000);
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
 
   // Slider
-  const [sliderRef] = useKeenSlider(
-    {
-      loop: true,
-    },
-    [
-      (slider) => {
-        let timeout;
-        let mouseOver = false;
-        function clearNextTimeout() {
-          clearTimeout(timeout);
-        }
-        function nextTimeout() {
-          clearTimeout(timeout);
-          if (mouseOver) return;
-          timeout = setTimeout(() => {
-            slider.next();
-          }, 4000);
-        }
-        slider.on("created", () => {
-          slider.container.addEventListener("mouseover", () => {
-            mouseOver = true;
-            clearNextTimeout();
-          });
-          slider.container.addEventListener("mouseout", () => {
-            mouseOver = false;
-            nextTimeout();
-          });
-          nextTimeout();
-        });
-        slider.on("dragStarted", clearNextTimeout);
-        slider.on("animationEnded", nextTimeout);
-        slider.on("updated", nextTimeout);
-      },
-    ]
-  );
+  const chunkArray = (arr, chunkSize) => {
+    const result = [];
+    for (let i = 0; i < arr.length; i += chunkSize) {
+      result.push(arr.slice(i, i + chunkSize));
+    }
+    return result;
+  };
+  const eventosPorSlide = chunkArray(eventosEnCurso, 5);
+  const [sliderRef] = useKeenSlider({
+    slides: eventosPorSlide.length,
+    loop: true,
+  });
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -289,27 +265,26 @@ function PantallaDirec1() {
     ];
 
     const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
     ];
 
     const now = new Date();
     const diaSemana = diasSemana[now.getDay()];
     const dia = now.getDate();
     const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
 
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
+    return `${diaSemana} ${dia}/${mes} `;
   };
 
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
@@ -321,7 +296,6 @@ function PantallaDirec1() {
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      {" "}
       <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
         <div id="Content" className="flex-grow flex flex-col justify-center ">
           {/* Header */}
@@ -353,7 +327,7 @@ function PantallaDirec1() {
               style={{ color: templateActual.fontColor }}
             >
               <p className="text-2xl text-center font-semibold mb-2">
-                {obtenerFecha()}
+                {obtenerFecha()}-{currentHour}
               </p>
               <h1 className="text-4xl font-bold">Eventos del día</h1>
             </div>
@@ -375,89 +349,86 @@ function PantallaDirec1() {
               )}
             </div>
           </div>
-          {/* Linea arriba */}
+          {/* Linea arriba */}{" "}
+          <div
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+            style={{
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
+            }}
+          >
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
+          </div>
+          {/* contenido principal */}
           <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-            <div className="">
+            <div className=" text-black">
+              {/* Imagen a la izquierda */}
               <div
-                className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
-                style={{
-                  backgroundColor: templateActual.templateColor,
-                  color: templateActual.fontColor,
-                  fontStyle: templateActual.fontStyle, //! NO FUNCIONA
-                }}
-              >
-                {/* Título */}
-                <h2 className=" text-white"> </h2>
-              </div>
-              <div className=" text-black">
-                {/* Imagen a la izquierda */}
-                <div
-                  className="flex flex-col
+                className="flex flex-col
               "
-                >
-                  <div className="flex items-center border-b border-black w-full">
-                    <div className="space-y-5 pl-5 flex-grow">
-                      {eventosEnCurso.map((event) => {
-                        return (
-                          <div
-                            key={event.id}
-                            className="flex items-center space-x-4"
-                          >
-                            {/* Imagen a la izquierda */}
-                            <img
-                              src={event.images[0]}
-                              alt={event.nombreEvento}
-                              style={{
-                                width: "130px",
-                                height: "110px",
-                              }}
-                            />
+              >
+                <div className="">
+                  <div className="space-y-5 pl-5 flex-grow">
+                    {/* Slots predeterminados */}
+                    <div ref={sliderRef} className="keen-slider">
+                      {eventosPorSlide.map((bloqueEventos, index) => (
+                        <div key={index} className="keen-slider__slide my-2">
+                          {bloqueEventos.map((event) => (
+                            <div key={event.id}>
+                              {/* Detalles del evento */}
+                              <div className="flex items-center space-x-4 space-y-5 border-b border-black">
+                                {/* Imagen a la izquierda */}
+                                <img
+                                  src={event.images[0]}
+                                  alt={event.nombreEvento}
+                                  style={{
+                                    width: "130px",
+                                    height: "110px",
+                                    margin: "0",
+                                  }}
+                                />
+                                {/* Detalles del evento */}
+                                <div className="grid grid-cols-2">
+                                  {/* Aplicando el color seleccionado */}
+                                  <div className="min-w-5">
+                                    <h3 className="font-bold mb-4">
+                                      {event.nombreEvento}
+                                    </h3>
+                                    <p>{event.tipoEvento}</p>
+                                    <p>{event.lugar}</p>
+                                  </div>
 
-                            {/* Detalles del evento */}
-                            <div
-                            // style={{
-                            //   color: fontColor,
-                            //   fontFamily: selectedFontStyle
-                            //     ? selectedFontStyle.value
-                            //     : "Arial",
-                            // }}
-                            >
-                              {/* Aplicando el color seleccionado */}
-                              <h3>{event.nombreEvento}</h3>
-                              <p>{event.tipoEvento}</p>
-                              <p>{event.lugar}</p>
-                              {/* Agrega más detalles según sea necesario */}
-                              <div className="text-right">
-                                <p>{event.horaInicialReal}</p>
+                                  {/* Agrega más detalles según sea necesario */}
+                                  <div className="text-right ">
+                                    <p>{event.horaInicialSalon} HRS</p>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        );
-                      })}
+                          ))}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
-
-              <div>
-                {/* Fecha y hora en la esquina inferior */}
-
-                <div
-                  className={`text-2xl font-semibold mt-1 text-center text-white bg-black justify-between flex px-20 rounded-b-xl`}
-                  // style={{
-                  //   color: fontColor,
-                  //   backgroundColor: templateColor,
-                  //   fontFamily: selectedFontStyle
-                  //     ? selectedFontStyle.value
-                  //     : "Arial",
-                  // }}
-                >
-                  <p> </p>
-                </div>
-              </div>
             </div>
           </div>
-          {/* contenido principal */}
+          {/* Linea abajo */}
+          <div
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl`}
+            style={{
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
+            }}
+          >
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
+          </div>
+          {/* texto de abajo */}
           <div className="flex justify-between items-center">
             <p
               className=""
@@ -472,7 +443,6 @@ function PantallaDirec1() {
             </p>
             <img src="/img/licensed-image.jpeg" alt="Logo" className="h-12" />
           </div>
-          {/* Linea abajo */}
         </div>
       </div>
     </section>
