@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import DatosFiscales from "./licenciaComponentes/datosFiscales";
 import LicenciaContratada from "./licenciaComponentes/LicenciaContratada";
 import DatosNegocio from "./licenciaComponentes/datosNegocio";
