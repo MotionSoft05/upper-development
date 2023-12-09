@@ -280,7 +280,7 @@ function Admin() {
     <div class="flex flex-col  bg-gray-100">
       <div class="flex-1 flex flex-wrap">
         <div class="flex-1 p-4 ">
-          <div class="relative max-w-md w-full">
+          <div class="relative max-w-xs w-full">
             <div class="absolute top-1 left-2 inline-flex items-center p-2">
               <i class="fas fa-search text-gray-400"></i>
             </div>
@@ -289,7 +289,7 @@ function Admin() {
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
               Datos de Usuarios
             </h2>
-            <div className="flex space-x-4 mt-4">
+            <div className="flex space-x-2 mt-4">
               <button
                 onClick={() => setFiltroSeleccionado("todos")}
                 className={`${
@@ -325,27 +325,27 @@ function Admin() {
             <table class="w-full table-auto text-sm">
               <thead>
                 <tr class="text-sm leading-normal">
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Nombre y Apellido
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Email
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Empresa
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Teléfono
                   </th>
 
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     PS
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     PD
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Total
+                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    T
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Tipo de Plan
@@ -358,7 +358,7 @@ function Admin() {
               <tbody>
                 {aplicarFiltro().map((usuario) => (
                   <tr className="hover:bg-grey-lighter" key={usuario.id}>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -377,7 +377,7 @@ function Admin() {
                         `${usuario.nombre} ${usuario.apellido}`
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -393,7 +393,7 @@ function Admin() {
                         usuario.email
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="py-2 px-0 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -409,7 +409,7 @@ function Admin() {
                         usuario.empresa
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="py-2 px-0 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -425,7 +425,7 @@ function Admin() {
                         usuario.telefono
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -445,7 +445,7 @@ function Admin() {
                       )}
                     </td>
 
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -464,7 +464,7 @@ function Admin() {
                         usuario.pd
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
@@ -634,14 +634,14 @@ function Admin() {
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Monto
                     </th>
-                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       PS
                     </th>
-                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       PD
                     </th>
-                    <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Total
+                    <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                      T
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       Acciones
@@ -702,7 +702,7 @@ function Admin() {
                           transaccion.monto
                         )}
                       </td>
-                      <td className="py-2 px-4 border-b border-grey-light">
+                      <td className="border-b border-grey-light">
                         {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
@@ -719,7 +719,7 @@ function Admin() {
                           transaccion.ps
                         )}
                       </td>
-                      <td className="py-2 px-4 border-b border-grey-light">
+                      <td className="border-b border-grey-light">
                         {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
@@ -736,7 +736,7 @@ function Admin() {
                           transaccion.pd
                         )}
                       </td>
-                      <td className="py-2 px-4 border-b border-grey-light">
+                      <td className="border-b border-grey-light">
                         {modoEdiciontransaccion &&
                         transaccionEditada.id === transaccion.id ? (
                           <input
