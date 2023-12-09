@@ -350,10 +350,21 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
+                Fecha de Inicio
+              </th>
+              <td className="px-6 py-4">
+                {currentUser ? currentUser.inicio : ""}
+              </td>
+            </tr>
+            <tr className="bg-white border-b">
+              <th
+                scope="row"
+                className="px-6 py-4 font-extrabold text-gray-900"
+              >
                 Fecha de expiración
               </th>
               <td className="px-6 py-4">
-                {currentUser ? currentUser.fechaExpiracion : ""}
+                {currentUser ? currentUser.final : ""}
               </td>
             </tr>
             <tr className="bg-white border-b">
