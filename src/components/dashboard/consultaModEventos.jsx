@@ -67,7 +67,6 @@ function ConsultaModEvento() {
           nombrePantallas: doc.data().nombrePantallas || [],
           nombrePantallasDirectorio: doc.data().nombrePantallasDirectorio || [],
         }));
-        console.log("Pantallas recibidas:", pantallasData);
         setPantallas(pantallasData);
       });
 
@@ -131,7 +130,13 @@ function ConsultaModEvento() {
 
   const eliminarEvento = async (id) => {
     try {
-      await firebase.firestore().collection("eventos").doc(id).delete();
+      const confirmacion = window.confirm(
+        "¿Estás seguro que quieres eliminar este evento?"
+      );
+
+      if (confirmacion) {
+        await firebase.firestore().collection("eventos").doc(id).delete();
+      }
     } catch (error) {
       console.error("Error al eliminar el evento:", error);
     }
@@ -690,8 +695,6 @@ function ConsultaModEvento() {
                                         eventoEditado?.userId === usuario.id
                                     )
                                     .map((usuario) => {
-                                      console.log("Usuario:", usuario);
-
                                       const nombrePantallas =
                                         Array.isArray(
                                           usuario.nombrePantallas
