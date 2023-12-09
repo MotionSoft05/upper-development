@@ -517,11 +517,11 @@ function PantallasSalon() {
               </label>
               <div className="flex flex-col">
                 {Array.from({ length: ps }, (_, index) => (
-                  <div className="flex" key={index}>
+                  <div className="flex items-center mb-2" key={index}>
                     <input
                       type="text"
                       placeholder={`Pantalla ${index + 1}`}
-                      className="w-48 py-2 px-3 border rounded-lg bg-gray-700 text-white mb-2"
+                      className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
                       value={nombrePantallas[index] || ""}
                       onChange={(e) => {
                         const updatedNombres = [...nombrePantallas];
@@ -532,7 +532,7 @@ function PantallasSalon() {
                     <Link
                       href={`/pantalla${index + 1}.html`}
                       target="_blank"
-                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4  active:bg-gray-500"
+                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                     >
                       URL
                     </Link>
