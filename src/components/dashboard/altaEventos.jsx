@@ -46,8 +46,6 @@ function AltaEventos() {
     endDate: new Date().setMonth(11),
   });
 
-  console.log("Initial value:", value);
-
   const [alertaEnviada, setAlertaEnviada] = useState(false);
   const [images, setImages] = useState([]);
   const [description, setDescription] = useState("");
@@ -114,7 +112,6 @@ function AltaEventos() {
 
         if (usuarioDoc.exists()) {
           const userData = usuarioDoc.data();
-          // console.log("UserData:", userData);
           setNombrePantallas(userData.nombrePantallas || []);
           setNombrePantallasDirectorio(
             userData.nombrePantallasDirectorio || []
@@ -166,7 +163,6 @@ function AltaEventos() {
   };
 
   const handleValueChange = (newValue) => {
-    // console.log("WDAAWAWDAWDWADAWA", newValue);
     setValue(newValue);
   };
 
@@ -237,7 +233,6 @@ function AltaEventos() {
       horaInicialReal.split(":")[0],
       horaInicialReal.split(":")[1]
     );
-    console.log("DALEEEEEEEEEEE", fechaInicio);
     const fechaFinal = new Date(value.endDate);
     fechaFinal.setDate(fechaFinal.getDate() + 1); // Agregar un día a la fecha final
     fechaFinal.setHours(
@@ -268,8 +263,7 @@ function AltaEventos() {
       userId: userId,
       userId: user.uid,
     };
-    // console.log("userId:", userId);
-    console.log("awwwwwwwwwwwwwwwwwwwwwwwwwwwwwww", eventoData);
+
     if (selectedUser) {
       // Asignar el evento al usuario seleccionado (solo si está seleccionado)
       eventoData.userId = selectedUser;
@@ -345,7 +339,6 @@ function AltaEventos() {
         ? prevDevices.filter((device) => device !== selectedDevice)
         : [...prevDevices, selectedDevice];
 
-      // console.log("Dispositivos seleccionados:", updatedDevices);
       return updatedDevices;
     });
   };
