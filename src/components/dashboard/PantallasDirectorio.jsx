@@ -147,11 +147,12 @@ function PantallasDirectorio() {
       setIsLoading(true);
       setError(null);
 
-      const apiKey = "d6bfb64ec94a413cabc181954232010";
-      const baseUrl = "http://api.weatherapi.com/v1";
+      const apiKey = "1cfcc82283ef423295e12ac8881b03af";
+      const baseUrl = "https://api.weatherbit.io/v2.0";
 
+      // Utiliza la API de Weatherbit para obtener datos del clima actual
       axios
-        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
+        .get(`${baseUrl}/current?city=${selectedCity.value}&key=${apiKey}`)
         .then((response) => {
           console.log("Datos del clima:", response.data);
           setWeatherData(response.data);
