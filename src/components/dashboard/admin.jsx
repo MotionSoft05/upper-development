@@ -179,6 +179,8 @@ function Admin() {
         ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
         ...(usuarioEditado.tipoPlan && { tipoPlan: usuarioEditado.tipoPlan }),
         empresa: usuarioEditado.empresa,
+        inicio: usuarioEditado.inicio,
+        final: usuarioEditado.final,
       };
 
       if (!usuarioEditado.tipoPlan) {
@@ -202,6 +204,8 @@ function Admin() {
                   ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
                   tipoPlan: usuarioEditado.tipoPlan,
                   empresa: usuarioEditado.empresa,
+                  inicio: usuarioEditado.inicio,
+                  final: usuarioEditado.final,
                 }
               : usuario
           )
@@ -219,6 +223,8 @@ function Admin() {
           total: "",
           tipoPlan: "",
           empresa: "",
+          inicio: "",
+          final: "",
         });
       } else {
         console.warn("No hay campos válidos para actualizar.");
@@ -346,6 +352,12 @@ function Admin() {
                   </th>
                   <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     T
+                  </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Inicio
+                  </th>
+                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                    Final
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     Tipo de Plan
@@ -478,6 +490,38 @@ function Admin() {
                         />
                       ) : (
                         usuario.total
+                      )}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
+                        <input
+                          type="text"
+                          value={usuarioEditado.inicio}
+                          onChange={(e) =>
+                            setUsuarioEditado({
+                              ...usuarioEditado,
+                              inicio: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        usuario.inicio
+                      )}
+                    </td>
+                    <td className="py-2 px-4 border-b border-grey-light">
+                      {modoEdicion && usuarioEditado.id === usuario.id ? (
+                        <input
+                          type="text"
+                          value={usuarioEditado.final}
+                          onChange={(e) =>
+                            setUsuarioEditado({
+                              ...usuarioEditado,
+                              final: e.target.value,
+                            })
+                          }
+                        />
+                      ) : (
+                        usuario.final
                       )}
                     </td>
                     <td className="py-2 px-4 border-b border-grey-light">
