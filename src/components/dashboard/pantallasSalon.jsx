@@ -230,9 +230,6 @@ function PantallasSalon() {
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
-    const textoEjemplo = "Texto de ejemplo";
-    const font = `${selectedOption.value}, sans-serif`;
-    const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
   };
 
   const handleImageChange = async (event) => {
