@@ -6,7 +6,15 @@ import {
   signInWithPopup,
   GoogleAuthProvider,
 } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  serverTimestamp,
+  addDoc,
+} from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -37,6 +45,14 @@ function Licencia() {
 
           if (userDocSnap.exists()) {
             setCurrentUser(userDocSnap.data());
+
+            // Obtener datos fiscales si existen
+            const datosFiscalesDocRef = doc(db, "DatosFiscales", user.uid);
+            const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+
+            if (datosFiscalesDocSnap.exists()) {
+              setDatosFiscales(datosFiscalesDocSnap.data());
+            }
           } else {
             const userData = {
               nombre: "Nombre predeterminado",
@@ -107,10 +123,65 @@ function Licencia() {
 }
 
 function DatosFiscales({ currentUser }) {
+  console.log("currentUser en DatosFiscales:", currentUser);
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("No se ha obtenido el usuario actual.");
+      return;
+    }
+
+    const userId = user.uid;
+
+    if (!userId) {
+      console.error("No se ha obtenido el UID del usuario actual.");
+      return;
+    }
+
+    const rfc = event.target.rfc.value;
+    const razonSocial = event.target.razonSocial.value;
+    const codigoPostal = event.target.codigoPostal.value;
+    const regimenFiscal = event.target.regimenFiscal.value;
+    const usoCdfi = event.target.usoCdfi.value;
+    const email = event.target.email.value;
+
+    if (
+      !rfc ||
+      !razonSocial ||
+      !codigoPostal ||
+      !regimenFiscal ||
+      !usoCdfi ||
+      !email
+    ) {
+      console.error("Por favor, completa todos los campos.");
+      return;
+    }
+
+    const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
+    const datosFiscalesData = {
+      userId,
+      rfc,
+      razonSocial,
+      codigoPostal,
+      regimenFiscal,
+      usoCdfi,
+      email,
+    };
+
+    try {
+      await setDoc(datosFiscalesDocRef, datosFiscalesData);
+      console.log("Datos fiscales enviados correctamente.");
+    } catch (error) {
+      console.error("Error al enviar datos fiscales:", error);
+    }
+  };
   return (
     <section className="px-8 py-12">
       <h1>Datos Fiscales</h1>
-      <form>
+      <form onSubmit={handleSubmit}>
         <div className="mb-6">
           <label
             htmlFor="rfc"
@@ -123,7 +194,7 @@ function DatosFiscales({ currentUser }) {
             id="rfc"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder="ABC 680524 P-76"
-            maxLength="4"
+            maxLength="20"
             defaultValue={currentUser ? currentUser.rfc : ""}
             required
           />
@@ -191,7 +262,7 @@ function DatosFiscales({ currentUser }) {
             id="usoCdfi"
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder=""
-            maxLength="3"
+            maxLength="24"
             defaultValue={currentUser ? currentUser.usoCdfi : ""}
             required
           />
