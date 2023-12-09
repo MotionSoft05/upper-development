@@ -544,7 +544,7 @@ function Admin() {
               <div className="mb-6 border-b border-gray-300"></div>
               <div className="flex items-center mb-4 space-x-2">
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-40"
                   type="text"
                   value={nuevaTransaccion.nombre}
                   onChange={(e) =>
@@ -556,7 +556,7 @@ function Admin() {
                   placeholder="Nombre y Apellido"
                 />
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-40"
                   type="text"
                   value={nuevaTransaccion.fecha}
                   onChange={(e) =>
@@ -568,7 +568,7 @@ function Admin() {
                   placeholder="Fecha"
                 />
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-25"
                   type="text"
                   value={nuevaTransaccion.monto}
                   onChange={(e) =>
@@ -580,7 +580,7 @@ function Admin() {
                   placeholder="Monto"
                 />
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-10"
                   type="text"
                   value={nuevaTransaccion.ps}
                   onChange={(e) =>
@@ -592,7 +592,7 @@ function Admin() {
                   placeholder="PS"
                 />
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-10"
                   type="text"
                   value={nuevaTransaccion.pd}
                   onChange={(e) =>
@@ -604,7 +604,7 @@ function Admin() {
                   placeholder="PD"
                 />
                 <input
-                  className="p-2 rounded border border-gray-300"
+                  className="p-2 rounded border border-gray-300 w-20"
                   type="text"
                   value={nuevaTransaccion.total}
                   onChange={(e) =>
@@ -663,6 +663,7 @@ function Admin() {
                                 nombre: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.nombre
@@ -680,6 +681,7 @@ function Admin() {
                                 fecha: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.fecha
@@ -697,6 +699,7 @@ function Admin() {
                                 monto: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.monto
@@ -714,6 +717,7 @@ function Admin() {
                                 ps: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.ps
@@ -731,6 +735,7 @@ function Admin() {
                                 pd: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.pd
@@ -748,6 +753,7 @@ function Admin() {
                                 total: e.target.value,
                               })
                             }
+                            className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
                           transaccion.total
