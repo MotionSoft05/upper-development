@@ -293,7 +293,7 @@ function DatosNegocio({ currentUser }) {
                 Tipo de membresía
               </th>
               <td className="px-6 py-4">
-                {currentUser ? currentUser.tipoMembresia : ""}
+                {currentUser ? currentUser.tipoPlan : ""}
               </td>
             </tr>
             <tr className="bg-white border-b">
@@ -304,7 +304,7 @@ function DatosNegocio({ currentUser }) {
                 Número de licencias
               </th>
               <td className="px-6 py-4">
-                {currentUser ? currentUser.numeroLicencias : ""}
+                {currentUser ? currentUser.total : ""}
               </td>
             </tr>
             <tr className="bg-white border-b">
@@ -315,7 +315,7 @@ function DatosNegocio({ currentUser }) {
                 Nombre de la empresa
               </th>
               <td className="px-6 py-4">
-                {currentUser ? currentUser.nombreEmpresa : ""}
+                {currentUser ? currentUser.empresa : ""}
               </td>
             </tr>
           </tbody>
