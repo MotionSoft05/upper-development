@@ -13,7 +13,6 @@ function Sidebar({
   setShowSoporte,
   setShowAdmin,
 }) {
-  console.log("Valor de userEmail:", userEmail);
   return (
     <div className="sidebar-content  ">
       <ul className="flex flex-col w-full">
