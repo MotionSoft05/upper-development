@@ -233,7 +233,6 @@ function PantallasSalon() {
     const textoEjemplo = "Texto de ejemplo";
     const font = `${selectedOption.value}, sans-serif`;
     const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
-    console.log("Ancho del texto medido:", textoAncho);
   };
 
   const handleImageChange = async (event) => {
