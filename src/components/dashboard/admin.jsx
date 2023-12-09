@@ -181,6 +181,10 @@ function Admin() {
         empresa: usuarioEditado.empresa,
       };
 
+      if (!usuarioEditado.tipoPlan) {
+        updateData.tipoPlan = "";
+      }
+
       if (Object.keys(updateData).length > 0) {
         await updateDoc(usuarioDocRef, updateData);
 
