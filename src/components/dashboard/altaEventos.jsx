@@ -366,7 +366,7 @@ function AltaEventos() {
                     </option>
                     {allUsers.map((u) => (
                       <option key={u.id} value={u.id}>
-                        {`${u.nombre} ${u.apellido}`}
+                        {`${u.empresa}`}
                       </option>
                     ))}
                   </select>
