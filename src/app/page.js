@@ -283,7 +283,7 @@ export default function Home() {
       <Precios />
       {/* Contacto */}
       <Contacto />
-      {/* Marcas */}
+      {/* Marcas
       <section id="marcas">
         <div className="py-8 lg:py-16 mx-auto max-w-screen-xl px-4">
           <div className="grid grid-cols-3 gap-8 text-gray-500 sm:gap-12">
@@ -333,7 +333,7 @@ export default function Home() {
             </a>
           </div>
         </div>
-      </section>
+      </section> */}
       {/* Top button */}
       <section>
         {showButton && (
