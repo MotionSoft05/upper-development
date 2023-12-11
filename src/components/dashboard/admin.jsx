@@ -35,8 +35,15 @@ function Admin() {
     id: "",
     nombre: "",
     apellido: "",
-    email: "",
+    email: "", // Inicializa con un valor vacío o el correo actual del usuario
     telefono: "",
+    ps: "",
+    pd: "",
+    total: "",
+    tipoPlan: "",
+    empresa: "",
+    inicio: "",
+    final: "",
   });
   const [nuevaTransaccion, setNuevaTransaccion] = useState({
     nombre: "",
@@ -163,49 +170,38 @@ function Admin() {
   const handleGuardarCambios = async () => {
     try {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
-      const psNumber = parseInt(usuarioEditado.ps || 0); // Usa 0 si es nulo o vacío
-      const pdNumber = parseInt(usuarioEditado.pd || 0);
 
-      const isPsValid = !isNaN(psNumber);
-      const isPdValid = !isNaN(pdNumber);
+      const psNumber = parseInt(usuarioEditado.ps || 0);
+      const pdNumber = parseInt(usuarioEditado.pd || 0);
 
       const updateData = {
         nombre: usuarioEditado.nombre,
         apellido: usuarioEditado.apellido,
-        email: usuarioEditado.email,
         telefono: usuarioEditado.telefono,
-        ...(isPsValid && { ps: psNumber }),
-        ...(isPdValid && { pd: pdNumber }),
-        ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
-        ...(usuarioEditado.tipoPlan && { tipoPlan: usuarioEditado.tipoPlan }),
+        ps: isNaN(psNumber) ? undefined : psNumber,
+        pd: isNaN(pdNumber) ? undefined : pdNumber,
+        total:
+          isNaN(psNumber) || isNaN(pdNumber) ? undefined : psNumber + pdNumber,
+        tipoPlan: usuarioEditado.tipoPlan,
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
         final: usuarioEditado.final,
+        // Agrega otros campos opcionales aquí...
       };
 
-      if (!usuarioEditado.tipoPlan) {
-        updateData.tipoPlan = "";
-      }
+      const validUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, value]) => value !== undefined)
+      );
 
-      if (Object.keys(updateData).length > 0) {
-        await updateDoc(usuarioDocRef, updateData);
+      if (Object.keys(validUpdateData).length > 0) {
+        await updateDoc(usuarioDocRef, validUpdateData);
 
         setUsuarios((prevUsuarios) =>
           prevUsuarios.map((usuario) =>
             usuario.id === usuarioEditado.id
               ? {
                   ...usuario,
-                  nombre: usuarioEditado.nombre,
-                  apellido: usuarioEditado.apellido,
-                  email: usuarioEditado.email,
-                  telefono: usuarioEditado.telefono,
-                  ...(isPsValid && { ps: psNumber }),
-                  ...(isPdValid && { pd: pdNumber }),
-                  ...(isPsValid && isPdValid && { total: psNumber + pdNumber }),
-                  tipoPlan: usuarioEditado.tipoPlan,
-                  empresa: usuarioEditado.empresa,
-                  inicio: usuarioEditado.inicio,
-                  final: usuarioEditado.final,
+                  ...validUpdateData,
                 }
               : usuario
           )
@@ -216,7 +212,6 @@ function Admin() {
           id: "",
           nombre: "",
           apellido: "",
-          email: "",
           telefono: "",
           ps: "",
           pd: "",
@@ -400,9 +395,10 @@ function Admin() {
                               email: e.target.value,
                             })
                           }
+                          readOnly // Agrega la propiedad readOnly
                         />
                       ) : (
-                        usuario.email
+                        <div>{usuario.email}</div>
                       )}
                     </td>
                     <td className="py-2 px-0 border-b border-grey-light">
