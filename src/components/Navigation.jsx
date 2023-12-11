@@ -7,7 +7,14 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import Router from "next/router";
+import {
+  getDocs,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  getFirestore,
+} from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -22,20 +29,54 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app); // Asegúrate de agregar esta línea para obtener la instancia de Firestore
+const usuariosCollection = collection(db, "usuarios");
 
 function Navigation() {
   const [user, setUser] = useState(null);
+  const [userName, setUserName] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.emailVerified) {
+        console.log("Usuario autenticado:", user);
         setUser(user);
+
+        // Obtener el nombre del usuario desde la propiedad displayName
+        const displayName = user.displayName;
+
+        // Dividir la cadena del nombre y apellido y tomar la primera parte (nombre)
+        const nombreUsuario = displayName ? displayName.split(" ")[0] : "";
+
+        setUserName(nombreUsuario);
+
+        const q = query(usuariosCollection, where("email", "==", user.email));
+
+        try {
+          const querySnapshot = await getDocs(q);
+          if (querySnapshot.docs.length > 0) {
+            const usuario = querySnapshot.docs[0].data();
+            setUserName(usuario.nombre);
+          }
+
+          // Manejar cambios en los datos del usuario
+          const unsubscribeUsuario = onSnapshot(q, (snapshot) => {
+            if (snapshot.docs.length > 0) {
+              const usuario = snapshot.docs[0].data();
+              setUserName(usuario.nombre);
+            }
+          });
+
+          return () => unsubscribeUsuario();
+        } catch (error) {
+          console.error("Error al obtener datos del usuario:", error);
+        }
       } else {
         setUser(null);
+        setUserName(null);
       }
     });
 
-    // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
 
@@ -97,7 +138,10 @@ function Navigation() {
                 <div className="ml-auto flex items-baseline space-x-4">
                   {user && (
                     <div className="flex items-center space-x-2">
-                      <span>Hola, {user.email}</span>
+                      <span className="text-3xl font-bold text-#2CCED7">
+                        ¡Hola, {userName}!
+                      </span>
+
                       {user.emailVerified && ( // Verificar si el correo electrónico está verificado
                         <>
                           <Link href="/dashboard.html">
