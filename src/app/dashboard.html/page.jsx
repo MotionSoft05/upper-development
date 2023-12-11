@@ -9,6 +9,7 @@ import PantallasSalon from "@/components/dashboard/pantallasSalon";
 import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin";
+import UserAdmin from "@/components/dashboard/userAdmin";
 
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -33,6 +34,7 @@ const db = getFirestore(app);
 function DashBoard() {
   const [userEmail, setUserEmail] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showUserAdmin, setShowUserAdmin] = useState(false);
   const [showConsultaEvento, setShowConsultaEvento] = useState(true);
 
   const [showAltaEvento, setShowAltaEvento] = useState(false);
@@ -74,6 +76,7 @@ function DashBoard() {
         <Sidebar
           userEmail={userEmail}
           setShowAdmin={setShowAdmin}
+          setShowUserAdmin={setShowUserAdmin}
           setShowAltaEvento={setShowAltaEvento}
           setShowConsultaEvento={setShowConsultaEvento}
           setShowPantallaSalon={setShowPantallaSalon}
@@ -87,6 +90,7 @@ function DashBoard() {
       <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
         <div className="">
           {showAdmin && userEmail === "uppermex10@gmail.com" && <Admin />}
+          {showUserAdmin && <UserAdmin />}
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
 

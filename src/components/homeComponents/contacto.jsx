@@ -7,11 +7,32 @@ function Contacto() {
 
   function closeModal() {
     setIsOpen(false);
+
+    // Limpiar los campos del formulario al cerrar la notificación
+    setEmail("");
+    setPhoneNumber("");
+    setSubject("");
+    setMessage("");
   }
 
   function openModal() {
     setIsOpen(true);
   }
+
+  const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+
+  function handlePhoneChange(event) {
+    const inputPhoneNumber = event.target.value;
+    const validatedPhoneNumber = inputPhoneNumber
+      .replace(/[^\d+]/g, "")
+      .substring(0, 15);
+
+    setPhoneNumber(validatedPhoneNumber);
+  }
+
   return (
     <section id="contacto">
       <div className="pt-24  px-4 mx-auto max-w-screen-md">
@@ -34,6 +55,8 @@ function Contacto() {
             <input
               type="email"
               id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  "
               placeholder="Ejemplo@gmail.com"
               required
@@ -41,7 +64,7 @@ function Contacto() {
           </div>
           <div>
             <label
-              for="subject"
+              htmlFor="subject"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
               Teléfono
@@ -49,6 +72,8 @@ function Contacto() {
             <input
               type="text"
               id="Tema"
+              value={phoneNumber} // Asignar el estado del número de teléfono al valor del input
+              onChange={handlePhoneChange} //! PUEDE QUE ESTO NO ANDE
               className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
               placeholder="(55) 1234-5678"
               required
@@ -64,6 +89,8 @@ function Contacto() {
             <input
               type="text"
               id="Tema"
+              value={subject}
+              onChange={(e) => setSubject(e.target.value)}
               className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
               placeholder="Déjanos saber como podemos ayudarte"
               required
@@ -79,6 +106,8 @@ function Contacto() {
             <textarea
               id="message"
               rows="6"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
               className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 "
               placeholder="Deja un comentario..."
             ></textarea>

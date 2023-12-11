@@ -45,7 +45,7 @@ export default function Home() {
     <main className="bg-gray-50">
       {/* Title */}
       <section>
-        <div className=" grid grid-cols-1 md:grid-cols-2">
+        <div className=" grid grid-cols-1 md:grid-cols-2 mt-5">
           <div ref={sliderRef} className="keen-slider">
             <div className="keen-slider__slide number-slide1 flex items-center justify-center">
               <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
@@ -67,7 +67,7 @@ export default function Home() {
             </div>
           </div>
 
-          <div>
+          <div className="">
             <div className="mb-8">
               <h1 className="md:text-6xl font-normal">
                 UPPER DS es el sistema de Señalización Digital que ayudara a
@@ -82,14 +82,6 @@ export default function Home() {
                   profesional. La plataforma se encuentra basada en la nube para
                   acceso desde cualquier dispositivo
                 </p>
-                <div>
-                  <button
-                    type="button"
-                    className="text-black border-2 border-custom hover:border-blue-400 font-medium rounded-lg text-sm px-4 py-2 mx-1"
-                  >
-                    Descargar folleto
-                  </button>
-                </div>
               </div>
             </div>
           </div>
@@ -205,12 +197,12 @@ export default function Home() {
               <p className="mb-6 font-light text-gray-500 ">
                 Regístrate y comienza a elevar tu negocio
               </p>
-              <a
-                href="#"
-                className="text-white bg-Second hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 "
-              >
-                Registrarse
-              </a>
+
+              <Link href="/register">
+                <button className="text-white bg-Second hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 ">
+                  Registrarse
+                </button>
+              </Link>
             </div>
           </div>
         </div>

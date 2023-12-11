@@ -12,6 +12,7 @@ function Sidebar({
   setShowGuia,
   setShowSoporte,
   setShowAdmin,
+  setShowUserAdmin,
 }) {
   return (
     <div className="sidebar-content  ">
@@ -26,6 +27,7 @@ function Sidebar({
             <button
               onClick={() => {
                 setShowAdmin(true);
+                setShowUserAdmin(false);
                 setShowAltaEvento(false);
                 setShowConsultaEvento(false);
                 setShowPantallaSalon(false);
@@ -50,6 +52,34 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(true);
+              setShowAltaEvento(false);
+              setShowConsultaEvento(false);
+              setShowPantallaSalon(false);
+              setShowPantallaDirectorio(false);
+              setShowPublicidad(false);
+              setShowlicencia(false);
+              setShowGuia(false);
+              setShowSoporte(false);
+            }}
+          >
+            <a
+              href="#"
+              className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+            >
+              <span className="flex items-center justify-center text-lg text-gray-400">
+                <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" />
+              </span>
+              <span className="ml-3">DashBoard</span>
+            </a>
+          </button>
+        </li>
+
+        <li className="my-px">
+          <button
+            onClick={() => {
+              setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(true);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -85,6 +115,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(true);
               setShowPantallaSalon(false);
@@ -126,6 +157,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(true);
@@ -161,6 +193,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -196,6 +229,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -237,6 +271,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
 
@@ -273,6 +308,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -308,6 +344,7 @@ function Sidebar({
           <button
             onClick={() => {
               setShowAdmin(false);
+              setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);

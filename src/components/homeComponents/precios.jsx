@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useState } from "react";
 
 function Precios() {
@@ -74,12 +75,11 @@ function Precios() {
                 <span>La licencia de evaluación se activara por 21 días.</span>
               </li>
             </ul>
-            <a
-              href="#"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-            >
-              Comienza ya
-            </a>
+            <Link href="/register">
+              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
+                Comienza ya
+              </button>
+            </Link>
           </div>
           <div className="flex flex-col p-6 mx-auto max-w-lg text-center rounded-lg border shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
             <h3 className="mb-4 text-2xl font-semibold text-custom">
@@ -106,12 +106,12 @@ function Precios() {
                 </span>
               </li>
             </ul>
-            <a
-              href="#"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-            >
-              Comienza ya
-            </a>
+
+            <Link href="/register">
+              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
+                Comienza ya
+              </button>
+            </Link>
           </div>
           <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
             <h3 className="mb-4 text-2xl font-semibold text-custom">
@@ -143,12 +143,11 @@ function Precios() {
                 </span>
               </li>
             </ul>
-            <a
-              href="#"
-              className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto"
-            >
-              Comienza ya
-            </a>
+            <Link href="/register">
+              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
+                Comienza ya
+              </button>
+            </Link>
           </div>
         </div>
 

@@ -100,7 +100,7 @@ function Navigation() {
                       <span>Hola, {user.email}</span>
                       {user.emailVerified && ( // Verificar si el correo electrónico está verificado
                         <>
-                          <Link href="/dashboard">
+                          <Link href="/dashboard.html">
                             <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                               Dashboard
                             </button>

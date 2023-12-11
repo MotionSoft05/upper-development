@@ -121,7 +121,7 @@ function Preguntas() {
         <p className="text-center text-gray-600 text-sm md:text-base mt-9">
           No encontraste una respuesta para tus preguntas?
           <a
-            href="#"
+            href="#contacto"
             title=""
             className="font-medium text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
           >

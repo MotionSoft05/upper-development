@@ -57,7 +57,6 @@ function AltaEventos() {
     useState([]);
 
   useEffect(() => {
-    // Obtener la lista de usuarios solo si el usuario logueado es "uppermex10@gmail.com"
     if (user && user.email === "uppermex10@gmail.com") {
       const usuariosRef = collection(db, "usuarios");
       const usuariosSnapshot = getDocs(usuariosRef);

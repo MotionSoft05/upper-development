@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-import React, { useState } from "react";
+import React, { useState, Fragment } from "react";
 import { initializeApp } from "firebase/app";
 import {
   getAuth,
@@ -9,6 +9,8 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import Link from "next/link";
+
+import { Dialog, Transition } from "@headlessui/react";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -33,6 +35,7 @@ function LogIn() {
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
   const [isResendingVerificationEmail, setIsResendingVerificationEmail] =
     useState(false);
+  let [isOpen, setIsOpen] = useState(false);
 
   const [successMessage, setSuccessMessage] = useState(null);
 
@@ -110,7 +113,11 @@ function LogIn() {
     }
   };
 
+  function closeModal() {
+    setIsOpen(false);
+  }
   const handleForgotPassword = async () => {
+    setIsOpen(true);
     try {
       await sendPasswordResetEmail(auth, email);
       // Mostrar un mensaje al usuario indicando que se ha enviado un correo electrónico de restablecimiento de contraseña
@@ -267,6 +274,66 @@ function LogIn() {
                       >
                         Enviar Correo de Recuperación
                       </button>
+
+                      <Transition appear show={isOpen} as={Fragment}>
+                        <Dialog
+                          as="div"
+                          className="relative z-10"
+                          onClose={closeModal}
+                        >
+                          <Transition.Child
+                            as={Fragment}
+                            enter="ease-out duration-300"
+                            enterFrom="opacity-0"
+                            enterTo="opacity-100"
+                            leave="ease-in duration-200"
+                            leaveFrom="opacity-100"
+                            leaveTo="opacity-0"
+                          >
+                            <div className="fixed inset-0 bg-black bg-opacity-25" />
+                          </Transition.Child>
+
+                          <div className="fixed inset-0 overflow-y-auto">
+                            <div className="flex min-h-full items-center justify-center p-4 text-center">
+                              <Transition.Child
+                                as={Fragment}
+                                enter="ease-out duration-300"
+                                enterFrom="opacity-0 scale-95"
+                                enterTo="opacity-100 scale-100"
+                                leave="ease-in duration-200"
+                                leaveFrom="opacity-100 scale-100"
+                                leaveTo="opacity-0 scale-95"
+                              >
+                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                                  <Dialog.Title
+                                    as="h3"
+                                    className="text-lg font-medium leading-6 text-gray-900"
+                                  >
+                                    Se a enviado un correo de recuperación
+                                  </Dialog.Title>
+                                  <div className="mt-2">
+                                    <p className="text-sm text-gray-500">
+                                      Si no encuentra el correo en la casilla
+                                      principal vea la sección de spam y siga
+                                      las instrucciones del correo
+                                    </p>
+                                  </div>
+
+                                  <div className="mt-4">
+                                    <button
+                                      type="button"
+                                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                                      onClick={closeModal}
+                                    >
+                                      Gracias!
+                                    </button>
+                                  </div>
+                                </Dialog.Panel>
+                              </Transition.Child>
+                            </div>
+                          </div>
+                        </Dialog>
+                      </Transition>
                       <button
                         onClick={() => setIsForgotPasswordModalOpen(false)}
                         className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
