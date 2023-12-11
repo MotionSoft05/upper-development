@@ -110,6 +110,12 @@ function Navigation() {
     }
   };
 
+  const navigateToDashboard = async () => {
+    setLoading(true); // Iniciar la pantalla de carga al dirigirse al dashboard
+    // Puedes agregar cualquier lógica adicional aquí antes de redirigir al dashboard
+    window.location.href = "/dashboard.html";
+  };
+
   return (
     <>
       {loading ? (
@@ -171,13 +177,14 @@ function Navigation() {
                             ¡Hola, {userName}!
                           </span>
 
-                          {user.emailVerified && ( // Verificar si el correo electrónico está verificado
+                          {user.emailVerified && (
                             <>
-                              <Link href="/dashboard.html">
-                                <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                                  Dashboard
-                                </button>
-                              </Link>
+                              <button
+                                onClick={navigateToDashboard}
+                                className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2"
+                              >
+                                Dashboard
+                              </button>
                               <button
                                 onClick={async () => {
                                   await handleLogout();
