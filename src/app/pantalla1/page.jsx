@@ -18,8 +18,7 @@ const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
-  const seconds = String(now.getSeconds()).padStart(2, "0");
-  return `${hours}:${minutes}:${seconds}`;
+  return `${hours}:${minutes}`;
 };
 
 function Pantalla1() {
@@ -369,18 +368,12 @@ function Pantalla1() {
 
               <div className="col-span-2 space-y-8  my-4">
                 <div>
-                  <h1
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
-                  >
-                    Sesión:
-                  </h1>
                   <p
                     className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {horaInicialSalon}
-                    <span className="text-2x1">hrs.</span>
+                    <span className="text-2x1"> hrs.</span>
                   </p>
                 </div>
                 <div className="">
@@ -419,13 +412,16 @@ function Pantalla1() {
             >
               {obtenerFecha()}
             </p>
-            <p
-              className=" uppercase"
-              style={{ color: personalizacionTemplate.fontColor }}
-            >
-              {currentHour}
-            </p>{" "}
-            {/* Mostrar la hora actual */}
+            <div className="flex items-center justify-center">
+              <img src="/img/clock.png" className="p-1 h-8" />
+              <p
+                className=" uppercase"
+                style={{ color: personalizacionTemplate.fontColor }}
+              >
+                {currentHour}
+              </p>{" "}
+              {/* Mostrar la hora actual */}
+            </div>
           </div>
         </div>
       </div>
