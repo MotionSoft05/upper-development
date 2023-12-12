@@ -177,9 +177,9 @@ function Contacto() {
                       </Dialog.Title>
                       <div className="mt-2">
                         <p className="text-sm text-gray-500">
-                          Gracias por elegir conectarte con nosotros. Estamos
-                          aquí para servirte y estarás escuchando de nosotros
-                          pronto
+                          Agradecemos tu interés en Upper DS. Hemos recibido tu
+                          mensaje y nuestro equipo se pondrá en contacto contigo
+                          pronto.
                         </p>
                       </div>
 
