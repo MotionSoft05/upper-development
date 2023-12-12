@@ -35,7 +35,7 @@ function Contacto() {
     const templateParams = {
       to_name: "Destinatario", // Puedes utilizar un nombre genérico o un marcador de posición
       from_name: "Remitente",
-      from_email: email,
+      email: email,
       telefono: phoneNumber, // Incluye el número de teléfono del formulario
       asunto: subject, // Incluye el asunto del formulario
       mensaje: message, // Utiliza el mensaje del formulario
