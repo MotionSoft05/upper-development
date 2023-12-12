@@ -1,14 +1,12 @@
 import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
+import emailjs from "emailjs-com";
 
 function Contacto() {
-  // Modal
   let [isOpen, setIsOpen] = useState(false);
 
   function closeModal() {
     setIsOpen(false);
-
-    // Limpiar los campos del formulario al cerrar la notificación
     setEmail("");
     setPhoneNumber("");
     setSubject("");
@@ -31,6 +29,31 @@ function Contacto() {
       .substring(0, 15);
 
     setPhoneNumber(validatedPhoneNumber);
+  }
+
+  function sendEmail() {
+    const templateParams = {
+      to_name: "Destinatario", // Puedes utilizar un nombre genérico o un marcador de posición
+      from_name: "Remitente",
+      from_email: email,
+      telefono: phoneNumber, // Incluye el número de teléfono del formulario
+      asunto: subject, // Incluye el asunto del formulario
+      mensaje: message, // Utiliza el mensaje del formulario
+    };
+
+    const serviceId = "service_qjv3qpt";
+    const templateId = "template_8pvt3ps";
+    const userId = "MEzsSEWILjBamER7b";
+
+    emailjs.send(serviceId, templateId, templateParams, userId).then(
+      (response) => {
+        console.log("Correo electrónico enviado:", response);
+        openModal();
+      },
+      (error) => {
+        console.error("Error al enviar el correo electrónico:", error);
+      }
+    );
   }
 
   return (
@@ -114,7 +137,7 @@ function Contacto() {
           </div>
           <button
             type="button"
-            onClick={openModal}
+            onClick={sendEmail}
             className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second"
           >
             Enviar mensaje
