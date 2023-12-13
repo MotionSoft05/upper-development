@@ -52,7 +52,7 @@ function Navigation() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.emailVerified) {
-        console.log("Usuario autenticado:", user);
+        // console.log("Usuario autenticado:", user);
         setUser(user);
 
         // Obtener el nombre del usuario desde la propiedad displayName
