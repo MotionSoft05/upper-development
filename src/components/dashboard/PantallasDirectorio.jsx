@@ -285,7 +285,7 @@ function PantallasDirectorio() {
         return;
       }
 
-      console.log("Usuario autenticado:", authUser);
+      // console.log("Usuario autenticado:", authUser);
 
       if (!selectedLogo) {
         console.error("selectedLogo es null. No se puede enviar a Firestore.");
