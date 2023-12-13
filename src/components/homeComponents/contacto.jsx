@@ -1,113 +1,60 @@
-import { useState, Fragment, useCallback, useEffect } from "react";
+import { useState, Fragment } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import emailjs from "emailjs-com";
 
 function Contacto() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [emailError, setEmailError] = useState("");
-  const [phoneError, setPhoneError] = useState("");
-  const [subjectError, setSubjectError] = useState("");
-  const [messageError, setMessageError] = useState("");
+  let [isOpen, setIsOpen] = useState(false);
+
+  function closeModal() {
+    setIsOpen(false);
+    setEmail("");
+    setPhoneNumber("");
+    setSubject("");
+    setMessage("");
+  }
+
+  function openModal() {
+    setIsOpen(true);
+  }
 
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  const [isEmailSent, setIsEmailSent] = useState(false);
 
-  useEffect(() => {
-    // Check for validation errors after the state has been updated
-    if (!isOpen && (emailError || phoneError || subjectError || messageError)) {
-      setIsEmailSent(false);
-    }
-  }, [isOpen, emailError, phoneError, subjectError, messageError]);
-
-  const handlePhoneChange = useCallback((event) => {
+  function handlePhoneChange(event) {
     const inputPhoneNumber = event.target.value;
     const validatedPhoneNumber = inputPhoneNumber
       .replace(/[^\d+]/g, "")
       .substring(0, 15);
 
     setPhoneNumber(validatedPhoneNumber);
-  }, []);
+  }
 
-  const validateEmail = useCallback(() => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    setEmailError(
-      !emailRegex.test(email) ? "Ingrese un correo electrónico válido." : ""
+  function sendEmail() {
+    const templateParams = {
+      to_name: "Destinatario", // Puedes utilizar un nombre genérico o un marcador de posición
+      from_name: "Remitente",
+      email: email,
+      telefono: phoneNumber, // Incluye el número de teléfono del formulario
+      asunto: subject, // Incluye el asunto del formulario
+      mensaje: message, // Utiliza el mensaje del formulario
+    };
+
+    const serviceId = "service_qjv3qpt";
+    const templateId = "template_8pvt3ps";
+    const userId = "MEzsSEWILjBamER7b";
+
+    emailjs.send(serviceId, templateId, templateParams, userId).then(
+      (response) => {
+        console.log("Correo electrónico enviado:", response);
+        openModal();
+      },
+      (error) => {
+        console.error("Error al enviar el correo electrónico:", error);
+      }
     );
-  }, [email]);
-
-  const validatePhone = useCallback(() => {
-    setPhoneError(!phoneNumber.trim() ? "Ingrese un número de teléfono." : "");
-  }, [phoneNumber]);
-
-  const validateSubject = useCallback(() => {
-    setSubjectError(!subject.trim() ? "Ingrese un asunto." : "");
-  }, [subject]);
-
-  const validateMessage = useCallback(() => {
-    setMessageError(!message.trim() ? "Ingrese un mensaje." : "");
-  }, [message]);
-
-  const closeModal = useCallback(() => {
-    setIsOpen(false);
-    setEmail("");
-    setPhoneNumber("");
-    setSubject("");
-    setMessage("");
-  }, []);
-
-  const openModal = useCallback(() => {
-    setIsOpen(true);
-  }, []);
-
-  const sendEmail = useCallback(() => {
-    validateEmail();
-    validatePhone();
-    validateSubject();
-    validateMessage();
-
-    if (!(emailError || phoneError || subjectError || messageError)) {
-      const templateParams = {
-        to_name: "Destinatario",
-        from_name: "Remitente",
-        email: email,
-        telefono: phoneNumber,
-        asunto: subject,
-        mensaje: message,
-      };
-
-      const serviceId = "service_qjv3qpt";
-      const templateId = "template_8pvt3ps";
-      const userId = "MEzsSEWILjBamER7b";
-
-      emailjs.send(serviceId, templateId, templateParams, userId).then(
-        (response) => {
-          console.log("Correo electrónico enviado:", response);
-          setIsEmailSent(true);
-          openModal();
-        },
-        (error) => {
-          console.error("Error al enviar el correo electrónico:", error);
-        }
-      );
-    }
-  }, [
-    email,
-    phoneNumber,
-    subject,
-    message,
-    validateEmail,
-    validatePhone,
-    validateSubject,
-    validateMessage,
-    emailError,
-    phoneError,
-    subjectError,
-    messageError,
-    openModal,
-  ]);
+  }
 
   return (
     <section id="contacto">
@@ -133,14 +80,10 @@ function Contacto() {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              onBlur={validateEmail}
-              className={`shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 ${
-                emailError ? "border-red-500" : ""
-              }`}
+              className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  "
               placeholder="Ejemplo@gmail.com"
               required
             />
-            {emailError && <p className="text-red-500">{emailError}</p>}
           </div>
           <div>
             <label
@@ -150,18 +93,14 @@ function Contacto() {
               Teléfono
             </label>
             <input
-              type="tel"
-              id="phone"
-              value={phoneNumber}
-              onChange={handlePhoneChange}
-              onBlur={validatePhone}
-              className={`shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 ${
-                phoneError ? "border-red-500" : ""
-              }`}
+              type="text"
+              id="Tema"
+              value={phoneNumber} // Asignar el estado del número de teléfono al valor del input
+              onChange={handlePhoneChange} //! PUEDE QUE ESTO NO ANDE
+              className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
               placeholder="(55) 1234-5678"
               required
             />
-            {phoneError && <p className="text-red-500">{phoneError}</p>}
           </div>
           <div>
             <label
@@ -172,17 +111,13 @@ function Contacto() {
             </label>
             <input
               type="text"
-              id="subject"
+              id="Tema"
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
-              onBlur={validateSubject}
-              className={`shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 ${
-                subjectError ? "border-red-500" : ""
-              }`}
-              placeholder="Asunto"
+              className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
+              placeholder="Déjanos saber como podemos ayudarte"
               required
             />
-            {subjectError && <p className="text-red-500">{subjectError}</p>}
           </div>
           <div className="sm:col-span-2">
             <label
@@ -193,45 +128,17 @@ function Contacto() {
             </label>
             <textarea
               id="message"
+              rows="6"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              onBlur={validateMessage}
-              rows="4"
-              className={`shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5 ${
-                messageError ? "border-red-500" : ""
-              }`}
-              placeholder="Escribe tu mensaje..."
-              required
-            />
-            {messageError && <p className="text-red-500">{messageError}</p>}
+              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 "
+              placeholder="Deja un comentario..."
+            ></textarea>
           </div>
           <button
             type="button"
             onClick={sendEmail}
-            disabled={
-              emailError ||
-              phoneError ||
-              subjectError ||
-              messageError ||
-              !email ||
-              !phoneNumber ||
-              !subject ||
-              !message
-            }
-            className={`py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second`}
-            style={{
-              cursor:
-                emailError ||
-                phoneError ||
-                subjectError ||
-                messageError ||
-                !email ||
-                !phoneNumber ||
-                !subject ||
-                !message
-                  ? "not-allowed"
-                  : "pointer",
-            }}
+            className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second"
           >
             Enviar mensaje
           </button>
@@ -269,13 +176,11 @@ function Contacto() {
                         Su pregunta a sido enviada
                       </Dialog.Title>
                       <div className="mt-2">
-                        {isEmailSent && (
-                          <p className="text-sm text-gray-500">
-                            Agradecemos tu interés en Upper DS. Hemos recibido
-                            tu mensaje y nuestro equipo se pondrá en contacto
-                            contigo pronto.
-                          </p>
-                        )}
+                        <p className="text-sm text-gray-500">
+                          Agradecemos tu interés en Upper DS. Hemos recibido tu
+                          mensaje y nuestro equipo se pondrá en contacto contigo
+                          pronto.
+                        </p>
                       </div>
 
                       <div className="mt-4">
@@ -298,5 +203,4 @@ function Contacto() {
     </section>
   );
 }
-
 export default Contacto;
