@@ -3,7 +3,7 @@ function Soporte() {
     <section className="px-5 md:px-32">
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-          Contacto soporte
+          Contacto soporte AUN EN PROCESO
         </h1>
       </div>
       <div className="container px-6 md:px-12 mt-10">

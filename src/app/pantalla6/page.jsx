@@ -31,6 +31,7 @@ function Pantalla6() {
 
   const numeroPantallaActual = "6";
 
+  const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -143,25 +144,43 @@ function Pantalla6() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+            let dispositivoCoincidente = null;
+
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
 
-              const pantallaCoincidente = devicesEvento.find((device) =>
-                Object.keys(pantallasNumeradas).includes(device)
+              const pantallasAsignadas = devicesEvento.reduce(
+                (pantallas, device) => {
+                  if (Object.keys(pantallasNumeradas).includes(device)) {
+                    const posicionPantalla = pantallasNumeradas[device];
+                    pantallas.push({ posicion: posicionPantalla, device });
+                  }
+                  return pantallas;
+                },
+                []
               );
 
-              if (pantallaCoincidente) {
-                const posicionPantalla =
-                  pantallasNumeradas[pantallaCoincidente];
-                const posicionActual = parseInt(numeroPantallaActual, 10);
+              console.log("pantallasAsignadas", pantallasAsignadas);
 
-                if (posicionPantalla === posicionActual) {
+              if (pantallasAsignadas.length > 0) {
+                const posicionActual = parseInt(numeroPantallaActual, 10);
+                console.log("posicionActual", posicionActual);
+
+                const dispositivosCoincidentes = pantallasAsignadas.filter(
+                  (pantalla) => pantalla.posicion === posicionActual
+                );
+
+                if (dispositivosCoincidentes.length > 0) {
+                  dispositivoCoincidente = dispositivosCoincidentes[0].device;
+                  setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
               }
             });
 
+            console.log("Dispositivo coincidente:", dispositivoCoincidente);
+            console.log("eventosData", eventosData);
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
               // Obtener fecha actual (solo día)
@@ -245,7 +264,6 @@ function Pantalla6() {
     img = eventoActualCopy.images.length;
   }
 
-  console.log("loop", img);
   // Slider
   const [sliderRef] = useKeenSlider(
     {
@@ -256,7 +274,6 @@ function Pantalla6() {
           (slide) => slide.portion
         );
         setOpacities(new_opacities);
-        console.log("new_opacities", new_opacities);
       },
     },
     [
@@ -296,7 +313,7 @@ function Pantalla6() {
   }
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
-  // console.log("eventoActual", eventoActual);
+  console.log("eventoActual", eventoActual);
   const {
     personalizacionTemplate,
     lugar,
@@ -333,10 +350,9 @@ function Pantalla6() {
               </>
             )}
             <h1
-              className={`font-bold uppercase text-5xl md:text-7xl  mr-16`}
-              style={{ color: personalizacionTemplate.fontColor }}
+              className={`font-bold uppercase text-5xl md:text-7xl text-color mr-16`}
             >
-              {devices[0]}
+              {dispositivoCoincidenteLAL}
             </h1>
           </div>
           {/* Linea arriba */}

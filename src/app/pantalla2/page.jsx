@@ -31,6 +31,7 @@ function Pantalla2() {
 
   const numeroPantallaActual = "2";
 
+  const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -143,30 +144,42 @@ function Pantalla2() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+            let dispositivoCoincidente = null;
+
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
-              console.log("evento", evento);
 
               const pantallasAsignadas = devicesEvento.reduce(
                 (pantallas, device) => {
                   if (Object.keys(pantallasNumeradas).includes(device)) {
                     const posicionPantalla = pantallasNumeradas[device];
-                    pantallas.push(posicionPantalla);
+                    pantallas.push({ posicion: posicionPantalla, device });
                   }
                   return pantallas;
                 },
                 []
               );
 
+              console.log("pantallasAsignadas", pantallasAsignadas);
+
               if (pantallasAsignadas.length > 0) {
                 const posicionActual = parseInt(numeroPantallaActual, 10);
+                console.log("posicionActual", posicionActual);
 
-                if (pantallasAsignadas.includes(posicionActual)) {
+                const dispositivosCoincidentes = pantallasAsignadas.filter(
+                  (pantalla) => pantalla.posicion === posicionActual
+                );
+
+                if (dispositivosCoincidentes.length > 0) {
+                  dispositivoCoincidente = dispositivosCoincidentes[0].device;
+                  setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
               }
             });
+
+            console.log("Dispositivo coincidente:", dispositivoCoincidente);
             console.log("eventosData", eventosData);
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
@@ -337,10 +350,9 @@ function Pantalla2() {
               </>
             )}
             <h1
-              className={`font-bold uppercase text-5xl md:text-7xl  mr-16`}
-              style={{ color: personalizacionTemplate.fontColor }}
+              className={`font-bold uppercase text-5xl md:text-7xl text-color mr-16`}
             >
-              {devices[0]}
+              {dispositivoCoincidenteLAL}
             </h1>
           </div>
           {/* Linea arriba */}
