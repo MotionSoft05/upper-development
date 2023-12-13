@@ -31,6 +31,40 @@ function Pantalla3() {
 
   const numeroPantallaActual = "3";
 
+  const obtenerFecha = () => {
+    const diasSemana = [
+      "DOMINGO",
+      "LUNES",
+      "MARTES",
+      "MIÉRCOLES",
+      "JUEVES",
+      "VIERNES",
+      "SÁBADO",
+    ];
+
+    const meses = [
+      "ENERO",
+      "FEBRERO",
+      "MARZO",
+      "ABRIL",
+      "MAYO",
+      "JUNIO",
+      "JULIO",
+      "AGOSTO",
+      "SEPTIEMBRE",
+      "OCTUBRE",
+      "NOVIEMBRE",
+      "DICIEMBRE",
+    ];
+
+    const now = new Date();
+    const diaSemana = diasSemana[now.getDay()];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
+    const año = now.getFullYear();
+
+    return `${diaSemana} ${dia} DE ${mes} ${año}`;
+  };
   // Función para obtener la hora actual
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
@@ -44,42 +78,6 @@ function Pantalla3() {
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
 
-  // Slider
-  const [sliderRef] = useKeenSlider(
-    {
-      loop: true,
-    },
-    [
-      (slider) => {
-        let timeout;
-        let mouseOver = false;
-        function clearNextTimeout() {
-          clearTimeout(timeout);
-        }
-        function nextTimeout() {
-          clearTimeout(timeout);
-          if (mouseOver) return;
-          timeout = setTimeout(() => {
-            slider.next();
-          }, 4000);
-        }
-        slider.on("created", () => {
-          slider.container.addEventListener("mouseover", () => {
-            mouseOver = true;
-            clearNextTimeout();
-          });
-          slider.container.addEventListener("mouseout", () => {
-            mouseOver = false;
-            nextTimeout();
-          });
-          nextTimeout();
-        });
-        slider.on("dragStarted", clearNextTimeout);
-        slider.on("animationEnded", nextTimeout);
-        slider.on("updated", nextTimeout);
-      },
-    ]
-  );
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -148,21 +146,28 @@ function Pantalla3() {
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
+              console.log("evento", evento);
 
-              const pantallaCoincidente = devicesEvento.find((device) =>
-                Object.keys(pantallasNumeradas).includes(device)
+              const pantallasAsignadas = devicesEvento.reduce(
+                (pantallas, device) => {
+                  if (Object.keys(pantallasNumeradas).includes(device)) {
+                    const posicionPantalla = pantallasNumeradas[device];
+                    pantallas.push(posicionPantalla);
+                  }
+                  return pantallas;
+                },
+                []
               );
 
-              if (pantallaCoincidente) {
-                const posicionPantalla =
-                  pantallasNumeradas[pantallaCoincidente];
+              if (pantallasAsignadas.length > 0) {
                 const posicionActual = parseInt(numeroPantallaActual, 10);
 
-                if (posicionPantalla === posicionActual) {
+                if (pantallasAsignadas.includes(posicionActual)) {
                   eventosData.push(evento);
                 }
               }
             });
+            console.log("eventosData", eventosData);
 
             // Filtrar por fecha y hora los eventos filtrados por pantalla
             const eventosEnCurso = eventosData.filter((evento) => {
@@ -179,8 +184,8 @@ function Pantalla3() {
               fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
               const horaActual = obtenerHora();
-              const horaInicialEvento = evento.horaInicialReal;
-              const horaFinalEvento = evento.horaFinalReal;
+              const horaInicialEvento = evento.horaInicialSalon;
+              const horaFinalEvento = evento.horaFinalSalon;
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
@@ -188,16 +193,16 @@ function Pantalla3() {
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
               console.log("evento", evento);
-              console.log("fechaActual", fechaActual);
-              console.log("fechaInicioEvento", fechaInicioEvento);
-              console.log("fechaFinalEvento", fechaFinalEvento);
-              console.log(
-                "---------------------------------------------------"
-              );
-              console.log("fechaActualEnRango", fechaActualEnRango);
-              console.log(
-                "---------------------------------------------------"
-              );
+              // console.log("fechaActual", fechaActual);
+              // console.log("fechaInicioEvento", fechaInicioEvento);
+              // console.log("fechaFinalEvento", fechaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("fechaActualEnRango", fechaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
 
               // console.log("horaActual", horaActual);
               // console.log("horaInicialEvento", horaInicialEvento);
@@ -233,52 +238,72 @@ function Pantalla3() {
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
+  const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
-  if (!eventosEnCurso) {
-    return <p>Cargando...</p>;
+  const [opacities, setOpacities] = useState([]);
+
+  let loop = true; // Establecer el valor predeterminado
+  let img = 1;
+  if (eventoActualCopy) {
+    loop =
+      eventoActualCopy.images && eventoActualCopy.images.length === 1
+        ? false
+        : true;
+    img = eventoActualCopy.images.length;
   }
 
-  const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
-
-    const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ];
-
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
-
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
-  };
+  console.log("loop", img);
+  // Slider
+  const [sliderRef] = useKeenSlider(
+    {
+      slides: img,
+      loop: loop,
+      detailsChanged(s) {
+        const new_opacities = s.track.details.slides.map(
+          (slide) => slide.portion
+        );
+        setOpacities(new_opacities);
+        console.log("new_opacities", new_opacities);
+      },
+    },
+    [
+      (slider) => {
+        let timeout;
+        let mouseOver = false;
+        function clearNextTimeout() {
+          clearTimeout(timeout);
+        }
+        function nextTimeout() {
+          clearTimeout(timeout);
+          if (mouseOver) return;
+          timeout = setTimeout(() => {
+            slider.next();
+          }, 7000);
+        }
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
+        slider.on("dragStarted", clearNextTimeout);
+        slider.on("animationEnded", nextTimeout);
+        slider.on("updated", nextTimeout);
+      },
+    ]
+  );
 
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     return <p>No hay eventos disponibles en este momento.</p>;
   }
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
-
+  // console.log("eventoActual", eventoActual);
   const {
     personalizacionTemplate,
     lugar,
@@ -339,7 +364,14 @@ function Pantalla3() {
                 {images && images.length > 0 ? (
                   <>
                     <div className="slider-container">
-                      <div ref={sliderRef} className="keen-slider">
+                      <div
+                        ref={sliderRef}
+                        className="keen-slider"
+                        style={{
+                          position: "relative",
+                          overflow: "hidden",
+                        }}
+                      >
                         {images.map((image, index) => (
                           <div
                             key={index}
@@ -347,12 +379,20 @@ function Pantalla3() {
                             style={{
                               width: "30vw",
                               height: "30vw",
+                              opacity: opacities[index],
+                              top: "0",
                             }}
                           >
                             <img
                               src={image}
                               alt={`Imagen ${index + 1}`}
                               className="w-full h-full object-cover"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                position: "absolute",
+                              }}
                             />
                           </div>
                         ))}
@@ -368,18 +408,12 @@ function Pantalla3() {
 
               <div className="col-span-2 space-y-8  my-4">
                 <div>
-                  <h1
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
-                  >
-                    Sesión:
-                  </h1>
                   <p
                     className={`text-3xl md:text-4xl font-bold`}
                     style={{ color: personalizacionTemplate.fontColor }}
                   >
                     {horaInicialReal}
-                    <span className="text-2x1">hrs.</span>
+                    <span className="text-2x1"> hrs.</span>
                   </p>
                 </div>
                 <div className="">
@@ -390,7 +424,7 @@ function Pantalla3() {
                   >
                     {tipoEvento}
                   </h1>
-                  <div className="text-center flex px-0">
+                  <div className="text-center flex px-0 mt-6">
                     <p
                       className={`text-3xl md:text-4xl`}
                       style={{ color: personalizacionTemplate.fontColor }}
@@ -418,13 +452,16 @@ function Pantalla3() {
             >
               {obtenerFecha()}
             </p>
-            <p
-              className=" uppercase"
-              style={{ color: personalizacionTemplate.fontColor }}
-            >
-              {currentHour}
-            </p>{" "}
-            {/* Mostrar la hora actual */}
+            <div className="flex items-center justify-center">
+              <img src="/img/clock.png" className="p-1 h-8" />
+              <p
+                className=" uppercase"
+                style={{ color: personalizacionTemplate.fontColor }}
+              >
+                {currentHour}
+              </p>{" "}
+              {/* Mostrar la hora actual */}
+            </div>
           </div>
         </div>
       </div>
