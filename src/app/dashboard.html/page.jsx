@@ -104,7 +104,7 @@ function DashBoard() {
         </div>
       </main>
       <button
-        className="fixed bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-3xl shadow"
+        className="fixed bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-3xl shadow md:hidden"
         onClick={toggleSidebar}
       >
         <img src="/img/sidebar.svg" alt="Logo" className="w-8" />
