@@ -44,22 +44,22 @@ function Contacto() {
 
   function sendEmail() {
     // Validar el correo electrónico
-    if (!emailRegex.test(email)) {
-      setError("Por favor, ingresa un correo electrónico válido.");
-      return;
-    }
-
-    // Validar el número de teléfono
-    if (!/^\d+$/.test(phoneNumber)) {
-      setError("Por favor, ingresa solo números en el campo de teléfono.");
-      return;
-    }
-
-    // Verifica que todos los campos obligatorios estén llenos
     if (!email || !phoneNumber || !subject || !message) {
       setError(
         "Por favor, completa todos los campos antes de enviar el mensaje."
       );
+      return;
+    }
+
+    // Validar el correo electrónico solo si está presente
+    if (email && !emailRegex.test(email)) {
+      setError("Por favor, ingresa un correo electrónico válido.");
+      return;
+    }
+
+    // Validar el número de teléfono solo si está presente
+    if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
+      setError("Por favor, ingresa solo números en el campo de teléfono.");
       return;
     }
 
@@ -80,6 +80,7 @@ function Contacto() {
       (response) => {
         console.log("Correo electrónico enviado:", response);
         setSuccess(true);
+        setError("");
         openModal();
       },
       (error) => {
