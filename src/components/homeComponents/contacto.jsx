@@ -4,6 +4,7 @@ import emailjs from "emailjs-com";
 
 function Contacto() {
   let [isOpen, setIsOpen] = useState(false);
+  const [error, setError] = useState("");
 
   function closeModal() {
     setIsOpen(false);
@@ -26,12 +27,18 @@ function Contacto() {
     const inputPhoneNumber = event.target.value;
     const validatedPhoneNumber = inputPhoneNumber
       .replace(/[^\d+]/g, "")
-      .substring(0, 15);
+      .substring(0, 16);
 
     setPhoneNumber(validatedPhoneNumber);
   }
 
   function sendEmail() {
+    if (!email || !phoneNumber || !subject || !message) {
+      setError(
+        "Por favor, completa todos los campos antes de enviar el mensaje."
+      );
+      return;
+    }
     const templateParams = {
       to_name: "Destinatario", // Puedes utilizar un nombre genérico o un marcador de posición
       from_name: "Remitente",
@@ -54,6 +61,7 @@ function Contacto() {
         console.error("Error al enviar el correo electrónico:", error);
       }
     );
+    setTimeout(() => setError(""), 5000);
   }
 
   return (
@@ -143,6 +151,7 @@ function Contacto() {
             Enviar mensaje
           </button>
 
+          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           <Transition appear show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={closeModal}>
               <Transition.Child
