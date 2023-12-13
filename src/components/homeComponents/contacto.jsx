@@ -5,6 +5,16 @@ import emailjs from "emailjs-com";
 function Contacto() {
   let [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  function handlePhoneChange(event) {
+    const inputPhoneNumber = event.target.value;
+    const validatedPhoneNumber = inputPhoneNumber.replace(/[^\d]/g, ""); // Reemplaza cualquier cosa que no sea un dígito con una cadena vacía
+
+    setPhoneNumber(validatedPhoneNumber);
+  }
 
   function closeModal() {
     setIsOpen(false);
@@ -33,19 +43,33 @@ function Contacto() {
   }
 
   function sendEmail() {
+    // Validar el correo electrónico
+    if (!emailRegex.test(email)) {
+      setError("Por favor, ingresa un correo electrónico válido.");
+      return;
+    }
+
+    // Validar el número de teléfono
+    if (!/^\d+$/.test(phoneNumber)) {
+      setError("Por favor, ingresa solo números en el campo de teléfono.");
+      return;
+    }
+
+    // Verifica que todos los campos obligatorios estén llenos
     if (!email || !phoneNumber || !subject || !message) {
       setError(
         "Por favor, completa todos los campos antes de enviar el mensaje."
       );
       return;
     }
+
     const templateParams = {
-      to_name: "Destinatario", // Puedes utilizar un nombre genérico o un marcador de posición
+      to_name: "Destinatario",
       from_name: "Remitente",
       email: email,
-      telefono: phoneNumber, // Incluye el número de teléfono del formulario
-      asunto: subject, // Incluye el asunto del formulario
-      mensaje: message, // Utiliza el mensaje del formulario
+      telefono: phoneNumber,
+      asunto: subject,
+      mensaje: message,
     };
 
     const serviceId = "service_qjv3qpt";
@@ -55,13 +79,16 @@ function Contacto() {
     emailjs.send(serviceId, templateId, templateParams, userId).then(
       (response) => {
         console.log("Correo electrónico enviado:", response);
+        setSuccess(true);
         openModal();
       },
       (error) => {
         console.error("Error al enviar el correo electrónico:", error);
+        setError(
+          "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde."
+        );
       }
     );
-    setTimeout(() => setError(""), 5000);
   }
 
   return (
@@ -152,6 +179,7 @@ function Contacto() {
           </button>
 
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
+
           <Transition appear show={isOpen} as={Fragment}>
             <Dialog as="div" className="relative z-10" onClose={closeModal}>
               <Transition.Child
