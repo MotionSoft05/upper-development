@@ -238,7 +238,10 @@ function LogIn() {
                       />
                       <button
                         onClick={handleForgotPassword}
-                        className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
+                        className={`w-full text-gray-600 mt-4 hover:underline focus:outline-none ${
+                          recoveryEmail ? "" : "cursor-not-allowed opacity-50"
+                        }`}
+                        disabled={!recoveryEmail}
                       >
                         Enviar Correo de Recuperación
                       </button>
