@@ -38,6 +38,7 @@ function LogIn() {
   let [isOpen, setIsOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const isFormValid = email && password;
 
@@ -45,7 +46,7 @@ function LogIn() {
     e.preventDefault();
     setIsFormSubmitted(true);
 
-    if (isFormValid) {
+    if (!isPasswordRecovery && isFormValid) {
       try {
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -89,8 +90,6 @@ function LogIn() {
         console.error("Error al iniciar sesión:", error.message);
         setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
       }
-    } else {
-      setError("Por favor, completa todos los campos."); // Muestra un mensaje de error si los campos no están completos
     }
   };
 
@@ -117,6 +116,7 @@ function LogIn() {
     setIsOpen(false);
   }
   const handleForgotPassword = async () => {
+    setIsPasswordRecovery(true);
     setIsOpen(true);
 
     try {
@@ -173,14 +173,14 @@ function LogIn() {
               )}
               <div
                 className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
-                  isFormSubmitted && !email ? "border-red-500" : ""
+                  isFormSubmitted && !email ? "" : ""
                 }`}
                 data-te-input-wrapper-init
               >
                 <input
                   type="text"
                   className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
-                    isFormSubmitted && !email ? "ring ring-red-500" : ""
+                    isFormSubmitted && !email ? "" : ""
                   }`}
                   id="exampleFormControlInput2"
                   placeholder="Email"
@@ -190,14 +190,14 @@ function LogIn() {
               </div>
               <div
                 className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
-                  isFormSubmitted && !password ? "border-red-500" : ""
+                  isFormSubmitted && !password ? "" : ""
                 }`}
                 data-te-input-wrapper-init
               >
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
-                    isFormSubmitted && !password ? "ring ring-red-500" : ""
+                    isFormSubmitted && !password ? "" : ""
                   }`}
                   id="exampleFormControlInput22"
                   placeholder="Contraseña"
