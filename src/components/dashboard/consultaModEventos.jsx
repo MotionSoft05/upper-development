@@ -33,6 +33,8 @@ function ConsultaModEvento() {
   const [usuarioLogeado, setUsuarioLogeado] = useState("");
   const [imagenesEvento, setImagenesEvento] = useState([]);
   const [pantallas, setPantallas] = useState([]);
+  const [filtro, setFiltro] = useState("activos");
+  const [eventosFiltrados, setEventosFiltrados] = useState([]);
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
@@ -81,31 +83,38 @@ function ConsultaModEvento() {
     try {
       const user = firebase.auth().currentUser;
 
+      let eventosRef;
+
       if (user && user.email === "uppermex10@gmail.com") {
-        // Si el usuario es uppermex10@gmail.com, muestra todos los eventos
-        const eventosRef = firebase.firestore().collection("eventos");
-        eventosRef.onSnapshot((snapshot) => {
-          const eventosData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setEventos(eventosData);
-        });
+        eventosRef = firebase.firestore().collection("eventos");
       } else if (user) {
-        // Si es otro usuario, muestra solo sus propios eventos
-        const eventosRef = firebase
+        eventosRef = firebase
           .firestore()
           .collection("eventos")
           .where("userId", "==", user.uid);
-
-        eventosRef.onSnapshot((snapshot) => {
-          const eventosData = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          setEventos(eventosData);
-        });
       }
+
+      eventosRef.onSnapshot((snapshot) => {
+        const eventosData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        // Filtrar eventos según el estado (activo o finalizado)
+        const eventosFiltrados = eventosData.filter((evento) => {
+          if (filtro === "activos") {
+            // Mostrar eventos con status true o sin status
+            return evento.status || evento.status === undefined;
+          } else if (filtro === "finalizados") {
+            // Mostrar eventos con status false
+            return evento.status === false;
+          }
+          return true; // Mostrar todos los eventos si no hay filtro aplicado
+        });
+
+        setEventos(eventosData);
+        setEventosFiltrados(eventosFiltrados);
+      });
     } catch (error) {
       console.error("Error al consultar eventos:", error);
     }
@@ -233,6 +242,24 @@ function ConsultaModEvento() {
             Consulta de Eventos
           </h1>
         </div>
+        <div className="mb-4">
+          <button
+            onClick={() => setFiltro("activos")}
+            className={`${
+              filtro === "activos" ? "bg-blue-500" : "bg-gray-300"
+            } text-white px-4 py-2 rounded mr-2`}
+          >
+            Eventos Activos
+          </button>
+          <button
+            onClick={() => setFiltro("finalizados")}
+            className={`${
+              filtro === "finalizados" ? "bg-red-500" : "bg-gray-300"
+            } text-white px-4 py-2 rounded`}
+          >
+            Eventos Finalizados
+          </button>
+        </div>
         <div className=" ">
           <table className=" ">
             <thead className="bg-gray-50">
@@ -299,6 +326,17 @@ function ConsultaModEvento() {
             </thead>
             <tbody className="bg-white">
               {eventos
+                .filter((evento) => {
+                  if (filtro === "activos") {
+                    // Filtrar eventos activos
+                    return evento.status === true;
+                  } else if (filtro === "finalizados") {
+                    // Filtrar eventos finalizados
+                    return evento.status === false;
+                  }
+                  // Si no hay filtro o el filtro es incorrecto, mostrar todos los eventos
+                  return true;
+                })
                 .slice() // Realizar una copia para no modificar el array original
                 .sort((a, b) => {
                   // Buscar los usuarios correspondientes para a y b
