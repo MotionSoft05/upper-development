@@ -99,17 +99,13 @@ function ConsultaModEvento() {
           id: doc.id,
           ...doc.data(),
         }));
-
-        // Filtrar eventos según el estado (activo o finalizado)
         const eventosFiltrados = eventosData.filter((evento) => {
           if (filtro === "activos") {
-            // Mostrar eventos con status true o sin status
             return evento.status || evento.status === undefined;
           } else if (filtro === "finalizados") {
-            // Mostrar eventos con status false
             return evento.status === false;
           }
-          return true; // Mostrar todos los eventos si no hay filtro aplicado
+          return true;
         });
 
         setEventos(eventosData);
@@ -126,10 +122,8 @@ function ConsultaModEvento() {
       const index = devices.indexOf(device);
 
       if (index === -1) {
-        // Si el dispositivo no está en la lista, agrégalo
         return { ...prevEventoEditado, devices: [...devices, device] };
       } else {
-        // Si el dispositivo está en la lista, quítalo
         const newDevices = [...devices];
         newDevices.splice(index, 1);
         return { ...prevEventoEditado, devices: newDevices };
@@ -214,16 +208,9 @@ function ConsultaModEvento() {
     const nuevaImagen = e.target.files[0];
 
     if (nuevaImagen) {
-      // Crea una referencia en Storage usando el nombre de archivo único
       const storageRef = storage.ref(`imagenes/${nuevaImagen.name}`);
-
-      // Sube la imagen a Storage
       const snapshot = await storageRef.put(nuevaImagen);
-
-      // Obtiene la URL de descarga de la imagen
       const url = await snapshot.ref.getDownloadURL();
-
-      // Actualiza el estado de las imágenes con la nueva URL
       setImagenesEvento([...imagenesEvento, url]);
     }
   };
@@ -328,18 +315,14 @@ function ConsultaModEvento() {
               {eventos
                 .filter((evento) => {
                   if (filtro === "activos") {
-                    // Filtrar eventos activos
                     return evento.status === true;
                   } else if (filtro === "finalizados") {
-                    // Filtrar eventos finalizados
                     return evento.status === false;
                   }
-                  // Si no hay filtro o el filtro es incorrecto, mostrar todos los eventos
                   return true;
                 })
-                .slice() // Realizar una copia para no modificar el array original
+                .slice()
                 .sort((a, b) => {
-                  // Buscar los usuarios correspondientes para a y b
                   const usuarioA = usuarios.find(
                     (usuario) => usuario.id === a.userId
                   );
@@ -347,11 +330,9 @@ function ConsultaModEvento() {
                     (usuario) => usuario.id === b.userId
                   );
 
-                  // Comparar los nombres de los creadores
                   return usuarioA?.nombre.localeCompare(usuarioB?.nombre);
                 })
                 .map((evento, index) => {
-                  // Buscar el usuario correspondiente
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
                   );
@@ -574,7 +555,7 @@ function ConsultaModEvento() {
                                           "description",
                                           e.target.value
                                         );
-                                        setDescription(e.target.value); // Agrega esta línea
+                                        setDescription(e.target.value);
                                       }}
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                       rows={4}
