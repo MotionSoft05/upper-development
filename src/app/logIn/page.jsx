@@ -82,7 +82,6 @@ function LogIn() {
           ));
         }
       } catch (error) {
-        console.error("Error al iniciar sesión:", error.message);
         setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
       }
     }
@@ -95,13 +94,7 @@ function LogIn() {
       await sendEmailVerification(user);
       setSuccessMessage("Correo de verificación reenviado exitosamente");
       setIsResendingVerificationEmail(false);
-
-      // Limpiar el mensaje después de 3 segundos
     } catch (error) {
-      console.error(
-        "Error al reenviar el correo de verificación:",
-        error.message
-      );
       setIsResendingVerificationEmail(false);
     }
   };
@@ -124,14 +117,12 @@ function LogIn() {
   };
 
   const handleShowPasswordClick = (e) => {
-    e.preventDefault(); // Evita el comportamiento predeterminado del botón
+    e.preventDefault();
     setShowPassword(!showPassword);
   };
 
   const handleFormKeyDown = (e) => {
-    // Verificar si la tecla presionada es "Enter"
     if (e.key === "Enter") {
-      // Prevenir el envío del formulario
       e.preventDefault();
       handleLogin(e);
     }
