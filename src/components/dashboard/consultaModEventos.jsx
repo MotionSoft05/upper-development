@@ -95,20 +95,53 @@ function ConsultaModEvento() {
       }
 
       eventosRef.onSnapshot((snapshot) => {
-        const eventosData = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        const eventosFiltrados = eventosData.filter((evento) => {
+        snapshot.docChanges().forEach((change) => {
+          const evento = {
+            id: change.doc.id,
+            ...change.doc.data(),
+          };
+
+          if (!evento.fechaFinal || !evento.horaFinalSalon) {
+            // Evitar comparaciones si falta información
+            return;
+          }
+
+          const ahora = new Date();
+          const fechaFinalSalon = new Date(
+            `${evento.fechaFinal}T${evento.horaFinalSalon}`
+          );
+
+          if (fechaFinalSalon < ahora && evento.status === true) {
+            // La fecha y hora final del salón ha pasado
+            evento.status = false;
+          }
+
+          // Actualizar el estado local de eventos
+          setEventos((prevEventos) => {
+            const index = prevEventos.findIndex((e) => e.id === evento.id);
+            const nuevosEventos =
+              index !== -1
+                ? [
+                    ...prevEventos.slice(0, index),
+                    evento,
+                    ...prevEventos.slice(index + 1),
+                  ]
+                : [...prevEventos, evento];
+            return nuevosEventos;
+          });
+        });
+
+        // Filtrar eventos según el estado seleccionado
+        const eventosFiltrados = eventos.filter((evento) => {
           if (filtro === "activos") {
-            return evento.status || evento.status === undefined;
+            return evento.status === true;
           } else if (filtro === "finalizados") {
             return evento.status === false;
           }
           return true;
         });
 
-        setEventos(eventosData);
+        // Establecer eventosFiltrados en el estado
         setEventosFiltrados(eventosFiltrados);
       });
     } catch (error) {
@@ -170,6 +203,15 @@ function ConsultaModEvento() {
           .delete()
           .catch((error) => console.error("Error al eliminar imagen:", error));
       });
+
+      const ahora = new Date();
+      const fechaFinalSalon = new Date(
+        `${eventoEditado.fechaFinal}T${eventoEditado.horaFinalSalon}`
+      );
+
+      const nuevoStatus =
+        fechaFinalSalon > ahora || !eventoEditado.fechaFinal ? true : false;
+
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
       await firebase
@@ -185,6 +227,7 @@ function ConsultaModEvento() {
           description: eventoEditado.description,
           images: imagenesEvento,
           devices: eventoEditado.devices || [],
+          status: nuevoStatus,
         });
 
       setModalAbierto(false);
