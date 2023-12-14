@@ -36,7 +36,7 @@ function LogIn() {
   const [isResendingVerificationEmail, setIsResendingVerificationEmail] =
     useState(false);
   let [isOpen, setIsOpen] = useState(false);
-
+  const [recoveryEmail, setRecoveryEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
 
   const isFormValid = email && password;
@@ -118,8 +118,9 @@ function LogIn() {
   }
   const handleForgotPassword = async () => {
     setIsOpen(true);
+
     try {
-      await sendPasswordResetEmail(auth, email);
+      await sendPasswordResetEmail(auth, recoveryEmail);
       // Mostrar un mensaje al usuario indicando que se ha enviado un correo electrónico de restablecimiento de contraseña
       console.log(
         "Correo electrónico de restablecimiento de contraseña enviado"
@@ -264,9 +265,9 @@ function LogIn() {
                       <input
                         type="email"
                         className="w-full p-2 border rounded mb-4"
-                        placeholder="Correo electrónico"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="Correo electrónico para recuperar contraseña"
+                        value={recoveryEmail}
+                        onChange={(e) => setRecoveryEmail(e.target.value)}
                       />
                       <button
                         onClick={handleForgotPassword}
