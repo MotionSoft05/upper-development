@@ -200,7 +200,7 @@ function LogIn() {
                       : "cursor-not-allowed bg-gray-400 text-gray-200"
                   }`}
                 >
-                  Login
+                  Iniciar Sesión
                 </button>
 
                 <div className="mt-3 text-sm font-light text-gray-500">
