@@ -232,7 +232,7 @@ function LogIn() {
                       <input
                         type="email"
                         className="w-full p-2 border rounded mb-4"
-                        placeholder="Correo electrónico para recuperar contraseña"
+                        placeholder="Email"
                         value={recoveryEmail}
                         onChange={(e) => setRecoveryEmail(e.target.value)}
                       />
