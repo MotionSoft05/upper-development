@@ -312,9 +312,10 @@ function LogIn() {
                                   </Dialog.Title>
                                   <div className="mt-2">
                                     <p className="text-sm text-gray-500">
-                                      Si no encuentra el correo en la casilla
-                                      principal vea la sección de spam y siga
-                                      las instrucciones del correo
+                                      Se enviara un correo electrónico con las
+                                      instrucciones para actualizar la
+                                      contraseña. No olvides revisar la carpeta
+                                      de correo no deseado por si acaso.
                                     </p>
                                   </div>
 
@@ -324,7 +325,7 @@ function LogIn() {
                                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                       onClick={closeModal}
                                     >
-                                      Gracias!
+                                      Listo!
                                     </button>
                                   </div>
                                 </Dialog.Panel>
