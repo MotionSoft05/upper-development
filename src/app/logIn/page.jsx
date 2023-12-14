@@ -129,18 +129,17 @@ function LogIn() {
   };
 
   return (
-    <section className="h-screen">
-      <div className="h-full px-20">
+    <section className="">
+      <div className="px-20 mt-20">
         <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
-          <div className="shrink-1 mb-12 grow-0 basis-auto md:mb-0 md:w-9/12 md:shrink-0 lg:w-6/12 xl:w-6/12">
+          <div className="mb-12 md:mb-0 md:w-full lg:w-6/12 xl:w-6/12">
             <img
               src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
               className="w-full"
               alt="Sample image"
             />
           </div>
-
-          <div className="mb-12 md:mb-0 md:w-8/12 lg:w-5/12 xl:w-5/12">
+          <div className="mb-4 md:mb-0 md:w-full lg:w-5/12 xl:w-5/12 md:ml-auto md:mr-auto lg:ml-0 lg:mr-0">
             <form onSubmit={handleLogin} onKeyDown={handleFormKeyDown}>
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
                 Inicio de Sesión
@@ -149,12 +148,7 @@ function LogIn() {
               {successMessage && (
                 <p className="text-green-500 mb-4">{successMessage}</p>
               )}
-              <div
-                className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
-                  isFormSubmitted && !email ? "" : ""
-                }`}
-                data-te-input-wrapper-init
-              >
+              <div className="mb-6 relative border border-gray-300 shadow-md w-full md:w-1/2">
                 <input
                   type="text"
                   className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
@@ -166,12 +160,7 @@ function LogIn() {
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
-              <div
-                className={`mb-6 relative border border-gray-300 shadow-md w-1/2 ${
-                  isFormSubmitted && !password ? "" : ""
-                }`}
-                data-te-input-wrapper-init
-              >
+              <div className="mb-6 relative border border-gray-300 shadow-md w-full md:w-1/2">
                 <input
                   type={showPassword ? "text" : "password"}
                   className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
