@@ -35,13 +35,11 @@ const usuariosCollection = collection(db, "usuarios");
 const Loader = () => (
   <div className="h-screen bg-white">
     <div className="flex justify-center items-center h-full">
-      {/*
       <img
         className="h-16 w-16"
         src="https://icons8.com/preloaders/preloaders/1488/Iphone-spinner-2.gif"
         alt="Loading spinner"
       />
-      */}
     </div>
   </div>
 );
@@ -101,10 +99,11 @@ function Navigation() {
 
   const handleLogout = async () => {
     try {
+      setLoading(true);
       await signOut(auth);
       setUser(null);
       setUserName(null);
-      setLoading(false); // Asegúrate de marcar la carga como completa al cerrar sesión
+      setLoading(false);
       window.location.href = "/";
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
