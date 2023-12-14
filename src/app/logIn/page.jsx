@@ -46,7 +46,7 @@ function LogIn() {
     e.preventDefault();
     setIsFormSubmitted(true);
 
-    if (!isPasswordRecovery && isFormValid) {
+    if (isFormValid) {
       try {
         const userCredential = await signInWithEmailAndPassword(
           auth,
@@ -117,7 +117,6 @@ function LogIn() {
     setIsForgotPasswordModalOpen(false);
   }
   const handleForgotPassword = async () => {
-    setIsPasswordRecovery(true);
     setIsOpen(true);
 
     try {
@@ -308,14 +307,14 @@ function LogIn() {
                                     as="h3"
                                     className="text-lg font-medium leading-6 text-gray-900"
                                   >
-                                    Se a enviado un correo de recuperación
+                                    ¡Correo de recuperación enviado!
                                   </Dialog.Title>
                                   <div className="mt-2">
                                     <p className="text-sm text-gray-500">
-                                      Se enviara un correo electrónico con las
-                                      instrucciones para actualizar la
-                                      contraseña. No olvides revisar la carpeta
-                                      de correo no deseado por si acaso.
+                                      Te enviamos un correo con instrucciones
+                                      para actualizar tu contraseña. Revisa
+                                      también tu carpeta de correo no deseado
+                                      por si acaso.
                                     </p>
                                   </div>
 
