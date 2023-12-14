@@ -245,6 +245,15 @@ function AltaEventos() {
     setImages([]);
     setDescription("");
 
+    const fechaHoraActual = new Date();
+    const fechaHoraFinalSalon = new Date(value.endDate);
+    fechaHoraFinalSalon.setDate(fechaHoraFinalSalon.getDate() + 1); // Agregar un día
+    fechaHoraFinalSalon.setHours(
+      parseInt(horaFinalSalon.split(":")[0]),
+      parseInt(horaFinalSalon.split(":")[1])
+    );
+    const status = fechaHoraActual <= fechaHoraFinalSalon;
+
     const eventoData = {
       nombreEvento,
       tipoEvento,
@@ -256,11 +265,11 @@ function AltaEventos() {
       horaFinalSalon,
       fechaInicio: formattedFechaInicio,
       fechaFinal: formattedFechaFinal,
-
       images,
       devices,
       userId: userId,
       userId: user.uid,
+      status,
     };
 
     if (selectedUser) {
