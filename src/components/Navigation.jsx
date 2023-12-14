@@ -249,36 +249,36 @@ function Navigation() {
                           </Menu.Item>
                           <Menu.Item>
                             <Link
-                              href="/about"
+                              href="/#soluciones"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
-                              About Us
+                              Soluciones
                             </Link>
                           </Menu.Item>
                         </div>
                         <div>
                           <Menu.Item>
                             <Link
-                              href="/shop"
+                              href="/#recursos"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
-                              Shop
+                              Recursos
                             </Link>
                           </Menu.Item>
                           <Menu.Item>
                             <Link
-                              href="/profile"
+                              href="/#precios"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
-                              Profile
+                              Precios
                             </Link>
                           </Menu.Item>
                           <Menu.Item>
                             <Link
-                              href="/contact"
+                              href="/#preguntas"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
-                              Contact
+                              FAQ
                             </Link>
                           </Menu.Item>
                         </div>
@@ -318,22 +318,49 @@ function Navigation() {
                     >
                       <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <div>
-                          <Menu.Item>
-                            <a
-                              href="/register"
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              Registrarse
-                            </a>
-                          </Menu.Item>
-                          <Menu.Item>
-                            <Link
-                              href="/login"
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              inician sesión
-                            </Link>
-                          </Menu.Item>
+                          {user && (
+                            <>
+                              <Menu.Item>
+                                <button
+                                  onClick={navigateToDashboard}
+                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                                >
+                                  Dashboard
+                                </button>
+                              </Menu.Item>
+                              <Menu.Item>
+                                <button
+                                  onClick={async () => {
+                                    await handleLogout();
+                                    window.location.href = "/";
+                                  }}
+                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                                >
+                                  Cerrar sesión
+                                </button>
+                              </Menu.Item>
+                            </>
+                          )}
+                          {!user && (
+                            <>
+                              <Menu.Item>
+                                <Link
+                                  href="/register"
+                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                                >
+                                  Registrarse
+                                </Link>
+                              </Menu.Item>
+                              <Menu.Item>
+                                <Link
+                                  href="/login"
+                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                                >
+                                  Iniciar sesión
+                                </Link>
+                              </Menu.Item>
+                            </>
+                          )}
                         </div>
                       </Menu.Items>
                     </Transition>
