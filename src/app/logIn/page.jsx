@@ -114,6 +114,7 @@ function LogIn() {
 
   function closeModal() {
     setIsOpen(false);
+    setIsForgotPasswordModalOpen(false);
   }
   const handleForgotPassword = async () => {
     setIsPasswordRecovery(true);
@@ -130,9 +131,6 @@ function LogIn() {
         "Error al enviar el correo electrónico de restablecimiento de contraseña:",
         error.message
       );
-    } finally {
-      // Cerrar el modal de recuperación de contraseña
-      setIsForgotPasswordModalOpen(false);
     }
   };
 
