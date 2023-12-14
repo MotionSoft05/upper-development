@@ -19,7 +19,7 @@ function footer() {
           </p>
         </div>
         <div className="sm:flex sm:items-center sm:justify-between my-2">
-          <a href="#" className="flex items-center mb-4 sm:mb-0">
+          <a href="/" className="flex items-center mb-4 sm:mb-0">
             <img src="/img/logov2.png" className="h-8 mr-3" alt="Logo" />
           </a>
         </div>
@@ -27,7 +27,7 @@ function footer() {
         <div className="">
           <span className="block text-sm sm:text-center text-gray-400">
             © 2023
-            <a href="#" className="hover:underline">
+            <a href="/" className="hover:underline">
               Upper™
             </a>
             . All Rights Reserved.
