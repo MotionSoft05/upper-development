@@ -38,7 +38,6 @@ function LogIn() {
   let [isOpen, setIsOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
-  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
 
   const isFormValid = email && password;
 
@@ -57,18 +56,14 @@ function LogIn() {
         const user = userCredential.user;
 
         if (user && user.emailVerified) {
-          console.log("Usuario ha iniciado sesión exitosamente");
-          // Limpiar campos del formulario y redirigir al usuario.
           setEmail("");
           setPassword("");
-          setError(null); // Limpiar cualquier mensaje de error existente
+          setError(null);
           window.location.href = "/";
         } else {
           setError(
             "Por favor, verifica tu correo electrónico antes de iniciar sesión."
           );
-
-          // Agrega la opción de reenviar el correo de verificación
           const resendVerificationOption = (
             <button
               className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
@@ -98,7 +93,6 @@ function LogIn() {
       setIsResendingVerificationEmail(true);
       const user = auth.currentUser;
       await sendEmailVerification(user);
-      console.log("Correo de verificación reenviado exitosamente");
       setSuccessMessage("Correo de verificación reenviado exitosamente");
       setIsResendingVerificationEmail(false);
 
@@ -121,10 +115,6 @@ function LogIn() {
 
     try {
       await sendPasswordResetEmail(auth, recoveryEmail);
-      // Mostrar un mensaje al usuario indicando que se ha enviado un correo electrónico de restablecimiento de contraseña
-      console.log(
-        "Correo electrónico de restablecimiento de contraseña enviado"
-      );
     } catch (error) {
       console.error(
         "Error al enviar el correo electrónico de restablecimiento de contraseña:",
