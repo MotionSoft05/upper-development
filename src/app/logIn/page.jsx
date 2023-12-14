@@ -130,7 +130,7 @@ function LogIn() {
 
   return (
     <section className="">
-      <div className="px-20 mt-20">
+      <div className="mt-20">
         <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
           <div className="mb-12 md:mb-0 md:w-full lg:w-6/12 xl:w-6/12">
             <img
