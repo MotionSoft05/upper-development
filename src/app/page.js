@@ -46,24 +46,76 @@ export default function Home() {
       {/* Title */}
       <section>
         <div className=" grid grid-cols-1 md:grid-cols-2 mt-5">
-          <div ref={sliderRef} className="keen-slider">
-            <div className="keen-slider__slide number-slide1 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+          <div
+            ref={sliderRef}
+            className="keen-slider"
+            style={{
+              position: "relative",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
+              style={{
+                width: "20vw",
+                height: "20vw",
+
+                top: "0",
+              }}
+            >
+              <img
+                src="/img/sliderImage.jpg"
+                className="w-full h-full object-cover"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                }}
+                alt="Logo"
+              />
             </div>
-            <div className="keen-slider__slide number-slide2 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            <div
+              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
+              style={{
+                width: "20vw",
+                height: "20vw",
+
+                top: "0",
+              }}
+            >
+              <img
+                src="/img/sliderImage2.jpg"
+                className="w-full h-full object-cover"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                }}
+                alt="Logo"
+              />
             </div>
-            <div className="keen-slider__slide number-slide3 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
-            </div>
-            <div className="keen-slider__slide number-slide4 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
-            </div>
-            <div className="keen-slider__slide number-slide5 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
-            </div>
-            <div className="keen-slider__slide number-slide6 flex items-center justify-center">
-              <img src="/img/sliderImage.png" className="mx-auto" alt="Logo" />
+            <div
+              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
+              style={{
+                width: "20vw",
+                height: "20vw",
+
+                top: "0",
+              }}
+            >
+              <img
+                src="/img/sliderImage3.jpg"
+                className="w-full h-full object-cover"
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  position: "absolute",
+                }}
+                alt="Logo"
+              />
             </div>
           </div>
 

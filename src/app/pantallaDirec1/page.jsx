@@ -32,7 +32,11 @@ function PantallaDirec1() {
   const [isLoading, setIsLoading] = useState(true);
   const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "1";
+  const [isPortrait, setIsPortrait] = useState(true); // Estado para controlar la orientación
 
+  const cambiarOrientacion = () => {
+    setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
+  };
   // Función para obtener la hora actual
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
@@ -48,13 +52,21 @@ function PantallaDirec1() {
 
   // Slider
   const chunkArray = (arr, chunkSize) => {
+    const maxContainers = isPortrait ? 10 : 5; // Determina el máximo de contenedores según la orientación
+
     const result = [];
     for (let i = 0; i < arr.length; i += chunkSize) {
-      result.push(arr.slice(i, i + chunkSize));
+      result.push(arr.slice(i, i + Math.min(chunkSize, maxContainers))); // Limita el número de contenedores
     }
     return result;
   };
   const eventosPorSlide = chunkArray(eventosEnCurso, 5);
+
+  // Asegurar que existan suficientes contenedores (bloques)
+  while (eventosPorSlide.length < 5) {
+    eventosPorSlide.push([]); // Agregar contenedores vacíos hasta llegar a 5
+  }
+  console.log("eventosPorSlide", eventosPorSlide);
   const [sliderRef] = useKeenSlider({
     slides: eventosPorSlide.length,
     loop: true,
@@ -296,7 +308,15 @@ function PantallaDirec1() {
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
+      <div
+        className="bg-white text-black h-full flex flex-col justify-center mx-2 my-2"
+        style={{
+          transform: isPortrait ? "rotate(0deg)" : "rotate(90deg)",
+          maxWidth: isPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
+          height: isPortrait ? "" : "100vh", // Ajustar la altura según la orientación
+          width: isPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
+        }}
+      >
         <div id="Content" className="flex-grow flex flex-col justify-center ">
           {/* Header */}
           <div className="flex items-center justify-between ">
@@ -316,6 +336,9 @@ function PantallaDirec1() {
                       src={templateActual.logo}
                       alt="Logo"
                       className="w-72"
+                      onClick={() => {
+                        cambiarOrientacion();
+                      }}
                     />
                   </div>{" "}
                 </>
@@ -373,43 +396,52 @@ function PantallaDirec1() {
                   <div className="space-y-5 pl-5 flex-grow">
                     {/* Slots predeterminados */}
                     <div ref={sliderRef} className="keen-slider">
-                      {eventosPorSlide.map((bloqueEventos, index) => (
-                        <div key={index} className="keen-slider__slide my-2">
-                          {bloqueEventos.map((event) => (
-                            <div key={event.id}>
-                              {/* Detalles del evento */}
-                              <div className="flex items-center space-x-4 space-y-5 border-b border-black">
-                                {/* Imagen a la izquierda */}
-                                <img
-                                  src={event.images[0]}
-                                  alt={event.nombreEvento}
-                                  style={{
-                                    width: "130px",
-                                    height: "110px",
-                                    margin: "0",
-                                  }}
-                                />
-                                {/* Detalles del evento */}
-                                <div className="grid grid-cols-2">
-                                  {/* Aplicando el color seleccionado */}
-                                  <div className="min-w-5">
-                                    <h3 className="font-bold mb-4">
-                                      {event.nombreEvento}
-                                    </h3>
-                                    <p>{event.tipoEvento}</p>
-                                    <p>{event.lugar}</p>
-                                  </div>
+                      {[...Array(isPortrait ? 10 : 5)].map((_, index) => {
+                        const eventos = eventosPorSlide[index] || []; // Obtener eventos si existen, de lo contrario, un array vacío
+                        return (
+                          <div key={index} className="keen-slider__slide my-2">
+                            {eventos.length > 0 ? (
+                              eventos.map((event) => (
+                                <div key={event.id}>
+                                  {/* Detalles del evento */}
+                                  <div className="flex items-center space-x-4 space-y-5 border-b border-black">
+                                    {/* Imagen a la izquierda */}
+                                    <img
+                                      src={event.images[0]}
+                                      alt={event.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                        margin: "0",
+                                      }}
+                                    />
+                                    {/* Detalles del evento */}
+                                    <div className="grid grid-cols-2">
+                                      {/* Aplicando el color seleccionado */}
+                                      <div className="min-w-5">
+                                        <h3 className="font-bold mb-4">
+                                          {event.nombreEvento}
+                                        </h3>
+                                        <p>{event.tipoEvento}</p>
+                                        <p>{event.lugar}</p>
+                                      </div>
 
-                                  {/* Agrega más detalles según sea necesario */}
-                                  <div className="text-right ">
-                                    <p>{event.horaInicialSalon} HRS</p>
+                                      {/* Agrega más detalles según sea necesario */}
+                                      <div className="text-right ">
+                                        <p>{event.horaInicialSalon} HRS</p>
+                                      </div>
+                                    </div>
                                   </div>
                                 </div>
+                              ))
+                            ) : (
+                              <div className="flex items-center justify-center w-full h-full bg-gray-200">
+                                <p>No hay eventos</p>
                               </div>
-                            </div>
-                          ))}
-                        </div>
-                      ))}
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 </div>
