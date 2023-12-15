@@ -36,7 +36,7 @@ function Contacto() {
   function handlePhoneChange(event) {
     const inputPhoneNumber = event.target.value;
     const validatedPhoneNumber = inputPhoneNumber
-      .replace(/[^\d+]/g, "")
+      .replace(/[^\d+()-]/g, "")
       .substring(0, 16);
 
     setPhoneNumber(validatedPhoneNumber);
@@ -58,7 +58,7 @@ function Contacto() {
     }
 
     // Validar el número de teléfono solo si está presente
-    if (phoneNumber && !/^\d+$/.test(phoneNumber)) {
+    if (phoneNumber && !/^[+\d()-]+$/.test(phoneNumber)) {
       setError("Por favor, ingresa solo números en el campo de teléfono.");
       return;
     }
@@ -72,9 +72,9 @@ function Contacto() {
       mensaje: message,
     };
 
-    const serviceId = "service_qjv3qpt";
-    const templateId = "template_8pvt3ps";
-    const userId = "MEzsSEWILjBamER7b";
+    const serviceId = "service_y3wemni";
+    const templateId = "template_jas85ew";
+    const userId = "IVTJPKKd0ooe1am6U";
 
     emailjs.send(serviceId, templateId, templateParams, userId).then(
       (response) => {
