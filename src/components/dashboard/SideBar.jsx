@@ -133,9 +133,9 @@ function Sidebar({
               <span className="flex items-center justify-center text-lg text-gray-400">
                 <svg
                   fill="none"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
                   className="h-6 w-6"
@@ -384,9 +384,9 @@ function Sidebar({
             <span className="flex items-center justify-center text-lg text-red-400">
               <svg
                 fill="none"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
                 className="h-6 w-6"
