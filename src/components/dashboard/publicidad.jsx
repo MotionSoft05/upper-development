@@ -3,9 +3,11 @@ import React, { useState } from "react";
 function Publicidad() {
   const [imagenesSalon, setImagenesSalon] = useState([null]);
   const [imagenesDirectorio, setImagenesDirectorio] = useState([null]);
-  const [tiemposSalon, setTiemposSalon] = useState([{ horas: 0, minutos: 0 }]);
+  const [tiemposSalon, setTiemposSalon] = useState([
+    { horas: 0, minutos: 0, segundos: 0 },
+  ]);
   const [tiemposDirectorio, setTiemposDirectorio] = useState([
-    { horas: 0, minutos: 0 },
+    { horas: 0, minutos: 0, segundos: 0 },
   ]);
 
   const handleImagenSelect = (event, tipo) => {
@@ -137,6 +139,20 @@ function Publicidad() {
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
                     />
                     <span className="text-gray-600">minutos</span>
+                  </div>
+                  <div className="flex items-center">
+                    <input
+                      type="number"
+                      name="segundos"
+                      min="0"
+                      max="59"
+                      value={tiempos[index].segundos || 0}
+                      onChange={(event) =>
+                        handleTiempoChange(event, index, tipo)
+                      }
+                      className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
+                    />
+                    <span className="text-gray-600">segundos</span>
                   </div>
                 </div>
               </div>
