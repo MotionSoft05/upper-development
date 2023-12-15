@@ -45,6 +45,7 @@ function AltaEventos() {
     startDate: new Date(),
     endDate: new Date().setMonth(11),
   });
+  const [hasImage, setHasImage] = useState(false);
 
   const [alertaEnviada, setAlertaEnviada] = useState(false);
   const [images, setImages] = useState([]);
@@ -147,6 +148,7 @@ function AltaEventos() {
         const imageUrl = await getDownloadURL(imageRef);
 
         setImages((prevImages) => [...prevImages, imageUrl]);
+        setHasImage(true); // Establecer que hay al menos una imagen
       } catch (error) {
         console.error("Error al subir imagen:", error);
       }
@@ -210,6 +212,10 @@ function AltaEventos() {
 
   const enviarDatosAFirebase = async () => {
     event.preventDefault();
+    if (!hasImage) {
+      alert("Debes subir al menos una imagen antes de enviar el formulario.");
+      return;
+    }
     const nombreEvento = document.getElementById("floating_name").value;
     const tipoEvento = document.getElementById("floating_event").value;
     const lugar = document.getElementById("floating_floor").value;
@@ -646,7 +652,10 @@ function AltaEventos() {
                 <div className="hidden md:block">
                   <button
                     onClick={enviarDatosAFirebase}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
+                    disabled={!hasImage}
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4 ${
+                      !hasImage && "opacity-50 cursor-not-allowed"
+                    }`}
                   >
                     Enviar
                   </button>
