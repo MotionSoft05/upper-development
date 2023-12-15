@@ -95,53 +95,24 @@ function ConsultaModEvento() {
       }
 
       eventosRef.onSnapshot((snapshot) => {
-        snapshot.docChanges().forEach((change) => {
-          const evento = {
-            id: change.doc.id,
-            ...change.doc.data(),
-          };
+        const eventosData = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-          if (!evento.fechaFinal || !evento.horaFinalSalon) {
-            // Evitar comparaciones si falta información
-            return;
-          }
-
-          const ahora = new Date();
-          const fechaFinalSalon = new Date(
-            `${evento.fechaFinal}T${evento.horaFinalSalon}`
-          );
-
-          if (fechaFinalSalon < ahora && evento.status === true) {
-            // La fecha y hora final del salón ha pasado
-            evento.status = false;
-          }
-
-          // Actualizar el estado local de eventos
-          setEventos((prevEventos) => {
-            const index = prevEventos.findIndex((e) => e.id === evento.id);
-            const nuevosEventos =
-              index !== -1
-                ? [
-                    ...prevEventos.slice(0, index),
-                    evento,
-                    ...prevEventos.slice(index + 1),
-                  ]
-                : [...prevEventos, evento];
-            return nuevosEventos;
-          });
-        });
-
-        // Filtrar eventos según el estado seleccionado
-        const eventosFiltrados = eventos.filter((evento) => {
+        // Filtrar eventos según el estado (activo o finalizado)
+        const eventosFiltrados = eventosData.filter((evento) => {
           if (filtro === "activos") {
-            return evento.status === true;
+            // Mostrar eventos con status true o sin status
+            return evento.status || evento.status === undefined;
           } else if (filtro === "finalizados") {
+            // Mostrar eventos con status false
             return evento.status === false;
           }
-          return true;
+          return true; // Mostrar todos los eventos si no hay filtro aplicado
         });
 
-        // Establecer eventosFiltrados en el estado
+        setEventos(eventosData);
         setEventosFiltrados(eventosFiltrados);
       });
     } catch (error) {
@@ -155,8 +126,10 @@ function ConsultaModEvento() {
       const index = devices.indexOf(device);
 
       if (index === -1) {
+        // Si el dispositivo no está en la lista, agrégalo
         return { ...prevEventoEditado, devices: [...devices, device] };
       } else {
+        // Si el dispositivo está en la lista, quítalo
         const newDevices = [...devices];
         newDevices.splice(index, 1);
         return { ...prevEventoEditado, devices: newDevices };
@@ -203,15 +176,6 @@ function ConsultaModEvento() {
           .delete()
           .catch((error) => console.error("Error al eliminar imagen:", error));
       });
-
-      const ahora = new Date();
-      const fechaFinalSalon = new Date(
-        `${eventoEditado.fechaFinal}T${eventoEditado.horaFinalSalon}`
-      );
-
-      const nuevoStatus =
-        fechaFinalSalon > ahora || !eventoEditado.fechaFinal ? true : false;
-
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
       await firebase
@@ -227,7 +191,6 @@ function ConsultaModEvento() {
           description: eventoEditado.description,
           images: imagenesEvento,
           devices: eventoEditado.devices || [],
-          status: nuevoStatus,
         });
 
       setModalAbierto(false);
@@ -251,9 +214,16 @@ function ConsultaModEvento() {
     const nuevaImagen = e.target.files[0];
 
     if (nuevaImagen) {
+      // Crea una referencia en Storage usando el nombre de archivo único
       const storageRef = storage.ref(`imagenes/${nuevaImagen.name}`);
+
+      // Sube la imagen a Storage
       const snapshot = await storageRef.put(nuevaImagen);
+
+      // Obtiene la URL de descarga de la imagen
       const url = await snapshot.ref.getDownloadURL();
+
+      // Actualiza el estado de las imágenes con la nueva URL
       setImagenesEvento([...imagenesEvento, url]);
     }
   };
@@ -598,7 +568,7 @@ function ConsultaModEvento() {
                                           "description",
                                           e.target.value
                                         );
-                                        setDescription(e.target.value);
+                                        setDescription(e.target.value); // Agrega esta línea
                                       }}
                                       className="w-full px-2 py-1 border rounded-lg text-center"
                                       rows={4}
