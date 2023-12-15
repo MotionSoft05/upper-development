@@ -120,7 +120,7 @@ function UserAdmin() {
 
   return (
     <section className="px-5 md:px-32">
-      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl ">
+      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6x2">
         Bienvenido
         <span className="text-blue-600 "> {nombreUsuario}</span>
       </h1>
@@ -134,7 +134,7 @@ function UserAdmin() {
                     <thead>
                       <tr>
                         <th className="px-4 py-2 text-left border-b-2 w-full">
-                          <h2 className="text-ml font-bold text-gray-600">
+                          <h2 className="text-ml font-bold ">
                             Información de eventos
                           </h2>
                         </th>
@@ -144,24 +144,62 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Eventos actuales</h2>
+                            <h2>Eventos Hoy</h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
                           <p>
-                            <span>5</span>
+                            <span>
+                              {
+                                userEvents.filter((evento) => {
+                                  const fechaInicial = new Date(
+                                    evento.fechaInicio + "T00:00:00"
+                                  );
+                                  const fechaFinal = new Date(
+                                    evento.fechaFinal + "T23:59:59"
+                                  );
+                                  const fechaActual = new Date();
+                                  // Añade la condición de status igual a true
+                                  return (
+                                    evento.status &&
+                                    fechaActual >= fechaInicial &&
+                                    fechaActual <= fechaFinal
+                                  );
+                                }).length
+                              }
+                            </span>
                           </p>
                         </td>
                       </tr>
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Eventos esta semana</h2>
+                            <h2>Eventos Semana</h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
                           <p>
-                            <span>10</span>
+                            <span>
+                              {
+                                userEvents.filter((evento) => {
+                                  const fechaInicial = new Date(
+                                    evento.fechaInicio + "T00:00:00"
+                                  );
+                                  const fechaFinal = new Date(
+                                    evento.fechaFinal + "T23:59:59"
+                                  );
+                                  const fechaActual = new Date();
+                                  const finSemana = new Date(fechaActual);
+                                  finSemana.setDate(fechaActual.getDate() + 6);
+                                  // Añade la condición de status igual a true y que ocurra en los próximos 7 días
+                                  return (
+                                    evento.status &&
+                                    fechaActual <= fechaFinal &&
+                                    finSemana >= fechaInicial
+                                  );
+                                }).length
+                              }
+                            </span>
                           </p>
                         </td>
                       </tr>
@@ -173,7 +211,20 @@ function UserAdmin() {
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
                           <p>
-                            <span>8</span>
+                            <span>
+                              {
+                                userEvents.filter((evento) => {
+                                  const fechaFinal = new Date(
+                                    evento.fechaFinal + "T23:59:59"
+                                  );
+                                  const fechaActual = new Date();
+                                  // Añade la condición de status igual a false y que la fecha final sea anterior a la fecha actual
+                                  return (
+                                    !evento.status && fechaFinal < fechaActual
+                                  );
+                                }).length
+                              }
+                            </span>
                           </p>
                         </td>
                       </tr>
@@ -187,11 +238,11 @@ function UserAdmin() {
                     <thead>
                       <tr>
                         <th className="px-4 py-2 text-left border-b-2 w-full">
-                          <h2 className="text-ml font-bold text-gray-600">
+                          <h2 className="text-ml font-bold ">
                             Plan de suscripción
                           </h2>
-                          <p className="text-ml font-bold ">
-                            actualmente tiene{" "}
+                          <p className="text-ml font-bold text-gray-600">
+                            Actualmente tienes{" "}
                             <span className=" text-cyan-500 w-1/2">
                               {total}
                             </span>{" "}
@@ -228,7 +279,7 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>publicidad</h2>
+                            <h2>Publicidad</h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
