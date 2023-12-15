@@ -1,20 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  onAuthStateChanged,
-  signInWithPopup,
-  GoogleAuthProvider,
-} from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  serverTimestamp,
-  addDoc,
-} from "firebase/firestore";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -51,7 +38,7 @@ function Licencia() {
             const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
 
             if (datosFiscalesDocSnap.exists()) {
-              setDatosFiscales(datosFiscalesDocSnap.data());
+              DatosFiscales(datosFiscalesDocSnap.data());
             }
           } else {
             const userData = {
@@ -123,7 +110,41 @@ function Licencia() {
 }
 
 function DatosFiscales({ currentUser }) {
-  console.log("currentUser en DatosFiscales:", currentUser);
+  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
+  const [datosFiscales, setDatosFiscales] = useState({
+    rfc: "",
+    razonSocial: "",
+    codigoPostal: "",
+    regimenFiscal: "",
+    usoCdfi: "",
+    email: "",
+  });
+
+  useEffect(() => {
+    const fetchDatosFiscales = async () => {
+      try {
+        const user = getAuth().currentUser;
+
+        if (user) {
+          const userId = user.uid;
+          const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
+          const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+
+          if (datosFiscalesDocSnap.exists()) {
+            const datosFiscalesData = datosFiscalesDocSnap.data();
+            setDatosFiscales(datosFiscalesData);
+            console.log("Datos Fiscales recibidos:", datosFiscalesData);
+          } else {
+            console.log("No se encontraron datos fiscales para el usuario.");
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos fiscales:", error);
+      }
+    };
+
+    fetchDatosFiscales();
+  }, []);
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -173,6 +194,7 @@ function DatosFiscales({ currentUser }) {
 
     try {
       await setDoc(datosFiscalesDocRef, datosFiscalesData);
+      setGuardadoExitoso(true);
       console.log("Datos fiscales enviados correctamente.");
     } catch (error) {
       console.error("Error al enviar datos fiscales:", error);
@@ -181,6 +203,11 @@ function DatosFiscales({ currentUser }) {
   return (
     <section className="px-8 py-12">
       <h1>Datos Fiscales</h1>
+      {guardadoExitoso && (
+        <div className="text-green-500 font-bold mb-4">
+          ¡Datos fiscales guardados correctamente!
+        </div>
+      )}
       <form onSubmit={handleSubmit}>
         <div className="mb-6">
           <label
@@ -195,7 +222,7 @@ function DatosFiscales({ currentUser }) {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder="ABC 680524 P-76"
             maxLength="20"
-            defaultValue={currentUser ? currentUser.rfc : ""}
+            defaultValue={datosFiscales.rfc}
             required
           />
         </div>
@@ -212,7 +239,7 @@ function DatosFiscales({ currentUser }) {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder=""
             maxLength="100"
-            defaultValue={currentUser ? currentUser.razonSocial : ""}
+            defaultValue={datosFiscales.razonSocial}
             required
           />
         </div>
@@ -229,7 +256,7 @@ function DatosFiscales({ currentUser }) {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder="01000"
             maxLength="10"
-            defaultValue={currentUser ? currentUser.codigoPostal : ""}
+            defaultValue={datosFiscales.codigoPostal}
             required
           />
         </div>
@@ -246,7 +273,7 @@ function DatosFiscales({ currentUser }) {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder=""
             maxLength="70"
-            defaultValue={currentUser ? currentUser.regimenFiscal : ""}
+            defaultValue={datosFiscales.regimenFiscal}
             required
           />
         </div>
@@ -263,7 +290,7 @@ function DatosFiscales({ currentUser }) {
             className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
             placeholder=""
             maxLength="24"
-            defaultValue={currentUser ? currentUser.usoCdfi : ""}
+            defaultValue={datosFiscales.usoCdfi}
             required
           />
         </div>
@@ -287,7 +314,7 @@ function DatosFiscales({ currentUser }) {
           type="submit"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
-          Enviar
+          Guardar
         </button>
       </form>
     </section>
