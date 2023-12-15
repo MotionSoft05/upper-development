@@ -261,8 +261,14 @@ function ConsultaModEvento() {
 
   const eliminarImagen = (index) => {
     const nuevasImagenes = [...imagenesEvento];
-    nuevasImagenes.splice(index, 1);
-    setImagenesEvento(nuevasImagenes);
+
+    // Ensure there is at least one image before deleting
+    if (nuevasImagenes.length > 1) {
+      nuevasImagenes.splice(index, 1);
+      setImagenesEvento(nuevasImagenes);
+    } else {
+      alert("Debe haber al menos una imagen.");
+    }
   };
 
   return (
