@@ -100,8 +100,39 @@ function ConsultaModEvento() {
           ...doc.data(),
         }));
 
-        // Filtrar eventos según el estado (activo o finalizado)
-        const eventosFiltrados = eventosData.filter((evento) => {
+        eventosData.forEach(async (evento) => {
+          if (evento.horaFinalSalon && evento.fechaFinal) {
+            const fechaFinalEvento = new Date(
+              evento.fechaFinal + "T" + evento.horaFinalSalon
+            );
+
+            const now = new Date();
+
+            if (
+              fechaFinalEvento.getTime() > now.getTime() &&
+              evento.status === false
+            ) {
+              // Actualizar el status a true si es necesario
+              await firebase
+                .firestore()
+                .collection("eventos")
+                .doc(evento.id)
+                .update({ status: true });
+            } else if (
+              fechaFinalEvento.getTime() <= now.getTime() &&
+              evento.status !== false
+            ) {
+              // Actualizar el status a false si es necesario
+              await firebase
+                .firestore()
+                .collection("eventos")
+                .doc(evento.id)
+                .update({ status: false });
+            }
+          }
+        });
+
+        const eventosFiltradosActivos = eventosData.filter((evento) => {
           if (filtro === "activos") {
             // Mostrar eventos con status true o sin status
             return evento.status || evento.status === undefined;
@@ -113,7 +144,7 @@ function ConsultaModEvento() {
         });
 
         setEventos(eventosData);
-        setEventosFiltrados(eventosFiltrados);
+        setEventosFiltrados(eventosFiltradosActivos);
       });
     } catch (error) {
       console.error("Error al consultar eventos:", error);
