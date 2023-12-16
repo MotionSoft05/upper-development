@@ -1,6 +1,30 @@
-import React, { useState } from "react";
+/* eslint-disable @next/next/no-img-element */
+import React, { useState, useEffect } from "react";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+import "firebase/compat/storage";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
+  authDomain: "upper-a544e.firebaseapp.com",
+  projectId: "upper-a544e",
+  storageBucket: "upper-a544e.appspot.com",
+  messagingSenderId: "665713417470",
+  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
+  measurementId: "G-QTFQ55YY5D",
+};
+
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const auth = firebase.auth(); // Obtener la instancia de Auth
+const db = firebase.firestore();
+const storage = firebase.storage();
 
 function Publicidad() {
+  const [user, setUser] = useState(null);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
   const [imagenesDirectorio, setImagenesDirectorio] = useState([null]);
   const [tiemposSalon, setTiemposSalon] = useState([
@@ -9,6 +33,14 @@ function Publicidad() {
   const [tiemposDirectorio, setTiemposDirectorio] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   const handleImagenSelect = (event, tipo) => {
     const file = event.target.files[0];
@@ -65,6 +97,55 @@ function Publicidad() {
       nuevosTiemposDirectorio.splice(index, 1);
       setImagenesDirectorio(nuevasImagenesDirectorio);
       setTiemposDirectorio(nuevosTiemposDirectorio);
+    }
+  };
+
+  const handleAgregarPublicidad = async (tipo) => {
+    try {
+      const storageRef = storage.ref();
+      const userUid = user.uid;
+
+      const promises = imagenesSalon.map(async (imagen, index) => {
+        if (imagen) {
+          const imageRef = storageRef.child(
+            `publicidad/${userUid}/${tipo}_${index}_${Date.now()}_${
+              imagen.name
+            }`
+          );
+          await imageRef.put(imagen);
+
+          const imageUrl = await imageRef.getDownloadURL();
+
+          // Agregar datos a la colección "Publicidad"
+          await db.collection("Publicidad").add({
+            imageUrl,
+            horas: tiemposSalon[index].horas,
+            minutos: tiemposSalon[index].minutos,
+            segundos: tiemposSalon[index].segundos,
+            tipo,
+            userId: userUid,
+          });
+        }
+      });
+
+      await Promise.all(promises);
+
+      // Limpiar campos después de agregar publicidad
+      if (tipo === "salon") {
+        setImagenesSalon([...imagenesSalon, null]);
+        setTiemposSalon([
+          ...tiemposSalon,
+          { horas: 0, minutos: 0, segundos: 0 },
+        ]);
+      } else if (tipo === "directorio") {
+        setImagenesDirectorio([...imagenesDirectorio, null]);
+        setTiemposDirectorio([
+          ...tiemposDirectorio,
+          { horas: 0, minutos: 0, segundos: 0 },
+        ]);
+      }
+    } catch (error) {
+      console.error("Error al agregar publicidad:", error);
     }
   };
 
@@ -197,16 +278,10 @@ function Publicidad() {
             {imagenesSalon.length < 10 && (
               <div className="mt-4">
                 <button
-                  onClick={() => {
-                    setImagenesSalon([...imagenesSalon, null]);
-                    setTiemposSalon([
-                      ...tiemposSalon,
-                      { horas: 0, minutos: 0 },
-                    ]);
-                  }}
+                  onClick={() => handleAgregarPublicidad("salon")}
                   className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md focus:outline-none"
                 >
-                  + Agregar Publicidad
+                  + Agregar Publicidad Salón
                 </button>
               </div>
             )}
@@ -223,16 +298,10 @@ function Publicidad() {
             {imagenesDirectorio.length < 10 && (
               <div className="mt-4">
                 <button
-                  onClick={() => {
-                    setImagenesDirectorio([...imagenesDirectorio, null]);
-                    setTiemposDirectorio([
-                      ...tiemposDirectorio,
-                      { horas: 0, minutos: 0 },
-                    ]);
-                  }}
+                  onClick={() => handleAgregarPublicidad("directorio")}
                   className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md focus:outline-none"
                 >
-                  + Agregar Publicidad
+                  + Agregar Publicidad Directorio
                 </button>
               </div>
             )}
