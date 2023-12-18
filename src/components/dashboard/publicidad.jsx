@@ -33,6 +33,7 @@ function Publicidad() {
   const [tiemposDirectorio, setTiemposDirectorio] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
+  const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -82,24 +83,6 @@ function Publicidad() {
     // Lógica para mostrar la vista previa de las imágenes con los tiempos configurados
   };
 
-  const handleEliminarCampo = (index, tipo) => {
-    if (tipo === "salon") {
-      const nuevasImagenesSalon = [...imagenesSalon];
-      const nuevosTiemposSalon = [...tiemposSalon];
-      nuevasImagenesSalon.splice(index, 1);
-      nuevosTiemposSalon.splice(index, 1);
-      setImagenesSalon(nuevasImagenesSalon);
-      setTiemposSalon(nuevosTiemposSalon);
-    } else if (tipo === "directorio") {
-      const nuevasImagenesDirectorio = [...imagenesDirectorio];
-      const nuevosTiemposDirectorio = [...tiemposDirectorio];
-      nuevasImagenesDirectorio.splice(index, 1);
-      nuevosTiemposDirectorio.splice(index, 1);
-      setImagenesDirectorio(nuevasImagenesDirectorio);
-      setTiemposDirectorio(nuevosTiemposDirectorio);
-    }
-  };
-
   const handleAgregarPublicidad = async (tipo) => {
     try {
       const storageRef = storage.ref();
@@ -144,6 +127,10 @@ function Publicidad() {
           { horas: 0, minutos: 0, segundos: 0 },
         ]);
       }
+      setSuccessMessage(`Publicidad ${tipo} agregada exitosamente`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 4000);
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
     }
@@ -238,10 +225,7 @@ function Publicidad() {
               </div>
 
               {/* Botón de eliminar campo */}
-              <button
-                onClick={() => handleEliminarCampo(index, tipo)}
-                className="mt-4 px-2 py-1 text-red-500 hover:text-red-700"
-              >
+              <button className="mt-4 px-2 py-1 text-red-500 hover:text-red-700">
                 Eliminar Campo
               </button>
             </div>
@@ -265,6 +249,11 @@ function Publicidad() {
               eventos.
             </p>
           </div>
+          {successMessage && (
+            <div className="bg-green-500 text-white p-2 mb-4 rounded-md">
+              {successMessage}
+            </div>
+          )}
 
           {/* Configuración de Salón de Eventos */}
           <div className="mb-8">
