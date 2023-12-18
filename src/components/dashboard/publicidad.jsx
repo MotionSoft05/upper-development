@@ -2,7 +2,14 @@
 import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import "firebase/compat/firestore";
+import {
+  collection,
+  deleteDoc,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
+
 import "firebase/compat/storage";
 
 const firebaseConfig = {
@@ -19,7 +26,7 @@ if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
 
-const auth = firebase.auth(); // Obtener la instancia de Auth
+const auth = firebase.auth();
 const db = firebase.firestore();
 const storage = firebase.storage();
 
@@ -136,6 +143,43 @@ function Publicidad() {
     }
   };
 
+  const handleEliminarPublicidad = async (tipo, index) => {
+    try {
+      const userUid = user.uid;
+
+      // Obtener una referencia al documento que quieres eliminar
+      const publicidadQuery = query(
+        collection(db, "Publicidad"),
+        where("userId", "==", userUid)
+      );
+
+      const querySnapshot = await getDocs(publicidadQuery);
+
+      if (!querySnapshot.empty) {
+        const documentToDelete = querySnapshot.docs[index];
+        await deleteDoc(documentToDelete.ref);
+      }
+
+      // Eliminar el campo correspondiente en el estado local
+      if (tipo === "salon") {
+        const nuevasImagenesSalon = [...imagenesSalon];
+        nuevasImagenesSalon.splice(index, 1);
+        setImagenesSalon(nuevasImagenesSalon);
+      } else if (tipo === "directorio") {
+        const nuevasImagenesDirectorio = [...imagenesDirectorio];
+        nuevasImagenesDirectorio.splice(index, 1);
+        setImagenesDirectorio(nuevasImagenesDirectorio);
+      }
+
+      setSuccessMessage(`Publicidad ${tipo} eliminada exitosamente`);
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 4000);
+    } catch (error) {
+      console.error("Error al eliminar publicidad:", error);
+    }
+  };
+
   const renderCamposImagenes = (imagenes, tiempos, tipo, titulo) => {
     return (
       <section>
@@ -225,7 +269,10 @@ function Publicidad() {
               </div>
 
               {/* Botón de eliminar campo */}
-              <button className="mt-4 px-2 py-1 text-red-500 hover:text-red-700">
+              <button
+                onClick={() => handleEliminarPublicidad(tipo, index)}
+                className="mt-4 px-2 py-1 text-red-500 hover:text-red-700"
+              >
                 Eliminar Campo
               </button>
             </div>
