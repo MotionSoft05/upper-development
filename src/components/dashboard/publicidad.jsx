@@ -8,6 +8,8 @@ import {
   query,
   where,
   getDocs,
+  docRef,
+  update,
 } from "firebase/firestore";
 
 import "firebase/compat/storage";
@@ -33,11 +35,7 @@ const storage = firebase.storage();
 function Publicidad() {
   const [user, setUser] = useState(null);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
-  const [imagenesDirectorio, setImagenesDirectorio] = useState([null]);
   const [tiemposSalon, setTiemposSalon] = useState([
-    { horas: 0, minutos: 0, segundos: 0 },
-  ]);
-  const [tiemposDirectorio, setTiemposDirectorio] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -50,47 +48,27 @@ function Publicidad() {
     return () => unsubscribe();
   }, []);
 
-  const handleImagenSelect = (event, tipo) => {
+  const handleImagenSelect = (event) => {
     const file = event.target.files[0];
-
-    if (tipo === "salon") {
-      const nuevasImagenesSalon = [...imagenesSalon];
-      nuevasImagenesSalon[imagenesSalon.length - 1] = file;
-      setImagenesSalon(nuevasImagenesSalon);
-    } else if (tipo === "directorio") {
-      const nuevasImagenesDirectorio = [...imagenesDirectorio];
-      nuevasImagenesDirectorio[imagenesDirectorio.length - 1] = file;
-      setImagenesDirectorio(nuevasImagenesDirectorio);
-    }
+    const nuevasImagenesSalon = [...imagenesSalon];
+    nuevasImagenesSalon[imagenesSalon.length - 1] = file;
+    setImagenesSalon(nuevasImagenesSalon);
   };
 
-  const eliminarImagen = (index, tipo) => {
-    if (tipo === "salon") {
-      const nuevasImagenesSalon = [...imagenesSalon];
-      nuevasImagenesSalon.splice(index, 1);
-      setImagenesSalon(nuevasImagenesSalon);
-    } else if (tipo === "directorio") {
-      const nuevasImagenesDirectorio = [...imagenesDirectorio];
-      nuevasImagenesDirectorio.splice(index, 1);
-      setImagenesDirectorio(nuevasImagenesDirectorio);
-    }
+  const eliminarImagen = (index) => {
+    const nuevasImagenesSalon = [...imagenesSalon];
+    nuevasImagenesSalon.splice(index, 1);
+    setImagenesSalon(nuevasImagenesSalon);
   };
 
-  const handleTiempoChange = (event, index, tipo) => {
+  const handleTiempoChange = (event, index) => {
     const { name, value } = event.target;
-    const newTiempos =
-      tipo === "salon" ? [...tiemposSalon] : [...tiemposDirectorio];
+    const newTiempos = [...tiemposSalon];
     newTiempos[index][name] = parseInt(value || 0);
-    tipo === "salon"
-      ? setTiemposSalon(newTiempos)
-      : setTiemposDirectorio(newTiempos);
+    setTiemposSalon(newTiempos);
   };
 
-  const handlePreviewClick = () => {
-    // Lógica para mostrar la vista previa de las imágenes con los tiempos configurados
-  };
-
-  const handleAgregarPublicidad = async (tipo) => {
+  const handleAgregarPublicidad = async () => {
     try {
       const storageRef = storage.ref();
       const userUid = user.uid;
@@ -98,9 +76,7 @@ function Publicidad() {
       const promises = imagenesSalon.map(async (imagen, index) => {
         if (imagen) {
           const imageRef = storageRef.child(
-            `publicidad/${userUid}/${tipo}_${index}_${Date.now()}_${
-              imagen.name
-            }`
+            `publicidad/${userUid}/salon_${index}_${Date.now()}_${imagen.name}`
           );
           await imageRef.put(imagen);
 
@@ -112,7 +88,7 @@ function Publicidad() {
             horas: tiemposSalon[index].horas,
             minutos: tiemposSalon[index].minutos,
             segundos: tiemposSalon[index].segundos,
-            tipo,
+            tipo: "salon",
             userId: userUid,
           });
         }
@@ -121,20 +97,10 @@ function Publicidad() {
       await Promise.all(promises);
 
       // Limpiar campos después de agregar publicidad
-      if (tipo === "salon") {
-        setImagenesSalon([...imagenesSalon, null]);
-        setTiemposSalon([
-          ...tiemposSalon,
-          { horas: 0, minutos: 0, segundos: 0 },
-        ]);
-      } else if (tipo === "directorio") {
-        setImagenesDirectorio([...imagenesDirectorio, null]);
-        setTiemposDirectorio([
-          ...tiemposDirectorio,
-          { horas: 0, minutos: 0, segundos: 0 },
-        ]);
-      }
-      setSuccessMessage(`Publicidad ${tipo} agregada exitosamente`);
+      setImagenesSalon([...imagenesSalon, null]);
+      setTiemposSalon([...tiemposSalon, { horas: 0, minutos: 0, segundos: 0 }]);
+
+      setSuccessMessage("Publicidad salon agregada exitosamente");
       setTimeout(() => {
         setSuccessMessage(null);
       }, 4000);
@@ -143,7 +109,7 @@ function Publicidad() {
     }
   };
 
-  const handleEliminarPublicidad = async (tipo, index) => {
+  const handleEliminarPublicidad = async (index) => {
     try {
       const userUid = user.uid;
 
@@ -161,46 +127,58 @@ function Publicidad() {
       }
 
       // Eliminar el campo correspondiente en el estado local
-      if (tipo === "salon") {
-        const nuevasImagenesSalon = [...imagenesSalon];
-        nuevasImagenesSalon.splice(index, 1);
-        setImagenesSalon(nuevasImagenesSalon);
-      } else if (tipo === "directorio") {
-        const nuevasImagenesDirectorio = [...imagenesDirectorio];
-        nuevasImagenesDirectorio.splice(index, 1);
-        setImagenesDirectorio(nuevasImagenesDirectorio);
-      }
+      const nuevasImagenesSalon = [...imagenesSalon];
+      nuevasImagenesSalon.splice(index, 1);
+      setImagenesSalon(nuevasImagenesSalon);
 
-      setSuccessMessage(`Publicidad ${tipo} eliminada exitosamente`);
+      setTiemposSalon((prevTiempos) => {
+        const newTiempos = [...prevTiempos];
+        newTiempos.splice(index, 1);
+        return newTiempos;
+      });
+
+      setSuccessMessage("Publicidad salon eliminada exitosamente");
       setTimeout(() => {
         setSuccessMessage(null);
       }, 4000);
+
+      // Update the remaining advertisements if needed
+      const remainingPublicidades = querySnapshot.docs.filter(
+        (_, i) => i !== index
+      );
+
+      for (const doc of remainingPublicidades) {
+        const docRef = doc.ref;
+        await docRef.delete(); // Use delete instead of update
+      }
     } catch (error) {
       console.error("Error al eliminar publicidad:", error);
     }
   };
 
-  const renderCamposImagenes = (imagenes, tiempos, tipo, titulo) => {
+  const renderCamposImagenes = () => {
+    const allFieldsEmpty = imagenesSalon.every((imagen) => !imagen);
     return (
       <section>
         <div className="mb-8">
-          <h3 className="text-xl font-semibold text-gray-800">{titulo}</h3>
-          {imagenes.map((imagen, index) => (
+          <h3 className="text-xl font-semibold text-gray-800">
+            Salón de Eventos
+          </h3>
+          {imagenesSalon.map((imagen, index) => (
             <div key={index} className="mb-8">
               <h3 className="text-xl font-semibold text-gray-800">
-                {tipo === "directorio" ? "Directorio" : "Salón de Eventos"} -
-                Imagen {index + 1}
+                Salón de Eventos - Imagen {index + 1}
               </h3>
               <div className="mt-4">
                 <input
                   type="file"
                   accept="image/*"
                   className="hidden"
-                  id={`imagen${tipo}-${index}`}
-                  onChange={(event) => handleImagenSelect(event, tipo)}
+                  id={`imagenSalon-${index}`}
+                  onChange={handleImagenSelect}
                 />
                 <label
-                  htmlFor={`imagen${tipo}-${index}`}
+                  htmlFor={`imagenSalon-${index}`}
                   className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2"
                 >
                   Seleccionar Imagen
@@ -210,7 +188,7 @@ function Publicidad() {
                   <div className="flex items-center mt-2">
                     <span className="block">{imagen.name}</span>
                     <button
-                      onClick={() => eliminarImagen(index, tipo)}
+                      onClick={() => eliminarImagen(index)}
                       className="ml-2 text-red-500 hover:text-red-700"
                     >
                       Eliminar
@@ -229,10 +207,8 @@ function Publicidad() {
                       name="horas"
                       min="0"
                       max="24"
-                      value={tiempos[index].horas || 0}
-                      onChange={(event) =>
-                        handleTiempoChange(event, index, tipo)
-                      }
+                      value={tiemposSalon[index].horas || 0}
+                      onChange={(event) => handleTiempoChange(event, index)}
                       className="w-16 px-2 py-1 mr-2 border rounded-md border-gray-300 focus:outline-none"
                     />
                     <span className="text-gray-600">horas</span>
@@ -243,10 +219,8 @@ function Publicidad() {
                       name="minutos"
                       min="0"
                       max="59"
-                      value={tiempos[index].minutos || 0}
-                      onChange={(event) =>
-                        handleTiempoChange(event, index, tipo)
-                      }
+                      value={tiemposSalon[index].minutos || 0}
+                      onChange={(event) => handleTiempoChange(event, index)}
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
                     />
                     <span className="text-gray-600">minutos</span>
@@ -257,10 +231,8 @@ function Publicidad() {
                       name="segundos"
                       min="0"
                       max="59"
-                      value={tiempos[index].segundos || 0}
-                      onChange={(event) =>
-                        handleTiempoChange(event, index, tipo)
-                      }
+                      value={tiemposSalon[index].segundos || 0}
+                      onChange={(event) => handleTiempoChange(event, index)}
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
                     />
                     <span className="text-gray-600">segundos</span>
@@ -270,8 +242,11 @@ function Publicidad() {
 
               {/* Botón de eliminar campo */}
               <button
-                onClick={() => handleEliminarPublicidad(tipo, index)}
-                className="mt-4 px-2 py-1 text-red-500 hover:text-red-700"
+                onClick={() => handleEliminarPublicidad(index)}
+                className={`mt-4 px-2 py-1 text-red-500 hover:text-red-700 ${
+                  allFieldsEmpty && "disabled:opacity-50 cursor-not-allowed"
+                }`}
+                disabled={allFieldsEmpty}
               >
                 Eliminar Campo
               </button>
@@ -304,52 +279,17 @@ function Publicidad() {
 
           {/* Configuración de Salón de Eventos */}
           <div className="mb-8">
-            {renderCamposImagenes(
-              imagenesSalon,
-              tiemposSalon,
-              "salon",
-              "Salón de Eventos"
-            )}
+            {renderCamposImagenes()}
             {imagenesSalon.length < 10 && (
               <div className="mt-4">
                 <button
-                  onClick={() => handleAgregarPublicidad("salon")}
+                  onClick={handleAgregarPublicidad}
                   className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md focus:outline-none"
                 >
                   + Agregar Publicidad Salón
                 </button>
               </div>
             )}
-          </div>
-
-          {/* Configuración de Directorio */}
-          <div className="mb-8">
-            {renderCamposImagenes(
-              imagenesDirectorio,
-              tiemposDirectorio,
-              "directorio",
-              "Directorio"
-            )}
-            {imagenesDirectorio.length < 10 && (
-              <div className="mt-4">
-                <button
-                  onClick={() => handleAgregarPublicidad("directorio")}
-                  className="px-4 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md focus:outline-none"
-                >
-                  + Agregar Publicidad Directorio
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Botón de vista previa */}
-          <div className="text-center">
-            <button
-              onClick={handlePreviewClick}
-              className="px-6 py-2 text-white bg-blue-500 hover:bg-blue-600 rounded-md focus:outline-none"
-            >
-              Vista Previa
-            </button>
           </div>
         </section>
       </div>
