@@ -139,13 +139,14 @@ function Publicidad() {
     const hasImage = imagenesSalon.some((imagen) => imagen !== null);
 
     // Check if all time fields are greater than 0 for all advertisements
-    const allValidTimeData = imagenesSalon.every((_, index) => {
+    const allValidTimeData = imagenesSalon.every((imagen, index) => {
       const { horas, minutos, segundos } = tiemposSalon[index];
-      return horas > 0 || minutos > 0 || segundos > 0;
+      return imagen !== null && (horas > 0 || minutos > 0 || segundos > 0);
     });
 
     return hasImage && allValidTimeData;
   };
+
   const renderCamposImagenes = () => (
     <section>
       <div className="mb-8">
