@@ -36,6 +36,7 @@ function Publicidad() {
   const [isLoading, setIsLoading] = useState(false);
   const [publicidadRef, setPublicidadRef] = useState([]);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
+  const [previewImages, setPreviewImages] = useState([]);
   const [tiemposSalon, setTiemposSalon] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
@@ -60,6 +61,15 @@ function Publicidad() {
     const newImages = [...imagenesSalon];
     newImages[index] = file;
     setImagenesSalon(newImages);
+
+    // Crear una vista previa de la imagen seleccionada
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newPreviewImages = [...previewImages];
+      newPreviewImages[index] = reader.result;
+      setPreviewImages(newPreviewImages);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAgregarPublicidad = async () => {
@@ -173,6 +183,13 @@ function Publicidad() {
                 Seleccionar Imagen
               </label>
             </div>
+            {previewImages[index] && (
+              <img
+                src={previewImages[index]}
+                alt={`Vista previa de la imagen ${index + 1}`}
+                className="mt-4 max-w-xs h-auto" // Ajustar el tamaño aquí
+              />
+            )}
             <div className="mt-4">
               <label className="text-gray-800">Tiempo de visualización:</label>
               <div className="flex mt-2">
