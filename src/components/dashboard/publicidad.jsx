@@ -1,16 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import {
-  collection,
-  deleteDoc,
-  query,
-  where,
-  getDocs,
-  docRef,
-  update,
-} from "firebase/firestore";
+import { collection, getDocs, query, where } from "firebase/firestore";
 import "firebase/compat/storage";
 
 const firebaseConfig = {
@@ -43,9 +34,59 @@ function Publicidad() {
   const [successMessage, setSuccessMessage] = useState(null);
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => setUser(user));
+    const unsubscribe = auth.onAuthStateChanged((user) => {
+      setUser(user);
+      if (user) {
+        cargarPublicidades(user.uid);
+      }
+    });
+
     return () => unsubscribe();
   }, []);
+
+  const cargarPublicidades = async (userId) => {
+    try {
+      setIsLoading(true);
+      console.log("Fetching publicidades for user:", userId);
+
+      const publicidadesSnapshot = await getDocs(
+        query(collection(db, "Publicidad"), where("userId", "==", userId))
+      );
+
+      const publicidadesData = [];
+      const imagenes = [];
+      const previews = [];
+      const tiempos = [];
+      const refs = [];
+
+      publicidadesSnapshot.forEach((doc) => {
+        const data = doc.data();
+        publicidadesData.push(data);
+
+        // Extract relevant data and update state variables
+        imagenes.push(null); // Placeholder for imagenesSalon
+        previews.push(null); // Placeholder for previewImages
+        tiempos.push({
+          horas: data.horas || 0,
+          minutos: data.minutos || 0,
+          segundos: data.segundos || 0,
+        });
+        refs.push({ ref: doc.ref, index: publicidadesData.length - 1 });
+      });
+
+      // Update state variables
+      setImagenesSalon(imagenes);
+      setPreviewImages(previews);
+      setTiemposSalon(tiempos);
+      setPublicidadRef(refs);
+
+      console.log("Publicidades data:", publicidadesData);
+    } catch (error) {
+      console.error("Error al cargar publicidades:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
@@ -62,7 +103,6 @@ function Publicidad() {
     newImages[index] = file;
     setImagenesSalon(newImages);
 
-    // Crear una vista previa de la imagen seleccionada
     const reader = new FileReader();
     reader.onloadend = () => {
       const newPreviewImages = [...previewImages];
@@ -97,11 +137,9 @@ function Publicidad() {
 
               const { horas, minutos, segundos } = tiemposSalon[index];
 
-              // Check if at least one of the time fields is filled
               const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
 
               if (hasTimeData) {
-                // Agregar datos a la colección "Publicidad"
                 const publicidadRef = await db.collection("Publicidad").add({
                   imageUrl,
                   horas,
@@ -123,7 +161,6 @@ function Publicidad() {
       );
 
       if (hasValidData) {
-        // Clear the state for the new advertisement
         setImagenesSalon((prevImages) => [...prevImages, null]);
         setTiemposSalon((prevTiempos) => [
           ...prevTiempos,
@@ -145,10 +182,8 @@ function Publicidad() {
   };
 
   const isValidData = () => {
-    // Check if at least one field has an image
     const hasImage = imagenesSalon.some((imagen) => imagen !== null);
 
-    // Check if all time fields are greater than 0 for all advertisements
     const allValidTimeData = imagenesSalon.every((imagen, index) => {
       const { horas, minutos, segundos } = tiemposSalon[index];
       return imagen !== null && (horas > 0 || minutos > 0 || segundos > 0);
@@ -187,7 +222,7 @@ function Publicidad() {
               <img
                 src={previewImages[index]}
                 alt={`Vista previa de la imagen ${index + 1}`}
-                className="mt-4 max-w-xs h-auto" // Ajustar el tamaño aquí
+                className="mt-4 max-w-xs h-auto"
               />
             )}
             <div className="mt-4">
