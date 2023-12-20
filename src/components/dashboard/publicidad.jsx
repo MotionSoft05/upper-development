@@ -53,32 +53,29 @@ function Publicidad() {
         query(collection(db, "Publicidad"), where("userId", "==", userId))
       );
 
-      const publicidadesData = [];
       const imagenes = [];
       const previews = [];
       const tiempos = [];
       const refs = [];
 
-      publicidadesSnapshot.forEach((doc) => {
+      const publicidadesData = publicidadesSnapshot.docs.map((doc) => {
         const data = doc.data();
-        publicidadesData.push(data);
-
-        // Extract relevant data and update state variables
         imagenes.push(null); // Placeholder for imagenesSalon
-        previews.push(null); // Placeholder for previewImages
+        previews.push(data.imageUrl); // Use imageUrl from Firebase directly
         tiempos.push({
           horas: data.horas || 0,
           minutos: data.minutos || 0,
           segundos: data.segundos || 0,
         });
-        refs.push({ ref: doc.ref, index: publicidadesData.length - 1 });
+        refs.push({ ref: doc.ref, index: imagenes.length - 1 });
+        return data;
       });
 
-      // Update state variables
-      setImagenesSalon(imagenes);
-      setPreviewImages(previews);
-      setTiemposSalon(tiempos);
-      setPublicidadRef(refs);
+      // Update state variables with deep copies
+      setImagenesSalon([...imagenes]);
+      setPreviewImages([...previews]);
+      setTiemposSalon([...tiempos]);
+      setPublicidadRef([...refs]);
 
       console.log("Publicidades data:", publicidadesData);
     } catch (error) {
@@ -91,10 +88,35 @@ function Publicidad() {
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
     const newValues = [...type];
-    newValues[index][name] = parseInt(value || 0);
-    type === tiemposSalon
-      ? setTiemposSalon(newValues)
-      : setImagenesSalon(newValues);
+
+    console.log("Type:", type);
+    console.log("New Values (before):", newValues);
+
+    if (!newValues[index]) {
+      newValues[index] = {};
+    }
+
+    if (name === "horas" || name === "minutos" || name === "segundos") {
+      // Actualizar el objeto de tiempos
+      newValues[index][name] = parseInt(value || 0);
+      setTiemposSalon(newValues);
+    } else {
+      // Actualizar el array de imágenes
+      newValues[index] = event.target.files[0];
+      setImagenesSalon(newValues);
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const newPreviewImages = [...previewImages];
+        newPreviewImages[index] = reader.result;
+        setPreviewImages(newPreviewImages);
+      };
+      reader.readAsDataURL(newValues[index]);
+    }
+
+    console.log("New Values (after):", newValues);
+    console.log("Tiempos Salon:", tiemposSalon);
+    console.log("Imagenes Salon:", imagenesSalon);
   };
 
   const handleImagenSelect = (event, index) => {
@@ -118,61 +140,57 @@ function Publicidad() {
       const storageRef = storage.ref();
       const userUid = user.uid;
 
-      let hasValidData = false;
+      const lastImageIndex = imagenesSalon.length - 1;
 
-      await Promise.all(
-        imagenesSalon.map(async (imagen, index) => {
-          if (imagen) {
-            const existingRef = publicidadRef.find(
-              (ref) => ref && ref.index === index
-            );
+      // Verifica si hay una imagen seleccionada para la última posición
+      if (imagenesSalon[lastImageIndex]) {
+        const existingRef = publicidadRef.find(
+          (ref) => ref && ref.index === lastImageIndex
+        );
 
-            if (!existingRef) {
-              const imageRef = storageRef.child(
-                `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
-              );
-              await imageRef.put(imagen);
+        if (!existingRef) {
+          const imageRef = storageRef.child(
+            `publicidad/salon_${lastImageIndex}_${Date.now()}_${
+              imagenesSalon[lastImageIndex].name
+            }`
+          );
+          await imageRef.put(imagenesSalon[lastImageIndex]);
 
-              const imageUrl = await imageRef.getDownloadURL();
+          const imageUrl = await imageRef.getDownloadURL();
 
-              const { horas, minutos, segundos } = tiemposSalon[index];
+          const { horas, minutos, segundos } = tiemposSalon[lastImageIndex];
 
-              const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
+          const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
 
-              if (hasTimeData) {
-                const publicidadRef = await db.collection("Publicidad").add({
-                  imageUrl,
-                  horas,
-                  minutos,
-                  segundos,
-                  tipo: "salon",
-                  userId: userUid,
-                });
+          if (hasTimeData) {
+            const publicidadRef = await db.collection("Publicidad").add({
+              imageUrl,
+              horas,
+              minutos,
+              segundos,
+              tipo: "salon",
+              userId: userUid,
+            });
 
-                setPublicidadRef((prevRefs) => [
-                  ...prevRefs,
-                  { ref: publicidadRef, index },
-                ]);
-                hasValidData = true;
-              }
-            }
+            setPublicidadRef((prevRefs) => [
+              ...prevRefs,
+              { ref: publicidadRef, index: lastImageIndex },
+            ]);
+
+            setImagenesSalon((prevImages) => [...prevImages, null]);
+            setTiemposSalon((prevTiempos) => [
+              ...prevTiempos,
+              { horas: 0, minutos: 0, segundos: 0 },
+            ]);
+
+            setSuccessMessage("Publicidad salon agregada exitosamente");
+            setTimeout(() => {
+              setSuccessMessage(null);
+            }, 4000);
           }
-        })
-      );
-
-      if (hasValidData) {
-        setImagenesSalon((prevImages) => [...prevImages, null]);
-        setTiemposSalon((prevTiempos) => [
-          ...prevTiempos,
-          { horas: 0, minutos: 0, segundos: 0 },
-        ]);
-
-        setSuccessMessage("Publicidad salon agregada exitosamente");
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 4000);
+        }
       } else {
-        console.warn("No valid data to add");
+        console.warn("No image selected for the last position.");
       }
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
@@ -182,14 +200,14 @@ function Publicidad() {
   };
 
   const isValidData = () => {
-    const hasImage = imagenesSalon.some((imagen) => imagen !== null);
+    const hasImages = imagenesSalon.every((imagen) => imagen !== null);
 
-    const allValidTimeData = imagenesSalon.every((imagen, index) => {
-      const { horas, minutos, segundos } = tiemposSalon[index];
-      return imagen !== null && (horas > 0 || minutos > 0 || segundos > 0);
+    const hasValidTimeData = tiemposSalon.some((tiempo) => {
+      const { horas, minutos, segundos } = tiempo;
+      return horas > 0 || minutos > 0 || segundos > 0;
     });
 
-    return hasImage && allValidTimeData;
+    return hasImages && hasValidTimeData;
   };
 
   const renderCamposImagenes = () => (
@@ -198,7 +216,7 @@ function Publicidad() {
         <h3 className="text-xl font-semibold text-gray-800">
           Salón de Eventos
         </h3>
-        {imagenesSalon.map((imagen, index) => (
+        {[...imagenesSalon, null].map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
               Salón de Eventos - Imagen {index + 1}
@@ -235,7 +253,9 @@ function Publicidad() {
                       name={unit}
                       min="0"
                       max={unit === "horas" ? "24" : "59"}
-                      value={tiemposSalon[index][unit] || 0}
+                      value={
+                        (tiemposSalon[index] && tiemposSalon[index][unit]) || 0
+                      }
                       onChange={(event) =>
                         handleInputChange(event, index, tiemposSalon)
                       }
