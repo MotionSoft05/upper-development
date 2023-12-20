@@ -89,21 +89,21 @@ function Publicidad() {
     const { name, value } = event.target;
     const newValues = [...type];
 
-    console.log("Type:", type);
-    console.log("New Values (before):", newValues);
-
     if (!newValues[index]) {
       newValues[index] = {};
     }
 
-    if (name === "horas" || name === "minutos" || name === "segundos") {
-      // Actualizar el objeto de tiempos
-      newValues[index][name] = parseInt(value || 0);
-      setTiemposSalon(newValues);
-    } else {
-      // Actualizar el array de imágenes
-      newValues[index] = event.target.files[0];
-      setImagenesSalon(newValues);
+    newValues[index][name] = parseInt(value || 0);
+    setTiemposSalon(newValues);
+  };
+
+  const handleImagenSelect = (event, index) => {
+    const file = event.target.files[0];
+
+    if (file) {
+      const newImages = [...imagenesSalon];
+      newImages[index] = file;
+      setImagenesSalon(newImages);
 
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -111,44 +111,30 @@ function Publicidad() {
         newPreviewImages[index] = reader.result;
         setPreviewImages(newPreviewImages);
       };
-      reader.readAsDataURL(newValues[index]);
+      reader.readAsDataURL(file);
     }
-
-    console.log("New Values (after):", newValues);
-    console.log("Tiempos Salon:", tiemposSalon);
-    console.log("Imagenes Salon:", imagenesSalon);
-  };
-
-  const handleImagenSelect = (event, index) => {
-    const file = event.target.files[0];
-    const newImages = [...imagenesSalon];
-    newImages[index] = file;
-    setImagenesSalon(newImages);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const newPreviewImages = [...previewImages];
-      newPreviewImages[index] = reader.result;
-      setPreviewImages(newPreviewImages);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleAgregarPublicidad = async () => {
     try {
       setIsLoading(true);
-      const storageRef = storage.ref();
-      const userUid = user.uid;
 
       const lastImageIndex = imagenesSalon.length - 1;
+      const hasSelectedImage = imagenesSalon[lastImageIndex] !== null;
+      const hasTimeData =
+        tiemposSalon[lastImageIndex].horas > 0 ||
+        tiemposSalon[lastImageIndex].minutos > 0 ||
+        tiemposSalon[lastImageIndex].segundos > 0;
 
-      // Verifica si hay una imagen seleccionada para la última posición
-      if (imagenesSalon[lastImageIndex]) {
+      if (hasSelectedImage && hasTimeData) {
         const existingRef = publicidadRef.find(
           (ref) => ref && ref.index === lastImageIndex
         );
 
         if (!existingRef) {
+          const storageRef = storage.ref();
+          const userUid = user.uid;
+
           const imageRef = storageRef.child(
             `publicidad/salon_${lastImageIndex}_${Date.now()}_${
               imagenesSalon[lastImageIndex].name
@@ -160,40 +146,42 @@ function Publicidad() {
 
           const { horas, minutos, segundos } = tiemposSalon[lastImageIndex];
 
-          const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
+          const publicidadRef = await db.collection("Publicidad").add({
+            imageUrl,
+            horas,
+            minutos,
+            segundos,
+            tipo: "salon",
+            userId: userUid,
+          });
 
-          if (hasTimeData) {
-            // Mueve la creación de la nueva publicidad aquí, después de verificar el tiempo y la imagen
-            const publicidadRef = await db.collection("Publicidad").add({
-              imageUrl,
-              horas,
-              minutos,
-              segundos,
-              tipo: "salon",
-              userId: userUid,
-            });
+          setPublicidadRef((prevRefs) => [
+            ...prevRefs,
+            { ref: publicidadRef, index: lastImageIndex },
+          ]);
 
-            setPublicidadRef((prevRefs) => [
-              ...prevRefs,
-              { ref: publicidadRef, index: lastImageIndex },
-            ]);
+          setImagenesSalon((prevImages) => {
+            const newImages = [...prevImages];
+            newImages[lastImageIndex] = null;
+            return newImages;
+          });
 
-            setImagenesSalon((prevImages) => [...prevImages, null]);
-            setTiemposSalon((prevTiempos) => [
-              ...prevTiempos,
-              { horas: 0, minutos: 0, segundos: 0 },
-            ]);
+          setTiemposSalon((prevTiempos) => [
+            ...prevTiempos,
+            { horas: 0, minutos: 0, segundos: 0 },
+          ]);
 
-            setSuccessMessage("Publicidad salon agregada exitosamente");
-            setTimeout(() => {
-              setSuccessMessage(null);
-            }, 4000);
-          }
+          setSuccessMessage("Publicidad salon agregada exitosamente");
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 4000);
         } else {
-          console.warn("Image already added for the last position.");
+          console.warn("Imagen ya agregada para la última posición.");
         }
       } else {
-        console.warn("No image selected for the last position.");
+        console.warn(
+          "No se cumplieron los requisitos para agregar publicidad."
+        );
       }
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
