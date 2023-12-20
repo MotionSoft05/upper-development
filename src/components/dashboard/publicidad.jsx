@@ -163,6 +163,7 @@ function Publicidad() {
           const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
 
           if (hasTimeData) {
+            // Mueve la creación de la nueva publicidad aquí, después de verificar el tiempo y la imagen
             const publicidadRef = await db.collection("Publicidad").add({
               imageUrl,
               horas,
@@ -188,6 +189,8 @@ function Publicidad() {
               setSuccessMessage(null);
             }, 4000);
           }
+        } else {
+          console.warn("Image already added for the last position.");
         }
       } else {
         console.warn("No image selected for the last position.");
@@ -200,8 +203,7 @@ function Publicidad() {
   };
 
   const isValidData = () => {
-    const hasImages = imagenesSalon.every((imagen) => imagen !== null);
-
+    const hasImages = imagenesSalon.some((imagen) => imagen !== null);
     const hasValidTimeData = tiemposSalon.some((tiempo) => {
       const { horas, minutos, segundos } = tiempo;
       return horas > 0 || minutos > 0 || segundos > 0;
