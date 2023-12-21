@@ -19,6 +19,7 @@ if (!firebase.apps.length) {
 
 const auth = firebase.auth();
 const storage = firebase.storage();
+const db = firebase.firestore();
 
 function Publicidad() {
   const [user, setUser] = useState(null);
@@ -82,10 +83,20 @@ function Publicidad() {
 
             const { horas, minutos, segundos } = tiemposSalon[index];
 
-            const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
+            // Siempre que haya una imagen, se considera válido
+            hasValidData = true;
 
-            if (hasTimeData) {
-              hasValidData = true;
+            if (horas > 0 || minutos > 0 || segundos > 0) {
+              const publicidadRef = await db.collection("Publicidad").add({
+                imageUrl,
+                horas,
+                minutos,
+                segundos,
+                tipo: "salon",
+                userId: userUid,
+              });
+
+              console.log("Publicidad agregada:", publicidadRef.id);
             }
           }
         })
