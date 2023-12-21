@@ -227,7 +227,7 @@ function Publicidad() {
                 onClick={() =>
                   handleEliminarPublicidad(publicidadesIds[index], index)
                 }
-                className="text-red-500 ml-4 cursor-pointer"
+                className="text-red-500 ml-4 mt-2 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
               >
                 Eliminar
               </button>
