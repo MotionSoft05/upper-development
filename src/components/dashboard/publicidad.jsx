@@ -53,29 +53,32 @@ function Publicidad() {
         query(collection(db, "Publicidad"), where("userId", "==", userId))
       );
 
+      const publicidadesData = [];
       const imagenes = [];
       const previews = [];
       const tiempos = [];
       const refs = [];
 
-      const publicidadesData = publicidadesSnapshot.docs.map((doc) => {
+      publicidadesSnapshot.forEach((doc) => {
         const data = doc.data();
+        publicidadesData.push(data);
+
+        // Extract relevant data and update state variables
         imagenes.push(null); // Placeholder for imagenesSalon
-        previews.push(data.imageUrl); // Use imageUrl from Firebase directly
+        previews.push(null); // Placeholder for previewImages
         tiempos.push({
           horas: data.horas || 0,
           minutos: data.minutos || 0,
           segundos: data.segundos || 0,
         });
-        refs.push({ ref: doc.ref, index: imagenes.length - 1 });
-        return data;
+        refs.push({ ref: doc.ref, index: publicidadesData.length - 1 });
       });
 
-      // Update state variables with deep copies
-      setImagenesSalon([...imagenes]);
-      setPreviewImages([...previews]);
-      setTiemposSalon([...tiempos]);
-      setPublicidadRef([...refs]);
+      // Update state variables
+      setImagenesSalon(imagenes);
+      setPreviewImages(previews);
+      setTiemposSalon(tiempos);
+      setPublicidadRef(refs);
 
       console.log("Publicidades data:", publicidadesData);
     } catch (error) {
@@ -88,100 +91,88 @@ function Publicidad() {
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
     const newValues = [...type];
-
-    if (!newValues[index]) {
-      newValues[index] = {};
-    }
-
     newValues[index][name] = parseInt(value || 0);
-    setTiemposSalon(newValues);
+    type === tiemposSalon
+      ? setTiemposSalon(newValues)
+      : setImagenesSalon(newValues);
   };
 
   const handleImagenSelect = (event, index) => {
     const file = event.target.files[0];
+    const newImages = [...imagenesSalon];
+    newImages[index] = file;
+    setImagenesSalon(newImages);
 
-    if (file) {
-      const newImages = [...imagenesSalon];
-      newImages[index] = file;
-      setImagenesSalon(newImages);
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const newPreviewImages = [...previewImages];
-        newPreviewImages[index] = reader.result;
-        setPreviewImages(newPreviewImages);
-      };
-      reader.readAsDataURL(file);
-    }
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const newPreviewImages = [...previewImages];
+      newPreviewImages[index] = reader.result;
+      setPreviewImages(newPreviewImages);
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleAgregarPublicidad = async () => {
     try {
       setIsLoading(true);
+      const storageRef = storage.ref();
+      const userUid = user.uid;
 
-      const lastImageIndex = imagenesSalon.length - 1;
-      const hasSelectedImage = imagenesSalon[lastImageIndex] !== null;
-      const hasTimeData =
-        tiemposSalon[lastImageIndex].horas > 0 ||
-        tiemposSalon[lastImageIndex].minutos > 0 ||
-        tiemposSalon[lastImageIndex].segundos > 0;
+      let hasValidData = false;
 
-      if (hasSelectedImage && hasTimeData) {
-        const existingRef = publicidadRef.find(
-          (ref) => ref && ref.index === lastImageIndex
-        );
+      await Promise.all(
+        imagenesSalon.map(async (imagen, index) => {
+          if (imagen) {
+            const existingRef = publicidadRef.find(
+              (ref) => ref && ref.index === index
+            );
 
-        if (!existingRef) {
-          const storageRef = storage.ref();
-          const userUid = user.uid;
+            if (!existingRef) {
+              const imageRef = storageRef.child(
+                `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
+              );
+              await imageRef.put(imagen);
 
-          const imageRef = storageRef.child(
-            `publicidad/salon_${lastImageIndex}_${Date.now()}_${
-              imagenesSalon[lastImageIndex].name
-            }`
-          );
-          await imageRef.put(imagenesSalon[lastImageIndex]);
+              const imageUrl = await imageRef.getDownloadURL();
 
-          const imageUrl = await imageRef.getDownloadURL();
+              const { horas, minutos, segundos } = tiemposSalon[index];
 
-          const { horas, minutos, segundos } = tiemposSalon[lastImageIndex];
+              const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
 
-          const publicidadRef = await db.collection("Publicidad").add({
-            imageUrl,
-            horas,
-            minutos,
-            segundos,
-            tipo: "salon",
-            userId: userUid,
-          });
+              if (hasTimeData) {
+                const publicidadRef = await db.collection("Publicidad").add({
+                  imageUrl,
+                  horas,
+                  minutos,
+                  segundos,
+                  tipo: "salon",
+                  userId: userUid,
+                });
 
-          setPublicidadRef((prevRefs) => [
-            ...prevRefs,
-            { ref: publicidadRef, index: lastImageIndex },
-          ]);
+                setPublicidadRef((prevRefs) => [
+                  ...prevRefs,
+                  { ref: publicidadRef, index },
+                ]);
+                hasValidData = true;
+              }
+            }
+          }
+        })
+      );
 
-          setImagenesSalon((prevImages) => {
-            const newImages = [...prevImages];
-            newImages[lastImageIndex] = null;
-            return newImages;
-          });
+      if (hasValidData) {
+        setImagenesSalon((prevImages) => [...prevImages, null]);
+        setTiemposSalon((prevTiempos) => [
+          ...prevTiempos,
+          { horas: 0, minutos: 0, segundos: 0 },
+        ]);
 
-          setTiemposSalon((prevTiempos) => [
-            ...prevTiempos,
-            { horas: 0, minutos: 0, segundos: 0 },
-          ]);
-
-          setSuccessMessage("Publicidad salon agregada exitosamente");
-          setTimeout(() => {
-            setSuccessMessage(null);
-          }, 4000);
-        } else {
-          console.warn("Imagen ya agregada para la última posición.");
-        }
+        setSuccessMessage("Publicidad salon agregada exitosamente");
+        setTimeout(() => {
+          setSuccessMessage(null);
+        }, 4000);
       } else {
-        console.warn(
-          "No se cumplieron los requisitos para agregar publicidad."
-        );
+        console.warn("No valid data to add");
       }
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
@@ -191,13 +182,14 @@ function Publicidad() {
   };
 
   const isValidData = () => {
-    const hasImages = imagenesSalon.some((imagen) => imagen !== null);
-    const hasValidTimeData = tiemposSalon.some((tiempo) => {
-      const { horas, minutos, segundos } = tiempo;
-      return horas > 0 || minutos > 0 || segundos > 0;
+    const hasImage = imagenesSalon.some((imagen) => imagen !== null);
+
+    const allValidTimeData = imagenesSalon.every((imagen, index) => {
+      const { horas, minutos, segundos } = tiemposSalon[index];
+      return imagen !== null && (horas > 0 || minutos > 0 || segundos > 0);
     });
 
-    return hasImages && hasValidTimeData;
+    return hasImage && allValidTimeData;
   };
 
   const renderCamposImagenes = () => (
@@ -206,7 +198,7 @@ function Publicidad() {
         <h3 className="text-xl font-semibold text-gray-800">
           Salón de Eventos
         </h3>
-        {[...imagenesSalon, null].map((imagen, index) => (
+        {imagenesSalon.map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
               Salón de Eventos - Imagen {index + 1}
@@ -243,9 +235,7 @@ function Publicidad() {
                       name={unit}
                       min="0"
                       max={unit === "horas" ? "24" : "59"}
-                      value={
-                        (tiemposSalon[index] && tiemposSalon[index][unit]) || 0
-                      }
+                      value={tiemposSalon[index][unit] || 0}
                       onChange={(event) =>
                         handleInputChange(event, index, tiemposSalon)
                       }
