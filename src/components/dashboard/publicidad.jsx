@@ -26,6 +26,8 @@ function Publicidad() {
   const [isLoading, setIsLoading] = useState(false);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
   const [previewImages, setPreviewImages] = useState([]);
+  const [publicidadesIds, setPublicidadesIds] = useState([]);
+
   const [tiemposSalon, setTiemposSalon] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
@@ -70,6 +72,7 @@ function Publicidad() {
       const userUid = user.uid;
 
       let hasValidData = false;
+      let newIds = [];
 
       await Promise.all(
         imagenesSalon.map(async (imagen, index) => {
@@ -97,12 +100,16 @@ function Publicidad() {
               });
 
               console.log("Publicidad agregada:", publicidadRef.id);
+
+              newIds = [...newIds, publicidadRef.id];
             }
           }
         })
       );
 
       if (hasValidData) {
+        setPublicidadesIds(newIds);
+
         setImagenesSalon((prevImages) => [...prevImages, null]);
         setTiemposSalon((prevTiempos) => [
           ...prevTiempos,
@@ -120,6 +127,32 @@ function Publicidad() {
       console.error("Error al agregar publicidad:", error);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const handleEliminarPublicidad = async (publicidadId, index) => {
+    try {
+      await db.collection("Publicidad").doc(publicidadId).delete();
+
+      // Eliminar localmente
+      const newImages = [...imagenesSalon];
+      newImages.splice(index, 1);
+
+      const newPreviewImages = [...previewImages];
+      newPreviewImages.splice(index, 1);
+
+      const newTiemposSalon = [...tiemposSalon];
+      newTiemposSalon.splice(index, 1);
+
+      const newIds = [...publicidadesIds];
+      newIds.splice(index, 1);
+
+      setImagenesSalon(newImages);
+      setPreviewImages(newPreviewImages);
+      setTiemposSalon(newTiemposSalon);
+      setPublicidadesIds(newIds);
+    } catch (error) {
+      console.error("Error al eliminar publicidad:", error);
     }
   };
 
@@ -145,6 +178,7 @@ function Publicidad() {
             <h3 className="text-xl font-semibold text-gray-800">
               Salón de Eventos - Imagen {index + 1}
             </h3>
+
             <div className="mt-4">
               <input
                 type="file"
@@ -188,6 +222,16 @@ function Publicidad() {
                 ))}
               </div>
             </div>
+            {publicidadesIds[index] && (
+              <button
+                onClick={() =>
+                  handleEliminarPublicidad(publicidadesIds[index], index)
+                }
+                className="text-red-500 ml-4 cursor-pointer"
+              >
+                Eliminar
+              </button>
+            )}
           </div>
         ))}
       </div>
