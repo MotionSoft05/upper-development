@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
-import { collection, getDocs, query, where } from "firebase/firestore";
 import "firebase/compat/storage";
 
 const firebaseConfig = {
@@ -19,13 +18,11 @@ if (!firebase.apps.length) {
 }
 
 const auth = firebase.auth();
-const db = firebase.firestore();
 const storage = firebase.storage();
 
 function Publicidad() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [publicidadRef, setPublicidadRef] = useState([]);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
   const [previewImages, setPreviewImages] = useState([]);
   const [tiemposSalon, setTiemposSalon] = useState([
@@ -36,57 +33,10 @@ function Publicidad() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setUser(user);
-      if (user) {
-        cargarPublicidades(user.uid);
-      }
     });
 
     return () => unsubscribe();
   }, []);
-
-  const cargarPublicidades = async (userId) => {
-    try {
-      setIsLoading(true);
-      console.log("Fetching publicidades for user:", userId);
-
-      const publicidadesSnapshot = await getDocs(
-        query(collection(db, "Publicidad"), where("userId", "==", userId))
-      );
-
-      const publicidadesData = [];
-      const imagenes = [];
-      const previews = [];
-      const tiempos = [];
-      const refs = [];
-
-      publicidadesSnapshot.forEach((doc) => {
-        const data = doc.data();
-        publicidadesData.push(data);
-
-        // Extract relevant data and update state variables
-        imagenes.push(null); // Placeholder for imagenesSalon
-        previews.push(null); // Placeholder for previewImages
-        tiempos.push({
-          horas: data.horas || 0,
-          minutos: data.minutos || 0,
-          segundos: data.segundos || 0,
-        });
-        refs.push({ ref: doc.ref, index: publicidadesData.length - 1 });
-      });
-
-      // Update state variables
-      setImagenesSalon(imagenes);
-      setPreviewImages(previews);
-      setTiemposSalon(tiempos);
-      setPublicidadRef(refs);
-
-      console.log("Publicidades data:", publicidadesData);
-    } catch (error) {
-      console.error("Error al cargar publicidades:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
@@ -123,38 +73,19 @@ function Publicidad() {
       await Promise.all(
         imagenesSalon.map(async (imagen, index) => {
           if (imagen) {
-            const existingRef = publicidadRef.find(
-              (ref) => ref && ref.index === index
+            const imageRef = storageRef.child(
+              `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
             );
+            await imageRef.put(imagen);
 
-            if (!existingRef) {
-              const imageRef = storageRef.child(
-                `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
-              );
-              await imageRef.put(imagen);
+            const imageUrl = await imageRef.getDownloadURL();
 
-              const imageUrl = await imageRef.getDownloadURL();
+            const { horas, minutos, segundos } = tiemposSalon[index];
 
-              const { horas, minutos, segundos } = tiemposSalon[index];
+            const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
 
-              const hasTimeData = horas > 0 || minutos > 0 || segundos > 0;
-
-              if (hasTimeData) {
-                const publicidadRef = await db.collection("Publicidad").add({
-                  imageUrl,
-                  horas,
-                  minutos,
-                  segundos,
-                  tipo: "salon",
-                  userId: userUid,
-                });
-
-                setPublicidadRef((prevRefs) => [
-                  ...prevRefs,
-                  { ref: publicidadRef, index },
-                ]);
-                hasValidData = true;
-              }
+            if (hasTimeData) {
+              hasValidData = true;
             }
           }
         })
