@@ -199,7 +199,7 @@ function Publicidad() {
       }
 
       if (hasValidData) {
-        setPublicidadesIds(newIds);
+        setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
         console.warn("No valid data to add");
       }
@@ -245,6 +245,10 @@ function Publicidad() {
   };
 
   const isValidData = (index) => {
+    console.log("index:", index);
+    console.log("imagenesSalon[index]:", imagenesSalon[index]);
+    console.log("previewImages[index]:", previewImages[index]);
+    console.log("tiemposSalon[index]:", tiemposSalon[index]);
     const hasImage =
       imagenesSalon[index] !== null && imagenesSalon[index] !== undefined;
     const isNewImageSelected =
