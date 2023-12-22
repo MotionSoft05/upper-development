@@ -249,16 +249,20 @@ function Publicidad() {
     console.log("imagenesSalon[index]:", imagenesSalon[index]);
     console.log("previewImages[index]:", previewImages[index]);
     console.log("tiemposSalon[index]:", tiemposSalon[index]);
-    const hasImage =
-      imagenesSalon[index] !== null && imagenesSalon[index] !== undefined;
+
+    const hasImage = imagenesSalon[index] !== null;
     const isNewImageSelected =
-      imagenesSalon[index] !== null && imagenesSalon[index].name !== undefined;
+      imagenesSalon[index] && imagenesSalon[index].name !== undefined;
     const { horas, minutos, segundos } = tiemposSalon[index];
     const isAdditionalField = index >= publicidadesIds.length;
 
+    // Verifica si hay una nueva imagen seleccionada y al menos uno de los campos de tiempo completado
     if (isAdditionalField) {
-      // Verifica si hay una nueva imagen seleccionada y al menos uno de los campos de tiempo completado
-      return isNewImageSelected && (horas > 0 || minutos > 0 || segundos > 0);
+      return (
+        isNewImageSelected &&
+        (horas > 0 || minutos > 0 || segundos > 0) &&
+        previewImages[index] !== null
+      );
     }
 
     // Para campos anteriores, verifica la existencia de una imagen y espera a que al menos uno de los campos de tiempo esté completado
@@ -266,7 +270,7 @@ function Publicidad() {
     return (
       hasImage &&
       (horas > 0 || minutos > 0 || segundos > 0) &&
-      previewImages[index]
+      previewImages[index] !== null
     );
   };
 
