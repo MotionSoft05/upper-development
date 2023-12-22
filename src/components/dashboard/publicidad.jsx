@@ -46,7 +46,10 @@ function Publicidad() {
       try {
         setIsLoading(true);
 
-        const publicidadesSnapshot = await db.collection("Publicidad").get();
+        const publicidadesSnapshot = await db
+          .collection("Publicidad")
+          .orderBy("fechaDeSubida", "asc") // Ordenar por fechaDeSubida de forma ascendente
+          .get();
         const publicidadesData = await Promise.all(
           publicidadesSnapshot.docs.map(async (doc) => {
             const data = doc.data();
@@ -61,6 +64,10 @@ function Publicidad() {
             };
           })
         );
+
+        // Ordenar las publicidades por fecha (de la más antigua a la más reciente)
+        publicidadesData.sort((a, b) => a.fechaDeCreacion - b.fechaDeCreacion);
+
         const cantidadPublicidades = publicidadesData.length;
         const cantidadNuevasPublicidades = 1;
         const nuevasImagenes = Array.from(
@@ -84,6 +91,7 @@ function Publicidad() {
         );
 
         const nuevasVistasPrevias = nuevasImagenes.map(() => null);
+
         setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
         setImagenesSalon([
           ...publicidadesData.map(() => null),
@@ -135,6 +143,8 @@ function Publicidad() {
     reader.readAsDataURL(file);
   };
 
+  // ...
+
   const handleAgregarPublicidad = async () => {
     try {
       setIsLoading(true);
@@ -142,8 +152,10 @@ function Publicidad() {
       const userUid = user.uid;
       let hasValidData = false;
       let newIds = [];
+
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
+
         if (imagen) {
           const imageRef = storageRef.child(
             `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
@@ -152,7 +164,12 @@ function Publicidad() {
           const imageUrl = await imageRef.getDownloadURL();
           const { horas, minutos, segundos } = tiemposSalon[index];
           hasValidData = true;
+
           if (horas > 0 || minutos > 0 || segundos > 0) {
+            // Agrega la fecha y hora de subida al documento
+            const fechaDeSubida =
+              firebase.firestore.FieldValue.serverTimestamp();
+
             const publicidadRef = await db.collection("Publicidad").add({
               imageUrl,
               horas,
@@ -160,7 +177,9 @@ function Publicidad() {
               segundos,
               tipo: "salon",
               userId: userUid,
+              fechaDeSubida, // Agrega este campo
             });
+
             newIds = [...newIds, publicidadRef.id];
 
             setImagenesSalon((prevImages) => {
@@ -173,10 +192,12 @@ function Publicidad() {
               ...prevTiempos,
               { horas: 0, minutos: 0, segundos: 0 },
             ]);
+
             setPreviewImages((prevPreviews) => [...prevPreviews, null]);
           }
         }
       }
+
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
