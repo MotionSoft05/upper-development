@@ -41,6 +41,84 @@ function Publicidad() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const obtenerPublicidades = async () => {
+      try {
+        setIsLoading(true);
+
+        const publicidadesSnapshot = await db.collection("Publicidad").get();
+        const publicidadesData = await Promise.all(
+          publicidadesSnapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            const imageUrl = await storage
+              .refFromURL(data.imageUrl)
+              .getDownloadURL();
+
+            return {
+              id: doc.id,
+              ...data,
+              imageUrl,
+            };
+          })
+        );
+
+        // Obtén el número de publicidades existentes
+        const cantidadPublicidades = publicidadesData.length;
+
+        // Siempre genera un campo adicional
+        const cantidadNuevasPublicidades = 1;
+
+        const nuevasImagenes = Array.from(
+          { length: cantidadNuevasPublicidades },
+          (_, index) =>
+            storage
+              .ref()
+              .child(
+                `publicidad/salon_${
+                  cantidadPublicidades + index + 1
+                }_${Date.now()}.jpg`
+              )
+        );
+
+        const nuevosTiempos = Array.from(
+          { length: cantidadNuevasPublicidades },
+          () => ({
+            horas: 0,
+            minutos: 0,
+            segundos: 0,
+          })
+        );
+
+        const nuevasVistasPrevias = nuevasImagenes.map(() => null);
+
+        // Actualiza el estado con las publicidades obtenidas y los nuevos campos vacíos
+        setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
+        setImagenesSalon([
+          ...publicidadesData.map(() => null),
+          ...nuevasImagenes,
+        ]);
+        setTiemposSalon([
+          ...publicidadesData.map((publicidad) => ({
+            horas: publicidad.horas || 0,
+            minutos: publicidad.minutos || 0,
+            segundos: publicidad.segundos || 0,
+          })),
+          ...nuevosTiempos,
+        ]);
+        setPreviewImages([
+          ...publicidadesData.map((publicidad) => publicidad.imageUrl),
+          ...nuevasVistasPrevias,
+        ]);
+      } catch (error) {
+        console.error("Error al obtener publicidades:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    obtenerPublicidades();
+  }, []);
+
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
     const newValues = [...type];
@@ -74,6 +152,11 @@ function Publicidad() {
       let hasValidData = false;
       let newIds = [];
 
+      // Almacena las nuevas imágenes y tiempos
+      const newImages = [];
+      const newTimes = [];
+      const newPreviews = [];
+
       await Promise.all(
         imagenesSalon.map(async (imagen, index) => {
           if (imagen) {
@@ -86,7 +169,6 @@ function Publicidad() {
 
             const { horas, minutos, segundos } = tiemposSalon[index];
 
-            // Siempre que haya una imagen, se considera válido
             hasValidData = true;
 
             if (horas > 0 || minutos > 0 || segundos > 0) {
@@ -103,18 +185,22 @@ function Publicidad() {
 
               newIds = [...newIds, publicidadRef.id];
             }
+
+            // Almacena las nuevas imágenes y tiempos
+            newImages.push(null);
+            newTimes.push({ horas: 0, minutos: 0, segundos: 0 });
+            newPreviews.push(null);
           }
         })
       );
 
       if (hasValidData) {
-        setPublicidadesIds(newIds);
+        setPublicidadesIds([...publicidadesIds, ...newIds]);
 
-        setImagenesSalon((prevImages) => [...prevImages, null]);
-        setTiemposSalon((prevTiempos) => [
-          ...prevTiempos,
-          { horas: 0, minutos: 0, segundos: 0 },
-        ]);
+        // Actualiza los estados con las nuevas imágenes y tiempos
+        setImagenesSalon([...imagenesSalon, ...newImages]);
+        setTiemposSalon([...tiemposSalon, ...newTimes]);
+        setPreviewImages([...previewImages, ...newPreviews]);
 
         setSuccessMessage("Publicidad salon agregada exitosamente");
         setTimeout(() => {
@@ -134,7 +220,7 @@ function Publicidad() {
     try {
       await db.collection("Publicidad").doc(publicidadId).delete();
 
-      // Eliminar localmente
+      // Elimina localmente la publicidad eliminada
       const newImages = [...imagenesSalon];
       newImages.splice(index, 1);
 
@@ -156,15 +242,26 @@ function Publicidad() {
     }
   };
 
-  const isValidData = () => {
-    const hasImage = imagenesSalon.some((imagen) => imagen !== null);
+  const isValidData = (index) => {
+    const hasImage =
+      imagenesSalon[index] !== null && imagenesSalon[index] !== undefined;
+    const isNewImageSelected =
+      imagenesSalon[index] !== null && imagenesSalon[index].name !== undefined;
+    const { horas, minutos, segundos } = tiemposSalon[index];
+    const isAdditionalField = index >= publicidadesIds.length;
 
-    const allValidTimeData = imagenesSalon.every((imagen, index) => {
-      const { horas, minutos, segundos } = tiemposSalon[index];
-      return imagen !== null && (horas > 0 || minutos > 0 || segundos > 0);
-    });
+    if (isAdditionalField) {
+      // Verifica si hay una nueva imagen seleccionada y al menos uno de los campos de tiempo completado
+      return isNewImageSelected && (horas > 0 || minutos > 0 || segundos > 0);
+    }
 
-    return hasImage && allValidTimeData;
+    // Para campos anteriores, verifica la existencia de una imagen y espera a que al menos uno de los campos de tiempo esté completado
+    // Además, verifica si el campo imageUrl ya está presente para evitar habilitar el botón si la imagen aún no se ha subido
+    return (
+      hasImage &&
+      (horas > 0 || minutos > 0 || segundos > 0) &&
+      previewImages[index]
+    );
   };
 
   const renderCamposImagenes = () => (
@@ -262,9 +359,9 @@ function Publicidad() {
               <div className="mt-4">
                 <button
                   onClick={handleAgregarPublicidad}
-                  disabled={!isValidData()}
+                  disabled={!isValidData(imagenesSalon.length - 1)}
                   className={`px-4 py-2 text-white ${
-                    isValidData()
+                    isValidData(imagenesSalon.length - 1)
                       ? "bg-blue-500 hover:bg-blue-600"
                       : "bg-gray-400 cursor-not-allowed"
                   } rounded-md focus:outline-none`}
