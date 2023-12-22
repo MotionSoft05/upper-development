@@ -161,8 +161,6 @@ function Publicidad() {
               tipo: "salon",
               userId: userUid,
             });
-
-            console.log("Publicidad agregada:", publicidadRef.id);
             newIds = [...newIds, publicidadRef.id];
 
             setImagenesSalon((prevImages) => {
@@ -223,11 +221,6 @@ function Publicidad() {
   };
 
   const isValidData = (index) => {
-    console.log("index:", index);
-    console.log("imagenesSalon[index]:", imagenesSalon[index]);
-    console.log("previewImages[index]:", previewImages[index]);
-    console.log("tiemposSalon[index]:", tiemposSalon[index]);
-
     const hasImage = imagenesSalon[index] !== null;
     const isNewImageSelected =
       imagenesSalon[index] && imagenesSalon[index].name !== undefined;
