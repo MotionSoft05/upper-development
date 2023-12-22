@@ -61,13 +61,8 @@ function Publicidad() {
             };
           })
         );
-
-        // Obtén el número de publicidades existentes
         const cantidadPublicidades = publicidadesData.length;
-
-        // Siempre genera un campo adicional
         const cantidadNuevasPublicidades = 1;
-
         const nuevasImagenes = Array.from(
           { length: cantidadNuevasPublicidades },
           (_, index) =>
@@ -79,7 +74,6 @@ function Publicidad() {
                 }_${Date.now()}.jpg`
               )
         );
-
         const nuevosTiempos = Array.from(
           { length: cantidadNuevasPublicidades },
           () => ({
@@ -90,8 +84,6 @@ function Publicidad() {
         );
 
         const nuevasVistasPrevias = nuevasImagenes.map(() => null);
-
-        // Actualiza el estado con las publicidades obtenidas y los nuevos campos vacíos
         setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
         setImagenesSalon([
           ...publicidadesData.map(() => null),
@@ -148,25 +140,18 @@ function Publicidad() {
       setIsLoading(true);
       const storageRef = storage.ref();
       const userUid = user.uid;
-
       let hasValidData = false;
       let newIds = [];
-
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
-
         if (imagen) {
           const imageRef = storageRef.child(
             `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
           );
           await imageRef.put(imagen);
-
           const imageUrl = await imageRef.getDownloadURL();
-
           const { horas, minutos, segundos } = tiemposSalon[index];
-
           hasValidData = true;
-
           if (horas > 0 || minutos > 0 || segundos > 0) {
             const publicidadRef = await db.collection("Publicidad").add({
               imageUrl,
@@ -178,10 +163,8 @@ function Publicidad() {
             });
 
             console.log("Publicidad agregada:", publicidadRef.id);
-
             newIds = [...newIds, publicidadRef.id];
 
-            // Limpiar valores después de agregar la publicidad
             setImagenesSalon((prevImages) => {
               const newImages = [...prevImages];
               newImages[index] = null;
@@ -192,19 +175,16 @@ function Publicidad() {
               ...prevTiempos,
               { horas: 0, minutos: 0, segundos: 0 },
             ]);
-
             setPreviewImages((prevPreviews) => [...prevPreviews, null]);
           }
         }
       }
-
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
         console.warn("No valid data to add");
       }
 
-      // Agregar un nuevo campo adicional
       setImagenesSalon((prevImages) => [...prevImages, null]);
       setTiemposSalon((prevTiempos) => [
         ...prevTiempos,
@@ -221,8 +201,6 @@ function Publicidad() {
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
       await db.collection("Publicidad").doc(publicidadId).delete();
-
-      // Eliminar localmente
       const newImages = [...imagenesSalon];
       newImages.splice(index, 1);
 
@@ -255,8 +233,6 @@ function Publicidad() {
       imagenesSalon[index] && imagenesSalon[index].name !== undefined;
     const { horas, minutos, segundos } = tiemposSalon[index];
     const isAdditionalField = index >= publicidadesIds.length;
-
-    // Verifica si hay una nueva imagen seleccionada y al menos uno de los campos de tiempo completado
     if (isAdditionalField) {
       return (
         isNewImageSelected &&
@@ -264,9 +240,6 @@ function Publicidad() {
         previewImages[index] !== null
       );
     }
-
-    // Para campos anteriores, verifica la existencia de una imagen y espera a que al menos uno de los campos de tiempo esté completado
-    // Además, verifica si el campo imageUrl ya está presente para evitar habilitar el botón si la imagen aún no se ha subido
     return (
       hasImage &&
       (horas > 0 || minutos > 0 || segundos > 0) &&
