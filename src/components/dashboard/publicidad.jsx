@@ -152,63 +152,65 @@ function Publicidad() {
       let hasValidData = false;
       let newIds = [];
 
-      // Almacena las nuevas imágenes y tiempos
-      const newImages = [];
-      const newTimes = [];
-      const newPreviews = [];
+      for (let index = 0; index < imagenesSalon.length; index++) {
+        const imagen = imagenesSalon[index];
 
-      await Promise.all(
-        imagenesSalon.map(async (imagen, index) => {
-          if (imagen) {
-            const imageRef = storageRef.child(
-              `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
-            );
-            await imageRef.put(imagen);
+        if (imagen) {
+          const imageRef = storageRef.child(
+            `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
+          );
+          await imageRef.put(imagen);
 
-            const imageUrl = await imageRef.getDownloadURL();
+          const imageUrl = await imageRef.getDownloadURL();
 
-            const { horas, minutos, segundos } = tiemposSalon[index];
+          const { horas, minutos, segundos } = tiemposSalon[index];
 
-            hasValidData = true;
+          hasValidData = true;
 
-            if (horas > 0 || minutos > 0 || segundos > 0) {
-              const publicidadRef = await db.collection("Publicidad").add({
-                imageUrl,
-                horas,
-                minutos,
-                segundos,
-                tipo: "salon",
-                userId: userUid,
-              });
+          if (horas > 0 || minutos > 0 || segundos > 0) {
+            const publicidadRef = await db.collection("Publicidad").add({
+              imageUrl,
+              horas,
+              minutos,
+              segundos,
+              tipo: "salon",
+              userId: userUid,
+            });
 
-              console.log("Publicidad agregada:", publicidadRef.id);
+            console.log("Publicidad agregada:", publicidadRef.id);
 
-              newIds = [...newIds, publicidadRef.id];
-            }
+            newIds = [...newIds, publicidadRef.id];
 
-            // Almacena las nuevas imágenes y tiempos
-            newImages.push(null);
-            newTimes.push({ horas: 0, minutos: 0, segundos: 0 });
-            newPreviews.push(null);
+            // Limpiar valores después de agregar la publicidad
+            setImagenesSalon((prevImages) => {
+              const newImages = [...prevImages];
+              newImages[index] = null;
+              return newImages;
+            });
+
+            setTiemposSalon((prevTiempos) => [
+              ...prevTiempos,
+              { horas: 0, minutos: 0, segundos: 0 },
+            ]);
+
+            setPreviewImages((prevPreviews) => [...prevPreviews, null]);
           }
-        })
-      );
+        }
+      }
 
       if (hasValidData) {
-        setPublicidadesIds([...publicidadesIds, ...newIds]);
-
-        // Actualiza los estados con las nuevas imágenes y tiempos
-        setImagenesSalon([...imagenesSalon, ...newImages]);
-        setTiemposSalon([...tiemposSalon, ...newTimes]);
-        setPreviewImages([...previewImages, ...newPreviews]);
-
-        setSuccessMessage("Publicidad salon agregada exitosamente");
-        setTimeout(() => {
-          setSuccessMessage(null);
-        }, 4000);
+        setPublicidadesIds(newIds);
       } else {
         console.warn("No valid data to add");
       }
+
+      // Agregar un nuevo campo adicional
+      setImagenesSalon((prevImages) => [...prevImages, null]);
+      setTiemposSalon((prevTiempos) => [
+        ...prevTiempos,
+        { horas: 0, minutos: 0, segundos: 0 },
+      ]);
+      setPreviewImages((prevPreviews) => [...prevPreviews, null]);
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
     } finally {
@@ -220,7 +222,7 @@ function Publicidad() {
     try {
       await db.collection("Publicidad").doc(publicidadId).delete();
 
-      // Elimina localmente la publicidad eliminada
+      // Eliminar localmente
       const newImages = [...imagenesSalon];
       newImages.splice(index, 1);
 
@@ -270,12 +272,11 @@ function Publicidad() {
         <h3 className="text-xl font-semibold text-gray-800">
           Salón de Eventos
         </h3>
-        {imagenesSalon.map((imagen, index) => (
+        {imagenesSalon.slice(0, 10).map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
               Salón de Eventos - Imagen {index + 1}
             </h3>
-
             <div className="mt-4">
               <input
                 type="file"
@@ -355,7 +356,7 @@ function Publicidad() {
           )}
           <div className="mb-8">
             {renderCamposImagenes()}
-            {imagenesSalon.length < 10 && (
+            {imagenesSalon.length < 11 && (
               <div className="mt-4">
                 <button
                   onClick={handleAgregarPublicidad}
