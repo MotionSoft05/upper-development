@@ -330,7 +330,10 @@ function Publicidad() {
                 className="hidden"
                 id={`imagenSalon-${index}`}
                 onChange={(event) => handleImagenSelect(event, index)}
-                disabled={editIndex !== null && editIndex !== index}
+                disabled={
+                  (editIndex !== null && editIndex !== index) ||
+                  editIndex === null
+                }
               />
               <label
                 htmlFor={`imagenSalon-${index}`}
@@ -361,7 +364,10 @@ function Publicidad() {
                         handleInputChange(event, index, tiemposSalon)
                       }
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
-                      disabled={editIndex !== null && editIndex !== index}
+                      disabled={
+                        (editIndex !== null && editIndex !== index) ||
+                        editIndex === null
+                      }
                     />
                     <span className="text-gray-600">{unit}</span>
                   </div>
