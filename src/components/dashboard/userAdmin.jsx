@@ -8,7 +8,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Importa las funciones necesarias
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 function UserAdmin() {
   const [cantidadPd, setCantidadPd] = useState(0);
@@ -17,9 +17,8 @@ function UserAdmin() {
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
   let total = cantidadPd + cantidadPs;
+
   useEffect(() => {
-    // Configuración de Firebase
-    // Reemplaza esta configuración con tu propia configuración de Firebase
     const firebaseConfig = {
       apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
       authDomain: "upper-a544e.firebaseapp.com",
@@ -30,7 +29,6 @@ function UserAdmin() {
       measurementId: "G-QTFQ55YY5D",
     };
 
-    // Inicializa Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
     const auth = getAuth(app);
@@ -45,14 +43,12 @@ function UserAdmin() {
             const userData = docSnap.data();
             setUserInfo(userData);
 
-            // Obtener y establecer la cantidad de "pd" y "ps"
             const cantidadPd = userData.pd || 0;
             const cantidadPs = userData.ps || 0;
 
             setCantidadPd(cantidadPd);
             setCantidadPs(cantidadPs);
 
-            // Obtener y establecer el nombre del usuario
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
           } else {
@@ -70,7 +66,6 @@ function UserAdmin() {
             console.log("userData", userData);
             setUserInfo(userData);
 
-            // Obtener eventos del usuario
             const eventsQuery = query(
               collection(db, "eventos"),
               where("userId", "==", user.uid)
@@ -78,21 +73,17 @@ function UserAdmin() {
             const eventsSnapshot = await getDocs(eventsQuery);
             const userEventsData = eventsSnapshot.docs.map((doc) => doc.data());
 
-            // Obtener la fecha actual del dispositivo
             const fechaActual = new Date();
-            // Filtro para eventos en curso
             const eventosEnCurso = userEventsData.filter((evento) => {
               const fechaInicial = new Date(evento.fechaInicial);
               const fechaFinal = new Date(evento.fechaFinal);
               return fechaActual >= fechaInicial && fechaActual <= fechaFinal;
             });
-            // Filtro para eventos finalizados
             const eventosFinalizados = userEventsData.filter((evento) => {
               const fechaFinal = new Date(evento.fechaFinal);
               return fechaFinal < fechaActual;
             });
 
-            // Filtro para eventos futuros
             const eventosFuturos = userEventsData.filter((evento) => {
               const fechaInicial = new Date(evento.fechaInicial);
               const fechaFinal = new Date(evento.fechaFinal);
@@ -159,7 +150,6 @@ function UserAdmin() {
                                     evento.fechaFinal + "T23:59:59"
                                   );
                                   const fechaActual = new Date();
-                                  // Añade la condición de status igual a true
                                   return (
                                     evento.status &&
                                     fechaActual >= fechaInicial &&
@@ -191,7 +181,6 @@ function UserAdmin() {
                                   const fechaActual = new Date();
                                   const finSemana = new Date(fechaActual);
                                   finSemana.setDate(fechaActual.getDate() + 6);
-                                  // Añade la condición de status igual a true y que ocurra en los próximos 7 días
                                   return (
                                     evento.status &&
                                     fechaActual <= fechaFinal &&
@@ -218,7 +207,6 @@ function UserAdmin() {
                                     evento.fechaFinal + "T23:59:59"
                                   );
                                   const fechaActual = new Date();
-                                  // Añade la condición de status igual a false y que la fecha final sea anterior a la fecha actual
                                   return (
                                     !evento.status && fechaFinal < fechaActual
                                   );
