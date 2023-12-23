@@ -27,6 +27,9 @@ function Publicidad() {
   const [imagenesSalon, setImagenesSalon] = useState([null]);
   const [previewImages, setPreviewImages] = useState([]);
   const [publicidadesIds, setPublicidadesIds] = useState([]);
+  const [imagenesSalonOriginales, setImagenesSalonOriginales] = useState([
+    null,
+  ]);
 
   const [tiemposSalon, setTiemposSalon] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
@@ -68,7 +71,23 @@ function Publicidad() {
       const publicidadId = publicidadesIds[index];
 
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
+      let imageUrl = previewImages[index]; // Usar la imagen actual por defecto
+
+      // Si hay una nueva imagen seleccionada, cargarla
+      if (imagenesSalon[index] !== null) {
+        const imageRef = storage
+          .ref()
+          .child(
+            `publicidad/salon_${index}_${Date.now()}_${
+              imagenesSalon[index].name
+            }`
+          );
+        await imageRef.put(imagenesSalon[index]);
+        imageUrl = await imageRef.getDownloadURL();
+      }
+
       await publicidadRef.update({
+        imageUrl,
         horas,
         minutos,
         segundos,
@@ -160,6 +179,7 @@ function Publicidad() {
           ...publicidadesData.map((publicidad) => publicidad.imageUrl),
           ...nuevasVistasPrevias,
         ]);
+        setImagenesSalonOriginales(publicidadesData.map(() => null));
       } catch (error) {
         console.error("Error al obtener publicidades:", error);
       } finally {
