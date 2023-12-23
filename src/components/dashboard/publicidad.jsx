@@ -32,6 +32,57 @@ function Publicidad() {
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [editIndex, setEditIndex] = useState(null);
+  const [editTiemposSalon, setEditTiemposSalon] = useState({
+    horas: 0,
+    minutos: 0,
+    segundos: 0,
+  });
+
+  const handleEditarPublicidad = (index) => {
+    setEditIndex(index);
+  };
+
+  const handleCancelarEdicion = () => {
+    setEditIndex(null);
+  };
+
+  const handleGuardarCambios = async (index) => {
+    try {
+      setIsLoading(true);
+
+      const { horas, minutos, segundos } = tiemposSalon[index];
+      const hasValidData =
+        horas > 0 &&
+        minutos >= 0 &&
+        minutos <= 59 &&
+        segundos >= 0 &&
+        segundos <= 59;
+
+      if (!hasValidData) {
+        console.warn("No valid data to update");
+        return;
+      }
+
+      const userUid = user.uid;
+      const publicidadId = publicidadesIds[index];
+
+      const publicidadRef = db.collection("Publicidad").doc(publicidadId);
+      await publicidadRef.update({
+        horas,
+        minutos,
+        segundos,
+      });
+
+      setEditIndex(null); // Para salir del modo de edición
+
+      console.log("Cambios guardados exitosamente");
+    } catch (error) {
+      console.error("Error al guardar cambios:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
@@ -279,6 +330,7 @@ function Publicidad() {
                 className="hidden"
                 id={`imagenSalon-${index}`}
                 onChange={(event) => handleImagenSelect(event, index)}
+                disabled={editIndex !== null && editIndex !== index}
               />
               <label
                 htmlFor={`imagenSalon-${index}`}
@@ -309,6 +361,7 @@ function Publicidad() {
                         handleInputChange(event, index, tiemposSalon)
                       }
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
+                      disabled={editIndex !== null && editIndex !== index}
                     />
                     <span className="text-gray-600">{unit}</span>
                   </div>
@@ -316,14 +369,42 @@ function Publicidad() {
               </div>
             </div>
             {publicidadesIds[index] && (
-              <button
-                onClick={() =>
-                  handleEliminarPublicidad(publicidadesIds[index], index)
-                }
-                className="text-red-500 ml-4 mt-2 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
-              >
-                Eliminar
-              </button>
+              <div className="flex mt-4">
+                {editIndex === null && (
+                  <>
+                    <button
+                      onClick={() => handleEditarPublicidad(index)}
+                      className="text-yellow-500 p-2 px-4 bg-white border border-yellow-500 rounded-full cursor-pointer hover:bg-yellow-100 hover:text-yellow-700 mr-4"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleEliminarPublicidad(publicidadesIds[index], index)
+                      }
+                      className="text-red-500 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
+                    >
+                      Eliminar
+                    </button>
+                  </>
+                )}
+                {editIndex === index && (
+                  <>
+                    <button
+                      onClick={() => handleCancelarEdicion()}
+                      className="text-gray-500 p-2 px-4 bg-white border border-gray-500 rounded-full cursor-pointer hover:bg-gray-100 hover:text-gray-700 mr-4"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={() => handleGuardarCambios(index)}
+                      className="text-green-500 p-2 px-4 bg-white border border-green-500 rounded-full cursor-pointer hover:bg-green-100 hover:text-green-700"
+                    >
+                      Guardar Cambios
+                    </button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         ))}
