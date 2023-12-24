@@ -305,6 +305,9 @@ function Publicidad() {
 
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
+      const confirmacion = window.confirm(
+        "¿Estás seguro de que quieres eliminar esta publicidad?"
+      );
       setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
       const newImages = [...imagenesSalon];
