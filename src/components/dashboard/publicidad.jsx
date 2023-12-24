@@ -47,10 +47,8 @@ function Publicidad() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      console.log("Usuario autenticado:", user);
       if (user) {
         setUser(user);
-        console.log("User inside AuthStateChanged:", user);
         await obtenerPublicidades(user);
       } else {
         console.warn("El objeto user es nulo.");
@@ -63,7 +61,6 @@ function Publicidad() {
   const obtenerPublicidades = async (currentUser) => {
     try {
       setIsLoading(true);
-      console.log("User inside obtenerPublicidades:", currentUser);
 
       if (currentUser && currentUser.uid) {
         const userUid = currentUser.uid;
@@ -212,7 +209,6 @@ function Publicidad() {
           (snapshot) => {
             const progress =
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-            console.log(`Progreso de carga: ${progress}%`);
           },
           (error) => {
             console.error("Error durante la carga de la imagen:", error);
@@ -228,7 +224,6 @@ function Publicidad() {
 
             setEditIndex(null);
             setIsUploading(false);
-            console.log("Cambios guardados exitosamente");
           }
         );
       } else {
@@ -240,7 +235,6 @@ function Publicidad() {
 
         setEditIndex(null);
         setIsUploading(false);
-        console.log("Cambios guardados exitosamente");
       }
     } catch (error) {
       console.error("Error al guardar cambios:", error);
