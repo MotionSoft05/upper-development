@@ -58,7 +58,11 @@ function Publicidad() {
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
 
-      if (!nuevaImagen) {
+      // Check if a new image is selected
+      const isEditingExistingPublicidad = index < publicidadesIds.length;
+      const hasNewImage = nuevaImagen && nuevaImagen.name !== undefined;
+
+      if (!isEditingExistingPublicidad && !hasNewImage) {
         console.warn("No se ha seleccionado una nueva imagen");
         return;
       }
@@ -81,37 +85,51 @@ function Publicidad() {
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
       let imageUrl = previewImages[index];
 
-      const imageRef = storage
-        .ref()
-        .child(`publicidad/salon_${index}_${Date.now()}_${nuevaImagen.name}`);
+      if (hasNewImage) {
+        // If a new image is selected, upload it
+        const imageRef = storage
+          .ref()
+          .child(`publicidad/salon_${index}_${Date.now()}_${nuevaImagen.name}`);
 
-      const uploadTask = imageRef.put(nuevaImagen);
+        const uploadTask = imageRef.put(nuevaImagen);
 
-      uploadTask.on(
-        "state_changed",
-        (snapshot) => {
-          const progress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-          console.log(`Progreso de carga: ${progress}%`);
-        },
-        (error) => {
-          console.error("Error durante la carga de la imagen:", error);
-        },
-        async () => {
-          imageUrl = await imageRef.getDownloadURL();
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            console.log(`Progreso de carga: ${progress}%`);
+          },
+          (error) => {
+            console.error("Error durante la carga de la imagen:", error);
+          },
+          async () => {
+            imageUrl = await imageRef.getDownloadURL();
+            // Update the document with the new image URL
+            await publicidadRef.update({
+              imageUrl,
+              horas,
+              minutos,
+              segundos,
+            });
 
-          await publicidadRef.update({
-            imageUrl,
-            horas,
-            minutos,
-            segundos,
-          });
+            setEditIndex(null);
+            setIsUploading(false);
+            console.log("Cambios guardados exitosamente");
+          }
+        );
+      } else {
+        // If no new image is selected, update the document without uploading an image
+        await publicidadRef.update({
+          horas,
+          minutos,
+          segundos,
+        });
 
-          setEditIndex(null);
-          setIsUploading(false);
-          console.log("Cambios guardados exitosamente");
-        }
-      );
+        setEditIndex(null);
+        setIsUploading(false);
+        console.log("Cambios guardados exitosamente");
+      }
     } catch (error) {
       console.error("Error al guardar cambios:", error);
       setIsUploading(false);
