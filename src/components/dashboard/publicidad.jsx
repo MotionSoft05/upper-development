@@ -352,7 +352,9 @@ function Publicidad() {
                 onChange={(event) => handleImagenSelect(event, index)}
                 disabled={
                   (editIndex !== null && editIndex !== index) ||
-                  editIndex === null
+                  (editIndex === null && publicidadesIds[index])
+                  // Deshabilitar si editIndex no es nulo y no es igual al índice actual
+                  // o si editIndex es nulo y el elemento ya está cargado en Firebase
                 }
               />
               <label
@@ -386,7 +388,9 @@ function Publicidad() {
                       className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
                       disabled={
                         (editIndex !== null && editIndex !== index) ||
-                        editIndex === null
+                        (editIndex === null && publicidadesIds[index])
+                        // Deshabilitar si editIndex no es nulo y no es igual al índice actual
+                        // o si editIndex es nulo y el elemento ya está cargado en Firebase
                       }
                     />
                     <span className="text-gray-600">{unit}</span>
