@@ -46,7 +46,6 @@ function Publicidad() {
 
   const handleEditarPublicidad = (index) => {
     setEditIndex(index);
-    // Save the original values and image URL
     setOriginalTiemposSalon({ ...tiemposSalon[index] });
     setOriginalImagen(imagenesSalon[index]);
     setOriginalImageUrl(previewImages[index]);
@@ -54,7 +53,6 @@ function Publicidad() {
 
   const handleCancelarEdicion = () => {
     setEditIndex(null);
-    // Restore the original values and image URL
     setTiemposSalon((prevTiempos) => [
       ...prevTiempos.slice(0, editIndex),
       originalTiemposSalon,
@@ -80,7 +78,6 @@ function Publicidad() {
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
 
-      // Check if a new image is selected
       const isEditingExistingPublicidad = index < publicidadesIds.length;
       const hasNewImage = nuevaImagen && nuevaImagen.name !== undefined;
 
@@ -108,7 +105,6 @@ function Publicidad() {
       let imageUrl = previewImages[index];
 
       if (hasNewImage) {
-        // If a new image is selected, upload it
         const imageRef = storage
           .ref()
           .child(`publicidad/salon_${index}_${Date.now()}_${nuevaImagen.name}`);
@@ -127,7 +123,6 @@ function Publicidad() {
           },
           async () => {
             imageUrl = await imageRef.getDownloadURL();
-            // Update the document with the new image URL
             await publicidadRef.update({
               imageUrl,
               horas,
@@ -141,7 +136,6 @@ function Publicidad() {
           }
         );
       } else {
-        // If no new image is selected, update the document without uploading an image
         await publicidadRef.update({
           horas,
           minutos,
