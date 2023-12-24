@@ -53,18 +53,16 @@ function Publicidad() {
   const handleGuardarCambios = async (index) => {
     try {
       setIsLoading(true);
-      setIsUploading(true); // Indicar que la carga está en progreso
+      setIsUploading(true);
 
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
 
-      // Verificar si se ha seleccionado una nueva imagen
       if (!nuevaImagen) {
         console.warn("No se ha seleccionado una nueva imagen");
         return;
       }
 
-      // Verificar si los valores de tiempo son válidos
       const hasValidData =
         horas > 0 &&
         minutos >= 0 &&
@@ -110,13 +108,13 @@ function Publicidad() {
           });
 
           setEditIndex(null);
-          setIsUploading(false); // Indicar que la carga ha finalizado
+          setIsUploading(false);
           console.log("Cambios guardados exitosamente");
         }
       );
     } catch (error) {
       console.error("Error al guardar cambios:", error);
-      setIsUploading(false); // Asegurar que el estado de carga se actualice en caso de error
+      setIsUploading(false);
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +135,7 @@ function Publicidad() {
 
         const publicidadesSnapshot = await db
           .collection("Publicidad")
-          .orderBy("fechaDeSubida", "asc") // Ordenar por fechaDeSubida de forma ascendente
+          .orderBy("fechaDeSubida", "asc")
           .get();
         const publicidadesData = await Promise.all(
           publicidadesSnapshot.docs.map(async (doc) => {
@@ -154,7 +152,6 @@ function Publicidad() {
           })
         );
 
-        // Ordenar las publicidades por fecha (de la más antigua a la más reciente)
         publicidadesData.sort((a, b) => a.fechaDeCreacion - b.fechaDeCreacion);
 
         const cantidadPublicidades = publicidadesData.length;
@@ -233,8 +230,6 @@ function Publicidad() {
     reader.readAsDataURL(file);
   };
 
-  // ...
-
   const handleAgregarPublicidad = async () => {
     try {
       setIsLoading(true);
@@ -257,7 +252,6 @@ function Publicidad() {
           hasValidData = true;
 
           if (horas > 0 || minutos > 0 || segundos > 0) {
-            // Agrega la fecha y hora de subida al documento
             const fechaDeSubida =
               firebase.firestore.FieldValue.serverTimestamp();
 
@@ -268,7 +262,7 @@ function Publicidad() {
               segundos,
               tipo: "salon",
               userId: userUid,
-              fechaDeSubida, // Agrega este campo
+              fechaDeSubida,
             });
 
             newIds = [...newIds, publicidadRef.id];
@@ -332,7 +326,6 @@ function Publicidad() {
     } catch (error) {
       console.error("Error al eliminar publicidad:", error);
     } finally {
-      // Restablecer el estado de carga después de completar la operación
       setIsLoading(false);
     }
   };
@@ -378,8 +371,6 @@ function Publicidad() {
                 disabled={
                   (editIndex !== null && editIndex !== index) ||
                   (editIndex === null && publicidadesIds[index])
-                  // Deshabilitar si editIndex no es nulo y no es igual al índice actual
-                  // o si editIndex es nulo y el elemento ya está cargado en Firebase
                 }
               />
               <label
@@ -415,8 +406,6 @@ function Publicidad() {
                       disabled={
                         (editIndex !== null && editIndex !== index) ||
                         (editIndex === null && publicidadesIds[index])
-                        // Deshabilitar si editIndex no es nulo y no es igual al índice actual
-                        // o si editIndex es nulo y el elemento ya está cargado en Firebase
                       }
                     />
                     <span className="text-gray-600">{unit}</span>
