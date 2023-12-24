@@ -30,7 +30,7 @@ function Publicidad() {
   const [imagenesSalonOriginales, setImagenesSalonOriginales] = useState([
     null,
   ]);
-
+  const [isUploading, setIsUploading] = useState(false);
   const [tiemposSalon, setTiemposSalon] = useState([
     { horas: 0, minutos: 0, segundos: 0 },
   ]);
@@ -53,8 +53,18 @@ function Publicidad() {
   const handleGuardarCambios = async (index) => {
     try {
       setIsLoading(true);
+      setIsUploading(true); // Indicar que la carga está en progreso
 
+      const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
+
+      // Verificar si se ha seleccionado una nueva imagen
+      if (!nuevaImagen) {
+        console.warn("No se ha seleccionado una nueva imagen");
+        return;
+      }
+
+      // Verificar si los valores de tiempo son válidos
       const hasValidData =
         horas > 0 &&
         minutos >= 0 &&
@@ -63,7 +73,7 @@ function Publicidad() {
         segundos <= 59;
 
       if (!hasValidData) {
-        console.warn("No valid data to update");
+        console.warn("No hay datos válidos para actualizar");
         return;
       }
 
@@ -71,33 +81,42 @@ function Publicidad() {
       const publicidadId = publicidadesIds[index];
 
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
-      let imageUrl = previewImages[index]; // Usar la imagen actual por defecto
+      let imageUrl = previewImages[index];
 
-      // Si hay una nueva imagen seleccionada, cargarla
-      if (imagenesSalon[index] !== null) {
-        const imageRef = storage
-          .ref()
-          .child(
-            `publicidad/salon_${index}_${Date.now()}_${
-              imagenesSalon[index].name
-            }`
-          );
-        await imageRef.put(imagenesSalon[index]);
-        imageUrl = await imageRef.getDownloadURL();
-      }
+      const imageRef = storage
+        .ref()
+        .child(`publicidad/salon_${index}_${Date.now()}_${nuevaImagen.name}`);
 
-      await publicidadRef.update({
-        imageUrl,
-        horas,
-        minutos,
-        segundos,
-      });
+      const uploadTask = imageRef.put(nuevaImagen);
 
-      setEditIndex(null); // Para salir del modo de edición
+      uploadTask.on(
+        "state_changed",
+        (snapshot) => {
+          const progress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          console.log(`Progreso de carga: ${progress}%`);
+        },
+        (error) => {
+          console.error("Error durante la carga de la imagen:", error);
+        },
+        async () => {
+          imageUrl = await imageRef.getDownloadURL();
 
-      console.log("Cambios guardados exitosamente");
+          await publicidadRef.update({
+            imageUrl,
+            horas,
+            minutos,
+            segundos,
+          });
+
+          setEditIndex(null);
+          setIsUploading(false); // Indicar que la carga ha finalizado
+          console.log("Cambios guardados exitosamente");
+        }
+      );
     } catch (error) {
       console.error("Error al guardar cambios:", error);
+      setIsUploading(false); // Asegurar que el estado de carga se actualice en caso de error
     } finally {
       setIsLoading(false);
     }
@@ -219,6 +238,7 @@ function Publicidad() {
   const handleAgregarPublicidad = async () => {
     try {
       setIsLoading(true);
+      setIsUploading(true);
       const storageRef = storage.ref();
       const userUid = user.uid;
       let hasValidData = false;
@@ -284,12 +304,14 @@ function Publicidad() {
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
     } finally {
+      setIsUploading(false);
       setIsLoading(false);
     }
   };
 
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
+      setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
       const newImages = [...imagenesSalon];
       newImages.splice(index, 1);
@@ -309,6 +331,9 @@ function Publicidad() {
       setPublicidadesIds(newIds);
     } catch (error) {
       console.error("Error al eliminar publicidad:", error);
+    } finally {
+      // Restablecer el estado de carga después de completar la operación
+      setIsLoading(false);
     }
   };
 
@@ -368,7 +393,8 @@ function Publicidad() {
               <img
                 src={previewImages[index]}
                 alt={`Vista previa de la imagen ${index + 1}`}
-                className="mt-4 max-w-xs h-auto"
+                className="mt-4"
+                style={{ maxWidth: "200px", height: "auto" }}
               />
             )}
             <div className="mt-4">
@@ -460,8 +486,12 @@ function Publicidad() {
               {successMessage}
             </div>
           )}
-          <div className="mb-8">
+          <div
+            className="mb-8"
+            style={{ cursor: isUploading ? "wait" : "auto" }}
+          >
             {renderCamposImagenes()}
+            {isUploading}
             {imagenesSalon.length < 11 && (
               <div className="mt-4">
                 <button
