@@ -447,7 +447,7 @@ function PublicidadSalon() {
                         (editIndex === null && publicidadesIds[index])
                       }
                     />
-                    <span className="text-gray-600">{unit}</span>
+                    <span className="text-gray-600 ml-1">{unit}</span>
                   </div>
                 ))}
               </div>
