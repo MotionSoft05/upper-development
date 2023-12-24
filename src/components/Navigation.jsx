@@ -179,12 +179,11 @@ function Navigation() {
 
                       {user.emailVerified && (
                         <>
-                          <button
-                            onClick={navigateToDashboard}
-                            className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2"
-                          >
-                            Dashboard
-                          </button>
+                          <Link href="/dashboard.html">
+                            <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
+                              Dashboard
+                            </button>
+                          </Link>
                           <button
                             onClick={async () => {
                               await handleLogout();
@@ -317,12 +316,14 @@ function Navigation() {
                       {user && (
                         <>
                           <Menu.Item>
-                            <button
-                              onClick={navigateToDashboard}
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              Dashboard
-                            </button>
+                            <Link href="/dashboard.html">
+                              <button
+                                onClick={navigateToDashboard}
+                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                              >
+                                Dashboard
+                              </button>
+                            </Link>
                           </Menu.Item>
                           <Menu.Item>
                             <button

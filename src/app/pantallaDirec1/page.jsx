@@ -13,7 +13,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
-
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -32,7 +31,7 @@ function PantallaDirec1() {
   const [isLoading, setIsLoading] = useState(true);
   const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "1";
-  const [isPortrait, setIsPortrait] = useState(true); // Estado para controlar la orientación
+  const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -52,25 +51,30 @@ function PantallaDirec1() {
 
   // Slider
   const chunkArray = (arr, chunkSize) => {
-    const maxContainers = isPortrait ? 10 : 5; // Determina el máximo de contenedores según la orientación
+    const totalEvents = arr.length;
+    const maxContainers = isPortrait
+      ? Math.ceil(totalEvents / chunkSize)
+      : Math.ceil(totalEvents / (chunkSize * 2));
 
     const result = [];
-    for (let i = 0; i < arr.length; i += chunkSize) {
-      result.push(arr.slice(i, i + Math.min(chunkSize, maxContainers))); // Limita el número de contenedores
+    for (let i = 0; i < totalEvents; i += chunkSize) {
+      result.push(arr.slice(i, i + Math.min(chunkSize, totalEvents - i)));
+    }
+    while (result.length < maxContainers) {
+      result.push([]);
     }
     return result;
   };
-  const eventosPorSlide = chunkArray(eventosEnCurso, 5);
 
-  // Asegurar que existan suficientes contenedores (bloques)
-  while (eventosPorSlide.length < 5) {
-    eventosPorSlide.push([]); // Agregar contenedores vacíos hasta llegar a 5
-  }
-  console.log("eventosPorSlide", eventosPorSlide);
+  // Calcular eventos por slide
+  const eventosPorSlide = chunkArray(eventosEnCurso, isPortrait ? 5 : 8);
+
+  // Uso de eventosPorSlide en useKeenSlider
   const [sliderRef] = useKeenSlider({
     slides: eventosPorSlide.length,
     loop: true,
   });
+
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -306,18 +310,26 @@ function PantallaDirec1() {
   // console.log("templateData", templateData);
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  console.log("screenWidth", screenWidth);
+  console.log("screenHeight", screenHeight);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
-        className="bg-white text-black h-full flex flex-col justify-center mx-2 my-2"
+        className="bg-white text-black h-screen flex flex-col justify-center "
         style={{
-          transform: isPortrait ? "rotate(0deg)" : "rotate(90deg)",
+          transform: isPortrait ? "rotate(0deg)" : "rotate(90deg) ",
           maxWidth: isPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
           height: isPortrait ? "" : "100vh", // Ajustar la altura según la orientación
           width: isPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
         }}
       >
-        <div id="Content" className="flex-grow flex flex-col justify-center ">
+        <div
+          id="Content"
+          className="flex-grow flex flex-col justify-center mx-2 my-2 "
+        >
           {/* Header */}
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
@@ -347,9 +359,12 @@ function PantallaDirec1() {
 
             <div
               className="flex flex-col items-center"
-              style={{ color: templateActual.fontColor }}
+              style={{
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
             >
-              <p className="text-2xl text-center font-semibold mb-2">
+              <p className="text-2xl text-center  mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
               <h1 className="text-4xl font-bold">Eventos del día</h1>
@@ -357,7 +372,10 @@ function PantallaDirec1() {
 
             <div
               className="flex flex-col"
-              style={{ color: templateActual.fontColor }}
+              style={{
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
             >
               {isLoading ? (
                 <p>Cargando datos del clima...</p>
@@ -378,7 +396,7 @@ function PantallaDirec1() {
             style={{
               backgroundColor: templateActual.templateColor,
               color: templateActual.fontColor,
-              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
+              fontFamily: templateActual.fontStyle,
             }}
           >
             {/* Título */}
@@ -396,52 +414,53 @@ function PantallaDirec1() {
                   <div className="space-y-5 pl-5 flex-grow">
                     {/* Slots predeterminados */}
                     <div ref={sliderRef} className="keen-slider">
-                      {[...Array(isPortrait ? 10 : 5)].map((_, index) => {
-                        const eventos = eventosPorSlide[index] || []; // Obtener eventos si existen, de lo contrario, un array vacío
-                        return (
-                          <div key={index} className="keen-slider__slide my-2">
-                            {eventos.length > 0 ? (
-                              eventos.map((event) => (
-                                <div key={event.id}>
-                                  {/* Detalles del evento */}
-                                  <div className="flex items-center space-x-4 space-y-5 border-b border-black">
-                                    {/* Imagen a la izquierda */}
-                                    <img
-                                      src={event.images[0]}
-                                      alt={event.nombreEvento}
-                                      style={{
-                                        width: "130px",
-                                        height: "110px",
-                                        margin: "0",
-                                      }}
-                                    />
-                                    {/* Detalles del evento */}
-                                    <div className="grid grid-cols-2">
-                                      {/* Aplicando el color seleccionado */}
-                                      <div className="min-w-5">
-                                        <h3 className="font-bold mb-4">
-                                          {event.nombreEvento}
-                                        </h3>
-                                        <p>{event.tipoEvento}</p>
-                                        <p>{event.lugar}</p>
-                                      </div>
+                      {eventosPorSlide.map((slideEventos, index) => (
+                        <div key={index} className="keen-slider__slide my-2">
+                          {Array.from({ length: isPortrait ? 5 : 8 }).map(
+                            (_, innerIndex) => {
+                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                                      {/* Agrega más detalles según sea necesario */}
-                                      <div className="text-right ">
-                                        <p>{event.horaInicialSalon} HRS</p>
+                              return (
+                                <div
+                                  key={innerIndex}
+                                  className="flex items-center space-x-4 space-y-5 border-b border-black"
+                                  style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
+                                >
+                                  {evento ? (
+                                    // Si hay evento, mostrar los detalles
+                                    <>
+                                      <img
+                                        src={evento.images[0]}
+                                        alt={evento.nombreEvento}
+                                        style={{
+                                          width: "130px",
+                                          height: "110px",
+                                          margin: "0",
+                                        }}
+                                      />
+                                      <div className="grid grid-cols-2">
+                                        <div className="min-w-5">
+                                          <h3 className="font-bold mb-4">
+                                            {evento.nombreEvento}
+                                          </h3>
+                                          <p>{evento.tipoEvento}</p>
+                                          <p>{evento.lugar}</p>
+                                        </div>
+                                        <div className="text-right">
+                                          <p>{evento.horaInicialSalon} HRS</p>
+                                        </div>
                                       </div>
-                                    </div>
-                                  </div>
+                                    </>
+                                  ) : (
+                                    // Si no hay evento, mostrar el mensaje de casillero vacío
+                                    <p></p>
+                                  )}
                                 </div>
-                              ))
-                            ) : (
-                              <div className="flex items-center justify-center w-full h-full bg-gray-200">
-                                <p>No hay eventos</p>
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })}
+                              );
+                            }
+                          )}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -454,7 +473,7 @@ function PantallaDirec1() {
             style={{
               backgroundColor: templateActual.templateColor,
               color: templateActual.fontColor,
-              fontStyle: templateActual.fontStyle, //! NO FUNCIONA
+              fontFamily: templateActual.fontStyle,
             }}
           >
             {/* Título */}
@@ -464,6 +483,9 @@ function PantallaDirec1() {
           <div className="flex justify-between items-center">
             <p
               className=""
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
               // style={{
               //   color: fontColor,
               //   fontFamily: selectedFontStyle

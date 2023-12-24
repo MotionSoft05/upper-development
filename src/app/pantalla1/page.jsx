@@ -27,10 +27,11 @@ function Pantalla1() {
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
+  const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
+  const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
 
   const numeroPantallaActual = "1";
 
-  const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const obtenerFecha = () => {
     const diasSemana = [
       "DOMINGO",
@@ -70,6 +71,28 @@ function Pantalla1() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
 
+  useEffect(() => {
+    if (user && firestore) {
+      const publicidadesRef = collection(firestore, "Publicidad"); // Reemplaza "Publicidad" con el nombre de tu colección
+      const publicidadesQuery = query(
+        publicidadesRef,
+        where("userId", "==", user.uid)
+      );
+
+      getDocs(publicidadesQuery)
+        .then((querySnapshot) => {
+          const publicidades = [];
+          querySnapshot.forEach((doc) => {
+            const publicidad = { id: doc.id, ...doc.data() };
+            publicidades.push(publicidad);
+          });
+          setPublicidadesUsuario(publicidades);
+        })
+        .catch((error) => {
+          console.error("Error al obtener las publicidades:", error);
+        });
+    }
+  }, [user, firestore]);
   useEffect(() => {
     const interval = setInterval(() => {
       obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
@@ -307,8 +330,26 @@ function Pantalla1() {
     ]
   );
 
+  console.log("publicidadesUsuario", publicidadesUsuario);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
-    return <p>No hay eventos disponibles en este momento.</p>;
+    return (
+      <>
+        <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+          <div className="slider-container">
+            <div ref={sliderRef} className="keen-slider" style={{}}>
+              {publicidadesUsuario.map((publicidad, index) => (
+                <div key={index} className="keen-slider__slide">
+                  <img
+                    src={publicidad.imageUrl}
+                    alt={`Publicidad ${index + 1}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      </>
+    );
   }
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
@@ -350,6 +391,7 @@ function Pantalla1() {
             )}
             <h1
               className={`font-bold uppercase text-5xl md:text-7xl text-color mr-16`}
+              style={{ fontFamily: personalizacionTemplate.fontStyle }}
             >
               {dispositivoCoincidenteLAL}
             </h1>
@@ -360,7 +402,7 @@ function Pantalla1() {
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle, //! NO FUNCIONA
+              fontFamily: personalizacionTemplate.fontStyle,
             }}
           >
             <h2>{nombreEvento}</h2>
@@ -408,7 +450,12 @@ function Pantalla1() {
                     </div>
                   </>
                 ) : (
-                  <p style={{ color: personalizacionTemplate.fontColor }}>
+                  <p
+                    style={{
+                      color: personalizacionTemplate.fontColor,
+                      fontFamily: personalizacionTemplate.fontStyle,
+                    }}
+                  >
                     No hay imágenes disponibles
                   </p>
                 )}
@@ -417,8 +464,14 @@ function Pantalla1() {
               <div className="col-span-2 space-y-8  my-4">
                 <div>
                   <p
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
+                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                  >
+                    sesión:
+                  </p>
+                  <p
+                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
                   >
                     {horaInicialReal}
                     <span className="text-2x1"> hrs.</span>
@@ -427,15 +480,15 @@ function Pantalla1() {
                 <div className="">
                   {/* Tipo de evento y descripción */}
                   <h1
-                    className={`text-3xl md:text-4xl font-bold`}
-                    style={{ color: personalizacionTemplate.fontColor }}
+                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0 mt-6">
                     <p
-                      className={`text-3xl md:text-4xl`}
-                      style={{ color: personalizacionTemplate.fontColor }}
+                      className={`text-3xl text-color md:text-4xl`}
+                      style={{ fontFamily: personalizacionTemplate.fontStyle }}
                     >
                       {description}
                     </p>
@@ -451,12 +504,15 @@ function Pantalla1() {
             style={{
               backgroundColor: personalizacionTemplate.templateColor,
               color: personalizacionTemplate.fontColor,
-              fontStyle: personalizacionTemplate.fontStyle,
+              fontFamily: personalizacionTemplate.fontStyle,
             }}
           >
             <p
               className="font-bold uppercase"
-              style={{ color: personalizacionTemplate.fontColor }}
+              style={{
+                color: personalizacionTemplate.fontColor,
+                fontFamily: personalizacionTemplate.fontStyle,
+              }}
             >
               {obtenerFecha()}
             </p>
@@ -464,7 +520,10 @@ function Pantalla1() {
               <img src="/img/clock.png" className="p-1 h-8" />
               <p
                 className=" uppercase"
-                style={{ color: personalizacionTemplate.fontColor }}
+                style={{
+                  color: personalizacionTemplate.fontColor,
+                  fontFamily: personalizacionTemplate.fontStyle,
+                }}
               >
                 {currentHour}
               </p>{" "}

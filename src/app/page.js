@@ -121,7 +121,7 @@ export default function Home() {
 
           <div className="">
             <div className="mb-8">
-              <h1 className="md:text-6xl font-normal">
+              <h1 className="md:text-4xl font-normal">
                 UPPER DS es el sistema de Señalización Digital que ayudara a
                 generar impacto visual en tu negocio
               </h1>
