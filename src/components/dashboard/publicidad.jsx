@@ -36,18 +36,40 @@ function Publicidad() {
   ]);
   const [successMessage, setSuccessMessage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
-  const [editTiemposSalon, setEditTiemposSalon] = useState({
+  const [originalTiemposSalon, setOriginalTiemposSalon] = useState({
     horas: 0,
     minutos: 0,
     segundos: 0,
   });
+  const [originalImagen, setOriginalImagen] = useState(null);
+  const [originalImageUrl, setOriginalImageUrl] = useState(null);
 
   const handleEditarPublicidad = (index) => {
     setEditIndex(index);
+    // Save the original values and image URL
+    setOriginalTiemposSalon({ ...tiemposSalon[index] });
+    setOriginalImagen(imagenesSalon[index]);
+    setOriginalImageUrl(previewImages[index]);
   };
 
   const handleCancelarEdicion = () => {
     setEditIndex(null);
+    // Restore the original values and image URL
+    setTiemposSalon((prevTiempos) => [
+      ...prevTiempos.slice(0, editIndex),
+      originalTiemposSalon,
+      ...prevTiempos.slice(editIndex + 1),
+    ]);
+    setImagenesSalon((prevImages) => [
+      ...prevImages.slice(0, editIndex),
+      originalImagen,
+      ...prevImages.slice(editIndex + 1),
+    ]);
+    setPreviewImages((prevPreviews) => [
+      ...prevPreviews.slice(0, editIndex),
+      originalImageUrl,
+      ...prevPreviews.slice(editIndex + 1),
+    ]);
   };
 
   const handleGuardarCambios = async (index) => {
