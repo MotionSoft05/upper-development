@@ -48,12 +48,9 @@ function Publicidad() {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       console.log("Usuario autenticado:", user);
-
       if (user) {
         setUser(user);
-        // Registra la información del usuario después de establecer el estado del usuario
         console.log("User inside AuthStateChanged:", user);
-
         await obtenerPublicidades(user);
       } else {
         console.warn("El objeto user es nulo.");
