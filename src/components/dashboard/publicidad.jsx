@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
+import "firebase/compat/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
@@ -43,6 +44,104 @@ function Publicidad() {
   });
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
+      console.log("Usuario autenticado:", user);
+
+      if (user) {
+        setUser(user);
+        // Registra la información del usuario después de establecer el estado del usuario
+        console.log("User inside AuthStateChanged:", user);
+
+        await obtenerPublicidades(user);
+      } else {
+        console.warn("El objeto user es nulo.");
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const obtenerPublicidades = async (currentUser) => {
+    try {
+      setIsLoading(true);
+      console.log("User inside obtenerPublicidades:", currentUser);
+
+      if (currentUser && currentUser.uid) {
+        const userUid = currentUser.uid;
+        const publicidadesSnapshot = await db
+          .collection("Publicidad")
+          .where("userId", "==", userUid)
+          .get();
+        const publicidadesData = await Promise.all(
+          publicidadesSnapshot.docs.map(async (doc) => {
+            const data = doc.data();
+            const imageUrl = await storage
+              .refFromURL(data.imageUrl)
+              .getDownloadURL();
+
+            return {
+              id: doc.id,
+              ...data,
+              imageUrl,
+            };
+          })
+        );
+
+        publicidadesData.sort((a, b) => a.fechaDeSubida - b.fechaDeSubida);
+
+        const cantidadPublicidades = publicidadesData.length;
+        const cantidadNuevasPublicidades = 1;
+        const nuevasImagenes = Array.from(
+          { length: cantidadNuevasPublicidades },
+          (_, index) =>
+            storage
+              .ref()
+              .child(
+                `publicidad/salon_${
+                  cantidadPublicidades + index + 1
+                }_${Date.now()}.jpg`
+              )
+        );
+        const nuevosTiempos = Array.from(
+          { length: cantidadNuevasPublicidades },
+          () => ({
+            horas: 0,
+            minutos: 0,
+            segundos: 0,
+          })
+        );
+
+        const nuevasVistasPrevias = nuevasImagenes.map(() => null);
+
+        setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
+        setImagenesSalon([
+          ...publicidadesData.map(() => null),
+          ...nuevasImagenes,
+        ]);
+        setTiemposSalon([
+          ...publicidadesData.map((publicidad) => ({
+            horas: publicidad.horas || 0,
+            minutos: publicidad.minutos || 0,
+            segundos: publicidad.segundos || 0,
+          })),
+          ...nuevosTiempos,
+        ]);
+        setPreviewImages([
+          ...publicidadesData.map((publicidad) => publicidad.imageUrl),
+          ...nuevasVistasPrevias,
+        ]);
+        setImagenesSalonOriginales(publicidadesData.map(() => null));
+      } else {
+        console.warn("El objeto user es nulo o no tiene la propiedad uid.");
+      }
+    } catch (error) {
+      console.error("Error al obtener publicidades:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleEditarPublicidad = (index) => {
     setEditIndex(index);
@@ -153,92 +252,6 @@ function Publicidad() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
-      setUser(user);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    const obtenerPublicidades = async () => {
-      try {
-        setIsLoading(true);
-
-        const publicidadesSnapshot = await db
-          .collection("Publicidad")
-          .orderBy("fechaDeSubida", "asc")
-          .get();
-        const publicidadesData = await Promise.all(
-          publicidadesSnapshot.docs.map(async (doc) => {
-            const data = doc.data();
-            const imageUrl = await storage
-              .refFromURL(data.imageUrl)
-              .getDownloadURL();
-
-            return {
-              id: doc.id,
-              ...data,
-              imageUrl,
-            };
-          })
-        );
-
-        publicidadesData.sort((a, b) => a.fechaDeCreacion - b.fechaDeCreacion);
-
-        const cantidadPublicidades = publicidadesData.length;
-        const cantidadNuevasPublicidades = 1;
-        const nuevasImagenes = Array.from(
-          { length: cantidadNuevasPublicidades },
-          (_, index) =>
-            storage
-              .ref()
-              .child(
-                `publicidad/salon_${
-                  cantidadPublicidades + index + 1
-                }_${Date.now()}.jpg`
-              )
-        );
-        const nuevosTiempos = Array.from(
-          { length: cantidadNuevasPublicidades },
-          () => ({
-            horas: 0,
-            minutos: 0,
-            segundos: 0,
-          })
-        );
-
-        const nuevasVistasPrevias = nuevasImagenes.map(() => null);
-
-        setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
-        setImagenesSalon([
-          ...publicidadesData.map(() => null),
-          ...nuevasImagenes,
-        ]);
-        setTiemposSalon([
-          ...publicidadesData.map((publicidad) => ({
-            horas: publicidad.horas || 0,
-            minutos: publicidad.minutos || 0,
-            segundos: publicidad.segundos || 0,
-          })),
-          ...nuevosTiempos,
-        ]);
-        setPreviewImages([
-          ...publicidadesData.map((publicidad) => publicidad.imageUrl),
-          ...nuevasVistasPrevias,
-        ]);
-        setImagenesSalonOriginales(publicidadesData.map(() => null));
-      } catch (error) {
-        console.error("Error al obtener publicidades:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    obtenerPublicidades();
-  }, []);
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
