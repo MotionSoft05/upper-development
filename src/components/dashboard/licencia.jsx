@@ -29,9 +29,12 @@ const db = getFirestore(app);
 function Licencia() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
+<<<<<<< HEAD
   const [userCompanies, setUserCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
+=======
+>>>>>>> parent of 1827ac0c (Update licencia.jsx)
 
   useEffect(() => {
     const fetchUserData = async (userId) => {
@@ -62,6 +65,7 @@ function Licencia() {
             return userData.empresa;
           });
 
+<<<<<<< HEAD
           setUserCompanies(allUserCompanies);
 
           // Check if a company is selected
@@ -77,14 +81,23 @@ function Licencia() {
                 setSelectedUser(selectedCompanyUser.data());
               }
             }
+=======
+            if (datosFiscalesDocSnap.exists()) {
+              DatosFiscales(datosFiscalesDocSnap.data());
+            }
+          } else {
+            const userData = {
+              nombre: "Nombre predeterminado",
+            };
+            await setDoc(userDocRef, userData);
+            setCurrentUser(userData);
+>>>>>>> parent of 1827ac0c (Update licencia.jsx)
           }
         } catch (error) {
           console.error("Error al obtener datos del usuario:", error);
         }
       } else {
         setCurrentUser(null);
-        setUserCompanies([]);
-        console.log("No se encontraron empresas para el usuario.");
       }
     });
 
@@ -93,6 +106,7 @@ function Licencia() {
 
   return (
     <section className="px-5 md:px-32">
+<<<<<<< HEAD
       <>
         <label
           htmlFor="companySelect"
@@ -115,6 +129,8 @@ function Licencia() {
         </select>
       </>
 
+=======
+>>>>>>> parent of 1827ac0c (Update licencia.jsx)
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
           Mis datos
@@ -155,7 +171,7 @@ function Licencia() {
               <DatosNegocio currentUser={currentUser} />
             )}
             {selectedFilter === "datosFiscales" && (
-              <DatosFiscalesForm currentUser={currentUser} />
+              <DatosFiscales currentUser={currentUser} />
             )}
           </div>
         </main>
@@ -164,9 +180,9 @@ function Licencia() {
   );
 }
 
-function DatosFiscalesForm({ currentUser, datosFiscales: propDatosFiscales }) {
+function DatosFiscales({ currentUser }) {
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
-  let [datosFiscales, setDatosFiscales] = useState({
+  const [datosFiscales, setDatosFiscales] = useState({
     rfc: "",
     razonSocial: "",
     codigoPostal: "",
@@ -186,8 +202,12 @@ function DatosFiscalesForm({ currentUser, datosFiscales: propDatosFiscales }) {
           const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
           if (datosFiscalesDocSnap.exists()) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
-            console.log("Datos Fiscales recibidos:", datosFiscalesData);
             setDatosFiscales(datosFiscalesData);
+            console.log("Datos Fiscales recibidos:", datosFiscalesData);
+<<<<<<< HEAD
+            setDatosFiscales(datosFiscalesData);
+=======
+>>>>>>> parent of 1827ac0c (Update licencia.jsx)
           } else {
             console.log("No se encontraron datos fiscales para el usuario.");
           }
