@@ -22,6 +22,8 @@ const db = getFirestore(app);
 function Licencia() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
+  const [userCompanies, setUserCompanies] = useState([]);
+  const [selectedCompany, setSelectedCompany] = useState("");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -38,7 +40,21 @@ function Licencia() {
             const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
 
             if (datosFiscalesDocSnap.exists()) {
-              DatosFiscales(datosFiscalesDocSnap.data());
+              const datosFiscalesData = datosFiscalesDocSnap.data();
+              console.log("Datos Fiscales recibidos:", datosFiscalesData);
+              <DatosFiscalesForm datosFiscales={datosFiscalesData} />;
+            }
+
+            const userCompaniesRef = doc(db, "usuarios", user.uid);
+            const userCompaniesSnap = await getDoc(userCompaniesRef);
+
+            if (userCompaniesSnap.exists()) {
+              const userCompaniesData = userCompaniesSnap.data();
+              const empresas = userCompaniesData.empresas || [];
+
+              setUserCompanies(empresas);
+
+              console.log("Empresas recibidas:", empresas);
             }
           } else {
             const userData = {
@@ -52,6 +68,8 @@ function Licencia() {
         }
       } else {
         setCurrentUser(null);
+        setUserCompanies([]);
+        console.log("No se encontraron empresas para el usuario.");
       }
     });
 
@@ -60,6 +78,29 @@ function Licencia() {
 
   return (
     <section className="px-5 md:px-32">
+      {currentUser?.email === "uppermex10@gmail.com" && (
+        <>
+          <label
+            htmlFor="companySelect"
+            className="block mb-2 text-sm font-medium text-gray-900"
+          >
+            Selecciona una empresa
+          </label>
+          <select
+            id="companySelect"
+            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+            onChange={(e) => setSelectedCompany(e.target.value)}
+            value={selectedCompany}
+          >
+            <option value="">Selecciona una empresa</option>
+            {userCompanies.map((company) => (
+              <option key={company} value={company}>
+                {company}
+              </option>
+            ))}
+          </select>
+        </>
+      )}
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
           Mis datos
@@ -100,7 +141,7 @@ function Licencia() {
               <DatosNegocio currentUser={currentUser} />
             )}
             {selectedFilter === "datosFiscales" && (
-              <DatosFiscales currentUser={currentUser} />
+              <DatosFiscalesForm currentUser={currentUser} />
             )}
           </div>
         </main>
@@ -109,9 +150,9 @@ function Licencia() {
   );
 }
 
-function DatosFiscales({ currentUser }) {
+function DatosFiscalesForm({ currentUser, datosFiscales: propDatosFiscales }) {
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
-  const [datosFiscales, setDatosFiscales] = useState({
+  let [datosFiscales, setDatosFiscales] = useState({
     rfc: "",
     razonSocial: "",
     codigoPostal: "",
@@ -132,8 +173,8 @@ function DatosFiscales({ currentUser }) {
 
           if (datosFiscalesDocSnap.exists()) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
-            setDatosFiscales(datosFiscalesData);
             console.log("Datos Fiscales recibidos:", datosFiscalesData);
+            <DatosFiscalesForm datosFiscales={datosFiscalesData} />;
           } else {
             console.log("No se encontraron datos fiscales para el usuario.");
           }
