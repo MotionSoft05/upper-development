@@ -31,51 +31,52 @@ function Licencia() {
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
   const [userCompanies, setUserCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState("");
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
+    const fetchUserData = async (userId) => {
+      try {
+        const userDocRef = doc(db, "usuarios", userId);
+        const userDocSnap = await getDoc(userDocRef);
+
+        if (userDocSnap.exists()) {
+          setCurrentUser(userDocSnap.data());
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del usuario:", error);
+      }
+    };
+
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const userDocRef = doc(db, "usuarios", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
+          const userId = user.uid;
+          await fetchUserData(userId);
 
-          if (userDocSnap.exists()) {
-            setCurrentUser(userDocSnap.data());
+          // Obtener empresas de todos los usuarios
+          const usersCollectionRef = collection(db, "usuarios");
+          const usersSnapshot = await getDocs(usersCollectionRef);
 
-            // Obtener datos fiscales si existen
-            const datosFiscalesDocRef = doc(db, "DatosFiscales", user.uid);
-            const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+          const allUserCompanies = usersSnapshot.docs.map((userDoc) => {
+            const userData = userDoc.data();
+            return userData.empresa;
+          });
 
-            if (datosFiscalesDocSnap.exists()) {
-              const datosFiscalesData = datosFiscalesDocSnap.data();
-              console.log("Datos Fiscales recibidos:", datosFiscalesData);
-              // Aquí podrías hacer algo con los datos fiscales si es necesario
-            }
+          setUserCompanies(allUserCompanies);
 
-            // Obtener empresas de todos los usuarios
-            const usersCollectionRef = collection(db, "usuarios");
-            const usersSnapshot = await getDocs(usersCollectionRef);
+          // Check if a company is selected
+          if (selectedCompany) {
+            const selectedCompanyUser = usersSnapshot.docs.find(
+              (userDoc) => userDoc.data().empresa === selectedCompany
+            );
 
-            const allUserCompanies = [];
-
-            usersSnapshot.forEach((userDoc) => {
-              const userData = userDoc.data();
-              const empresa = userData.empresa;
-
-              if (empresa) {
-                allUserCompanies.push(empresa);
+            if (selectedCompanyUser) {
+              const selectedCompanyUserId = selectedCompanyUser.id;
+              if (currentUser?.email === "uppermex10@gmail.com") {
+                await fetchUserData(selectedCompanyUserId);
+                setSelectedUser(selectedCompanyUser.data());
               }
-            });
-
-            setUserCompanies(allUserCompanies);
-
-            console.log("Empresas de todos los usuarios:", allUserCompanies);
-          } else {
-            const userData = {
-              nombre: "Nombre predeterminado",
-            };
-            await setDoc(userDocRef, userData);
-            setCurrentUser(userData);
+            }
           }
         } catch (error) {
           console.error("Error al obtener datos del usuario:", error);
@@ -88,33 +89,32 @@ function Licencia() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [selectedCompany]);
 
   return (
     <section className="px-5 md:px-32">
-      {currentUser?.email === "uppermex10@gmail.com" && (
-        <>
-          <label
-            htmlFor="companySelect"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Selecciona una empresa
-          </label>
-          <select
-            id="companySelect"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            onChange={(e) => setSelectedCompany(e.target.value)}
-            value={selectedCompany}
-          >
-            <option value="">Selecciona una empresa</option>
-            {userCompanies.map((company, index) => (
-              <option key={index} value={company}>
-                {company}
-              </option>
-            ))}
-          </select>
-        </>
-      )}
+      <>
+        <label
+          htmlFor="companySelect"
+          className="block mb-2 text-sm font-medium text-gray-900"
+        >
+          Selecciona una empresa
+        </label>
+        <select
+          id="companySelect"
+          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+          onChange={(e) => setSelectedCompany(e.target.value)}
+          value={selectedCompany}
+        >
+          <option value="">Selecciona una empresa</option>
+          {userCompanies.map((company, index) => (
+            <option key={index} value={company}>
+              {company}
+            </option>
+          ))}
+        </select>
+      </>
+
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
           Mis datos
@@ -184,11 +184,10 @@ function DatosFiscalesForm({ currentUser, datosFiscales: propDatosFiscales }) {
           const userId = user.uid;
           const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
           const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
-
           if (datosFiscalesDocSnap.exists()) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
             console.log("Datos Fiscales recibidos:", datosFiscalesData);
-            <DatosFiscalesForm datosFiscales={datosFiscalesData} />;
+            setDatosFiscales(datosFiscalesData);
           } else {
             console.log("No se encontraron datos fiscales para el usuario.");
           }
