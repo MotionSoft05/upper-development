@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  getDoc,
+  setDoc,
+  collection,
+  getDocs,
+} from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -42,20 +49,27 @@ function Licencia() {
             if (datosFiscalesDocSnap.exists()) {
               const datosFiscalesData = datosFiscalesDocSnap.data();
               console.log("Datos Fiscales recibidos:", datosFiscalesData);
-              <DatosFiscalesForm datosFiscales={datosFiscalesData} />;
+              // Aquí podrías hacer algo con los datos fiscales si es necesario
             }
 
-            const userCompaniesRef = doc(db, "usuarios", user.uid);
-            const userCompaniesSnap = await getDoc(userCompaniesRef);
+            // Obtener empresas de todos los usuarios
+            const usersCollectionRef = collection(db, "usuarios");
+            const usersSnapshot = await getDocs(usersCollectionRef);
 
-            if (userCompaniesSnap.exists()) {
-              const userCompaniesData = userCompaniesSnap.data();
-              const empresas = userCompaniesData.empresas || [];
+            const allUserCompanies = [];
 
-              setUserCompanies(empresas);
+            usersSnapshot.forEach((userDoc) => {
+              const userData = userDoc.data();
+              const empresa = userData.empresa;
 
-              console.log("Empresas recibidas:", empresas);
-            }
+              if (empresa) {
+                allUserCompanies.push(empresa);
+              }
+            });
+
+            setUserCompanies(allUserCompanies);
+
+            console.log("Empresas de todos los usuarios:", allUserCompanies);
           } else {
             const userData = {
               nombre: "Nombre predeterminado",
@@ -93,8 +107,8 @@ function Licencia() {
             value={selectedCompany}
           >
             <option value="">Selecciona una empresa</option>
-            {userCompanies.map((company) => (
-              <option key={company} value={company}>
+            {userCompanies.map((company, index) => (
+              <option key={index} value={company}>
                 {company}
               </option>
             ))}
