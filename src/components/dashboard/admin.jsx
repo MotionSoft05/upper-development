@@ -91,14 +91,21 @@ function Admin() {
           return acc;
         }, {});
 
-        // Combine data from DatosFiscales and usuarios
-        const datosFiscalesConNombreData = datosFiscalesData.map((datos) => ({
-          ...datos,
-          nombreEmpresa: usuariosData[datos.userId],
-        }));
+        // Combine data from DatosFiscales and usuarios, including companies without datos fiscales
+        const datosFiscalesConNombreData = usuariosSnapshot.docs.map((doc) => {
+          const userId = doc.id;
+          const datosFiscales =
+            datosFiscalesData.find((datos) => datos.userId === userId) || {};
+          return {
+            ...datosFiscales,
+            userId,
+            nombreEmpresa: usuariosData[userId],
+          };
+        });
 
         // Update the state variable and set loading to false
         setDatosFiscalesConNombre(datosFiscalesConNombreData);
+
         console.log(
           "Nombres de Empresas:",
           datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
