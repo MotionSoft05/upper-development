@@ -22,8 +22,6 @@ const db = getFirestore(app);
 function Licencia() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
-  const [userCompanies, setUserCompanies] = useState([]);
-  const [selectedCompany, setSelectedCompany] = useState("");
 
   useEffect(() => {
     const fetchUserData = async (userId) => {
