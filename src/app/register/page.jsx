@@ -215,6 +215,7 @@ function Register() {
         setEmail("");
         setPassword("");
         setCompanyName("");
+        setConfirmPassword("");
         //window.location.href = "/login";
       }, 2300);
     } catch (error) {
