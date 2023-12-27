@@ -42,8 +42,8 @@ function AltaEventos() {
     []
   );
   const [value, setValue] = useState({
-    startDate: null,
-    endDate: null,
+    startDate: new Date(),
+    endDate: new Date().setMonth(11),
   });
   const [hasImage, setHasImage] = useState(false);
 
@@ -212,15 +212,10 @@ function AltaEventos() {
 
   const enviarDatosAFirebase = async () => {
     event.preventDefault();
-    if (!value.startDate || !value.endDate) {
-      alert("Debes seleccionar tanto la fecha inicial como la fecha final.");
-      return;
-    }
     if (!hasImage) {
       alert("Debes subir al menos una imagen antes de enviar el formulario.");
       return;
     }
-
     const nombreEvento = document.getElementById("floating_name").value;
     const tipoEvento = document.getElementById("floating_event").value;
     const lugar = document.getElementById("floating_floor").value;
@@ -238,13 +233,13 @@ function AltaEventos() {
     }:${document.getElementById("minuteSelectorFinalSalon").value}`;
 
     const fechaInicio = new Date(value.startDate);
-    fechaInicio.setDate(fechaInicio.getDate() + 1);
+    fechaInicio.setDate(fechaInicio.getDate() + 1); // Agregar un día a la fecha de inicio
     fechaInicio.setHours(
       horaInicialReal.split(":")[0],
       horaInicialReal.split(":")[1]
     );
     const fechaFinal = new Date(value.endDate);
-    fechaFinal.setDate(fechaFinal.getDate() + 1);
+    fechaFinal.setDate(fechaFinal.getDate() + 1); // Agregar un día a la fecha final
     fechaFinal.setHours(
       horaFinalReal.split(":")[0],
       horaFinalReal.split(":")[1]
@@ -657,7 +652,9 @@ function AltaEventos() {
                 <div className="hidden md:block">
                   <button
                     onClick={enviarDatosAFirebase}
-                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4 
+                    disabled={!hasImage}
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4 ${
+                      !hasImage && "opacity-50 cursor-not-allowed"
                     }`}
                   >
                     Enviar
