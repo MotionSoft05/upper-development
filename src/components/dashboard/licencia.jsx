@@ -24,51 +24,21 @@ function Licencia() {
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
 
   useEffect(() => {
-    const fetchUserData = async (userId) => {
-      try {
-        const userDocRef = doc(db, "usuarios", userId);
-        const userDocSnap = await getDoc(userDocRef);
-
-        if (userDocSnap.exists()) {
-          setCurrentUser(userDocSnap.data());
-        }
-      } catch (error) {
-        console.error("Error al obtener datos del usuario:", error);
-      }
-    };
-
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const userId = user.uid;
-          await fetchUserData(userId);
+          const userDocRef = doc(db, "usuarios", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
 
-          // Obtener empresas de todos los usuarios
-          const usersCollectionRef = collection(db, "usuarios");
-          const usersSnapshot = await getDocs(usersCollectionRef);
+          if (userDocSnap.exists()) {
+            setCurrentUser(userDocSnap.data());
 
-          const allUserCompanies = usersSnapshot.docs.map((userDoc) => {
-            const userData = userDoc.data();
-            return userData.empresa;
-          });
+            // Obtener datos fiscales si existen
+            const datosFiscalesDocRef = doc(db, "DatosFiscales", user.uid);
+            const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
 
-          setUserCompanies(allUserCompanies);
-
-          // Check if a company is selected
-          if (selectedCompany) {
-            const selectedCompanyUser = usersSnapshot.docs.find(
-              (userDoc) => userDoc.data().empresa === selectedCompany
-            );
-
-            if (selectedCompanyUser) {
-              const selectedCompanyUserId = selectedCompanyUser.id;
-              if (currentUser?.email === "uppermex10@gmail.com") {
-                await fetchUserData(selectedCompanyUserId);
-                setSelectedUser(selectedCompanyUser.data());
-              }
-            }
             if (datosFiscalesDocSnap.exists()) {
-              DatosFiscales(datosFiscalesDocSnap.data());
+              DatosFiscalesForm(datosFiscalesDocSnap.data());
             }
           } else {
             const userData = {
@@ -86,8 +56,7 @@ function Licencia() {
     });
 
     return () => unsubscribe();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedCompany]);
+  }, []);
 
   return (
     <section className="px-5 md:px-32">
@@ -131,7 +100,7 @@ function Licencia() {
               <DatosNegocio currentUser={currentUser} />
             )}
             {selectedFilter === "datosFiscales" && (
-              <DatosFiscales currentUser={currentUser} />
+              <DatosFiscalesForm currentUser={currentUser} />
             )}
           </div>
         </main>
@@ -140,7 +109,7 @@ function Licencia() {
   );
 }
 
-function DatosFiscales({ currentUser }) {
+function DatosFiscalesForm({ currentUser }) {
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [datosFiscales, setDatosFiscales] = useState({
     rfc: "",
@@ -160,11 +129,11 @@ function DatosFiscales({ currentUser }) {
           const userId = user.uid;
           const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
           const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+
           if (datosFiscalesDocSnap.exists()) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
             setDatosFiscales(datosFiscalesData);
             console.log("Datos Fiscales recibidos:", datosFiscalesData);
-            <DatosFiscales datosFiscales={datosFiscalesData} />;
           } else {
             console.log("No se encontraron datos fiscales para el usuario.");
           }
