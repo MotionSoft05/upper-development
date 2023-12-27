@@ -34,6 +34,7 @@ function Admin() {
   const [datosFiscales, setDatosFiscales] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
+  const [datosFiscalesConNombre, setDatosFiscalesConNombre] = useState([]);
 
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
@@ -80,8 +81,28 @@ function Admin() {
           id: doc.id,
           ...doc.data(),
         }));
-        setDatosFiscales(datosFiscalesData);
-        console.log(datosFiscalesData);
+
+        // Fetch data from usuarios
+        const usuariosCollection = collection(db, "usuarios");
+        const usuariosSnapshot = await getDocs(usuariosCollection);
+        const usuariosData = usuariosSnapshot.docs.reduce((acc, doc) => {
+          const userData = doc.data();
+          acc[doc.id] = userData.empresa; // Use doc.id as the key instead of userData.userId
+          return acc;
+        }, {});
+
+        // Combine data from DatosFiscales and usuarios
+        const datosFiscalesConNombreData = datosFiscalesData.map((datos) => ({
+          ...datos,
+          nombreEmpresa: usuariosData[datos.userId],
+        }));
+
+        // Update the state variable and set loading to false
+        setDatosFiscalesConNombre(datosFiscalesConNombreData);
+        console.log(
+          "Nombres de Empresas:",
+          datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
+        );
       } catch (error) {
         console.error(
           "Error al obtener los datos fiscales de Firebase:",
@@ -871,16 +892,16 @@ function Admin() {
                   value={selectedEmpresa}
                   onChange={(e) => {
                     setSelectedEmpresa(e.target.value);
-                    const selectedCompany = datosFiscales.find(
-                      (empresa) => empresa.razonSocial === e.target.value
+                    const selectedCompany = datosFiscalesConNombre.find(
+                      (empresa) => empresa.nombreEmpresa === e.target.value
                     );
                     setEmpresaSeleccionada(selectedCompany);
                   }}
                 >
                   <option value="">Seleccione Empresa</option>
-                  {datosFiscales.map((empresa) => (
-                    <option key={empresa.id} value={empresa.razonSocial}>
-                      {empresa.razonSocial}
+                  {datosFiscalesConNombre.map((empresa) => (
+                    <option key={empresa.id} value={empresa.nombreEmpresa}>
+                      {empresa.nombreEmpresa}
                     </option>
                   ))}
                 </select>
