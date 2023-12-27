@@ -8,6 +8,8 @@ import {
   addDoc,
   deleteDoc,
   updateData,
+  getDoc,
+  onSnapshot,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -34,6 +36,18 @@ function Admin() {
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [datosFiscalesConNombre, setDatosFiscalesConNombre] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [mensaje, setMensaje] = useState(null);
+  const [mensajeEstilo, setMensajeEstilo] = useState(null);
+
+  // Función para mostrar un mensaje y ocultarlo después de 3 segundos
+  const mostrarMensaje = (mensaje, estilo) => {
+    setMensaje(mensaje);
+    setMensajeEstilo({ color: estilo }); // Cambia aquí
+    setTimeout(() => {
+      setMensaje(null);
+    }, 3000);
+  };
 
   const [datosFiscalesEditados, setDatosFiscalesEditados] = useState({
     id: "",
@@ -82,43 +96,53 @@ function Admin() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
+    let unsubscribe;
+
     const obtenerDatosFiscales = async () => {
       try {
         const datosFiscalesCollection = collection(db, "DatosFiscales");
-        const datosFiscalesSnapshot = await getDocs(datosFiscalesCollection);
-        const datosFiscalesData = datosFiscalesSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
 
-        // Fetch data from usuarios
-        const usuariosCollection = collection(db, "usuarios");
-        const usuariosSnapshot = await getDocs(usuariosCollection);
-        const usuariosData = usuariosSnapshot.docs.reduce((acc, doc) => {
-          const userData = doc.data();
-          acc[doc.id] = userData.empresa; // Use doc.id as the key instead of userData.userId
-          return acc;
-        }, {});
+        // Escucha en tiempo real para cambios en DatosFiscales
+        unsubscribe = onSnapshot(datosFiscalesCollection, (snapshot) => {
+          const datosFiscalesData = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
 
-        // Combine data from DatosFiscales and usuarios, including companies without datos fiscales
-        const datosFiscalesConNombreData = usuariosSnapshot.docs.map((doc) => {
-          const userId = doc.id;
-          const datosFiscales =
-            datosFiscalesData.find((datos) => datos.userId === userId) || {};
-          return {
-            ...datosFiscales,
-            userId,
-            nombreEmpresa: usuariosData[userId],
-          };
+          const usuariosCollection = collection(db, "usuarios");
+
+          // Obtiene datos de usuarios una vez
+          getDocs(usuariosCollection).then((usuariosSnapshot) => {
+            const usuariosData = usuariosSnapshot.docs.reduce((acc, doc) => {
+              const userData = doc.data();
+              acc[doc.id] = userData.empresa;
+              return acc;
+            }, {});
+
+            // Combina datos de DatosFiscales y usuarios, incluyendo empresas sin datos fiscales
+            const datosFiscalesConNombreData = usuariosSnapshot.docs.map(
+              (doc) => {
+                const userId = doc.id;
+                const datosFiscales =
+                  datosFiscalesData.find((datos) => datos.userId === userId) ||
+                  {};
+                return {
+                  ...datosFiscales,
+                  userId,
+                  nombreEmpresa: usuariosData[userId],
+                };
+              }
+            );
+
+            // Actualiza el estado y establece loading en false
+            setDatosFiscalesConNombre(datosFiscalesConNombreData);
+
+            console.log(
+              "Nombres de Empresas:",
+              datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
+            );
+          });
         });
-
-        // Update the state variable and set loading to false
-        setDatosFiscalesConNombre(datosFiscalesConNombreData);
-
-        console.log(
-          "Nombres de Empresas:",
-          datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
-        );
       } catch (error) {
         console.error(
           "Error al obtener los datos fiscales de Firebase:",
@@ -128,71 +152,89 @@ function Admin() {
     };
 
     obtenerDatosFiscales();
-  }, []);
 
-  const handleEditarDatosFiscales = (datosFiscales) => {
-    setDatosFiscalesEditados({
-      id: datosFiscales.id,
-      usoCdfi: datosFiscales.usoCdfi,
-      email: datosFiscales.email,
-      razonSocial: datosFiscales.razonSocial,
-      regimenFiscal: datosFiscales.regimenFiscal,
-      rfc: datosFiscales.rfc,
-      // Agrega otros campos según tu estructura de datos
-    });
-    // Puedes añadir más lógica aquí según tus necesidades
-  };
+    // Asegúrate de llamar a unsubscribe cuando dejes de necesitar la escucha en tiempo real
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
+  }, []);
 
   const handleGuardarCambiosDatosFiscales = async () => {
     try {
+      // Verificar que todos los campos estén completos
+      if (
+        !datosFiscalesEditados.usoCdfi ||
+        !datosFiscalesEditados.email ||
+        !datosFiscalesEditados.razonSocial ||
+        !datosFiscalesEditados.regimenFiscal ||
+        !datosFiscalesEditados.rfc
+        // Agregar más verificaciones según tus necesidades
+      ) {
+        mostrarMensaje("Todos los campos deben estar completos", "red");
+        return;
+      }
+
       const datosFiscalesDocRef = doc(
         db,
         "DatosFiscales",
         datosFiscalesEditados.id
       );
 
-      await updateDoc(datosFiscalesDocRef, {
-        usoCdfi: datosFiscalesEditados.usoCdfi,
-        email: datosFiscalesEditados.email,
-        razonSocial: datosFiscalesEditados.razonSocial,
-        regimenFiscal: datosFiscalesEditados.regimenFiscal,
-        rfc: datosFiscalesEditados.rfc,
-        // Actualiza otros campos según tu estructura de datos
-      });
+      // Intentar obtener el documento existente
+      const datosFiscalesDoc = await getDoc(datosFiscalesDocRef);
 
-      // Actualiza la lista de datos fiscales
-      const nuevosDatosFiscales = datosFiscalesConNombre.map((datos) =>
-        datos.id === datosFiscalesEditados.id
-          ? { ...datos, ...datosFiscalesEditados }
-          : datos
-      );
+      if (datosFiscalesDoc.exists()) {
+        // Si el documento existe, actualizarlo
+        await updateDoc(datosFiscalesDocRef, {
+          usoCdfi: datosFiscalesEditados.usoCdfi,
+          email: datosFiscalesEditados.email,
+          razonSocial: datosFiscalesEditados.razonSocial,
+          regimenFiscal: datosFiscalesEditados.regimenFiscal,
+          rfc: datosFiscalesEditados.rfc,
+          // Otros campos según tu estructura de datos
+        });
 
-      setDatosFiscalesConNombre(nuevosDatosFiscales);
-      setDatosFiscalesEditados({
-        id: "",
-        usoCdfi: "",
-        email: "",
-        razonSocial: "",
-        regimenFiscal: "",
-        rfc: "",
+        mostrarMensaje("Guardado con éxito", "green");
+      } else {
+        // Si el documento no existe, crearlo con el userId
+        const nuevoDatosFiscalesDocRef = await addDoc(
+          collection(db, "DatosFiscales"),
+          {
+            userId: datosFiscalesEditados.userId,
+            usoCdfi: datosFiscalesEditados.usoCdfi,
+            email: datosFiscalesEditados.email,
+            razonSocial: datosFiscalesEditados.razonSocial,
+            regimenFiscal: datosFiscalesEditados.regimenFiscal,
+            rfc: datosFiscalesEditados.rfc,
+            // Otros campos según tu estructura de datos
+          }
+        );
 
-        // Restablece otros campos según tu estructura de datos
-      });
+        // Actualizar el estado con el nuevo ID creado
+        setDatosFiscalesEditados({
+          ...datosFiscalesEditados,
+          id: nuevoDatosFiscalesDocRef.id,
+        });
+
+        mostrarMensaje("Guardado con éxito", "green");
+      }
     } catch (error) {
       console.error("Error al guardar los cambios en datos fiscales:", error);
+      mostrarMensaje("Error al guardar los cambios", "red");
     }
   };
 
   const handleEliminarDatosFiscales = async (datosFiscalesId) => {
-    // Mostrar una alerta de confirmación
+    // Mostrar un alert antes de la confirmación
     const confirmacion = window.confirm(
       "¿Estás seguro de que deseas eliminar estos datos fiscales?"
     );
 
     if (confirmacion) {
       try {
-        const datosFiscalesDocRef = doc(db, "DatosFiscales", datosFiscalesId);
-        await deleteDoc(datosFiscalesDocRef);
+        // Resto del código para eliminar los datos fiscales
 
         // Filtra los datos fiscales eliminados de la lista
         const nuevosDatosFiscales = datosFiscalesConNombre.map((datos) =>
@@ -201,23 +243,24 @@ function Admin() {
                 ...datos,
                 ...{
                   codigoPostal: "",
-                  usoCdfi: "",
                   email: "",
                   razonSocial: "",
                   regimenFiscal: "",
                   rfc: "",
+                  usoCdfi: "",
                 },
               }
             : datos
         );
 
         setDatosFiscalesConNombre(nuevosDatosFiscales);
-
-        // No restablezcas el valor seleccionado en el select para mantenerlo
-        // setSelectedEmpresa("");
+        mostrarMensaje("Eliminado con éxito", "green");
       } catch (error) {
         console.error("Error al eliminar datos fiscales:", error);
       }
+    } else {
+      // Alerta si no se confirma la eliminación
+      alert("No se eliminaron los datos fiscales.");
     }
   };
 
@@ -987,12 +1030,14 @@ function Admin() {
               </table>
             </div>
           </div>
+
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
                 Licencias
               </h2>
               <div className="mb-6 border-b border-gray-300"></div>
+
               <div className="flex items-center mb-4 space-x-2">
                 <select
                   className="p-2 rounded border border-gray-300 w-90"
@@ -1003,6 +1048,15 @@ function Admin() {
                       (empresa) => empresa.nombreEmpresa === e.target.value
                     );
                     setEmpresaSeleccionada(selectedCompany);
+                    setDatosFiscalesEditados({
+                      id: selectedCompany?.id || "",
+                      codigoPostal: selectedCompany?.codigoPostal || "",
+                      email: selectedCompany?.email || "",
+                      razonSocial: selectedCompany?.razonSocial || "",
+                      regimenFiscal: selectedCompany?.regimenFiscal || "",
+                      rfc: selectedCompany?.rfc || "",
+                      usoCdfi: selectedCompany?.usoCdfi || "",
+                    });
                   }}
                 >
                   <option value="">Seleccione Empresa</option>
@@ -1013,45 +1067,116 @@ function Admin() {
                   ))}
                 </select>
               </div>
-
               {empresaSeleccionada && (
-                <div>
-                  <p>
-                    <strong>Código Postal:</strong>{" "}
-                    {empresaSeleccionada.codigoPostal}
-                  </p>
-                  <p>
-                    <strong>Email:</strong> {empresaSeleccionada.email}
-                  </p>
-                  <p>
-                    <strong>Razón Social:</strong>{" "}
-                    {empresaSeleccionada.razonSocial}
-                  </p>
-                  <p>
-                    <strong>Regimen Fiscal:</strong>{" "}
-                    {empresaSeleccionada.regimenFiscal}
-                  </p>
-                  <p>
-                    <strong>RFC:</strong> {empresaSeleccionada.rfc}
-                  </p>
+                <div className="mt-4">
+                  {/* Include input fields for editing */}
+                  <label className="block text-sm font-semibold text-gray-600">
+                    Código Postal:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.codigoPostal}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        codigoPostal: e.target.value,
+                      })
+                    }
+                    placeholder="Código Postal"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
 
-                  <p>
-                    <strong>Uso CDFI:</strong> {empresaSeleccionada.usoCdfi}
-                  </p>
+                  <label className="block text-sm font-semibold text-gray-600">
+                    Correo Electrónico:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.email}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        email: e.target.value,
+                      })
+                    }
+                    placeholder="Correo Electrónico"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
 
-                  {/* Botones de Editar y Eliminar */}
+                  <label className="block text-sm font-semibold text-gray-600">
+                    Razón Social:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.razonSocial}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        razonSocial: e.target.value,
+                      })
+                    }
+                    placeholder="Razón Social"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
+
+                  <label className="block text-sm font-semibold text-gray-600">
+                    Régimen Fiscal:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.regimenFiscal}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        regimenFiscal: e.target.value,
+                      })
+                    }
+                    placeholder="Régimen Fiscal"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
+
+                  <label className="block text-sm font-semibold text-gray-600">
+                    RFC:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.rfc}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        rfc: e.target.value,
+                      })
+                    }
+                    placeholder="RFC"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
+
+                  <label className="block text-sm font-semibold text-gray-600">
+                    Uso CDFI:
+                  </label>
+                  <input
+                    type="text"
+                    value={datosFiscalesEditados.usoCdfi}
+                    onChange={(e) =>
+                      setDatosFiscalesEditados({
+                        ...datosFiscalesEditados,
+                        usoCdfi: e.target.value,
+                      })
+                    }
+                    placeholder="Uso CDFI"
+                    className="p-2 rounded border border-gray-300 mr-2"
+                  />
+                  <div style={mensajeEstilo}>{mensaje}</div>
+
                   <div className="mt-4 flex space-x-2">
                     <button
-                      onClick={() =>
-                        handleEditarDatosFiscales(empresaSeleccionada)
-                      }
-                      className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
+                      onClick={handleGuardarCambiosDatosFiscales}
+                      className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                     >
-                      Editar
+                      Guardar Cambios
                     </button>
                     <button
                       onClick={() =>
-                        handleEliminarDatosFiscales(empresaSeleccionada.id)
+                        handleEliminarDatosFiscales(datosFiscalesEditados.id)
                       }
                       className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
                     >
