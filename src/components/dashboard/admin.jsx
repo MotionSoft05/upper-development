@@ -871,16 +871,16 @@ function Admin() {
                   value={selectedEmpresa}
                   onChange={(e) => {
                     setSelectedEmpresa(e.target.value);
-                    const selectedCompany = usuarios.find(
-                      (usuario) => usuario.userId === e.target.value
+                    const selectedCompany = datosFiscales.find(
+                      (empresa) => empresa.razonSocial === e.target.value
                     );
                     setEmpresaSeleccionada(selectedCompany);
                   }}
                 >
                   <option value="">Seleccione Empresa</option>
-                  {usuarios.map((usuario) => (
-                    <option key={usuario.id} value={usuario.userId}>
-                      {usuario.empresa}
+                  {datosFiscales.map((empresa) => (
+                    <option key={empresa.id} value={empresa.razonSocial}>
+                      {empresa.razonSocial}
                     </option>
                   ))}
                 </select>
