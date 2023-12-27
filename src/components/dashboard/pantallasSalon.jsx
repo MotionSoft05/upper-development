@@ -523,11 +523,14 @@ function PantallasSalon() {
                       className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
                       value={nombrePantallas[index] || ""}
                       onChange={(e) => {
+                        const enteredValue = e.target.value;
+                        const truncatedValue = enteredValue.slice(0, 25); // Limit to 25 characters
                         const updatedNombres = [...nombrePantallas];
-                        updatedNombres[index] = e.target.value;
+                        updatedNombres[index] = truncatedValue;
                         setNombrePantallas(updatedNombres);
                       }}
                     />
+
                     <Link
                       href={`/pantalla${index + 1}.html`}
                       target="_blank"
