@@ -42,9 +42,10 @@ function AltaEventos() {
     []
   );
   const [value, setValue] = useState({
-    startDate: new Date(),
+    startDate: 0, // Set the default value to 0 (current date)
     endDate: new Date().setMonth(11),
   });
+
   const [hasImage, setHasImage] = useState(false);
 
   const [alertaEnviada, setAlertaEnviada] = useState(false);
@@ -212,6 +213,10 @@ function AltaEventos() {
 
   const enviarDatosAFirebase = async () => {
     event.preventDefault();
+    if (!value.startDate || value.startDate === 0) {
+      alert("Debes seleccionar una fecha antes de enviar el formulario.");
+      return;
+    }
     if (!hasImage) {
       alert("Debes subir al menos una imagen antes de enviar el formulario.");
       return;
@@ -652,9 +657,7 @@ function AltaEventos() {
                 <div className="hidden md:block">
                   <button
                     onClick={enviarDatosAFirebase}
-                    disabled={!hasImage}
-                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4 ${
-                      !hasImage && "opacity-50 cursor-not-allowed"
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4
                     }`}
                   >
                     Enviar
