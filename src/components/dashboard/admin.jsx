@@ -186,34 +186,15 @@ function Admin() {
         ? doc(db, "DatosFiscales", datosFiscalesEditados.id)
         : await addDoc(datosFiscalesCollection, {});
 
-      // Obtener userId
-      const userId = datosFiscalesEditados.userId;
-
-      // Verificar si el userId está definido
-      if (userId) {
-        // Actualizar el documento con los nuevos datos y userId
-        await updateDoc(datosFiscalesDocRef, {
-          userId,
-          usoCdfi: datosFiscalesEditados.usoCdfi,
-          email: datosFiscalesEditados.email,
-          codigoPostal: datosFiscalesEditados.codigoPostal,
-          razonSocial: datosFiscalesEditados.razonSocial,
-          regimenFiscal: datosFiscalesEditados.regimenFiscal,
-          rfc: datosFiscalesEditados.rfc,
-          // Otros campos según tu estructura de datos
-        });
-      } else {
-        // Si userId no está definido, crea un nuevo documento con los nuevos datos
-        await setDoc(datosFiscalesDocRef, {
-          usoCdfi: datosFiscalesEditados.usoCdfi,
-          email: datosFiscalesEditados.email,
-          codigoPostal: datosFiscalesEditados.codigoPostal,
-          razonSocial: datosFiscalesEditados.razonSocial,
-          regimenFiscal: datosFiscalesEditados.regimenFiscal,
-          rfc: datosFiscalesEditados.rfc,
-          // Otros campos según tu estructura de datos
-        });
-      }
+      await updateDoc(datosFiscalesDocRef, {
+        usoCdfi: datosFiscalesEditados.usoCdfi,
+        email: datosFiscalesEditados.email,
+        codigoPostal: datosFiscalesEditados.codigoPostal,
+        razonSocial: datosFiscalesEditados.razonSocial,
+        regimenFiscal: datosFiscalesEditados.regimenFiscal,
+        rfc: datosFiscalesEditados.rfc,
+        // Otros campos según tu estructura de datos
+      });
 
       mostrarMensaje("Guardado con éxito", "green");
     } catch (error) {
@@ -230,7 +211,10 @@ function Admin() {
 
     if (confirmacion) {
       try {
-        // Resto del código para eliminar los datos fiscales
+        const datosFiscalesDocRef = doc(db, "DatosFiscales", datosFiscalesId);
+
+        // Eliminar el documento en Firebase
+        await deleteDoc(datosFiscalesDocRef);
 
         // Filtra los datos fiscales eliminados de la lista
         const nuevosDatosFiscales = datosFiscalesConNombre.map((datos) =>
@@ -253,6 +237,7 @@ function Admin() {
         mostrarMensaje("Eliminado con éxito", "green");
       } catch (error) {
         console.error("Error al eliminar datos fiscales:", error);
+        mostrarMensaje("Error al eliminar datos fiscales", "red");
       }
     } else {
       // Alerta si no se confirma la eliminación
@@ -1047,7 +1032,6 @@ function Admin() {
                     setDatosFiscalesEditados({
                       id: selectedCompany?.id || "",
                       codigoPostal: selectedCompany?.codigoPostal || "",
-
                       email: selectedCompany?.email || "",
                       razonSocial: selectedCompany?.razonSocial || "",
                       regimenFiscal: selectedCompany?.regimenFiscal || "",
@@ -1057,11 +1041,13 @@ function Admin() {
                   }}
                 >
                   <option value="">Seleccione Empresa</option>
-                  {datosFiscalesConNombre.map((empresa) => (
-                    <option key={empresa.id} value={empresa.nombreEmpresa}>
-                      {empresa.nombreEmpresa}
-                    </option>
-                  ))}
+                  {datosFiscalesConNombre
+                    .filter((empresa) => empresa.codigoPostal) // Filtra las empresas que tienen código postal
+                    .map((empresa) => (
+                      <option key={empresa.id} value={empresa.nombreEmpresa}>
+                        {empresa.nombreEmpresa}
+                      </option>
+                    ))}
                 </select>
               </div>
               {empresaSeleccionada && (
