@@ -22,13 +22,13 @@ import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCzD--npY_6fZcXH-8CzBV7UGzPBqg85y8",
-  authDomain: "upper-a544e.firebaseapp.com",
-  projectId: "upper-a544e",
-  storageBucket: "upper-a544e.appspot.com",
-  messagingSenderId: "665713417470",
-  appId: "1:665713417470:web:73f7fb8ee518bea35999af",
-  measurementId: "G-QTFQ55YY5D",
+  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+  authDomain: "upper-8c817.firebaseapp.com",
+  projectId: "upper-8c817",
+  storageBucket: "upper-8c817.appspot.com",
+  messagingSenderId: "798455798906",
+  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+  measurementId: "G-6VHX927GH1",
 };
 
 firebase.initializeApp(firebaseConfig);
