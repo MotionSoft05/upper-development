@@ -1,14 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import {
-  getFirestore,
-  doc,
-  getDoc,
-  setDoc,
-  collection,
-  getDocs,
-} from "firebase/firestore";
+import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -29,12 +22,8 @@ const db = getFirestore(app);
 function Licencia() {
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
-<<<<<<< HEAD
   const [userCompanies, setUserCompanies] = useState([]);
   const [selectedCompany, setSelectedCompany] = useState("");
-  const [selectedUser, setSelectedUser] = useState(null);
-=======
->>>>>>> parent of 1827ac0c (Update licencia.jsx)
 
   useEffect(() => {
     const fetchUserData = async (userId) => {
@@ -65,7 +54,6 @@ function Licencia() {
             return userData.empresa;
           });
 
-<<<<<<< HEAD
           setUserCompanies(allUserCompanies);
 
           // Check if a company is selected
@@ -81,7 +69,6 @@ function Licencia() {
                 setSelectedUser(selectedCompanyUser.data());
               }
             }
-=======
             if (datosFiscalesDocSnap.exists()) {
               DatosFiscales(datosFiscalesDocSnap.data());
             }
@@ -91,7 +78,6 @@ function Licencia() {
             };
             await setDoc(userDocRef, userData);
             setCurrentUser(userData);
->>>>>>> parent of 1827ac0c (Update licencia.jsx)
           }
         } catch (error) {
           console.error("Error al obtener datos del usuario:", error);
@@ -102,35 +88,11 @@ function Licencia() {
     });
 
     return () => unsubscribe();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCompany]);
 
   return (
     <section className="px-5 md:px-32">
-<<<<<<< HEAD
-      <>
-        <label
-          htmlFor="companySelect"
-          className="block mb-2 text-sm font-medium text-gray-900"
-        >
-          Selecciona una empresa
-        </label>
-        <select
-          id="companySelect"
-          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-          onChange={(e) => setSelectedCompany(e.target.value)}
-          value={selectedCompany}
-        >
-          <option value="">Selecciona una empresa</option>
-          {userCompanies.map((company, index) => (
-            <option key={index} value={company}>
-              {company}
-            </option>
-          ))}
-        </select>
-      </>
-
-=======
->>>>>>> parent of 1827ac0c (Update licencia.jsx)
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
           Mis datos
@@ -204,10 +166,7 @@ function DatosFiscales({ currentUser }) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
             setDatosFiscales(datosFiscalesData);
             console.log("Datos Fiscales recibidos:", datosFiscalesData);
-<<<<<<< HEAD
-            setDatosFiscales(datosFiscalesData);
-=======
->>>>>>> parent of 1827ac0c (Update licencia.jsx)
+            <DatosFiscales datosFiscales={datosFiscalesData} />;
           } else {
             console.log("No se encontraron datos fiscales para el usuario.");
           }
