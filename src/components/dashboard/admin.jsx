@@ -6,6 +6,7 @@ import {
   doc,
   updateDoc,
   addDoc,
+  setDoc,
   deleteDoc,
   updateData,
   getDoc,
@@ -185,17 +186,34 @@ function Admin() {
         ? doc(db, "DatosFiscales", datosFiscalesEditados.id)
         : await addDoc(datosFiscalesCollection, {});
 
-      // Actualizar o crear el documento con los nuevos datos
-      await setDoc(datosFiscalesDocRef, {
-        userId: datosFiscalesEditados.userId,
-        usoCdfi: datosFiscalesEditados.usoCdfi,
-        email: datosFiscalesEditados.email,
-        codigoPostal: datosFiscalesEditados.codigoPostal,
-        razonSocial: datosFiscalesEditados.razonSocial,
-        regimenFiscal: datosFiscalesEditados.regimenFiscal,
-        rfc: datosFiscalesEditados.rfc,
-        // Otros campos según tu estructura de datos
-      });
+      // Obtener userId
+      const userId = datosFiscalesEditados.userId;
+
+      // Verificar si el userId está definido
+      if (userId) {
+        // Actualizar el documento con los nuevos datos y userId
+        await updateDoc(datosFiscalesDocRef, {
+          userId,
+          usoCdfi: datosFiscalesEditados.usoCdfi,
+          email: datosFiscalesEditados.email,
+          codigoPostal: datosFiscalesEditados.codigoPostal,
+          razonSocial: datosFiscalesEditados.razonSocial,
+          regimenFiscal: datosFiscalesEditados.regimenFiscal,
+          rfc: datosFiscalesEditados.rfc,
+          // Otros campos según tu estructura de datos
+        });
+      } else {
+        // Si userId no está definido, crea un nuevo documento con los nuevos datos
+        await setDoc(datosFiscalesDocRef, {
+          usoCdfi: datosFiscalesEditados.usoCdfi,
+          email: datosFiscalesEditados.email,
+          codigoPostal: datosFiscalesEditados.codigoPostal,
+          razonSocial: datosFiscalesEditados.razonSocial,
+          regimenFiscal: datosFiscalesEditados.regimenFiscal,
+          rfc: datosFiscalesEditados.rfc,
+          // Otros campos según tu estructura de datos
+        });
+      }
 
       mostrarMensaje("Guardado con éxito", "green");
     } catch (error) {
