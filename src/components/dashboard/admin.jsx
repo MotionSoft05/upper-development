@@ -31,6 +31,10 @@ function Admin() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
   const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
+  const [datosFiscales, setDatosFiscales] = useState([]);
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
+  const [selectedEmpresa, setSelectedEmpresa] = useState("");
+
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
     nombre: "",
@@ -68,21 +72,25 @@ function Admin() {
   const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const obtenerTransacciones = async () => {
+    const obtenerDatosFiscales = async () => {
       try {
-        const transaccionesCollection = collection(db, "transacciones");
-        const transaccionesSnapshot = await getDocs(transaccionesCollection);
-        const transaccionesData = transaccionesSnapshot.docs.map((doc) => ({
+        const datosFiscalesCollection = collection(db, "DatosFiscales");
+        const datosFiscalesSnapshot = await getDocs(datosFiscalesCollection);
+        const datosFiscalesData = datosFiscalesSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
-        setTransacciones(transaccionesData);
+        setDatosFiscales(datosFiscalesData);
+        console.log(datosFiscalesData);
       } catch (error) {
-        console.error("Error al obtener las transacciones de Firebase:", error);
+        console.error(
+          "Error al obtener los datos fiscales de Firebase:",
+          error
+        );
       }
     };
 
-    obtenerTransacciones();
+    obtenerDatosFiscales();
   }, []);
 
   const handleGuardarTransaccion = async () => {
@@ -575,7 +583,6 @@ function Admin() {
               </tbody>
             </table>
           </div>
-
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
@@ -850,6 +857,63 @@ function Admin() {
                   ))}
                 </tbody>
               </table>
+            </div>
+          </div>
+          <div className="mt-8 bg-white p-4 shadow rounded-lg">
+            <div className="bg-white p-4 rounded-md mt-4">
+              <h2 className="text-gray-500 text-lg font-semibold pb-4">
+                Licencias
+              </h2>
+              <div className="mb-6 border-b border-gray-300"></div>
+              <div className="flex items-center mb-4 space-x-2">
+                <select
+                  className="p-2 rounded border border-gray-300 w-40"
+                  value={selectedEmpresa}
+                  onChange={(e) => {
+                    setSelectedEmpresa(e.target.value);
+                    const selectedCompany = usuarios.find(
+                      (usuario) => usuario.userId === e.target.value
+                    );
+                    setEmpresaSeleccionada(selectedCompany);
+                  }}
+                >
+                  <option value="">Seleccione Empresa</option>
+                  {usuarios.map((usuario) => (
+                    <option key={usuario.id} value={usuario.userId}>
+                      {usuario.empresa}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {empresaSeleccionada && (
+                <div>
+                  <p>
+                    <strong>Código Postal:</strong>{" "}
+                    {empresaSeleccionada.codigoPostal}
+                  </p>
+                  <p>
+                    <strong>Email:</strong> {empresaSeleccionada.email}
+                  </p>
+                  <p>
+                    <strong>Razón Social:</strong>{" "}
+                    {empresaSeleccionada.razonSocial}
+                  </p>
+                  <p>
+                    <strong>Regimen Fiscal:</strong>{" "}
+                    {empresaSeleccionada.regimenFiscal}
+                  </p>
+                  <p>
+                    <strong>RFC:</strong> {empresaSeleccionada.rfc}
+                  </p>
+                  <p>
+                    <strong>User ID:</strong> {empresaSeleccionada.userId}
+                  </p>
+                  <p>
+                    <strong>Uso CDFI:</strong> {empresaSeleccionada.usoCdfi}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
