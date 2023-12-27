@@ -31,7 +31,6 @@ function Admin() {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
   const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
-  const [datosFiscales, setDatosFiscales] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [datosFiscalesConNombre, setDatosFiscalesConNombre] = useState([]);
@@ -43,7 +42,6 @@ function Admin() {
     razonSocial: "",
     regimenFiscal: "",
     rfc: "",
-    userId: "",
     // Agrega otros campos según tu estructura de datos
   });
 
@@ -140,7 +138,6 @@ function Admin() {
       razonSocial: datosFiscales.razonSocial,
       regimenFiscal: datosFiscales.regimenFiscal,
       rfc: datosFiscales.rfc,
-      userId: datosFiscales.userId,
       // Agrega otros campos según tu estructura de datos
     });
     // Puedes añadir más lógica aquí según tus necesidades
@@ -160,7 +157,6 @@ function Admin() {
         razonSocial: datosFiscalesEditados.razonSocial,
         regimenFiscal: datosFiscalesEditados.regimenFiscal,
         rfc: datosFiscalesEditados.rfc,
-        userId: datosFiscalesEditados.userId,
         // Actualiza otros campos según tu estructura de datos
       });
 
@@ -179,7 +175,7 @@ function Admin() {
         razonSocial: "",
         regimenFiscal: "",
         rfc: "",
-        userId: "",
+
         // Restablece otros campos según tu estructura de datos
       });
     } catch (error) {
@@ -1026,9 +1022,7 @@ function Admin() {
                   <p>
                     <strong>RFC:</strong> {empresaSeleccionada.rfc}
                   </p>
-                  <p>
-                    <strong>User ID:</strong> {empresaSeleccionada.userId}
-                  </p>
+
                   <p>
                     <strong>Uso CDFI:</strong> {empresaSeleccionada.usoCdfi}
                   </p>
