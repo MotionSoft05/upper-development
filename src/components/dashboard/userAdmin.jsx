@@ -16,6 +16,8 @@ function UserAdmin() {
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
+  const [cantidadPublicidad, setCantidadPublicidad] = useState(0);
+
   let total = cantidadPd + cantidadPs;
 
   useEffect(() => {
@@ -51,6 +53,16 @@ function UserAdmin() {
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
+
+            const publicidadQuery = query(
+              collection(db, "Publicidad"),
+              where("userId", "==", user.uid)
+            );
+            const publicidadSnapshot = await getDocs(publicidadQuery);
+            const cantidadPublicidad = publicidadSnapshot.docs.length;
+
+            // Update the state with the count of advertisements
+            setCantidadPublicidad(cantidadPublicidad);
           } else {
             console.log("No se encontraron datos para este usuario.");
           }
@@ -272,7 +284,7 @@ function UserAdmin() {
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
                           <p>
-                            <span>8</span>
+                            <span>{cantidadPublicidad}</span>
                           </p>
                         </td>
                       </tr>
