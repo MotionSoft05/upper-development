@@ -51,12 +51,12 @@ function Admin() {
 
   const [datosFiscalesEditados, setDatosFiscalesEditados] = useState({
     id: "",
+    codigoPostal: "",
     usoCdfi: "",
     email: "",
     razonSocial: "",
     regimenFiscal: "",
     rfc: "",
-    codigoPostal: "",
     // Agrega otros campos según tu estructura de datos
   });
 
@@ -1029,6 +1029,7 @@ function Admin() {
                     setDatosFiscalesEditados({
                       id: selectedCompany?.id || "",
                       codigoPostal: selectedCompany?.codigoPostal || "",
+
                       email: selectedCompany?.email || "",
                       razonSocial: selectedCompany?.razonSocial || "",
                       regimenFiscal: selectedCompany?.regimenFiscal || "",
