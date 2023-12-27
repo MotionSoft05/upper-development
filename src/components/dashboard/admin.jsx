@@ -36,6 +36,17 @@ function Admin() {
   const [selectedEmpresa, setSelectedEmpresa] = useState("");
   const [datosFiscalesConNombre, setDatosFiscalesConNombre] = useState([]);
 
+  const [datosFiscalesEditados, setDatosFiscalesEditados] = useState({
+    id: "",
+    usoCdfi: "",
+    email: "",
+    razonSocial: "",
+    regimenFiscal: "",
+    rfc: "",
+    userId: "",
+    // Agrega otros campos según tu estructura de datos
+  });
+
   const [usuarioEditado, setUsuarioEditado] = useState({
     id: "",
     nombre: "",
@@ -120,6 +131,87 @@ function Admin() {
 
     obtenerDatosFiscales();
   }, []);
+
+  const handleEditarDatosFiscales = (datosFiscales) => {
+    setDatosFiscalesEditados({
+      id: datosFiscales.id,
+      usoCdfi: datosFiscales.usoCdfi,
+      email: datosFiscales.email,
+      razonSocial: datosFiscales.razonSocial,
+      regimenFiscal: datosFiscales.regimenFiscal,
+      rfc: datosFiscales.rfc,
+      userId: datosFiscales.userId,
+      // Agrega otros campos según tu estructura de datos
+    });
+    // Puedes añadir más lógica aquí según tus necesidades
+  };
+
+  const handleGuardarCambiosDatosFiscales = async () => {
+    try {
+      const datosFiscalesDocRef = doc(
+        db,
+        "DatosFiscales",
+        datosFiscalesEditados.id
+      );
+
+      await updateDoc(datosFiscalesDocRef, {
+        usoCdfi: datosFiscalesEditados.usoCdfi,
+        email: datosFiscalesEditados.email,
+        razonSocial: datosFiscalesEditados.razonSocial,
+        regimenFiscal: datosFiscalesEditados.regimenFiscal,
+        rfc: datosFiscalesEditados.rfc,
+        userId: datosFiscalesEditados.userId,
+        // Actualiza otros campos según tu estructura de datos
+      });
+
+      // Actualiza la lista de datos fiscales
+      const nuevosDatosFiscales = datosFiscalesConNombre.map((datos) =>
+        datos.id === datosFiscalesEditados.id
+          ? { ...datos, ...datosFiscalesEditados }
+          : datos
+      );
+
+      setDatosFiscalesConNombre(nuevosDatosFiscales);
+      setDatosFiscalesEditados({
+        id: "",
+        usoCdfi: "",
+        email: "",
+        razonSocial: "",
+        regimenFiscal: "",
+        rfc: "",
+        userId: "",
+        // Restablece otros campos según tu estructura de datos
+      });
+    } catch (error) {
+      console.error("Error al guardar los cambios en datos fiscales:", error);
+    }
+  };
+
+  const handleEliminarDatosFiscales = async (datosFiscalesId) => {
+    // Mostrar una alerta de confirmación
+    const confirmacion = window.confirm(
+      "¿Estás seguro de que deseas eliminar estos datos fiscales?"
+    );
+
+    if (confirmacion) {
+      try {
+        const datosFiscalesDocRef = doc(db, "DatosFiscales", datosFiscalesId);
+        await deleteDoc(datosFiscalesDocRef);
+
+        // Filtra los datos fiscales eliminados de la lista
+        const nuevosDatosFiscales = datosFiscalesConNombre.filter(
+          (datos) => datos.id !== datosFiscalesId
+        );
+
+        setDatosFiscalesConNombre(nuevosDatosFiscales);
+
+        // Restablece el valor seleccionado en el select
+        setSelectedEmpresa("");
+      } catch (error) {
+        console.error("Error al eliminar datos fiscales:", error);
+      }
+    }
+  };
 
   const handleGuardarTransaccion = async () => {
     try {
@@ -895,7 +987,7 @@ function Admin() {
               <div className="mb-6 border-b border-gray-300"></div>
               <div className="flex items-center mb-4 space-x-2">
                 <select
-                  className="p-2 rounded border border-gray-300 w-40"
+                  className="p-2 rounded border border-gray-300 w-90"
                   value={selectedEmpresa}
                   onChange={(e) => {
                     setSelectedEmpresa(e.target.value);
@@ -940,6 +1032,26 @@ function Admin() {
                   <p>
                     <strong>Uso CDFI:</strong> {empresaSeleccionada.usoCdfi}
                   </p>
+
+                  {/* Botones de Editar y Eliminar */}
+                  <div className="mt-4 flex space-x-2">
+                    <button
+                      onClick={() =>
+                        handleEditarDatosFiscales(empresaSeleccionada)
+                      }
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleEliminarDatosFiscales(empresaSeleccionada.id)
+                      }
+                      className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               )}
             </div>
