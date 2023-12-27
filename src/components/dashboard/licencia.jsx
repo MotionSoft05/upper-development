@@ -38,7 +38,7 @@ function Licencia() {
             const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
 
             if (datosFiscalesDocSnap.exists()) {
-              DatosFiscalesForm(datosFiscalesDocSnap.data());
+              DatosFiscales(datosFiscalesDocSnap.data());
             }
           } else {
             const userData = {
@@ -100,7 +100,7 @@ function Licencia() {
               <DatosNegocio currentUser={currentUser} />
             )}
             {selectedFilter === "datosFiscales" && (
-              <DatosFiscalesForm currentUser={currentUser} />
+              <DatosFiscales currentUser={currentUser} />
             )}
           </div>
         </main>
@@ -109,7 +109,7 @@ function Licencia() {
   );
 }
 
-function DatosFiscalesForm({ currentUser }) {
+function DatosFiscales({ currentUser }) {
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [datosFiscales, setDatosFiscales] = useState({
     rfc: "",
