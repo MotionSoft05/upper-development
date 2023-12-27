@@ -176,13 +176,14 @@ function Admin() {
         return;
       }
 
+      // Obtener la referencia del documento
       const datosFiscalesDocRef = doc(
         db,
         "DatosFiscales",
         datosFiscalesEditados.id
       );
 
-      // Intentar obtener el documento existente
+      // Verificar si el documento existe
       const datosFiscalesDoc = await getDoc(datosFiscalesDocRef);
 
       if (datosFiscalesDoc.exists()) {
