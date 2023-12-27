@@ -56,6 +56,7 @@ function Admin() {
     razonSocial: "",
     regimenFiscal: "",
     rfc: "",
+    codigoPostal: "",
     // Agrega otros campos según tu estructura de datos
   });
 
@@ -169,58 +170,34 @@ function Admin() {
         !datosFiscalesEditados.email ||
         !datosFiscalesEditados.razonSocial ||
         !datosFiscalesEditados.regimenFiscal ||
-        !datosFiscalesEditados.rfc
+        !datosFiscalesEditados.rfc ||
+        !datosFiscalesEditados.codigoPostal
         // Agregar más verificaciones según tus necesidades
       ) {
         mostrarMensaje("Todos los campos deben estar completos", "red");
         return;
       }
 
-      // Obtener la referencia del documento
-      const datosFiscalesDocRef = doc(
-        db,
-        "DatosFiscales",
-        datosFiscalesEditados.id
-      );
+      const datosFiscalesCollection = collection(db, "DatosFiscales");
 
       // Verificar si el documento existe
-      const datosFiscalesDoc = await getDoc(datosFiscalesDocRef);
+      const datosFiscalesDocRef = datosFiscalesEditados.id
+        ? doc(db, "DatosFiscales", datosFiscalesEditados.id)
+        : await addDoc(datosFiscalesCollection, {});
 
-      if (datosFiscalesDoc.exists()) {
-        // Si el documento existe, actualizarlo
-        await updateDoc(datosFiscalesDocRef, {
-          usoCdfi: datosFiscalesEditados.usoCdfi,
-          email: datosFiscalesEditados.email,
-          razonSocial: datosFiscalesEditados.razonSocial,
-          regimenFiscal: datosFiscalesEditados.regimenFiscal,
-          rfc: datosFiscalesEditados.rfc,
-          // Otros campos según tu estructura de datos
-        });
+      // Actualizar o crear el documento con los nuevos datos
+      await setDoc(datosFiscalesDocRef, {
+        userId: datosFiscalesEditados.userId,
+        usoCdfi: datosFiscalesEditados.usoCdfi,
+        email: datosFiscalesEditados.email,
+        codigoPostal: datosFiscalesEditados.codigoPostal,
+        razonSocial: datosFiscalesEditados.razonSocial,
+        regimenFiscal: datosFiscalesEditados.regimenFiscal,
+        rfc: datosFiscalesEditados.rfc,
+        // Otros campos según tu estructura de datos
+      });
 
-        mostrarMensaje("Guardado con éxito", "green");
-      } else {
-        // Si el documento no existe, crearlo con el userId
-        const nuevoDatosFiscalesDocRef = await addDoc(
-          collection(db, "DatosFiscales"),
-          {
-            userId: datosFiscalesEditados.userId,
-            usoCdfi: datosFiscalesEditados.usoCdfi,
-            email: datosFiscalesEditados.email,
-            razonSocial: datosFiscalesEditados.razonSocial,
-            regimenFiscal: datosFiscalesEditados.regimenFiscal,
-            rfc: datosFiscalesEditados.rfc,
-            // Otros campos según tu estructura de datos
-          }
-        );
-
-        // Actualizar el estado con el nuevo ID creado
-        setDatosFiscalesEditados({
-          ...datosFiscalesEditados,
-          id: nuevoDatosFiscalesDocRef.id,
-        });
-
-        mostrarMensaje("Guardado con éxito", "green");
-      }
+      mostrarMensaje("Guardado con éxito", "green");
     } catch (error) {
       console.error("Error al guardar los cambios en datos fiscales:", error);
       mostrarMensaje("Error al guardar los cambios", "red");
