@@ -195,14 +195,26 @@ function Admin() {
         await deleteDoc(datosFiscalesDocRef);
 
         // Filtra los datos fiscales eliminados de la lista
-        const nuevosDatosFiscales = datosFiscalesConNombre.filter(
-          (datos) => datos.id !== datosFiscalesId
+        const nuevosDatosFiscales = datosFiscalesConNombre.map((datos) =>
+          datos.id === datosFiscalesId
+            ? {
+                ...datos,
+                ...{
+                  codigoPostal: "",
+                  usoCdfi: "",
+                  email: "",
+                  razonSocial: "",
+                  regimenFiscal: "",
+                  rfc: "",
+                },
+              }
+            : datos
         );
 
         setDatosFiscalesConNombre(nuevosDatosFiscales);
 
-        // Restablece el valor seleccionado en el select
-        setSelectedEmpresa("");
+        // No restablezcas el valor seleccionado en el select para mantenerlo
+        // setSelectedEmpresa("");
       } catch (error) {
         console.error("Error al eliminar datos fiscales:", error);
       }
