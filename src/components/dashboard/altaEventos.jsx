@@ -387,8 +387,9 @@ function AltaEventos() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gray-300 p-4">
             <form>
-              {(user && user.email === "uppermex10@gmail.com") ||
-                (user && user.email === "ulises.jacobo@hotmail.com" && (
+              {user &&
+                (user.email === "uppermex10@gmail.com" ||
+                  user.email === "ulises.jacobo@hotmail.com") && (
                   <div className="relative z-0 w-full mb-6 group">
                     <select
                       value={selectedUser || ""}
@@ -405,7 +406,7 @@ function AltaEventos() {
                       ))}
                     </select>
                   </div>
-                ))}
+                )}
               <div className="relative z-0 w-full mb-6 group">
                 <input
                   type="text"
