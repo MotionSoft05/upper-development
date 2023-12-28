@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import axios from "axios";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -390,15 +391,43 @@ function Admin() {
   };
 
   const handleEliminarUsuario = async (usuarioId) => {
-    try {
-      await deleteDoc(doc(db, "usuarios", usuarioId));
-      setUsuarios((prevUsuarios) =>
-        prevUsuarios.filter((usuario) => usuario.id !== usuarioId)
-      );
-    } catch (error) {
-      console.error("Error al eliminar el usuario de Firebase:", error);
+    const confirmacion = window.confirm(
+      "¿Estás seguro de que deseas eliminar este usuario?"
+    );
+
+    // Si el usuario confirma la eliminación, procede
+    if (confirmacion) {
+      try {
+        // Eliminar usuario de Firestore
+        await deleteDoc(doc(db, "usuarios", usuarioId));
+
+        // Hacer la solicitud DELETE al backend usando Axios
+        const response = await axios.delete(
+          `http://localhost:3001/eliminar-usuario/${usuarioId}`
+        );
+
+        if (response.status === 200) {
+          console.log(`Usuario con ID ${usuarioId} eliminado correctamente.`);
+        } else {
+          console.error(
+            "Error al eliminar usuario del backend:",
+            response.statusText
+          );
+        }
+
+        // Actualizar el estado de React eliminando al usuario de la lista
+        setUsuarios((prevUsuarios) =>
+          prevUsuarios.filter((usuario) => usuario.id !== usuarioId)
+        );
+      } catch (error) {
+        console.error(
+          "Error al eliminar el usuario de Firestore o al hacer la solicitud al backend:",
+          error
+        );
+      }
     }
   };
+
   useEffect(() => {
     const obtenerUsuarios = async () => {
       try {
