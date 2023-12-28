@@ -22,7 +22,8 @@ function Sidebar({
             Principal
           </span>
         </div>
-        {userEmail === "uppermex10@gmail.com" && (
+        {(userEmail === "uppermex10@gmail.com" ||
+          userEmail === "ulises.jacobo@hotmail.com") && (
           <li className="my-px">
             <button
               onClick={() => {
