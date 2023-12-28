@@ -302,6 +302,16 @@ function AltaEventos() {
       };
     }
 
+    const resetFormState = () => {
+      // Reset the date value to 0 after successfully submitting the form
+      setValue({
+        startDate: 0,
+        endDate: new Date().setMonth(11),
+      });
+      setImages([]);
+      setDescription("");
+    };
+
     firebase
       .firestore()
       .collection("eventos")
@@ -319,10 +329,7 @@ function AltaEventos() {
         document.getElementById("minuteSelectorInicioSalon").value = "00";
         document.getElementById("hourSelectorFinalSalon").value = "00";
         document.getElementById("minuteSelectorFinalSalon").value = "00";
-        setValue({
-          startDate: 0,
-          endDate: new Date().setMonth(11),
-        });
+
         setRepeatingDays({
           Lunes: false,
           Martes: false,
@@ -339,7 +346,7 @@ function AltaEventos() {
         setImages([]);
         resetForm();
         setDescription("");
-
+        resetFormState();
         setTimeout(() => {
           setAlertaEnviada(false);
         }, 6000);
