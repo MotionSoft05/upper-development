@@ -62,7 +62,7 @@ function LogIn() {
           window.location.href = "/";
         } else {
           setError(
-            "Por favor, verifica tu correo electrónico antes de iniciar sesión."
+            "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
           );
           const resendVerificationOption = (
             <button
