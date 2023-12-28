@@ -59,7 +59,11 @@ function AltaEventos() {
     useState([]);
 
   useEffect(() => {
-    if (user && user.email === "uppermex10@gmail.com") {
+    if (
+      user &&
+      (user.email === "uppermex10@gmail.com" ||
+        user.email === "ulises.jacobo@hotmail.com")
+    ) {
       const usuariosRef = collection(db, "usuarios");
       const usuariosSnapshot = getDocs(usuariosRef);
 
@@ -381,24 +385,25 @@ function AltaEventos() {
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-gray-300 p-4">
             <form>
-              {user && user.email === "uppermex10@gmail.com" && (
-                <div className="relative z-0 w-full mb-6 group">
-                  <select
-                    value={selectedUser || ""}
-                    onChange={handleUserSelect}
-                    className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2  appearance-none  border-gray-600  focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                  >
-                    <option value="" disabled>
-                      Seleccionar Empresa
-                    </option>
-                    {allUsers.map((u) => (
-                      <option key={u.id} value={u.id}>
-                        {`${u.empresa}`}
+              {(user && user.email === "uppermex10@gmail.com") ||
+                (user && user.email === "ulises.jacobo@hotmail.com" && (
+                  <div className="relative z-0 w-full mb-6 group">
+                    <select
+                      value={selectedUser || ""}
+                      onChange={handleUserSelect}
+                      className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2  appearance-none  border-gray-600  focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    >
+                      <option value="" disabled>
+                        Seleccionar Empresa
                       </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+                      {allUsers.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {`${u.empresa}`}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
               <div className="relative z-0 w-full mb-6 group">
                 <input
                   type="text"
@@ -735,7 +740,8 @@ function AltaEventos() {
                   Seleccionar Dispositivos:
                 </h4>
                 <div className="mb-4">
-                  {user && user.email !== "uppermex10@gmail.com" ? (
+                  {(user && user.email !== "uppermex10@gmail.com") ||
+                  (user && user.email === "ulises.jacobo@hotmail.com") ? (
                     // Renderizar pantallas del usuario logeado particular
                     <>
                       {Array.isArray(nombrePantallas)
