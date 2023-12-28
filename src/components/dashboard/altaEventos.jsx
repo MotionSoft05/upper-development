@@ -146,7 +146,9 @@ function AltaEventos() {
 
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const imageRef = ref(storage, `imagenes/${file.name}`);
+      const randomString = Math.random().toString(36).substring(7);
+      const uniqueName = `${randomString}_${file.name}`;
+      const imageRef = ref(storage, `imagenes/${uniqueName}`);
 
       try {
         await uploadBytes(imageRef, file);
