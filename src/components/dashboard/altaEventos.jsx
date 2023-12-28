@@ -160,6 +160,9 @@ function AltaEventos() {
         console.error("Error al subir imagen:", error);
       }
     }
+
+    // Limpiar la entrada de archivos para permitir seleccionar el mismo archivo nuevamente
+    e.target.value = null;
   };
 
   const deleteImage = (index) => {
@@ -316,6 +319,7 @@ function AltaEventos() {
       });
       setImages([]);
       setDescription("");
+      setHasImage(false);
     };
 
     firebase
@@ -351,6 +355,7 @@ function AltaEventos() {
         setImages([]);
         resetFormState();
         setDescription("");
+        setHasImage(false);
         resetFormState();
         setTimeout(() => {
           setAlertaEnviada(false);
