@@ -179,7 +179,26 @@ function ConsultaModEvento() {
       );
 
       if (confirmacion) {
+        // Fetch the event data
+        const evento = await firebase
+          .firestore()
+          .collection("eventos")
+          .doc(id)
+          .get();
+
+        // Check if the event has images
+        const imagenesEvento = evento.data().images || [];
+
+        // Delete the event
         await firebase.firestore().collection("eventos").doc(id).delete();
+
+        // Delete the associated images
+        if (imagenesEvento.length > 0) {
+          imagenesEvento.forEach(async (imagen) => {
+            const imagenRef = storage.refFromURL(imagen);
+            await imagenRef.delete();
+          });
+        }
       }
     } catch (error) {
       console.error("Error al eliminar el evento:", error);
@@ -249,29 +268,40 @@ function ConsultaModEvento() {
     const nuevaImagen = e.target.files[0];
 
     if (nuevaImagen) {
-      // Crea una referencia en Storage usando el nombre de archivo único
-      const storageRef = storage.ref(`imagenes/${nuevaImagen.name}`);
+      const randomString = Math.random().toString(36).substring(7);
+      const uniqueName = `${randomString}_${nuevaImagen.name}`;
 
-      // Sube la imagen a Storage
-      const snapshot = await storageRef.put(nuevaImagen);
+      const storageRef = storage.ref(`imagenes/${uniqueName}`);
 
-      // Obtiene la URL de descarga de la imagen
-      const url = await snapshot.ref.getDownloadURL();
-
-      // Actualiza el estado de las imágenes con la nueva URL
-      setImagenesEvento([...imagenesEvento, url]);
+      try {
+        const snapshot = await storageRef.put(nuevaImagen);
+        const url = await snapshot.ref.getDownloadURL();
+        setImagenesEvento([...imagenesEvento, url]);
+      } catch (error) {
+        console.error("Error al subir imagen:", error);
+      }
     }
   };
 
-  const eliminarImagen = (index) => {
-    const nuevasImagenes = [...imagenesEvento];
+  const eliminarImagen = async (index) => {
+    try {
+      const nuevasImagenes = [...imagenesEvento];
+      const imagenToDelete = nuevasImagenes[index];
 
-    // Ensure there is at least one image before deleting
-    if (nuevasImagenes.length > 1) {
-      nuevasImagenes.splice(index, 1);
-      setImagenesEvento(nuevasImagenes);
-    } else {
-      alert("Debe haber al menos una imagen.");
+      // Ensure there is at least one image before deleting
+      if (nuevasImagenes.length > 1) {
+        nuevasImagenes.splice(index, 1);
+
+        // Delete the image from Firebase Storage
+        const imagenRef = storage.refFromURL(imagenToDelete);
+        await imagenRef.delete();
+
+        setImagenesEvento(nuevasImagenes);
+      } else {
+        alert("Debe haber al menos una imagen.");
+      }
+    } catch (error) {
+      console.error("Error al eliminar la imagen:", error);
     }
   };
 
