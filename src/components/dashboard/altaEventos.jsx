@@ -348,9 +348,8 @@ function AltaEventos() {
 
         setAlertaEnviada(true);
         setSelectedDevices([]);
-        setSelectedImages([]);
         setImages([]);
-        resetForm();
+        resetFormState();
         setDescription("");
         resetFormState();
         setTimeout(() => {
