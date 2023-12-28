@@ -89,7 +89,9 @@ function DashBoard() {
       </aside>
       <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
         <div className="">
-          {showAdmin && userEmail === "uppermex10@gmail.com" && <Admin />}
+          {showAdmin &&
+            (userEmail === "uppermex10@gmail.com" ||
+              userEmail === "ulises.jacobo@hotmail.com") && <Admin />}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
