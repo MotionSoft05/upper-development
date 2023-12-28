@@ -320,7 +320,7 @@ function AltaEventos() {
         document.getElementById("hourSelectorFinalSalon").value = "00";
         document.getElementById("minuteSelectorFinalSalon").value = "00";
         setValue({
-          startDate: new Date(),
+          startDate: 0,
           endDate: new Date().setMonth(11),
         });
         setRepeatingDays({
@@ -332,6 +332,7 @@ function AltaEventos() {
           Sábado: false,
           Domingo: false,
         });
+
         setAlertaEnviada(true);
         setSelectedDevices([]);
         setSelectedImages([]);
