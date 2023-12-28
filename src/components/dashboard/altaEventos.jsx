@@ -487,6 +487,9 @@ function AltaEventos() {
                   Seleccione las horas:
                 </h4>
                 <div className="bg-white p-3 sm:p-4 mb-3 sm:mb-4 rounded-lg shadow-md">
+                  <p className="text-gray-700 font-medium text-sm sm:text-base mb-2">
+                    Horario en que se tiene programado el evento
+                  </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="relative mb-2 sm:mb-0">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
@@ -577,6 +580,11 @@ function AltaEventos() {
                   </div>
                 </div>
                 <div className="bg-white p-3 sm:p-4 mb-3 sm:mb-4 rounded-lg shadow-md">
+                  <p className="text-gray-700 font-medium text-sm sm:text-base mb-2">
+                    Horario en que se mostrará la información del evento en
+                    pantallas
+                  </p>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="relative mb-2 sm:mb-0">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
