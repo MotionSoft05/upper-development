@@ -18,6 +18,9 @@ function Publicidad() {
               Ingresar imágenes que serán desplegadas cuando no se cuente con
               eventos.
             </p>
+            <p className="text-gray-600">
+              El tamaño recomendado es el de tu pantalla.
+            </p>
           </div>
 
           <div className="mb-8">
