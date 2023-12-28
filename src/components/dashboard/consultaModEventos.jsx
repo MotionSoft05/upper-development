@@ -85,7 +85,11 @@ function ConsultaModEvento() {
 
       let eventosRef;
 
-      if (user && user.email === "uppermex10@gmail.com") {
+      if (
+        user &&
+        (user.email === "uppermex10@gmail.com" ||
+          user.email === "ulises.jacobo@hotmail.com")
+      ) {
         eventosRef = firebase.firestore().collection("eventos");
       } else if (user) {
         eventosRef = firebase
@@ -301,7 +305,8 @@ function ConsultaModEvento() {
           <table className=" ">
             <thead className="bg-gray-50">
               <tr>
-                {usuarioLogeado === "uppermex10@gmail.com" && (
+                {(usuarioLogeado === "uppermex10@gmail.com" ||
+                  usuarioLogeado === "ulises.jacobo@hotmail.com") && (
                   <th
                     scope="col"
                     className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
@@ -389,7 +394,8 @@ function ConsultaModEvento() {
 
                   return (
                     <tr key={evento.id} className="text-xs md:text-base">
-                      {usuarioLogeado === "uppermex10@gmail.com" && (
+                      {(usuarioLogeado === "uppermex10@gmail.com" ||
+                        usuarioLogeado === "ulises.jacobo@hotmail.com") && (
                         <td className="md:px-6 md:py-4 ">
                           {usuario
                             ? `${usuario.nombre} ${usuario.apellido}`
