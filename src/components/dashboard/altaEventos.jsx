@@ -42,7 +42,7 @@ function AltaEventos() {
     []
   );
   const [value, setValue] = useState({
-    startDate: 0, // Set the default value to 0 (current date)
+    startDate: 0,
     endDate: new Date().setMonth(11),
   });
 
@@ -80,28 +80,19 @@ function AltaEventos() {
   const handleUserSelect = (e) => {
     const selectedUserId = e.target.value;
 
-    // Obtener las pantallas del usuario seleccionado
     const selectedUserPantallas =
       allUsers.find((user) => user.id === selectedUserId)?.nombrePantallas ||
       [];
 
-    // Obtener las pantallas del directorio del usuario seleccionado
     const selectedUserPantallasDirectorio =
       allUsers.find((user) => user.id === selectedUserId)
         ?.nombrePantallasDirectorio || [];
 
-    // Establecer las pantallas del usuario seleccionado en el estado
     setSelectedUserPantallas(selectedUserPantallas);
-
-    // Establecer las pantallas del directorio del usuario seleccionado en el estado
     setSelectedUserPantallasDirectorio(selectedUserPantallasDirectorio);
 
-    // Restablecer las pantallas seleccionadas al cambiar de usuario
     setSelectedDevices([]);
     setImages([]);
-    // Otros restablecimientos que puedas necesitar...
-
-    // Finalmente, establecer el usuario seleccionado en el estado
     setSelectedUser(selectedUserId);
   };
 
@@ -111,7 +102,6 @@ function AltaEventos() {
         setUser(user);
         setUserId(user.uid);
 
-        // Obtener datos del usuario desde Firestore
         const usuarioRef = doc(db, "usuarios", user.uid);
         const usuarioDoc = await getDoc(usuarioRef);
 
@@ -160,8 +150,6 @@ function AltaEventos() {
         console.error("Error al subir imagen:", error);
       }
     }
-
-    // Limpiar la entrada de archivos para permitir seleccionar el mismo archivo nuevamente
     e.target.value = null;
   };
 
@@ -187,13 +175,6 @@ function AltaEventos() {
     Domingo: false,
   });
 
-  const handleRepeatingDayChange = (day) => {
-    setRepeatingDays({
-      ...repeatingDays,
-      [day]: !repeatingDays[day],
-    });
-  };
-
   const obtenerInformacionPersonalizacion = async (userId) => {
     try {
       const templateSalonesRef = collection(db, "TemplateSalones");
@@ -204,11 +185,9 @@ function AltaEventos() {
       const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
       if (!templateSalonesSnapshot.empty) {
-        // Si se encuentra un documento, devuelve la información de personalización
         const templateSalonesDoc = templateSalonesSnapshot.docs[0].data();
         return templateSalonesDoc;
       } else {
-        // Si no hay información de personalización, puedes devolver un valor por defecto o null
         return null;
       }
     } catch (error) {
@@ -247,13 +226,13 @@ function AltaEventos() {
     }:${document.getElementById("minuteSelectorFinalSalon").value}`;
 
     const fechaInicio = new Date(value.startDate);
-    fechaInicio.setDate(fechaInicio.getDate() + 1); // Agregar un día a la fecha de inicio
+    fechaInicio.setDate(fechaInicio.getDate() + 1);
     fechaInicio.setHours(
       horaInicialReal.split(":")[0],
       horaInicialReal.split(":")[1]
     );
     const fechaFinal = new Date(value.endDate);
-    fechaFinal.setDate(fechaFinal.getDate() + 1); // Agregar un día a la fecha final
+    fechaFinal.setDate(fechaFinal.getDate() + 1);
     fechaFinal.setHours(
       horaFinalReal.split(":")[0],
       horaFinalReal.split(":")[1]
@@ -267,7 +246,7 @@ function AltaEventos() {
 
     const fechaHoraActual = new Date();
     const fechaHoraFinalSalon = new Date(value.endDate);
-    fechaHoraFinalSalon.setDate(fechaHoraFinalSalon.getDate() + 1); // Agregar un día
+    fechaHoraFinalSalon.setDate(fechaHoraFinalSalon.getDate() + 1);
     fechaHoraFinalSalon.setHours(
       parseInt(horaFinalSalon.split(":")[0]),
       parseInt(horaFinalSalon.split(":")[1])
@@ -293,7 +272,6 @@ function AltaEventos() {
     };
 
     if (selectedUser) {
-      // Asignar el evento al usuario seleccionado (solo si está seleccionado)
       eventoData.userId = selectedUser;
     }
 
@@ -301,7 +279,6 @@ function AltaEventos() {
       userId
     );
 
-    // Aplicar la información de personalización al evento
     if (personalizacionTemplate) {
       eventoData.personalizacionTemplate = {
         fontColor: personalizacionTemplate.fontColor,
@@ -312,7 +289,6 @@ function AltaEventos() {
     }
 
     const resetFormState = () => {
-      // Reset the date value to 0 after successfully submitting the form
       setValue({
         startDate: 0,
         endDate: new Date().setMonth(11),
@@ -757,7 +733,6 @@ function AltaEventos() {
                 <div className="mb-4">
                   {(user && user.email !== "uppermex10@gmail.com") ||
                   (user && user.email === "ulises.jacobo@hotmail.com") ? (
-                    // Renderizar pantallas del usuario logeado particular
                     <>
                       {Array.isArray(nombrePantallas)
                         ? nombrePantallas.map((nombrePantalla, index) => (
