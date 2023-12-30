@@ -35,6 +35,10 @@ function ConsultaModEvento() {
   const [pantallas, setPantallas] = useState([]);
   const [filtro, setFiltro] = useState("activos");
   const [eventosFiltrados, setEventosFiltrados] = useState([]);
+  const [imagenesPendientesEliminar, setImagenesPendientesEliminar] = useState(
+    []
+  );
+  const [cambiosPendientes, setCambiosPendientes] = useState(false);
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
@@ -219,17 +223,36 @@ function ConsultaModEvento() {
     setEventoEditado(null);
     setHoraInicialReal("");
     setHoraFinalReal("");
+    setDescription("");
+    setImagenesPendientesEliminar([]); // Limpiar la lista de imágenes eliminadas
+    setCambiosPendientes(false);
   };
 
   const guardarCambios = async () => {
     try {
-      const imagenesAntiguas = eventos.images || [];
-      imagenesAntiguas.forEach((imagen) => {
-        const imagenRef = storage.refFromURL(imagen);
-        imagenRef
-          .delete()
-          .catch((error) => console.error("Error al eliminar imagen:", error));
-      });
+      // Eliminar imágenes pendientes del almacenamiento
+      if (cambiosPendientes) {
+        if (imagenesPendientesEliminar.length > 0) {
+          await Promise.all(
+            imagenesPendientesEliminar.map(async (imagen) => {
+              const imagenRef = storage.refFromURL(imagen);
+
+              try {
+                // Verificar si la imagen existe antes de intentar eliminarla
+                await imagenRef.getMetadata();
+
+                // Si la imagen existe, entonces eliminarla
+                await imagenRef.delete();
+              } catch (error) {
+                // Manejar el error si la imagen no existe
+                console.warn(`La imagen no existe: ${imagen}`);
+              }
+            })
+          );
+        }
+      }
+
+      // Guardar cambios en el evento
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
       await firebase
@@ -247,11 +270,14 @@ function ConsultaModEvento() {
           devices: eventoEditado.devices || [],
         });
 
+      // Cerrar el modal y restablecer estados
       setModalAbierto(false);
       setEventoEditado(null);
       setHoraInicialReal("");
       setHoraFinalReal("");
       setDescription("");
+      setImagenesPendientesEliminar([]); // Limpiar la lista de imágenes eliminadas
+      setCambiosPendientes(false);
     } catch (error) {
       console.error("Error al guardar cambios:", error);
     }
@@ -283,25 +309,18 @@ function ConsultaModEvento() {
     }
   };
 
-  const eliminarImagen = async (index) => {
-    try {
-      const nuevasImagenes = [...imagenesEvento];
-      const imagenToDelete = nuevasImagenes[index];
+  const eliminarImagen = (index) => {
+    const nuevasImagenes = [...imagenesEvento];
+    const imagenToDelete = nuevasImagenes[index];
 
-      // Ensure there is at least one image before deleting
-      if (nuevasImagenes.length > 1) {
-        nuevasImagenes.splice(index, 1);
+    if (nuevasImagenes.length > 1) {
+      nuevasImagenes.splice(index, 1);
 
-        // Delete the image from Firebase Storage
-        const imagenRef = storage.refFromURL(imagenToDelete);
-        await imagenRef.delete();
-
-        setImagenesEvento(nuevasImagenes);
-      } else {
-        alert("Debe haber al menos una imagen.");
-      }
-    } catch (error) {
-      console.error("Error al eliminar la imagen:", error);
+      setImagenesPendientesEliminar((prev) => [...prev, imagenToDelete]);
+      setImagenesEvento(nuevasImagenes);
+      setCambiosPendientes(true); // Indica que hay cambios pendientes
+    } else {
+      alert("Debe haber al menos una imagen asociada al evento.");
     }
   };
 
