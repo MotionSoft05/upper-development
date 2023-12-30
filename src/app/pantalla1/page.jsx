@@ -13,7 +13,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
-import SliderPublicidad from "@/components/dashboard/sliderPublicidad";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -67,37 +66,33 @@ function Pantalla1() {
 
     return `${diaSemana} ${dia} DE ${mes} ${año}`;
   };
+  // Función para obtener la hora actual
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
-  // Señal no se apage monitor-------------------------------
+
   useEffect(() => {
-    const enableWakeLock = async () => {
-      if ("wakeLock" in navigator) {
-        try {
-          const wakeLock = await navigator.wakeLock.request("screen");
-          // Realizar acciones con el wakeLock si se obtuvo con éxito
-          wakeLock.addEventListener("release", () => {
-            // Manejar la liberación del bloqueo de pantalla
+    if (user && firestore) {
+      const publicidadesRef = collection(firestore, "Publicidad"); // Reemplaza "Publicidad" con el nombre de tu colección
+      const publicidadesQuery = query(
+        publicidadesRef,
+        where("userId", "==", user.uid)
+      );
+
+      getDocs(publicidadesQuery)
+        .then((querySnapshot) => {
+          const publicidades = [];
+          querySnapshot.forEach((doc) => {
+            const publicidad = { id: doc.id, ...doc.data() };
+            publicidades.push(publicidad);
           });
-        } catch (error) {
-          // Manejar errores al solicitar el bloqueo de pantalla
-          console.error("Error al solicitar el bloqueo de pantalla:", error);
-        }
-      } else {
-        // El navegador no admite la API Wake Lock
-        console.warn("El navegador no admite la API Wake Lock");
-      }
-    };
-
-    enableWakeLock(); // Llamar a la función para solicitar el bloqueo de pantalla al cargar el componente
-
-    // Realizar la limpieza al desmontar el componente si es necesario
-    return () => {
-      // Realizar acciones de limpieza si es necesario al desmontar el componente
-    };
-  }, []);
-  // Hora actual---------------------------------------------
+          setPublicidadesUsuario(publicidades);
+        })
+        .catch((error) => {
+          console.error("Error al obtener las publicidades:", error);
+        });
+    }
+  }, [user, firestore]);
   useEffect(() => {
     const interval = setInterval(() => {
       obtenerHoraActual(); // Llamar a obtenerHoraActual cada segundo
@@ -106,7 +101,6 @@ function Pantalla1() {
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
 
-  // Datos Firebase------------------------------------------
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -134,30 +128,20 @@ function Pantalla1() {
 
     return () => unsubscribe();
   }, []);
-  // Publicidades-------------------------------------------
-  useEffect(() => {
-    if (user && firestore) {
-      const publicidadesRef = collection(firestore, "Publicidad"); // Reemplaza "Publicidad" con el nombre de tu colección
-      const publicidadesQuery = query(
-        publicidadesRef,
-        where("userId", "==", user.uid)
-      );
 
-      getDocs(publicidadesQuery)
-        .then((querySnapshot) => {
-          const publicidades = [];
-          querySnapshot.forEach((doc) => {
-            const publicidad = { id: doc.id, ...doc.data() };
-            publicidades.push(publicidad);
-          });
-          setPublicidadesUsuario(publicidades);
-        })
-        .catch((error) => {
-          console.error("Error al obtener las publicidades:", error);
-        });
-    }
-  }, [user, firestore]);
-  // Eventos------------------------------------------------
+  const obtenerDiaActual = () => {
+    const diasSemana = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    const now = new Date();
+    return diasSemana[now.getDay()];
+  };
 
   useEffect(() => {
     if (user && firestore) {
@@ -199,8 +183,11 @@ function Pantalla1() {
                 []
               );
 
+              console.log("pantallasAsignadas", pantallasAsignadas);
+
               if (pantallasAsignadas.length > 0) {
                 const posicionActual = parseInt(numeroPantallaActual, 10);
+                console.log("posicionActual", posicionActual);
 
                 const dispositivosCoincidentes = pantallasAsignadas.filter(
                   (pantalla) => pantalla.posicion === posicionActual
@@ -214,8 +201,10 @@ function Pantalla1() {
               }
             });
 
+            console.log("Dispositivo coincidente:", dispositivoCoincidente);
+            console.log("eventosData", eventosData);
             // Filtrar por fecha y hora los eventos filtrados por pantalla
-            const eventosEnCursoEffect = eventosData.filter((evento) => {
+            const eventosEnCurso = eventosData.filter((evento) => {
               // Obtener fecha actual (solo día)
               const fechaActual = new Date();
 
@@ -238,11 +227,32 @@ function Pantalla1() {
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
               console.log("evento", evento);
+              // console.log("fechaActual", fechaActual);
+              // console.log("fechaInicioEvento", fechaInicioEvento);
+              // console.log("fechaFinalEvento", fechaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("fechaActualEnRango", fechaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
 
+              // console.log("horaActual", horaActual);
+              // console.log("horaInicialEvento", horaInicialEvento);
+              // console.log("horaFinalEvento", horaFinalEvento);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
+              // console.log("horaActualEnRango", horaActualEnRango);
+              // console.log(
+              //   "---------------------------------------------------"
+              // );
               return fechaActualEnRango && horaActualEnRango;
             });
-            console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
-            setEventosEnCurso(eventosEnCursoEffect);
+
+            console.log("Eventos filtrados por fecha y hora:", eventosEnCurso);
+            setEventosEnCurso(eventosEnCurso);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -257,12 +267,11 @@ function Pantalla1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 10000);
+      }, 5000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
-  console.log("publicidadesUsuario.", publicidadesUsuario);
   const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
   const [opacities, setOpacities] = useState([]);
@@ -292,18 +301,28 @@ function Pantalla1() {
     [
       (slider) => {
         let timeout;
-
+        let mouseOver = false;
         function clearNextTimeout() {
           clearTimeout(timeout);
         }
         function nextTimeout() {
           clearTimeout(timeout);
-
+          if (mouseOver) return;
           timeout = setTimeout(() => {
             slider.next();
-          }, 5000);
+          }, 7000);
         }
-
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
         slider.on("dragStarted", clearNextTimeout);
         slider.on("animationEnded", nextTimeout);
         slider.on("updated", nextTimeout);
@@ -311,6 +330,7 @@ function Pantalla1() {
     ]
   );
 
+  console.log("publicidadesUsuario", publicidadesUsuario);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     return (
       <>
@@ -333,7 +353,7 @@ function Pantalla1() {
   }
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
-
+  console.log("eventoActual", eventoActual);
   const {
     personalizacionTemplate,
     lugar,
@@ -370,7 +390,7 @@ function Pantalla1() {
               </>
             )}
             <h1
-              className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
+              className={`font-bold uppercase text-5xl md:text-7xl text-color mr-16`}
               style={{ fontFamily: personalizacionTemplate.fontStyle }}
             >
               {dispositivoCoincidenteLAL}
@@ -392,56 +412,43 @@ function Pantalla1() {
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
                 {images && images.length > 0 ? (
-                  images.length === 1 ? (
-                    <div>
-                      <img
-                        src={images[0]}
-                        alt={`Imagen 1`}
+                  <>
+                    <div className="slider-container">
+                      <div
+                        ref={sliderRef}
+                        className="keen-slider"
                         style={{
-                          width: "30vw",
-                          height: "30vw",
-                          objectFit: "cover",
+                          position: "relative",
+                          overflow: "hidden",
                         }}
-                      />
-                    </div>
-                  ) : (
-                    <div
-                      ref={sliderRef}
-                      className="fader"
-                      style={{
-                        position: "relative",
-                        overflow: "hidden",
-                        width: "30vw", // Ajusta el ancho del contenedor según sea necesario
-                        height: "30vw", // Ajusta el alto del contenedor según sea necesario
-                      }}
-                    >
-                      {images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="fader__slide "
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            opacity: opacities[index],
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        >
-                          <img
-                            src={image}
-                            alt={`Imagen ${index + 1}`}
-                            className="w-full h-full object-cover"
+                      >
+                        {images.map((image, index) => (
+                          <div
+                            key={index}
+                            className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
                             style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
+                              width: "30vw",
+                              height: "30vw",
+                              opacity: opacities[index],
+                              top: "0",
                             }}
-                          />
-                        </div>
-                      ))}
+                          >
+                            <img
+                              src={image}
+                              alt={`Imagen ${index + 1}`}
+                              className="w-full h-full object-cover"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                position: "absolute",
+                              }}
+                            />
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  )
+                  </>
                 ) : (
                   <p
                     style={{
@@ -460,7 +467,7 @@ function Pantalla1() {
                     className={`text-3xl md:text-4xl text-color font-bold`}
                     style={{ fontFamily: personalizacionTemplate.fontStyle }}
                   >
-                    Sesión:
+                    sesión:
                   </p>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}
