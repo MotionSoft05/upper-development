@@ -305,19 +305,6 @@ function PublicidadSalon() {
             });
 
             newIds = [...newIds, publicidadRef.id];
-
-            setImagenesSalon((prevImages) => {
-              const newImages = [...prevImages];
-              newImages[index] = null;
-              return newImages;
-            });
-
-            setTiemposSalon((prevTiempos) => [
-              ...prevTiempos,
-              { horas: 0, minutos: 0, segundos: 0 },
-            ]);
-
-            setPreviewImages((prevPreviews) => [...prevPreviews, null]);
           }
         }
       }
