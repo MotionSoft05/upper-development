@@ -13,7 +13,6 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
-import SliderPublicidad from "@/components/dashboard/sliderPublicidad";
 
 const obtenerHora = () => {
   const now = new Date();
