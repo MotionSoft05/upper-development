@@ -45,14 +45,71 @@ function PantallasDirectorio() {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(obtenerHora());
-  const [weatherData, setWeatherData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedLogo, setSelectedLogo] = useState(null);
-  const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
-    { value: "New York", label: "New York" },
-    { value: "Los Angeles", label: "Los Angeles" },
+    // Ciudades de México
+    {
+      value: "Aguascalientes",
+      label: "Aguascalientes, Aguascalientes, México",
+    },
+    { value: "Cancún", label: "Cancún, Quintana Roo, México" },
+    { value: "Chihuahua", label: "Chihuahua, Chihuahua, México" },
+    {
+      value: "Ciudad de México",
+      label: "Ciudad de México, Ciudad de México, México",
+    },
+    { value: "Guadalajara", label: "Guadalajara, Jalisco, México" },
+    { value: "Hermosillo", label: "Hermosillo, Sonora, México" },
+    { value: "León", label: "León, Guanajuato, México" },
+    { value: "Mérida", label: "Mérida, Yucatán, México" },
+    { value: "Monterrey", label: "Monterrey, Nuevo León, México" },
+    { value: "Morelia", label: "Morelia, Michoacán, México" },
+    { value: "Puebla", label: "Puebla, Puebla, México" },
+    { value: "Querétaro", label: "Querétaro, Querétaro, México" },
+    { value: "Saltillo", label: "Saltillo, Coahuila, México" },
+    {
+      value: "San Luis Potosí",
+      label: "San Luis Potosí, San Luis Potosí, México",
+    },
+    { value: "Tijuana", label: "Tijuana, Baja California, México" },
+    { value: "Toluca", label: "Toluca, Estado de México, México" },
+    { value: "Torreón", label: "Torreón, Coahuila, México" },
+    { value: "Tuxtla Gutiérrez", label: "Tuxtla Gutiérrez, Chiapas, México" },
+    { value: "Veracruz", label: "Veracruz, Veracruz, México" },
+    { value: "Zacatecas", label: "Zacatecas, Zacatecas, México" },
+
+    // Ciudades de Estados Unidos
+    { value: "Austin", label: "Austin, Texas, Estados Unidos" },
+    {
+      value: "Charlotte",
+      label: "Charlotte, Carolina del Norte, Estados Unidos",
+    },
+    { value: "Chicago", label: "Chicago, Illinois, Estados Unidos" },
+    { value: "Columbus", label: "Columbus, Ohio, Estados Unidos" },
+    { value: "Dallas", label: "Dallas, Texas, Estados Unidos" },
+    { value: "Denver", label: "Denver, Colorado, Estados Unidos" },
+    { value: "Fort Worth", label: "Fort Worth, Texas, Estados Unidos" },
+    { value: "Houston", label: "Houston, Texas, Estados Unidos" },
+    { value: "Indianapolis", label: "Indianapolis, Indiana, Estados Unidos" },
+    { value: "Jacksonville", label: "Jacksonville, Florida, Estados Unidos" },
+    { value: "Los Angeles", label: "Los Angeles, California, Estados Unidos" },
+    { value: "New York", label: "Nueva York, Nueva York, Estados Unidos" },
+    { value: "Philadelphia", label: "Filadelfia, Pensilvania, Estados Unidos" },
+    { value: "Phoenix", label: "Phoenix, Arizona, Estados Unidos" },
+    { value: "San Antonio", label: "San Antonio, Texas, Estados Unidos" },
+    { value: "San Diego", label: "San Diego, California, Estados Unidos" },
+    {
+      value: "San Francisco",
+      label: "San Francisco, California, Estados Unidos",
+    },
+    { value: "San Jose", label: "San José, California, Estados Unidos" },
+    { value: "Seattle", label: "Seattle, Washington, Estados Unidos" },
+    { value: "Washington", label: "Washington, D.C., Estados Unidos" },
   ]);
+
+  // Ordenar alfabéticamente
+  cityOptions.sort((a, b) => a.label.localeCompare(b.label));
+
   const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
