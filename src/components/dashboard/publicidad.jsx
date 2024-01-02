@@ -19,7 +19,8 @@ function Publicidad() {
               eventos.
             </p>
             <p className="text-gray-600">
-              El tamaño recomendado es el de tu pantalla.
+              El tamaño recomendado es el de tu pantalla. Cómo máximo 10
+              publicidades por sección.
             </p>
           </div>
 
