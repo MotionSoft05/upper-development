@@ -49,62 +49,155 @@ function PantallasDirectorio() {
   const [cityOptions, setCityOptions] = useState([
     // Ciudades de México
     {
-      value: "Aguascalientes",
+      value: "Aguascalientes, Aguascalientes, México",
       label: "Aguascalientes, Aguascalientes, México",
     },
-    { value: "Cancún", label: "Cancún, Quintana Roo, México" },
-    { value: "Chihuahua", label: "Chihuahua, Chihuahua, México" },
     {
-      value: "Ciudad de México",
+      value: "Cancún, Quintana Roo, México",
+      label: "Cancún, Quintana Roo, México",
+    },
+    {
+      value: "Chihuahua, Chihuahua, México",
+      label: "Chihuahua, Chihuahua, México",
+    },
+    {
+      value: "Ciudad de México, Ciudad de México, México",
       label: "Ciudad de México, Ciudad de México, México",
     },
-    { value: "Guadalajara", label: "Guadalajara, Jalisco, México" },
-    { value: "Hermosillo", label: "Hermosillo, Sonora, México" },
-    { value: "León", label: "León, Guanajuato, México" },
-    { value: "Mérida", label: "Mérida, Yucatán, México" },
-    { value: "Monterrey", label: "Monterrey, Nuevo León, México" },
-    { value: "Morelia", label: "Morelia, Michoacán, México" },
-    { value: "Puebla", label: "Puebla, Puebla, México" },
-    { value: "Querétaro", label: "Querétaro, Querétaro, México" },
-    { value: "Saltillo", label: "Saltillo, Coahuila, México" },
     {
-      value: "San Luis Potosí",
+      value: "Guadalajara, Jalisco, México",
+      label: "Guadalajara, Jalisco, México",
+    },
+    {
+      value: "Hermosillo, Sonora, México",
+      label: "Hermosillo, Sonora, México",
+    },
+    { value: "León, Guanajuato, México", label: "León, Guanajuato, México" },
+    { value: "Mérida, Yucatán, México", label: "Mérida, Yucatán, México" },
+    {
+      value: "Monterrey, Nuevo León, México",
+      label: "Monterrey, Nuevo León, México",
+    },
+    {
+      value: "Morelia, Michoacán, México",
+      label: "Morelia, Michoacán, México",
+    },
+    { value: "Puebla, Puebla, México", label: "Puebla, Puebla, México" },
+    {
+      value: "Querétaro, Querétaro, México",
+      label: "Querétaro, Querétaro, México",
+    },
+    {
+      value: "Saltillo, Coahuila, México",
+      label: "Saltillo, Coahuila, México",
+    },
+    {
+      value: "San Luis Potosí, San Luis Potosí, México",
       label: "San Luis Potosí, San Luis Potosí, México",
     },
-    { value: "Tijuana", label: "Tijuana, Baja California, México" },
-    { value: "Toluca", label: "Toluca, Estado de México, México" },
-    { value: "Torreón", label: "Torreón, Coahuila, México" },
-    { value: "Tuxtla Gutiérrez", label: "Tuxtla Gutiérrez, Chiapas, México" },
-    { value: "Veracruz", label: "Veracruz, Veracruz, México" },
-    { value: "Zacatecas", label: "Zacatecas, Zacatecas, México" },
+    {
+      value: "Tijuana, Baja California, México",
+      label: "Tijuana, Baja California, México",
+    },
+    {
+      value: "Toluca, Estado de México, México",
+      label: "Toluca, Estado de México, México",
+    },
+    { value: "Torreón, Coahuila, México", label: "Torreón, Coahuila, México" },
+    {
+      value: "Tuxtla Gutiérrez, Chiapas, México",
+      label: "Tuxtla Gutiérrez, Chiapas, México",
+    },
+    {
+      value: "Veracruz, Veracruz, México",
+      label: "Veracruz, Veracruz, México",
+    },
+    {
+      value: "Zacatecas, Zacatecas, México",
+      label: "Zacatecas, Zacatecas, México",
+    },
 
     // Ciudades de Estados Unidos
-    { value: "Austin", label: "Austin, Texas, Estados Unidos" },
     {
-      value: "Charlotte",
+      value: "Austin, Texas, Estados Unidos",
+      label: "Austin, Texas, Estados Unidos",
+    },
+    {
+      value: "Charlotte, Carolina del Norte, Estados Unidos",
       label: "Charlotte, Carolina del Norte, Estados Unidos",
     },
-    { value: "Chicago", label: "Chicago, Illinois, Estados Unidos" },
-    { value: "Columbus", label: "Columbus, Ohio, Estados Unidos" },
-    { value: "Dallas", label: "Dallas, Texas, Estados Unidos" },
-    { value: "Denver", label: "Denver, Colorado, Estados Unidos" },
-    { value: "Fort Worth", label: "Fort Worth, Texas, Estados Unidos" },
-    { value: "Houston", label: "Houston, Texas, Estados Unidos" },
-    { value: "Indianapolis", label: "Indianapolis, Indiana, Estados Unidos" },
-    { value: "Jacksonville", label: "Jacksonville, Florida, Estados Unidos" },
-    { value: "Los Angeles", label: "Los Angeles, California, Estados Unidos" },
-    { value: "New York", label: "Nueva York, Nueva York, Estados Unidos" },
-    { value: "Philadelphia", label: "Filadelfia, Pensilvania, Estados Unidos" },
-    { value: "Phoenix", label: "Phoenix, Arizona, Estados Unidos" },
-    { value: "San Antonio", label: "San Antonio, Texas, Estados Unidos" },
-    { value: "San Diego", label: "San Diego, California, Estados Unidos" },
     {
-      value: "San Francisco",
+      value: "Chicago, Illinois, Estados Unidos",
+      label: "Chicago, Illinois, Estados Unidos",
+    },
+    {
+      value: "Columbus, Ohio, Estados Unidos",
+      label: "Columbus, Ohio, Estados Unidos",
+    },
+    {
+      value: "Dallas, Texas, Estados Unidos",
+      label: "Dallas, Texas, Estados Unidos",
+    },
+    {
+      value: "Denver, Colorado, Estados Unidos",
+      label: "Denver, Colorado, Estados Unidos",
+    },
+    {
+      value: "Fort Worth, Texas, Estados Unidos",
+      label: "Fort Worth, Texas, Estados Unidos",
+    },
+    {
+      value: "Houston, Texas, Estados Unidos",
+      label: "Houston, Texas, Estados Unidos",
+    },
+    {
+      value: "Indianapolis, Indiana, Estados Unidos",
+      label: "Indianapolis, Indiana, Estados Unidos",
+    },
+    {
+      value: "Jacksonville, Florida, Estados Unidos",
+      label: "Jacksonville, Florida, Estados Unidos",
+    },
+    {
+      value: "Los Angeles, California, Estados Unidos",
+      label: "Los Angeles, California, Estados Unidos",
+    },
+    {
+      value: "Nueva York, Nueva York, Estados Unidos",
+      label: "Nueva York, Nueva York, Estados Unidos",
+    },
+    {
+      value: "Filadelfia, Pensilvania, Estados Unidos",
+      label: "Filadelfia, Pensilvania, Estados Unidos",
+    },
+    {
+      value: "Phoenix, Arizona, Estados Unidos",
+      label: "Phoenix, Arizona, Estados Unidos",
+    },
+    {
+      value: "San Antonio, Texas, Estados Unidos",
+      label: "San Antonio, Texas, Estados Unidos",
+    },
+    {
+      value: "San Diego, California, Estados Unidos",
+      label: "San Diego, California, Estados Unidos",
+    },
+    {
+      value: "San Francisco, California, Estados Unidos",
       label: "San Francisco, California, Estados Unidos",
     },
-    { value: "San Jose", label: "San José, California, Estados Unidos" },
-    { value: "Seattle", label: "Seattle, Washington, Estados Unidos" },
-    { value: "Washington", label: "Washington, D.C., Estados Unidos" },
+    {
+      value: "San José, California, Estados Unidos",
+      label: "San José, California, Estados Unidos",
+    },
+    {
+      value: "Seattle, Washington, Estados Unidos",
+      label: "Seattle, Washington, Estados Unidos",
+    },
+    {
+      value: "Washington, D.C., Estados Unidos",
+      label: "Washington, D.C., Estados Unidos",
+    },
   ]);
 
   // Ordenar alfabéticamente
@@ -194,15 +287,44 @@ function PantallasDirectorio() {
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
-    { value: "Times New Roman", label: "Times New Roman" },
-    { value: "Verdana", label: "Verdana" },
-    { value: "Rockwell", label: "Rockwell" },
-    { value: "Helvetica", label: "Helvetica" },
+    { value: "Avenir", label: "Avenir" },
+    { value: "Bebas Neue", label: "Bebas Neue" },
+    { value: "Cabin", label: "Cabin" },
     { value: "Courier New", label: "Courier New" },
+    { value: "Crimson Text", label: "Crimson Text" },
+    { value: "Cormorant", label: "Cormorant" },
+    { value: "Dancing Script", label: "Dancing Script" },
+    { value: "Dosis", label: "Dosis" },
+    { value: "Exo", label: "Exo" },
+    { value: "Fira Sans", label: "Fira Sans" },
+    { value: "Garamond", label: "Garamond" },
     { value: "Georgia", label: "Georgia" },
-    { value: "Tahoma", label: "Tahoma" },
-    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Helvetica", label: "Helvetica" },
+    { value: "Josefin Sans", label: "Josefin Sans" },
+    { value: "Lato", label: "Lato" },
+    { value: "Merriweather", label: "Merriweather" },
+    { value: "Montserrat", label: "Montserrat" },
+    { value: "Muli", label: "Muli" },
+    { value: "Nunito", label: "Nunito" },
+    { value: "Noticia Text", label: "Noticia Text" },
+    { value: "Open Sans", label: "Open Sans" },
+    { value: "Oswald", label: "Oswald" },
+    { value: "Pacifico", label: "Pacifico" },
     { value: "Palatino", label: "Palatino" },
+    { value: "Playfair Display", label: "Playfair Display" },
+    { value: "Poppins", label: "Poppins" },
+    { value: "Quicksand", label: "Quicksand" },
+    { value: "Raleway", label: "Raleway" },
+    { value: "Roboto", label: "Roboto" },
+    { value: "Rockwell", label: "Rockwell" },
+    { value: "Source Sans Pro", label: "Source Sans Pro" },
+    { value: "Tahoma", label: "Tahoma" },
+    { value: "Times New Roman", label: "Times New Roman" },
+    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Ubuntu", label: "Ubuntu" },
+    { value: "Varela Round", label: "Varela Round" },
+    { value: "Verdana", label: "Verdana" },
+    { value: "Yanone Kaffeesatz", label: "Yanone Kaffeesatz" },
   ];
 
   const [selectedFontStyle, setSelectedFontStyle] = useState(
@@ -230,35 +352,6 @@ function PantallasDirectorio() {
     const font = `${selectedOption.value}, sans-serif`;
     const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
     console.log("Ancho del texto medido:", textoAncho);
-  };
-
-  const handlePreviewClick = () => {
-    setPreviewVisible(true);
-  };
-
-  const handleClosePreview = () => {
-    setPreviewVisible(false);
-  };
-  const obtenerDia = () => {
-    const diasSemana = [
-      "Domingo",
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-    ];
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    return diaSemana;
-  };
-
-  const obtenerFecha = () => {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${day}/${month}`;
   };
 
   function obtenerHora() {
