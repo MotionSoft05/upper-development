@@ -2,11 +2,9 @@
 import React, { useState, useEffect } from "react";
 import { ChromePicker } from "react-color";
 import Select from "react-select";
-import axios from "axios";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import {
-  getFirestore,
   collection,
   onSnapshot,
   where,
@@ -41,23 +39,15 @@ function PantallasDirectorio() {
     []
   );
   const [pd, setPd] = useState(0);
-  const [user, setUser] = useState(null);
-  const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
-  const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
   const [fontColor, setFontColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
-  const [weatherURL, setWeatherURL] = useState("");
-  const [calendarEventURL, setCalendarEventURL] = useState("");
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(obtenerHora());
   const [weatherData, setWeatherData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [events, setEvents] = useState([]);
   const [selectedLogo, setSelectedLogo] = useState(null);
-
   const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
     { value: "New York", label: "New York" },
@@ -86,7 +76,6 @@ function PantallasDirectorio() {
             setNombrePantallasDirectorio(namesArray);
             setPd(numberOfScreens);
 
-            // Escuchar cambios en los nombres de las pantallas
             const unsubscribe = onSnapshot(usuarioRef, (doc) => {
               const data = doc.data();
               if (data && data.nombrePantallasDirectorio) {
@@ -95,7 +84,6 @@ function PantallasDirectorio() {
               }
             });
 
-            // Importante: Detener la escucha cuando el componente se desmonta
             return () => unsubscribe();
           }
         }
@@ -141,30 +129,6 @@ function PantallasDirectorio() {
     fetchUserData();
     fetchTemplateData();
   }, []);
-
-  useEffect(() => {
-    if (selectedCity) {
-      setIsLoading(true);
-      setError(null);
-
-      const apiKey = "1cfcc82283ef423295e12ac8881b03af";
-      const baseUrl = "https://api.weatherbit.io/v2.0";
-
-      // Utiliza la API de Weatherbit para obtener datos del clima actual
-      axios
-        .get(`${baseUrl}/current?city=${selectedCity.value}&key=${apiKey}`)
-        .then((response) => {
-          console.log("Datos del clima:", response.data);
-          setWeatherData(response.data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error al obtener datos del clima:", error);
-          setError("No se pudo obtener la información del clima");
-          setIsLoading(false);
-        });
-    }
-  }, [selectedCity]);
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
