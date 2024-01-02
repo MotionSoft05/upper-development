@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
@@ -44,6 +46,7 @@ function PublicidadDirec() {
   });
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
+  const [currentAction, setCurrentAction] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -139,6 +142,7 @@ function PublicidadDirec() {
   };
 
   const handleEditarPublicidad = (index) => {
+    setCurrentAction("Editar");
     setEditIndex(index);
     setOriginalTiemposSalon({ ...tiemposSalon[index] });
     setOriginalImagen(imagenesSalon[index]);
@@ -168,6 +172,7 @@ function PublicidadDirec() {
     try {
       setIsLoading(true);
       setIsUploading(true);
+      setCurrentAction("Guardar Cambios");
 
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
@@ -242,16 +247,26 @@ function PublicidadDirec() {
       setIsUploading(false);
     } finally {
       setIsLoading(false);
+      setCurrentAction(null);
     }
   };
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
-    const newValues = [...type];
-    newValues[index][name] = parseInt(value || 0);
-    type === tiemposSalon
-      ? setTiemposSalon(newValues)
-      : setImagenesSalon(newValues);
+    const newValue = parseInt(value) || 0;
+
+    if (name === "horas" || name === "minutos" || name === "segundos") {
+      // Verificar que el valor esté dentro del rango permitido
+      const max = name === "horas" ? 23 : 59;
+      const validValue = Math.min(Math.max(newValue, 0), max);
+
+      const newValues = [...type];
+      newValues[index][name] = validValue;
+
+      type === tiemposSalon
+        ? setTiemposSalon(newValues)
+        : setImagenesSalon(newValues);
+    }
   };
 
   const handleImagenSelect = (event, index) => {
@@ -273,6 +288,7 @@ function PublicidadDirec() {
     try {
       setIsLoading(true);
       setIsUploading(true);
+      setCurrentAction("Guardar Publicidad");
       const storageRef = storage.ref();
       const userUid = user.uid;
       let hasValidData = false;
@@ -337,6 +353,7 @@ function PublicidadDirec() {
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
     } finally {
+      setIsUploading(false);
       setIsUploading(false);
       setIsLoading(false);
     }
@@ -436,7 +453,7 @@ function PublicidadDirec() {
                       type="number"
                       name={unit}
                       min="0"
-                      max={unit === "horas" ? "24" : "59"}
+                      max={unit === "horas" ? "23" : "59"}
                       value={tiemposSalon[index][unit] || 0}
                       onChange={(event) =>
                         handleInputChange(event, index, tiemposSalon)
@@ -446,6 +463,7 @@ function PublicidadDirec() {
                         (editIndex !== null && editIndex !== index) ||
                         (editIndex === null && publicidadesIds[index])
                       }
+                      pattern="\d*"
                     />
                     <span className="text-gray-600 ml-1">{unit}</span>
                   </div>
@@ -499,30 +517,42 @@ function PublicidadDirec() {
   return (
     <section className="md:mt-3 ">
       <div>
-        {successMessage && (
-          <div className="bg-green-500 text-white p-2 mb-4 rounded-md">
-            {successMessage}
-          </div>
-        )}
-        <div className="mb-8" style={{ cursor: isUploading ? "wait" : "auto" }}>
-          {renderCamposImagenes()}
-          {isUploading}
-          {imagenesSalon.length < 11 && (
-            <div className="mt-4">
-              <button
-                onClick={handleAgregarPublicidad}
-                disabled={!isValidData(imagenesSalon.length - 1)}
-                className={`px-4 py-2 text-white ${
-                  isValidData(imagenesSalon.length - 1)
-                    ? "bg-blue-500 hover:bg-blue-600"
-                    : "bg-gray-400 cursor-not-allowed"
-                } rounded-md focus:outline-none`}
-              >
-                Guardar Publicidad
-              </button>
+        <section className="">
+          {successMessage && (
+            <div className="bg-green-500 text-white p-2 mb-4 rounded-md">
+              {successMessage}
             </div>
           )}
-        </div>
+          <div
+            className="mb-8"
+            style={{ cursor: isUploading ? "wait" : "auto" }}
+          >
+            {renderCamposImagenes()}
+            {imagenesSalon.length < 11 && (
+              <div className="mt-4">
+                <button
+                  onClick={handleAgregarPublicidad}
+                  disabled={
+                    isUploading || !isValidData(imagenesSalon.length - 1)
+                  }
+                  className={`px-4 py-2 text-white ${
+                    isValidData(imagenesSalon.length - 1)
+                      ? "bg-blue-500 hover:bg-blue-600"
+                      : "bg-gray-400 cursor-not-allowed"
+                  } rounded-md focus:outline-none`}
+                >
+                  {isUploading && currentAction === "Guardar Publicidad" ? (
+                    <FontAwesomeIcon icon={faSync} spin size="lg" />
+                  ) : currentAction === "Guardar Publicidad" ? (
+                    "Guardar Publicidad"
+                  ) : (
+                    "Guardar Cambios"
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
       </div>
     </section>
   );
