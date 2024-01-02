@@ -522,7 +522,7 @@ function PublicidadSalon() {
                       : "bg-gray-400 cursor-not-allowed"
                   } rounded-md focus:outline-none`}
                 >
-                  + Agregar Publicidad Salón
+                  Guardar Publicidad
                 </button>
               </div>
             )}
