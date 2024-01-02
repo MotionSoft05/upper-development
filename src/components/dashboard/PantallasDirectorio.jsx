@@ -510,17 +510,17 @@ function PantallasDirectorio() {
   };
 
   return (
-    <section className="px-5 md:px-32">
+    <section className="px-8 py-12">
       <div>
-        <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            Ajuste de pantallas directorio
-          </h1>
+        <div className="p-5 text-center">
+          <h2 className="text-4xl font-extrabold text-gray-900">
+            AJUSTES DE PANTALLAS DIRECTORIO
+          </h2>
         </div>
 
         {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800">
-          <h1 className="text-xl font-bold text-white capitalize dark:text-white">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
+          <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
