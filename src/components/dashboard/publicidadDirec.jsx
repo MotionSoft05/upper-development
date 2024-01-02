@@ -518,7 +518,7 @@ function PublicidadDirec() {
                     : "bg-gray-400 cursor-not-allowed"
                 } rounded-md focus:outline-none`}
               >
-                + Agregar Publicidad Directorio
+                Guardar Publicidad
               </button>
             </div>
           )}
