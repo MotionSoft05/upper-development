@@ -253,11 +253,20 @@ function PublicidadSalon() {
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
-    const newValues = [...type];
-    newValues[index][name] = parseInt(value || 0);
-    type === tiemposSalon
-      ? setTiemposSalon(newValues)
-      : setImagenesSalon(newValues);
+    const newValue = parseInt(value) || 0;
+
+    if (name === "horas" || name === "minutos" || name === "segundos") {
+      // Verificar que el valor esté dentro del rango permitido
+      const max = name === "horas" ? 23 : 59;
+      const validValue = Math.min(Math.max(newValue, 0), max);
+
+      const newValues = [...type];
+      newValues[index][name] = validValue;
+
+      type === tiemposSalon
+        ? setTiemposSalon(newValues)
+        : setImagenesSalon(newValues);
+    }
   };
 
   const handleImagenSelect = (event, index) => {
@@ -454,6 +463,7 @@ function PublicidadSalon() {
                         (editIndex !== null && editIndex !== index) ||
                         (editIndex === null && publicidadesIds[index])
                       }
+                      pattern="\d*"
                     />
                     <span className="text-gray-600 ml-1">{unit}</span>
                   </div>
