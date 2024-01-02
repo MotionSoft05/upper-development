@@ -46,6 +46,7 @@ function PublicidadSalon() {
   });
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
+  const [currentAction, setCurrentAction] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -141,6 +142,7 @@ function PublicidadSalon() {
   };
 
   const handleEditarPublicidad = (index) => {
+    setCurrentAction("Editar");
     setEditIndex(index);
     setOriginalTiemposSalon({ ...tiemposSalon[index] });
     setOriginalImagen(imagenesSalon[index]);
@@ -170,6 +172,7 @@ function PublicidadSalon() {
     try {
       setIsLoading(true);
       setIsUploading(true);
+      setCurrentAction("Guardar Cambios");
 
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
@@ -244,6 +247,7 @@ function PublicidadSalon() {
       setIsUploading(false);
     } finally {
       setIsLoading(false);
+      setCurrentAction(null);
     }
   };
 
@@ -275,6 +279,7 @@ function PublicidadSalon() {
     try {
       setIsLoading(true);
       setIsUploading(true);
+      setCurrentAction("Guardar Publicidad");
       const storageRef = storage.ref();
       const userUid = user.uid;
       let hasValidData = false;
@@ -339,6 +344,7 @@ function PublicidadSalon() {
     } catch (error) {
       console.error("Error al agregar publicidad:", error);
     } finally {
+      setCurrentAction(null);
       setIsUploading(false);
       setIsLoading(false);
     }
@@ -438,7 +444,7 @@ function PublicidadSalon() {
                       type="number"
                       name={unit}
                       min="0"
-                      max={unit === "horas" ? "24" : "59"}
+                      max={unit === "horas" ? "23" : "59"}
                       value={tiemposSalon[index][unit] || 0}
                       onChange={(event) =>
                         handleInputChange(event, index, tiemposSalon)
@@ -525,10 +531,12 @@ function PublicidadSalon() {
                       : "bg-gray-400 cursor-not-allowed"
                   } rounded-md focus:outline-none`}
                 >
-                  {isUploading ? (
+                  {isUploading && currentAction === "Guardar Publicidad" ? (
                     <FontAwesomeIcon icon={faSync} spin size="lg" />
-                  ) : (
+                  ) : currentAction === "Guardar Publicidad" ? (
                     "Guardar Publicidad"
+                  ) : (
+                    "Guardar Cambios"
                   )}
                 </button>
               </div>
