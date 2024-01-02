@@ -52,7 +52,7 @@ function PublicidadSalon() {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        await obtenerPublicidades(user, "salon"); // Tipo: "salon"
+        await obtenerPublicidades(user, "salon");
       } else {
         console.warn("El objeto user es nulo.");
       }
