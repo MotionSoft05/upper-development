@@ -517,6 +517,8 @@ function PantallasDirectorio() {
                 </div>
               ))}
             </div>
+          </div>
+          <div className="flex justify-end mt-6">
             <button
               onClick={() => {
                 guardarInformacionPersonalizacion(selectedLogo);
