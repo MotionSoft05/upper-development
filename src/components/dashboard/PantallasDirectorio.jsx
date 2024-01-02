@@ -109,7 +109,7 @@ function PantallasDirectorio() {
           if (!templateDirectoriosSnapshot.empty) {
             const templateDirectoriosDoc =
               templateDirectoriosSnapshot.docs[0].data();
-            const { fontColor, fontStyle, logo, templateColor } =
+            const { fontColor, fontStyle, logo, templateColor, ciudad } =
               templateDirectoriosDoc;
 
             setFontColor(fontColor || "#000000");
@@ -119,6 +119,7 @@ function PantallasDirectorio() {
             });
             setSelectedLogo(logo || null);
             setTemplateColor(templateColor || "#D1D5DB");
+            setSelectedCity({ value: ciudad, label: ciudad });
           }
         }
       } catch (error) {
