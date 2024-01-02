@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faSync } from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
@@ -510,19 +512,24 @@ function PublicidadSalon() {
             style={{ cursor: isUploading ? "wait" : "auto" }}
           >
             {renderCamposImagenes()}
-            {isUploading}
             {imagenesSalon.length < 11 && (
               <div className="mt-4">
                 <button
                   onClick={handleAgregarPublicidad}
-                  disabled={!isValidData(imagenesSalon.length - 1)}
+                  disabled={
+                    isUploading || !isValidData(imagenesSalon.length - 1)
+                  }
                   className={`px-4 py-2 text-white ${
                     isValidData(imagenesSalon.length - 1)
                       ? "bg-blue-500 hover:bg-blue-600"
                       : "bg-gray-400 cursor-not-allowed"
                   } rounded-md focus:outline-none`}
                 >
-                  Guardar Publicidad
+                  {isUploading ? (
+                    <FontAwesomeIcon icon={faSync} spin size="lg" />
+                  ) : (
+                    "Guardar Publicidad"
+                  )}
                 </button>
               </div>
             )}
