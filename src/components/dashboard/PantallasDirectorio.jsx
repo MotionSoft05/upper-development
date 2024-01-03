@@ -48,156 +48,49 @@ function PantallasDirectorio() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
     // Ciudades de México
-    {
-      value: "Aguascalientes, Aguascalientes, México",
-      label: "Aguascalientes, Aguascalientes, México",
-    },
-    {
-      value: "Cancún, Quintana Roo, México",
-      label: "Cancún, Quintana Roo, México",
-    },
-    {
-      value: "Chihuahua, Chihuahua, México",
-      label: "Chihuahua, Chihuahua, México",
-    },
-    {
-      value: "Ciudad de México, Ciudad de México, México",
-      label: "Ciudad de México, Ciudad de México, México",
-    },
-    {
-      value: "Guadalajara, Jalisco, México",
-      label: "Guadalajara, Jalisco, México",
-    },
-    {
-      value: "Hermosillo, Sonora, México",
-      label: "Hermosillo, Sonora, México",
-    },
-    { value: "León, Guanajuato, México", label: "León, Guanajuato, México" },
-    { value: "Mérida, Yucatán, México", label: "Mérida, Yucatán, México" },
-    {
-      value: "Monterrey, Nuevo León, México",
-      label: "Monterrey, Nuevo León, México",
-    },
-    {
-      value: "Morelia, Michoacán, México",
-      label: "Morelia, Michoacán, México",
-    },
-    { value: "Puebla, Puebla, México", label: "Puebla, Puebla, México" },
-    {
-      value: "Querétaro, Querétaro, México",
-      label: "Querétaro, Querétaro, México",
-    },
-    {
-      value: "Saltillo, Coahuila, México",
-      label: "Saltillo, Coahuila, México",
-    },
-    {
-      value: "San Luis Potosí, San Luis Potosí, México",
-      label: "San Luis Potosí, San Luis Potosí, México",
-    },
-    {
-      value: "Tijuana, Baja California, México",
-      label: "Tijuana, Baja California, México",
-    },
-    {
-      value: "Toluca, Estado de México, México",
-      label: "Toluca, Estado de México, México",
-    },
-    { value: "Torreón, Coahuila, México", label: "Torreón, Coahuila, México" },
-    {
-      value: "Tuxtla Gutiérrez, Chiapas, México",
-      label: "Tuxtla Gutiérrez, Chiapas, México",
-    },
-    {
-      value: "Veracruz, Veracruz, México",
-      label: "Veracruz, Veracruz, México",
-    },
-    {
-      value: "Zacatecas, Zacatecas, México",
-      label: "Zacatecas, Zacatecas, México",
-    },
+    { value: "Aguascalientes", label: "Aguascalientes" },
+    { value: "Cancún", label: "Cancún" },
+    { value: "Chihuahua", label: "Chihuahua" },
+    { value: "Ciudad de México", label: "Ciudad de México" },
+    { value: "Guadalajara", label: "Guadalajara" },
+    { value: "Hermosillo", label: "Hermosillo" },
+    { value: "León", label: "León" },
+    { value: "Mérida", label: "Mérida" },
+    { value: "Monterrey", label: "Monterrey" },
+    { value: "Morelia", label: "Morelia" },
+    { value: "Puebla", label: "Puebla" },
+    { value: "Querétaro", label: "Querétaro" },
+    { value: "Saltillo", label: "Saltillo" },
+    { value: "San Luis Potosí", label: "San Luis Potosí" },
+    { value: "Tijuana", label: "Tijuana" },
+    { value: "Toluca", label: "Toluca" },
+    { value: "Torreón", label: "Torreón" },
+    { value: "Tuxtla Gutiérrez", label: "Tuxtla Gutiérrez" },
+    { value: "Veracruz", label: "Veracruz" },
+    { value: "Zacatecas", label: "Zacatecas" },
+    { value: "Buenos Aires", label: "Buenos Aires" },
 
     // Ciudades de Estados Unidos
-    {
-      value: "Austin, Texas, Estados Unidos",
-      label: "Austin, Texas, Estados Unidos",
-    },
-    {
-      value: "Charlotte, Carolina del Norte, Estados Unidos",
-      label: "Charlotte, Carolina del Norte, Estados Unidos",
-    },
-    {
-      value: "Chicago, Illinois, Estados Unidos",
-      label: "Chicago, Illinois, Estados Unidos",
-    },
-    {
-      value: "Columbus, Ohio, Estados Unidos",
-      label: "Columbus, Ohio, Estados Unidos",
-    },
-    {
-      value: "Dallas, Texas, Estados Unidos",
-      label: "Dallas, Texas, Estados Unidos",
-    },
-    {
-      value: "Denver, Colorado, Estados Unidos",
-      label: "Denver, Colorado, Estados Unidos",
-    },
-    {
-      value: "Fort Worth, Texas, Estados Unidos",
-      label: "Fort Worth, Texas, Estados Unidos",
-    },
-    {
-      value: "Houston, Texas, Estados Unidos",
-      label: "Houston, Texas, Estados Unidos",
-    },
-    {
-      value: "Indianapolis, Indiana, Estados Unidos",
-      label: "Indianapolis, Indiana, Estados Unidos",
-    },
-    {
-      value: "Jacksonville, Florida, Estados Unidos",
-      label: "Jacksonville, Florida, Estados Unidos",
-    },
-    {
-      value: "Los Angeles, California, Estados Unidos",
-      label: "Los Angeles, California, Estados Unidos",
-    },
-    {
-      value: "Nueva York, Nueva York, Estados Unidos",
-      label: "Nueva York, Nueva York, Estados Unidos",
-    },
-    {
-      value: "Filadelfia, Pensilvania, Estados Unidos",
-      label: "Filadelfia, Pensilvania, Estados Unidos",
-    },
-    {
-      value: "Phoenix, Arizona, Estados Unidos",
-      label: "Phoenix, Arizona, Estados Unidos",
-    },
-    {
-      value: "San Antonio, Texas, Estados Unidos",
-      label: "San Antonio, Texas, Estados Unidos",
-    },
-    {
-      value: "San Diego, California, Estados Unidos",
-      label: "San Diego, California, Estados Unidos",
-    },
-    {
-      value: "San Francisco, California, Estados Unidos",
-      label: "San Francisco, California, Estados Unidos",
-    },
-    {
-      value: "San José, California, Estados Unidos",
-      label: "San José, California, Estados Unidos",
-    },
-    {
-      value: "Seattle, Washington, Estados Unidos",
-      label: "Seattle, Washington, Estados Unidos",
-    },
-    {
-      value: "Washington, D.C., Estados Unidos",
-      label: "Washington, D.C., Estados Unidos",
-    },
+    { value: "Austin", label: "Austin" },
+    { value: "Charlotte", label: "Charlotte" },
+    { value: "Chicago", label: "Chicago" },
+    { value: "Columbus", label: "Columbus" },
+    { value: "Dallas", label: "Dallas" },
+    { value: "Denver", label: "Denver" },
+    { value: "Fort Worth", label: "Fort Worth" },
+    { value: "Houston", label: "Houston" },
+    { value: "Indianapolis", label: "Indianapolis" },
+    { value: "Jacksonville", label: "Jacksonville" },
+    { value: "Los Angeles", label: "Los Angeles" },
+    { value: "Nueva York", label: "Nueva York" },
+    { value: "Filadelfia", label: "Filadelfia" },
+    { value: "Phoenix", label: "Phoenix" },
+    { value: "San Antonio", label: "San Antonio" },
+    { value: "San Diego", label: "San Diego" },
+    { value: "San Francisco", label: "San Francisco" },
+    { value: "San José", label: "San José" },
+    { value: "Seattle", label: "Seattle" },
+    { value: "Washington, D.C.", label: "Washington, D.C." },
   ]);
 
   // Ordenar alfabéticamente
