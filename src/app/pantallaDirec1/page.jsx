@@ -12,7 +12,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
+
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
