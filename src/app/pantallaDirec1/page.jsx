@@ -44,7 +44,7 @@ function PantallaDirec1() {
       const baseUrl = window.location.origin;
 
       // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/pantallaDirec1/${user.uid}`);
+      setQrCodeUrl(`${baseUrl}/pantallaDirec1`);
     }
   }, [user]);
 
@@ -589,17 +589,19 @@ function PantallaDirec1() {
             >
               Grupo renueca el mejor programa de recompensa para asistentes ejec
             </p>
-            {qrCodeUrl && (
-              <a
-                href={qrCodeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ cursor: "pointer" }}
-              >
-                {/* Muestra el código QR */}
-                <QRCode value={qrCodeUrl} size={120} />
-              </a>
-            )}
+            <div style={{ marginTop: "20px", marginRight: "20px" }}>
+              {qrCodeUrl && (
+                <a
+                  href={qrCodeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ cursor: "pointer" }}
+                >
+                  {/* Muestra el código QR */}
+                  <QRCode value={qrCodeUrl} size={80} />
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
