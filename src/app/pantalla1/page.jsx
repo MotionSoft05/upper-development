@@ -104,7 +104,6 @@ function Pantalla1() {
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
-
   // Datos Firebase------------------------------------------
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
@@ -134,30 +133,44 @@ function Pantalla1() {
     return () => unsubscribe();
   }, []);
   // Publicidades-------------------------------------------
+  const pantalla = "salon";
+
   useEffect(() => {
-    if (user && firestore) {
-      const publicidadesRef = collection(firestore, "Publicidad"); // Reemplaza "Publicidad" con el nombre de tu colección
-      const publicidadesQuery = query(
-        publicidadesRef,
-        where("userId", "==", user.uid)
-      );
+    const fetchPublicidades = () => {
+      if (user && firestore) {
+        const publicidadesRef = collection(firestore, "Publicidad");
+        const publicidadesQuery = query(
+          publicidadesRef,
+          where("userId", "==", user.uid)
+        );
 
-      getDocs(publicidadesQuery)
-        .then((querySnapshot) => {
-          const publicidades = [];
-          querySnapshot.forEach((doc) => {
-            const publicidad = { id: doc.id, ...doc.data() };
-            publicidades.push(publicidad);
+        getDocs(publicidadesQuery)
+          .then((querySnapshot) => {
+            const publicidades = [];
+            querySnapshot.forEach((doc) => {
+              const publicidad = { id: doc.id, ...doc.data() };
+              // Comparar el tipo de la publicidad con la pantalla deseada
+              if (publicidad.tipo === pantalla) {
+                publicidades.push(publicidad);
+              }
+            });
+            setPublicidadesUsuario(publicidades);
+          })
+          .catch((error) => {
+            console.error("Error al obtener las publicidades:", error);
           });
-          setPublicidadesUsuario(publicidades);
-        })
-        .catch((error) => {
-          console.error("Error al obtener las publicidades:", error);
-        });
-    }
-  }, [user, firestore]);
-  // Eventos------------------------------------------------
+      }
+    };
 
+    const interval = setInterval(() => {
+      fetchPublicidades();
+    }, 10000);
+
+    fetchPublicidades(); // Llamar inicialmente
+
+    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, [user, firestore, pantalla]);
+  // Eventos------------------------------------------------
   useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user.uid);
@@ -312,13 +325,27 @@ function Pantalla1() {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    let timeoutId;
+
+    const changeImage = () => {
       setCurrentImageIndex(
         (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
       );
-    }, publicidadesUsuario[currentImageIndex]?.segundos * 1000 || 5000); // Default a 5 segundos si no hay datos
+    };
 
-    return () => clearInterval(interval);
+    const currentAd = publicidadesUsuario[currentImageIndex];
+    if (currentAd) {
+      console.log("currentAd", currentAd);
+      const totalSeconds =
+        currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
+      console.log("totalSeconds", totalSeconds);
+      timeoutId = setTimeout(changeImage, totalSeconds * 1000);
+      console.log("timeoutId", timeoutId);
+    } else {
+      timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
+    }
+
+    return () => clearTimeout(timeoutId); // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
   }, [currentImageIndex, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
