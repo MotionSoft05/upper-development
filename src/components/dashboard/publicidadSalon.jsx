@@ -186,14 +186,15 @@ function PublicidadSalon() {
       }
 
       const hasValidData =
-        horas > 0 &&
+        (horas > 0 || minutos > 0 || segundos > 0) &&
         minutos >= 0 &&
         minutos <= 59 &&
         segundos >= 0 &&
         segundos <= 59;
 
       if (!hasValidData) {
-        console.warn("No hay datos válidos para actualizar");
+        // Muestra una alerta si no hay datos válidos para actualizar
+        window.alert("Completa por lo menos uno de los tres campos");
         return;
       }
 

@@ -48,9 +48,6 @@ const obtenerHora = () => {
 function PantallasSalon() {
   const [nombrePantallas, setNombrePantallas] = useState([]);
   const [ps, setPs] = useState(0);
-  const [screenNames, setScreenNames] = useState([]);
-  const [screen1AspectRatio, setScreen1AspectRatio] = useState("16:9");
-  const [screen2AspectRatio, setScreen2AspectRatio] = useState("9:16");
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
   const [fontColor, setFontColor] = useState("#000000");
   const [showColorPicker, setShowColorPicker] = useState(false);
@@ -60,7 +57,6 @@ function PantallasSalon() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
-  const [pantallasUsuario, setPantallasUsuario] = useState([]);
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -81,15 +77,44 @@ function PantallasSalon() {
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
-    { value: "Times New Roman", label: "Times New Roman" },
-    { value: "Verdana", label: "Verdana" },
-    { value: "Rockwell", label: "Rockwell" },
-    { value: "Helvetica", label: "Helvetica" },
+    { value: "Avenir", label: "Avenir" },
+    { value: "Bebas Neue", label: "Bebas Neue" },
+    { value: "Cabin", label: "Cabin" },
     { value: "Courier New", label: "Courier New" },
+    { value: "Crimson Text", label: "Crimson Text" },
+    { value: "Cormorant", label: "Cormorant" },
+    { value: "Dancing Script", label: "Dancing Script" },
+    { value: "Dosis", label: "Dosis" },
+    { value: "Exo", label: "Exo" },
+    { value: "Fira Sans", label: "Fira Sans" },
+    { value: "Garamond", label: "Garamond" },
     { value: "Georgia", label: "Georgia" },
-    { value: "Tahoma", label: "Tahoma" },
-    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Helvetica", label: "Helvetica" },
+    { value: "Josefin Sans", label: "Josefin Sans" },
+    { value: "Lato", label: "Lato" },
+    { value: "Merriweather", label: "Merriweather" },
+    { value: "Montserrat", label: "Montserrat" },
+    { value: "Muli", label: "Muli" },
+    { value: "Nunito", label: "Nunito" },
+    { value: "Noticia Text", label: "Noticia Text" },
+    { value: "Open Sans", label: "Open Sans" },
+    { value: "Oswald", label: "Oswald" },
+    { value: "Pacifico", label: "Pacifico" },
     { value: "Palatino", label: "Palatino" },
+    { value: "Playfair Display", label: "Playfair Display" },
+    { value: "Poppins", label: "Poppins" },
+    { value: "Quicksand", label: "Quicksand" },
+    { value: "Raleway", label: "Raleway" },
+    { value: "Roboto", label: "Roboto" },
+    { value: "Rockwell", label: "Rockwell" },
+    { value: "Source Sans Pro", label: "Source Sans Pro" },
+    { value: "Tahoma", label: "Tahoma" },
+    { value: "Times New Roman", label: "Times New Roman" },
+    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Ubuntu", label: "Ubuntu" },
+    { value: "Varela Round", label: "Varela Round" },
+    { value: "Verdana", label: "Verdana" },
+    { value: "Yanone Kaffeesatz", label: "Yanone Kaffeesatz" },
   ];
 
   const [selectedFontStyle, setSelectedFontStyle] = useState(
@@ -433,14 +458,14 @@ function PantallasSalon() {
   return (
     <section className="px-8 py-12">
       <div>
-        <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            Ajuste de pantallas salon
-          </h1>
+        <div className="p-5 text-center">
+          <h2 className="text-4xl font-extrabold text-gray-900">
+            AJUSTES DE PANTALLAS SALON
+          </h2>
         </div>
 
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-20">
-          <h1 className="text-2xl font-bold text-white capitalize mb-4">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
+          <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -575,309 +600,7 @@ function PantallasSalon() {
             </div>
           </div>
 
-          {isPortrait ? (
-            <>
-              {previewVisible && (
-                <section className="relative z-10 inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-                  <div className="bg-white  text-black h-full flex flex-col justify-center">
-                    <div className="flex items-center justify-between">
-                      {selectedLogo && (
-                        <img src={selectedLogo} alt="Logo" className="w-96" />
-                      )}
-                      <h1
-                        style={{
-                          color: fontColor,
-                          fontFamily: selectedFontStyle
-                            ? selectedFontStyle.value
-                            : "Arial",
-                        }}
-                      >
-                        {selectedEvent ? selectedEvent.lugar : "SALON portada"}
-                      </h1>
-                    </div>
-                    <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-                      <div className="mx-2">
-                        <div
-                          className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
-                          style={{
-                            color: fontColor,
-                            backgroundColor: templateColor,
-                            fontFamily: selectedFontStyle
-                              ? selectedFontStyle.value
-                              : "Arial",
-                          }}
-                        >
-                          <h2>
-                            {selectedEvent
-                              ? selectedEvent.nombreEvento.toUpperCase()
-                              : "TÍTULO DEL EVENTO"}
-                          </h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4 text-black">
-                          <div className="mr-4 my-4">
-                            {selectedEvent &&
-                            selectedEvent.images.length > 0 ? (
-                              <>
-                                <div className="mr-4">
-                                  <div ref={sliderRef} className="keen-slider">
-                                    {selectedEvent.images.map(
-                                      (image, index) => (
-                                        // eslint-disable-next-line react/jsx-key
-                                        <div className="keen-slider__slide number-slide1 flex items-center justify-center">
-                                          <img
-                                            key={index}
-                                            src={image}
-                                            alt={`Imagen ${index + 1}`}
-                                            className="h-10"
-                                          />
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <p>No hay imágenes disponibles</p>
-                            )}
-                          </div>
-
-                          <div
-                            className=" space-y-8 pl-10 mb-12 my-4"
-                            style={{
-                              color: fontColor,
-                              fontFamily: selectedFontStyle
-                                ? selectedFontStyle.value
-                                : "Arial",
-                            }}
-                          >
-                            <div>
-                              <h1 className="text-4xl font-bold">Sesión:</h1>
-                              <p className="text-4xl font-bold">
-                                {selectedEvent ? (
-                                  <span className="text-4xl font-bold">
-                                    {selectedEvent.horaInicialReal}
-                                  </span>
-                                ) : (
-                                  "Hora Inicial"
-                                )}{" "}
-                                <span className="text-2x1">hrs.</span>
-                              </p>
-                            </div>
-                            <div
-                              className="max-w-xs"
-                              style={{
-                                fontFamily: selectedFontStyle
-                                  ? selectedFontStyle.value
-                                  : "Arial",
-                              }}
-                            >
-                              {/* Tipo de evento y descripción */}
-                              <h1 className="text-4xl font-bold">
-                                {selectedEvent
-                                  ? selectedEvent.tipoEvento
-                                  : "Tipo de Evento Desconocido"}
-                              </h1>
-                              <div className="text-center flex px-0">
-                                {selectedEvent && selectedEvent.description && (
-                                  <div>
-                                    {dividirTexto(
-                                      selectedEvent.description,
-                                      40
-                                    ).map((linea, index) => (
-                                      <p key={index} className="text-left">
-                                        {linea}
-                                      </p>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div
-                            className={`text-4xl py-4 font-semibold mt-1 text-center  justify-between flex px-20 rounded-b-xl`}
-                            style={{
-                              color: fontColor,
-                              backgroundColor: templateColor,
-                              fontFamily: selectedFontStyle
-                                ? selectedFontStyle.value
-                                : "Arial",
-                            }}
-                          >
-                            <p style={{ color: fontColor }}>{obtenerFecha()}</p>
-                            <p style={{ color: fontColor }}>{currentHour}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleClosePreview}
-                      className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-                    >
-                      Volver atrás
-                    </button>
-                  </div>
-                </section>
-              )}
-            </>
-          ) : (
-            <>
-              {previewVisible && (
-                <section className="relative z-10 inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-                  <div className="bg-white  text-black h-full flex flex-col justify-center">
-                    <div className="flex items-center justify-between">
-                      {selectedLogo && (
-                        <img src={selectedLogo} alt="Logo" className="w-96" />
-                      )}
-                      <h1
-                        style={{
-                          color: fontColor,
-                          fontFamily: selectedFontStyle
-                            ? selectedFontStyle.value
-                            : "Arial",
-                        }}
-                      >
-                        {selectedEvent ? selectedEvent.lugar : "SALON EJEMPLO"}
-                      </h1>
-                    </div>
-                    <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-                      <div className="mx-2">
-                        <div
-                          className={`text-white py-5 text-5xl font-bold px-20 rounded-t-xl`}
-                          style={{
-                            color: fontColor,
-                            backgroundColor: templateColor,
-                            fontFamily: selectedFontStyle
-                              ? selectedFontStyle.value
-                              : "Arial",
-                          }}
-                        >
-                          <h2>
-                            {selectedEvent
-                              ? selectedEvent.nombreEvento.toUpperCase()
-                              : "TÍTULO DEL EVENTO"}
-                          </h2>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4 text-black">
-                          <div className="mr-4 my-4">
-                            {selectedEvent &&
-                            selectedEvent.images.length > 0 ? (
-                              <>
-                                <div className="mr-4">
-                                  <div ref={sliderRef} className="keen-slider">
-                                    {selectedEvent.images.map(
-                                      (image, index) => (
-                                        // eslint-disable-next-line react/jsx-key
-                                        <div className="keen-slider__slide number-slide1 flex items-center justify-center">
-                                          <img
-                                            key={index}
-                                            src={image}
-                                            alt={`Imagen ${index + 1}`}
-                                            className="h-10"
-                                          />
-                                        </div>
-                                      )
-                                    )}
-                                  </div>
-                                </div>
-                              </>
-                            ) : (
-                              <p>No hay imágenes disponibles</p>
-                            )}
-                          </div>
-
-                          <div
-                            className=" space-y-8 pl-10 mb-12 my-4"
-                            style={{
-                              color: fontColor,
-                              fontFamily: selectedFontStyle
-                                ? selectedFontStyle.value
-                                : "Arial",
-                            }}
-                          >
-                            <div>
-                              <h1 className="text-4xl font-bold">Sesión:</h1>
-                              <p className="text-4xl font-bold">
-                                {selectedEvent ? (
-                                  <span className="text-4xl font-bold">
-                                    {selectedEvent.horaInicialReal}
-                                  </span>
-                                ) : (
-                                  "Hora Inicial"
-                                )}{" "}
-                                <span className="text-2x1">hrs.</span>
-                              </p>
-                            </div>
-                            <div
-                              className="max-w-xs"
-                              style={{
-                                fontFamily: selectedFontStyle
-                                  ? selectedFontStyle.value
-                                  : "Arial",
-                              }}
-                            >
-                              {/* Tipo de evento y descripción */}
-                              <h1 className="text-4xl font-bold">
-                                {selectedEvent
-                                  ? selectedEvent.tipoEvento
-                                  : "Tipo de Evento Desconocido"}
-                              </h1>
-                              <div className="text-center flex px-0">
-                                {selectedEvent && selectedEvent.description && (
-                                  <div>
-                                    {dividirTexto(
-                                      selectedEvent.description,
-                                      40
-                                    ).map((linea, index) => (
-                                      <p key={index} className="text-left">
-                                        {linea}
-                                      </p>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div>
-                          <div
-                            className={`text-4xl py-4 font-semibold mt-1 text-center  justify-between flex px-20 rounded-b-xl`}
-                            style={{
-                              color: fontColor,
-                              backgroundColor: templateColor,
-                              fontFamily: selectedFontStyle
-                                ? selectedFontStyle.value
-                                : "Arial",
-                            }}
-                          >
-                            <p style={{ color: fontColor }}>{obtenerFecha()}</p>
-                            <p style={{ color: fontColor }}>{currentHour}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleClosePreview}
-                      className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-                    >
-                      Volver atrás
-                    </button>
-                  </div>
-                </section>
-              )}
-            </>
-          )}
-
           <div className="flex justify-end mt-6">
-            {/*
-            <button
-              onClick={handlePreviewClick}
-              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
-            >
-              Vista Previa
-            </button>
-            */}
             <button
               onClick={() => {
                 guardarInformacionPersonalizacion(selectedLogo);

@@ -45,14 +45,164 @@ function PantallasDirectorio() {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(obtenerHora());
-  const [weatherData, setWeatherData] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
   const [selectedLogo, setSelectedLogo] = useState(null);
-  const [logo, setLogo] = useState(null);
   const [cityOptions, setCityOptions] = useState([
-    { value: "New York", label: "New York" },
-    { value: "Los Angeles", label: "Los Angeles" },
+    // Ciudades de México
+    {
+      value: "Aguascalientes, Aguascalientes, México",
+      label: "Aguascalientes, Aguascalientes, México",
+    },
+    {
+      value: "Cancún, Quintana Roo, México",
+      label: "Cancún, Quintana Roo, México",
+    },
+    {
+      value: "Chihuahua, Chihuahua, México",
+      label: "Chihuahua, Chihuahua, México",
+    },
+    {
+      value: "Ciudad de México, Ciudad de México, México",
+      label: "Ciudad de México, Ciudad de México, México",
+    },
+    {
+      value: "Guadalajara, Jalisco, México",
+      label: "Guadalajara, Jalisco, México",
+    },
+    {
+      value: "Hermosillo, Sonora, México",
+      label: "Hermosillo, Sonora, México",
+    },
+    { value: "León, Guanajuato, México", label: "León, Guanajuato, México" },
+    { value: "Mérida, Yucatán, México", label: "Mérida, Yucatán, México" },
+    {
+      value: "Monterrey, Nuevo León, México",
+      label: "Monterrey, Nuevo León, México",
+    },
+    {
+      value: "Morelia, Michoacán, México",
+      label: "Morelia, Michoacán, México",
+    },
+    { value: "Puebla, Puebla, México", label: "Puebla, Puebla, México" },
+    {
+      value: "Querétaro, Querétaro, México",
+      label: "Querétaro, Querétaro, México",
+    },
+    {
+      value: "Saltillo, Coahuila, México",
+      label: "Saltillo, Coahuila, México",
+    },
+    {
+      value: "San Luis Potosí, San Luis Potosí, México",
+      label: "San Luis Potosí, San Luis Potosí, México",
+    },
+    {
+      value: "Tijuana, Baja California, México",
+      label: "Tijuana, Baja California, México",
+    },
+    {
+      value: "Toluca, Estado de México, México",
+      label: "Toluca, Estado de México, México",
+    },
+    { value: "Torreón, Coahuila, México", label: "Torreón, Coahuila, México" },
+    {
+      value: "Tuxtla Gutiérrez, Chiapas, México",
+      label: "Tuxtla Gutiérrez, Chiapas, México",
+    },
+    {
+      value: "Veracruz, Veracruz, México",
+      label: "Veracruz, Veracruz, México",
+    },
+    {
+      value: "Zacatecas, Zacatecas, México",
+      label: "Zacatecas, Zacatecas, México",
+    },
+
+    // Ciudades de Estados Unidos
+    {
+      value: "Austin, Texas, Estados Unidos",
+      label: "Austin, Texas, Estados Unidos",
+    },
+    {
+      value: "Charlotte, Carolina del Norte, Estados Unidos",
+      label: "Charlotte, Carolina del Norte, Estados Unidos",
+    },
+    {
+      value: "Chicago, Illinois, Estados Unidos",
+      label: "Chicago, Illinois, Estados Unidos",
+    },
+    {
+      value: "Columbus, Ohio, Estados Unidos",
+      label: "Columbus, Ohio, Estados Unidos",
+    },
+    {
+      value: "Dallas, Texas, Estados Unidos",
+      label: "Dallas, Texas, Estados Unidos",
+    },
+    {
+      value: "Denver, Colorado, Estados Unidos",
+      label: "Denver, Colorado, Estados Unidos",
+    },
+    {
+      value: "Fort Worth, Texas, Estados Unidos",
+      label: "Fort Worth, Texas, Estados Unidos",
+    },
+    {
+      value: "Houston, Texas, Estados Unidos",
+      label: "Houston, Texas, Estados Unidos",
+    },
+    {
+      value: "Indianapolis, Indiana, Estados Unidos",
+      label: "Indianapolis, Indiana, Estados Unidos",
+    },
+    {
+      value: "Jacksonville, Florida, Estados Unidos",
+      label: "Jacksonville, Florida, Estados Unidos",
+    },
+    {
+      value: "Los Angeles, California, Estados Unidos",
+      label: "Los Angeles, California, Estados Unidos",
+    },
+    {
+      value: "Nueva York, Nueva York, Estados Unidos",
+      label: "Nueva York, Nueva York, Estados Unidos",
+    },
+    {
+      value: "Filadelfia, Pensilvania, Estados Unidos",
+      label: "Filadelfia, Pensilvania, Estados Unidos",
+    },
+    {
+      value: "Phoenix, Arizona, Estados Unidos",
+      label: "Phoenix, Arizona, Estados Unidos",
+    },
+    {
+      value: "San Antonio, Texas, Estados Unidos",
+      label: "San Antonio, Texas, Estados Unidos",
+    },
+    {
+      value: "San Diego, California, Estados Unidos",
+      label: "San Diego, California, Estados Unidos",
+    },
+    {
+      value: "San Francisco, California, Estados Unidos",
+      label: "San Francisco, California, Estados Unidos",
+    },
+    {
+      value: "San José, California, Estados Unidos",
+      label: "San José, California, Estados Unidos",
+    },
+    {
+      value: "Seattle, Washington, Estados Unidos",
+      label: "Seattle, Washington, Estados Unidos",
+    },
+    {
+      value: "Washington, D.C., Estados Unidos",
+      label: "Washington, D.C., Estados Unidos",
+    },
   ]);
+
+  // Ordenar alfabéticamente
+  cityOptions.sort((a, b) => a.label.localeCompare(b.label));
+
   const [selectedCity, setSelectedCity] = useState(null);
 
   useEffect(() => {
@@ -109,7 +259,7 @@ function PantallasDirectorio() {
           if (!templateDirectoriosSnapshot.empty) {
             const templateDirectoriosDoc =
               templateDirectoriosSnapshot.docs[0].data();
-            const { fontColor, fontStyle, logo, templateColor } =
+            const { fontColor, fontStyle, logo, templateColor, ciudad } =
               templateDirectoriosDoc;
 
             setFontColor(fontColor || "#000000");
@@ -119,6 +269,7 @@ function PantallasDirectorio() {
             });
             setSelectedLogo(logo || null);
             setTemplateColor(templateColor || "#D1D5DB");
+            setSelectedCity({ value: ciudad, label: ciudad });
           }
         }
       } catch (error) {
@@ -130,17 +281,50 @@ function PantallasDirectorio() {
     fetchTemplateData();
   }, []);
 
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption);
+  };
+
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
-    { value: "Times New Roman", label: "Times New Roman" },
-    { value: "Verdana", label: "Verdana" },
-    { value: "Rockwell", label: "Rockwell" },
-    { value: "Helvetica", label: "Helvetica" },
+    { value: "Avenir", label: "Avenir" },
+    { value: "Bebas Neue", label: "Bebas Neue" },
+    { value: "Cabin", label: "Cabin" },
     { value: "Courier New", label: "Courier New" },
+    { value: "Crimson Text", label: "Crimson Text" },
+    { value: "Cormorant", label: "Cormorant" },
+    { value: "Dancing Script", label: "Dancing Script" },
+    { value: "Dosis", label: "Dosis" },
+    { value: "Exo", label: "Exo" },
+    { value: "Fira Sans", label: "Fira Sans" },
+    { value: "Garamond", label: "Garamond" },
     { value: "Georgia", label: "Georgia" },
-    { value: "Tahoma", label: "Tahoma" },
-    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Helvetica", label: "Helvetica" },
+    { value: "Josefin Sans", label: "Josefin Sans" },
+    { value: "Lato", label: "Lato" },
+    { value: "Merriweather", label: "Merriweather" },
+    { value: "Montserrat", label: "Montserrat" },
+    { value: "Muli", label: "Muli" },
+    { value: "Nunito", label: "Nunito" },
+    { value: "Noticia Text", label: "Noticia Text" },
+    { value: "Open Sans", label: "Open Sans" },
+    { value: "Oswald", label: "Oswald" },
+    { value: "Pacifico", label: "Pacifico" },
     { value: "Palatino", label: "Palatino" },
+    { value: "Playfair Display", label: "Playfair Display" },
+    { value: "Poppins", label: "Poppins" },
+    { value: "Quicksand", label: "Quicksand" },
+    { value: "Raleway", label: "Raleway" },
+    { value: "Roboto", label: "Roboto" },
+    { value: "Rockwell", label: "Rockwell" },
+    { value: "Source Sans Pro", label: "Source Sans Pro" },
+    { value: "Tahoma", label: "Tahoma" },
+    { value: "Times New Roman", label: "Times New Roman" },
+    { value: "Trebuchet MS", label: "Trebuchet MS" },
+    { value: "Ubuntu", label: "Ubuntu" },
+    { value: "Varela Round", label: "Varela Round" },
+    { value: "Verdana", label: "Verdana" },
+    { value: "Yanone Kaffeesatz", label: "Yanone Kaffeesatz" },
   ];
 
   const [selectedFontStyle, setSelectedFontStyle] = useState(
@@ -168,35 +352,6 @@ function PantallasDirectorio() {
     const font = `${selectedOption.value}, sans-serif`;
     const textoAncho = getTextWidth(textoEjemplo, `bold 20px ${font}`);
     console.log("Ancho del texto medido:", textoAncho);
-  };
-
-  const handlePreviewClick = () => {
-    setPreviewVisible(true);
-  };
-
-  const handleClosePreview = () => {
-    setPreviewVisible(false);
-  };
-  const obtenerDia = () => {
-    const diasSemana = [
-      "Domingo",
-      "Lunes",
-      "Martes",
-      "Miércoles",
-      "Jueves",
-      "Viernes",
-      "Sábado",
-    ];
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    return diaSemana;
-  };
-
-  const obtenerFecha = () => {
-    const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    return `${day}/${month}`;
   };
 
   function obtenerHora() {
@@ -249,7 +404,10 @@ function PantallasDirectorio() {
         return;
       }
 
-      // console.log("Usuario autenticado:", authUser);
+      if (!selectedCity) {
+        alert("Por favor, seleccione una ciudad.");
+        return;
+      }
 
       if (!selectedLogo) {
         console.error("selectedLogo es null. No se puede enviar a Firestore.");
@@ -261,6 +419,7 @@ function PantallasDirectorio() {
         templateColor: templateColor,
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
+        ciudad: selectedCity.value,
       };
 
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
@@ -280,6 +439,7 @@ function PantallasDirectorio() {
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
+          ciudad: selectedCity.value,
           timestamp: serverTimestamp(),
         });
       } else {
@@ -289,6 +449,7 @@ function PantallasDirectorio() {
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
+          ciudad: selectedCity.value,
           timestamp: serverTimestamp(),
         });
       }
@@ -349,17 +510,17 @@ function PantallasDirectorio() {
   };
 
   return (
-    <section className="px-5 md:px-32">
+    <section className="px-8 py-12">
       <div>
-        <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            Ajuste de pantallas directorio
-          </h1>
+        <div className="p-5 text-center">
+          <h2 className="text-4xl font-extrabold text-gray-900">
+            AJUSTES DE PANTALLAS DIRECTORIO
+          </h2>
         </div>
 
         {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800">
-          <h1 className="text-xl font-bold text-white capitalize dark:text-white">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
+          <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
@@ -438,9 +599,12 @@ function PantallasDirectorio() {
               <Select
                 options={cityOptions}
                 value={selectedCity}
-                onChange={setSelectedCity}
+                onChange={handleCityChange}
                 placeholder="Seleccione una ciudad"
                 className="w-full"
+                isSearchable
+                isClearable={false}
+                required // Asegura que la ciudad sea obligatoria
               />
             </div>
 
@@ -505,181 +669,7 @@ function PantallasDirectorio() {
               ))}
             </div>
           </div>
-          ;{/* Sección de vista previa */}
-          {previewVisible && (
-            <div className="fixed top-0 left-0 flex items-center justify-center w-screen h-screen bg-black bg-opacity-80 z-50">
-              <div className="bg-white w-2/4  p-6 rounded-md shadow-lg text-black  ">
-                <div className="flex justify-between items-center">
-                  {/* Logo en la esquina superior izquierda */}
-                  <div className="">
-                    {logo ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={URL.createObjectURL(logo)}
-                        alt="Logo"
-                        className="h-28 mb-2"
-                      />
-                    ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src="/img/fiestamericana.png"
-                        alt="Logo"
-                        className="h-15"
-                      />
-                    )}
-                  </div>
-
-                  <div
-                    className="flex flex-col items-center"
-                    style={{
-                      color: fontColor,
-                      fontFamily: selectedFontStyle
-                        ? selectedFontStyle.value
-                        : "Arial",
-                    }}
-                  >
-                    <p className="text-2xl text-center font-semibold mb-2">
-                      {`${obtenerDia()} ${obtenerFecha()} - ${currentTime}`}
-                    </p>
-                    <h1 className="text-4xl font-bold">Eventos del día</h1>
-                  </div>
-
-                  <div className="flex flex-col" style={{ color: fontColor }}>
-                    {isLoading ? (
-                      <p>Cargando datos del clima...</p>
-                    ) : weatherData &&
-                      weatherData.current &&
-                      weatherData.current.temp_c ? (
-                      <p className="text-3xl font-bold">
-                        {weatherData.current.temp_c} °C
-                      </p>
-                    ) : (
-                      <p>No se pudo obtener la información del clima</p>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-                  <div className="">
-                    <div
-                      className={` text-white text-2xl font-semibold mt-1 text-center justify-between flex px-20 mb-4 rounded-t-xl`}
-                      style={{
-                        color: fontColor,
-                        backgroundColor: templateColor,
-                        fontFamily: selectedFontStyle
-                          ? selectedFontStyle.value
-                          : "Arial",
-                      }}
-                    >
-                      {/* Título */}
-                      <h2 className=" text-white"> </h2>
-                    </div>
-                    <div className=" text-black">
-                      {/* Imagen a la izquierda */}
-                      <div
-                        className="flex flex-col
-                      "
-                      >
-                        <div className="flex items-center border-b border-black w-full">
-                          <div className="space-y-5 pl-5 flex-grow">
-                            {selectedEvents &&
-                              selectedEvents.map((event) => {
-                                return (
-                                  <div
-                                    key={event.id}
-                                    className="flex items-center space-x-4"
-                                  >
-                                    {/* Imagen a la izquierda */}
-                                    <img
-                                      src={event.images[0]}
-                                      alt={event.nombreEvento}
-                                      style={{
-                                        width: "130px",
-                                        height: "110px",
-                                      }}
-                                    />
-
-                                    {/* Detalles del evento */}
-                                    <div
-                                      style={{
-                                        color: fontColor,
-                                        fontFamily: selectedFontStyle
-                                          ? selectedFontStyle.value
-                                          : "Arial",
-                                      }}
-                                    >
-                                      {/* Aplicando el color seleccionado */}
-                                      <h3>{event.nombreEvento}</h3>
-                                      <p>{event.tipoEvento}</p>
-                                      <p>{event.lugar}</p>
-                                      {/* Agrega más detalles según sea necesario */}
-                                      <div className="text-right">
-                                        <p>{event.horaInicialReal}</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      {/* Fecha y hora en la esquina inferior */}
-
-                      <div
-                        className={`text-2xl font-semibold mt-1 text-center text-white bg-black justify-between flex px-20 rounded-b-xl`}
-                        style={{
-                          color: fontColor,
-                          backgroundColor: templateColor,
-                          fontFamily: selectedFontStyle
-                            ? selectedFontStyle.value
-                            : "Arial",
-                        }}
-                      >
-                        <p> </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <p
-                    className=""
-                    style={{
-                      color: fontColor,
-                      fontFamily: selectedFontStyle
-                        ? selectedFontStyle.value
-                        : "Arial",
-                    }}
-                  >
-                    Grupo renueca el mejor programa de recompensa para
-                    asistentes ejec
-                  </p>
-                  <img
-                    src="/img/licensed-image.jpeg"
-                    alt="Logo"
-                    className="h-12"
-                  />
-                </div>
-                {/* Botón para volver atrás */}
-                <button
-                  onClick={handleClosePreview}
-                  className="absolute top-4 right-4 bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full"
-                >
-                  Volver atrás
-                </button>
-              </div>
-            </div>
-          )}
           <div className="flex justify-end mt-6">
-            {/*
-            <button
-              onClick={handlePreviewClick}
-              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
-            >
-              Vista Previa
-            </button>
-            */}
             <button
               onClick={() => {
                 guardarInformacionPersonalizacion(selectedLogo);
