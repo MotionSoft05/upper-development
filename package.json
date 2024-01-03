@@ -22,6 +22,7 @@
     "emailjs-com": "^3.2.0",
     "eslint": "8.48.0",
     "eslint-config-next": "13.4.19",
+    "fast-xml-parser": "^4.3.2",
     "feather-icons-react": "^0.6.2",
     "firebase": "^10.5.0",
     "firebase-admin": "^12.0.0",

@@ -12,7 +12,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
-
+import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
@@ -62,6 +62,36 @@ function PantallaDirec1() {
     }, 1000);
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, []);
+
+  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
+
+  useEffect(() => {
+    axios
+      .get(
+        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
+      )
+      .then((response) => {
+        if (parser.validate(response.data) === true) {
+          const jsonObj = parser.parse(response.data);
+          const items = jsonObj.rss.channel.item.map((item) => {
+            return {
+              title: item.title,
+              link: item.link,
+              description: item.description,
+              // ... otros campos que desees obtener
+            };
+          });
+
+          setRssItems(items); // Guardar los elementos del RSS en el estado
+          console.log("Items del RSS:", items); // Agregar un console.log aquí
+        } else {
+          console.error("Invalid XML format");
+        }
+      })
+      .catch((error) =>
+        console.error("Error fetching or parsing data:", error)
+      );
   }, []);
 
   // Slider
@@ -575,20 +605,20 @@ function PantallaDirec1() {
           </div>
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
-            <p
-              className=""
-              style={{
-                fontFamily: templateActual.fontStyle,
-              }}
-              // style={{
-              //   color: fontColor,
-              //   fontFamily: selectedFontStyle
-              //     ? selectedFontStyle.value
-              //     : "Arial",
-              // }}
-            >
-              Grupo renueca el mejor programa de recompensa para asistentes ejec
-            </p>
+            <div className="w-full">
+              {rssItems.length > 0 && (
+                <div ref={sliderRef} className="keen-slider">
+                  {rssItems.map((item, index) => (
+                    <div key={index} className="keen-slider__slide">
+                      {/* Aquí puedes mostrar los elementos del RSS dentro del carrusel */}
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                      {/* ... otros campos que quieras mostrar */}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
             <div style={{ marginTop: "20px", marginRight: "20px" }}>
               {qrCodeUrl && (
                 <a
