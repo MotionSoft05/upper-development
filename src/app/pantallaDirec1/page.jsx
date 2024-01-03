@@ -219,7 +219,6 @@ function PantallaDirec1() {
                 });
               });
               setTemplateData(templateData);
-              // Aquí puedes hacer algo con la información obtenida de TemplateDirectorios
             } else {
               console.log(
                 "No se encontró información en TemplateDirectorios para este usuario."
