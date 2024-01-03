@@ -12,8 +12,10 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
+import QRCode from "qrcode.react";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -34,6 +36,17 @@ function PantallaDirec1() {
   const numeroPantallaActual = "1";
   const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
   const [error, setError] = useState(null);
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      // Obtén la URL base del navegador
+      const baseUrl = window.location.origin;
+
+      // Actualiza la URL del código QR al cambiar el usuario
+      setQrCodeUrl(`${baseUrl}/pantallaDirec1/${user.uid}`);
+    }
+  }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -499,7 +512,17 @@ function PantallaDirec1() {
             >
               Grupo renueca el mejor programa de recompensa para asistentes ejec
             </p>
-            <img src="/img/licensed-image.jpeg" alt="Logo" className="h-12" />
+            {qrCodeUrl && (
+              <a
+                href={qrCodeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ cursor: "pointer" }}
+              >
+                {/* Muestra el código QR */}
+                <QRCode value={qrCodeUrl} size={120} />
+              </a>
+            )}
           </div>
         </div>
       </div>
