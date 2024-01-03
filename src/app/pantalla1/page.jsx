@@ -309,21 +309,32 @@ function Pantalla1() {
       },
     ]
   );
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentImageIndex(
+        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
+      );
+    }, publicidadesUsuario[currentImageIndex]?.segundos * 1000 || 5000); // Default a 5 segundos si no hay datos
+
+    return () => clearInterval(interval);
+  }, [currentImageIndex, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
+    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+      return null; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+    }
+
     return (
       <>
         <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
           <div className="slider-container">
-            <div ref={sliderRef} className="keen-slider" style={{}}>
-              {publicidadesUsuario.map((publicidad, index) => (
-                <div key={index} className="keen-slider__slide">
-                  <img
-                    src={publicidad.imageUrl}
-                    alt={`Publicidad ${index + 1}`}
-                  />
-                </div>
-              ))}
+            <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
+              <img
+                src={publicidadesUsuario[currentImageIndex]?.imageUrl}
+                alt={currentImageIndex}
+                style={{}}
+              />
             </div>
           </div>
         </section>
@@ -335,13 +346,12 @@ function Pantalla1() {
 
   const {
     personalizacionTemplate,
-    lugar,
+
     nombreEvento,
     images,
     horaInicialReal,
     tipoEvento,
     description,
-    devices,
   } = eventoActual;
 
   return (
