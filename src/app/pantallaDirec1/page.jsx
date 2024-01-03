@@ -37,7 +37,7 @@ function PantallaDirec1() {
   const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
   const [error, setError] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
-
+  const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   useEffect(() => {
     if (user) {
       // Obtén la URL base del navegador
@@ -281,10 +281,44 @@ function PantallaDirec1() {
         });
     }
   }, [selectedCity]);
+  // Publicidades-------------------------------------------
+  const pantalla = "directorio";
 
-  if (!eventosEnCurso) {
-    return <p>Cargando...</p>;
-  }
+  useEffect(() => {
+    const fetchPublicidades = () => {
+      if (user && firestore) {
+        const publicidadesRef = collection(firestore, "Publicidad");
+        const publicidadesQuery = query(
+          publicidadesRef,
+          where("userId", "==", user.uid)
+        );
+
+        getDocs(publicidadesQuery)
+          .then((querySnapshot) => {
+            const publicidades = [];
+            querySnapshot.forEach((doc) => {
+              const publicidad = { id: doc.id, ...doc.data() };
+              // Comparar el tipo de la publicidad con la pantalla deseada
+              if (publicidad.tipo === pantalla) {
+                publicidades.push(publicidad);
+              }
+            });
+            setPublicidadesUsuario(publicidades);
+          })
+          .catch((error) => {
+            console.error("Error al obtener las publicidades:", error);
+          });
+      }
+    };
+
+    const interval = setInterval(() => {
+      fetchPublicidades();
+    }, 10000);
+
+    fetchPublicidades(); // Llamar inicialmente
+
+    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -320,8 +354,51 @@ function PantallaDirec1() {
     return `${diaSemana} ${dia}/${mes} `;
   };
 
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    let timeoutId;
+
+    const changeImage = () => {
+      setCurrentImageIndex(
+        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
+      );
+    };
+
+    const currentAd = publicidadesUsuario[currentImageIndex];
+    if (currentAd) {
+      console.log("currentAd", currentAd);
+      const totalSeconds =
+        currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
+      console.log("totalSeconds", totalSeconds);
+      timeoutId = setTimeout(changeImage, totalSeconds * 1000);
+      console.log("timeoutId", timeoutId);
+    } else {
+      timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
+    }
+
+    return () => clearTimeout(timeoutId); // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
+  }, [currentImageIndex, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
-    return <p>No hay eventos disponibles en este momento.</p>;
+    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+      return "No hay publicidad ni eventos"; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+    }
+
+    return (
+      <>
+        <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+          <div className="slider-container">
+            <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
+              <img
+                src={publicidadesUsuario[currentImageIndex]?.imageUrl}
+                alt={currentImageIndex}
+                style={{}}
+              />
+            </div>
+          </div>
+        </section>
+      </>
+    );
   }
   console.log("EVENTOSSSS", eventosEnCurso);
   // console.log("templateData", templateData);
@@ -375,7 +452,7 @@ function PantallaDirec1() {
             </div>
 
             <div
-              className="flex flex-col items-center"
+              className="flex flex-col text-color items-center"
               style={{
                 color: templateActual.fontColor,
                 fontFamily: templateActual.fontStyle,
@@ -388,7 +465,7 @@ function PantallaDirec1() {
             </div>
 
             <div
-              className="flex flex-col"
+              className="flex text-color flex-col"
               style={{
                 color: templateActual.fontColor,
                 fontFamily: templateActual.fontStyle,
@@ -497,7 +574,7 @@ function PantallaDirec1() {
             <h2 className=" text-white"> </h2>
           </div>
           {/* texto de abajo */}
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between text-color items-center">
             <p
               className=""
               style={{
