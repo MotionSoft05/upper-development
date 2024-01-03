@@ -13,6 +13,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
 import "keen-slider/keen-slider.min.css";
+import axios from "axios";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -32,6 +33,7 @@ function PantallaDirec1() {
   const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "1";
   const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
+  const [error, setError] = useState(null);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -116,29 +118,6 @@ function PantallaDirec1() {
     const now = new Date();
     return diasSemana[now.getDay()];
   };
-
-  useEffect(() => {
-    if (selectedCity) {
-      setIsLoading(true);
-      setError(null);
-
-      const apiKey = "d6bfb64ec94a413cabc181954232010";
-      const baseUrl = "http://api.weatherapi.com/v1";
-
-      axios
-        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
-        .then((response) => {
-          console.log("Datos del clima:", response.data);
-          setWeatherData(response.data);
-          setIsLoading(false);
-        })
-        .catch((error) => {
-          console.error("Error al obtener datos del clima:", error);
-          setError("No se pudo obtener la información del clima");
-          setIsLoading(false);
-        });
-    }
-  }, [selectedCity]);
 
   useEffect(() => {
     if (user && firestore) {
@@ -234,13 +213,17 @@ function PantallaDirec1() {
               templateSnapshot.forEach((doc) => {
                 const template = { id: doc.id, ...doc.data() };
                 templateData.push(template);
+                setSelectedCity({
+                  value: template.ciudad,
+                  label: template.ciudad,
+                });
               });
               setTemplateData(templateData);
               // Aquí puedes hacer algo con la información obtenida de TemplateDirectorios
             } else {
-              // console.log(
-              //   "No se encontró información en TemplateDirectorios para este usuario."
-              // );
+              console.log(
+                "No se encontró información en TemplateDirectorios para este usuario."
+              );
             }
             // Filtrar por fecha y hora los eventos filtrados por pantalla
 
@@ -264,6 +247,28 @@ function PantallaDirec1() {
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
+  useEffect(() => {
+    if (selectedCity) {
+      setIsLoading(true);
+      setError(null);
+
+      const apiKey = "a067ad0b3d4440b192b223344240201";
+      const baseUrl = "http://api.weatherapi.com/v1";
+
+      axios
+        .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
+        .then((response) => {
+          console.log("Datos del clima:", response.data);
+          setWeatherData(response.data);
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error al obtener datos del clima:", error);
+          setError("No se pudo obtener la información del clima");
+          setIsLoading(false);
+        });
+    }
+  }, [selectedCity]);
 
   if (!eventosEnCurso) {
     return <p>Cargando...</p>;
