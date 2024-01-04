@@ -19,7 +19,6 @@ export default function Home() {
       const threshold = 500; // Cambia esto según tu preferencia.
 
       if (window.scrollY > threshold) {
-        // Si el desplazamiento vertical supera el umbral, muestra el botón.
         setShowButton(true);
       } else {
         // De lo contrario, oculta el botón.
