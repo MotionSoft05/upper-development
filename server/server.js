@@ -11,6 +11,8 @@ app.use(cors());
 app.delete("/eliminar-usuario/:uid", async (req, res) => {
   const uid = req.params.uid;
 
+  res.header("Access-Control-Allow-Origin", "*");
+
   try {
     await auth.deleteUser(uid);
     res
