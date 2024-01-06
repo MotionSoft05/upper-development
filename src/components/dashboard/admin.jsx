@@ -403,7 +403,7 @@ function Admin() {
 
         // Hacer la solicitud DELETE al backend usando Axios
         const response = await axios.delete(
-          `https://upperds.mx/eliminar-usuario/${usuarioId}`
+          `http://localhost:3001/eliminar-usuario/${usuarioId}`
         );
 
         if (response.status === 200) {
