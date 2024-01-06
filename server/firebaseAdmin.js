@@ -1,11 +1,12 @@
-// firebaseAdmin.js
-
 const admin = require("firebase-admin");
 const serviceAccount = require("./firebase-credentials.json");
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-});
+// Inicializar la aplicación Firebase solo si no se ha inicializado previamente
+if (!admin.apps.length) {
+  admin.initializeApp({
+    credential: admin.credential.cert(serviceAccount),
+  });
+}
 
 const auth = admin.auth();
 
