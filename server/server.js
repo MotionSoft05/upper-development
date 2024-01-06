@@ -5,7 +5,29 @@ const app = express();
 const auth = require("./firebaseAdmin");
 const cors = require("cors");
 
-app.use(cors());
+const allowedOrigins = ["http://localhost:3000", "https://upperds.mx/"];
+
+app.use(
+  cors({
+    allowedHeaders: [
+      "Origin",
+      "X-Requested-With",
+      "Content-Type",
+      "Accept",
+      "Authorization",
+    ],
+    credentials: true,
+    origin: (origin, callback) => {
+      // Permitir cualquier origen si no se especifica (por ejemplo, solicitudes locales)
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE"],
+  })
+);
 
 // Ruta para eliminar usuario
 app.delete("/eliminar-usuario/:uid", async (req, res) => {
@@ -29,5 +51,5 @@ app.delete("/eliminar-usuario/:uid", async (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Servidor en ejecución en http://localhost:${PORT}`);
+  console.log(`Servidor en ejecución en https://localhost:${PORT}`);
 });
