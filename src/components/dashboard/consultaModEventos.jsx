@@ -83,6 +83,20 @@ function ConsultaModEvento() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleEscape = (e) => {
+      if (e.key === "Escape") {
+        cerrarModal();
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
+
   const consultarEventos = async () => {
     try {
       const user = firebase.auth().currentUser;
