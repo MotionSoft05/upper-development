@@ -1,9 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useReducer } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSync, faFilePdf } from "@fortawesome/free-solid-svg-icons";
+import {
+  faSync,
+  faFilePdf,
+  faTimes,
+  faEye,
+} from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
-import "firebase/compat/auth"; // Asegúrate de importar el módulo de autenticación
+import "firebase/compat/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
@@ -22,10 +27,10 @@ const Guia = () => {
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
-  const [user, setUser] = useState(null); // Estado para almacenar información del usuario actual
+  const [user, setUser] = useState(null);
+  const [, forceUpdate] = useReducer((x) => x + 1, 0);
 
   useEffect(() => {
-    // Obtener información del usuario actual al cargar la guía de usuario
     const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => {
       if (authUser) {
         setUser(authUser);
@@ -34,7 +39,6 @@ const Guia = () => {
       }
     });
 
-    // Obtener todos los PDFs al cargar la guía de usuario
     const storageRef = firebase.storage().ref("pdfs");
 
     storageRef.listAll().then((result) => {
@@ -42,7 +46,6 @@ const Guia = () => {
         return { name: item.name, url: item.getDownloadURL() };
       });
 
-      // Extraer el número al final del nombre del archivo y ordenar según ese número
       files.sort((a, b) => {
         const regex = /(\d+)\.pdf/;
         const numberA = parseInt(a.name.match(regex)[1]);
@@ -50,7 +53,6 @@ const Guia = () => {
         return numberA - numberB;
       });
 
-      // Usar Promise.all para esperar todas las promesas antes de actualizar el estado
       Promise.all(files.map(async (file) => ({ ...file, url: await file.url })))
         .then((filesWithUrls) => setUploadedFiles(filesWithUrls))
         .catch((error) =>
@@ -58,7 +60,7 @@ const Guia = () => {
         );
     });
 
-    return () => unsubscribe(); // Limpieza del efecto al desmontar el componente
+    return () => unsubscribe();
   }, [fileUploaded]);
 
   const handleFileChange = (event) => {
@@ -82,13 +84,11 @@ const Guia = () => {
         .then((snapshot) => {
           console.log("PDF subido con éxito", snapshot);
 
-          // Obtener la URL del archivo recién subido
           pdfRef.getDownloadURL().then((url) => {
             setPdfFile({ ...pdfFile, url });
             setFileUploaded(true);
             setIsUploading(false);
 
-            // Agregar el nuevo archivo a la lista de archivos cargados
             setUploadedFiles((prevFiles) => [
               ...prevFiles,
               { name: fileName, url },
@@ -104,22 +104,39 @@ const Guia = () => {
     }
   };
 
+  const handleDelete = (fileName) => {
+    // Manejar la eliminación de PDF
+    const storageRef = firebase.storage().ref();
+    const pdfRef = storageRef.child(`pdfs/${fileName}`);
+
+    pdfRef
+      .delete()
+      .then(() => {
+        console.log("PDF eliminado con éxito");
+        // Actualizar localmente el estado de los archivos eliminando el PDF correspondiente
+        setUploadedFiles((prevFiles) =>
+          prevFiles.filter((file) => file.name !== fileName)
+        );
+        setFileUploaded(false);
+      })
+      .catch((error) => {
+        console.error("Error al eliminar el PDF:", error);
+      });
+  };
+
   return (
     <section className="px-5 md:px-32">
       <div>
         <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
+          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
             Guía de usuario
           </h1>
 
-          {user && // Mostrar solo a los usuarios autenticados
+          {user &&
             (user.email === "uppermex10@gmail.com" ||
               user.email === "ulises.jacobo@hotmail.com") && (
               <div className="flex items-center space-x-4">
-                {/* Input para seleccionar un archivo PDF */}
                 <input type="file" accept=".pdf" onChange={handleFileChange} />
-
-                {/* Botón para subir el PDF */}
                 <button
                   onClick={handleUpload}
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -131,31 +148,32 @@ const Guia = () => {
                     "Subir PDF"
                   )}
                 </button>
-
-                {/* Enlace para descargar el PDF subido */}
-                {fileUploaded && pdfFile && (
-                  <a
-                    href={pdfFile.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                  >
-                    Ver PDF
-                  </a>
-                )}
               </div>
             )}
 
-          {/* Lista de archivos subidos */}
           <div className="mt-4">
             {uploadedFiles.map((file, index) => (
-              <div
-                key={index}
-                className="flex items-center space-x-4 cursor-pointer mb-3"
-                onClick={() => window.open(file.url, "_blank")}
-              >
+              <div key={index} className="flex items-center space-x-4 mb-3">
                 <FontAwesomeIcon icon={faFilePdf} size="3x" color="red" />
                 <span>{file.name}</span>
+                {user &&
+                  (user.email === "uppermex10@gmail.com" ||
+                    user.email === "ulises.jacobo@hotmail.com") && (
+                    <>
+                      <button
+                        onClick={() => window.open(file.url, "_blank")}
+                        className="text-blue-600 ml-2 cursor-pointer"
+                      >
+                        <FontAwesomeIcon icon={faEye} size="lg" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(file.name)}
+                        className="text-red-600 ml-2 cursor-pointer"
+                      >
+                        <FontAwesomeIcon icon={faTimes} size="lg" />
+                      </button>
+                    </>
+                  )}
               </div>
             ))}
           </div>
