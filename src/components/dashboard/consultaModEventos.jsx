@@ -660,6 +660,113 @@ function ConsultaModEvento() {
                                       maxLength={255}
                                     />
                                   </div>
+                                </div>
+
+                                <div>
+                                  <div className="mb-2 flex space-x-3">
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Fecha de Inicio
+                                      </label>
+                                      <input
+                                        type="date"
+                                        value={eventoEditado?.fechaInicio || ""}
+                                        onChange={(e) =>
+                                          handleFieldEdit(
+                                            "fechaInicio",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Fecha de Finalización
+                                      </label>
+                                      <input
+                                        type="date"
+                                        value={eventoEditado?.fechaFinal || ""}
+                                        onChange={(e) =>
+                                          handleFieldEdit(
+                                            "fechaFinal",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Horas Salon */}
+                                  <div className="mb-2 flex space-x-3">
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Inicial Salon
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={
+                                          eventoEditado?.horaInicialSalon || ""
+                                        }
+                                        onChange={(e) =>
+                                          handleFieldEdit(
+                                            "horaInicialSalon",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Final Salon
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={
+                                          eventoEditado?.horaFinalSalon || ""
+                                        }
+                                        onChange={(e) =>
+                                          handleFieldEdit(
+                                            "horaFinalSalon",
+                                            e.target.value
+                                          )
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                  </div>
+
+                                  {/* Horas Real */}
+                                  <div className="mb-2 flex space-x-3">
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Inicial Real
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={horaInicialReal}
+                                        onChange={(e) =>
+                                          setHoraInicialReal(e.target.value)
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Final Real
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={horaFinalReal}
+                                        onChange={(e) =>
+                                          setHoraFinalReal(e.target.value)
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                  </div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
                                       Imágenes del Evento (Máximo 3)
@@ -691,103 +798,6 @@ function ConsultaModEvento() {
                                         className="mt-2"
                                       />
                                     )}
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Fecha de Inicio
-                                    </label>
-                                    <input
-                                      type="date"
-                                      value={eventoEditado?.fechaInicio || ""}
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "fechaInicio",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Fecha de Finalización
-                                    </label>
-                                    <input
-                                      type="date"
-                                      value={eventoEditado?.fechaFinal || ""}
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "fechaFinal",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Hora Inicial Salon
-                                    </label>
-                                    <input
-                                      type="time"
-                                      value={
-                                        eventoEditado?.horaInicialSalon || ""
-                                      }
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "horaInicialSalon",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Hora Final Salon
-                                    </label>
-                                    <input
-                                      type="time"
-                                      value={
-                                        eventoEditado?.horaFinalSalon || ""
-                                      }
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "horaFinalSalon",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Hora Inicial Real
-                                    </label>
-                                    <input
-                                      type="time"
-                                      value={horaInicialReal}
-                                      onChange={(e) =>
-                                        setHoraInicialReal(e.target.value)
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Hora Final Real
-                                    </label>
-                                    <input
-                                      type="time"
-                                      value={horaFinalReal}
-                                      onChange={(e) =>
-                                        setHoraFinalReal(e.target.value)
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
                                   </div>
                                 </div>
                               </div>
