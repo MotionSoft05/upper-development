@@ -399,14 +399,7 @@ function ConsultaModEvento() {
                 >
                   HORA SALON
                 </th>
-                {/*
-                <th
-                  scope="col"
-                  className="hidden md:block px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
-                >
-                  ID DEL EVENTO
-                </th>
-                */}
+
                 <th
                   scope="col"
                   className="px-0.5 py-1 md:px-6 md:py-3 text-center text-xs font-medium text-gray-500 "
@@ -794,15 +787,6 @@ function ConsultaModEvento() {
                                         setHoraFinalReal(e.target.value)
                                       }
                                       className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Id del evento
-                                    </label>
-                                    <input
-                                      value={eventoEditado?.id}
-                                      className="w-full px-2 py-1 text-center"
                                     />
                                   </div>
                                 </div>
