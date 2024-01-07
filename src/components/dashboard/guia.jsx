@@ -157,23 +157,30 @@ const Guia = () => {
                 <FontAwesomeIcon icon={faFilePdf} size="3x" color="red" />
                 <span>{file.name}</span>
                 {user &&
-                  (user.email === "uppermex10@gmail.com" ||
-                    user.email === "ulises.jacobo@hotmail.com") && (
-                    <>
-                      <button
-                        onClick={() => window.open(file.url, "_blank")}
-                        className="text-blue-600 ml-2 cursor-pointer"
-                      >
-                        <FontAwesomeIcon icon={faEye} size="lg" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(file.name)}
-                        className="text-red-600 ml-2 cursor-pointer"
-                      >
-                        <FontAwesomeIcon icon={faTimes} size="lg" />
-                      </button>
-                    </>
-                  )}
+                (user.email === "uppermex10@gmail.com" ||
+                  user.email === "ulises.jacobo@hotmail.com") ? (
+                  <>
+                    <button
+                      onClick={() => window.open(file.url, "_blank")}
+                      className="text-blue-600 ml-2 cursor-pointer"
+                    >
+                      <FontAwesomeIcon icon={faEye} size="lg" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(file.name)}
+                      className="text-red-600 ml-2 cursor-pointer"
+                    >
+                      <FontAwesomeIcon icon={faTimes} size="lg" />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => window.open(file.url, "_blank")}
+                    className="text-blue-600 ml-2 cursor-pointer"
+                  >
+                    <FontAwesomeIcon icon={faEye} size="lg" />
+                  </button>
+                )}
               </div>
             ))}
           </div>
