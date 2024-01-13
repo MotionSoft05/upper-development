@@ -97,7 +97,7 @@ function PantallaDirec1() {
   // Slider
   const chunkArray = (arr, chunkSize) => {
     const totalEvents = arr.length;
-    const maxContainers = isPortrait
+    const maxContainers = templateData[0]?.setPortrait
       ? Math.ceil(totalEvents / chunkSize)
       : Math.ceil(totalEvents / (chunkSize * 2));
 
@@ -112,7 +112,10 @@ function PantallaDirec1() {
   };
 
   // Calcular eventos por slide
-  const eventosPorSlide = chunkArray(eventosEnCurso, isPortrait ? 5 : 8);
+  const eventosPorSlide = chunkArray(
+    eventosEnCurso,
+    templateData[0]?.setPortrait ? 5 : 8
+  );
 
   // Uso de eventosPorSlide en useKeenSlider
   const [sliderRef] = useKeenSlider({
@@ -204,7 +207,7 @@ function PantallaDirec1() {
                 }
               }
             });
-            console.log("eventosData:", eventosData);
+            // console.log("eventosData:", eventosData);
             // const eventosFiltrados = eventosData.filter((evento) => {
             //   const fechaFinalEvento = new Date(evento.fechaFinal);
             //   const fechaActual = new Date();
@@ -242,7 +245,7 @@ function PantallaDirec1() {
             // Usar eventosFiltrados en tu componente
             // setEventosEnCurso(eventosFiltradosv1);
 
-            console.log("Eventos ordenados:", eventosOrdenados);
+            // console.log("Eventos ordenados:", eventosOrdenados);
 
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
@@ -300,7 +303,7 @@ function PantallaDirec1() {
       axios
         .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
         .then((response) => {
-          console.log("Datos del clima:", response.data);
+          // console.log("Datos del clima:", response.data);
           setWeatherData(response.data);
           setIsLoading(false);
         })
@@ -397,12 +400,12 @@ function PantallaDirec1() {
 
     const currentAd = publicidadesUsuario[currentImageIndex];
     if (currentAd) {
-      console.log("currentAd", currentAd);
+      // console.log("currentAd", currentAd);
       const totalSeconds =
         currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
-      console.log("totalSeconds", totalSeconds);
+      // console.log("totalSeconds", totalSeconds);
       timeoutId = setTimeout(changeImage, totalSeconds * 1000);
-      console.log("timeoutId", timeoutId);
+      // console.log("timeoutId", timeoutId);
     } else {
       timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
     }
@@ -430,24 +433,28 @@ function PantallaDirec1() {
       </>
     );
   }
-  console.log("EVENTOSSSS", eventosEnCurso);
+  // console.log("EVENTOSSSS", eventosEnCurso);
   // console.log("templateData", templateData);
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  console.log("screenWidth", screenWidth);
-  console.log("screenHeight", screenHeight);
+  // console.log("screenWidth", screenWidth);
+  console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
-        className="bg-white text-black h-screen flex flex-col justify-center "
+        className="bg-white text-black h-screen flex flex-col justify-center  "
         style={{
-          transform: isPortrait ? "rotate(0deg)" : "rotate(90deg) ",
-          maxWidth: isPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
-          height: isPortrait ? "" : "100vh", // Ajustar la altura según la orientación
-          width: isPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
+          transform: templateData[0]?.setPortrait
+            ? "rotate(0deg)"
+            : "rotate(90deg) ",
+          maxWidth: templateData[0]?.setPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
+          height: templateData[0]?.setPortrait ? "" : "100vh", // Ajustar la altura según la orientación
+          width: templateData[0]?.setPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
+          marginLeft: templateData[0]?.setPortrait ? "" : "auto",
+          marginRight: templateData[0]?.setPortrait ? "" : "auto",
         }}
       >
         <div
@@ -540,49 +547,49 @@ function PantallaDirec1() {
                     <div ref={sliderRef} className="keen-slider">
                       {eventosPorSlide.map((slideEventos, index) => (
                         <div key={index} className="keen-slider__slide my-2">
-                          {Array.from({ length: isPortrait ? 5 : 8 }).map(
-                            (_, innerIndex) => {
-                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+                          {Array.from({
+                            length: templateData[0]?.setPortrait ? 5 : 8,
+                          }).map((_, innerIndex) => {
+                            const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                              return (
-                                <div
-                                  key={innerIndex}
-                                  className="flex items-center space-x-4 space-y-5 border-b border-black"
-                                  style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
-                                >
-                                  {evento ? (
-                                    // Si hay evento, mostrar los detalles
-                                    <>
-                                      <img
-                                        src={evento.images[0]}
-                                        alt={evento.nombreEvento}
-                                        style={{
-                                          width: "130px",
-                                          height: "110px",
-                                          margin: "0",
-                                        }}
-                                      />
-                                      <div className="grid grid-cols-2">
-                                        <div className="min-w-5">
-                                          <h3 className="font-bold mb-4">
-                                            {evento.nombreEvento}
-                                          </h3>
-                                          <p>{evento.tipoEvento}</p>
-                                          <p>{evento.lugar}</p>
-                                        </div>
-                                        <div className="text-right">
-                                          <p>{evento.horaInicialSalon} HRS</p>
-                                        </div>
+                            return (
+                              <div
+                                key={innerIndex}
+                                className="flex items-center space-x-4 space-y-5 border-b border-black"
+                                style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
+                              >
+                                {evento ? (
+                                  // Si hay evento, mostrar los detalles
+                                  <>
+                                    <img
+                                      src={evento.images[0]}
+                                      alt={evento.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                        margin: "0",
+                                      }}
+                                    />
+                                    <div className="grid grid-cols-2">
+                                      <div className="min-w-5">
+                                        <h3 className="font-bold mb-4">
+                                          {evento.nombreEvento}
+                                        </h3>
+                                        <p>{evento.tipoEvento}</p>
+                                        <p>{evento.lugar}</p>
                                       </div>
-                                    </>
-                                  ) : (
-                                    // Si no hay evento, mostrar el mensaje de casillero vacío
-                                    <p></p>
-                                  )}
-                                </div>
-                              );
-                            }
-                          )}
+                                      <div className="text-right">
+                                        <p>{evento.horaInicialSalon} HRS</p>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  // Si no hay evento, mostrar el mensaje de casillero vacío
+                                  <p></p>
+                                )}
+                              </div>
+                            );
+                          })}
                         </div>
                       ))}
                     </div>

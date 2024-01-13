@@ -92,7 +92,7 @@ function PantallasDirectorio() {
     { value: "Seattle", label: "Seattle" },
     { value: "Washington, D.C.", label: "Washington, D.C." },
   ]);
-
+  const [setPortrait, setSetPortrait] = useState(false);
   // Ordenar alfabéticamente
   cityOptions.sort((a, b) => a.label.localeCompare(b.label));
 
@@ -313,6 +313,7 @@ function PantallasDirectorio() {
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
         ciudad: selectedCity.value,
+        setPortrait: setPortrait, // Agrega setPortrait al objeto
       };
 
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
@@ -333,6 +334,8 @@ function PantallasDirectorio() {
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
           ciudad: selectedCity.value,
+          setPortrait: setPortrait, // Agrega setPortrait al objeto
+
           timestamp: serverTimestamp(),
         });
       } else {
@@ -343,6 +346,8 @@ function PantallasDirectorio() {
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
           ciudad: selectedCity.value,
+          setPortrait: setPortrait, // Agrega setPortrait al objeto
+
           timestamp: serverTimestamp(),
         });
       }
@@ -558,6 +563,12 @@ function PantallasDirectorio() {
                   >
                     URL
                   </Link>
+                  <button
+                    onClick={() => setSetPortrait((prevState) => !prevState)}
+                    className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
+                  >
+                    {setPortrait ? "Desactivar Portrait" : "Activar Portrait"}
+                  </button>
                 </div>
               ))}
             </div>
