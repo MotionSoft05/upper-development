@@ -18,7 +18,7 @@ import {
   where,
   getDocs,
 } from "firebase/firestore";
-
+import { v4 as uuidv4 } from "uuid";
 const firebaseConfig = {
   apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
   authDomain: "upper-b0be3.firebaseapp.com",
@@ -269,6 +269,10 @@ function AltaEventos() {
       userId: userId,
       userId: user.uid,
       status,
+      uuid: `${uuidv4().slice(0, 4)}-${uuidv4().slice(0, 4)}-${uuidv4().slice(
+        0,
+        3
+      )}`,
     };
 
     if (selectedUser) {
