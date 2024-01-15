@@ -13,5 +13,4 @@ const nextConfig = {
   // Optional: Change the output directory `out` -> `dist`
   // distDir: 'dist',
 };
-module.exports = { trailingSlash: true };
-module.exports = nextConfig;
+(module.exports = { trailingSlash: true }), nextConfig;
