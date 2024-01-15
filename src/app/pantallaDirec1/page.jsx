@@ -27,7 +27,34 @@ function PantallaDirec1() {
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
-  const [firestore, setFirestore] = useState(null);
+  const [firestore, setFirestore] = useState({
+    uid: "SAAg4F7EZkZHaJeZXWKQ0nLMxfd2",
+    email: "motionsoft-@hotmail.com",
+    emailVerified: true,
+    displayName: "Kevin Barrios",
+    isAnonymous: false,
+    providerData: [
+      {
+        providerId: "password",
+        uid: "motionsoft-@hotmail.com",
+        displayName: "Kevin Barrios",
+        email: "motionsoft-@hotmail.com",
+        phoneNumber: null,
+        photoURL: null,
+      },
+    ],
+    stsTokenManager: {
+      refreshToken:
+        "AMf-vBx2moEpMZuXZAT83AcKJJFREcTieYK_qnKd3dRrvZj4drZ_jdqWQsqSwzHh8BjN4EIvgXHEKCdJjxJeLV6V9G7952rqmhqmFiy4Fvn80hqKDszHYQRMxcJX5OnMtFAs0SsdUOYTWqQdsdhU6XUAQ9pYjLB4XMRXp7x5gzzYpIfRs1bMvgXaTCHpvrIGzg2K7A4Cr4ccyby-RlxjQMpHdLKShtLh3cVfXjCLPKgFOCjb3a3TbPs",
+      accessToken:
+        "eyJhbGciOiJSUzI1NiIsImtpZCI6IjdjZjdmODcyNzA5MWU0Yzc3YWE5OTVkYjYwNzQzYjdkZDJiYjcwYjUiLCJ0eXAiOiJKV1QifQ.eyJuYW1lIjoiS2V2aW4gQmFycmlvcyIsImlzcyI6Imh0dHBzOi8vc2VjdXJldG9rZW4uZ29vZ2xlLmNvbS91cHBlci1iMGJlMyIsImF1ZCI6InVwcGVyLWIwYmUzIiwiYXV0aF90aW1lIjoxNzA1MzQwNjI4LCJ1c2VyX2lkIjoiU0FBZzRGN0Vaa1pIYUplWlhXS1EwbkxNeGZkMiIsInN1YiI6IlNBQWc0RjdFWmtaSGFKZVpYV0tRMG5MTXhmZDIiLCJpYXQiOjE3MDUzNDM5MjksImV4cCI6MTcwNTM0NzUyOSwiZW1haWwiOiJtb3Rpb25zb2Z0LUBob3RtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjp0cnVlLCJmaXJlYmFzZSI6eyJpZGVudGl0aWVzIjp7ImVtYWlsIjpbIm1vdGlvbnNvZnQtQGhvdG1haWwuY29tIl19LCJzaWduX2luX3Byb3ZpZGVyIjoicGFzc3dvcmQifX0.VXMG92WOf3gMp6E8_UuF9f3nMdbSJ5kn5Pnc3NZbFgaWjBAu2ivzB3vl3bmK2bMxC-zu77_asrATvG29GUf4PCFKHzKX9c1IJN32Lop-UM5wlditS_gAAU1xX2kpsxynCgWoBNesIZge5wAeavXaGGXy4l3FiFSQK8rby1c_qnsvjYixd5rZ3QSgDCXqsAnBUg7lNHhnm13C2I64b-txDh_kRe37SOZQe99OZZN9u2R0Z_qGRHd10ybq2mKU8JKFcXHRZjzbBxtZXUwBgZ4lUZ42m2AVmsTLsnh5mFq4pZLfdxqOBB_kuGbeheuqgQOHqkNlfjKBZNdtOy0v5jMTjQ",
+      expirationTime: 1705347526789,
+    },
+    createdAt: "1704492684173",
+    lastLoginAt: "1705340628539",
+    apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
+    appName: "[DEFAULT]",
+  });
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
   const [weatherData, setWeatherData] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
@@ -44,7 +71,7 @@ function PantallaDirec1() {
       const baseUrl = window.location.origin;
 
       // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/pantallaDirec1`);
+      setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
     }
   }, [user]);
 
@@ -65,34 +92,6 @@ function PantallaDirec1() {
   }, []);
 
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
-
-  useEffect(() => {
-    axios
-      .get(
-        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
-      )
-      .then((response) => {
-        if (parser.validate(response.data) === true) {
-          const jsonObj = parser.parse(response.data);
-          const items = jsonObj.rss.channel.item.map((item) => {
-            return {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              // ... otros campos que desees obtener
-            };
-          });
-
-          setRssItems(items); // Guardar los elementos del RSS en el estado
-          console.log("Items del RSS:", items); // Agregar un console.log aquí
-        } else {
-          console.error("Invalid XML format");
-        }
-      })
-      .catch((error) =>
-        console.error("Error fetching or parsing data:", error)
-      );
-  }, []);
 
   // Slider
   const chunkArray = (arr, chunkSize) => {
@@ -150,7 +149,7 @@ function PantallaDirec1() {
 
     return () => unsubscribe();
   }, []);
-
+  console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
