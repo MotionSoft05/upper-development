@@ -545,7 +545,7 @@ function Pantalla6() {
               {obtenerFecha()}
             </p>
             <div className="flex items-center justify-center">
-              <img src="/img/clock.png" className="p-1 h-8" />
+              <img src="/img/reloj.png" className="p-1 h-8" />
               <p
                 className=" uppercase"
                 style={{
