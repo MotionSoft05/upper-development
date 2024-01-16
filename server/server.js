@@ -2,8 +2,10 @@
 
 const express = require("express");
 const app = express();
-const auth = require("./firebaseAdmin");
+const axios = require("axios");
 const cors = require("cors");
+
+const parser = require('fast-xml-parser');
 
 const allowedOrigins = ["http://localhost:3000", "https://upperds.mx/"];
 
@@ -29,23 +31,25 @@ app.use(
   })
 );
 
-// Ruta para eliminar usuario
-app.delete("/eliminar-usuario/:uid", async (req, res) => {
-  const uid = req.params.uid;
-
+// Ruta para obtener información de RSS
+app.get("/fetch-rss", async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*");
 
   try {
-    await auth.deleteUser(uid);
-    res
-      .status(200)
-      .json({ mensaje: `Usuario con UID ${uid} eliminado correctamente.` });
+    const response = await axios.get('https://editorial.aristeguinoticias.com/feed/');
+    const jsonObj = parser.parse(response.data);
+
+    const items = jsonObj.rss.channel.item.map((item) => ({
+      title: item.title,
+      link: item.link,
+      description: item.description,
+      // ... otros campos que desees obtener
+    }));
+
+    res.status(200).json({ items });
   } catch (error) {
-    console.error(
-      "Error al eliminar usuario de Firebase Authentication:",
-      error
-    );
-    res.status(500).json({ error: "Error interno del servidor." });
+    console.error("Error fetching or parsing data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
 
