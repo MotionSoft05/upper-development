@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import { usePathname } from "next/navigation"; // Captura la url
 import {
   getDocs,
   onSnapshot,
@@ -52,6 +53,9 @@ function Navigation() {
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(null);
   //const [loading, setLoading] = useState(true);
+
+  const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
+  console.log("🚀 ~ Page ~ router:", pathname)
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -136,13 +140,16 @@ function Navigation() {
           </div>
           <div className="hidden md:block">
             <div className="ml-auto flex items-baseline space-x-4">
+
+              {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
+              {(pathname === "/" || pathname === "/upper.mx") && 
               <ul className="flex font-bold rounded-lg flex-row space-x-8">
                 <li>
                   <a
                     href="#"
                     className="hover:text-custom md:p-0"
                     aria-current="page"
-                  >
+                    >
                     Productos
                   </a>
                 </li>
@@ -167,6 +174,8 @@ function Navigation() {
                   </a>
                 </li>
               </ul>
+              }
+
               <div className="px-3">
                 <div className="ml-auto flex items-baseline space-x-4">
                   {user && (
@@ -215,69 +224,74 @@ function Navigation() {
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-auto flex items-center space-x-1">
-              <Menu as="div" className=" ">
-                <div>
-                  <Menu.Button className="p-2">
-                    <Bars3Icon className="h-6 text-black" aria-hidden="true" />
-                  </Menu.Button>
-                </div>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div>
-                      <Menu.Item>
-                        <a
-                          href="#"
-                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                        >
-                          Productos
-                        </a>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <Link
-                          href="/#soluciones"
-                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                        >
-                          Soluciones
-                        </Link>
-                      </Menu.Item>
-                    </div>
-                    <div>
-                      <Menu.Item>
-                        <Link
-                          href="/#recursos"
-                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                        >
-                          Recursos
-                        </Link>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <Link
-                          href="/#precios"
-                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                        >
-                          Precios
-                        </Link>
-                      </Menu.Item>
-                      <Menu.Item>
-                        <Link
-                          href="/#preguntas"
-                          className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                        >
-                          FAQ
-                        </Link>
-                      </Menu.Item>
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
+
+              {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
+              {(pathname === "/" || pathname === "/upper.mx")  && 
+                <Menu as="div" className=" ">
+                  <div>
+                    <Menu.Button className="p-2">
+                      <Bars3Icon className="h-6 text-black" aria-hidden="true" />
+                    </Menu.Button>
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div>
+                        <Menu.Item>
+                          <a
+                            href="#"
+                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                          >
+                            Productos
+                          </a>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Link
+                            href="/#soluciones"
+                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                          >
+                            Soluciones
+                          </Link>
+                        </Menu.Item>
+                      </div>
+                      <div>
+                        <Menu.Item>
+                          <Link
+                            href="/#recursos"
+                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                          >
+                            Recursos
+                          </Link>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Link
+                            href="/#precios"
+                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                          >
+                            Precios
+                          </Link>
+                        </Menu.Item>
+                        <Menu.Item>
+                          <Link
+                            href="/#preguntas"
+                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                          >
+                            FAQ
+                          </Link>
+                        </Menu.Item>
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              }
+
             </div>
           </div>
           <div className="  md:hidden flex-shrink-0  items-center ">

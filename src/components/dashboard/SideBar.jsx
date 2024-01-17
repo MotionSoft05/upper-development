@@ -24,7 +24,8 @@ function Sidebar({
           </span>
         </div>
         {(userEmail === "uppermex10@gmail.com" ||
-          userEmail === "ulises.jacobo@hotmail.com") && (
+          userEmail === "ulises.jacobo@hotmail.com" ||
+          userEmail === "contacto@upperds.mx" ) && (
           <li className="my-px">
             <button
               onClick={() => {
