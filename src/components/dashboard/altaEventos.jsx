@@ -20,13 +20,13 @@ import {
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 const firebaseConfig = {
-  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-  authDomain: "upper-b0be3.firebaseapp.com",
-  projectId: "upper-b0be3",
-  storageBucket: "upper-b0be3.appspot.com",
-  messagingSenderId: "295362615418",
-  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-  measurementId: "G-2E66K5XY81",
+  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+  authDomain: "upper-8c817.firebaseapp.com",
+  projectId: "upper-8c817",
+  storageBucket: "upper-8c817.appspot.com",
+  messagingSenderId: "798455798906",
+  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+  measurementId: "G-6VHX927GH1",
 };
 
 const app = initializeApp(firebaseConfig);

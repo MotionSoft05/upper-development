@@ -18,13 +18,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-  authDomain: "upper-b0be3.firebaseapp.com",
-  projectId: "upper-b0be3",
-  storageBucket: "upper-b0be3.appspot.com",
-  messagingSenderId: "295362615418",
-  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-  measurementId: "G-2E66K5XY81",
+  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+  authDomain: "upper-8c817.firebaseapp.com",
+  projectId: "upper-8c817",
+  storageBucket: "upper-8c817.appspot.com",
+  messagingSenderId: "798455798906",
+  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+  measurementId: "G-6VHX927GH1",
 };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -55,7 +55,7 @@ function Navigation() {
   //const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
-  console.log("🚀 ~ Page ~ router:", pathname)
+  console.log("🚀 ~ Page ~ router:", pathname);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -140,41 +140,40 @@ function Navigation() {
           </div>
           <div className="hidden md:block">
             <div className="ml-auto flex items-baseline space-x-4">
-
               {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
-              {(pathname === "/" || pathname === "/upper.mx") && 
-              <ul className="flex font-bold rounded-lg flex-row space-x-8">
-                <li>
-                  <a
-                    href="#"
-                    className="hover:text-custom md:p-0"
-                    aria-current="page"
+              {(pathname === "/" || pathname === "/upper.mx") && (
+                <ul className="flex font-bold rounded-lg flex-row space-x-8">
+                  <li>
+                    <a
+                      href="#"
+                      className="hover:text-custom md:p-0"
+                      aria-current="page"
                     >
-                    Productos
-                  </a>
-                </li>
-                <li>
-                  <a href="#soluciones" className="hover:text-custom md:p-0">
-                    Soluciones
-                  </a>
-                </li>
-                <li>
-                  <a href="#recursos" className="hover:text-custom md:p-0">
-                    Recursos
-                  </a>
-                </li>
-                <li>
-                  <a href="#precios" className="hover:text-custom md:p-0">
-                    Precios
-                  </a>
-                </li>
-                <li>
-                  <a href="#preguntas" className="hover:text-custom md:p-0">
-                    FAQ
-                  </a>
-                </li>
-              </ul>
-              }
+                      Productos
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#soluciones" className="hover:text-custom md:p-0">
+                      Soluciones
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#recursos" className="hover:text-custom md:p-0">
+                      Recursos
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#precios" className="hover:text-custom md:p-0">
+                      Precios
+                    </a>
+                  </li>
+                  <li>
+                    <a href="#preguntas" className="hover:text-custom md:p-0">
+                      FAQ
+                    </a>
+                  </li>
+                </ul>
+              )}
 
               <div className="px-3">
                 <div className="ml-auto flex items-baseline space-x-4">
@@ -224,13 +223,15 @@ function Navigation() {
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-auto flex items-center space-x-1">
-
               {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
-              {(pathname === "/" || pathname === "/upper.mx")  && 
+              {(pathname === "/" || pathname === "/upper.mx") && (
                 <Menu as="div" className=" ">
                   <div>
                     <Menu.Button className="p-2">
-                      <Bars3Icon className="h-6 text-black" aria-hidden="true" />
+                      <Bars3Icon
+                        className="h-6 text-black"
+                        aria-hidden="true"
+                      />
                     </Menu.Button>
                   </div>
                   <Transition
@@ -290,8 +291,7 @@ function Navigation() {
                     </Menu.Items>
                   </Transition>
                 </Menu>
-              }
-
+              )}
             </div>
           </div>
           <div className="  md:hidden flex-shrink-0  items-center ">
