@@ -16,6 +16,7 @@ import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
+import Textra from "react-textra";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -38,6 +39,7 @@ function PantallaDirec1() {
   const [error, setError] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
+  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
   useEffect(() => {
     if (user) {
       // Obtén la URL base del navegador
@@ -63,8 +65,6 @@ function PantallaDirec1() {
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
-
-  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
 
   // Slider
   const chunkArray = (arr, chunkSize) => {
@@ -301,7 +301,7 @@ function PantallaDirec1() {
         console.error("Error fetching or parsing data:", error)
       );
   }, []);
-  
+
   // ----------------- RSS ---------------------------
 
   const pantalla = "directorio";
@@ -544,8 +544,11 @@ function PantallaDirec1() {
                             return (
                               <div
                                 key={innerIndex}
-                                className="flex items-center space-x-4 space-y-5 border-b border-black"
-                                style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
+                                className="flex items-center space-x-4 space-y-5 border-b"
+                                style={{
+                                  height: evento ? "auto" : "110px",
+                                  borderColor: templateActual.templateColor,
+                                }} // Establecer la altura dependiendo de si hay evento o no
                               >
                                 {evento ? (
                                   // Si hay evento, mostrar los detalles
@@ -602,18 +605,11 @@ function PantallaDirec1() {
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
             <div className="w-full">
-              {rssItems.length > 0 && (
-                <div ref={sliderRef} className="keen-slider">
-                  {rssItems.map((item, index) => (
-                    <div key={index} className="keen-slider__slide">
-                      {/* Aquí puedes mostrar los elementos del RSS dentro del carrusel */}
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
-                      {/* ... otros campos que quieras mostrar */}
-                    </div>
-                  ))}
+              {rssItems.map((item, index) => (
+                <div key={index}>
+                  <Textra effect="topDown" data={[item.title]} />
                 </div>
-              )}
+              ))}
             </div>
             <div style={{ marginTop: "20px", marginRight: "20px" }}>
               {qrCodeUrl && (
@@ -624,7 +620,7 @@ function PantallaDirec1() {
                   style={{ cursor: "pointer" }}
                 >
                   {/* Muestra el código QR */}
-                  <QRCode value={qrCodeUrl} size={80} />
+                  <QRCode value={qrCodeUrl} size={100} />
                 </a>
               )}
             </div>
