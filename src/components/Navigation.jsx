@@ -197,12 +197,12 @@ function Navigation() {
                   )}
                   {!user && (
                     <div className="flex items-center space-x-2">
-                      <Link href="/register">
+                      <Link href="/register.html">
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Registrarse
                         </button>
                       </Link>
-                      <Link href="/login">
+                      <Link href="/login.html">
                         <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Iniciar sesión
                         </button>
@@ -340,7 +340,7 @@ function Navigation() {
                         <>
                           <Menu.Item>
                             <Link
-                              href="/register"
+                              href="/register.html"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
                               Registrarse
@@ -348,7 +348,7 @@ function Navigation() {
                           </Menu.Item>
                           <Menu.Item>
                             <Link
-                              href="/login"
+                              href="/login.html"
                               className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                             >
                               Iniciar sesión

@@ -14,3 +14,4 @@ const nextConfig = {
   // distDir: 'dist',
 };
 (module.exports = { trailingSlash: true }), nextConfig;
+module.exports = nextConfig;
