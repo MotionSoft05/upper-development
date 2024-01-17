@@ -429,8 +429,9 @@ function PantallaDirec1() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // console.log("screenWidth", screenWidth);
+  // console.log("CLIMA", weatherData.current.condition.icon);
   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
+
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
@@ -462,6 +463,7 @@ function PantallaDirec1() {
                       width: "18vw",
                       height: "10vw",
                       overflow: "hidden",
+                      marginBottom: "20px",
                     }}
                   >
                     <img
@@ -502,9 +504,16 @@ function PantallaDirec1() {
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
-                <p className="text-3xl font-bold">
-                  {weatherData.current.temp_c} °C
-                </p>
+                <div className="flex items-center justify-center mr-4">
+                  <img
+                    src={weatherData.current.condition.icon}
+                    alt="Clima"
+                    className="w-20"
+                  />
+                  <p className="text-3xl font-bold ml-2">
+                    {weatherData.current.temp_c} °C
+                  </p>
+                </div>
               ) : (
                 <h2 className="text-3xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
               )}
@@ -512,18 +521,19 @@ function PantallaDirec1() {
           </div>
           {/* Linea arriba */}{" "}
           <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl bg-red-600 h-20`}
             style={{
-              backgroundColor: templateActual.templateColor,
+              // backgroundColor: templateActual.templateColor,
+              background: `linear-gradient(${templateActual.templateColor}, #ffffff)`,
               color: templateActual.fontColor,
               fontFamily: templateActual.fontStyle,
             }}
           >
             {/* Título */}
-            <h2 className=" text-white"> </h2>
+            <h2 className=" text-white "></h2>
           </div>
           {/* contenido principal */}
-          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+          <div className="bg-gradient-to-t from-gray-50  to-gray-100 text-gray-50">
             <div className=" text-black">
               {/* Imagen a la izquierda */}
               <div
@@ -560,18 +570,22 @@ function PantallaDirec1() {
                                         width: "130px",
                                         height: "110px",
                                         margin: "0",
+                                        padding: "10px",
                                       }}
                                     />
                                     <div className="grid grid-cols-2">
                                       <div className="min-w-5">
-                                        <h3 className="font-bold mb-4">
+                                        <h3 className="font-bold mb-4 text-xl">
                                           {evento.nombreEvento}
                                         </h3>
                                         <p>{evento.tipoEvento}</p>
                                         <p>{evento.lugar}</p>
                                       </div>
                                       <div className="text-right">
-                                        <p>{evento.horaInicialSalon} HRS</p>
+                                        <p>
+                                          {evento.horaInicialSalon} HRS hasta{" "}
+                                          {evento.horaFinalSalon}
+                                        </p>
                                       </div>
                                     </div>
                                   </>
@@ -592,15 +606,16 @@ function PantallaDirec1() {
           </div>
           {/* Linea abajo */}
           <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl`}
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-20`}
             style={{
-              backgroundColor: templateActual.templateColor,
+              // backgroundColor: templateActual.templateColor,
+              background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
               color: templateActual.fontColor,
               fontFamily: templateActual.fontStyle,
             }}
           >
             {/* Título */}
-            <h2 className=" text-white"> </h2>
+            <h2 className=" text-white"></h2>
           </div>
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
