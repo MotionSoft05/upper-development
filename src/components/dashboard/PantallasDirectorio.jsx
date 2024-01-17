@@ -564,7 +564,10 @@ function PantallasDirectorio() {
                     URL
                   </Link>
                   <button
-                    onClick={() => setSetPortrait((prevState) => !prevState)}
+                    onClick={() => {
+                      setSetPortrait((prevState) => !prevState);
+                      guardarInformacionPersonalizacion(selectedLogo);
+                    }}
                     className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >
                     {setPortrait ? "Desactivar Portrait" : "Activar Portrait"}
