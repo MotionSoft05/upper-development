@@ -5,10 +5,10 @@ const app = express();
 const axios = require("axios");
 const cors = require("cors");
 
-const parser = require('fast-xml-parser');
+const parser = require("fast-xml-parser");
 
 const allowedOrigins = ["http://localhost:3000", "https://upperds.mx/"];
-//
+
 app.use(
   cors({
     allowedHeaders: [
@@ -36,7 +36,9 @@ app.get("/fetch-rss", async (req, res) => {
   res.header("Access-Control-Allow-Origin", "*");
 
   try {
-    const response = await axios.get('https://editorial.aristeguinoticias.com/feed/');
+    const response = await axios.get(
+      "https://editorial.aristeguinoticias.com/feed/"
+    );
     const jsonObj = parser.parse(response.data);
 
     const items = jsonObj.rss.channel.item.map((item) => ({
