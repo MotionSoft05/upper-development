@@ -13,6 +13,7 @@ function Sidebar({
   setShowSoporte,
   setShowAdmin,
   setShowUserAdmin,
+  toggleSidebar
 }) {
   return (
     <div className="sidebar-content  ">
@@ -62,6 +63,8 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
+
             }}
           >
             <a
@@ -89,6 +92,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -125,6 +129,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -167,6 +172,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -203,6 +209,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -239,6 +246,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -282,6 +290,7 @@ function Sidebar({
               setShowlicencia(true);
               setShowGuia(false);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -318,6 +327,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(true);
               setShowSoporte(false);
+              toggleSidebar()
             }}
           >
             <a
@@ -354,6 +364,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(true);
+              toggleSidebar()
             }}
           >
             <a

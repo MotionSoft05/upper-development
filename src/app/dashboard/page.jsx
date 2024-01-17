@@ -84,6 +84,7 @@ function DashBoard() {
           setShowlicencia={setShowlicencia}
           setShowGuia={setShowGuia}
           setShowSoporte={setShowSoporte}
+          toggleSidebar={toggleSidebar}
         />
       </aside>
       <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
