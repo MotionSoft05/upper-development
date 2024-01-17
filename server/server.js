@@ -8,7 +8,7 @@ const cors = require("cors");
 const parser = require('fast-xml-parser');
 
 const allowedOrigins = ["http://localhost:3000", "https://upperds.mx/"];
-
+//
 app.use(
   cors({
     allowedHeaders: [
