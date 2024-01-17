@@ -52,6 +52,7 @@ function Admin() {
   };
 
   const [datosFiscalesEditados, setDatosFiscalesEditados] = useState({
+    userId: "",
     id: "",
     codigoPostal: "",
     usoCdfi: "",
@@ -104,47 +105,72 @@ function Admin() {
     const obtenerDatosFiscales = async () => {
       try {
         const datosFiscalesCollection = collection(db, "DatosFiscales");
+        const usuariosCollection = collection(db, "usuarios");
 
-        // Escucha en tiempo real para cambios en DatosFiscales
+        const [datosFiscalesSnapshot, usuariosSnapshot] = await Promise.all([
+          getDocs(datosFiscalesCollection),
+          getDocs(usuariosCollection),
+        ]);
+
+        const datosFiscalesData = datosFiscalesSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+
+        const usuariosData = usuariosSnapshot.docs.reduce((acc, doc) => {
+          const userData = doc.data();
+          acc[doc.id] = userData.empresa;
+          return acc;
+        }, {});
+
+        const datosFiscalesConNombreData = usuariosSnapshot.docs.map((doc) => {
+          const userId = doc.id;
+          const datosFiscales =
+            datosFiscalesData.find((datos) => datos.userId === userId) || {};
+          return {
+            ...datosFiscales,
+            userId,
+            nombreEmpresa: usuariosData[userId],
+          };
+        });
+
+        setDatosFiscalesConNombre(datosFiscalesConNombreData);
+
+        console.log(
+          "Nombres de Empresas:",
+          datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
+        );
+
+        // Escucha cambios en DatosFiscales
         unsubscribe = onSnapshot(datosFiscalesCollection, (snapshot) => {
-          const datosFiscalesData = snapshot.docs.map((doc) => ({
+          const updatedDatosFiscalesData = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
           }));
 
-          const usuariosCollection = collection(db, "usuarios");
+          const updatedDatosFiscalesConNombreData = usuariosSnapshot.docs.map(
+            (doc) => {
+              const userId = doc.id;
+              const datosFiscales =
+                updatedDatosFiscalesData.find(
+                  (datos) => datos.userId === userId
+                ) || {};
+              return {
+                ...datosFiscales,
+                userId,
+                nombreEmpresa: usuariosData[userId],
+              };
+            }
+          );
 
-          // Obtiene datos de usuarios una vez
-          getDocs(usuariosCollection).then((usuariosSnapshot) => {
-            const usuariosData = usuariosSnapshot.docs.reduce((acc, doc) => {
-              const userData = doc.data();
-              acc[doc.id] = userData.empresa;
-              return acc;
-            }, {});
+          setDatosFiscalesConNombre(updatedDatosFiscalesConNombreData);
 
-            // Combina datos de DatosFiscales y usuarios, incluyendo empresas sin datos fiscales
-            const datosFiscalesConNombreData = usuariosSnapshot.docs.map(
-              (doc) => {
-                const userId = doc.id;
-                const datosFiscales =
-                  datosFiscalesData.find((datos) => datos.userId === userId) ||
-                  {};
-                return {
-                  ...datosFiscales,
-                  userId,
-                  nombreEmpresa: usuariosData[userId],
-                };
-              }
-            );
-
-            // Actualiza el estado y establece loading en false
-            setDatosFiscalesConNombre(datosFiscalesConNombreData);
-
-            console.log(
-              "Nombres de Empresas:",
-              datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
-            );
-          });
+          console.log(
+            "Nombres de Empresas Actualizados:",
+            updatedDatosFiscalesConNombreData.map(
+              (empresa) => empresa.nombreEmpresa
+            )
+          );
         });
       } catch (error) {
         console.error(
@@ -185,9 +211,10 @@ function Admin() {
       // Verificar si el documento existe
       const datosFiscalesDocRef = datosFiscalesEditados.id
         ? doc(db, "DatosFiscales", datosFiscalesEditados.id)
-        : await addDoc(datosFiscalesCollection, {});
+        : doc(db, "DatosFiscales", datosFiscalesEditados.userId); // Usar userId como id del documento
 
-      await updateDoc(datosFiscalesDocRef, {
+      await setDoc(datosFiscalesDocRef, {
+        userId: datosFiscalesEditados.userId,
         usoCdfi: datosFiscalesEditados.usoCdfi,
         email: datosFiscalesEditados.email,
         codigoPostal: datosFiscalesEditados.codigoPostal,
@@ -1059,6 +1086,7 @@ function Admin() {
                     );
                     setEmpresaSeleccionada(selectedCompany);
                     setDatosFiscalesEditados({
+                      userId: selectedCompany?.userId || "", // Añadir userId
                       id: selectedCompany?.id || "",
                       codigoPostal: selectedCompany?.codigoPostal || "",
                       email: selectedCompany?.email || "",
@@ -1070,13 +1098,11 @@ function Admin() {
                   }}
                 >
                   <option value="">Seleccione Empresa</option>
-                  {datosFiscalesConNombre
-                    .filter((empresa) => empresa.codigoPostal) // Filtra las empresas que tienen código postal
-                    .map((empresa) => (
-                      <option key={empresa.id} value={empresa.nombreEmpresa}>
-                        {empresa.nombreEmpresa}
-                      </option>
-                    ))}
+                  {usuarios.map((usuario) => (
+                    <option key={usuario.id} value={usuario.empresa}>
+                      {usuario.empresa}
+                    </option>
+                  ))}
                 </select>
               </div>
               {empresaSeleccionada && (
