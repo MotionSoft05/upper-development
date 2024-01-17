@@ -506,7 +506,7 @@ function PantallaDirec1() {
                   {weatherData.current.temp_c} °C
                 </p>
               ) : (
-                <p>No se pudo obtener la información del clima</p>
+                <h2 className="text-3xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
               )}
             </div>
           </div>
