@@ -44,7 +44,8 @@ export default function Home() {
     <main className="bg-gray-50">
       {/* Title */}
       <section>
-        <div className=" grid grid-cols-1 md:grid-cols-2 mt-5">
+        <div className=" grid grid-cols-1 md:grid-cols-2 md:mx-8 lg:mx-16 xl:mx-36 ">
+          {/* ---- Slider KeenSlider ---- */}
           <div
             ref={sliderRef}
             className="keen-slider"
@@ -117,17 +118,18 @@ export default function Home() {
               />
             </div>
           </div>
-
+          {/* ^^^^ Slider KeenSlider ^^^^ */}
+          
           <div className="">
             <div className="mb-8">
-              <h1 className="md:text-4xl font-normal">
+              <h1 className="md:text-4xl text-lg sm:text-2xl sm:mt-4 font-bold sm:font-normal mt-4 pl-10">
                 UPPER DS es el sistema de Señalización Digital que ayudara a
                 generar impacto visual en tu negocio
               </h1>
             </div>
             <div className="">
               <div className="">
-                <p className="md:text-lg">
+                <p className="md:text-lg pl-10">
                   Es una plataforma de señalización digital fácil de
                   personalizar, programar y diseñar contenido de forma
                   profesional. La plataforma se encuentra basada en la nube para
@@ -140,7 +142,7 @@ export default function Home() {
       </section>
       {/* Soluciones */}
       <section id="soluciones">
-        <div className="py-24">
+        <div className="py-24 sm:pt-10">
           <div className="px-4 mx-auto max-w-screen-xl ">
             <h1 className="text-lg md:text-2xl text-center font-bold  mb-16">
               Existe una diversidad de industrias para Soluciones de
