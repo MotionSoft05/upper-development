@@ -13,7 +13,7 @@ function Sidebar({
   setShowSoporte,
   setShowAdmin,
   setShowUserAdmin,
-  toggleSidebar
+  toggleSidebar,
 }) {
   return (
     <div className="sidebar-content  ">
@@ -25,7 +25,7 @@ function Sidebar({
         </div>
         {(userEmail === "uppermex10@gmail.com" ||
           userEmail === "ulises.jacobo@hotmail.com" ||
-          userEmail === "contacto@upperds.mx" ) && (
+          userEmail === "contacto@upperds.mx") && (
           <li className="my-px">
             <button
               onClick={() => {
@@ -39,6 +39,7 @@ function Sidebar({
                 setShowlicencia(false);
                 setShowGuia(false);
                 setShowSoporte(false);
+                toggleSidebar();
               }}
             >
               <a
@@ -64,8 +65,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
-
+              toggleSidebar();
             }}
           >
             <a
@@ -93,7 +93,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -130,7 +130,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -173,7 +173,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -210,7 +210,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -247,7 +247,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -284,14 +284,13 @@ function Sidebar({
               setShowUserAdmin(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
-
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
               setShowlicencia(true);
               setShowGuia(false);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -328,7 +327,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(true);
               setShowSoporte(false);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a
@@ -365,7 +364,7 @@ function Sidebar({
               setShowlicencia(false);
               setShowGuia(false);
               setShowSoporte(true);
-              toggleSidebar()
+              toggleSidebar();
             }}
           >
             <a

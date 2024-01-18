@@ -33,8 +33,8 @@ const db = getFirestore(app);
 function DashBoard() {
   const [userEmail, setUserEmail] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
-  const [showUserAdmin, setShowUserAdmin] = useState(false);
-  const [showConsultaEvento, setShowConsultaEvento] = useState(true);
+  const [showUserAdmin, setShowUserAdmin] = useState(true);
+  const [showConsultaEvento, setShowConsultaEvento] = useState(false);
 
   const [showAltaEvento, setShowAltaEvento] = useState(false);
 
@@ -49,7 +49,7 @@ function DashBoard() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
-      setShowConsultaEvento(true); // Muestra ConsultaModEvento por defecto
+      setShowUserAdmin(true); // Muestra ConsultaModEvento por defecto
     });
 
     return () => unsubscribe();

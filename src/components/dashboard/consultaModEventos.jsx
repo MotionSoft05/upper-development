@@ -710,8 +710,10 @@ function ConsultaModEvento() {
                                       />
                                     </div>
                                   </div>
-
-                                  {/* Horas Salon */}
+                                  {/* Horas Salon */}{" "}
+                                  <p className="md:text-sm">
+                                    Horario en que se tiene programado el evento
+                                  </p>
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
@@ -750,7 +752,10 @@ function ConsultaModEvento() {
                                       />
                                     </div>
                                   </div>
-
+                                  <p className="md:text-sm">
+                                    Horario en que se mostrara la información
+                                    del evento en pantallas
+                                  </p>
                                   {/* Horas Real */}
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
