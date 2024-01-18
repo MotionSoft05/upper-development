@@ -454,7 +454,7 @@ function PantallaDirec1() {
           {/* Header */}
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
-            <div className="">
+            <div className=" ">
               {templateActual.logo && (
                 <>
                   {" "}
@@ -469,7 +469,7 @@ function PantallaDirec1() {
                     <img
                       src={templateActual.logo}
                       alt="Logo"
-                      className="w-72"
+                      className="rounded-lg object-contain w-full h-full  "
                       onClick={() => {
                         cambiarOrientacion();
                       }}
@@ -478,7 +478,7 @@ function PantallaDirec1() {
                 </>
               )}
             </div>
-
+            {/* ---- Titulo Eventos del dia y Fecha---- */}
             <div
               className="flex flex-col text-color items-center"
               style={{
@@ -486,12 +486,13 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              <p className="text-2xl text-center  mb-2">
+              <p className="text-3xl text-center  mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
-              <h1 className="text-4xl font-bold">Eventos del día</h1>
+              <h1 className="text-5xl font-bold">Eventos del día</h1>
             </div>
 
+            {/* ---- Clima e Icono ---- */}
             <div
               className="flex text-color flex-col"
               style={{
@@ -508,115 +509,123 @@ function PantallaDirec1() {
                   <img
                     src={weatherData.current.condition.icon}
                     alt="Clima"
-                    className="w-20"
+                    className="w-28"
                   />
-                  <p className="text-3xl font-bold ml-2">
+                  <p className="text-5xl font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
               ) : (
-                <h2 className="text-3xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
+                <h2 className="text-4xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
               )}
             </div>
           </div>
-          {/* Linea arriba */}{" "}
-          <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl bg-red-600 h-20`}
-            style={{
-              // backgroundColor: templateActual.templateColor,
-              background: `linear-gradient(${templateActual.templateColor}, #ffffff)`,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            {/* Título */}
-            <h2 className=" text-white "></h2>
-          </div>
-          {/* contenido principal */}
-          <div className="bg-gradient-to-t from-gray-50  to-gray-100 text-gray-50">
-            <div className=" text-black">
-              {/* Imagen a la izquierda */}
-              <div
-                className="flex flex-col
+          {/* Contenerdor de eventos */}
+          <div className="">
+            {/* Linea arriba */}{" "}
+            <div
+              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+              style={{
+                // backgroundColor: templateActual.templateColor,
+                background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {/* Título */}
+              <h2 className=" text-white "></h2>
+            </div>
+            {/* contenido principal */}
+            <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50">
+              <div className=" text-black">
+                {/* Imagen a la izquierda */}
+                <div
+                  className="flex flex-col
               "
-              >
-                <div className="">
-                  <div className="space-y-5 pl-5 flex-grow">
-                    {/* Slots predeterminados */}
-                    <div ref={sliderRef} className="keen-slider">
-                      {eventosPorSlide.map((slideEventos, index) => (
-                        <div key={index} className="keen-slider__slide my-2">
-                          {Array.from({
-                            length: templateData[0]?.setPortrait ? 5 : 8,
-                          }).map((_, innerIndex) => {
-                            const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+                >
+                  <div className="">
+                    <div className="space-y-5 pl-5 flex-grow">
+                      {/* Slots predeterminados */}
+                      <div ref={sliderRef} className="keen-slider">
+                        {eventosPorSlide.map((slideEventos, index) => (
+                          <div key={index} className="keen-slider__slide my-2">
+                            {Array.from({
+                              length: templateData[0]?.setPortrait ? 5 : 10,
+                            }).map((_, innerIndex) => {
+                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                            return (
-                              <div
-                                key={innerIndex}
-                                className="flex items-center space-x-4 space-y-5 border-b"
-                                style={{
-                                  height: evento ? "auto" : "110px",
-                                  borderColor: templateActual.templateColor,
-                                }} // Establecer la altura dependiendo de si hay evento o no
-                              >
-                                {evento ? (
-                                  // Si hay evento, mostrar los detalles
-                                  <>
-                                    <img
-                                      src={evento.images[0]}
-                                      alt={evento.nombreEvento}
-                                      style={{
-                                        width: "130px",
-                                        height: "110px",
-                                        margin: "0",
-                                        padding: "10px",
-                                      }}
-                                    />
-                                    <div className="grid grid-cols-2">
-                                      <div className="min-w-5">
-                                        <h3 className="font-bold mb-4 text-xl">
+                              return (
+                                <div
+                                  key={innerIndex}
+                                  className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                  style={{
+                                    height: evento ? "auto" : "110px",
+                                    borderColor: templateActual.templateColor,
+                                  }} // Establecer la altura dependiendo de si hay evento o no
+                                >
+                                  {/* ---- Evento ---- */}
+                                  {evento ? (
+                                    // Si hay evento, mostrar los detalles
+                                    <>
+                                      <img
+                                        className="object-contain w-auto h-[100px] my-2 shadow-xl "
+                                        src={evento.images[0]}
+                                        alt={evento.nombreEvento}
+                                      />
+                                      <div className="w-full ">
+                                        <h3 className="font-bold mb-4 text-3xl">
                                           {evento.nombreEvento}
                                         </h3>
-                                        <p>{evento.tipoEvento}</p>
-                                        <p>{evento.lugar}</p>
+                                        <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                          {/* Columna 1: Nombre (a la izquierda) */}
+                                          <p className="col-span-3 ">
+                                            {evento.tipoEvento}
+                                          </p>
+
+                                          {/* Columna 2: Lugar (en el centro) */}
+                                          <p className="col-span-3 text-center ">
+                                            {evento.lugar}
+                                          </p>
+
+                                          {/* Columna 3: Rango de horas (a la derecha) */}
+                                          <p className="col-span-1 text-right ">
+                                            {evento.horaInicialSalon + " HRS"}
+                                             {/* {"HRS hasta "}
+                                            {evento.horaFinalSalon} */}
+                                          </p>
+                                        </div>
                                       </div>
-                                      <div className="text-right">
-                                        <p>
-                                          {evento.horaInicialSalon} HRS hasta{" "}
-                                          {evento.horaFinalSalon}
-                                        </p>
-                                      </div>
-                                    </div>
-                                  </>
-                                ) : (
-                                  // Si no hay evento, mostrar el mensaje de casillero vacío
-                                  <p></p>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ))}
+                                    </>
+                                  ) : (
+                                    // Si no hay evento, mostrar el mensaje de casillero vacío
+                                    <p></p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            {/* Linea abajo */}
+            <div
+              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
+              style={{
+                // backgroundColor: templateActual.templateColor,
+                background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {/* Título */}
+              <h2 className=" text-white"></h2>
+            </div>
           </div>
-          {/* Linea abajo */}
-          <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-20`}
-            style={{
-              // backgroundColor: templateActual.templateColor,
-              background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            {/* Título */}
-            <h2 className=" text-white"></h2>
-          </div>
+
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
             <div className="w-full">
@@ -626,7 +635,7 @@ function PantallaDirec1() {
                 </div>
               ))}
             </div>
-            <div style={{ marginTop: "20px", marginRight: "20px" }}>
+            <div style={{ marginTop: "20px", marginRight: "20px", marginBottom: "20px"}}>
               {qrCodeUrl && (
                 <a
                   href={qrCodeUrl}
