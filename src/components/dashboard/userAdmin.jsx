@@ -17,6 +17,9 @@ function UserAdmin() {
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
   const [cantidadPublicidad, setCantidadPublicidad] = useState(0);
+  const [cantidadPublicidadSalon, setCantidadPublicidadSalon] = useState(0);
+  const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
+    useState(0);
 
   let total = cantidadPd + cantidadPs;
 
@@ -53,18 +56,34 @@ function UserAdmin() {
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
 
-            const publicidadQuery = query(
+            console.log("Inicio del bloque de inicialización de publicidad");
+
+            const publicidadSalonQuery = query(
               collection(db, "Publicidad"),
-              where("userId", "==", user.uid)
+              where("userId", "==", user.uid),
+              where("tipo", "==", "salon")
             );
-            const publicidadSnapshot = await getDocs(publicidadQuery);
-            const cantidadPublicidad = publicidadSnapshot.docs.length;
+            const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
+            const cantidadSalon = publicidadSalonSnapshot.docs.length;
+            setCantidadPublicidadSalon(cantidadSalon);
+            console.log("Cantidad de publicidad de salón:", cantidadSalon);
+
+            // Bloque de inicialización de publicidad de directorio
+            const publicidadDirectorioQuery = query(
+              collection(db, "Publicidad"),
+              where("userId", "==", user.uid),
+              where("tipo", "==", "directorio")
+            );
+            const publicidadDirectorioSnapshot = await getDocs(
+              publicidadDirectorioQuery
+            );
+            const cantidadDirectorio = publicidadDirectorioSnapshot.docs.length;
+            setCantidadPublicidadDirectorio(cantidadDirectorio);
             console.log(
-              "🚀 ~ unsubscribe ~ cantidadPublicidad:",
-              cantidadPublicidad
+              "Cantidad de publicidad de directorio:",
+              cantidadDirectorio
             );
 
-            // Update the state with the count of advertisements
             setCantidadPublicidad(cantidadPublicidad);
           } else {
             console.log("No se encontraron datos para este usuario.");
@@ -282,12 +301,24 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Publicidad</h2>
+                            <h2>Publicidad Salón</h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
                           <p>
-                            <span>{cantidadPublicidad}</span>
+                            <span>{cantidadPublicidadSalon}</span>
+                          </p>
+                        </td>
+                      </tr>
+                      <tr className="border-b w-full">
+                        <td className="px-4 py-2 text-left align-top w-1/2">
+                          <div>
+                            <h2>Publicidad Directorio</h2>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
+                          <p>
+                            <span>{cantidadPublicidadDirectorio}</span>
                           </p>
                         </td>
                       </tr>
