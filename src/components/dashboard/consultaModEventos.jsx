@@ -398,7 +398,7 @@ function ConsultaModEvento() {
                   scope="col"
                   className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  LUGAR
+                  NOMBRE DE SALON
                 </th>
                 <th
                   scope="col"
@@ -494,21 +494,33 @@ function ConsultaModEvento() {
                           evento.tipoEvento
                         )}
                       </td>
-                      {/* Lugar   */}
+                      {/* Nombre de salon   */}
                       <td className="md:px-6 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
-                            value={eventoEditado.lugar || ""}
+                            value={eventoEditado.devices || ""}
                             onChange={(e) =>
-                              handleFieldEdit("lugar", e.target.value)
+                              handleFieldEdit("devices", e.target.value)
                             }
                             className="w-full px-2 py-1 border rounded-lg text-center"
                           />
                         ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.lugar
+                          eventoEditado.devices
                         ) : (
-                          evento.lugar
+                          // Devices names o "Sin pantallas" si no hay ninguna disponible
+                          <> 
+                            {evento.devices.length === 0 ? (
+                              "sin Pantallas"
+                            ) : (
+                              <>
+                                {" "}
+                                {evento.devices.map((device, key) => {
+                                  return <div key={key}>{`* ${device}`}</div>;
+                                })}{" "}
+                              </>
+                            )}
+                          </>
                         )}
                       </td>
                       {/* Fecha */}
