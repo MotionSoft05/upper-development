@@ -16,7 +16,7 @@ import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
-import Textra from "react-textra";
+import Textra from "react-textra"; // Slider para RSS
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -122,7 +122,7 @@ function PantallaDirec1() {
 
     return () => unsubscribe();
   }, []);
-  console.log("user", user);
+  //? console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
@@ -302,6 +302,37 @@ function PantallaDirec1() {
       );
   }, []);
 
+  let timeOutRss = 7000; // valor de cambio de animacion de RSS
+  const [displayedItem, setDisplayedItem] = useState('');
+
+  useEffect(() => {
+    let currentIndex = 0;
+
+    const interval = setInterval(() => {
+      setDisplayedItem(rssItems[currentIndex].title);
+
+      // Cambiar al siguiente índice, o volver al principio si llegamos al final
+      currentIndex = (currentIndex + 1) % rssItems.length;
+    }, 7000); // Cambia cada 2000 milisegundos (2 segundos)
+
+    // Limpiar el intervalo cuando el componente se desmonta
+    return () => clearInterval(interval);
+  }, [rssItems]);
+
+  // const [currentIndex, setCurrentIndex] = useState(0);
+
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     // Cambiar al siguiente índice, o volver al principio si llegamos al final
+  //     setCurrentIndex((prevIndex) =>
+  //       prevIndex === rssItems.length - 1 ? 0 : prevIndex + 1
+  //     );
+  //   }, 3000); // Cambia cada 3000 milisegundos (3 segundos)
+
+  //   // Limpiar el intervalo cuando el componente se desmonta
+  //   return () => clearInterval(interval);
+  // }, [rssItems]); // Asegúrate de que el efecto se ejecute cuando rssItems cambie
+
   // ----------------- RSS ---------------------------
 
   const pantalla = "directorio";
@@ -430,7 +461,6 @@ function PantallaDirec1() {
   const screenHeight = window.innerHeight;
 
   // console.log("CLIMA", weatherData.current.condition.icon);
-  console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
@@ -590,7 +620,7 @@ function PantallaDirec1() {
                                           {/* Columna 3: Rango de horas (a la derecha) */}
                                           <p className="col-span-1 text-right ">
                                             {evento.horaInicialSalon + " HRS"}
-                                             {/* {"HRS hasta "}
+                                            {/* {"HRS hasta "}
                                             {evento.horaFinalSalon} */}
                                           </p>
                                         </div>
@@ -628,14 +658,37 @@ function PantallaDirec1() {
 
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
-            <div className="w-full">
-              {rssItems.map((item, index) => (
-                <div key={index}>
-                  <Textra effect="topDown" data={[item.title]} />
+            {/* --- RSS --- */}
+            <div className="w-full ">
+              <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
+                <Textra
+                  className="ml-12 text-xl "
+                  effect="rightLeft"
+                  duration={1000}
+                  stopDuration={timeOutRss}
+                  data={[displayedItem]}
+                  // data={[rssItems[currentIndex].title]}
+                />
+              </div>
+              {/* {rssItems.map((item, index) => (
+                <div className="my-3 font-black" key={index}>
+                  <Textra
+                    effect="topDown"
+                    duration={1000}
+                    stopDuration={4000}
+                    data={[rssItems[index].title]}
+                  />
                 </div>
-              ))}
+              ))} */}
             </div>
-            <div style={{ marginTop: "20px", marginRight: "20px", marginBottom: "20px"}}>
+            {/* --- QR image --- */}
+            <div
+              style={{
+                marginTop: "20px",
+                marginRight: "20px",
+                marginBottom: "20px",
+              }}
+            >
               {qrCodeUrl && (
                 <a
                   href={qrCodeUrl}
