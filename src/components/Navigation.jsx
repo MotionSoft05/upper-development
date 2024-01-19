@@ -55,7 +55,6 @@ function Navigation() {
   //const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
-  console.log("🚀 ~ Page ~ router:", pathname);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {

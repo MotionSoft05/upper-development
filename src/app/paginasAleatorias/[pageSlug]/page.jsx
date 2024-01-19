@@ -15,50 +15,13 @@ import { useEffect, useState } from "react";
 import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
-import QRCode from "qrcode.react";
+
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
   const minutes = String(now.getMinutes()).padStart(2, "0");
   return `${hours}:${minutes}`;
 };
-
-// Configura Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-  authDomain: "upper-b0be3.firebaseapp.com",
-  projectId: "upper-b0be3",
-  storageBucket: "upper-b0be3.appspot.com",
-  messagingSenderId: "295362615418",
-  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-  measurementId: "G-2E66K5XY81",
-};
-
-// Inicializa Firebase
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-
-// Obtiene una referencia a la colección de usuarios en Firestore
-const usersCollection = firebase.firestore().collection("users");
-
-// Función para obtener todos los IDs de usuarios
-export async function generateStaticParams() {
-  try {
-    const usersSnapshot = await usersCollection.get();
-
-    // Mapea los IDs de los usuarios
-    const userIds = usersSnapshot.docs.map((doc) => doc.id);
-
-    // Retorna los IDs en el formato necesario para generateStaticParams
-    return userIds.map((userId) => ({
-      params: { userId },
-    }));
-  } catch (error) {
-    console.error("Error al obtener los IDs de usuarios:", error);
-    return [];
-  }
-}
 
 function PaginaAleatoria({ params }) {
   const [user, setUser] = useState(params.pageSlug);
@@ -74,18 +37,8 @@ function PaginaAleatoria({ params }) {
   const numeroPantallaActual = "1";
   const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
   const [error, setError] = useState(null);
-  const [qrCodeUrl, setQrCodeUrl] = useState("");
+
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
-
-  useEffect(() => {
-    if (user) {
-      // Obtén la URL base del navegador
-      const baseUrl = window.location.origin;
-
-      // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user}`);
-    }
-  }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -462,15 +415,7 @@ function PaginaAleatoria({ params }) {
       </>
     );
   }
-  // console.log("EVENTOSSSS", eventosEnCurso);
-  // console.log("templateData", templateData);
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
-
-  // console.log("screenWidth", screenWidth);
-  console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
@@ -653,19 +598,6 @@ function PaginaAleatoria({ params }) {
                     </div>
                   ))}
                 </div>
-              )}
-            </div>
-            <div style={{ marginTop: "20px", marginRight: "20px" }}>
-              {qrCodeUrl && (
-                <a
-                  href={qrCodeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ cursor: "pointer" }}
-                >
-                  {/* Muestra el código QR */}
-                  <QRCode value={qrCodeUrl} size={80} />
-                </a>
               )}
             </div>
           </div>

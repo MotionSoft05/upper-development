@@ -59,6 +59,10 @@ function UserAdmin() {
             );
             const publicidadSnapshot = await getDocs(publicidadQuery);
             const cantidadPublicidad = publicidadSnapshot.docs.length;
+            console.log(
+              "🚀 ~ unsubscribe ~ cantidadPublicidad:",
+              cantidadPublicidad
+            );
 
             // Update the state with the count of advertisements
             setCantidadPublicidad(cantidadPublicidad);

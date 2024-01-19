@@ -345,7 +345,11 @@ function Pantalla1() {
       timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
     }
 
-    return () => clearTimeout(timeoutId); // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(interval);
+    };
+    // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
   }, [currentImageIndex, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
