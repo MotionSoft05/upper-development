@@ -72,10 +72,11 @@ function PublicidadSalon() {
           .where("userId", "==", userUid)
           .where("tipo", "==", tipo)
           .get();
+
         const publicidadesData = await Promise.all(
           publicidadesSnapshot.docs.map(async (doc) => {
             const data = doc.data();
-            let imageUrl;
+            let imageUrl, videoUrl;
 
             if (data.imageUrl) {
               imageUrl = await storage
@@ -83,10 +84,17 @@ function PublicidadSalon() {
                 .getDownloadURL();
             }
 
+            if (data.videoUrl) {
+              videoUrl = await storage
+                .refFromURL(data.videoUrl)
+                .getDownloadURL();
+            }
+
             return {
               id: doc.id,
               ...data,
               imageUrl,
+              videoUrl,
             };
           })
         );
@@ -130,13 +138,15 @@ function PublicidadSalon() {
           })),
           ...nuevosTiempos,
         ]);
-        setPreviewImages([
-          ...publicidadesData.map((publicidad) => ({
-            url: publicidad.imageUrl,
-            type: "image",
+        setPreviewImages(
+          publicidadesData.map((publicidad) => ({
+            url: publicidad.videoUrl || publicidad.imageUrl,
+            type: publicidad.videoUrl ? "video" : "image",
           })),
-          ...nuevasVistasPrevias,
-        ]);
+          // Asegúrate de agregar las nuevas vistas previas para las imágenes recién agregadas
+          ...nuevasVistasPrevias
+        );
+
         setImagenesSalonOriginales(publicidadesData.map(() => null));
       } else {
         console.warn("El objeto user es nulo o no tiene la propiedad uid.");
@@ -185,10 +195,10 @@ function PublicidadSalon() {
       const { horas, minutos, segundos } = tiemposSalon[index];
 
       const isEditingExistingPublicidad = index < publicidadesIds.length;
-      const hasNewImage = nuevaImagen && nuevaImagen.name !== undefined;
+      const hasNewMedia = nuevaImagen && nuevaImagen.name !== undefined;
 
-      if (!isEditingExistingPublicidad && !hasNewImage) {
-        console.warn("No se ha seleccionado una nueva imagen");
+      if (!isEditingExistingPublicidad && !hasNewMedia) {
+        console.warn("No se ha seleccionado un nuevo archivo de media");
         return;
       }
 
@@ -200,7 +210,6 @@ function PublicidadSalon() {
         segundos <= 59;
 
       if (!hasValidData) {
-        // Muestra una alerta si no hay datos válidos para actualizar
         window.alert("Completa por lo menos uno de los tres campos");
         return;
       }
@@ -209,14 +218,20 @@ function PublicidadSalon() {
       const publicidadId = publicidadesIds[index];
 
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
-      let imageUrl = previewImages[index];
+      let mediaUrl = previewImages[index].url;
 
-      if (hasNewImage) {
-        const imageRef = storage
+      if (hasNewMedia) {
+        const isImage = nuevaImagen.type.startsWith("image");
+        const isVideo = nuevaImagen.type.startsWith("video");
+        const mediaRef = storage
           .ref()
-          .child(`publicidad/salon_${index}_${Date.now()}_${nuevaImagen.name}`);
+          .child(
+            `publicidad/${
+              isImage ? "imagenes" : "videos"
+            }/${index}_${Date.now()}_${nuevaImagen.name}`
+          );
 
-        const uploadTask = imageRef.put(nuevaImagen);
+        const uploadTask = mediaRef.put(nuevaImagen);
 
         uploadTask.on(
           "state_changed",
@@ -225,16 +240,29 @@ function PublicidadSalon() {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           },
           (error) => {
-            console.error("Error durante la carga de la imagen:", error);
+            console.error("Error durante la carga de la media:", error);
           },
           async () => {
-            imageUrl = await imageRef.getDownloadURL();
-            await publicidadRef.update({
-              imageUrl,
-              horas,
-              minutos,
-              segundos,
-            });
+            mediaUrl = await mediaRef.getDownloadURL();
+
+            // Limpiar el campo opuesto si cambias de imagen a video o viceversa
+            if (isVideo) {
+              await publicidadRef.update({
+                imageUrl: null, // Limpiar el campo de imagen
+                videoUrl: mediaUrl,
+                horas,
+                minutos,
+                segundos,
+              });
+            } else {
+              await publicidadRef.update({
+                imageUrl: mediaUrl,
+                videoUrl: null, // Limpiar el campo de video
+                horas,
+                minutos,
+                segundos,
+              });
+            }
 
             setEditIndex(null);
             setIsUploading(false);
@@ -277,25 +305,32 @@ function PublicidadSalon() {
     }
   };
 
-  const handleImagenSelect = (event, index) => {
+  const handleImagenSelect = async (event, index) => {
     const file = event.target.files[0];
-    const newImages = [...imagenesSalon];
-    newImages[index] = file;
-    setImagenesSalon(newImages);
+
+    if (!file) {
+      return;
+    }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      const newPreviewImages = [...previewImages];
-      if (file.type.startsWith("image")) {
-        newPreviewImages[index] = { url: reader.result, type: "image" };
-      } else if (file.type.startsWith("video")) {
-        newPreviewImages[index] = { url: reader.result, type: "video" };
-      }
-      setPreviewImages(newPreviewImages);
+    reader.onload = () => {
+      setImagenesSalon((prevImages) => {
+        const newImages = [...prevImages];
+        newImages[index] = file;
+        return newImages;
+      });
+
+      setPreviewImages((prevPreviews) => {
+        const newPreviews = [...prevPreviews];
+        newPreviews[index] = {
+          url: reader.result,
+          type: file.type.startsWith("video/") ? "video" : "image",
+        };
+        return newPreviews;
+      });
     };
-    if (file) {
-      reader.readAsDataURL(file);
-    }
+
+    reader.readAsDataURL(file);
   };
 
   const handleAgregarPublicidad = async () => {
@@ -312,20 +347,25 @@ function PublicidadSalon() {
         const imagen = imagenesSalon[index];
 
         if (imagen) {
-          const imageRef = storageRef.child(
-            `publicidad/salon_${index}_${Date.now()}_${imagen.name}`
+          const isImage = imagen.type.startsWith("image");
+          const isVideo = imagen.type.startsWith("video");
+          const mediaRef = storageRef.child(
+            `publicidad/${
+              isImage ? "imagenes" : "videos"
+            }/${index}_${Date.now()}_${imagen.name}`
           );
-          await imageRef.put(imagen);
-          const imageUrl = await imageRef.getDownloadURL();
+
+          await mediaRef.put(imagen);
+          const mediaUrl = await mediaRef.getDownloadURL();
           const { horas, minutos, segundos } = tiemposSalon[index];
           hasValidData = true;
 
           if (horas > 0 || minutos > 0 || segundos > 0) {
             const fechaDeSubida =
               firebase.firestore.FieldValue.serverTimestamp();
-
             const publicidadRef = await db.collection("Publicidad").add({
-              imageUrl,
+              imageUrl: isImage ? mediaUrl : null,
+              videoUrl: isVideo ? mediaUrl : null,
               horas,
               minutos,
               segundos,
@@ -355,7 +395,7 @@ function PublicidadSalon() {
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
-        console.warn("No valid data to add");
+        console.warn("No hay datos válidos para agregar");
       }
 
       setImagenesSalon((prevImages) => [...prevImages, null]);
@@ -429,7 +469,7 @@ function PublicidadSalon() {
         {imagenesSalon.slice(0, 10).map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
-              Salón de Eventos - Imagen {index + 1}
+              Salón de Eventos {index + 1}
             </h3>
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
@@ -463,6 +503,7 @@ function PublicidadSalon() {
                     className="mt-4"
                     style={{ maxWidth: "200px", height: "auto" }}
                     controls
+                    preload="metadata"
                   />
                 )}
               </div>
