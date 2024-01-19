@@ -91,7 +91,8 @@ function DashBoard() {
         <div className="">
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
-              userEmail === "ulises.jacobo@hotmail.com") && <Admin />}
+              userEmail === "ulises.jacobo@hotmail.com" ||
+              userEmail === "contacto@upperds.mx") && <Admin />}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
