@@ -105,7 +105,8 @@ function ConsultaModEvento() {
       if (
         user &&
         (user.email === "uppermex10@gmail.com" ||
-          user.email === "ulises.jacobo@hotmail.com")
+          user.email === "ulises.jacobo@hotmail.com" ||
+          user.email === "contacto@upperds.mx")
       ) {
         eventosRef = firebase.firestore().collection("eventos");
       } else if (user) {
@@ -368,7 +369,8 @@ function ConsultaModEvento() {
             <thead className="bg-gray-50">
               <tr>
                 {(usuarioLogeado === "uppermex10@gmail.com" ||
-                  usuarioLogeado === "ulises.jacobo@hotmail.com") && (
+                  usuarioLogeado === "ulises.jacobo@hotmail.com" ||
+                  usuarioLogeado === "contacto@upperds.mx") && (
                   <th
                     scope="col"
                     className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
@@ -450,7 +452,8 @@ function ConsultaModEvento() {
                   return (
                     <tr key={evento.id} className="text-xs md:text-base">
                       {(usuarioLogeado === "uppermex10@gmail.com" ||
-                        usuarioLogeado === "ulises.jacobo@hotmail.com") && (
+                        usuarioLogeado === "ulises.jacobo@hotmail.com" ||
+                        usuarioLogeado === "contacto@upperds.mx") && (
                         <td className="md:px-6 md:py-4 ">
                           {usuario
                             ? `${usuario.nombre} ${usuario.apellido}`
@@ -509,7 +512,7 @@ function ConsultaModEvento() {
                           eventoEditado.devices
                         ) : (
                           // Devices names o "Sin pantallas" si no hay ninguna disponible
-                          <> 
+                          <>
                             {evento.devices.length === 0 ? (
                               "sin Pantallas"
                             ) : (
