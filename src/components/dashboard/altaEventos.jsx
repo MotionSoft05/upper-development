@@ -62,7 +62,8 @@ function AltaEventos() {
     if (
       user &&
       (user.email === "uppermex10@gmail.com" ||
-        user.email === "ulises.jacobo@hotmail.com")
+        user.email === "ulises.jacobo@hotmail.com" ||
+        user.email === "contacto@upperds.mx")
     ) {
       const usuariosRef = collection(db, "usuarios");
       const usuariosSnapshot = getDocs(usuariosRef);
@@ -373,7 +374,8 @@ function AltaEventos() {
             <form>
               {user &&
                 (user.email === "uppermex10@gmail.com" ||
-                  user.email === "ulises.jacobo@hotmail.com") && (
+                  user.email === "ulises.jacobo@hotmail.com" ||
+                  user.email === "contacto@upperds.mx") && (
                   <div className="relative z-0 w-full mb-6 group">
                     <select
                       value={selectedUser || ""}
@@ -736,7 +738,8 @@ function AltaEventos() {
                 </h4>
                 <div className="mb-4">
                   {(user && user.email !== "uppermex10@gmail.com") ||
-                  (user && user.email === "ulises.jacobo@hotmail.com") ? (
+                  (user && user.email === "ulises.jacobo@hotmail.com") ||
+                  (user && user.email === "contacto@upperds.mx") ? (
                     <>
                       {Array.isArray(nombrePantallas)
                         ? nombrePantallas.map((nombrePantalla, index) => (
