@@ -134,7 +134,8 @@ const Guia = () => {
 
           {user &&
             (user.email === "uppermex10@gmail.com" ||
-              user.email === "ulises.jacobo@hotmail.com") && (
+              user.email === "ulises.jacobo@hotmail.com" ||
+              user.email === "contacto@upperds.mx") && (
               <div className="flex items-center space-x-4">
                 <input type="file" accept=".pdf" onChange={handleFileChange} />
                 <button
@@ -158,7 +159,8 @@ const Guia = () => {
                 <span>{file.name}</span>
                 {user &&
                 (user.email === "uppermex10@gmail.com" ||
-                  user.email === "ulises.jacobo@hotmail.com") ? (
+                  user.email === "ulises.jacobo@hotmail.com" ||
+                  user.email === "contacto@upperds.mx") ? (
                   <>
                     <button
                       onClick={() => window.open(file.url, "_blank")}
