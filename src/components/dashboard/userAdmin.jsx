@@ -19,7 +19,7 @@ function UserAdmin() {
   const [cantidadPublicidad, setCantidadPublicidad] = useState(0);
 
   let total = cantidadPd + cantidadPs;
-
+  //
   useEffect(() => {
     const firebaseConfig = {
       apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
