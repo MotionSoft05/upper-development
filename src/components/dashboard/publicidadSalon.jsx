@@ -75,9 +75,13 @@ function PublicidadSalon() {
         const publicidadesData = await Promise.all(
           publicidadesSnapshot.docs.map(async (doc) => {
             const data = doc.data();
-            const imageUrl = await storage
-              .refFromURL(data.imageUrl)
-              .getDownloadURL();
+            let imageUrl;
+
+            if (data.imageUrl) {
+              imageUrl = await storage
+                .refFromURL(data.imageUrl)
+                .getDownloadURL();
+            }
 
             return {
               id: doc.id,
@@ -127,7 +131,10 @@ function PublicidadSalon() {
           ...nuevosTiempos,
         ]);
         setPreviewImages([
-          ...publicidadesData.map((publicidad) => publicidad.imageUrl),
+          ...publicidadesData.map((publicidad) => ({
+            url: publicidad.imageUrl,
+            type: "image",
+          })),
           ...nuevasVistasPrevias,
         ]);
         setImagenesSalonOriginales(publicidadesData.map(() => null));
@@ -279,10 +286,16 @@ function PublicidadSalon() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const newPreviewImages = [...previewImages];
-      newPreviewImages[index] = reader.result;
+      if (file.type.startsWith("image")) {
+        newPreviewImages[index] = { url: reader.result, type: "image" };
+      } else if (file.type.startsWith("video")) {
+        newPreviewImages[index] = { url: reader.result, type: "video" };
+      }
       setPreviewImages(newPreviewImages);
     };
-    reader.readAsDataURL(file);
+    if (file) {
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAgregarPublicidad = async () => {
@@ -419,32 +432,42 @@ function PublicidadSalon() {
               Salón de Eventos - Imagen {index + 1}
             </h3>
             <div className="mt-4">
-              <input
-                type="file"
-                accept="image/*"
-                className="hidden"
-                id={`imagenSalon-${index}`}
-                onChange={(event) => handleImagenSelect(event, index)}
-                disabled={
-                  (editIndex !== null && editIndex !== index) ||
-                  (editIndex === null && publicidadesIds[index])
-                }
-              />
-              <label
-                htmlFor={`imagenSalon-${index}`}
-                className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2"
-              >
-                Seleccionar Imagen
+              <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
+                Seleccionar Imagen o Video
+                <input
+                  type="file"
+                  accept="image/*,video/*"
+                  className="hidden"
+                  id={`imagenSalon-${index}`}
+                  onChange={(event) => handleImagenSelect(event, index)}
+                  disabled={
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                  }
+                />
               </label>
             </div>
             {previewImages[index] && (
-              <img
-                src={previewImages[index]}
-                alt={`Vista previa de la imagen ${index + 1}`}
-                className="mt-4"
-                style={{ maxWidth: "200px", height: "auto" }}
-              />
+              <div className="mt-4">
+                {previewImages[index].type === "image" ? (
+                  <img
+                    src={previewImages[index].url}
+                    alt={`Vista previa de la imagen ${index + 1}`}
+                    className="mt-4"
+                    style={{ maxWidth: "200px", height: "auto" }}
+                  />
+                ) : (
+                  <video
+                    src={previewImages[index].url}
+                    alt={`Vista previa del video ${index + 1}`}
+                    className="mt-4"
+                    style={{ maxWidth: "200px", height: "auto" }}
+                    controls
+                  />
+                )}
+              </div>
             )}
+
             <div className="mt-4">
               <label className="text-gray-800">Tiempo de visualización:</label>
               <div className="flex mt-2">
