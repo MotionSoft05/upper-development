@@ -257,6 +257,13 @@ function Register() {
       return "El número de teléfono es obligatorio";
     }
 
+    // Expresión regular para permitir solo + - ( ) y números
+    const phoneNumberRegex = /^[+()0-9\-]*$/;
+
+    if (!phoneNumberRegex.test(value)) {
+      return "El número de teléfono solo puede contener + - ( ) y números";
+    }
+
     return null;
   };
 
@@ -366,11 +373,15 @@ function Register() {
                     onChange={(e) => {
                       const inputValue = e.target.value;
                       const filteredValue = inputValue.replace(
-                        /[^0-9+\s-]/g,
+                        /[^+()0-9\-]/g,
                         ""
                       );
-                      setPhoneNumber(filteredValue);
-                      const error = validatePhoneNumber(filteredValue);
+
+                      // Limitar a 16 caracteres
+                      const truncatedValue = filteredValue.slice(0, 16);
+
+                      setPhoneNumber(truncatedValue);
+                      const error = validatePhoneNumber(truncatedValue);
                       setPhoneNumberError(error);
                     }}
                   />
