@@ -430,7 +430,7 @@ function Admin() {
 
         // Hacer la solicitud DELETE al backend usando Axios
         const response = await axios.delete(
-          `http://localhost:3001/eliminar-usuario/${usuarioId}`
+          `http://localhost:5001/eliminar-usuario/${usuarioId}`
         );
 
         if (response.status === 200) {
