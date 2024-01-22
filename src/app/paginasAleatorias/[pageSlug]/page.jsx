@@ -8,14 +8,14 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { initializeApp, firebase } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import { useEffect, useState } from "react";
 import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
-
+import QRCode from "qrcode.react";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -25,7 +25,6 @@ const obtenerHora = () => {
 
 function PaginaAleatoria({ params }) {
   const [user, setUser] = useState(params.pageSlug);
-
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
@@ -37,8 +36,18 @@ function PaginaAleatoria({ params }) {
   const numeroPantallaActual = "1";
   const [isPortrait, setIsPortrait] = useState(false); // Estado para controlar la orientación
   const [error, setError] = useState(null);
-
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
+
+  useEffect(() => {
+    if (user) {
+      // Obtén la URL base del navegador
+      const baseUrl = window.location.origin;
+
+      // Actualiza la URL del código QR al cambiar el usuario
+      setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
+    }
+  }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -60,7 +69,9 @@ function PaginaAleatoria({ params }) {
 
   useEffect(() => {
     axios
-      .get("https://editorial.aristeguinoticias.com/feed/")
+      .get(
+        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
+      )
       .then((response) => {
         if (parser.validate(response.data) === true) {
           const jsonObj = parser.parse(response.data);
@@ -115,13 +126,13 @@ function PaginaAleatoria({ params }) {
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
-      apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-      authDomain: "upper-b0be3.firebaseapp.com",
-      projectId: "upper-b0be3",
-      storageBucket: "upper-b0be3.appspot.com",
-      messagingSenderId: "295362615418",
-      appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-      measurementId: "G-2E66K5XY81",
+      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+      authDomain: "upper-8c817.firebaseapp.com",
+      projectId: "upper-8c817",
+      storageBucket: "upper-8c817.appspot.com",
+      messagingSenderId: "798455798906",
+      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+      measurementId: "G-6VHX927GH1",
     };
 
     const app = initializeApp(firebaseConfig);
@@ -135,7 +146,7 @@ function PaginaAleatoria({ params }) {
 
     return () => unsubscribe();
   }, []);
-
+  console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
@@ -415,7 +426,15 @@ function PaginaAleatoria({ params }) {
       </>
     );
   }
+  // console.log("EVENTOSSSS", eventosEnCurso);
+  // console.log("templateData", templateData);
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
+
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+
+  // console.log("screenWidth", screenWidth);
+  console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
@@ -491,7 +510,7 @@ function PaginaAleatoria({ params }) {
                   {weatherData.current.temp_c} °C
                 </p>
               ) : (
-                <h2 className="text-3xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
+                <p>No se pudo obtener la información del clima</p>
               )}
             </div>
           </div>
@@ -598,6 +617,19 @@ function PaginaAleatoria({ params }) {
                     </div>
                   ))}
                 </div>
+              )}
+            </div>
+            <div style={{ marginTop: "20px", marginRight: "20px" }}>
+              {qrCodeUrl && (
+                <a
+                  href={qrCodeUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ cursor: "pointer" }}
+                >
+                  {/* Muestra el código QR */}
+                  <QRCode value={qrCodeUrl} size={80} />
+                </a>
               )}
             </div>
           </div>
