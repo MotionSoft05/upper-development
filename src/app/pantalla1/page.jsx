@@ -344,13 +344,10 @@ function Pantalla1() {
     } else {
       timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
     }
-    const intervalId = setInterval(() => {
-      // Llamando a changeImage cada 40 segundos
-      changeImage();
-    }, 40000);
+
     return () => {
       clearTimeout(timeoutId);
-      clearInterval(intervalId);
+      clearInterval(interval);
     };
     // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
   }, [currentImageIndex, publicidadesUsuario]);
