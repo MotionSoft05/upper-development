@@ -422,7 +422,6 @@ function Admin() {
       "¿Estás seguro de que deseas eliminar este usuario?"
     );
 
-    // Si el usuario confirma la eliminación, procede
     if (confirmacion) {
       try {
         // Eliminar usuario de Firestore
