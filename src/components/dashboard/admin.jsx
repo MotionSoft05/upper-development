@@ -427,10 +427,14 @@ function Admin() {
         // Eliminar usuario de Firestore
         await deleteDoc(doc(db, "usuarios", usuarioId));
 
+        // Determinar la URL de la solicitud DELETE basándote en la URL de origen
+        const apiUrl =
+          window.location.origin === "http://localhost:3000"
+            ? "http://localhost:8000/eliminar-usuario" // Cambia esto según tu configuración local
+            : "https://upperds.onrender.com/eliminar-usuario";
+
         // Hacer la solicitud DELETE al backend usando Axios
-        const response = await axios.delete(
-          `https://upperds.onrender.com/eliminar-usuario/${usuarioId}`
-        );
+        const response = await axios.delete(`${apiUrl}/${usuarioId}`);
 
         if (response.status === 200) {
           console.log(`Usuario con ID ${usuarioId} eliminado correctamente.`);
