@@ -665,7 +665,7 @@ function PantallaDirec1() {
                   className="ml-12 text-xl "
                   effect="rightLeft"
                   duration={1000}
-                  stopDuration={timeOutRss}
+                  stopduration={timeOutRss}
                   data={[displayedItem]}
                   // data={[rssItems[currentIndex].title]}
                 />
