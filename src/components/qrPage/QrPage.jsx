@@ -16,7 +16,6 @@ import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
-import Textra from "react-textra"; // Slider para RSS
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -24,8 +23,9 @@ const obtenerHora = () => {
   return `${hours}:${minutes}`;
 };
 
-function PantallaDirec1() {
-  const [user, setUser] = useState(null);
+function QrDinamic({ searchQuery }) {
+//   console.log("🚀 ~ QrPage ~ params:", searchQuery)
+  const [user, setUser] = useState(searchQuery);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
   const [firestore, setFirestore] = useState(null);
@@ -39,16 +39,16 @@ function PantallaDirec1() {
   const [error, setError] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
-  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
-  useEffect(() => {
-    if (user) {
-      // Obtén la URL base del navegador
-      const baseUrl = window.location.origin;
 
-      // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias?qr=${user.uid}`);
-    }
-  }, [user]);
+//   useEffect(() => {
+//     if (user) {
+//       // Obtén la URL base del navegador
+//       const baseUrl = window.location.origin;
+
+//       // Actualiza la URL del código QR al cambiar el usuario
+//       setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
+//     }
+//   }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -64,6 +64,36 @@ function PantallaDirec1() {
     }, 1000);
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  }, []);
+
+  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
+
+  useEffect(() => {
+    axios
+      .get(
+        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
+      )
+      .then((response) => {
+        if (parser.validate(response.data) === true) {
+          const jsonObj = parser.parse(response.data);
+          const items = jsonObj.rss.channel.item.map((item) => {
+            return {
+              title: item.title,
+              link: item.link,
+              description: item.description,
+              // ... otros campos que desees obtener
+            };
+          });
+
+          setRssItems(items); // Guardar los elementos del RSS en el estado
+          console.log("Items del RSS:", items); // Agregar un console.log aquí
+        } else {
+          console.error("Invalid XML format");
+        }
+      })
+      .catch((error) =>
+        console.error("Error fetching or parsing data:", error)
+      );
   }, []);
 
   // Slider
@@ -94,7 +124,6 @@ function PantallaDirec1() {
     slides: eventosPorSlide.length,
     loop: true,
   });
-
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
@@ -113,16 +142,12 @@ function PantallaDirec1() {
 
     const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setUser(user);
-      } else {
-        setUser(null);
-      }
+      setUser(user);
     });
 
     return () => unsubscribe();
   }, []);
-  //? console.log("user", user);
+//   console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
@@ -136,10 +161,12 @@ function PantallaDirec1() {
     const now = new Date();
     return diasSemana[now.getDay()];
   };
-
+  
+//   console.log("🚀 ~ useEffect ~ firestore:", firestore)
+//   console.log("🚀 ~ useEffect ~ user:", user)
   useEffect(() => {
     if (user && firestore) {
-      const userRef = doc(firestore, "usuarios", user.uid);
+      const userRef = doc(firestore, "usuarios", searchQuery);//! revisar antes era doc(firestore, "usuarios", user)
       const obtenerUsuario = async () => {
         try {
           const docSnap = await getDoc(userRef);
@@ -154,10 +181,7 @@ function PantallaDirec1() {
             });
 
             const eventosRef = collection(firestore, "eventos");
-            const eventosQuery = query(
-              eventosRef,
-              where("userId", "==", user.uid)
-            );
+            const eventosQuery = query(eventosRef, where("userId", "==", searchQuery)); //! revisar antes era ("userId", "==", user)
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
@@ -222,7 +246,7 @@ function PantallaDirec1() {
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
               templateRef,
-              where("userId", "==", user.uid)
+              where("userId", "==", searchQuery) //! revisar antes era ("userId", "==", user)
             );
             const templateSnapshot = await getDocs(templateQuery);
 
@@ -287,54 +311,6 @@ function PantallaDirec1() {
     }
   }, [selectedCity]);
   // Publicidades-------------------------------------------
-
-  // ----------------- RSS ---------------------------
-  useEffect(() => {
-    axios
-      .get("http://localhost:3001/fetch-rss")
-      .then((response) => {
-        const items = response.data.items;
-        setRssItems(items);
-        console.log("Items del RSS:", items);
-      })
-      .catch((error) =>
-        console.error("Error fetching or parsing data:", error)
-      );
-  }, []);
-
-  let timeOutRss = 7000; // valor de cambio de animacion de RSS
-  const [displayedItem, setDisplayedItem] = useState('');
-
-  useEffect(() => {
-    let currentIndex = 0;
-
-    const interval = setInterval(() => {
-      setDisplayedItem(rssItems[currentIndex].title);
-
-      // Cambiar al siguiente índice, o volver al principio si llegamos al final
-      currentIndex = (currentIndex + 1) % rssItems.length;
-    }, 7000); // Cambia cada 2000 milisegundos (2 segundos)
-
-    // Limpiar el intervalo cuando el componente se desmonta
-    return () => clearInterval(interval);
-  }, [rssItems]);
-
-  // const [currentIndex, setCurrentIndex] = useState(0);
-
-  // useEffect(() => {
-  //   const interval = setInterval(() => {
-  //     // Cambiar al siguiente índice, o volver al principio si llegamos al final
-  //     setCurrentIndex((prevIndex) =>
-  //       prevIndex === rssItems.length - 1 ? 0 : prevIndex + 1
-  //     );
-  //   }, 3000); // Cambia cada 3000 milisegundos (3 segundos)
-
-  //   // Limpiar el intervalo cuando el componente se desmonta
-  //   return () => clearInterval(interval);
-  // }, [rssItems]); // Asegúrate de que el efecto se ejecute cuando rssItems cambie
-
-  // ----------------- RSS ---------------------------
-
   const pantalla = "directorio";
 
   useEffect(() => {
@@ -343,7 +319,7 @@ function PantallaDirec1() {
         const publicidadesRef = collection(firestore, "Publicidad");
         const publicidadesQuery = query(
           publicidadesRef,
-          where("userId", "==", user.uid)
+          where("userId", "==", searchQuery) //! revisar antes era ("userId", "==", user)
         );
 
         getDocs(publicidadesQuery)
@@ -369,9 +345,8 @@ function PantallaDirec1() {
     }, 10000);
 
     fetchPublicidades(); // Llamar inicialmente
-
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  }, [user, firestore, pantalla]);
+}, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -460,8 +435,8 @@ function PantallaDirec1() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  // console.log("CLIMA", weatherData.current.condition.icon);
-
+  // console.log("screenWidth", screenWidth);
+//   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
@@ -484,7 +459,7 @@ function PantallaDirec1() {
           {/* Header */}
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
-            <div className=" ">
+            <div className="">
               {templateActual.logo && (
                 <>
                   {" "}
@@ -493,13 +468,12 @@ function PantallaDirec1() {
                       width: "18vw",
                       height: "10vw",
                       overflow: "hidden",
-                      marginBottom: "20px",
                     }}
                   >
                     <img
                       src={templateActual.logo}
                       alt="Logo"
-                      className="rounded-lg object-contain w-full h-full  "
+                      className="w-72"
                       onClick={() => {
                         cambiarOrientacion();
                       }}
@@ -508,7 +482,7 @@ function PantallaDirec1() {
                 </>
               )}
             </div>
-            {/* ---- Titulo Eventos del dia y Fecha---- */}
+
             <div
               className="flex flex-col text-color items-center"
               style={{
@@ -516,13 +490,12 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              <p className="text-3xl text-center  mb-2">
+              <p className="text-2xl text-center  mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
-              <h1 className="text-5xl font-bold">Eventos del día</h1>
+              <h1 className="text-4xl font-bold">Eventos del día</h1>
             </div>
 
-            {/* ---- Clima e Icono ---- */}
             <div
               className="flex text-color flex-col"
               style={{
@@ -535,160 +508,120 @@ function PantallaDirec1() {
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
-                <div className="flex items-center justify-center mr-4">
-                  <img
-                    src={weatherData.current.condition.icon}
-                    alt="Clima"
-                    className="w-28"
-                  />
-                  <p className="text-5xl font-bold ml-2 mr-6">
-                    {weatherData.current.temp_c} °C
-                  </p>
-                </div>
+                <p className="text-3xl font-bold">
+                  {weatherData.current.temp_c} °C
+                </p>
               ) : (
-                <h2 className="text-4xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
+                <p>No se pudo obtener la información del clima</p>
               )}
             </div>
           </div>
-          {/* Contenerdor de eventos */}
-          <div className="">
-            {/* Linea arriba */}{" "}
-            <div
-              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
-              style={{
-                // backgroundColor: templateActual.templateColor,
-                background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {/* Título */}
-              <h2 className=" text-white "></h2>
-            </div>
-            {/* contenido principal */}
-            <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50">
-              <div className=" text-black">
-                {/* Imagen a la izquierda */}
-                <div
-                  className="flex flex-col
+          {/* Linea arriba */}{" "}
+          <div
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+            style={{
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
+            }}
+          >
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
+          </div>
+          {/* contenido principal */}
+          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
+            <div className=" text-black">
+              {/* Imagen a la izquierda */}
+              <div
+                className="flex flex-col
               "
-                >
-                  <div className="">
-                    <div className="space-y-5 pl-5 flex-grow">
-                      {/* Slots predeterminados */}
-                      <div ref={sliderRef} className="keen-slider">
-                        {eventosPorSlide.map((slideEventos, index) => (
-                          <div key={index} className="keen-slider__slide my-2">
-                            {Array.from({
-                              length: templateData[0]?.setPortrait ? 5 : 10,
-                            }).map((_, innerIndex) => {
-                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+              >
+                <div className="">
+                  <div className="space-y-5 pl-5 flex-grow">
+                    {/* Slots predeterminados */}
+                    <div ref={sliderRef} className="keen-slider">
+                      {eventosPorSlide.map((slideEventos, index) => (
+                        <div key={index} className="keen-slider__slide my-2">
+                          {Array.from({
+                            length: templateData[0]?.setPortrait ? 5 : 8,
+                          }).map((_, innerIndex) => {
+                            const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                              return (
-                                <div
-                                  key={innerIndex}
-                                  className="flex items-center space-x-4 space-y-5 border-b pr-8"
-                                  style={{
-                                    height: evento ? "auto" : "110px",
-                                    borderColor: templateActual.templateColor,
-                                  }} // Establecer la altura dependiendo de si hay evento o no
-                                >
-                                  {/* ---- Evento ---- */}
-                                  {evento ? (
-                                    // Si hay evento, mostrar los detalles
-                                    <>
-                                      <img
-                                        className="object-contain w-auto h-[100px] my-2 shadow-xl "
-                                        src={evento.images[0]}
-                                        alt={evento.nombreEvento}
-                                      />
-                                      <div className="w-full ">
-                                        <h3 className="font-bold mb-4 text-3xl">
+                            return (
+                              <div
+                                key={innerIndex}
+                                className="flex items-center space-x-4 space-y-5 border-b border-black"
+                                style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
+                              >
+                                {evento ? (
+                                  // Si hay evento, mostrar los detalles
+                                  <>
+                                    <img
+                                      src={evento.images[0]}
+                                      alt={evento.nombreEvento}
+                                      style={{
+                                        width: "130px",
+                                        height: "110px",
+                                        margin: "0",
+                                      }}
+                                    />
+                                    <div className="grid grid-cols-2">
+                                      <div className="min-w-5">
+                                        <h3 className="font-bold mb-4">
                                           {evento.nombreEvento}
                                         </h3>
-                                        <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
-                                          {/* Columna 1: Nombre (a la izquierda) */}
-                                          <p className="col-span-3 ">
-                                            {evento.tipoEvento}
-                                          </p>
-
-                                          {/* Columna 2: Lugar (en el centro) */}
-                                          <p className="col-span-3 text-center ">
-                                            {evento.lugar}
-                                          </p>
-
-                                          {/* Columna 3: Rango de horas (a la derecha) */}
-                                          <p className="col-span-1 text-right ">
-                                            {evento.horaInicialSalon + " HRS"}
-                                            {/* {"HRS hasta "}
-                                            {evento.horaFinalSalon} */}
-                                          </p>
-                                        </div>
+                                        <p>{evento.tipoEvento}</p>
+                                        <p>{evento.lugar}</p>
                                       </div>
-                                    </>
-                                  ) : (
-                                    // Si no hay evento, mostrar el mensaje de casillero vacío
-                                    <p></p>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))}
-                      </div>
+                                      <div className="text-right">
+                                        <p>{evento.horaInicialSalon} HRS</p>
+                                      </div>
+                                    </div>
+                                  </>
+                                ) : (
+                                  // Si no hay evento, mostrar el mensaje de casillero vacío
+                                  <p></p>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      ))}
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-            {/* Linea abajo */}
-            <div
-              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
-              style={{
-                // backgroundColor: templateActual.templateColor,
-                background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {/* Título */}
-              <h2 className=" text-white"></h2>
-            </div>
           </div>
-
+          {/* Linea abajo */}
+          <div
+            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl`}
+            style={{
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
+            }}
+          >
+            {/* Título */}
+            <h2 className=" text-white"> </h2>
+          </div>
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
-            {/* --- RSS --- */}
-            <div className="w-full ">
-              <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
-                <Textra
-                  className="ml-12 text-xl "
-                  effect="rightLeft"
-                  duration={1000}
-                  stopduration={timeOutRss}
-                  data={[displayedItem]}
-                  // data={[rssItems[currentIndex].title]}
-                />
-              </div>
-              {/* {rssItems.map((item, index) => (
-                <div className="my-3 font-black" key={index}>
-                  <Textra
-                    effect="topDown"
-                    duration={1000}
-                    stopDuration={4000}
-                    data={[rssItems[index].title]}
-                  />
+          <div className="w-full">
+              {rssItems.length > 0 && (
+                <div ref={sliderRef} className="keen-slider">
+                  {rssItems.map((item, index) => (
+                    <div key={index} className="keen-slider__slide">
+                      {/* Aquí puedes mostrar los elementos del RSS dentro del carrusel */}
+                      <h3>{item.title}</h3>
+                      <p>{item.description}</p>
+                      {/* ... otros campos que quieras mostrar */}
+                    </div>
+                  ))}
                 </div>
-              ))} */}
+              )}
             </div>
-            {/* --- QR image --- */}
-            <div
-              style={{
-                marginTop: "20px",
-                marginRight: "20px",
-                marginBottom: "20px",
-              }}
-            >
+            <div style={{ marginTop: "20px", marginRight: "20px" }}>
               {qrCodeUrl && (
                 <a
                   href={qrCodeUrl}
@@ -697,7 +630,7 @@ function PantallaDirec1() {
                   style={{ cursor: "pointer" }}
                 >
                   {/* Muestra el código QR */}
-                  <QRCode value={qrCodeUrl} size={100} />
+                  <QRCode value={qrCodeUrl} size={80} />
                 </a>
               )}
             </div>
@@ -707,5 +640,4 @@ function PantallaDirec1() {
     </section>
   );
 }
-
-export default PantallaDirec1;
+export default QrDinamic;

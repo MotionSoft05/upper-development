@@ -23,7 +23,8 @@ const obtenerHora = () => {
   return `${hours}:${minutes}`;
 };
 
-function PaginaAleatoria({ params }) {
+function QrPage({ params }) {
+  console.log("🚀 ~ QrPage ~ params:", params.pageSlug)
   const [user, setUser] = useState(params.pageSlug);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -39,15 +40,15 @@ function PaginaAleatoria({ params }) {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
 
-  useEffect(() => {
-    if (user) {
-      // Obtén la URL base del navegador
-      const baseUrl = window.location.origin;
+//   useEffect(() => {
+//     if (user) {
+//       // Obtén la URL base del navegador
+//       const baseUrl = window.location.origin;
 
-      // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
-    }
-  }, [user]);
+//       // Actualiza la URL del código QR al cambiar el usuario
+//       setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
+//     }
+//   }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -67,33 +68,33 @@ function PaginaAleatoria({ params }) {
 
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
 
-  useEffect(() => {
-    axios
-      .get(
-        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
-      )
-      .then((response) => {
-        if (parser.validate(response.data) === true) {
-          const jsonObj = parser.parse(response.data);
-          const items = jsonObj.rss.channel.item.map((item) => {
-            return {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              // ... otros campos que desees obtener
-            };
-          });
+//   useEffect(() => {
+//     axios
+//       .get(
+//         "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
+//       )
+//       .then((response) => {
+//         if (parser.validate(response.data) === true) {
+//           const jsonObj = parser.parse(response.data);
+//           const items = jsonObj.rss.channel.item.map((item) => {
+//             return {
+//               title: item.title,
+//               link: item.link,
+//               description: item.description,
+//               // ... otros campos que desees obtener
+//             };
+//           });
 
-          setRssItems(items); // Guardar los elementos del RSS en el estado
-          console.log("Items del RSS:", items); // Agregar un console.log aquí
-        } else {
-          console.error("Invalid XML format");
-        }
-      })
-      .catch((error) =>
-        console.error("Error fetching or parsing data:", error)
-      );
-  }, []);
+//           setRssItems(items); // Guardar los elementos del RSS en el estado
+//           console.log("Items del RSS:", items); // Agregar un console.log aquí
+//         } else {
+//           console.error("Invalid XML format");
+//         }
+//       })
+//       .catch((error) =>
+//         console.error("Error fetching or parsing data:", error)
+//       );
+//   }, []);
 
   // Slider
   const chunkArray = (arr, chunkSize) => {
@@ -146,7 +147,7 @@ function PaginaAleatoria({ params }) {
 
     return () => unsubscribe();
   }, []);
-  console.log("user", user);
+//   console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
@@ -161,6 +162,8 @@ function PaginaAleatoria({ params }) {
     return diasSemana[now.getDay()];
   };
 
+  console.log("🚀 ~ useEffect ~ firestore:", firestore)
+  console.log("🚀 ~ useEffect ~ user:", user)
   useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user);
@@ -342,9 +345,8 @@ function PaginaAleatoria({ params }) {
     }, 10000);
 
     fetchPublicidades(); // Llamar inicialmente
-
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  }, [user, firestore, pantalla]);
+}, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -434,7 +436,7 @@ function PaginaAleatoria({ params }) {
   const screenHeight = window.innerHeight;
 
   // console.log("screenWidth", screenWidth);
-  console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
+//   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
@@ -605,20 +607,13 @@ function PaginaAleatoria({ params }) {
           </div>
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
-            <div className="w-full">
-              {rssItems.length > 0 && (
-                <div ref={sliderRef} className="keen-slider">
-                  {rssItems.map((item, index) => (
-                    <div key={index} className="keen-slider__slide">
-                      {/* Aquí puedes mostrar los elementos del RSS dentro del carrusel */}
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
-                      {/* ... otros campos que quieras mostrar */}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+            {/* -------------------------
+            -------------------------
+            ------------ RSS aqui -------------
+            -------------------------
+            -------------------------
+            -------------------------
+            ------------------------- */}
             <div style={{ marginTop: "20px", marginRight: "20px" }}>
               {qrCodeUrl && (
                 <a
@@ -638,4 +633,4 @@ function PaginaAleatoria({ params }) {
     </section>
   );
 }
-export default PaginaAleatoria;
+export default QrPage;
