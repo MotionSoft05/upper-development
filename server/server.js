@@ -73,8 +73,8 @@ app.delete("/eliminar-usuario/:uid", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor." });
   }
 });
-
-const PORT = process.env.PORT || 3001;
+//
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Servidor en ejecución en https://localhost:${PORT}`);
 });
