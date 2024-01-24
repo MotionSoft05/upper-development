@@ -46,7 +46,7 @@ function PantallaDirec1() {
       const baseUrl = window.location.origin;
 
       // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias?qr=${user.uid}`);
+      setQrCodeUrl(`${baseUrl}/paginasAleatorias.html?qr=${user.uid}`);
     }
   }, [user]);
 
@@ -303,7 +303,7 @@ function PantallaDirec1() {
   }, []);
 
   let timeOutRss = 7000; // valor de cambio de animacion de RSS
-  const [displayedItem, setDisplayedItem] = useState('');
+  const [displayedItem, setDisplayedItem] = useState("");
 
   useEffect(() => {
     let currentIndex = 0;
@@ -366,7 +366,7 @@ function PantallaDirec1() {
 
     const interval = setInterval(() => {
       fetchPublicidades();
-    }, 10000);
+    }, 40000);
 
     fetchPublicidades(); // Llamar inicialmente
 
