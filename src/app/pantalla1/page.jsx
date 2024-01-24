@@ -29,7 +29,7 @@ function Pantalla1() {
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
-
+  const [templateData, setTemplateData] = useState([]);
   const numeroPantallaActual = "1";
 
   const obtenerFecha = () => {
@@ -253,6 +253,30 @@ function Pantalla1() {
 
               return fechaActualEnRango && horaActualEnRango;
             });
+
+            const templateRef = collection(firestore, "TemplateSalones");
+            const templateQuery = query(
+              templateRef,
+              where("userId", "==", user.uid)
+            );
+            const templateSnapshot = await getDocs(templateQuery);
+
+            if (!templateSnapshot.empty) {
+              const templateData = [];
+              templateSnapshot.forEach((doc) => {
+                const template = { id: doc.id, ...doc.data() };
+                templateData.push(template);
+                setSelectedCity({
+                  value: template.ciudad,
+                  label: template.ciudad,
+                });
+              });
+              setTemplateData(templateData);
+            } else {
+              console.log(
+                "No se encontró información en TemplateDirectorios para este usuario."
+              );
+            }
             console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
@@ -377,6 +401,8 @@ function Pantalla1() {
   }
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
+  const templateActual = templateData[0]; // Obtener el primer evento de la lista
+  console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
 
   const {
     personalizacionTemplate,
