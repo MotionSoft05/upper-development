@@ -291,7 +291,7 @@ function PantallaDirec1() {
   // ----------------- RSS ---------------------------
   useEffect(() => {
     axios
-      .get("http://localhost:3001/fetch-rss")
+      .get("http://localhost:10000/fetch-rss")
       .then((response) => {
         const items = response.data.items;
         setRssItems(items);

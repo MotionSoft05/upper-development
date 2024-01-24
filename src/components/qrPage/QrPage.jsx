@@ -66,36 +66,6 @@ function QrDinamic({ searchQuery }) {
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
 
-  const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
-
-  useEffect(() => {
-    axios
-      .get(
-        "https://www.feedspot.com/infiniterss.php?_src=feed_title&followfeedid=4381919&q=site:https%3A%2F%2Fwww.excelsior.com.mx%2Frss.xml"
-      )
-      .then((response) => {
-        if (parser.validate(response.data) === true) {
-          const jsonObj = parser.parse(response.data);
-          const items = jsonObj.rss.channel.item.map((item) => {
-            return {
-              title: item.title,
-              link: item.link,
-              description: item.description,
-              // ... otros campos que desees obtener
-            };
-          });
-
-          setRssItems(items); // Guardar los elementos del RSS en el estado
-          console.log("Items del RSS:", items); // Agregar un console.log aquí
-        } else {
-          console.error("Invalid XML format");
-        }
-      })
-      .catch((error) =>
-        console.error("Error fetching or parsing data:", error)
-      );
-  }, []);
-
   // Slider
   const chunkArray = (arr, chunkSize) => {
     const totalEvents = arr.length;
@@ -441,9 +411,9 @@ function QrDinamic({ searchQuery }) {
   // console.log("screenWidth", screenWidth);
   //   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
-    <section className="relative w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white overflow-y-auto">
+    <section className="relative w-full  bg-white overflow-y-auto">
       <div
-        className="bg-white text-black h-screen flex flex-col justify-center  "
+        className="bg-white text-black  flex flex-col justify-center  "
         style={{
           transform: templateData[0]?.setPortrait
             ? "rotate(0deg)"
@@ -462,28 +432,37 @@ function QrDinamic({ searchQuery }) {
           {/* Header */}
           <div className="flex flex-col items-center justify-center md:flex-row md:justify-between">
             {/* Logo en la esquina superior izquierda */}
-            <div className="mb-4 md:mb-0">
+            <div className=" ">
               {templateActual.logo && (
-                <div
-                  style={{ width: "18vw", height: "10vw", overflow: "hidden" }}
-                >
-                  <img
-                    src={templateActual.logo}
-                    alt="Logo"
-                    className="w-72 cursor-pointer"
-                    onClick={() => {
-                      cambiarOrientacion();
+                <>
+                  {" "}
+                  <div
+                    className="max-w-[150px] lg:max-w-[250px]"
+                    style={{
+                      // width: "18vw",
+                      // height: "10vw",
+                      // overflow: "hidden",
+                      marginBottom: "20px",
                     }}
-                  />
-                </div>
+                  >
+                    <img
+                      src={templateActual.logo}
+                      alt="Logo"
+                      className="rounded-lg object-contain w-full h-full  "
+                      onClick={() => {
+                        cambiarOrientacion();
+                      }}
+                    />
+                  </div>{" "}
+                </>
               )}
             </div>
-
+            {/* Titulo , fecha y hora central */}
             <div className="flex flex-col text-color items-center md:ml-4">
-              <p className="text-2xl text-center mb-2">
-                {obtenerFecha()}-{currentHour}
+              <p className="text-xs lg:text-2xl text-center mb-2">
+                {obtenerFecha()} Hr: {currentHour}
               </p>
-              <h1 className="text-4xl font-bold">Eventos del día</h1>
+              <h1 className="text-2xl lg:text-4xl font-bold">Eventos del día</h1>
             </div>
 
             {/* Clima e Icono */}
@@ -497,9 +476,9 @@ function QrDinamic({ searchQuery }) {
                   <img
                     src={weatherData.current.condition.icon}
                     alt="Clima"
-                    className="w-28"
+                    className="w-12"
                   />
-                  <p className="text-5xl font-bold ml-2 mr-6">
+                  <p className="text-2xl font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -509,96 +488,96 @@ function QrDinamic({ searchQuery }) {
             </div>
           </div>
           <div className="">
-{/* Linea arriba */}
-<div
-          className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-t-xl h-16`}
-          style={{
-            background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
-            color: templateActual.fontColor,
-            fontFamily: templateActual.fontStyle,
-          }}
-        >
-          {/* Título */}
-          <h2 className="text-white"></h2>
-        </div>
+            {/* Linea arriba */}
+            <div
+              className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-t-xl h-16`}
+              style={{
+                background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {/* Título */}
+              <h2 className="text-white text-4xl text-center">EVENTOS</h2>
+            </div>
 
-        {/* Contenido principal */}
-        <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50">
-          <div className="text-black">
-            {/* Imagen a la izquierda */}
-            <div className="flex flex-col">
-              <div className="">
-                <div className="space-y-5 pl-5 flex-grow">
-                  {/* Slots predeterminados */}
-                  <div ref={sliderRef} className="keen-slider">
-                    {eventosPorSlide.map((slideEventos, index) => (
-                      <div key={index} className="keen-slider__slide my-2">
-                        {Array.from({
-                          length: templateData[0]?.setPortrait ? 5 : 10,
-                        }).map((_, innerIndex) => {
-                          const evento = slideEventos[innerIndex];
+            {/* Contenido principal */}
+            <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50">
+              <div className="text-black">
+                {/* Imagen a la izquierda */}
+                <div className="flex flex-col">
+                  <div className="">
+                    <div className="space-y-5 pl-2 flex-grow">
+                      {/* Slots predeterminados */}
+                      <div ref={sliderRef} className="keen-slider">
+                        {eventosPorSlide.map((slideEventos, index) => (
+                          <div key={index} className="keen-slider__slide my-2">
+                            {Array.from({
+                              length: templateData[0]?.setPortrait ? 5 : 10,
+                            }).map((_, innerIndex) => {
+                              const evento = slideEventos[innerIndex];
 
-                          return (
-                            <div
-                              key={innerIndex}
-                              className="flex items-center space-x-4 space-y-5 border-b pr-8"
-                              style={{
-                                height: evento ? "auto" : "110px",
-                                borderColor: templateActual.templateColor,
-                              }}
-                            >
-                              {/* Evento */}
-                              {evento ? (
-                                <>
-                                  <img
-                                    className="object-contain w-auto h-[100px] my-2 shadow-xl"
-                                    src={evento.images[0]}
-                                    alt={evento.nombreEvento}
-                                  />
-                                  <div className="w-full">
-                                    <h3 className="font-bold mb-4 text-3xl">
-                                      {evento.nombreEvento}
-                                    </h3>
-                                    <div className="grid grid-cols-7 gap-4 font-bold text-2xl">
-                                      <p className="col-span-3">
-                                        {evento.tipoEvento}
-                                      </p>
-                                      <p className="col-span-3 text-center">
-                                        {evento.lugar}
-                                      </p>
-                                      <p className="col-span-1 text-right">
-                                        {evento.horaInicialSalon + " HRS"}
-                                      </p>
-                                    </div>
-                                  </div>
-                                </>
-                              ) : (
-                                <p></p>
-                              )}
-                            </div>
-                          );
-                        })}
+                              return (
+                                <div
+                                  key={innerIndex}
+                                  className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                  style={{
+                                    height: evento ? "auto" : "110px",
+                                    borderColor: templateActual.templateColor,
+                                  }}
+                                >
+                                  {/* Evento */}
+                                  {evento ? (
+                                    <>
+                                      <img
+                                        className="object-contain w-auto h-[70px] my-2 shadow-xl"
+                                        src={evento.images[0]}
+                                        alt={evento.nombreEvento}
+                                      />
+                                      <div className="w-full">
+                                        <h3 className="font-bold mb-4 text-base lg:text-3xl">
+                                          {evento.nombreEvento}
+                                        </h3>
+                                        <div className="grid grid-cols-7 gap-4 font-bold text-xs lg:text-2xl">
+                                          <p className="col-span-3">
+                                            {evento.tipoEvento}
+                                          </p>
+                                          <p className="col-span-3 text-center">
+                                            {evento.lugar}
+                                          </p>
+                                          <p className="col-span-1  text-center">
+                                            {evento.horaInicialSalon + " a " + evento.horaFinalSalon}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    <p></p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
                       </div>
-                    ))}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Linea abajo */}
-        <div
-          className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-b-xl h-16`}
-          style={{
-            background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
-            color: templateActual.fontColor,
-            fontFamily: templateActual.fontStyle,
-          }}
-        >
-          {/* Título */}
-          <h2 className="text-white"></h2>
-        </div>
+            {/* Linea abajo */}
+            <div
+              className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-b-xl h-16`}
+              style={{
+                background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {/* Título */}
+              <h2 className="text-white"></h2>
+            </div>
           </div>
         </div>
       </div>
