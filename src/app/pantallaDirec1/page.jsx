@@ -460,6 +460,7 @@ function PantallaDirec1() {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
+  console.log("CLIMA", weatherData);
   // console.log("CLIMA", weatherData.current.condition.icon);
 
   return (

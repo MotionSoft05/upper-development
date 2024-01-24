@@ -55,6 +55,9 @@ function Navigation() {
   //const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
+  const isVisible = !pathname.includes("/paginasAleatorias") // Cuando este para la Vista Qr va a desaparecer el Navbar
+  console.log("🚀 ~ Navigation ~ isVisible:", isVisible)
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -123,6 +126,11 @@ function Navigation() {
     // Puedes agregar cualquier lógica adicional aquí antes de redirigir al dashboard
     window.location.href = "/dashboard.html";
   };
+
+  if(!isVisible){
+    // Cuando la NavBar esta en /paginasAleatorias devuelve el componente en null
+    return null
+  }
 
   return (
     <nav className="bg-white">
@@ -223,7 +231,7 @@ function Navigation() {
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-auto flex items-center space-x-1">
               {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
-              {(pathname === "/" || pathname === "/upper.mx") && (
+              {(pathname === "/" || pathname === "/upperds.mx") && (
                 <Menu as="div" className=" ">
                   <div>
                     <Menu.Button className="p-2">
@@ -304,75 +312,77 @@ function Navigation() {
           </div>
           <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="">
-              <Menu as="div" className=" ">
-                <div>
-                  <Menu.Button className="p-2">
-                    <UserCircleIcon
-                      className="h-6 text-black"
-                      aria-hidden="true"
-                    />
-                  </Menu.Button>
-                </div>
-                <Transition
-                  as={Fragment}
-                  enter="transition ease-out duration-100"
-                  enterFrom="transform opacity-0 scale-95"
-                  enterTo="transform opacity-100 scale-100"
-                  leave="transition ease-in duration-75"
-                  leaveFrom="transform opacity-100 scale-100"
-                  leaveTo="transform opacity-0 scale-95"
-                >
-                  <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                    <div>
-                      {user && (
-                        <>
-                          <Menu.Item>
-                            <Link href="/dashboard.html">
+              {(pathname === "/" || pathname === "/upperds.mx") && (
+                <Menu as="div" className=" ">
+                  <div>
+                    <Menu.Button className="p-2">
+                      <UserCircleIcon
+                        className="h-6 text-black"
+                        aria-hidden="true"
+                      />
+                    </Menu.Button>
+                  </div>
+                  <Transition
+                    as={Fragment}
+                    enter="transition ease-out duration-100"
+                    enterFrom="transform opacity-0 scale-95"
+                    enterTo="transform opacity-100 scale-100"
+                    leave="transition ease-in duration-75"
+                    leaveFrom="transform opacity-100 scale-100"
+                    leaveTo="transform opacity-0 scale-95"
+                  >
+                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                      <div>
+                        {user && (
+                          <>
+                            <Menu.Item>
+                              <Link href="/dashboard.html">
+                                <button
+                                  onClick={navigateToDashboard}
+                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                                >
+                                  Dashboard
+                                </button>
+                              </Link>
+                            </Menu.Item>
+                            <Menu.Item>
                               <button
-                                onClick={navigateToDashboard}
+                                onClick={async () => {
+                                  await handleLogout();
+                                  window.location.href = "/";
+                                }}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
-                                Dashboard
+                                Cerrar sesión
                               </button>
-                            </Link>
-                          </Menu.Item>
-                          <Menu.Item>
-                            <button
-                              onClick={async () => {
-                                await handleLogout();
-                                window.location.href = "/";
-                              }}
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              Cerrar sesión
-                            </button>
-                          </Menu.Item>
-                        </>
-                      )}
-                      {!user && (
-                        <>
-                          <Menu.Item>
-                            <Link
-                              href="/register.html"
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              Registrarse
-                            </Link>
-                          </Menu.Item>
-                          <Menu.Item>
-                            <Link
-                              href="/login.html"
-                              className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                            >
-                              Iniciar sesión
-                            </Link>
-                          </Menu.Item>
-                        </>
-                      )}
-                    </div>
-                  </Menu.Items>
-                </Transition>
-              </Menu>
+                            </Menu.Item>
+                          </>
+                        )}
+                        {!user && (
+                          <>
+                            <Menu.Item>
+                              <Link
+                                href="/register.html"
+                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                              >
+                                Registrarse
+                              </Link>
+                            </Menu.Item>
+                            <Menu.Item>
+                              <Link
+                                href="/login.html"
+                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                              >
+                                Iniciar sesión
+                              </Link>
+                            </Menu.Item>
+                          </>
+                        )}
+                      </div>
+                    </Menu.Items>
+                  </Transition>
+                </Menu>
+              )}
             </div>
           </div>
         </div>

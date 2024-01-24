@@ -24,7 +24,7 @@ const obtenerHora = () => {
 };
 
 function QrDinamic({ searchQuery }) {
-//   console.log("🚀 ~ QrPage ~ params:", searchQuery)
+  //   console.log("🚀 ~ QrPage ~ params:", searchQuery)
   const [user, setUser] = useState(searchQuery);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -40,15 +40,15 @@ function QrDinamic({ searchQuery }) {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
 
-//   useEffect(() => {
-//     if (user) {
-//       // Obtén la URL base del navegador
-//       const baseUrl = window.location.origin;
+  //   useEffect(() => {
+  //     if (user) {
+  //       // Obtén la URL base del navegador
+  //       const baseUrl = window.location.origin;
 
-//       // Actualiza la URL del código QR al cambiar el usuario
-//       setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
-//     }
-//   }, [user]);
+  //       // Actualiza la URL del código QR al cambiar el usuario
+  //       setQrCodeUrl(`${baseUrl}/paginasAleatorias/${user.uid}`);
+  //     }
+  //   }, [user]);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -147,7 +147,7 @@ function QrDinamic({ searchQuery }) {
 
     return () => unsubscribe();
   }, []);
-//   console.log("user", user);
+  //   console.log("user", user);
   const obtenerDiaActual = () => {
     const diasSemana = [
       "Domingo",
@@ -161,12 +161,12 @@ function QrDinamic({ searchQuery }) {
     const now = new Date();
     return diasSemana[now.getDay()];
   };
-  
-//   console.log("🚀 ~ useEffect ~ firestore:", firestore)
-//   console.log("🚀 ~ useEffect ~ user:", user)
+
+  //   console.log("🚀 ~ useEffect ~ firestore:", firestore)
+  //   console.log("🚀 ~ useEffect ~ user:", user)
   useEffect(() => {
     if (user && firestore) {
-      const userRef = doc(firestore, "usuarios", searchQuery);//! revisar antes era doc(firestore, "usuarios", user)
+      const userRef = doc(firestore, "usuarios", searchQuery); //! revisar antes era doc(firestore, "usuarios", user)
       const obtenerUsuario = async () => {
         try {
           const docSnap = await getDoc(userRef);
@@ -181,7 +181,10 @@ function QrDinamic({ searchQuery }) {
             });
 
             const eventosRef = collection(firestore, "eventos");
-            const eventosQuery = query(eventosRef, where("userId", "==", searchQuery)); //! revisar antes era ("userId", "==", user)
+            const eventosQuery = query(
+              eventosRef,
+              where("userId", "==", searchQuery)
+            ); //! revisar antes era ("userId", "==", user)
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
@@ -346,7 +349,7 @@ function QrDinamic({ searchQuery }) {
 
     fetchPublicidades(); // Llamar inicialmente
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-}, [user, firestore, pantalla]);
+  }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -436,9 +439,9 @@ function QrDinamic({ searchQuery }) {
   const screenHeight = window.innerHeight;
 
   // console.log("screenWidth", screenWidth);
-//   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
+  //   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+    <section className="relative w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white overflow-y-auto">
       <div
         className="bg-white text-black h-screen flex flex-col justify-center  "
         style={{
@@ -457,183 +460,145 @@ function QrDinamic({ searchQuery }) {
           className="flex-grow flex flex-col justify-center mx-2 my-2 "
         >
           {/* Header */}
-          <div className="flex items-center justify-between ">
+          <div className="flex flex-col items-center justify-center md:flex-row md:justify-between">
             {/* Logo en la esquina superior izquierda */}
-            <div className="">
+            <div className="mb-4 md:mb-0">
               {templateActual.logo && (
-                <>
-                  {" "}
-                  <div
-                    style={{
-                      width: "18vw",
-                      height: "10vw",
-                      overflow: "hidden",
+                <div
+                  style={{ width: "18vw", height: "10vw", overflow: "hidden" }}
+                >
+                  <img
+                    src={templateActual.logo}
+                    alt="Logo"
+                    className="w-72 cursor-pointer"
+                    onClick={() => {
+                      cambiarOrientacion();
                     }}
-                  >
-                    <img
-                      src={templateActual.logo}
-                      alt="Logo"
-                      className="w-72"
-                      onClick={() => {
-                        cambiarOrientacion();
-                      }}
-                    />
-                  </div>{" "}
-                </>
+                  />
+                </div>
               )}
             </div>
 
-            <div
-              className="flex flex-col text-color items-center"
-              style={{
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              <p className="text-2xl text-center  mb-2">
+            <div className="flex flex-col text-color items-center md:ml-4">
+              <p className="text-2xl text-center mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
               <h1 className="text-4xl font-bold">Eventos del día</h1>
             </div>
 
-            <div
-              className="flex text-color flex-col"
-              style={{
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
+            {/* Clima e Icono */}
+            <div className="flex flex-col md:flex-row text-color items-center md:ml-4">
               {isLoading ? (
                 <p>Cargando datos del clima...</p>
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
-                <p className="text-3xl font-bold">
-                  {weatherData.current.temp_c} °C
-                </p>
+                <div className="flex items-center justify-center md:mr-4">
+                  <img
+                    src={weatherData.current.condition.icon}
+                    alt="Clima"
+                    className="w-28"
+                  />
+                  <p className="text-5xl font-bold ml-2 mr-6">
+                    {weatherData.current.temp_c} °C
+                  </p>
+                </div>
               ) : (
-                <p>No se pudo obtener la información del clima</p>
+                <h2 className="text-4xl mr-16">Bienvenido</h2>
               )}
             </div>
           </div>
-          {/* Linea arriba */}{" "}
-          <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            {/* Título */}
-            <h2 className=" text-white"> </h2>
-          </div>
-          {/* contenido principal */}
-          <div className="bg-gradient-to-t from-gray-50  to-white text-gray-50">
-            <div className=" text-black">
-              {/* Imagen a la izquierda */}
-              <div
-                className="flex flex-col
-              "
-              >
-                <div className="">
-                  <div className="space-y-5 pl-5 flex-grow">
-                    {/* Slots predeterminados */}
-                    <div ref={sliderRef} className="keen-slider">
-                      {eventosPorSlide.map((slideEventos, index) => (
-                        <div key={index} className="keen-slider__slide my-2">
-                          {Array.from({
-                            length: templateData[0]?.setPortrait ? 5 : 8,
-                          }).map((_, innerIndex) => {
-                            const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+          <div className="">
+{/* Linea arriba */}
+<div
+          className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-t-xl h-16`}
+          style={{
+            background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+            color: templateActual.fontColor,
+            fontFamily: templateActual.fontStyle,
+          }}
+        >
+          {/* Título */}
+          <h2 className="text-white"></h2>
+        </div>
 
-                            return (
-                              <div
-                                key={innerIndex}
-                                className="flex items-center space-x-4 space-y-5 border-b border-black"
-                                style={{ height: evento ? "auto" : "110px" }} // Establecer la altura dependiendo de si hay evento o no
-                              >
-                                {evento ? (
-                                  // Si hay evento, mostrar los detalles
-                                  <>
-                                    <img
-                                      src={evento.images[0]}
-                                      alt={evento.nombreEvento}
-                                      style={{
-                                        width: "130px",
-                                        height: "110px",
-                                        margin: "0",
-                                      }}
-                                    />
-                                    <div className="grid grid-cols-2">
-                                      <div className="min-w-5">
-                                        <h3 className="font-bold mb-4">
-                                          {evento.nombreEvento}
-                                        </h3>
-                                        <p>{evento.tipoEvento}</p>
-                                        <p>{evento.lugar}</p>
-                                      </div>
-                                      <div className="text-right">
-                                        <p>{evento.horaInicialSalon} HRS</p>
-                                      </div>
+        {/* Contenido principal */}
+        <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50">
+          <div className="text-black">
+            {/* Imagen a la izquierda */}
+            <div className="flex flex-col">
+              <div className="">
+                <div className="space-y-5 pl-5 flex-grow">
+                  {/* Slots predeterminados */}
+                  <div ref={sliderRef} className="keen-slider">
+                    {eventosPorSlide.map((slideEventos, index) => (
+                      <div key={index} className="keen-slider__slide my-2">
+                        {Array.from({
+                          length: templateData[0]?.setPortrait ? 5 : 10,
+                        }).map((_, innerIndex) => {
+                          const evento = slideEventos[innerIndex];
+
+                          return (
+                            <div
+                              key={innerIndex}
+                              className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                              style={{
+                                height: evento ? "auto" : "110px",
+                                borderColor: templateActual.templateColor,
+                              }}
+                            >
+                              {/* Evento */}
+                              {evento ? (
+                                <>
+                                  <img
+                                    className="object-contain w-auto h-[100px] my-2 shadow-xl"
+                                    src={evento.images[0]}
+                                    alt={evento.nombreEvento}
+                                  />
+                                  <div className="w-full">
+                                    <h3 className="font-bold mb-4 text-3xl">
+                                      {evento.nombreEvento}
+                                    </h3>
+                                    <div className="grid grid-cols-7 gap-4 font-bold text-2xl">
+                                      <p className="col-span-3">
+                                        {evento.tipoEvento}
+                                      </p>
+                                      <p className="col-span-3 text-center">
+                                        {evento.lugar}
+                                      </p>
+                                      <p className="col-span-1 text-right">
+                                        {evento.horaInicialSalon + " HRS"}
+                                      </p>
                                     </div>
-                                  </>
-                                ) : (
-                                  // Si no hay evento, mostrar el mensaje de casillero vacío
-                                  <p></p>
-                                )}
-                              </div>
-                            );
-                          })}
-                        </div>
-                      ))}
-                    </div>
+                                  </div>
+                                </>
+                              ) : (
+                                <p></p>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          {/* Linea abajo */}
-          <div
-            className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            {/* Título */}
-            <h2 className=" text-white"> </h2>
-          </div>
-          {/* texto de abajo */}
-          <div className="flex justify-between text-color items-center">
-          <div className="w-full">
-              {rssItems.length > 0 && (
-                <div ref={sliderRef} className="keen-slider">
-                  {rssItems.map((item, index) => (
-                    <div key={index} className="keen-slider__slide">
-                      {/* Aquí puedes mostrar los elementos del RSS dentro del carrusel */}
-                      <h3>{item.title}</h3>
-                      <p>{item.description}</p>
-                      {/* ... otros campos que quieras mostrar */}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div style={{ marginTop: "20px", marginRight: "20px" }}>
-              {qrCodeUrl && (
-                <a
-                  href={qrCodeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ cursor: "pointer" }}
-                >
-                  {/* Muestra el código QR */}
-                  <QRCode value={qrCodeUrl} size={80} />
-                </a>
-              )}
-            </div>
+        </div>
+
+        {/* Linea abajo */}
+        <div
+          className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-b-xl h-16`}
+          style={{
+            background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+            color: templateActual.fontColor,
+            fontFamily: templateActual.fontStyle,
+          }}
+        >
+          {/* Título */}
+          <h2 className="text-white"></h2>
+        </div>
           </div>
         </div>
       </div>
