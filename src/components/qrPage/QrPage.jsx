@@ -483,7 +483,7 @@ function QrDinamic({ searchQuery }) {
                   </p>
                 </div>
               ) : (
-                <h2 className="text-4xl mr-16">Bienvenido</h2>
+                <h2 className="text-2xl mr-16">Bienvenido</h2>
               )}
             </div>
           </div>

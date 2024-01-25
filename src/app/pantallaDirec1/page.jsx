@@ -291,7 +291,8 @@ function PantallaDirec1() {
   // ----------------- RSS ---------------------------
   useEffect(() => {
     axios
-      .get("http://localhost:10000/fetch-rss")
+      // .get("http://localhost:10000/fetch-rss")
+      .get("https://upperds.onrender.com/fetch-rss")
       .then((response) => {
         const items = response.data.items;
         setRssItems(items);
