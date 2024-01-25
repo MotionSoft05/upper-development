@@ -278,7 +278,7 @@ function Pantalla1() {
                 "No se encontró información en TemplateDirectorios para este usuario."
               );
             }
-            console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
+            // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
@@ -299,7 +299,7 @@ function Pantalla1() {
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
-  console.log("publicidadesUsuario.", publicidadesUsuario);
+  // console.log("publicidadesUsuario.", publicidadesUsuario);
   const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
   const [opacities, setOpacities] = useState([]);
@@ -307,10 +307,6 @@ function Pantalla1() {
   let loop = true; // Establecer el valor predeterminado
   let img = 1;
   if (eventoActualCopy) {
-    loop =
-      eventoActualCopy.images && eventoActualCopy.images.length === 1
-        ? false
-        : true;
     img = eventoActualCopy.images.length;
   }
 
@@ -360,12 +356,12 @@ function Pantalla1() {
 
     const currentAd = publicidadesUsuario[currentImageIndex];
     if (currentAd) {
-      console.log("currentAd", currentAd);
+      // console.log("currentAd", currentAd);
       const totalSeconds =
         currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
-      console.log("totalSeconds", totalSeconds);
+      // console.log("totalSeconds", totalSeconds);
       timeoutId = setTimeout(changeImage, totalSeconds * 1000);
-      console.log("timeoutId", timeoutId);
+      // console.log("timeoutId", timeoutId);
     } else {
       timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
     }
@@ -403,7 +399,7 @@ function Pantalla1() {
 
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
+  // console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
 
   const {
     personalizacionTemplate,
