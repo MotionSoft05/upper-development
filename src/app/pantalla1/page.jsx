@@ -343,60 +343,69 @@ function Pantalla1() {
       },
     ]
   );
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
     let timeoutId;
 
-    const changeImage = () => {
-      setCurrentImageIndex(
+    const changeMedia = () => {
+      setCurrentMediaIndex(
         (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
       );
     };
 
-    const currentAd = publicidadesUsuario[currentImageIndex];
+    const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      // console.log("currentAd", currentAd);
-      const totalSeconds =
-        currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
-      // console.log("totalSeconds", totalSeconds);
-      timeoutId = setTimeout(changeImage, totalSeconds * 1000);
-      // console.log("timeoutId", timeoutId);
+      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const totalSeconds = isVideo
+        ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
+        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+
+      timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
-      timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
+      timeoutId = setTimeout(changeMedia, 5000); // Cambiar cada 5 segundos si no hay datos
     }
-    const intervalId = setInterval(() => {
-      // Llamando a changeImage cada 40 segundos
-      changeImage();
-    }, 40000);
-    return () => {
-      clearTimeout(timeoutId);
-      clearInterval(intervalId);
-    };
-    // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
-  }, [currentImageIndex, publicidadesUsuario]);
+
+    return () => clearTimeout(timeoutId);
+  }, [currentMediaIndex, publicidadesUsuario]);
+
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      return null; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+      return "No hay publicidad ni eventos";
     }
+
+    const currentAd = publicidadesUsuario[currentMediaIndex];
+    const isVideo = !!currentAd.videoUrl;
 
     return (
       <>
         <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
           <div className="slider-container">
             <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
-              <img
-                src={publicidadesUsuario[currentImageIndex]?.imageUrl}
-                alt={currentImageIndex}
-                style={{}}
-              />
+              {isVideo ? (
+                // Si es un video, muestra un elemento de video
+                <video
+                  src={currentAd.videoUrl}
+                  alt={`Video ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  autoPlay
+                  muted
+                  loop
+                />
+              ) : (
+                // Si no es un video, muestra una imagen
+                <img
+                  src={currentAd.imageUrl}
+                  alt={`Image ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              )}
             </div>
           </div>
         </section>
       </>
     );
   }
-
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
   // console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
@@ -453,58 +462,60 @@ function Pantalla1() {
           <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
-                {images && images.length > 0 ? (
-                  images.length === 1 ? (
-                    <div>
+                <div
+                  ref={sliderRef}
+                  className={`fader${
+                    images.length === 1 ? " single-image" : ""
+                  }`}
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
+                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                  }}
+                >
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="fader__slide "
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        opacity: opacities[index],
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
                       <img
-                        src={images[0]}
-                        alt={`Imagen 1`}
+                        src={image}
+                        alt={`Imagen ${index + 1}`}
+                        className="w-full h-full object-cover"
                         style={{
-                          width: "30vw",
-                          height: "30vw",
+                          width: "100%",
+                          height: "100%",
                           objectFit: "cover",
                         }}
                       />
                     </div>
-                  ) : (
-                    <div
-                      ref={sliderRef}
-                      className="fader"
+                  ))}
+                </div>
+
+                {images.length === 1 && (
+                  <div>
+                    <img
+                      src={images[0]}
+                      alt={`Imagen 1`}
                       style={{
-                        position: "relative",
-                        overflow: "hidden",
-                        width: "30vw", // Ajusta el ancho del contenedor según sea necesario
-                        height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                        width: "30vw",
+                        height: "30vw",
+                        objectFit: "cover",
                       }}
-                    >
-                      {images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="fader__slide "
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            opacity: opacities[index],
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        >
-                          <img
-                            src={image}
-                            alt={`Imagen ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )
-                ) : (
+                    />
+                  </div>
+                )}
+
+                {images.length === 0 && (
                   <p
                     style={{
                       color: templateActual.fontColor,

@@ -40,6 +40,7 @@ function PantallaDirec1() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
+
   useEffect(() => {
     if (user) {
       // Obtén la URL base del navegador
@@ -408,46 +409,63 @@ function PantallaDirec1() {
     return `${diaSemana} ${dia}/${mes} `;
   };
 
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
     let timeoutId;
 
-    const changeImage = () => {
-      setCurrentImageIndex(
+    const changeMedia = () => {
+      setCurrentMediaIndex(
         (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
       );
     };
 
-    const currentAd = publicidadesUsuario[currentImageIndex];
+    const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      // console.log("currentAd", currentAd);
-      const totalSeconds =
-        currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
-      // console.log("totalSeconds", totalSeconds);
-      timeoutId = setTimeout(changeImage, totalSeconds * 1000);
-      // console.log("timeoutId", timeoutId);
+      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const totalSeconds = isVideo
+        ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
+        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+
+      timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
-      timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
+      timeoutId = setTimeout(changeMedia, 5000); // Cambiar cada 5 segundos si no hay datos
     }
 
-    return () => clearTimeout(timeoutId); // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
-  }, [currentImageIndex, publicidadesUsuario]);
+    return () => clearTimeout(timeoutId);
+  }, [currentMediaIndex, publicidadesUsuario]);
+
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      return "No hay publicidad ni eventos"; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+      return "No hay publicidad ni eventos";
     }
+
+    const currentAd = publicidadesUsuario[currentMediaIndex];
+    const isVideo = !!currentAd.videoUrl;
 
     return (
       <>
         <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
           <div className="slider-container">
             <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
-              <img
-                src={publicidadesUsuario[currentImageIndex]?.imageUrl}
-                alt={currentImageIndex}
-                style={{}}
-              />
+              {isVideo ? (
+                // Si es un video, muestra un elemento de video
+                <video
+                  src={currentAd.videoUrl}
+                  alt={`Video ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  autoPlay
+                  muted
+                  loop
+                />
+              ) : (
+                // Si no es un video, muestra una imagen
+                <img
+                  src={currentAd.imageUrl}
+                  alt={`Image ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              )}
             </div>
           </div>
         </section>

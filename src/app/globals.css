@@ -46,3 +46,10 @@
   object-fit: cover;
   position: absolute;
 }
+.single-image {
+  display: none; /* Oculta el contenedor cuando hay más de una imagen */
+}
+
+.single-image > img {
+  display: block; /* Muestra la imagen cuando hay solo una imagen */
+}
