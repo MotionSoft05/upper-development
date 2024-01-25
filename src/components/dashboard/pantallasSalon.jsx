@@ -57,6 +57,46 @@ function PantallasSalon() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
+  const [eventosUsuario, setEventosUsuario] = useState([]);
+  const [nombrePantallasUsuario, setNombrePantallasUsuario] = useState([]);
+
+  useEffect(() => {
+    const obtenerDatosUsuario = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser) {
+          // Obtener eventos del usuario
+          const eventosRef = firebase.firestore().collection("eventos");
+          const eventosQuery = eventosRef.where("userId", "==", authUser.uid);
+          const eventosSnapshot = await eventosQuery.get();
+
+          eventosSnapshot.forEach((doc) => {
+            const eventData = doc.data();
+            console.log("Devices del Evento:", eventData.devices);
+            // Aquí puedes realizar cualquier otro procesamiento necesario con los devices del evento
+          });
+
+          // Obtener información de la colección usuarios del usuario
+          const usuariosRef = firebase.firestore().collection("usuarios");
+          const usuarioDoc = await usuariosRef.doc(authUser.uid).get();
+
+          if (usuarioDoc.exists) {
+            const usuarioData = usuarioDoc.data();
+            const nombrePantallas = usuarioData.nombrePantallas || [];
+            console.log("Nombre de Pantallas del Usuario:", nombrePantallas);
+            setNombrePantallasUsuario(nombrePantallas);
+          } else {
+            console.error("Documento de usuario no encontrado");
+          }
+        }
+      } catch (error) {
+        console.error("Error al obtener datos del usuario:", error);
+      }
+    };
+
+    obtenerDatosUsuario();
+  }, []);
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
