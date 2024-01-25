@@ -123,9 +123,9 @@ function ConsultaModEvento() {
         }));
 
         eventosData.forEach(async (evento) => {
-          if (evento.horaFinalReal && evento.fechaFinal) {
+          if (evento.horaFinalSalon && evento.fechaFinal) {
             const fechaFinalEvento = new Date(
-              evento.fechaFinal + "T" + evento.horaFinalReal
+              evento.fechaFinal + "T" + evento.horaFinalSalon
             );
 
             const now = new Date();
