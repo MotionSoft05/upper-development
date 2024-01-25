@@ -441,9 +441,24 @@ function ConsultaModEvento() {
                   const usuarioB = usuarios.find(
                     (usuario) => usuario.id === b.userId
                   );
+                  const ordenPorUsuario = usuarioA?.nombre.localeCompare(
+                    usuarioB?.nombre
+                  );
 
-                  return usuarioA?.nombre.localeCompare(usuarioB?.nombre);
+                  if (ordenPorUsuario === 0) {
+                    // Si los usuarios son iguales, ordena por fecha y hora final del salón
+                    const fechaHoraFinalA = new Date(
+                      `${a.fechaFinal}T${a.horaFinalSalon}`
+                    );
+                    const fechaHoraFinalB = new Date(
+                      `${b.fechaFinal}T${b.horaFinalSalon}`
+                    );
+                    return fechaHoraFinalA - fechaHoraFinalB;
+                  }
+
+                  return ordenPorUsuario;
                 })
+
                 .map((evento, index) => {
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
