@@ -565,7 +565,7 @@ function PantallaDirec1() {
               }}
             >
               {/* Título */}
-              <h2 className=" text-white "></h2>
+              <h2 className="text-white text-4xl text-center">EVENTOS</h2>
             </div>
             {/* contenido principal */}
             <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50">
@@ -654,7 +654,7 @@ function PantallaDirec1() {
               }}
             >
               {/* Título */}
-              <h2 className=" text-white"></h2>
+              <h2 className="text-white text-4xl text-center">NOTICIAS</h2>
             </div>
           </div>
 
