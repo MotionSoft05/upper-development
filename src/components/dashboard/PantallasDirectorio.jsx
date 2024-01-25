@@ -549,7 +549,10 @@ function PantallasDirectorio() {
                     type="text"
                     placeholder={`Pantalla ${index + 1}`}
                     className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                    value={nombrePantallasDirectorio[index] || ""}
+                    value={(nombrePantallasDirectorio[index] || "").slice(
+                      0,
+                      16
+                    )}
                     onChange={(e) => {
                       const updatedNombres = [...nombrePantallasDirectorio];
                       updatedNombres[index] = e.target.value;
