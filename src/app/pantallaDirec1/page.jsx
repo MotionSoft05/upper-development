@@ -270,7 +270,7 @@ function PantallaDirec1() {
       setError(null);
 
       const apiKey = "a067ad0b3d4440b192b223344240201";
-      const baseUrl = "http://api.weatherapi.com/v1";
+      const baseUrl = "https://api.weatherapi.com/v1";
 
       axios
         .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
