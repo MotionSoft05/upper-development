@@ -30,6 +30,7 @@ function Pantalla1() {
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
   const numeroPantallaActual = "1";
 
   const obtenerFecha = () => {
@@ -420,7 +421,7 @@ function Pantalla1() {
         <div id="Content" className="flex-grow flex flex-col justify-center ">
           {/* Header */}
           <div className="flex items-center justify-between ">
-            {personalizacionTemplate.logo && (
+            {templateActual.logo && (
               <>
                 {" "}
                 <div
@@ -430,17 +431,13 @@ function Pantalla1() {
                     overflow: "hidden",
                   }}
                 >
-                  <img
-                    src={personalizacionTemplate.logo}
-                    alt="Logo"
-                    className="w-72"
-                  />
+                  <img src={templateActual.logo} alt="Logo" className="w-72" />
                 </div>{" "}
               </>
             )}
             <h1
               className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
-              style={{ fontFamily: personalizacionTemplate.fontStyle }}
+              style={{ fontFamily: templateActual.fontStyle }}
             >
               {dispositivoCoincidenteLAL}
             </h1>
@@ -449,9 +446,9 @@ function Pantalla1() {
           <div
             className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontFamily: personalizacionTemplate.fontStyle,
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
             }}
           >
             <h2>{nombreEvento}</h2>
@@ -514,8 +511,8 @@ function Pantalla1() {
                 ) : (
                   <p
                     style={{
-                      color: personalizacionTemplate.fontColor,
-                      fontFamily: personalizacionTemplate.fontStyle,
+                      color: templateActual.fontColor,
+                      fontFamily: templateActual.fontStyle,
                     }}
                   >
                     No hay imágenes disponibles
@@ -527,13 +524,13 @@ function Pantalla1() {
                 <div>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     Sesión:
                   </p>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {horaInicialReal}
                     <span className="text-2x1"> hrs.</span>
@@ -543,14 +540,14 @@ function Pantalla1() {
                   {/* Tipo de evento y descripción */}
                   <h1
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0 mt-6">
                     <p
                       className={`text-3xl text-color md:text-4xl`}
-                      style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                      style={{ fontFamily: templateActual.fontStyle }}
                     >
                       {description}
                     </p>
@@ -564,16 +561,16 @@ function Pantalla1() {
             id="Abajo"
             className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontFamily: personalizacionTemplate.fontStyle,
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
             }}
           >
             <p
               className="font-bold uppercase"
               style={{
-                color: personalizacionTemplate.fontColor,
-                fontFamily: personalizacionTemplate.fontStyle,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
               }}
             >
               {obtenerFecha()}
@@ -583,8 +580,8 @@ function Pantalla1() {
               <p
                 className=" uppercase"
                 style={{
-                  color: personalizacionTemplate.fontColor,
-                  fontFamily: personalizacionTemplate.fontStyle,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
                 }}
               >
                 {currentHour}
