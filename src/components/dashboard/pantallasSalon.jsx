@@ -57,6 +57,14 @@ function PantallasSalon() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
+  const [nombresPantallasOriginales, setNombresPantallasOriginales] = useState(
+    []
+  );
+
+  useEffect(() => {
+    // Almacenar los nombres de las pantallas actuales en la constante al ingresar
+    setNombresPantallasOriginales([...nombrePantallas]);
+  }, [nombrePantallas]);
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -371,18 +379,20 @@ function PantallasSalon() {
         const eventoData = doc.data();
 
         if (eventoRef && eventoData) {
-          if (eventoData.personalizacionTemplate) {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          } else {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
+          // Verificar si el evento tiene el campo "devices" y es una matriz
+          if (eventoData.devices && Array.isArray(eventoData.devices)) {
+            // Comparar si hay cambios en los dispositivos
+            if (!arraysEqual(eventoData.devices, nombrePantallas)) {
+              // Solo realizar la actualización si hay cambios
+              console.log("Realizando la actualización");
+              updatePromises.push(
+                updateDoc(eventoRef, {
+                  devices: nombrePantallas,
+                })
+              );
+            } else {
+              console.log("Sin cambios en los dispositivos");
+            }
           }
         } else {
           console.error("Referencia de evento no válida:", doc.id);
@@ -391,13 +401,22 @@ function PantallasSalon() {
 
       await Promise.all(updatePromises);
 
-      alert("Información de personalización guardada con éxito.");
+      alert(
+        "Información de personalización y nombres de pantallas guardada con éxito."
+      );
     } catch (error) {
       console.error(
-        "Error al guardar la información de personalización y URL del logo:",
+        "Error al guardar la información de personalización y nombres de pantallas:",
         error
       );
     }
+  };
+
+  const arraysEqual = (arr1, arr2) => {
+    return (
+      arr1.length === arr2.length &&
+      arr1.every((value, index) => value === arr2[index])
+    );
   };
 
   const handlePreviewClick = () => {
