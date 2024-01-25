@@ -725,9 +725,42 @@ function ConsultaModEvento() {
                                       />
                                     </div>
                                   </div>
-                                  {/* Horas Salon */}{" "}
                                   <p className="md:text-sm">
                                     Horario en que se tiene programado el evento
+                                  </p>
+                                  {/* Horas Real */}
+                                  <div className="mb-2 flex space-x-3">
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Inicial Real
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={horaInicialReal}
+                                        onChange={(e) =>
+                                          setHoraInicialReal(e.target.value)
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                    <div className="w-1/2">
+                                      <label className="block text-sm font-medium text-gray-700">
+                                        Hora Final Real
+                                      </label>
+                                      <input
+                                        type="time"
+                                        value={horaFinalReal}
+                                        onChange={(e) =>
+                                          setHoraFinalReal(e.target.value)
+                                        }
+                                        className="w-full px-2 py-1 border rounded-lg text-center"
+                                      />
+                                    </div>
+                                  </div>
+                                  {/* Horas Salon */}{" "}
+                                  <p className="md:text-sm">
+                                    Horario en que se mostrara la información
+                                    del evento en pantallas
                                   </p>
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
@@ -762,39 +795,6 @@ function ConsultaModEvento() {
                                             "horaFinalSalon",
                                             e.target.value
                                           )
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                  </div>
-                                  <p className="md:text-sm">
-                                    Horario en que se mostrara la información
-                                    del evento en pantallas
-                                  </p>
-                                  {/* Horas Real */}
-                                  <div className="mb-2 flex space-x-3">
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        Hora Inicial Real
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={horaInicialReal}
-                                        onChange={(e) =>
-                                          setHoraInicialReal(e.target.value)
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        Hora Final Real
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={horaFinalReal}
-                                        onChange={(e) =>
-                                          setHoraFinalReal(e.target.value)
                                         }
                                         className="w-full px-2 py-1 border rounded-lg text-center"
                                       />
