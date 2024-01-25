@@ -267,7 +267,9 @@ function QrDinamic({ searchQuery }) {
       setError(null);
 
       const apiKey = "a067ad0b3d4440b192b223344240201";
-      const baseUrl = "http://api.weatherapi.com/v1";
+      const baseUrl = "https://api.weatherapi.com/v1";
+      //http://api.weatherapi.com/v1/current.json?key=a067ad0b3d4440b192b223344240201&q=Aguascalientes 
+      //https://api.weatherapi.com/v1/current.json?key=a067ad0b3d4440b192b223344240201&q=Aguascalientes
 
       axios
         .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
