@@ -71,32 +71,7 @@ function Pantalla1() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
   // Señal no se apage monitor-------------------------------
-  useEffect(() => {
-    const enableWakeLock = async () => {
-      if ("wakeLock" in navigator) {
-        try {
-          const wakeLock = await navigator.wakeLock.request("screen");
-          // Realizar acciones con el wakeLock si se obtuvo con éxito
-          wakeLock.addEventListener("release", () => {
-            // Manejar la liberación del bloqueo de pantalla
-          });
-        } catch (error) {
-          // Manejar errores al solicitar el bloqueo de pantalla
-          console.error("Error al solicitar el bloqueo de pantalla:", error);
-        }
-      } else {
-        // El navegador no admite la API Wake Lock
-        console.warn("El navegador no admite la API Wake Lock");
-      }
-    };
 
-    enableWakeLock(); // Llamar a la función para solicitar el bloqueo de pantalla al cargar el componente
-
-    // Realizar la limpieza al desmontar el componente si es necesario
-    return () => {
-      // Realizar acciones de limpieza si es necesario al desmontar el componente
-    };
-  }, []);
   // Hora actual---------------------------------------------
   useEffect(() => {
     const interval = setInterval(() => {
@@ -251,6 +226,14 @@ function Pantalla1() {
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
               console.log("evento", evento);
+              console.log(
+                "🚀 ~ eventosEnCursoEffect ~ horaActualEnRango:",
+                horaActualEnRango
+              );
+              console.log(
+                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
+                fechaActualEnRango
+              );
 
               return fechaActualEnRango && horaActualEnRango;
             });
@@ -280,6 +263,10 @@ function Pantalla1() {
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+            // console.log(
+            //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
+            //   eventosEnCursoEffect
+            // );
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {

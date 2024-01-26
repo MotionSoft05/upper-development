@@ -29,7 +29,8 @@ function Pantalla9() {
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
-
+  const [templateData, setTemplateData] = useState([]);
+  const [selectedCity, setSelectedCity] = useState(null);
   const numeroPantallaActual = "9";
 
   const obtenerFecha = () => {
@@ -108,13 +109,13 @@ function Pantalla9() {
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
-      apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-      authDomain: "upper-b0be3.firebaseapp.com",
-      projectId: "upper-b0be3",
-      storageBucket: "upper-b0be3.appspot.com",
-      messagingSenderId: "295362615418",
-      appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-      measurementId: "G-2E66K5XY81",
+      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+      authDomain: "upper-8c817.firebaseapp.com",
+      projectId: "upper-8c817",
+      storageBucket: "upper-8c817.appspot.com",
+      messagingSenderId: "798455798906",
+      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+      measurementId: "G-6VHX927GH1",
     };
 
     const app = initializeApp(firebaseConfig);
@@ -253,7 +254,31 @@ function Pantalla9() {
 
               return fechaActualEnRango && horaActualEnRango;
             });
-            console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
+
+            const templateRef = collection(firestore, "TemplateSalones");
+            const templateQuery = query(
+              templateRef,
+              where("userId", "==", user.uid)
+            );
+            const templateSnapshot = await getDocs(templateQuery);
+
+            if (!templateSnapshot.empty) {
+              const templateData = [];
+              templateSnapshot.forEach((doc) => {
+                const template = { id: doc.id, ...doc.data() };
+                templateData.push(template);
+                setSelectedCity({
+                  value: template.ciudad,
+                  label: template.ciudad,
+                });
+              });
+              setTemplateData(templateData);
+            } else {
+              console.log(
+                "No se encontró información en TemplateDirectorios para este usuario."
+              );
+            }
+            // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
@@ -274,7 +299,7 @@ function Pantalla9() {
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
-  console.log("publicidadesUsuario.", publicidadesUsuario);
+  // console.log("publicidadesUsuario.", publicidadesUsuario);
   const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
   const [opacities, setOpacities] = useState([]);
@@ -282,10 +307,6 @@ function Pantalla9() {
   let loop = true; // Establecer el valor predeterminado
   let img = 1;
   if (eventoActualCopy) {
-    loop =
-      eventoActualCopy.images && eventoActualCopy.images.length === 1
-        ? false
-        : true;
     img = eventoActualCopy.images.length;
   }
 
@@ -322,54 +343,72 @@ function Pantalla9() {
       },
     ]
   );
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
     let timeoutId;
 
-    const changeImage = () => {
-      setCurrentImageIndex(
+    const changeMedia = () => {
+      setCurrentMediaIndex(
         (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
       );
     };
 
-    const currentAd = publicidadesUsuario[currentImageIndex];
+    const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      console.log("currentAd", currentAd);
-      const totalSeconds =
-        currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600;
-      console.log("totalSeconds", totalSeconds);
-      timeoutId = setTimeout(changeImage, totalSeconds * 1000);
-      console.log("timeoutId", timeoutId);
+      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const totalSeconds = isVideo
+        ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
+        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+
+      timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
-      timeoutId = setTimeout(changeImage, 5000); // Cambiar cada 5 segundos si no hay datos
+      timeoutId = setTimeout(changeMedia, 5000); // Cambiar cada 5 segundos si no hay datos
     }
 
-    return () => clearTimeout(timeoutId); // Limpiar el timeout anterior al desmontar o cuando se ejecute este efecto nuevamente
-  }, [currentImageIndex, publicidadesUsuario]);
+    return () => clearTimeout(timeoutId);
+  }, [currentMediaIndex, publicidadesUsuario]);
+
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      return null; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+      return "No hay publicidad ni eventos";
     }
+
+    const currentAd = publicidadesUsuario[currentMediaIndex];
+    const isVideo = !!currentAd.videoUrl;
 
     return (
       <>
         <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
           <div className="slider-container">
             <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
-              <img
-                src={publicidadesUsuario[currentImageIndex]?.imageUrl}
-                alt={currentImageIndex}
-                style={{}}
-              />
+              {isVideo ? (
+                // Si es un video, muestra un elemento de video
+                <video
+                  src={currentAd.videoUrl}
+                  alt={`Video ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                  autoPlay
+                  muted
+                  loop
+                />
+              ) : (
+                // Si no es un video, muestra una imagen
+                <img
+                  src={currentAd.imageUrl}
+                  alt={`Image ${currentMediaIndex}`}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              )}
             </div>
           </div>
         </section>
       </>
     );
   }
-
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
+  const templateActual = templateData[0]; // Obtener el primer evento de la lista
+  // console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
 
   const {
     personalizacionTemplate,
@@ -387,7 +426,7 @@ function Pantalla9() {
         <div id="Content" className="flex-grow flex flex-col justify-center ">
           {/* Header */}
           <div className="flex items-center justify-between ">
-            {personalizacionTemplate.logo && (
+            {templateActual.logo && (
               <>
                 {" "}
                 <div
@@ -397,17 +436,13 @@ function Pantalla9() {
                     overflow: "hidden",
                   }}
                 >
-                  <img
-                    src={personalizacionTemplate.logo}
-                    alt="Logo"
-                    className="w-72"
-                  />
+                  <img src={templateActual.logo} alt="Logo" className="w-72" />
                 </div>{" "}
               </>
             )}
             <h1
               className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
-              style={{ fontFamily: personalizacionTemplate.fontStyle }}
+              style={{ fontFamily: templateActual.fontStyle }}
             >
               {dispositivoCoincidenteLAL}
             </h1>
@@ -416,9 +451,9 @@ function Pantalla9() {
           <div
             className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontFamily: personalizacionTemplate.fontStyle,
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
             }}
           >
             <h2>{nombreEvento}</h2>
@@ -427,62 +462,64 @@ function Pantalla9() {
           <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
-                {images && images.length > 0 ? (
-                  images.length === 1 ? (
-                    <div>
+                <div
+                  ref={sliderRef}
+                  className={`fader${
+                    images.length === 1 ? " single-image" : ""
+                  }`}
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
+                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                  }}
+                >
+                  {images.map((image, index) => (
+                    <div
+                      key={index}
+                      className="fader__slide "
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        opacity: opacities[index],
+                        width: "100%",
+                        height: "100%",
+                      }}
+                    >
                       <img
-                        src={images[0]}
-                        alt={`Imagen 1`}
+                        src={image}
+                        alt={`Imagen ${index + 1}`}
+                        className="w-full h-full object-cover"
                         style={{
-                          width: "30vw",
-                          height: "30vw",
+                          width: "100%",
+                          height: "100%",
                           objectFit: "cover",
                         }}
                       />
                     </div>
-                  ) : (
-                    <div
-                      ref={sliderRef}
-                      className="fader"
+                  ))}
+                </div>
+
+                {images.length === 1 && (
+                  <div>
+                    <img
+                      src={images[0]}
+                      alt={`Imagen 1`}
                       style={{
-                        position: "relative",
-                        overflow: "hidden",
-                        width: "30vw", // Ajusta el ancho del contenedor según sea necesario
-                        height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                        width: "30vw",
+                        height: "30vw",
+                        objectFit: "cover",
                       }}
-                    >
-                      {images.map((image, index) => (
-                        <div
-                          key={index}
-                          className="fader__slide "
-                          style={{
-                            position: "absolute",
-                            top: 0,
-                            left: 0,
-                            opacity: opacities[index],
-                            width: "100%",
-                            height: "100%",
-                          }}
-                        >
-                          <img
-                            src={image}
-                            alt={`Imagen ${index + 1}`}
-                            className="w-full h-full object-cover"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        </div>
-                      ))}
-                    </div>
-                  )
-                ) : (
+                    />
+                  </div>
+                )}
+
+                {images.length === 0 && (
                   <p
                     style={{
-                      color: personalizacionTemplate.fontColor,
-                      fontFamily: personalizacionTemplate.fontStyle,
+                      color: templateActual.fontColor,
+                      fontFamily: templateActual.fontStyle,
                     }}
                   >
                     No hay imágenes disponibles
@@ -494,13 +531,13 @@ function Pantalla9() {
                 <div>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     Sesión:
                   </p>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {horaInicialReal}
                     <span className="text-2x1"> hrs.</span>
@@ -510,14 +547,14 @@ function Pantalla9() {
                   {/* Tipo de evento y descripción */}
                   <h1
                     className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                    style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0 mt-6">
                     <p
                       className={`text-3xl text-color md:text-4xl`}
-                      style={{ fontFamily: personalizacionTemplate.fontStyle }}
+                      style={{ fontFamily: templateActual.fontStyle }}
                     >
                       {description}
                     </p>
@@ -531,16 +568,16 @@ function Pantalla9() {
             id="Abajo"
             className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
-              backgroundColor: personalizacionTemplate.templateColor,
-              color: personalizacionTemplate.fontColor,
-              fontFamily: personalizacionTemplate.fontStyle,
+              backgroundColor: templateActual.templateColor,
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
             }}
           >
             <p
               className="font-bold uppercase"
               style={{
-                color: personalizacionTemplate.fontColor,
-                fontFamily: personalizacionTemplate.fontStyle,
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
               }}
             >
               {obtenerFecha()}
@@ -550,8 +587,8 @@ function Pantalla9() {
               <p
                 className=" uppercase"
                 style={{
-                  color: personalizacionTemplate.fontColor,
-                  fontFamily: personalizacionTemplate.fontStyle,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
                 }}
               >
                 {currentHour}
