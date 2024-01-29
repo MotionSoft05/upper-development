@@ -26,11 +26,12 @@ function footer() {
 
         <div className="">
           <span className="block text-sm sm:text-center text-gray-400">
-            © 2023
+            © 2024
             <a href="/" className="hover:underline">
               Upper™
             </a>
-            . All Rights Reserved.
+            &nbsp;All Rights Reserved.
+            <span className="ml-2">Versión: 1.0.0</span>
           </span>
         </div>
       </div>
