@@ -8,6 +8,7 @@ import "firebase/compat/firestore";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, currentUser, onAuthStateChanged } from "firebase/auth";
+import moment from "moment";
 import {
   collection,
   addDoc,
@@ -226,18 +227,15 @@ function AltaEventos() {
       document.getElementById("hourSelectorFinalSalon").value
     }:${document.getElementById("minuteSelectorFinalSalon").value}`;
 
-    const fechaInicio = new Date(value.startDate);
-    fechaInicio.setDate(fechaInicio.getDate() + 1);
-    fechaInicio.setHours(
-      horaInicialReal.split(":")[0],
-      horaInicialReal.split(":")[1]
-    );
-    const fechaFinal = new Date(value.endDate);
-    fechaFinal.setDate(fechaFinal.getDate() + 1);
-    fechaFinal.setHours(
-      horaFinalReal.split(":")[0],
-      horaFinalReal.split(":")[1]
-    );
+    const fechaInicio = moment(value.startDate).set({
+      hour: horaInicialReal.split(":")[0],
+      minute: horaInicialReal.split(":")[1],
+    });
+
+    const fechaFinal = moment(value.endDate).set({
+      hour: horaFinalReal.split(":")[0],
+      minute: horaFinalReal.split(":")[1],
+    });
 
     const formattedFechaInicio = fechaInicio.toISOString().split("T")[0];
     const formattedFechaFinal = fechaFinal.toISOString().split("T")[0];
