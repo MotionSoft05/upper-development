@@ -529,9 +529,11 @@ function Register() {
                         Usuario registrado correctamente.
                       </p>
                       <p className="mb-4">
-                        Por favor, verifica tu correo electrónico. Se ha enviado
-                        un correo de verificación.
+                        Se ha enviado un correo de verificación. Revisa tu
+                        bandeja de spam para asegurarte de que no se haya pasado
+                        por alto.
                       </p>
+
                       <Link href="/login" passHref>
                         <p className="text-blue-500 hover:underline">
                           Ir a iniciar sesión
