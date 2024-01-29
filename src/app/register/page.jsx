@@ -74,8 +74,14 @@ function Register() {
           ? "Las contraseñas no coinciden"
           : "Las contraseñas coinciden";
       setPasswordsMatchError(matchError);
+
+      // Actualiza el estado de error de la confirmación de contraseña
+      setConfirmPasswordError(
+        matchError !== "Las contraseñas coinciden" ? matchError : null
+      );
     } else {
       setPasswordsMatchError("");
+      setConfirmPasswordError("");
     }
   }, [password, confirmPassword, isConfirmPasswordTouched]);
 
@@ -98,7 +104,11 @@ function Register() {
       confirmPassword &&
       companyName;
 
-    setIsButtonDisabled(hasErrors || !isFieldsCompleted);
+    setIsButtonDisabled(
+      hasErrors ||
+        !isFieldsCompleted ||
+        passwordsMatchError !== "Las contraseñas coinciden"
+    );
   }, [
     firstName,
     lastName,
@@ -113,6 +123,7 @@ function Register() {
     passwordError,
     confirmPasswordError,
     companyNameError,
+    passwordsMatchError,
   ]);
 
   const handleShowPasswordClick = (e) => {
