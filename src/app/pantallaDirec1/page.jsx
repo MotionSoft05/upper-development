@@ -679,7 +679,7 @@ function PantallaDirec1() {
           {/* texto de abajo */}
           <div className="flex justify-between text-color items-center">
             {/* --- RSS --- */}
-            <div className="w-full ">
+            <div className="w-9/12 ">
               <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
                 <Textra
                   className="ml-12 text-xl "
@@ -703,12 +703,14 @@ function PantallaDirec1() {
             </div>
             {/* --- QR image --- */}
             <div
+              className="flex flex-col items-center"
               style={{
                 marginTop: "20px",
                 marginRight: "20px",
                 marginBottom: "20px",
               }}
             >
+              <p style={{ marginBottom: "10px" }}>Eventos en tu dispositivo</p>
               {qrCodeUrl && (
                 <a
                   href={qrCodeUrl}
