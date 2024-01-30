@@ -237,6 +237,10 @@ function AltaEventos() {
       minute: horaFinalReal.split(":")[1],
     });
 
+    // Ahora, puedes usar toDate para obtener un objeto Date o format para obtener una cadena formateada según tus necesidades.
+    console.log("Fecha Inicio:", fechaInicio.toDate());
+    console.log("Fecha Final:", fechaFinal.toDate());
+
     const formattedFechaInicio = fechaInicio.toISOString().split("T")[0];
     const formattedFechaFinal = fechaFinal.toISOString().split("T")[0];
     const devices = selectedDevices;
