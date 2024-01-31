@@ -236,12 +236,10 @@ function AltaEventos() {
       .hour(horaFinalReal.split(":")[0])
       .minute(horaFinalReal.split(":")[1]);
 
-    // Ahora, puedes usar toDate para obtener un objeto Date o format para obtener una cadena formateada según tus necesidades.
-    console.log("Fecha Inicio:", fechaInicio);
-    console.log("Fecha Final:", fechaFinal);
+    // Agregar líneas de console.log para visualizar las fechas
+    console.log("Fecha Inicio antes de enviar a Firebase:", fechaInicio._i);
+    console.log("Fecha Final antes de enviar a Firebase:", fechaFinal._i);
 
-    const formattedFechaInicio = fechaInicio.toISOString().split("T")[0];
-    const formattedFechaFinal = fechaFinal.toISOString().split("T")[0];
     const devices = selectedDevices;
     setImages([]);
     setDescription("");
@@ -263,8 +261,8 @@ function AltaEventos() {
       horaFinalReal,
       horaInicialSalon,
       horaFinalSalon,
-      fechaInicio: formattedFechaInicio,
-      fechaFinal: formattedFechaFinal,
+      fechaInicio: fechaInicio._i,
+      fechaFinal: fechaFinal._i,
       images,
       devices,
       userId: userId,
