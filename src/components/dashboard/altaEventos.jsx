@@ -232,14 +232,13 @@ function AltaEventos() {
       minute: horaInicialReal.split(":")[1],
     });
 
-    const fechaFinal = moment(value.endDate).set({
-      hour: horaFinalReal.split(":")[0],
-      minute: horaFinalReal.split(":")[1],
-    });
+    const fechaFinal = moment(value.endDate)
+      .hour(horaFinalReal.split(":")[0])
+      .minute(horaFinalReal.split(":")[1]);
 
     // Ahora, puedes usar toDate para obtener un objeto Date o format para obtener una cadena formateada según tus necesidades.
-    console.log("Fecha Inicio:", fechaInicio.toDate());
-    console.log("Fecha Final:", fechaFinal.toDate());
+    console.log("Fecha Inicio:", fechaInicio);
+    console.log("Fecha Final:", fechaFinal);
 
     const formattedFechaInicio = fechaInicio.toISOString().split("T")[0];
     const formattedFechaFinal = fechaFinal.toISOString().split("T")[0];
@@ -248,13 +247,12 @@ function AltaEventos() {
     setDescription("");
 
     const fechaHoraActual = new Date();
-    const fechaHoraFinalSalon = new Date(value.endDate);
-    fechaHoraFinalSalon.setDate(fechaHoraFinalSalon.getDate() + 1);
-    fechaHoraFinalSalon.setHours(
-      parseInt(horaFinalSalon.split(":")[0]),
-      parseInt(horaFinalSalon.split(":")[1])
-    );
-    const status = fechaHoraActual <= fechaHoraFinalSalon;
+    const fechaHoraFinalSalon = moment(fechaFinal); // Utilizar la fechaFinal creada con moment
+    fechaHoraFinalSalon.set({
+      hour: parseInt(horaFinalSalon.split(":")[0]),
+      minute: parseInt(horaFinalSalon.split(":")[1]),
+    });
+    const status = fechaHoraActual <= fechaHoraFinalSalon.toDate();
 
     const eventoData = {
       nombreEvento,
