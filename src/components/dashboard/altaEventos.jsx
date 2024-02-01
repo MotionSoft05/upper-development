@@ -665,17 +665,16 @@ function AltaEventos() {
                 <div className="hidden md:block">
                   <button
                     onClick={enviarDatosAFirebase}
-                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4
-                    }`}
+                    className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4`}
                   >
                     Enviar
                   </button>
+                  {alertaEnviada && (
+                    <div className="mt-4 text-green-500">
+                      Los datos se enviaron correctamente.
+                    </div>
+                  )}
                 </div>
-                {alertaEnviada && (
-                  <div className="mt-4 text-green-500">
-                    Los datos se enviaron correctamente.
-                  </div>
-                )}
               </div>
             </form>
           </div>
