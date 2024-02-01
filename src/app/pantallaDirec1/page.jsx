@@ -180,17 +180,7 @@ function PantallaDirec1() {
                 }
               }
             });
-            // console.log("eventosData:", eventosData);
-            // const eventosFiltrados = eventosData.filter((evento) => {
-            //   const fechaFinalEvento = new Date(evento.fechaFinal);
-            //   const fechaActual = new Date();
 
-            // Si la fecha final del evento es anterior a la fecha actual, se filtra
-            //   return fechaActual <= fechaFinalEvento;
-            // });
-            // console.log("eventosFiltrados:", eventosFiltrados);
-            // Ordenar los eventos por fecha y hora más cercanas a la actual
-            // Suponiendo que tienes eventos ordenados en eventosEnCurso
             const eventosOrdenados = eventosData.slice().sort((a, b) => {
               const fechaFinalA = new Date(a.fechaFinal);
               const fechaFinalB = new Date(b.fechaFinal);
@@ -205,20 +195,6 @@ function PantallaDirec1() {
 
               return horaInicioA - horaInicioB;
             });
-
-            // Filtrar por eventos cuya horaInicialSalon sea mayor que la hora actual
-            // const horaActual = new Date();
-            // const eventosFiltradosv1 = eventosOrdenados.filter((evento) => {
-            //   const horaInicioEvento = new Date(
-            //     `2000-01-01T${evento.horaInicialSalon}`
-            //   );
-            //   return horaInicioEvento > horaActual;
-            // });
-
-            // Usar eventosFiltrados en tu componente
-            // setEventosEnCurso(eventosFiltradosv1);
-
-            // console.log("Eventos ordenados:", eventosOrdenados);
 
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
@@ -243,11 +219,11 @@ function PantallaDirec1() {
                 "No se encontró información en TemplateDirectorios para este usuario."
               );
             }
-            // Filtrar por fecha y hora los eventos filtrados por pantalla
-
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosOrdenados:",
+              eventosOrdenados
+            );
             setEventosEnCurso(eventosOrdenados);
-            // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
-            // setEventData(eventosEnCurso);
           } else {
             console.log("No se encontraron datos para este usuario.");
           }
@@ -358,6 +334,7 @@ function PantallaDirec1() {
                 publicidades.push(publicidad);
               }
             });
+
             setPublicidadesUsuario(publicidades);
           })
           .catch((error) => {
@@ -368,7 +345,7 @@ function PantallaDirec1() {
 
     const interval = setInterval(() => {
       fetchPublicidades();
-    }, 40000);
+    }, 120000);
 
     fetchPublicidades(); // Llamar inicialmente
 
@@ -410,7 +387,7 @@ function PantallaDirec1() {
   };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-
+  // console.log("🚀 ~ .then ~ publicidadesUsuario:", publicidadesUsuario);
   useEffect(() => {
     let timeoutId;
 
@@ -422,10 +399,10 @@ function PantallaDirec1() {
 
     const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const isVideo = !!currentAd.videoUrl;
       const totalSeconds = isVideo
         ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
-        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+        : currentAd.segundos; // Utilizamos el tiempo de la imagen si no es un vídeo
 
       timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
@@ -457,6 +434,7 @@ function PantallaDirec1() {
                   autoPlay
                   muted
                   loop
+                  playsInline
                 />
               ) : (
                 // Si no es un video, muestra una imagen
@@ -472,14 +450,12 @@ function PantallaDirec1() {
       </>
     );
   }
-  // console.log("EVENTOSSSS", eventosEnCurso);
-  // console.log("templateData", templateData);
+
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
-  console.log("CLIMA", weatherData);
   // console.log("CLIMA", weatherData.current.condition.icon);
 
   return (
@@ -532,7 +508,6 @@ function PantallaDirec1() {
             <div
               className="flex flex-col text-color items-center"
               style={{
-                color: templateActual.fontColor,
                 fontFamily: templateActual.fontStyle,
               }}
             >
@@ -546,7 +521,6 @@ function PantallaDirec1() {
             <div
               className="flex text-color flex-col"
               style={{
-                color: templateActual.fontColor,
                 fontFamily: templateActual.fontStyle,
               }}
             >
@@ -583,7 +557,7 @@ function PantallaDirec1() {
               }}
             >
               {/* Título */}
-              <h2 className="text-white text-4xl text-center">EVENTOS</h2>
+              <h2 className="text-color text-4xl text-center">EVENTOS</h2>
             </div>
             {/* contenido principal */}
             <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50">
@@ -617,11 +591,25 @@ function PantallaDirec1() {
                                   {evento ? (
                                     // Si hay evento, mostrar los detalles
                                     <>
-                                      <img
-                                        className="object-contain w-auto h-[100px] my-2 shadow-xl "
-                                        src={evento.images[0]}
-                                        alt={evento.nombreEvento}
-                                      />
+                                      <div
+                                        style={{
+                                          position: "relative",
+                                          overflow: "hidden",
+                                          width: "7vw", // Ajusta el ancho del contenedor según sea necesario
+                                          height: "7vw", // Ajusta el alto del contenedor según sea necesario
+                                        }}
+                                      >
+                                        <img
+                                          style={{
+                                            width: "7vw",
+                                            height: "7vw",
+                                            objectFit: "cover",
+                                          }}
+                                          src={evento.images[0]}
+                                          alt={evento.nombreEvento}
+                                        />
+                                      </div>
+
                                       <div className="w-full ">
                                         <h3 className="font-bold mb-4 text-3xl">
                                           {evento.nombreEvento}
@@ -672,7 +660,7 @@ function PantallaDirec1() {
               }}
             >
               {/* Título */}
-              <h2 className="text-white text-4xl text-center">NOTICIAS</h2>
+              <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
             </div>
           </div>
 
