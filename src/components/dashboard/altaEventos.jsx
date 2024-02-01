@@ -685,7 +685,7 @@ function AltaEventos() {
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900">
                   Subir Imágenes:
                 </h4>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   {[0, 1, 2].map((index) => (
                     <div key={index} className="col-span-1">
                       <label
@@ -702,27 +702,22 @@ function AltaEventos() {
                         onChange={handleImageUpload}
                       />
                       {images[index] && (
-                        <button
-                          onClick={() => deleteImage(index)}
-                          className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-2"
-                        >
-                          x
-                        </button>
+                        <div>
+                          <button
+                            onClick={() => deleteImage(index)}
+                            className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded mt-2"
+                          >
+                            x
+                          </button>
+                          <div className="w-30 h-40 flex items-center justify-center mt-2">
+                            <img
+                              src={images[index]}
+                              alt={`Imagen ${index + 1}`}
+                              className="max-w-full max-h-full"
+                            />
+                          </div>
+                        </div>
                       )}
-                    </div>
-                  ))}
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {images.map((imageUrl, index) => (
-                    <div
-                      key={index}
-                      className="w-30 h-40 flex items-center justify-center"
-                    >
-                      <img
-                        src={imageUrl}
-                        alt={`Imagen ${index + 1}`}
-                        className="max-w-full max-h-full"
-                      />
                     </div>
                   ))}
                 </div>
