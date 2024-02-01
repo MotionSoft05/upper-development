@@ -90,11 +90,69 @@ function PantallaDirec1() {
     templateData[0]?.setPortrait ? 5 : 8
   );
 
+  useEffect(() => {
+    // Actualizar la configuración de loop cuando eventosEnCurso cambia
+    sliderRef.current?.refresh();
+  }, [eventosEnCurso]);
+
+  // Función para determinar la condición de loop
+  const determineLoopCondition = (isPortrait, eventos) => {
+    // Verificar si eventos es null o undefined y devolver true
+    if (!eventos || eventos.length === 0) {
+      return true;
+    }
+
+    if (isPortrait && eventos.length <= 5) {
+      return false;
+    }
+
+    if (!isPortrait && eventos.length <= 8) {
+      return false;
+    }
+
+    return true;
+  };
+
   // Uso de eventosPorSlide en useKeenSlider
-  const [sliderRef] = useKeenSlider({
-    slides: eventosPorSlide.length,
-    loop: true,
-  });
+  const [sliderRef] = useKeenSlider(
+    {
+      slides: eventosPorSlide.length,
+      loop: determineLoopCondition(
+        templateData[0]?.setPortrait,
+        eventosEnCurso
+      ),
+    },
+    [
+      (slider) => {
+        let timeout;
+        let mouseOver = false;
+        function clearNextTimeout() {
+          clearTimeout(timeout);
+        }
+        function nextTimeout() {
+          clearTimeout(timeout);
+          if (mouseOver) return;
+          timeout = setTimeout(() => {
+            slider.next();
+          }, 10000);
+        }
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
+        slider.on("dragStarted", clearNextTimeout);
+        slider.on("animationEnded", nextTimeout);
+        slider.on("updated", nextTimeout);
+      },
+    ]
+  );
 
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
@@ -174,9 +232,22 @@ function PantallaDirec1() {
                 const posicionPantalla =
                   pantallasNumeradas[pantallaCoincidente];
                 const posicionActual = parseInt(numeroPantallaActual, 10);
-
                 if (posicionPantalla === posicionActual) {
-                  eventosData.push(evento);
+                  // Agregar el filtro para eventos del día en curso
+
+                  const fechaInicio = new Date(
+                    `${evento.fechaInicio}T00:00:00`
+                  );
+                  fechaInicio.setDate(fechaInicio.getDate()); // Sumar 1 día
+
+                  const fechaFinal = new Date(`${evento.fechaFinal}T23:59:59`);
+                  fechaFinal.setDate(fechaFinal.getDate()); // Sumar 1 día
+
+                  const hoy = new Date();
+
+                  if (fechaInicio <= hoy && hoy <= fechaFinal) {
+                    eventosData.push(evento);
+                  }
                 }
               }
             });
@@ -219,10 +290,7 @@ function PantallaDirec1() {
                 "No se encontró información en TemplateDirectorios para este usuario."
               );
             }
-            console.log(
-              "🚀 ~ obtenerUsuario ~ eventosOrdenados:",
-              eventosOrdenados
-            );
+
             setEventosEnCurso(eventosOrdenados);
           } else {
             console.log("No se encontraron datos para este usuario.");
@@ -252,7 +320,6 @@ function PantallaDirec1() {
       axios
         .get(`${baseUrl}/current.json?key=${apiKey}&q=${selectedCity.value}`)
         .then((response) => {
-          // console.log("Datos del clima:", response.data);
           setWeatherData(response.data);
           setIsLoading(false);
         })
@@ -273,7 +340,6 @@ function PantallaDirec1() {
       .then((response) => {
         const items = response.data.items;
         setRssItems(items);
-        console.log("Items del RSS:", items);
       })
       .catch((error) =>
         console.error("Error fetching or parsing data:", error)
@@ -387,7 +453,7 @@ function PantallaDirec1() {
   };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  // console.log("🚀 ~ .then ~ publicidadesUsuario:", publicidadesUsuario);
+
   useEffect(() => {
     let timeoutId;
 
@@ -452,6 +518,7 @@ function PantallaDirec1() {
   }
 
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
+  console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
@@ -627,9 +694,10 @@ function PantallaDirec1() {
 
                                           {/* Columna 3: Rango de horas (a la derecha) */}
                                           <p className="col-span-1 text-right ">
-                                            {evento.horaInicialSalon + " HRS"}
-                                            {/* {"HRS hasta "}
-                                            {evento.horaFinalSalon} */}
+                                            {evento.horaInicialSalon + " a "}
+
+                                            {evento.horaFinalSalon}
+                                            {"HRS"}
                                           </p>
                                         </div>
                                       </div>
