@@ -716,7 +716,7 @@ function AltaEventos() {
                   {images.map((imageUrl, index) => (
                     <div
                       key={index}
-                      className="w-40 h-40 flex items-center justify-center"
+                      className="w-30 h-40 flex items-center justify-center"
                     >
                       <img
                         src={imageUrl}
