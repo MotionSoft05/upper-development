@@ -46,6 +46,7 @@ function PantallasDirectorio() {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [currentTime, setCurrentTime] = useState(obtenerHora());
   const [selectedLogo, setSelectedLogo] = useState(null);
+  const [selectedPublicidad, setSelectedPublicidad] = useState(null);
   const [cityOptions, setCityOptions] = useState([
     // Ciudades de México
     { value: "Aguascalientes", label: "Aguascalientes" },
@@ -152,8 +153,15 @@ function PantallasDirectorio() {
           if (!templateDirectoriosSnapshot.empty) {
             const templateDirectoriosDoc =
               templateDirectoriosSnapshot.docs[0].data();
-            const { fontColor, fontStyle, logo, templateColor, ciudad } =
-              templateDirectoriosDoc;
+            const {
+              fontColor,
+              fontStyle,
+              logo,
+              templateColor,
+              ciudad,
+              setPortrait, // Asegúrate de que esta propiedad se llame 'setPortrait' en la base de datos
+              publicidad, // Asegúrate de que esta propiedad se llame 'publicidad' en la base de datos
+            } = templateDirectoriosDoc;
 
             setFontColor(fontColor || "#000000");
             setSelectedFontStyle({
@@ -163,6 +171,8 @@ function PantallasDirectorio() {
             setSelectedLogo(logo || null);
             setTemplateColor(templateColor || "#D1D5DB");
             setSelectedCity({ value: ciudad, label: ciudad });
+            setSetPortrait(setPortrait || false);
+            setSelectedPublicidad(publicidad || null);
           }
         }
       } catch (error) {
@@ -303,7 +313,12 @@ function PantallasDirectorio() {
       }
 
       if (!selectedLogo) {
-        console.error("selectedLogo es null. No se puede enviar a Firestore.");
+        alert("Por favor, seleccione un logo.");
+        return;
+      }
+
+      if (!selectedPublicidad) {
+        alert("Por favor, seleccione una imagen para Publicidad.");
         return;
       }
 
@@ -314,6 +329,7 @@ function PantallasDirectorio() {
         logo: selectedLogo,
         ciudad: selectedCity.value,
         setPortrait: setPortrait, // Agrega setPortrait al objeto
+        publicidad: selectedPublicidad,
       };
 
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
@@ -335,6 +351,7 @@ function PantallasDirectorio() {
           logo: selectedLogo,
           ciudad: selectedCity.value,
           setPortrait: setPortrait, // Agrega setPortrait al objeto
+          publicidad: selectedPublicidad,
 
           timestamp: serverTimestamp(),
         });
@@ -347,6 +364,7 @@ function PantallasDirectorio() {
           logo: selectedLogo,
           ciudad: selectedCity.value,
           setPortrait: setPortrait, // Agrega setPortrait al objeto
+          publicidad: selectedPublicidad,
 
           timestamp: serverTimestamp(),
         });
@@ -407,6 +425,26 @@ function PantallasDirectorio() {
     }
   };
 
+  const handlePublicidadChange = async (event) => {
+    const file = event.target.files[0];
+    const storageRef = ref(
+      storage,
+      `pantallaDirectorioPublicidad/${file.name}`
+    );
+
+    try {
+      await uploadBytes(storageRef, file);
+      const publicidadUrl = await getDownloadURL(storageRef);
+
+      setSelectedPublicidad(publicidadUrl);
+    } catch (error) {
+      console.error(
+        "Error al subir la imagen de publicidad a Firebase Storage:",
+        error
+      );
+    }
+  };
+
   return (
     <section className="px-8 py-12">
       <div>
@@ -435,6 +473,40 @@ function PantallasDirectorio() {
               </div>
             </div>
 
+            <div className="flex flex-col">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Publicidad
+              </label>
+              <div className="flex items-center">
+                <input
+                  onChange={handlePublicidadChange}
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Logo actual
+              </label>
+              {selectedLogo && (
+                <img src={selectedLogo} alt="Logo Actual" className="w-48" />
+              )}
+            </div>
+            <div>
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Publicidad actual
+              </label>
+              {selectedPublicidad && (
+                <img
+                  src={selectedPublicidad}
+                  alt="Publicidad Actual"
+                  className="w-48"
+                />
+              )}
+            </div>
+
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 Estilo de texto
@@ -445,15 +517,6 @@ function PantallasDirectorio() {
                 onChange={handleFontStyleChange}
                 placeholder="Seleccionar estilo de texto"
               />
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                Logo Actual
-              </label>
-              {selectedLogo && (
-                <img src={selectedLogo} alt="Logo Actual" className="w-48" />
-              )}
             </div>
 
             <div className="mb-4">
@@ -538,11 +601,12 @@ function PantallasDirectorio() {
               </div>
             </div>
           </div>
-          <div className="mb-4">
-            <label className="text-white dark:text-gray-200 block mb-1">
-              Nombres de pantallas
-            </label>
-            <div className="flex flex-col">
+          <div className="mb-4 flex flex-wrap">
+            {/* Nombres de pantallas */}
+            <div className="flex flex-col mr-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                Nombres de pantallas
+              </label>
               {Array.from({ length: pd }, (_, index) => (
                 <div className="flex items-center mb-2" key={index}>
                   <input
@@ -569,7 +633,6 @@ function PantallasDirectorio() {
                   <button
                     onClick={() => {
                       setSetPortrait((prevState) => !prevState);
-                      guardarInformacionPersonalizacion(selectedLogo);
                     }}
                     className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >
@@ -578,7 +641,10 @@ function PantallasDirectorio() {
                 </div>
               ))}
             </div>
+
+            {/* Publicidad */}
           </div>
+
           <div className="flex justify-end mt-6">
             <button
               onClick={() => {
