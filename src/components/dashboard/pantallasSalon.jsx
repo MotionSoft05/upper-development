@@ -558,7 +558,7 @@ function PantallasSalon() {
                     <Link
                       href={`/pantalla${index + 1}.html`}
                       target="_blank"
-                      className="bg-gray-300 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
+                      className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                     >
                       URL
                     </Link>
