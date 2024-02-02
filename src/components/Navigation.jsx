@@ -18,13 +18,13 @@ import {
 } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
+  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
+  authDomain: "upper-b0be3.firebaseapp.com",
+  projectId: "upper-b0be3",
+  storageBucket: "upper-b0be3.appspot.com",
+  messagingSenderId: "295362615418",
+  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
+  measurementId: "G-2E66K5XY81",
 };
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
@@ -55,9 +55,8 @@ function Navigation() {
   //const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
-  const isVisible = !pathname.includes("/paginasAleatorias") // Cuando este para la Vista Qr va a desaparecer el Navbar
-  console.log("🚀 ~ Navigation ~ isVisible:", isVisible)
-
+  const isVisible = !pathname.includes("/paginasAleatorias"); // Cuando este para la Vista Qr va a desaparecer el Navbar
+  console.log("🚀 ~ Navigation ~ isVisible:", isVisible);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -127,9 +126,9 @@ function Navigation() {
     window.location.href = "/dashboard.html";
   };
 
-  if(!isVisible){
+  if (!isVisible) {
     // Cuando la NavBar esta en /paginasAleatorias devuelve el componente en null
-    return null
+    return null;
   }
 
   return (
