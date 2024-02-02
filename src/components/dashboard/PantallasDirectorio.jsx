@@ -460,8 +460,8 @@ function PantallasDirectorio() {
             Personalización del Template
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block">
+            <div className="flex flex-col">
+              <label className="text-white dark:text-gray-200 block mb-1">
                 Logo
               </label>
               <div className="flex items-center">
