@@ -71,8 +71,8 @@ function PantallaDirec1() {
   const chunkArray = (arr, chunkSize) => {
     const totalEvents = arr.length;
     const maxContainers = templateData[0]?.setPortrait
-      ? Math.ceil(totalEvents / chunkSize)
-      : Math.ceil(totalEvents / (chunkSize * 2));
+      ? Math.ceil(totalEvents / (chunkSize * 2))
+      : Math.ceil(totalEvents / chunkSize);
 
     const result = [];
     for (let i = 0; i < totalEvents; i += chunkSize) {
@@ -87,7 +87,7 @@ function PantallaDirec1() {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 5 : 8
+    templateData[0]?.setPortrait ? 8 : 5
   );
 
   useEffect(() => {
@@ -97,22 +97,25 @@ function PantallaDirec1() {
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
-    // Verificar si eventos es null o undefined y devolver true
+    const limite = isPortrait ? 8 : 5;
     if (!eventos || eventos.length === 0) {
       return true;
     }
 
-    if (isPortrait && eventos.length <= 5) {
-      return false;
+    if (isPortrait && eventos.length > 8) {
+      // Si es portrait y supera los 8 eventos, recargar la página
+
+      return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
     }
 
-    if (!isPortrait && eventos.length <= 8) {
-      return false;
+    if (!isPortrait && eventos.length > 5) {
+      // Si no es portrait y supera los 5 eventos, recargar la página
+
+      return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
     }
 
     return true;
   };
-
   // Uso de eventosPorSlide en useKeenSlider
   const [sliderRef] = useKeenSlider(
     {
@@ -134,7 +137,7 @@ function PantallaDirec1() {
           if (mouseOver) return;
           timeout = setTimeout(() => {
             slider.next();
-          }, 10000);
+          }, 3000);
         }
         slider.on("created", () => {
           slider.container.addEventListener("mouseover", () => {
@@ -531,13 +534,13 @@ function PantallaDirec1() {
         className="bg-white text-black h-screen flex flex-col justify-center  "
         style={{
           transform: templateData[0]?.setPortrait
-            ? "rotate(0deg)"
-            : "rotate(90deg) ",
-          maxWidth: templateData[0]?.setPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
-          height: templateData[0]?.setPortrait ? "" : "100vh", // Ajustar la altura según la orientación
-          width: templateData[0]?.setPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
-          marginLeft: templateData[0]?.setPortrait ? "" : "auto",
-          marginRight: templateData[0]?.setPortrait ? "" : "auto",
+            ? "rotate(90deg)"
+            : "rotate(0deg)  ",
+          maxWidth: templateData[0]?.setPortrait ? "100vh" : "", // Establecer el ancho máximo para ajustarse a la pantalla
+          height: templateData[0]?.setPortrait ? "100vh" : "", // Ajustar la altura según la orientación
+          width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
+          marginLeft: templateData[0]?.setPortrait ? "auto" : "",
+          marginRight: templateData[0]?.setPortrait ? "auto" : "",
         }}
       >
         <div
@@ -612,141 +615,294 @@ function PantallaDirec1() {
             </div>
           </div>
           {/* Contenerdor de eventos */}
-          <div className="">
-            {/* Linea arriba */}{" "}
-            <div
-              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
-              style={{
-                // backgroundColor: templateActual.templateColor,
-                background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {/* Título */}
-              <h2 className="text-color text-4xl text-center">EVENTOS</h2>
-            </div>
-            {/* contenido principal */}
-            <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50">
-              <div className=" text-black">
-                {/* Imagen a la izquierda */}
+          {!templateData[0]?.setPortrait ? (
+            <div className="grid grid-cols-4">
+              <div className="col-span-3 md:col-span-3  m-3">
+                {/* Linea arriba */}{" "}
                 <div
-                  className="flex flex-col
-              "
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                  style={{
+                    // backgroundColor: templateActual.templateColor,
+                    background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                  }}
                 >
-                  <div className="">
-                    <div className="space-y-5 pl-5 flex-grow">
-                      {/* Slots predeterminados */}
-                      <div ref={sliderRef} className="keen-slider">
-                        {eventosPorSlide.map((slideEventos, index) => (
-                          <div key={index} className="keen-slider__slide my-2">
-                            {Array.from({
-                              length: templateData[0]?.setPortrait ? 5 : 10,
-                            }).map((_, innerIndex) => {
-                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+                  {/* Título */}
+                  <h2 className="text-color text-4xl text-center">EVENTOS</h2>
+                </div>
+                {/* contenido principal */}
+                <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50 ">
+                  <div className=" text-black">
+                    {/* Imagen a la izquierda */}
+                    <div
+                      className="flex flex-col
+              "
+                    >
+                      <div className="">
+                        <div className="space-y-5 pl-5 flex-grow">
+                          {/* Slots predeterminados */}
+                          <div ref={sliderRef} className="keen-slider">
+                            {eventosPorSlide.map((slideEventos, index) => (
+                              <div
+                                key={index}
+                                className="keen-slider__slide my-2"
+                              >
+                                {Array.from({
+                                  length: templateData[0]?.setPortrait ? 10 : 5,
+                                }).map((_, innerIndex) => {
+                                  const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                              return (
-                                <div
-                                  key={innerIndex}
-                                  className="flex items-center space-x-4 space-y-5 border-b pr-8"
-                                  style={{
-                                    height: evento ? "auto" : "110px",
-                                    borderColor: templateActual.templateColor,
-                                  }} // Establecer la altura dependiendo de si hay evento o no
-                                >
-                                  {/* ---- Evento ---- */}
-                                  {evento ? (
-                                    // Si hay evento, mostrar los detalles
-                                    <>
-                                      <div
-                                        style={{
-                                          position: "relative",
-                                          overflow: "hidden",
-                                          width: "7vw", // Ajusta el ancho del contenedor según sea necesario
-                                          height: "7vw", // Ajusta el alto del contenedor según sea necesario
-                                        }}
-                                      >
-                                        <img
-                                          style={{
-                                            width: "7vw",
-                                            height: "7vw",
-                                            objectFit: "cover",
-                                          }}
-                                          src={evento.images[0]}
-                                          alt={evento.nombreEvento}
-                                        />
-                                      </div>
+                                  return (
+                                    <div
+                                      key={innerIndex}
+                                      className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                      style={{
+                                        height: evento ? "auto" : "110px",
+                                        borderColor:
+                                          templateActual.templateColor,
+                                      }} // Establecer la altura dependiendo de si hay evento o no
+                                    >
+                                      {/* ---- Evento ---- */}
+                                      {evento ? (
+                                        // Si hay evento, mostrar los detalles
+                                        <>
+                                          <div
+                                            style={{
+                                              position: "relative",
+                                              overflow: "hidden",
+                                              width: "5vw", // Ajusta el ancho del contenedor según sea necesario
+                                              height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                            }}
+                                          >
+                                            <img
+                                              style={{
+                                                width: "5vw",
+                                                height: "5vw",
+                                                objectFit: "cover",
+                                              }}
+                                              src={evento.images[0]}
+                                              alt={evento.nombreEvento}
+                                            />
+                                          </div>
 
-                                      <div className="w-full ">
-                                        <h3 className="font-bold mb-4 text-3xl">
-                                          {evento.nombreEvento}
-                                        </h3>
-                                        <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
-                                          {/* Columna 1: Nombre (a la izquierda) */}
-                                          <p className="col-span-3 ">
-                                            {evento.tipoEvento}
-                                          </p>
+                                          <div className="w-full ">
+                                            <h3 className="font-bold mb-4 text-3xl">
+                                              {evento.nombreEvento}
+                                            </h3>
+                                            <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                              {/* Columna 1: Nombre (a la izquierda) */}
+                                              <p className="col-span-3 ">
+                                                {evento.tipoEvento}
+                                              </p>
 
-                                          {/* Columna 2: Lugar (en el centro) */}
-                                          <p className="col-span-3 text-center ">
-                                            {evento.lugar}
-                                          </p>
+                                              {/* Columna 2: Lugar (en el centro) */}
+                                              <p className="col-span-3 text-center ">
+                                                {evento.lugar}
+                                              </p>
 
-                                          {/* Columna 3: Rango de horas (a la derecha) */}
-                                          <p className="col-span-1 text-right ">
-                                            {evento.horaInicialSalon + " a "}
+                                              {/* Columna 3: Rango de horas (a la derecha) */}
+                                              <p className="col-span-1 text-right ">
+                                                {evento.horaInicialSalon +
+                                                  " a "}
 
-                                            {evento.horaFinalSalon}
-                                            {"HRS"}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </>
-                                  ) : (
-                                    // Si no hay evento, mostrar el mensaje de casillero vacío
-                                    <p></p>
-                                  )}
-                                </div>
-                              );
-                            })}
+                                                {evento.horaFinalSalon}
+                                                {"HRS"}
+                                              </p>
+                                            </div>
+                                          </div>
+                                        </>
+                                      ) : (
+                                        // Si no hay evento, mostrar el mensaje de casillero vacío
+                                        <p></p>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                {/* Linea abajo */}
+                <div
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
+                  style={{
+                    // backgroundColor: templateActual.templateColor,
+                    background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                  }}
+                >
+                  {/* Título */}
+                  <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
+                </div>
+              </div>
+              <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
+                <div
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    width: "100%", // Hacer que ocupe el 100% del ancho del contenedor
+                    height: "100%", // Hacer que ocupe el 100% del alto del contenedor
+                    borderRadius: "10px", // Redondear las esquinas
+                  }}
+                >
+                  <img
+                    style={{
+                      width: "100%", // Hacer que la imagen ocupe el 100% del ancho del contenedor
+                      height: "100%", // Hacer que la imagen ocupe el 100% del alto del contenedor
+                      objectFit: "cover",
+                    }}
+                    src={templateData[0].publicidad}
+                    alt="Publicidad"
+                  />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="">
+              {/* Linea arriba */}{" "}
+              <div
+                className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                style={{
+                  // backgroundColor: templateActual.templateColor,
+                  background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                {/* Título */}
+                <h2 className="text-color text-4xl text-center">EVENTOS</h2>
+              </div>
+              {/* contenido principal */}
+              <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50 ">
+                <div className=" text-black">
+                  {/* Imagen a la izquierda */}
+                  <div
+                    className="flex flex-col
+              "
+                  >
+                    <div className="">
+                      <div className="space-y-5 pl-5 flex-grow">
+                        {/* Slots predeterminados */}
+                        <div ref={sliderRef} className="keen-slider">
+                          {eventosPorSlide.map((slideEventos, index) => (
+                            <div
+                              key={index}
+                              className="keen-slider__slide my-2"
+                            >
+                              {Array.from({
+                                length: templateData[0]?.setPortrait ? 10 : 5,
+                              }).map((_, innerIndex) => {
+                                const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+
+                                return (
+                                  <div
+                                    key={innerIndex}
+                                    className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                    style={{
+                                      height: evento ? "auto" : "110px",
+                                      borderColor: templateActual.templateColor,
+                                    }} // Establecer la altura dependiendo de si hay evento o no
+                                  >
+                                    {/* ---- Evento ---- */}
+                                    {evento ? (
+                                      // Si hay evento, mostrar los detalles
+                                      <>
+                                        <div
+                                          style={{
+                                            position: "relative",
+                                            overflow: "hidden",
+                                            width: "5vw", // Ajusta el ancho del contenedor según sea necesario
+                                            height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                          }}
+                                        >
+                                          <img
+                                            style={{
+                                              width: "5vw",
+                                              height: "5vw",
+                                              objectFit: "cover",
+                                            }}
+                                            src={evento.images[0]}
+                                            alt={evento.nombreEvento}
+                                          />
+                                        </div>
+
+                                        <div className="w-full ">
+                                          <h3 className="font-bold mb-4 text-3xl">
+                                            {evento.nombreEvento}
+                                          </h3>
+                                          <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                            {/* Columna 1: Nombre (a la izquierda) */}
+                                            <p className="col-span-3 ">
+                                              {evento.tipoEvento}
+                                            </p>
+
+                                            {/* Columna 2: Lugar (en el centro) */}
+                                            <p className="col-span-3 text-center ">
+                                              {evento.lugar}
+                                            </p>
+
+                                            {/* Columna 3: Rango de horas (a la derecha) */}
+                                            <p className="col-span-1 text-right ">
+                                              {evento.horaInicialSalon + " a "}
+
+                                              {evento.horaFinalSalon}
+                                              {"HRS"}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      // Si no hay evento, mostrar el mensaje de casillero vacío
+                                      <p></p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
-            {/* Linea abajo */}
-            <div
-              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
-              style={{
-                // backgroundColor: templateActual.templateColor,
-                background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {/* Título */}
-              <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
-            </div>
-          </div>
-
-          {/* texto de abajo */}
-          <div className="flex justify-between text-color items-center">
-            {/* --- RSS --- */}
-            <div className="w-9/12 ">
-              <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
-                <Textra
-                  className="ml-12 text-xl "
-                  effect="rightLeft"
-                  duration={1000}
-                  stopduration={timeOutRss}
-                  data={[displayedItem]}
-                  // data={[rssItems[currentIndex].title]}
-                />
+              {/* Linea abajo */}
+              <div
+                className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
+                style={{
+                  // backgroundColor: templateActual.templateColor,
+                  background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                {/* Título */}
+                <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
               </div>
-              {/* {rssItems.map((item, index) => (
+            </div>
+          )}
+          {/* texto de abajo */}
+          <div className="">
+            <div className="flex justify-between text-color items-center">
+              {/* --- RSS --- */}
+              <div className="w-9/12 ">
+                <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
+                  <Textra
+                    className="ml-12 text-xl "
+                    effect="rightLeft"
+                    duration={1000}
+                    stopduration={timeOutRss}
+                    data={[displayedItem]}
+                    // data={[rssItems[currentIndex].title]}
+                  />
+                </div>
+                {/* {rssItems.map((item, index) => (
                 <div className="my-3 font-black" key={index}>
                   <Textra
                     effect="topDown"
@@ -756,28 +912,52 @@ function PantallaDirec1() {
                   />
                 </div>
               ))} */}
+              </div>
+              {/* --- QR image --- */}
+              <div
+                className="flex flex-col items-center"
+                style={{
+                  marginTop: "20px",
+                  marginRight: "20px",
+                  marginBottom: "20px",
+                }}
+              >
+                <p style={{ marginBottom: "10px" }}>
+                  Eventos en tu dispositivo
+                </p>
+                {qrCodeUrl && (
+                  <a
+                    href={qrCodeUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ cursor: "pointer" }}
+                  >
+                    {/* Muestra el código QR */}
+                    <QRCode value={qrCodeUrl} size={100} />
+                  </a>
+                )}
+              </div>
             </div>
-            {/* --- QR image --- */}
-            <div
-              className="flex flex-col items-center"
-              style={{
-                marginTop: "20px",
-                marginRight: "20px",
-                marginBottom: "20px",
-              }}
-            >
-              <p style={{ marginBottom: "10px" }}>Eventos en tu dispositivo</p>
-              {qrCodeUrl && (
-                <a
-                  href={qrCodeUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{ cursor: "pointer" }}
-                >
-                  {/* Muestra el código QR */}
-                  <QRCode value={qrCodeUrl} size={100} />
-                </a>
-              )}
+            <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
+              <div
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  width: "100%", // Hacer que ocupe el 100% del ancho del contenedor
+                  height: "100%", // Hacer que ocupe el 100% del alto del contenedor
+                  borderRadius: "10px", // Redondear las esquinas
+                }}
+              >
+                <img
+                  style={{
+                    width: "100%", // Hacer que la imagen ocupe el 100% del ancho del contenedor
+                    height: "100%", // Hacer que la imagen ocupe el 100% del alto del contenedor
+                    objectFit: "cover",
+                  }}
+                  src={templateData[0].publicidad}
+                  alt="Publicidad"
+                />
+              </div>
             </div>
           </div>
         </div>

@@ -112,7 +112,7 @@ function Pantalla2() {
   const pantalla = "salon";
 
   useEffect(() => {
-    const fetchPublicidades = () => {
+    const fetchPublicidades00000000000000 = () => {
       if (user && firestore) {
         const publicidadesRef = collection(firestore, "Publicidad");
         const publicidadesQuery = query(
@@ -217,20 +217,8 @@ function Pantalla2() {
               fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
               const horaActual = obtenerHora();
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ horaActual:",
-                horaActual
-              );
               const horaInicialEvento = evento.horaInicialSalon;
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ horaInicialEvento:",
-                horaInicialEvento
-              );
               const horaFinalEvento = evento.horaFinalSalon;
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ horaFinalEvento:",
-                horaFinalEvento
-              );
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
@@ -242,13 +230,13 @@ function Pantalla2() {
                 "🚀 ~ eventosEnCursoEffect ~ horaActualEnRango:",
                 horaActualEnRango
               );
+              console.log(
+                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
+                fechaActualEnRango
+              );
 
               return fechaActualEnRango && horaActualEnRango;
             });
-            console.log(
-              "🚀 ~ eventosEnCursoEffect ~ eventosEnCursoEffect:",
-              eventosEnCursoEffect
-            );
 
             const templateRef = collection(firestore, "TemplateSalones");
             const templateQuery = query(
@@ -275,6 +263,10 @@ function Pantalla2() {
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+            // console.log(
+            //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
+            //   eventosEnCursoEffect
+            // );
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -351,10 +343,10 @@ function Pantalla2() {
 
     const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const isVideo = !!currentAd.videoUrl;
       const totalSeconds = isVideo
         ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
-        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+        : currentAd.segundos; // Utilizamos el tiempo de la imagen si no es un vídeo
 
       timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
@@ -386,6 +378,7 @@ function Pantalla2() {
                   autoPlay
                   muted
                   loop
+                  playsInline
                 />
               ) : (
                 // Si no es un video, muestra una imagen

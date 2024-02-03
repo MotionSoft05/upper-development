@@ -637,8 +637,8 @@ function PantallasDirectorio() {
                     className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >
                     {setPortrait
-                      ? "Pantalla Vertical: desactivado"
-                      : "Pantalla Vertical: activado"}
+                      ? "Pantalla Vertical: activado"
+                      : "Pantalla Vertical: desactivado"}
                   </button>
                 </div>
               ))}
