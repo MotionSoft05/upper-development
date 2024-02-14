@@ -145,7 +145,7 @@ function UserAdmin() {
   }, []);
 
   return (
-    <section className="px-5 md:px-32">
+    <section className="pl-10 md:px-32">
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6x2">
         Bienvenido
         <span className="text-blue-600 "> {nombreUsuario}</span>

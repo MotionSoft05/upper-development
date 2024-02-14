@@ -40,6 +40,7 @@ function PantallaDirec1() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
+  console.log("🚀 ~ PantallaDirec1 ~ rssItems:", rssItems);
 
   useEffect(() => {
     if (user) {
@@ -338,16 +339,27 @@ function PantallaDirec1() {
   // ----------------- RSS ---------------------------
   useEffect(() => {
     axios
-      // .get("http://localhost:10000/fetch-rss")
       .get("https://upperds.onrender.com/fetch-rss")
       .then((response) => {
-        const items = response.data.items;
+        const items = response.data.items.map((item) => ({
+          title: removeSymbols(item.title),
+          link: item.link,
+          description: removeSymbols(item.description),
+        }));
         setRssItems(items);
       })
       .catch((error) =>
         console.error("Error fetching or parsing data:", error)
       );
   }, []);
+
+  // Función para eliminar símbolos de una cadena de texto
+  const removeSymbols = (text) => {
+    // Expresión regular para eliminar símbolos
+    const regex = /[^a-zA-Z0-9\s,.:-]/g;
+    // Aplicar el regex y reemplazar los símbolos con una cadena vacía
+    return text.replace(regex, "");
+  };
 
   let timeOutRss = 7000; // valor de cambio de animacion de RSS
   const [displayedItem, setDisplayedItem] = useState("");
@@ -938,7 +950,11 @@ function PantallaDirec1() {
                 )}
               </div>
             </div>
-            <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
+            <div
+              className={`col-span-3 md:col-span-1 flex items-center justify-center m-3 ${
+                !templateData[0]?.setPortrait ? "hidden" : ""
+              }`}
+            >
               <div
                 style={{
                   position: "relative",
@@ -954,7 +970,7 @@ function PantallaDirec1() {
                     height: "100%", // Hacer que la imagen ocupe el 100% del alto del contenedor
                     objectFit: "cover",
                   }}
-                  src={templateData[0].publicidad}
+                  src={templateData[0]?.publicidad}
                   alt="Publicidad"
                 />
               </div>

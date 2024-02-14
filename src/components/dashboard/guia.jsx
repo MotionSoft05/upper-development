@@ -128,7 +128,7 @@ const Guia = () => {
     <section className="px-5 md:px-32">
       <div>
         <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
+          <h1 className=" text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
             Guía de usuario
           </h1>
 

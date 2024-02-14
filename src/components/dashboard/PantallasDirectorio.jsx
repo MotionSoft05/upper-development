@@ -455,7 +455,7 @@ function PantallasDirectorio() {
         </div>
 
         {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>

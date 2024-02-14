@@ -93,7 +93,7 @@ function Licencia() {
         </ul>
       </div>
       <main>
-        <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
+        <main className="main ">
           <div className="main-content flex flex-col flex-grow p-4">
             {selectedFilter === "datosNegocio" && (
               <DatosNegocio currentUser={currentUser} />

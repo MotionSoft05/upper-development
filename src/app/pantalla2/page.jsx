@@ -112,7 +112,7 @@ function Pantalla2() {
   const pantalla = "salon";
 
   useEffect(() => {
-    const fetchPublicidades00000000000000 = () => {
+    const fetchPublicidades = () => {
       if (user && firestore) {
         const publicidadesRef = collection(firestore, "Publicidad");
         const publicidadesQuery = query(

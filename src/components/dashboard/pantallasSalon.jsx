@@ -456,7 +456,7 @@ function PantallasSalon() {
   }, []);
 
   return (
-    <section className="px-8 py-12">
+    <section className="pl-10 md:px-32">
       <div>
         <div className="p-5 text-center">
           <h2 className="text-4xl font-extrabold text-gray-900">
@@ -464,7 +464,7 @@ function PantallasSalon() {
           </h2>
         </div>
 
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             Personalización del Template
           </h1>
