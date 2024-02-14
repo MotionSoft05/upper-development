@@ -121,10 +121,7 @@ function PantallaDirec1() {
   const [sliderRef] = useKeenSlider(
     {
       slides: eventosPorSlide.length,
-      loop: determineLoopCondition(
-        templateData[0]?.setPortrait,
-        eventosEnCurso
-      ),
+      loop: true,
     },
     [
       (slider) => {
@@ -644,22 +641,122 @@ function PantallaDirec1() {
                   <h2 className="text-color text-4xl text-center">EVENTOS</h2>
                 </div>
                 {/* contenido principal */}
-                <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50 ">
+                <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50 relative z-20">
                   <div className=" text-black">
-                    {/* Imagen a la izquierda */}
-                    <div
-                      className="flex flex-col
-              "
-                    >
-                      <div className="">
-                        <div className="space-y-5 pl-5 flex-grow">
-                          {/* Slots predeterminados */}
-                          <div ref={sliderRef} className="keen-slider">
+                    <div className="flex flex-col">
+                      <div className="space-y-5 pl-5 flex-grow">
+                        <div className="">
+                          {/* Parte con slider */}
+                          <div
+                            className=""
+                            style={{
+                              display:
+                                (templateData[0]?.setPortrait &&
+                                  eventosEnCurso.length < 11) ||
+                                (!templateData[0]?.setPortrait &&
+                                  eventosEnCurso.length < 6)
+                                  ? "none"
+                                  : "",
+                            }}
+                          >
+                            <div ref={sliderRef} className="keen-slider">
+                              {eventosPorSlide.map((slideEventos, index) => (
+                                <div
+                                  key={index}
+                                  className="keen-slider__slide my-2"
+                                >
+                                  {Array.from({
+                                    length: templateData[0]?.setPortrait
+                                      ? 10
+                                      : 5,
+                                  }).map((_, innerIndex) => {
+                                    const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+
+                                    return (
+                                      <div
+                                        key={innerIndex}
+                                        className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                        style={{
+                                          height: evento ? "auto" : "110px",
+                                          borderColor:
+                                            templateActual.templateColor,
+                                        }} // Establecer la altura dependiendo de si hay evento o no
+                                      >
+                                        {/* ---- Evento ---- */}
+                                        {evento ? (
+                                          // Si hay evento, mostrar los detalles
+                                          <>
+                                            <div
+                                              style={{
+                                                position: "relative",
+                                                overflow: "hidden",
+                                                width: "5vw", // Ajusta el ancho del contenedor según sea necesario
+                                                height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                              }}
+                                            >
+                                              <img
+                                                style={{
+                                                  width: "5vw",
+                                                  height: "5vw",
+                                                  objectFit: "cover",
+                                                }}
+                                                src={evento.images[0]}
+                                                alt={evento.nombreEvento}
+                                              />
+                                            </div>
+
+                                            <div className="w-full ">
+                                              <h3 className="font-bold mb-4 text-3xl">
+                                                {evento.nombreEvento}
+                                              </h3>
+                                              <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                                {/* Columna 1: Nombre (a la izquierda) */}
+                                                <p className="col-span-3 ">
+                                                  {evento.tipoEvento}
+                                                </p>
+
+                                                {/* Columna 2: Lugar (en el centro) */}
+                                                <p className="col-span-3 text-center ">
+                                                  {evento.lugar}
+                                                </p>
+
+                                                {/* Columna 3: Rango de horas (a la derecha) */}
+                                                <p className="col-span-1 text-right ">
+                                                  {evento.horaInicialSalon +
+                                                    " a "}
+
+                                                  {evento.horaFinalSalon}
+                                                  {"HRS"}
+                                                </p>
+                                              </div>
+                                            </div>
+                                          </>
+                                        ) : (
+                                          // Si no hay evento, mostrar el mensaje de casillero vacío
+                                          <p></p>
+                                        )}
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          {/* Parte sin slider */}
+                          <div
+                            className=""
+                            style={{
+                              display:
+                                (templateData[0]?.setPortrait &&
+                                  eventosEnCurso.length > 10) ||
+                                (!templateData[0]?.setPortrait &&
+                                  eventosEnCurso.length > 5)
+                                  ? "none"
+                                  : "",
+                            }}
+                          >
                             {eventosPorSlide.map((slideEventos, index) => (
-                              <div
-                                key={index}
-                                className="keen-slider__slide my-2"
-                              >
+                              <div key={index} className="my-2 ">
                                 {Array.from({
                                   length: templateData[0]?.setPortrait ? 10 : 5,
                                 }).map((_, innerIndex) => {
@@ -717,7 +814,6 @@ function PantallaDirec1() {
                                               <p className="col-span-1 text-right ">
                                                 {evento.horaInicialSalon +
                                                   " a "}
-
                                                 {evento.horaFinalSalon}
                                                 {"HRS"}
                                               </p>
