@@ -339,7 +339,7 @@ function ConsultaModEvento() {
   };
 
   return (
-    <section className="pl-10 md:px-32">
+    <section className="pl-10 md:px-20">
       <div>
         <div className="p-5">
           <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
@@ -373,51 +373,51 @@ function ConsultaModEvento() {
                   usuarioLogeado === "contacto@upperds.mx") && (
                   <th
                     scope="col"
-                    className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                    className="px-0.5 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                   >
                     USUARIO
                   </th>
                 )}
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-0.5 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   N
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   NOMBRE
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   TIPO
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   NOMBRE DE SALON
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   FECHA/S
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-6 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   HORA SALON
                 </th>
 
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-6 md:py-3 text-center text-xs font-medium text-gray-500 "
+                  className="px-0.5 py-1 md:px-2 md:py-3 text-center text-xs font-medium text-gray-500 "
                 >
                   ACCIONES
                 </th>
@@ -469,16 +469,16 @@ function ConsultaModEvento() {
                       {(usuarioLogeado === "uppermex10@gmail.com" ||
                         usuarioLogeado === "ulises.jacobo@hotmail.com" ||
                         usuarioLogeado === "contacto@upperds.mx") && (
-                        <td className="md:px-6 md:py-4 ">
+                        <td className="md:px-2 md:py-4 ">
                           {usuario
                             ? `${usuario.nombre} ${usuario.apellido}`
                             : "N/A"}
                         </td>
                       )}
                       {/* Contador */}
-                      <td className="md:px-6 md:py-4 ">{index + 1}</td>
+                      <td className="md:px-2 md:py-4 ">{index + 1}</td>
                       {/* Nombre */}
-                      <td className="md:px-6 md:py-4 ">
+                      <td className="md:px-2 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -502,7 +502,7 @@ function ConsultaModEvento() {
                         )}
                       </td>
                       {/* Tipo  */}
-                      <td className="md:px-6 md:py-4 ">
+                      <td className="md:px-2 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -528,7 +528,7 @@ function ConsultaModEvento() {
                         )}
                       </td>
                       {/* Nombre de salon   */}
-                      <td className="md:px-6 md:py-4 ">
+                      <td className="md:px-2 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -557,7 +557,7 @@ function ConsultaModEvento() {
                         )}
                       </td>
                       {/* Fecha */}
-                      <td className="md:px-6 md:py-4 ">
+                      <td className="md:px-2 md:py-4 ">
                         {modoEdicion &&
                         evento.id === eventoEditado?.id &&
                         edicionFechas ? (
@@ -601,7 +601,7 @@ function ConsultaModEvento() {
                         )}
                       </td>
                       {/* Hora salon     */}
-                      <td className="md:px-6 md:py-4">
+                      <td className="md:px-2 md:py-4">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="time"
@@ -635,13 +635,9 @@ function ConsultaModEvento() {
                           evento.horaFinalSalon
                         )}
                       </td>
-                      {/* Id Evento 
-                    <td className="hidden md:block md:px-6 md:py-4">
-                      {evento.id}
-                    </td>
-                    */}
+
                       {/* Editar */}
-                      <td className="md:px-6 md:py-4">
+                      <td className="md:px-2 md:py-4">
                         {modalAbierto && (
                           <div className="fixed inset-0 flex items-center justify-center z-50">
                             <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
