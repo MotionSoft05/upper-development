@@ -71,32 +71,7 @@ function Pantalla8() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
   // Señal no se apage monitor-------------------------------
-  useEffect(() => {
-    const enableWakeLock = async () => {
-      if ("wakeLock" in navigator) {
-        try {
-          const wakeLock = await navigator.wakeLock.request("screen");
-          // Realizar acciones con el wakeLock si se obtuvo con éxito
-          wakeLock.addEventListener("release", () => {
-            // Manejar la liberación del bloqueo de pantalla
-          });
-        } catch (error) {
-          // Manejar errores al solicitar el bloqueo de pantalla
-          console.error("Error al solicitar el bloqueo de pantalla:", error);
-        }
-      } else {
-        // El navegador no admite la API Wake Lock
-        console.warn("El navegador no admite la API Wake Lock");
-      }
-    };
 
-    enableWakeLock(); // Llamar a la función para solicitar el bloqueo de pantalla al cargar el componente
-
-    // Realizar la limpieza al desmontar el componente si es necesario
-    return () => {
-      // Realizar acciones de limpieza si es necesario al desmontar el componente
-    };
-  }, []);
   // Hora actual---------------------------------------------
   useEffect(() => {
     const interval = setInterval(() => {
@@ -251,6 +226,14 @@ function Pantalla8() {
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
               console.log("evento", evento);
+              console.log(
+                "🚀 ~ eventosEnCursoEffect ~ horaActualEnRango:",
+                horaActualEnRango
+              );
+              console.log(
+                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
+                fechaActualEnRango
+              );
 
               return fechaActualEnRango && horaActualEnRango;
             });
@@ -280,6 +263,10 @@ function Pantalla8() {
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+            // console.log(
+            //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
+            //   eventosEnCursoEffect
+            // );
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
@@ -314,7 +301,7 @@ function Pantalla8() {
   const [sliderRef] = useKeenSlider(
     {
       slides: img,
-      loop: loop,
+      loop: true,
       detailsChanged(s) {
         const new_opacities = s.track.details.slides.map(
           (slide) => slide.portion
@@ -325,18 +312,28 @@ function Pantalla8() {
     [
       (slider) => {
         let timeout;
-
+        let mouseOver = false;
         function clearNextTimeout() {
           clearTimeout(timeout);
         }
         function nextTimeout() {
           clearTimeout(timeout);
-
+          if (mouseOver) return;
           timeout = setTimeout(() => {
             slider.next();
-          }, 5000);
+          }, 7000);
         }
-
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
         slider.on("dragStarted", clearNextTimeout);
         slider.on("animationEnded", nextTimeout);
         slider.on("updated", nextTimeout);
@@ -356,10 +353,10 @@ function Pantalla8() {
 
     const currentAd = publicidadesUsuario[currentMediaIndex];
     if (currentAd) {
-      const isVideo = !!currentAd.videoUrl; // Verifica si hay una URL de video
+      const isVideo = !!currentAd.videoUrl;
       const totalSeconds = isVideo
         ? currentAd.segundos + currentAd.minutos * 60 + currentAd.horas * 3600
-        : 5; // Si es un video, utiliza la duración del video; de lo contrario, 5 segundos por defecto
+        : currentAd.segundos; // Utilizamos el tiempo de la imagen si no es un vídeo
 
       timeoutId = setTimeout(changeMedia, totalSeconds * 1000);
     } else {
@@ -391,6 +388,7 @@ function Pantalla8() {
                   autoPlay
                   muted
                   loop
+                  playsInline
                 />
               ) : (
                 // Si no es un video, muestra una imagen
@@ -464,14 +462,13 @@ function Pantalla8() {
               <div className="col-span-1  mr-4 my-auto">
                 <div
                   ref={sliderRef}
-                  className={`fader${
-                    images.length === 1 ? " single-image" : ""
-                  }`}
+                  className={`fader$`}
                   style={{
                     position: "relative",
                     overflow: "hidden",
                     width: "30vw", // Ajusta el ancho del contenedor según sea necesario
                     height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                    display: images.length > 1 ? "" : "none",
                   }}
                 >
                   {images.map((image, index) => (
@@ -501,30 +498,35 @@ function Pantalla8() {
                   ))}
                 </div>
 
-                {images.length === 1 && (
-                  <div>
-                    <img
-                      src={images[0]}
-                      alt={`Imagen 1`}
-                      style={{
-                        width: "30vw",
-                        height: "30vw",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                )}
-
-                {images.length === 0 && (
-                  <p
+                <div
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
+                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                    display: images.length === 1 ? "" : "none",
+                  }}
+                >
+                  <img
+                    src={images[0]}
+                    alt={`Imagen 1`}
                     style={{
-                      color: templateActual.fontColor,
-                      fontFamily: templateActual.fontStyle,
+                      width: "30vw",
+                      height: "30vw",
+                      objectFit: "cover",
                     }}
-                  >
-                    No hay imágenes disponibles
-                  </p>
-                )}
+                  />
+                </div>
+
+                <p
+                  style={{
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                    display: images.length === 0 ? "" : "none",
+                  }}
+                >
+                  No hay imágenes disponibles
+                </p>
               </div>
 
               <div className="col-span-2 space-y-8  my-4">
@@ -582,8 +584,8 @@ function Pantalla8() {
             >
               {obtenerFecha()}
             </p>
-            <div className="flex items-center justify-center">
-              <img src="/img/reloj.png" className="p-1 h-8" />
+            <div className="flex items-center justify-center mb-1">
+              <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
               <p
                 className=" uppercase"
                 style={{

@@ -301,7 +301,7 @@ function Pantalla4() {
   const [sliderRef] = useKeenSlider(
     {
       slides: img,
-      loop: loop,
+      loop: true,
       detailsChanged(s) {
         const new_opacities = s.track.details.slides.map(
           (slide) => slide.portion
@@ -312,18 +312,28 @@ function Pantalla4() {
     [
       (slider) => {
         let timeout;
-
+        let mouseOver = false;
         function clearNextTimeout() {
           clearTimeout(timeout);
         }
         function nextTimeout() {
           clearTimeout(timeout);
-
+          if (mouseOver) return;
           timeout = setTimeout(() => {
             slider.next();
-          }, 5000);
+          }, 7000);
         }
-
+        slider.on("created", () => {
+          slider.container.addEventListener("mouseover", () => {
+            mouseOver = true;
+            clearNextTimeout();
+          });
+          slider.container.addEventListener("mouseout", () => {
+            mouseOver = false;
+            nextTimeout();
+          });
+          nextTimeout();
+        });
         slider.on("dragStarted", clearNextTimeout);
         slider.on("animationEnded", nextTimeout);
         slider.on("updated", nextTimeout);
@@ -452,14 +462,13 @@ function Pantalla4() {
               <div className="col-span-1  mr-4 my-auto">
                 <div
                   ref={sliderRef}
-                  className={`fader${
-                    images.length === 1 ? " single-image" : ""
-                  }`}
+                  className={`fader$`}
                   style={{
                     position: "relative",
                     overflow: "hidden",
                     width: "30vw", // Ajusta el ancho del contenedor según sea necesario
                     height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                    display: images.length > 1 ? "" : "none",
                   }}
                 >
                   {images.map((image, index) => (
@@ -489,30 +498,35 @@ function Pantalla4() {
                   ))}
                 </div>
 
-                {images.length === 1 && (
-                  <div>
-                    <img
-                      src={images[0]}
-                      alt={`Imagen 1`}
-                      style={{
-                        width: "30vw",
-                        height: "30vw",
-                        objectFit: "cover",
-                      }}
-                    />
-                  </div>
-                )}
-
-                {images.length === 0 && (
-                  <p
+                <div
+                  style={{
+                    position: "relative",
+                    overflow: "hidden",
+                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
+                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
+                    display: images.length === 1 ? "" : "none",
+                  }}
+                >
+                  <img
+                    src={images[0]}
+                    alt={`Imagen 1`}
                     style={{
-                      color: templateActual.fontColor,
-                      fontFamily: templateActual.fontStyle,
+                      width: "30vw",
+                      height: "30vw",
+                      objectFit: "cover",
                     }}
-                  >
-                    No hay imágenes disponibles
-                  </p>
-                )}
+                  />
+                </div>
+
+                <p
+                  style={{
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                    display: images.length === 0 ? "" : "none",
+                  }}
+                >
+                  No hay imágenes disponibles
+                </p>
               </div>
 
               <div className="col-span-2 space-y-8  my-4">
@@ -570,8 +584,8 @@ function Pantalla4() {
             >
               {obtenerFecha()}
             </p>
-            <div className="flex items-center justify-center">
-              <img src="/img/reloj.png" className="p-1 h-8" />
+            <div className="flex items-center justify-center mb-1">
+              <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
               <p
                 className=" uppercase"
                 style={{
