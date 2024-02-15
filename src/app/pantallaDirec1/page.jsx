@@ -17,6 +17,8 @@ import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
 import Textra from "react-textra"; // Slider para RSS
+import SliderRSS from "@/components/SliderRSS";
+
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -40,7 +42,6 @@ function PantallaDirec1() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
-  console.log("🚀 ~ PantallaDirec1 ~ rssItems:", rssItems);
 
   useEffect(() => {
     if (user) {
@@ -135,7 +136,7 @@ function PantallaDirec1() {
           if (mouseOver) return;
           timeout = setTimeout(() => {
             slider.next();
-          }, 3000);
+          }, 10000);
         }
         slider.on("created", () => {
           slider.container.addEventListener("mouseover", () => {
@@ -530,7 +531,7 @@ function PantallaDirec1() {
   }
 
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
+  // console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
@@ -565,8 +566,8 @@ function PantallaDirec1() {
                   {" "}
                   <div
                     style={{
-                      width: "18vw",
-                      height: "10vw",
+                      width: "15vw",
+                      height: "8vw",
                       overflow: "hidden",
                       marginBottom: "20px",
                     }}
@@ -625,11 +626,11 @@ function PantallaDirec1() {
           </div>
           {/* Contenerdor de eventos */}
           {!templateData[0]?.setPortrait ? (
-            <div className="grid grid-cols-4">
-              <div className="col-span-3 md:col-span-3  m-3">
+            <div className="grid grid-cols-4 bg-white">
+              <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-10`}
                   style={{
                     // backgroundColor: templateActual.templateColor,
                     background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
@@ -837,7 +838,7 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-12`}
                   style={{
                     // backgroundColor: templateActual.templateColor,
                     background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
@@ -996,19 +997,12 @@ function PantallaDirec1() {
             </div>
           )}
           {/* texto de abajo */}
-          <div className="">
+          <div className=" bg-white">
             <div className="flex justify-between text-color items-center">
               {/* --- RSS --- */}
               <div className="w-9/12 ">
-                <div className="flex items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-12 rounded-md">
-                  <Textra
-                    className="ml-12 text-xl "
-                    effect="rightLeft"
-                    duration={1000}
-                    stopduration={timeOutRss}
-                    data={[displayedItem]}
-                    // data={[rssItems[currentIndex].title]}
-                  />
+                <div className="flex ml-3  items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-36 rounded-md">
+                  <SliderRSS />
                 </div>
                 {/* {rssItems.map((item, index) => (
                 <div className="my-3 font-black" key={index}>
