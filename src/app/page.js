@@ -64,7 +64,7 @@ export default function Home() {
               }}
             >
               <img
-                src="/img/sliderImage.jpg"
+                src="/img/ImagenSliderUpper1.jpg"
                 className="w-full h-full object-cover"
                 style={{
                   width: "100%",
@@ -85,7 +85,7 @@ export default function Home() {
               }}
             >
               <img
-                src="/img/sliderImage2.jpg"
+                src="/img/ImagenSliderUpper2.jpg"
                 className="w-full h-full object-cover"
                 style={{
                   width: "100%",
@@ -106,7 +106,7 @@ export default function Home() {
               }}
             >
               <img
-                src="/img/sliderImage3.jpg"
+                src="/img/ImagenSliderUpper3.jpg"
                 className="w-full h-full object-cover"
                 style={{
                   width: "100%",
@@ -119,7 +119,7 @@ export default function Home() {
             </div>
           </div>
           {/* ^^^^ Slider KeenSlider ^^^^ */}
-          
+
           <div className="">
             <div className="mb-8">
               <h1 className="md:text-4xl text-lg sm:text-2xl sm:mt-4 font-bold sm:font-normal mt-4 pl-10">
