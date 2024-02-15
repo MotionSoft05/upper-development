@@ -488,13 +488,19 @@ function ConsultaModEvento() {
                             }
                             className="w-full px-2 py-1 border rounded-lg text-center"
                           />
-                        ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.nombreEvento
                         ) : (
-                          evento.nombreEvento
+                          <span>
+                            {eventoEditado?.id === evento.id
+                              ? eventoEditado.nombreEvento.length > 15
+                                ? eventoEditado.nombreEvento.substring(0, 15) +
+                                  "..."
+                                : eventoEditado.nombreEvento
+                              : evento.nombreEvento.length > 15
+                              ? evento.nombreEvento.substring(0, 15) + "..."
+                              : evento.nombreEvento}
+                          </span>
                         )}
                       </td>
-
                       {/* Tipo  */}
                       <td className="md:px-6 md:py-4 ">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
@@ -506,10 +512,19 @@ function ConsultaModEvento() {
                             }
                             className="w-full px-2 py-1 border rounded-lg text-center"
                           />
-                        ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.tipoEvento
                         ) : (
-                          evento.tipoEvento
+                          <span>
+                            {eventoEditado?.id === evento.id
+                              ? eventoEditado.tipoEvento &&
+                                eventoEditado.tipoEvento.length > 15
+                                ? eventoEditado.tipoEvento.substring(0, 15) +
+                                  "..."
+                                : eventoEditado.tipoEvento || ""
+                              : evento.tipoEvento &&
+                                evento.tipoEvento.length > 15
+                              ? evento.tipoEvento.substring(0, 15) + "..."
+                              : evento.tipoEvento || ""}
+                          </span>
                         )}
                       </td>
                       {/* Nombre de salon   */}
