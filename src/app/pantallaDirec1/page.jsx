@@ -89,7 +89,7 @@ function PantallaDirec1() {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 10 : 5
+    templateData[0]?.setPortrait ? 7 : 5
   );
 
   useEffect(() => {
@@ -99,12 +99,12 @@ function PantallaDirec1() {
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
-    const limite = isPortrait ? 10 : 5;
+    const limite = isPortrait ? 7 : 5;
     if (!eventos || eventos.length === 0) {
       return true;
     }
 
-    if (isPortrait && eventos.length > 10) {
+    if (isPortrait && eventos.length > 7) {
       // Si es portrait y supera los 8 eventos, recargar la página
 
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
@@ -667,7 +667,7 @@ function PantallaDirec1() {
                                 >
                                   {Array.from({
                                     length: templateData[0]?.setPortrait
-                                      ? 10
+                                      ? 7
                                       : 5,
                                   }).map((_, innerIndex) => {
                                     const evento = slideEventos[innerIndex]; // Obtener el evento si existe
@@ -748,7 +748,7 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 10) ||
+                                  eventosEnCurso.length > 7) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length > 5)
                                   ? "none"
@@ -758,7 +758,7 @@ function PantallaDirec1() {
                             {eventosPorSlide.map((slideEventos, index) => (
                               <div key={index} className="my-2 ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 10 : 5,
+                                  length: templateData[0]?.setPortrait ? 7 : 5,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
@@ -919,7 +919,7 @@ function PantallaDirec1() {
                                 >
                                   {Array.from({
                                     length: templateData[0]?.setPortrait
-                                      ? 10
+                                      ? 7
                                       : 5,
                                   }).map((_, innerIndex) => {
                                     const evento = slideEventos[innerIndex]; // Obtener el evento si existe
@@ -1000,7 +1000,7 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 10) ||
+                                  eventosEnCurso.length > 7) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length > 5)
                                   ? "none"
@@ -1010,7 +1010,7 @@ function PantallaDirec1() {
                             {eventosPorSlide.map((slideEventos, index) => (
                               <div key={index} className="my-2 ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 10 : 5,
+                                  length: templateData[0]?.setPortrait ? 7 : 5,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
@@ -1157,13 +1157,13 @@ function PantallaDirec1() {
                   position: "relative",
                   overflow: "hidden",
                   width: "100%", // Ajusta el ancho del contenedor según sea necesario
-                  height: "10vw", // Ajusta el alto del contenedor según sea necesario
+                  height: "27vw", // Ajusta el alto del contenedor según sea necesario
                 }}
               >
                 <img
                   style={{
                     width: "100%",
-                    height: "10vw",
+                    height: "27vw",
                     objectFit: "cover",
                   }}
                   src={templateData[0]?.publicidad}

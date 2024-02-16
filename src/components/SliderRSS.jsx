@@ -4,7 +4,7 @@ import "keen-slider/keen-slider.min.css";
 // import "../app/globals.css";
 import axios from "axios";
 
-const animation = { duration: 20000, easing: (t) => t };
+const animation = { duration: 25000, easing: (t) => t };
 
 export default function SliderRSS() {
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
