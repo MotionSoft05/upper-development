@@ -547,17 +547,24 @@ function QrDinamic({ searchQuery }) {
                                         <h3 className="font-bold mb-4 text-base lg:text-3xl">
                                           {evento.nombreEvento}
                                         </h3>
-                                        <div className="grid grid-cols-7 gap-4 font-bold text-xs lg:text-2xl">
+                                        <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
+                                          {/* Columna 1: Nombre (a la izquierda) */}
                                           <p className="col-span-3">
                                             {evento.tipoEvento}
                                           </p>
-                                          <p className="col-span-3 text-center">
+                                          <p className=" ">
+                                            {evento.devices[0]}
+                                          </p>
+                                          {/* Columna 2: Lugar (en el centro) */}
+                                          <p className="text-center ">
                                             {evento.lugar}
                                           </p>
-                                          <p className="col-span-1  text-center">
-                                            {evento.horaInicialSalon +
-                                              " a " +
-                                              evento.horaFinalSalon}
+
+                                          {/* Columna 3: Rango de horas (a la derecha) */}
+                                          <p className=" text-right ">
+                                            {evento.horaInicialSalon + " a "}
+                                            {evento.horaFinalSalon}
+                                            {"HRS"}
                                           </p>
                                         </div>
                                       </div>
@@ -579,12 +586,12 @@ function QrDinamic({ searchQuery }) {
 
             {/* Linea abajo */}
             <div
-                  className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
-                  style={{
-                    background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
-                    color: templateActual.fontColor,
-                    fontFamily: templateActual.fontStyle,
-                  }}
+              className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
+              style={{
+                background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
             >
               {/* Título */}
               <h2 className="text-white"></h2>
