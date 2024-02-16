@@ -494,13 +494,13 @@ function QrDinamic({ searchQuery }) {
           <div className="">
             {/* Linea arriba */}
             <div
-  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
-  style={{
-    background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
-    color: templateActual.fontColor,
-    fontFamily: templateActual.fontStyle,
-  }}
->
+              className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+              style={{
+                background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
+                color: templateActual.fontColor,
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
               {/* Título */}
               <h2 className="text-white text-4xl text-center">EVENTOS</h2>
             </div>
@@ -579,12 +579,12 @@ function QrDinamic({ searchQuery }) {
 
             {/* Linea abajo */}
             <div
-              className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-6 md:px-20 rounded-b-xl h-16`}
-              style={{
-                background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
+                  className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
+                  style={{
+                    background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                  }}
             >
               {/* Título */}
               <h2 className="text-white"></h2>
