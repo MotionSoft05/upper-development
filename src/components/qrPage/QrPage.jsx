@@ -416,16 +416,16 @@ function QrDinamic({ searchQuery }) {
     <section className="relative w-full  bg-white overflow-y-auto">
       <div
         className="bg-white text-black  flex flex-col justify-center  "
-        style={{
-          transform: templateData[0]?.setPortrait
-            ? "rotate(0deg)"
-            : "rotate(90deg) ",
-          maxWidth: templateData[0]?.setPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
-          height: templateData[0]?.setPortrait ? "" : "100vh", // Ajustar la altura según la orientación
-          width: templateData[0]?.setPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
-          marginLeft: templateData[0]?.setPortrait ? "" : "auto",
-          marginRight: templateData[0]?.setPortrait ? "" : "auto",
-        }}
+        // style={{
+        //   transform: templateData[0]?.setPortrait
+        //     ? "rotate(0deg)"
+        //     : "rotate(90deg) ",
+        //   maxWidth: templateData[0]?.setPortrait ? "" : "100vh", // Establecer el ancho máximo para ajustarse a la pantalla
+        //   height: templateData[0]?.setPortrait ? "" : "100vh", // Ajustar la altura según la orientación
+        //   width: templateData[0]?.setPortrait ? "" : "100%", // Asegurar que el ancho se ajuste correctamente
+        //   marginLeft: templateData[0]?.setPortrait ? "" : "auto",
+        //   marginRight: templateData[0]?.setPortrait ? "" : "auto",
+        // }}
       >
         <div
           id="Content"
@@ -537,6 +537,11 @@ function QrDinamic({ searchQuery }) {
                                         className="object-contain w-auto h-[70px] my-2 shadow-xl"
                                         src={evento.images[0]}
                                         alt={evento.nombreEvento}
+                                        style={{
+                                          width: "5vw",
+                                          height: "5vw",
+                                          objectFit: "cover",
+                                        }}
                                       />
                                       <div className="w-full">
                                         <h3 className="font-bold mb-4 text-base lg:text-3xl">
