@@ -110,7 +110,6 @@ function Pantalla3() {
   }, []);
   // Publicidades-------------------------------------------
   const pantalla = "salon";
-
   useEffect(() => {
     const fetchPublicidades = () => {
       if (user && firestore) {
@@ -130,6 +129,7 @@ function Pantalla3() {
                 publicidades.push(publicidad);
               }
             });
+
             setPublicidadesUsuario(publicidades);
           })
           .catch((error) => {
@@ -140,7 +140,7 @@ function Pantalla3() {
 
     const interval = setInterval(() => {
       fetchPublicidades();
-    }, 10000);
+    }, 120000);
 
     fetchPublicidades(); // Llamar inicialmente
 
@@ -340,6 +340,7 @@ function Pantalla3() {
       },
     ]
   );
+
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
   useEffect(() => {
