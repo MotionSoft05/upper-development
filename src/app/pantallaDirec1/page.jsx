@@ -629,10 +629,9 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-10`}
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                   style={{
-                    // backgroundColor: templateActual.templateColor,
-                    background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                    background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
                     fontFamily: templateActual.fontStyle,
                   }}
@@ -837,16 +836,17 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-12`}
+                  className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
                   style={{
-                    // backgroundColor: templateActual.templateColor,
-                    background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                    background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
                     fontFamily: templateActual.fontStyle,
                   }}
                 >
                   {/* Título */}
-                  <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
+                  <h2 className="text-color text-4xl text-center align-bottom ">
+                    NOTICIAS
+                  </h2>
                 </div>
               </div>
               <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
