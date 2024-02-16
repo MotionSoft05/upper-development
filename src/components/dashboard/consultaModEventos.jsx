@@ -339,7 +339,7 @@ function ConsultaModEvento() {
   };
 
   return (
-    <section className="pl-10 md:px-20">
+    <section className="pl-14 md:px-20">
       <div>
         <div className="p-5">
           <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">

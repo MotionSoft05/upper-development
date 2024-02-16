@@ -7,7 +7,7 @@ function Publicidad() {
   const [showSalon, setShowSalon] = useState(true);
 
   return (
-    <section className="pl-32 md:px-32">
+    <section className="pl-20 md:px-32">
       <div>
         <section className="">
           <div className="mb-8">
