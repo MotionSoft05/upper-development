@@ -708,22 +708,23 @@ function PantallaDirec1() {
                                               <h3 className="font-bold mb-4 text-3xl">
                                                 {evento.nombreEvento}
                                               </h3>
-                                              <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                              <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3 ">
+                                                <p className="col-span-3">
                                                   {evento.tipoEvento}
                                                 </p>
-
+                                                <p className=" ">
+                                                  {evento.devices[0]}
+                                                </p>
                                                 {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="col-span-3 text-center ">
+                                                <p className="text-center ">
                                                   {evento.lugar}
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className="col-span-1 text-right ">
+                                                <p className=" text-right ">
                                                   {evento.horaInicialSalon +
                                                     " a "}
-
                                                   {evento.horaFinalSalon}
                                                   {"HRS"}
                                                 </p>
@@ -798,19 +799,21 @@ function PantallaDirec1() {
                                             <h3 className="font-bold mb-4 text-3xl">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3 ">
+                                              <p className="col-span-3">
                                                 {evento.tipoEvento}
                                               </p>
-
+                                              <p className=" ">
+                                                {evento.devices[0]}
+                                              </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="col-span-3 text-center ">
+                                              <p className="text-center ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className="col-span-1 text-right ">
+                                              <p className=" text-right ">
                                                 {evento.horaInicialSalon +
                                                   " a "}
                                                 {evento.horaFinalSalon}
@@ -961,22 +964,23 @@ function PantallaDirec1() {
                                               <h3 className="font-bold mb-4 text-3xl">
                                                 {evento.nombreEvento}
                                               </h3>
-                                              <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                              <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3 ">
+                                                <p className="col-span-3">
                                                   {evento.tipoEvento}
                                                 </p>
-
+                                                <p className=" ">
+                                                  {evento.devices[0]}
+                                                </p>
                                                 {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="col-span-3 text-center ">
+                                                <p className="text-center ">
                                                   {evento.lugar}
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className="col-span-1 text-right ">
+                                                <p className=" text-right ">
                                                   {evento.horaInicialSalon +
                                                     " a "}
-
                                                   {evento.horaFinalSalon}
                                                   {"HRS"}
                                                 </p>
@@ -1051,19 +1055,21 @@ function PantallaDirec1() {
                                             <h3 className="font-bold mb-4 text-3xl">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3 ">
+                                              <p className="col-span-3">
                                                 {evento.tipoEvento}
                                               </p>
-
+                                              <p className=" ">
+                                                {evento.devices[0]}
+                                              </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="col-span-3 text-center ">
+                                              <p className="text-center ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className="col-span-1 text-right ">
+                                              <p className=" text-right ">
                                                 {evento.horaInicialSalon +
                                                   " a "}
                                                 {evento.horaFinalSalon}
