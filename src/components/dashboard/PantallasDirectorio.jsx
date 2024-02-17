@@ -546,6 +546,9 @@ function PantallasDirectorio() {
                   type="file"
                 />
               </div>
+              <p className="text-white dark:text-gray-200 block text-sm">
+                Desktop: (440px x 660x max) portrait: (520px x 1040px max)
+              </p>
             </div>
 
             <div className="mb-4">

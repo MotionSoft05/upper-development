@@ -89,7 +89,7 @@ function PantallaDirec1() {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 10 : 5
+    templateData[0]?.setPortrait ? 7 : 5
   );
 
   useEffect(() => {
@@ -99,12 +99,12 @@ function PantallaDirec1() {
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
-    const limite = isPortrait ? 10 : 5;
+    const limite = isPortrait ? 7 : 5;
     if (!eventos || eventos.length === 0) {
       return true;
     }
 
-    if (isPortrait && eventos.length > 10) {
+    if (isPortrait && eventos.length > 7) {
       // Si es portrait y supera los 8 eventos, recargar la página
 
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
@@ -629,10 +629,9 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-10`}
+                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                   style={{
-                    // backgroundColor: templateActual.templateColor,
-                    background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                    background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
                     fontFamily: templateActual.fontStyle,
                   }}
@@ -667,7 +666,7 @@ function PantallaDirec1() {
                                 >
                                   {Array.from({
                                     length: templateData[0]?.setPortrait
-                                      ? 10
+                                      ? 7
                                       : 5,
                                   }).map((_, innerIndex) => {
                                     const evento = slideEventos[innerIndex]; // Obtener el evento si existe
@@ -709,22 +708,23 @@ function PantallaDirec1() {
                                               <h3 className="font-bold mb-4 text-3xl">
                                                 {evento.nombreEvento}
                                               </h3>
-                                              <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                              <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3 ">
+                                                <p className="col-span-3">
                                                   {evento.tipoEvento}
                                                 </p>
-
+                                                <p className=" ">
+                                                  {evento.devices[0]}
+                                                </p>
                                                 {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="col-span-3 text-center ">
+                                                <p className="text-center ">
                                                   {evento.lugar}
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className="col-span-1 text-right ">
+                                                <p className=" text-right ">
                                                   {evento.horaInicialSalon +
                                                     " a "}
-
                                                   {evento.horaFinalSalon}
                                                   {"HRS"}
                                                 </p>
@@ -748,7 +748,7 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 10) ||
+                                  eventosEnCurso.length > 7) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length > 5)
                                   ? "none"
@@ -758,7 +758,7 @@ function PantallaDirec1() {
                             {eventosPorSlide.map((slideEventos, index) => (
                               <div key={index} className="my-2 ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 10 : 5,
+                                  length: templateData[0]?.setPortrait ? 7 : 5,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
@@ -799,19 +799,21 @@ function PantallaDirec1() {
                                             <h3 className="font-bold mb-4 text-3xl">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3 ">
+                                              <p className="col-span-3">
                                                 {evento.tipoEvento}
                                               </p>
-
+                                              <p className=" ">
+                                                {evento.devices[0]}
+                                              </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="col-span-3 text-center ">
+                                              <p className="text-center ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className="col-span-1 text-right ">
+                                              <p className=" text-right ">
                                                 {evento.horaInicialSalon +
                                                   " a "}
                                                 {evento.horaFinalSalon}
@@ -837,16 +839,17 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-12`}
+                  className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
                   style={{
-                    // backgroundColor: templateActual.templateColor,
-                    background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                    background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
                     fontFamily: templateActual.fontStyle,
                   }}
                 >
                   {/* Título */}
-                  <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
+                  <h2 className="text-color text-4xl text-center align-bottom ">
+                    NOTICIAS
+                  </h2>
                 </div>
               </div>
               <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
@@ -919,7 +922,7 @@ function PantallaDirec1() {
                                 >
                                   {Array.from({
                                     length: templateData[0]?.setPortrait
-                                      ? 10
+                                      ? 7
                                       : 5,
                                   }).map((_, innerIndex) => {
                                     const evento = slideEventos[innerIndex]; // Obtener el evento si existe
@@ -961,22 +964,23 @@ function PantallaDirec1() {
                                               <h3 className="font-bold mb-4 text-3xl">
                                                 {evento.nombreEvento}
                                               </h3>
-                                              <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                              <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3 ">
+                                                <p className="col-span-3">
                                                   {evento.tipoEvento}
                                                 </p>
-
+                                                <p className=" ">
+                                                  {evento.devices[0]}
+                                                </p>
                                                 {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="col-span-3 text-center ">
+                                                <p className="text-center ">
                                                   {evento.lugar}
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className="col-span-1 text-right ">
+                                                <p className=" text-right ">
                                                   {evento.horaInicialSalon +
                                                     " a "}
-
                                                   {evento.horaFinalSalon}
                                                   {"HRS"}
                                                 </p>
@@ -1000,7 +1004,7 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 10) ||
+                                  eventosEnCurso.length > 7) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length > 5)
                                   ? "none"
@@ -1010,7 +1014,7 @@ function PantallaDirec1() {
                             {eventosPorSlide.map((slideEventos, index) => (
                               <div key={index} className="my-2 ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 10 : 5,
+                                  length: templateData[0]?.setPortrait ? 7 : 5,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
@@ -1051,19 +1055,21 @@ function PantallaDirec1() {
                                             <h3 className="font-bold mb-4 text-3xl">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-7 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3 ">
+                                              <p className="col-span-3">
                                                 {evento.tipoEvento}
                                               </p>
-
+                                              <p className=" ">
+                                                {evento.devices[0]}
+                                              </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="col-span-3 text-center ">
+                                              <p className="text-center ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className="col-span-1 text-right ">
+                                              <p className=" text-right ">
                                                 {evento.horaInicialSalon +
                                                   " a "}
                                                 {evento.horaFinalSalon}
@@ -1157,13 +1163,13 @@ function PantallaDirec1() {
                   position: "relative",
                   overflow: "hidden",
                   width: "100%", // Ajusta el ancho del contenedor según sea necesario
-                  height: "10vw", // Ajusta el alto del contenedor según sea necesario
+                  height: "27vw", // Ajusta el alto del contenedor según sea necesario
                 }}
               >
                 <img
                   style={{
                     width: "100%",
-                    height: "10vw",
+                    height: "27vw",
                     objectFit: "cover",
                   }}
                   src={templateData[0]?.publicidad}
