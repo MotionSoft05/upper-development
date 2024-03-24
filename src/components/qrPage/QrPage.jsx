@@ -172,21 +172,25 @@ function QrDinamic({ searchQuery }) {
                 const posicionActual = parseInt(numeroPantallaActual, 10);
 
                 if (posicionPantalla === posicionActual) {
-                  eventosData.push(evento);
+                  // Agregar el filtro para eventos del día en curso
+
+                  const fechaInicio = new Date(
+                    `${evento.fechaInicio}T00:00:00`
+                  );
+                  fechaInicio.setDate(fechaInicio.getDate()); // Sumar 1 día
+
+                  const fechaFinal = new Date(`${evento.fechaFinal}T23:59:59`);
+                  fechaFinal.setDate(fechaFinal.getDate()); // Sumar 1 día
+
+                  const hoy = new Date();
+
+                  if (fechaInicio <= hoy && hoy <= fechaFinal) {
+                    eventosData.push(evento);
+                  }
                 }
               }
             });
-            // console.log("eventosData:", eventosData);
-            // const eventosFiltrados = eventosData.filter((evento) => {
-            //   const fechaFinalEvento = new Date(evento.fechaFinal);
-            //   const fechaActual = new Date();
 
-            // Si la fecha final del evento es anterior a la fecha actual, se filtra
-            //   return fechaActual <= fechaFinalEvento;
-            // });
-            // console.log("eventosFiltrados:", eventosFiltrados);
-            // Ordenar los eventos por fecha y hora más cercanas a la actual
-            // Suponiendo que tienes eventos ordenados en eventosEnCurso
             const eventosOrdenados = eventosData.slice().sort((a, b) => {
               const fechaFinalA = new Date(a.fechaFinal);
               const fechaFinalB = new Date(b.fechaFinal);
@@ -201,20 +205,6 @@ function QrDinamic({ searchQuery }) {
 
               return horaInicioA - horaInicioB;
             });
-
-            // Filtrar por eventos cuya horaInicialSalon sea mayor que la hora actual
-            // const horaActual = new Date();
-            // const eventosFiltradosv1 = eventosOrdenados.filter((evento) => {
-            //   const horaInicioEvento = new Date(
-            //     `2000-01-01T${evento.horaInicialSalon}`
-            //   );
-            //   return horaInicioEvento > horaActual;
-            // });
-
-            // Usar eventosFiltrados en tu componente
-            // setEventosEnCurso(eventosFiltradosv1);
-
-            // console.log("Eventos ordenados:", eventosOrdenados);
 
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
@@ -502,7 +492,14 @@ function QrDinamic({ searchQuery }) {
               }}
             >
               {/* Título */}
-              <h2 className="text-white text-4xl text-center">EVENTOS</h2>
+              <h2
+                className="text-white text-4xl text-center"
+                style={{
+                  color: templateActual.fontColor,
+                }}
+              >
+                EVENTOS
+              </h2>
             </div>
 
             {/* Contenido principal */}
@@ -534,20 +531,20 @@ function QrDinamic({ searchQuery }) {
                                   {evento ? (
                                     <>
                                       <img
-                                        className="object-contain w-auto h-[70px] my-2 shadow-xl"
+                                        className="object-contain my-2 shadow-xl"
                                         src={evento.images[0]}
                                         alt={evento.nombreEvento}
                                         style={{
-                                          width: "5vw",
-                                          height: "5vw",
+                                          width: "20vw",
+                                          height: "20vw",
                                           objectFit: "cover",
                                         }}
                                       />
-                                      <div className="w-full">
+                                      <div className="w-full ">
                                         <h3 className="font-bold mb-4 text-base lg:text-3xl">
                                           {evento.nombreEvento}
                                         </h3>
-                                        <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
+                                        <div className="grid grid-cols-3 gap-1 font-bold text-xs ">
                                           {/* Columna 1: Nombre (a la izquierda) */}
                                           <p className="col-span-3">
                                             {evento.tipoEvento}

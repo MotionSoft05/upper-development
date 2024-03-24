@@ -286,6 +286,7 @@ function PantallaDirec1() {
                   label: template.ciudad,
                 });
               });
+              console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
               setTemplateData(templateData);
             } else {
               console.log(
@@ -531,7 +532,7 @@ function PantallaDirec1() {
   }
 
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  // console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
+  console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
@@ -629,7 +630,7 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                  className={` text-black py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                   style={{
                     background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
@@ -637,11 +638,14 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2 className="text-color text-4xl text-center">EVENTOS</h2>
+                  <h2 className=" text-4xl text-center">EVENTOS</h2>
                 </div>
                 {/* contenido principal */}
-                <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50 relative z-20">
-                  <div className=" text-black">
+                <div
+                  className=" bg-gradient-to-t from-white to-gray-200  relative z-20"
+                  style={{}}
+                >
+                  <div className=" ">
                     <div className="flex flex-col">
                       <div className="space-y-5 pl-5 flex-grow">
                         <div className="">
@@ -689,6 +693,7 @@ function PantallaDirec1() {
                                               style={{
                                                 position: "relative",
                                                 overflow: "hidden",
+
                                                 width: "5vw", // Ajusta el ancho del contenedor según sea necesario
                                                 height: "5vw", // Ajusta el alto del contenedor según sea necesario
                                               }}
@@ -842,12 +847,15 @@ function PantallaDirec1() {
                   className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
                   style={{
                     background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
-                    color: templateActual.fontColor,
+
                     fontFamily: templateActual.fontStyle,
                   }}
                 >
                   {/* Título */}
-                  <h2 className="text-color text-4xl text-center align-bottom ">
+                  <h2
+                    className="text-color text-4xl text-center align-bottom "
+                    style={{ color: templateActual.fontColor }}
+                  >
                     NOTICIAS
                   </h2>
                 </div>
@@ -878,16 +886,25 @@ function PantallaDirec1() {
             <div className="">
               {/* Linea arriba */}{" "}
               <div
-                className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                className={` py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
-                  color: templateActual.fontColor,
+
                   fontFamily: templateActual.fontStyle,
                 }}
               >
                 {/* Título */}
-                <h2 className="text-color text-4xl text-center">EVENTOS</h2>
+                <h2
+                  className=" text-4xl text-center"
+                  style={{
+                    // backgroundColor: templateActual.templateColor,
+
+                    color: templateActual.fontColor,
+                  }}
+                >
+                  EVENTOS
+                </h2>
               </div>
               {/* contenido principal */}
               <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50 ">
@@ -1105,7 +1122,14 @@ function PantallaDirec1() {
                 }}
               >
                 {/* Título */}
-                <h2 className="text-color text-4xl text-center">NOTICIAS</h2>
+                <h2
+                  className="text-color text-4xl text-center"
+                  style={{
+                    color: templateActual.fontColor,
+                  }}
+                >
+                  NOTICIAS
+                </h2>
               </div>
             </div>
           )}

@@ -508,7 +508,7 @@ function PantallasDirectorio() {
   };
 
   return (
-    <section className="px-8 py-12">
+    <section className="pl-16 md:px-8 py-12">
       <div>
         <div className="p-5 text-center">
           <h2 className="text-4xl font-extrabold text-gray-900">

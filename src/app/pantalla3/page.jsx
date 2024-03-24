@@ -11,8 +11,18 @@ import {
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
-import { useEffect, useState } from "react";
-import "keen-slider/keen-slider.min.css";
+import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
+
+import { Swiper, SwiperSlide } from "swiper/react";
+
+// Import Swiper styles
+import "../../../node_modules/swiper/swiper-bundle.min.css";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+
+// import required modules
+import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -32,6 +42,7 @@ function Pantalla3() {
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
   const numeroPantallaActual = "3";
+  const swiperRef = useRef(null);
 
   const obtenerFecha = () => {
     const diasSemana = [
@@ -291,7 +302,6 @@ function Pantalla3() {
 
   const [opacities, setOpacities] = useState([]);
 
-  let loop = true; // Establecer el valor predeterminado
   let img = 1;
   if (eventoActualCopy) {
     img = eventoActualCopy.images.length;
@@ -461,62 +471,36 @@ function Pantalla3() {
           <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
             <div className="grid grid-cols-3 gap-x-4 text-black">
               <div className="col-span-1  mr-4 my-auto">
-                <div
-                  ref={sliderRef}
-                  className={`fader$`}
-                  style={{
-                    position: "relative",
-                    overflow: "hidden",
-                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
-                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
-                    display: images.length > 1 ? "" : "none",
-                  }}
-                >
-                  {images.map((image, index) => (
-                    <div
-                      key={index}
-                      className="fader__slide "
-                      style={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        opacity: opacities[index],
-                        width: "100%",
-                        height: "100%",
-                      }}
-                    >
-                      <img
-                        src={image}
-                        alt={`Imagen ${index + 1}`}
-                        className="w-full h-full object-cover"
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          objectFit: "cover",
-                        }}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                <div
-                  style={{
-                    position: "relative",
-                    overflow: "hidden",
-                    width: "30vw", // Ajusta el ancho del contenedor según sea necesario
-                    height: "30vw", // Ajusta el alto del contenedor según sea necesario
-                    display: images.length === 1 ? "" : "none",
-                  }}
-                >
-                  <img
-                    src={images[0]}
-                    alt={`Imagen 1`}
+                <div className="col-span-1  mr-4 my-auto">
+                  <Swiper
+                    ref={swiperRef}
+                    spaceBetween={30}
+                    effect={"fade"}
+                    autoplay={{
+                      delay: 2500,
+                      disableOnInteraction: false,
+                    }}
+                    loop={true}
+                    modules={[Autoplay, Pagination, EffectFade]}
+                    className="mySwiper"
                     style={{
+                      position: "relative",
+                      overflow: "hidden",
                       width: "30vw",
                       height: "30vw",
-                      objectFit: "cover",
                     }}
-                  />
+                  >
+                    {images.map((image, index) => (
+                      <SwiperSlide key={index + 1} style={{}}>
+                        <img
+                          src={image}
+                          alt={index + 1}
+                          className="w-full h-full object-cover"
+                          style={{}}
+                        />
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
                 </div>
 
                 <p
