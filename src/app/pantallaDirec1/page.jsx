@@ -96,6 +96,7 @@ function PantallaDirec1() {
     // Actualizar la configuración de loop cuando eventosEnCurso cambia
     sliderRef.current?.refresh();
   }, [eventosEnCurso]);
+  console.log("🚀 ~ PantallaDirec1 ~ eventosEnCurso:", eventosEnCurso);
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
@@ -624,7 +625,7 @@ function PantallaDirec1() {
               )}
             </div>
           </div>
-          {/* Contenerdor de eventos */}
+          {/* Contenedor de eventos */}
           {!templateData[0]?.setPortrait ? (
             <div className="grid grid-cols-4 bg-white">
               <div className="col-span-3 md:col-span-3  mx-3">
@@ -649,13 +650,13 @@ function PantallaDirec1() {
                     <div className="flex flex-col">
                       <div className="space-y-5 pl-5 flex-grow">
                         <div className="">
-                          {/* Parte con slider */}
+                          {/* Parte con slider horizontal  ------------------------------------------------------------------ */}
                           <div
                             className=""
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 11) ||
+                                  eventosEnCurso.length < 8) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length < 6)
                                   ? "none"
@@ -713,7 +714,7 @@ function PantallaDirec1() {
                                               <h3 className="font-bold mb-4 text-3xl">
                                                 {evento.nombreEvento}
                                               </h3>
-                                              <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
+                                              <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
                                                 <p className="col-span-3">
                                                   {evento.tipoEvento}
@@ -747,7 +748,7 @@ function PantallaDirec1() {
                               ))}
                             </div>
                           </div>
-                          {/* Parte sin slider */}
+                          {/* Parte sin slider horizontal ------------------------------------------------------------------ */}
                           <div
                             className=""
                             style={{
@@ -804,7 +805,7 @@ function PantallaDirec1() {
                                             <h3 className="font-bold mb-4 text-3xl">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
                                               <p className="col-span-3">
                                                 {evento.tipoEvento}
@@ -874,7 +875,7 @@ function PantallaDirec1() {
                     style={{
                       width: "100%", // Hacer que la imagen ocupe el 100% del ancho del contenedor
                       height: "100%", // Hacer que la imagen ocupe el 100% del alto del contenedor
-                      objectFit: "cover",
+                      borderRadius: "10px", // Redondear las esquinas objectFit: "cover",
                     }}
                     src={templateData[0].publicidad}
                     alt="Publicidad"
@@ -889,7 +890,7 @@ function PantallaDirec1() {
                 className={` py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
-                  background: `linear-gradient(${templateActual.templateColor}, #e3e3e3d9)`,
+                  background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
 
                   fontFamily: templateActual.fontStyle,
                 }}
@@ -918,13 +919,14 @@ function PantallaDirec1() {
                       <div className="space-y-5 pl-5 flex-grow">
                         {/* Slots predeterminados */}
                         <div className="">
-                          {/* Parte con slider */}
+                          {/* Parte con slider Vertical ------------------------------------------------------------------ */}
+
                           <div
                             className=""
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 11) ||
+                                  eventosEnCurso.length < 8) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length < 6)
                                   ? "none"
@@ -1015,7 +1017,7 @@ function PantallaDirec1() {
                               ))}
                             </div>
                           </div>
-                          {/* Parte sin slider */}
+                          {/* Parte sin slider Vertical ------------------------------------------------------------------*/}
                           <div
                             className=""
                             style={{
@@ -1116,7 +1118,7 @@ function PantallaDirec1() {
                 className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
-                  background: `linear-gradient(#ffffff,${templateActual.templateColor})`,
+                  background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
                   color: templateActual.fontColor,
                   fontFamily: templateActual.fontStyle,
                 }}
@@ -1188,6 +1190,7 @@ function PantallaDirec1() {
                   overflow: "hidden",
                   width: "100%", // Ajusta el ancho del contenedor según sea necesario
                   height: "27vw", // Ajusta el alto del contenedor según sea necesario
+                  borderRadius: "10px", // Redondear las esquinas
                 }}
               >
                 <img

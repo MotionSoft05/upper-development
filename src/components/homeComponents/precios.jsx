@@ -105,6 +105,10 @@ function Precios() {
                   Digital
                 </span>
               </li>
+              <li className="flex items-center space-x-3">
+                <img src="/img/tick.svg" />
+                <span>Costo mensual por pantalla.</span>
+              </li>
             </ul>
 
             <Link href="/register">
