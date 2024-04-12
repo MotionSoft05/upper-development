@@ -7,6 +7,7 @@ import Preguntas from "@/components/homeComponents/preguntas";
 import Contacto from "@/components/homeComponents/contacto";
 import Register from "./register/page";
 import Link from "next/link";
+import HomeSlider from "@/components/homeComponents/sliderHome";
 
 export default function Home() {
   const buttonRef = useRef(null);
@@ -44,101 +45,7 @@ export default function Home() {
     <main className="bg-gray-50">
       {/* Title */}
       <section>
-        <div className=" grid grid-cols-1 md:grid-cols-2 md:mx-8 lg:mx-16 xl:mx-36 ">
-          {/* ---- Slider KeenSlider ---- */}
-          <div
-            ref={sliderRef}
-            className="keen-slider"
-            style={{
-              position: "relative",
-              overflow: "hidden",
-            }}
-          >
-            <div
-              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
-              style={{
-                width: "20vw",
-                height: "20vw",
-
-                top: "0",
-              }}
-            >
-              <img
-                src="/img/ImagenSliderUpper1.jpg"
-                className="w-full h-full object-cover"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  position: "absolute",
-                }}
-                alt="Logo"
-              />
-            </div>
-            <div
-              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
-              style={{
-                width: "20vw",
-                height: "20vw",
-
-                top: "0",
-              }}
-            >
-              <img
-                src="/img/ImagenSliderUpper2.jpg"
-                className="w-full h-full object-cover"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  position: "absolute",
-                }}
-                alt="Logo"
-              />
-            </div>
-            <div
-              className="keen-slider__slide number-slide1 flex justify-center items-center overflow-hidden"
-              style={{
-                width: "20vw",
-                height: "20vw",
-
-                top: "0",
-              }}
-            >
-              <img
-                src="/img/ImagenSliderUpper3.jpg"
-                className="w-full h-full object-cover"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  position: "absolute",
-                }}
-                alt="Logo"
-              />
-            </div>
-          </div>
-          {/* ^^^^ Slider KeenSlider ^^^^ */}
-
-          <div className="">
-            <div className="mb-8">
-              <h1 className="md:text-4xl text-lg sm:text-2xl sm:mt-4 font-bold sm:font-normal mt-4 pl-10">
-                UPPER DS es el sistema de Señalización Digital que ayudara a
-                generar impacto visual en tu negocio
-              </h1>
-            </div>
-            <div className="">
-              <div className="">
-                <p className="md:text-lg pl-10">
-                  Es una plataforma de señalización digital fácil de
-                  personalizar, programar y diseñar contenido de forma
-                  profesional. La plataforma se encuentra basada en la nube para
-                  acceso desde cualquier dispositivo
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <HomeSlider />
       </section>
       {/* Soluciones */}
       <section id="soluciones">

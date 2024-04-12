@@ -1,4 +1,12 @@
+"use client";
+import { usePathname } from "next/navigation"; // Captura la url
 function footer() {
+  const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
+
+  if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
+    return null;
+  }
+
   return (
     <footer className="">
       <div className="w-full max-w-screen-xl mx-auto md:py-8 flex flex-col items-center">

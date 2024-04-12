@@ -373,51 +373,51 @@ function ConsultaModEvento() {
                   usuarioLogeado === "contacto@upperds.mx") && (
                   <th
                     scope="col"
-                    className="px-0.5 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                    className="px-0.5 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                   >
                     USUARIO
                   </th>
                 )}
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-0.5 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   N
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   NOMBRE
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   TIPO
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   NOMBRE DE SALON
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   FECHA/S
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-2 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   HORA SALON
                 </th>
 
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-2 md:py-3 text-center text-xs font-medium text-gray-500 "
+                  className="px-0.5 py-1 md:px-3 md:py-3 text-center text-xs font-medium text-gray-500 "
                 >
                   ACCIONES
                 </th>

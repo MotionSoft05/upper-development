@@ -428,161 +428,157 @@ function Pantalla1() {
     tipoEvento,
     description,
   } = eventoActual;
-
+  // h-screen PONE LA SCROLL BAR?!?!?!?!
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
-        <div id="Content" className="flex-grow flex flex-col justify-center ">
-          {/* Header */}
-          <div className="flex items-center justify-between ">
-            {templateActual.logo && (
-              <>
-                {" "}
-                <div
-                  style={{
-                    width: "18vw",
-                    height: "10vw",
-                    overflow: "hidden",
-                  }}
-                >
-                  <img src={templateActual.logo} alt="Logo" className="w-72" />
-                </div>{" "}
-              </>
-            )}
-            <h1
-              className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
-              style={{ fontFamily: templateActual.fontStyle }}
+    <section className=" h-screen bg-white  text-black  flex flex-col justify-center mx-2 my-2 overflow-hidden">
+      {/* Header */}
+      <div className="flex items-center justify-between ">
+        {templateActual.logo && (
+          <>
+            {" "}
+            <div
+              style={{
+                width: "18vw",
+                height: "10vw",
+                overflow: "hidden",
+              }}
             >
-              {dispositivoCoincidenteLAL}
-            </h1>
-          </div>
-          {/* Linea arriba */}
-          <div
-            className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            <h2>{nombreEvento}</h2>
-          </div>
-          {/* contenido principal */}
-          <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
-            <div className="grid grid-cols-3 gap-x-4 text-black">
-              <div className="col-span-1  mr-4 my-auto">
-                <div className="col-span-1  mr-4 my-auto">
-                  <Swiper
-                    ref={swiperRef}
-                    spaceBetween={30}
-                    effect={"fade"}
-                    autoplay={{
-                      delay: 2500,
-                      disableOnInteraction: false,
-                    }}
-                    loop={true}
-                    modules={[Autoplay, Pagination, EffectFade]}
-                    className="mySwiper"
-                    style={{
-                      position: "relative",
-                      overflow: "hidden",
-                      width: "30vw",
-                      height: "30vw",
-                    }}
-                  >
-                    {images.map((image, index) => (
-                      <SwiperSlide key={index + 1} style={{}}>
-                        <img
-                          src={image}
-                          alt={index + 1}
-                          className="w-full h-full object-cover"
-                          style={{}}
-                        />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                </div>
-
-                <p
-                  style={{
-                    color: templateActual.fontColor,
-                    fontFamily: templateActual.fontStyle,
-                    display: images.length === 0 ? "" : "none",
-                  }}
-                >
-                  No hay imágenes disponibles
-                </p>
-              </div>
-
-              <div className="col-span-2 space-y-8  my-4">
-                <div>
-                  <p
-                    className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    Sesión:
-                  </p>
-                  <p
-                    className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    {horaInicialReal}
-                    <span className="text-2x1"> hrs.</span>
-                  </p>
-                </div>
-                <div className="">
-                  {/* Tipo de evento y descripción */}
-                  <h1
-                    className={`text-3xl md:text-4xl text-color font-bold`}
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    {tipoEvento}
-                  </h1>
-                  <div className="text-center flex px-0 mt-6">
-                    <p
-                      className={`text-3xl text-color md:text-4xl`}
-                      style={{ fontFamily: templateActual.fontStyle }}
-                    >
-                      {description}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <img src={templateActual.logo} alt="Logo" className="w-72" />
+            </div>{" "}
+          </>
+        )}
+        <h1
+          className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
+          style={{ fontFamily: templateActual.fontStyle }}
+        >
+          {dispositivoCoincidenteLAL}
+        </h1>
+      </div>
+      {/* Linea arriba */}
+      <div
+        className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+        style={{
+          backgroundColor: templateActual.templateColor,
+          color: templateActual.fontColor,
+          fontFamily: templateActual.fontStyle,
+        }}
+      >
+        <h2>{nombreEvento}</h2>
+      </div>
+      {/* contenido principal */}
+      <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
+        <div className="grid grid-cols-3 gap-x-4 text-black">
+          <div className="col-span-1  mr-4 my-auto">
+            <div className="col-span-1  mr-4 my-auto">
+              <Swiper
+                ref={swiperRef}
+                spaceBetween={30}
+                effect={"fade"}
+                autoplay={{
+                  delay: 2500,
+                  disableOnInteraction: false,
+                }}
+                loop={true}
+                modules={[Autoplay, Pagination, EffectFade]}
+                className="mySwiper"
+                style={{
+                  position: "relative",
+                  overflow: "hidden",
+                  width: "30vw",
+                  height: "30vw",
+                }}
+              >
+                {images.map((image, index) => (
+                  <SwiperSlide key={index + 1} style={{}}>
+                    <img
+                      src={image}
+                      alt={index + 1}
+                      className="w-full h-full object-cover"
+                      style={{}}
+                    />
+                  </SwiperSlide>
+                ))}
+              </Swiper>
             </div>
-          </div>
-          {/* Linea abajo */}
-          <div
-            id="Abajo"
-            className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
+
             <p
-              className="font-bold uppercase"
               style={{
                 color: templateActual.fontColor,
                 fontFamily: templateActual.fontStyle,
+                display: images.length === 0 ? "" : "none",
               }}
             >
-              {obtenerFecha()}
+              No hay imágenes disponibles
             </p>
-            <div className="flex items-center justify-center mb-1">
-              <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
+          </div>
+
+          <div className="col-span-2 space-y-8  my-4">
+            <div>
               <p
-                className=" uppercase"
-                style={{
-                  color: templateActual.fontColor,
-                  fontFamily: templateActual.fontStyle,
-                }}
+                className={`text-3xl md:text-4xl text-color font-bold`}
+                style={{ fontFamily: templateActual.fontStyle }}
               >
-                {currentHour}
-              </p>{" "}
-              {/* Mostrar la hora actual */}
+                Sesión:
+              </p>
+              <p
+                className={`text-3xl md:text-4xl text-color font-bold`}
+                style={{ fontFamily: templateActual.fontStyle }}
+              >
+                {horaInicialReal}
+                <span className="text-2x1"> hrs.</span>
+              </p>
+            </div>
+            <div className="">
+              {/* Tipo de evento y descripción */}
+              <h1
+                className={`text-3xl md:text-4xl text-color font-bold`}
+                style={{ fontFamily: templateActual.fontStyle }}
+              >
+                {tipoEvento}
+              </h1>
+              <div className="text-center flex px-0 mt-6">
+                <p
+                  className={`text-3xl text-color md:text-4xl`}
+                  style={{ fontFamily: templateActual.fontStyle }}
+                >
+                  {description}
+                </p>
+              </div>
             </div>
           </div>
+        </div>
+      </div>
+      {/* Linea abajo */}
+      <div
+        id="Abajo"
+        className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl `}
+        style={{
+          backgroundColor: templateActual.templateColor,
+          color: templateActual.fontColor,
+          fontFamily: templateActual.fontStyle,
+        }}
+      >
+        <p
+          className="font-bold uppercase"
+          style={{
+            color: templateActual.fontColor,
+            fontFamily: templateActual.fontStyle,
+          }}
+        >
+          {obtenerFecha()}
+        </p>
+        <div className="flex items-center justify-center mb-1">
+          <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
+          <p
+            className=" uppercase"
+            style={{
+              color: templateActual.fontColor,
+              fontFamily: templateActual.fontStyle,
+            }}
+          >
+            {currentHour}
+          </p>{" "}
+          {/* Mostrar la hora actual */}
         </div>
       </div>
     </section>

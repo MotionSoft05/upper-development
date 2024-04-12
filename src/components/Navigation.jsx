@@ -55,8 +55,8 @@ function Navigation() {
   //const [loading, setLoading] = useState(true);
 
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
-  const isVisible = !pathname.includes("/paginasAleatorias"); // Cuando este para la Vista Qr va a desaparecer el Navbar
-  console.log("🚀 ~ Navigation ~ isVisible:", isVisible);
+  // const isVisible = !pathname.includes("/paginasAleatorias"); // Cuando este para la Vista Qr va a desaparecer el Navbar
+  // console.log("🚀 ~ Navigation ~ isVisible:", isVisible);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -126,8 +126,7 @@ function Navigation() {
     window.location.href = "/dashboard.html";
   };
 
-  if (!isVisible) {
-    // Cuando la NavBar esta en /paginasAleatorias devuelve el componente en null
+  if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
     return null;
   }
 
