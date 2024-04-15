@@ -28,6 +28,7 @@ const auth = getAuth(app);
 function LogIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsChecked, setTermsChecked] = useState(false);
   const [error, setError] = useState(null);
   const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
     useState(false);
@@ -39,7 +40,7 @@ function LogIn() {
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
 
-  const isFormValid = email && password;
+  const isFormValid = email && password && termsChecked;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -190,6 +191,31 @@ function LogIn() {
                   )}
                 </button>
               </div>
+              <div class="flex items-start mb-5">
+                <div class="flex items-center h-5">
+                  <input
+                    id="terms"
+                    type="checkbox"
+                    value=""
+                    class="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-blue-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800"
+                    required
+                    onChange={(e) => setTermsChecked(e.target.checked)}
+                  />
+                </div>
+                <label
+                  for="terms"
+                  class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
+                >
+                  Estoy de acuerdo con los&nbsp;
+                  <a
+                    href="#"
+                    class="text-blue-600 hover:underline dark:text-blue-500"
+                  >
+                    términos y condiciones
+                  </a>
+                </label>
+              </div>
+
               <div className="text-center lg:text-left">
                 <button
                   type="submit"
