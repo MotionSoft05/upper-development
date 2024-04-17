@@ -211,6 +211,7 @@ function Register() {
         email: email,
         telefono: phoneNumber,
         empresa: companyName,
+        sesion: 0,
         pd: 0,
         ps: 0,
         total: 0,
