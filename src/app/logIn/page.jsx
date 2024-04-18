@@ -107,7 +107,7 @@ function LogIn() {
 
           // Verificar si la sesión pasó a estar en 1 y enviar el correo electrónico
           if (sesionActual + 1 === 1) {
-            sendEmail(user.uid);
+            await sendEmail(user.uid);
           }
 
           window.location.href = "/";
