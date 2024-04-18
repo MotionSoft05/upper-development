@@ -9,6 +9,43 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import Link from "next/link";
+import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore";
+import emailjs from "emailjs-com";
+
+// Esta función enviará un correo electrónico utilizando Email.js
+const sendEmail = async (userID) => {
+  // Cambiar user.uid a userID
+  try {
+    // Configura tus credenciales de Email.js
+    const serviceID = "service_qjv3qpt"; // Reemplaza con tu Service ID
+    const templateID = "template_pa584we"; // Reemplaza con tu Template ID
+    const userIDEmailJS = "MEzsSEWILjBamER7b"; // Reemplaza con tu User ID de Email.js
+
+    // Obtiene una referencia al documento del usuario en Firestore
+    const db = getFirestore();
+    const userDocRef = doc(db, "usuarios", userID); // Usar userID aquí
+
+    // Obtiene los datos del usuario de Firestore
+    const userDocSnapshot = await getDoc(userDocRef);
+    const userData = userDocSnapshot.data();
+
+    // Console log de empresa y email
+    console.log("Empresa:", userData.empresa);
+    console.log("Email:", userData.email);
+
+    // Configura los datos del correo electrónico que deseas enviar
+    const emailParams = {
+      to_empresa: userData.empresa,
+      to_correo: userData.email,
+    };
+
+    // Envía el correo electrónico utilizando Email.js
+    await emailjs.send(serviceID, templateID, emailParams, userIDEmailJS);
+    console.log("Correo electrónico enviado exitosamente");
+  } catch (error) {
+    console.error("Error al enviar el correo electrónico:", error);
+  }
+};
 
 import { Dialog, Transition } from "@headlessui/react";
 
@@ -60,7 +97,27 @@ function LogIn() {
           setEmail("");
           setPassword("");
           setError(null);
-          window.location.href = "/";
+          // Obtener una referencia al documento del usuario en Firestore
+          const db = getFirestore();
+          const userDocRef = doc(db, "usuarios", user.uid);
+
+          // Obtener el valor actual del campo "sesion"
+          const userDocSnapshot = await getDoc(userDocRef);
+          const sesionActual = userDocSnapshot.data().sesion || 0;
+
+          // Incrementar el valor del campo "sesion" en 1
+          await updateDoc(userDocRef, {
+            sesion: sesionActual + 1,
+          });
+
+          // Verificar si la sesión pasó a estar en 1 y enviar el correo electrónico
+          if (sesionActual + 1 === 1) {
+            sendEmail(user.uid);
+          }
+
+          setTimeout(() => {
+            window.location.href = "/";
+          }, 15000);
         } else {
           setError(
             "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
