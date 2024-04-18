@@ -136,11 +136,6 @@ function Admin() {
 
         setDatosFiscalesConNombre(datosFiscalesConNombreData);
 
-        console.log(
-          "Nombres de Empresas:",
-          datosFiscalesConNombreData.map((empresa) => empresa.nombreEmpresa)
-        );
-
         // Escucha cambios en DatosFiscales
         unsubscribe = onSnapshot(datosFiscalesCollection, (snapshot) => {
           const updatedDatosFiscalesData = snapshot.docs.map((doc) => ({
@@ -164,13 +159,6 @@ function Admin() {
           );
 
           setDatosFiscalesConNombre(updatedDatosFiscalesConNombreData);
-
-          console.log(
-            "Nombres de Empresas Actualizados:",
-            updatedDatosFiscalesConNombreData.map(
-              (empresa) => empresa.nombreEmpresa
-            )
-          );
         });
       } catch (error) {
         console.error(
