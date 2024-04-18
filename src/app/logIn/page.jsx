@@ -29,10 +29,6 @@ const sendEmail = async (userID) => {
     const userDocSnapshot = await getDoc(userDocRef);
     const userData = userDocSnapshot.data();
 
-    // Console log de empresa y email
-    console.log("Empresa:", userData.empresa);
-    console.log("Email:", userData.email);
-
     // Configura los datos del correo electrónico que deseas enviar
     const emailParams = {
       to_empresa: userData.empresa,
@@ -41,7 +37,6 @@ const sendEmail = async (userID) => {
 
     // Envía el correo electrónico utilizando Email.js
     await emailjs.send(serviceID, templateID, emailParams, userIDEmailJS);
-    console.log("Correo electrónico enviado exitosamente");
   } catch (error) {
     console.error("Error al enviar el correo electrónico:", error);
   }
@@ -115,9 +110,7 @@ function LogIn() {
             sendEmail(user.uid);
           }
 
-          setTimeout(() => {
-            window.location.href = "/";
-          }, 15000);
+          window.location.href = "/";
         } else {
           setError(
             "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
