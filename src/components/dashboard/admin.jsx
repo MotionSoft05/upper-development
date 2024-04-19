@@ -847,16 +847,16 @@ function Admin() {
                               onClick={() =>
                                 handleDeshabilitarUsuario(usuario.id)
                               }
-                              className="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded"
+                              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              <FontAwesomeIcon icon={faToggleOff} />
+                              <FontAwesomeIcon icon={faToggleOn} />
                             </button>
                           ) : (
                             <button
                               onClick={() => handleHabilitarUsuario(usuario.id)}
-                              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
+                              className="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              <FontAwesomeIcon icon={faToggleOn} />
+                              <FontAwesomeIcon icon={faToggleOff} />
                             </button>
                           )}
                         </div>
