@@ -212,6 +212,7 @@ function Register() {
         telefono: phoneNumber,
         empresa: companyName,
         sesion: 0,
+        status: true,
         pd: 0,
         ps: 0,
         total: 0,
