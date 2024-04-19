@@ -15,6 +15,15 @@ import {
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import axios from "axios";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faEdit,
+  faTrashAlt,
+  faToggleOff,
+  faToggleOn,
+  faSave,
+  faTimes,
+} from "@fortawesome/free-solid-svg-icons";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -450,6 +459,7 @@ function Admin() {
         const usuariosData = usuariosSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
+          status: doc.data().status,
         }));
         setUsuarios(usuariosData);
       } catch (error) {
@@ -477,6 +487,68 @@ function Admin() {
       );
     } else {
       return usuarios;
+    }
+  };
+
+  const handleHabilitarUsuario = async (usuarioId) => {
+    try {
+      // Hacer la solicitud PUT al backend usando Axios
+      const response = await axios.put(
+        `http://localhost:8000/usuarios/${usuarioId}`,
+        { habilitar: true }
+      );
+
+      if (response.status === 200) {
+        console.log(`Usuario con ID ${usuarioId} habilitado correctamente.`);
+        // Actualizar el estado de React para reflejar el cambio
+        setUsuarios((prevUsuarios) =>
+          prevUsuarios.map((usuario) =>
+            usuario.id === usuarioId ? { ...usuario, status: true } : usuario
+          )
+        );
+
+        // Actualizar el campo 'status' en Firestore
+        const usuarioRef = doc(db, "usuarios", usuarioId);
+        await updateDoc(usuarioRef, { status: true });
+      } else {
+        console.error(
+          "Error al habilitar usuario en el backend:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error al habilitar el usuario:", error);
+    }
+  };
+
+  const handleDeshabilitarUsuario = async (usuarioId) => {
+    try {
+      // Hacer la solicitud PUT al backend usando Axios
+      const response = await axios.put(
+        `http://localhost:8000/usuarios/${usuarioId}`,
+        { habilitar: false }
+      );
+
+      if (response.status === 200) {
+        console.log(`Usuario con ID ${usuarioId} deshabilitado correctamente.`);
+        // Actualizar el estado de React para reflejar el cambio
+        setUsuarios((prevUsuarios) =>
+          prevUsuarios.map((usuario) =>
+            usuario.id === usuarioId ? { ...usuario, status: false } : usuario
+          )
+        );
+
+        // Actualizar el campo 'status' en Firestore
+        const usuarioRef = doc(db, "usuarios", usuarioId);
+        await updateDoc(usuarioRef, { status: false });
+      } else {
+        console.error(
+          "Error al deshabilitar usuario en el backend:",
+          response.statusText
+        );
+      }
+    } catch (error) {
+      console.error("Error al deshabilitar el usuario:", error);
     }
   };
 
@@ -739,7 +811,6 @@ function Admin() {
                         usuario.tipoPlan
                       )}
                     </td>
-
                     <td className="py-2 px-4 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <div className="flex space-x-2">
@@ -747,13 +818,13 @@ function Admin() {
                             onClick={handleGuardarCambios}
                             className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                           >
-                            Guardar
+                            <FontAwesomeIcon icon={faSave} />
                           </button>
                           <button
                             onClick={() => setModoEdicion(false)}
                             className="bg-gray-500 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded"
                           >
-                            Cancelar
+                            <FontAwesomeIcon icon={faTimes} />
                           </button>
                         </div>
                       ) : (
@@ -762,14 +833,32 @@ function Admin() {
                             onClick={() => handleEditar(usuario)}
                             className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
                           >
-                            Editar
+                            <FontAwesomeIcon icon={faEdit} />
                           </button>
                           <button
                             onClick={() => handleEliminarUsuario(usuario.id)}
                             className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
                           >
-                            Eliminar
+                            <FontAwesomeIcon icon={faTrashAlt} />
                           </button>
+                          {/* Botón para habilitar/deshabilitar */}
+                          {usuario.status ? (
+                            <button
+                              onClick={() =>
+                                handleDeshabilitarUsuario(usuario.id)
+                              }
+                              className="bg-yellow-500 hover:bg-yellow-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              <FontAwesomeIcon icon={faToggleOff} />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleHabilitarUsuario(usuario.id)}
+                              className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
+                            >
+                              <FontAwesomeIcon icon={faToggleOn} />
+                            </button>
+                          )}
                         </div>
                       )}
                     </td>
