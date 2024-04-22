@@ -274,6 +274,13 @@ function PantallasSalon() {
     try {
       const authUser = firebase.auth().currentUser;
 
+      if (ps === 0) {
+        alert(
+          "No hay licencias activas. No se pueden personalizar las pantallas."
+        );
+        return;
+      }
+
       if (!authUser) {
         console.error(
           "Usuario no autenticado. No se puede enviar a Firestore."
