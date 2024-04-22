@@ -362,6 +362,13 @@ function PantallasDirectorio() {
     try {
       const authUser = firebase.auth().currentUser;
 
+      if (pd === 0) {
+        alert(
+          "No hay licencias activas. No se pueden personalizar las pantallas."
+        );
+        return;
+      }
+
       if (!authUser) {
         console.error(
           "Usuario no autenticado. No se puede enviar a Firestore."
