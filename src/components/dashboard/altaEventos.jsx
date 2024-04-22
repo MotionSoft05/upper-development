@@ -8,6 +8,7 @@ import "firebase/compat/firestore";
 import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, currentUser, onAuthStateChanged } from "firebase/auth";
+import Swal from "sweetalert2";
 import moment from "moment";
 import {
   collection,
@@ -58,6 +59,88 @@ function AltaEventos() {
   const [selectedUserPantallas, setSelectedUserPantallas] = useState([]);
   const [selectedUserPantallasDirectorio, setSelectedUserPantallasDirectorio] =
     useState([]);
+  const [dbError, setDbError] = useState(false); // Nuevo estado para manejar errores de base de datos
+  const [loading, setLoading] = useState(true); // Nuevo estado para manejar la carga inicial
+
+  useEffect(() => {
+    const usuariosRef = collection(db, "usuarios");
+
+    if (userId) {
+      const usuarioRef = doc(usuariosRef, userId);
+
+      getDoc(usuarioRef)
+        .then((doc) => {
+          if (doc.exists()) {
+            const userData = doc.data();
+            if (userData.pd === 0 && userData.ps === 0) {
+              // Si ambos son 0, muestra la alerta con SweetAlert y recarga la página
+              Swal.fire({
+                icon: "error",
+                title: "Oops...",
+                text: "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
+                confirmButtonColor: "#4482F6", // Color del botón OK
+              }).then(() => {
+                window.location.reload();
+              });
+            } else {
+              // Verificar la presencia de documentos en las colecciones TemplateSalones y TemplateDirectorios
+              const templateSalonesRef = collection(db, "TemplateSalones");
+              const templateDirectoriosRef = collection(
+                db,
+                "TemplateDirectorios"
+              );
+
+              const templateSalonesQuery = query(
+                templateSalonesRef,
+                where("userId", "==", userId)
+              );
+              const templateDirectoriosQuery = query(
+                templateDirectoriosRef,
+                where("userId", "==", userId)
+              );
+
+              Promise.all([
+                getDocs(templateSalonesQuery),
+                getDocs(templateDirectoriosQuery),
+              ])
+                .then(
+                  ([templateSalonesSnapshot, templateDirectoriosSnapshot]) => {
+                    if (
+                      templateSalonesSnapshot.empty &&
+                      templateDirectoriosSnapshot.empty
+                    ) {
+                      // Si no hay documentos en ninguna colección, mostrar la alerta con SweetAlert
+                      Swal.fire({
+                        icon: "info",
+                        title: "¡Atención!",
+                        text: "Actualmente no cuenta con Publicidad en Salones/Directorio de Eventos. Sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes",
+                        confirmButtonColor: "#4482F6", // Color del botón OK
+                      }).then(() => {
+                        window.location.reload();
+                      });
+                    }
+                  }
+                )
+                .catch((error) => {
+                  console.error(
+                    "Error al obtener información de las colecciones:",
+                    error
+                  );
+                });
+            }
+          } else {
+            setDbError(true);
+          }
+        })
+        .catch((error) => {
+          console.error("Error al obtener datos de usuario:", error);
+          setDbError(true);
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (
