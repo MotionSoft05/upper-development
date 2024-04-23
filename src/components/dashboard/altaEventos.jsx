@@ -78,55 +78,68 @@ function AltaEventos() {
                 icon: "error",
                 title: "Oops...",
                 text: "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
-                confirmButtonColor: "#4482F6", // Color del botón OK
+                confirmButtonColor: "#4482F6",
               }).then(() => {
                 window.location.reload();
               });
             } else {
-              // Verificar la presencia de documentos en las colecciones TemplateSalones y TemplateDirectorios
-              const templateSalonesRef = collection(db, "TemplateSalones");
-              const templateDirectoriosRef = collection(
-                db,
-                "TemplateDirectorios"
-              );
-
-              const templateSalonesQuery = query(
-                templateSalonesRef,
-                where("userId", "==", userId)
-              );
-              const templateDirectoriosQuery = query(
-                templateDirectoriosRef,
+              // Verificar si hay publicidad para el usuario
+              const publicidadRef = collection(db, "Publicidad");
+              const publicidadQuery = query(
+                publicidadRef,
                 where("userId", "==", userId)
               );
 
-              Promise.all([
-                getDocs(templateSalonesQuery),
-                getDocs(templateDirectoriosQuery),
-              ])
-                .then(
-                  ([templateSalonesSnapshot, templateDirectoriosSnapshot]) => {
-                    if (
-                      templateSalonesSnapshot.empty &&
-                      templateDirectoriosSnapshot.empty
-                    ) {
-                      // Si no hay documentos en ninguna colección, mostrar la alerta con SweetAlert
-                      Swal.fire({
-                        icon: "info",
-                        title: "¡Atención!",
-                        text: "Actualmente no cuenta con Publicidad en Salones/Directorio de Eventos. Sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes",
-                        confirmButtonColor: "#4482F6", // Color del botón OK
-                      }).then(() => {
-                        window.location.reload();
-                      });
-                    }
-                  }
-                )
-                .catch((error) => {
-                  console.error(
-                    "Error al obtener información de las colecciones:",
-                    error
+              getDocs(publicidadQuery).then((snapshot) => {
+                const tienePublicidadSalon = snapshot.docs.some((doc) => {
+                  const publicidadData = doc.data();
+                  return publicidadData.tipo === "salon" && userData.ps >= 1;
+                });
+
+                const tienePublicidadDirectorio = snapshot.docs.some((doc) => {
+                  const publicidadData = doc.data();
+                  return (
+                    publicidadData.tipo === "directorio" && userData.pd >= 1
                   );
                 });
+
+                if (
+                  !tienePublicidadSalon &&
+                  !tienePublicidadDirectorio &&
+                  userData.ps >= 1 &&
+                  userData.pd >= 1
+                ) {
+                  // Si no tiene publicidad adecuada, muestra la alerta con SweetAlert y recarga la página
+                  Swal.fire({
+                    icon: "warning",
+                    title: "¡Atención!",
+                    text: "Actualmente no cuenta con Publicidad en Salones y Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    confirmButtonColor: "#4482F6",
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                } else if (!tienePublicidadSalon && userData.ps >= 1) {
+                  // Si no tiene publicidad en salones y ps es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
+                  Swal.fire({
+                    icon: "warning",
+                    title: "¡Atención!",
+                    text: "Actualmente no cuenta con Publicidad en Salones de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    confirmButtonColor: "#4482F6",
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                } else if (!tienePublicidadDirectorio && userData.pd >= 1) {
+                  // Si no tiene publicidad en directorio y pd es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
+                  Swal.fire({
+                    icon: "warning",
+                    title: "¡Atención!",
+                    text: "Actualmente no cuenta con Publicidad en Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    confirmButtonColor: "#4482F6",
+                  }).then(() => {
+                    window.location.reload();
+                  });
+                }
+              });
             }
           } else {
             setDbError(true);
