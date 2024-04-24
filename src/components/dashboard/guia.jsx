@@ -3,8 +3,10 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSync,
   faFilePdf,
+  faBook,
   faTimes,
   faEye,
+  faFile,
 } from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
@@ -46,12 +48,12 @@ const Guia = () => {
         return { name: item.name, url: item.getDownloadURL() };
       });
 
-      files.sort((a, b) => {
-        const regex = /(\d+)\.pdf/;
-        const numberA = parseInt(a.name.match(regex)[1]);
-        const numberB = parseInt(b.name.match(regex)[1]);
-        return numberA - numberB;
-      });
+      // files.sort((a, b) => {
+      //   const regex = /(\d+)\.pdf/;
+      //   const numberA = parseInt(a.name.match(regex)[1]);
+      //   const numberB = parseInt(b.name.match(regex)[1]);
+      //   return numberA - numberB;
+      // });
 
       Promise.all(files.map(async (file) => ({ ...file, url: await file.url })))
         .then((filesWithUrls) => setUploadedFiles(filesWithUrls))
@@ -73,9 +75,10 @@ const Guia = () => {
     if (pdfFile) {
       setIsUploading(true);
 
-      const fileName = `${pdfFile.name.replace(".pdf", "")}_${
-        uploadedFiles.length + 1
-      }.pdf`;
+      //     const fileName = `${pdfFile.name.replace(".pdf", "")}_${
+      //       uploadedFiles.length + 1
+      //     }.pdf`;
+      const fileName = pdfFile.name;
       const storageRef = firebase.storage().ref();
       const pdfRef = storageRef.child(`pdfs/${fileName}`);
 
@@ -124,6 +127,20 @@ const Guia = () => {
       });
   };
 
+  //Función que renderiza el icono dependiendo la extensión del archivo
+  const getExtensionIcon = (fileName) => {
+    const extension = fileName.split('.').pop().toLowerCase();
+    switch (extension) {
+      case 'pdf':
+        return <FontAwesomeIcon icon={faFilePdf} size="3x" color="red" />;
+      case 'zip':
+      case 'rar':
+        return <FontAwesomeIcon icon={faBook} size="3x" color="red" />;
+      default:
+        return <FontAwesomeIcon icon={faFile} size="3x" color="red" />;
+    }
+  };
+  
   return (
     <section className="px-5 md:px-32">
       <div>
@@ -137,7 +154,7 @@ const Guia = () => {
               user.email === "ulises.jacobo@hotmail.com" ||
               user.email === "contacto@upperds.mx") && (
               <div className="flex items-center space-x-4">
-                <input type="file" accept=".pdf" onChange={handleFileChange} />
+                <input type="file" onChange={handleFileChange} />
                 <button
                   onClick={handleUpload}
                   className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -155,7 +172,8 @@ const Guia = () => {
           <div className="mt-4">
             {uploadedFiles.map((file, index) => (
               <div key={index} className="flex items-center space-x-4 mb-3">
-                <FontAwesomeIcon icon={faFilePdf} size="3x" color="red" />
+                {/* Funcion "getExtensionIcon" para mostar icono segun el tipo de archivo */}
+                {getExtensionIcon(file.name)}
                 <span>{file.name}</span>
                 {user &&
                 (user.email === "uppermex10@gmail.com" ||
