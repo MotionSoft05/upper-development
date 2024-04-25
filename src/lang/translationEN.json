@@ -1,0 +1,93 @@
+{
+    "navbar": {
+      "title": "Welcome to Upperds",
+      "products": "Products",
+      "solutions": "Solutions",
+      "resources": "Resources",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "logout": "Logout",
+      "register": "Register",
+      "login": "Login",
+      "greeting": "¡Hello,",
+      "language": "Language"
+    },
+    "homeSliderData": {
+        "sliderTag1": "Boost your business",
+        "sliderTag2": "Great visual impact",
+        "sliderTag3": "Easy and simple to use",
+        "sliderTitle1": "UPPER DS, the Digital Signage system",
+        "sliderTitle2": "Artificial Intelligence",
+        "sliderTitle3": "App Development",
+        "sliderDescription1": "TechWizard offers high-quality and reliable software development services. We focus on your specific needs that fit the budget and time frame.",
+        "sliderDescription2": "TechWizard is bringing artificial intelligence and machine learning within reach of commercial, government, and nonprofit organizations.",
+        "sliderDescription3": "Unleash the power of code and creativity to turn your innovative ideas into interactive and functional mobile applications. Explore the world of app development and discover how to bring your digital visions to life on smartphones and tablets."
+      },
+
+      "home": {
+        "title": "There is a diversity of industries for Digital Signage Solutions, where Upper DS will be your best ally to convey your message to the right people at the right time",
+        "restaurantAndBars": {
+          "title": "Restaurants and Bars",
+          "description1": "Offer attractive menus, schedule promotions, and update prices easily"
+        },
+        "transport":{
+          "title": "transport",
+          "description1": "Inform travelers with real-time transportation updates and useful content"
+        },
+        "offices":{
+          "title": "offices",
+          "description1": "Promote optimal and agile communication towards your customers"
+        },
+        "eventVenues": {
+          "title": "Event Venues",
+          "description1": "Provide timely guidance and information about your events"
+        },
+        "hotels": {
+            "title": "Hotels",
+            "description1": "Create a digital signage experience for guests that allows you to maximize your revenue"
+        },
+        "retailersAndMedicalCenters": {
+          "title": "Retailers and Medical Centers",
+          "description1": "Announce offers and news in your store to stimulate purchases"
+        },
+        "startToday": {
+          "title": "Start today",
+          "description1": "Sign up and start elevating your business"
+        },
+
+        "btnRegister": "Register",
+        "title1": "Publish high-impact content for your customers quickly, easily, and professionally",
+
+        "publishHighImpactContent": {
+          "title": "Customize the design of your screens",
+          "description1": "Show interesting content that your customers will appreciate instantly. Add them to our free and customizable screen design templates"
+        },
+        "easyContentScheduling": {
+          "title": "Easy content scheduling",
+          "description1": "Manage dozens of screens, upload, edit, and display content remotely from any device, using our cloud platform"
+        },
+        "generateImpactWithVersatileContent": {
+          "title": "Generate impact with versatile content",
+          "description1": "Offer versatility when it comes to generating content. The possibilities are endless, from event ads, promotions, weather updates, and news"
+        },
+        "toolSecurityAndHighAvailability": {
+          "title": "Tool security and high availability",
+          "description1": "Upper DS operates on platforms that are certified with the leading security and privacy standards (ISO and SOC compliance)"
+        }
+      },
+
+    "aboutUs": {
+      "title": "About Us",
+      "content": "Learn more about our company and our mission to help businesses grow."
+    },
+    "contactUs": {
+      "title": "Contact Us",
+      "content": "Get in touch with us to discuss how we can assist you with your business needs."
+    },
+    "footer": {
+      "privacyPolicy": "Privacy Policy",
+      "termsOfService": "Terms of Service"
+    }
+  }
+  
+  

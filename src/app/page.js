@@ -8,8 +8,14 @@ import Contacto from "@/components/homeComponents/contacto";
 import Register from "./register/page";
 import Link from "next/link";
 import HomeSlider from "@/components/homeComponents/sliderHome";
+// i18n
+import {initReactI18next, useTranslation } from 'react-i18next';
+import i18n from "@/utils/i18n";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 
 export default function Home() {
+  const { t } = useTranslation();
+
   const buttonRef = useRef(null);
   const [showButton, setShowButton] = useState(false);
 
@@ -41,6 +47,7 @@ export default function Home() {
     loop: true,
   });
 
+//*------------------------ RETURN ------------------------------
   return (
     <main className="bg-gray-50">
       {/* Title */}
@@ -52,10 +59,7 @@ export default function Home() {
         <div className="py-24 sm:pt-10">
           <div className="px-4 mx-auto max-w-screen-xl ">
             <h1 className="text-lg md:text-2xl text-center font-bold  mb-16">
-              Existe una diversidad de industrias para Soluciones de
-              Señalización Digital, donde Upper DS será tu mejor aliado para
-              transmitir su mensaje a las personas adecuadas y en el momento
-              adecuado
+              {t('home.title')}
             </h1>
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-2 md:gap-8 ">
@@ -67,11 +71,10 @@ export default function Home() {
                   />
                 </div>
                 <h1 className="font-bold text-center mb-1">
-                  Restaurantes y bares
+                {t('home.restaurantAndBars.title')}
                 </h1>
                 <p className="text-sm text-center text-gray-600">
-                  Ofrezca menús atractivos, programe promociones y actualice
-                  precios de forma sencilla
+                {t('home.restaurantAndBars.description1')}
                 </p>
               </article>
               <article>
@@ -81,10 +84,9 @@ export default function Home() {
                     className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
                   />
                 </div>
-                <h1 className="font-bold text-center mb-1">Transporte</h1>
+                <h1 className="font-bold text-center mb-1">{t('home.transport.title')}</h1>
                 <p className="text-sm text-center text-gray-600">
-                  Informe a los viajeros con actualizaciones de transporte en
-                  tiempo real y con contenido útil.
+                {t('home.transport.description1')}
                 </p>
               </article>
               <article>
@@ -94,10 +96,9 @@ export default function Home() {
                     className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
                   />
                 </div>
-                <h1 className="font-bold text-center mb-1">Oficinas</h1>
+                <h1 className="font-bold text-center mb-1">{t('home.offices.title')}</h1>
                 <p className="text-sm text-center text-gray-600">
-                  Promueva la comunicación hacia sus clientes de firma optima y
-                  ágil
+                {t('home.offices.description1')}
                 </p>
               </article>
               <article>
@@ -108,10 +109,10 @@ export default function Home() {
                   />
                 </div>
                 <h1 className="font-bold text-center mb-1">
-                  Salones de Eventos
+                {t('home.eventVenues.title')}
                 </h1>
                 <p className="text-sm text-center text-gray-600">
-                  Brinde orientación e información oportuna de sus eventos
+                {t('home.eventVenues.description1')}
                 </p>
               </article>
               <article>
@@ -121,10 +122,9 @@ export default function Home() {
                     className="rounded-lg w-32 md:w-64 p-4 bg-gray-50  border border-gray-300 shadow-md mx-auto"
                   />
                 </div>
-                <h1 className="font-bold text-center mb-1">Hoteles</h1>
+                <h1 className="font-bold text-center mb-1">{t('home.hotels.title')}</h1>
                 <p className="text-sm text-center text-gray-600">
-                  Genere una experiencia de señalización digital para los
-                  huéspedes que le permita maximizar sus ingresos.
+                  {t('home.hotels.description1')}
                 </p>
               </article>
               <article>
@@ -135,11 +135,10 @@ export default function Home() {
                   />
                 </div>
                 <h1 className="font-bold text-center mb-1">
-                  Minoristas y Centros Médicos​
+                {t('home.retailersAndMedicalCenters.title')}
                 </h1>
                 <p className="text-sm text-center text-gray-600">
-                  De a conocer las ofertas y novedades en su tienda para
-                  estimular las compras
+                {t('home.retailersAndMedicalCenters.description1')}
                 </p>
               </article>
             </div>
@@ -152,15 +151,15 @@ export default function Home() {
           <div className="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
             <div className="mx-auto max-w-screen-sm text-center">
               <h2 className="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-custom">
-                Comienza hoy
+              {t('home.startToday.title')}
               </h2>
               <p className="mb-6 font-light text-gray-500 ">
-                Regístrate y comienza a elevar tu negocio
+              {t('home.startToday.description1')}
               </p>
 
               <Link href="/register">
                 <button className="text-white bg-Second hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 ">
-                  Registrarse
+                {t('home.btnRegister')}
                 </button>
               </Link>
             </div>
@@ -173,8 +172,7 @@ export default function Home() {
           <div className="mx-auto max-w-7xl px-6 lg:px-8">
             <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
               <h2 className="mb-4 text-xl md:text-4xl tracking-tight font-extrabold text-custom">
-                Publique contenido de alto impacto para sus ​ clientes de forma
-                rapida, sencilla y profesional
+              {t('home.title1')}
               </h2>
             </div>
             <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-4xl">
@@ -184,12 +182,10 @@ export default function Home() {
                     <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
                       <img src="/img/screens.svg" className="p-1 h-8" />
                     </div>
-                    Personalice el diseño de sus pantallas
+                    {t('home.publishHighImpactContent.title')}
                   </dt>
                   <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
-                    Muestre contenido interesante que sus clientes apreciarán
-                    instantáneamente. Agréguelos a nuestras plantillas de diseño
-                    de pantalla gratuitas y personalizables.
+                  {t('home.publishHighImpactContent.description1')}
                   </dd>
                 </div>
                 <div className="relative pl-9 md:pl-16">
@@ -197,12 +193,10 @@ export default function Home() {
                     <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
                       <img src="/img/keyboard.svg" className="p-1 h-8" />
                     </div>
-                    Fácil programación de contenido
+                    {t('home.easyContentScheduling.title')}
                   </dt>
                   <dd className="mt-2  text-xs md:text-base  text-gray-600 text-justify">
-                    Administre decenas de pantallas, cargue, edite y muestre
-                    contenido de forma remota desde cualquier dispositivo,
-                    utilizando nuestra plataforma en la nube.
+                  {t('home.easyContentScheduling.description1')}
                   </dd>
                 </div>
                 <div className="relative pl-9 md:pl-16">
@@ -210,13 +204,10 @@ export default function Home() {
                     <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
                       <img src="/img/Posibility.svg" className="p-1 h-8" />
                     </div>
-                    Genera impacto por contenido versátil
+                    {t('home.generateImpactWithVersatileContent.title')}
                   </dt>
                   <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
-                    Ofrece una versatilidad cuando se trate de generar
-                    contenido. Las posibilidades son infinitas, desde anuncios
-                    de eventos, promociones, actualizaciones meteorológicas y
-                    noticias.
+                  {t('home.generateImpactWithVersatileContent.description1')}
                   </dd>
                 </div>
                 <div className="relative pl-9 md:pl-16">
@@ -224,12 +215,10 @@ export default function Home() {
                     <div className="absolute left-0 top-0 flex md:h-10 md:w-10 items-center justify-center rounded-lg bg-indigo-600">
                       <img src="/img/security2.svg" className="p-1 h-8" />
                     </div>
-                    Seguridad y alta disponibilidad de herramienta
+                    {t('home.toolSecurityAndHighAvailability.title')}
                   </dt>
                   <dd className="mt-2 text-xs md:text-base  text-gray-600 text-justify">
-                    Upper DS opera en plataformas que están certificadas con los
-                    principales estándares de seguridad y privacidad
-                    (Cumplimiento de ISO y SOC).
+                  {t('home.toolSecurityAndHighAvailability.description1')}
                   </dd>
                 </div>
               </dl>

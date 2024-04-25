@@ -1,0 +1,91 @@
+{
+    "navbar": {
+      "title": "Bienvenido a Upperds",
+      "products": "Productos",
+      "solutions": "Soluciones",
+      "resources": "Recursos",
+      "pricing": "Precios",
+      "faq": "FAQ",
+      "logout": "Cerrar sesión",
+      "register": "Registrarse",
+      "login": "Iniciar sesión",
+      "greeting": "¡Hola,",
+      "language": "Idioma"
+    },
+    "homeSliderData": {
+        "sliderTag1": "Impulsa tu negocio",
+        "sliderTag2": "Gran impacto visual",
+        "sliderTag3": "Uso fácil y sencillo",
+        "sliderTitle1": "UPPER DS, el sistema de Señalización Digital",
+        "sliderTitle2": "Inteligencia Artificial",
+        "sliderTitle3": "Desarrollo de Aplicaciones",
+        "sliderDescription1": "TechWizard ofrece servicios de desarrollo de software de alta calidad y confiables relacionados. Nos enfocamos en tus necesidades específicas que se ajustan al presupuesto y al marco de tiempo.",
+        "sliderDescription2": "TechWizard está poniendo la inteligencia artificial y el aprendizaje automático al alcance de las organizaciones comerciales, gubernamentales y sin fines de lucro.",
+        "sliderDescription3": "Libera el poder del código y la creatividad para convertir tus ideas innovadoras en aplicaciones móviles interactivas y funcionales. Explora el mundo del desarrollo de aplicaciones y descubre cómo dar vida a tus visiones digitales en teléfonos inteligentes y tabletas."
+      },
+
+      "home": {
+        "title": "Existe una diversidad de industrias para Soluciones de Señalización Digital, donde Upper DS será tu mejor aliado para transmitir su mensaje a las personas adecuadas y en el momento adecuado",
+        "restaurantAndBars": {
+          "title": "Restaurantes y Bares",
+          "description1": "Ofrezca menús atractivos, programe promociones y actualice precios de forma sencilla"
+        },
+        "transport":{
+            "title": "Transporte",
+            "description1": "Informe a los viajeros con actualizaciones de transporte en tiempo real y con contenido útil"
+        },
+        "offices":{
+            "title": "Oficinas",
+            "description1": "Promueva la comunicación hacia sus clientes de firma optima y ágil"
+        },
+        "eventVenues": {
+          "title": "Salones de Eventos",
+          "description1": "Brinde orientación e información oportuna de sus eventos"
+        },
+        "hotels": {
+            "title": "Hoteles",
+            "description1": "Genere una experiencia de señalización digital para los huéspedes que le permita maximizar sus ingresos"
+        },
+        "retailersAndMedicalCenters": {
+          "title": "Minoristas y Centros Médicos​",
+          "description1": "De a conocer las ofertas y novedades en su tienda para estimular las compras"
+        },
+        "startToday": {
+          "title": "Comienza hoy",
+          "description1": "Regístrate y comienza a elevar tu negocio"
+        },
+
+        "btnRegister": "Registrarse",
+        "title1": "Publique contenido de alto impacto para sus​ clientes de forma rapida, sencilla y profesional",
+
+        "publishHighImpactContent": {
+          "title": "Personalice el diseño de sus pantallas",
+          "description1": "Muestre contenido interesante que sus clientes apreciarán instantáneamente. Agréguelos a nuestras plantillas de diseño de pantalla gratuitas y personalizables"
+        },
+        "easyContentScheduling": {
+          "title": "Fácil programación de contenido",
+          "description1": "Administre decenas de pantallas, cargue, edite y muestre contenido de forma remota desde cualquier dispositivo, utilizando nuestra plataforma en la nube"
+        },
+        "generateImpactWithVersatileContent": {
+          "title": "Genera impacto por contenido versátil",
+          "description1": "Ofrece una versatilidad cuando se trate de generar contenido. Las posibilidades son infinitas, desde anuncios de eventos, promociones, actualizaciones meteorológicas y noticias"
+        },
+        "toolSecurityAndHighAvailability": {
+          "title": "Seguridad y alta disponibilidad de herramienta",
+          "description1": "Upper DS opera en plataformas que están certificadas con los principales estándares de seguridad y privacidad (Cumplimiento de ISO y SOC)"
+        }
+      },
+
+    "aboutUs": {
+      "title": "Sobre nosotros",
+      "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."
+    },
+    "contactUs": {
+      "title": "Contáctanos",
+      "content": "Ponte en contacto con nosotros para discutir cómo podemos ayudarte con tus necesidades comerciales."
+    },
+    "footer": {
+      "privacyPolicy": "Política de privacidad",
+      "termsOfService": "Términos de servicio"
+    }
+  }

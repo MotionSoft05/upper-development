@@ -16,6 +16,7 @@ import {
   where,
   getFirestore,
 } from "firebase/firestore";
+import LanguageSwitcher from "./LanguageSwitcher";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -26,6 +27,7 @@ const firebaseConfig = {
   appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
   measurementId: "G-6VHX927GH1",
 };
+import { useTranslation } from 'react-i18next'; // Traducciones
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -50,6 +52,8 @@ const Loader = () => (
 }
 
 function Navigation() {
+  const { t } = useTranslation(); // i18n
+
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(null);
   //const [loading, setLoading] = useState(true);
@@ -154,22 +158,22 @@ function Navigation() {
                       className="hover:text-custom md:p-0"
                       aria-current="page"
                     >
-                      Productos
+                      {t('navbar.products')}
                     </a>
                   </li>
                   <li>
                     <a href="#soluciones" className="hover:text-custom md:p-0">
-                      Soluciones
+                      {t('navbar.solutions')}
                     </a>
                   </li>
                   <li>
                     <a href="#recursos" className="hover:text-custom md:p-0">
-                      Recursos
+                      {t('navbar.resources')}
                     </a>
                   </li>
                   <li>
                     <a href="#precios" className="hover:text-custom md:p-0">
-                      Precios
+                      {t('navbar.pricing')}
                     </a>
                   </li>
                   <li>
@@ -181,11 +185,11 @@ function Navigation() {
               )}
 
               <div className="px-3">
-                <div className="ml-auto flex items-baseline space-x-4">
+                <div className="ml-auto flex items-baseline space-x-4 ">
                   {user && (
                     <div className="flex items-center space-x-2">
                       <span className="text-3x2 font-bold text-black">
-                        ¡Hola, {userName}!
+                      {t('navbar.greeting')} {userName}!
                       </span>
 
                       {user.emailVerified && (
@@ -202,7 +206,7 @@ function Navigation() {
                             }}
                             className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
                           >
-                            Cerrar sesión
+                            {t('navbar.logout')}
                           </button>
                         </>
                       )}
@@ -222,6 +226,7 @@ function Navigation() {
                       </Link>
                     </div>
                   )}
+                  <LanguageSwitcher/>
                 </div>
               </div>
             </div>
@@ -255,7 +260,7 @@ function Navigation() {
                             href="#"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            Productos
+                            {t('navbar.products')}
                           </a>
                         </Menu.Item>
                         <Menu.Item>
@@ -263,7 +268,7 @@ function Navigation() {
                             href="/#soluciones"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            Soluciones
+                            {t('navbar.solutions')}
                           </Link>
                         </Menu.Item>
                       </div>
@@ -273,7 +278,7 @@ function Navigation() {
                             href="/#recursos"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            Recursos
+                            {t('navbar.resources')}
                           </Link>
                         </Menu.Item>
                         <Menu.Item>
@@ -281,7 +286,7 @@ function Navigation() {
                             href="/#precios"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            Precios
+                            {t('navbar.pricing')}
                           </Link>
                         </Menu.Item>
                         <Menu.Item>
@@ -351,7 +356,7 @@ function Navigation() {
                                 }}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
-                                Cerrar sesión
+                                {t('navbar.logout')}
                               </button>
                             </Menu.Item>
                           </>

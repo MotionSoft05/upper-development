@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Keyboard, EffectFade, Pagination } from "swiper/modules";
 import "swiper/css";
@@ -8,6 +9,9 @@ import { SliderHomeData } from "./sliderHomeData";
 import { homeSliderData } from "@/data/homeSliderData";
 
 const HomeSlider = () => {
+
+  const { t } = useTranslation();
+
   return (
     // HERO SLIDER
     <Swiper
@@ -35,7 +39,7 @@ const HomeSlider = () => {
         {homeSliderData?.map((slider, i) => (
           // {/* SLIDER ITEM */}
           <SwiperSlide key={i}>
-            <SliderHomeData slider={slider} index={i} />
+            <SliderHomeData slider={slider} index={i} t={t}/>
           </SwiperSlide>
         ))}
       </ul>
