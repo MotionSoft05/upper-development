@@ -98,6 +98,7 @@
             "contactSupport": "Contact support"
         }
     },
+
     "precios": {
         "free": {
             "title": "Free",
@@ -134,6 +135,26 @@
         "yearly": "Yearly",
         "pricesNote": "*Prices are expressed in Mexican pesos (MXN) before taxes."
     },
+
+    "contacto": {
+        "title": "Contact Us",
+        "description": "Our contact section is the direct channel to connect with Upper DS. Below, you'll find options to request a quote and contract our services.",
+        "email": "Email",
+        "emailPlaceholder": "Example@gmail.com",
+        "phone": "Phone",
+        "subject": "Subject",
+        "subjectPlaceholder": "Let us know how we can assist you",
+        "message": "Message",
+        "messagePlaceholder": "Leave a comment...",
+        "sendMessage": "Send Message",
+        "successMessage": "Your inquiry has been sent",
+        "successMessageNote": "We appreciate your interest in Upper DS. We have received your message, and our team will contact you shortly.",
+        "thankYou": "Thank you!",
+        "validationMessage": "Please fill out all required fields",
+        "validEmailError": "Please enter a valid email address.",
+        "validationNumber": "Please enter only numbers in the phone field."
+
+      },
     "aboutUs": {
         "title": "About Us",
         "content": "Learn more about our company and our mission to help businesses grow."

@@ -135,6 +135,28 @@
         "pricesNote": "*Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos"
 
     },
+
+    "contacto": {
+        "title": "Contáctenos",
+        "description": "Nuestra sección de contacto es el canal directo para conectarte con Upper DS. A continuación, encontrarás las opciones para cotizar y contratar nuestros servicios​",
+        "email": "Correo electrónico ​",
+        "emailPlaceholder": "Ejemplo@gmail.com",
+        "phone": "Teléfono",
+        "subject": "Asunto",
+        "subjectPlaceholder": "Déjanos saber como podemos ayudarte",
+        "message": "Mensaje",
+        "messagePlaceholder": "Deja un comentario...",
+        "sendMessage": "Enviar mensaje",
+        "successMessage": "Su pregunta a sido enviada",
+        "successMessageNote": "Agradecemos tu interés en Upper DS. Hemos recibido tu mensaje y nuestro equipo se pondrá en contacto contigo pronto.",
+        "thankYou": "Gracias!",
+        "validationMessage": "Por favor, complete todos los campos requeridos",
+        "validEmailError": "Por favor, ingresa un correo electrónico válido.",
+        "validationNumber": "Por favor, ingresa solo números en el campo de teléfono."
+
+
+      },
+
     "aboutUs": {
         "title": "Sobre nosotros",
         "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."
