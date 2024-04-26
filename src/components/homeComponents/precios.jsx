@@ -1,40 +1,63 @@
 import Link from "next/link";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import CardPrice from "./CardPrice";
 
 function Precios() {
-  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState(false);
+  const { t } = useTranslation();
+  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState("mensual");
 
-  // Función para alternar entre precios mensuales y anuales
+  //! Función para alternar entre precios mensuales y anuales
   const alternarPrecios = () => {
     setMostrarPreciosAnuales(!mostrarPreciosAnuales);
   };
 
   // Función para obtener el texto del período (mensual o anual)
   const obtenerTextoPeriodo = () => {
-    return mostrarPreciosAnuales ? "anual" : "mensual";
+    mostrarPreciosAnuales === "mensual"
+      ? setMostrarPreciosAnuales("anual")
+      : setMostrarPreciosAnuales("mensual");
   };
 
   // Función para obtener el precio según el período
-  const obtenerPrecio = (categoria) => {
-    // Define los precios según la categoría y el período
-    const precios = {
-      gratis: {
-        mensual: "$0",
-        anual: "$0",
-      },
-      estandar: {
-        mensual: "$99",
-        anual: "$1200",
-      },
-      profesional: {
-        mensual: "$Contacto",
-        anual: "$Contacto", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
-      },
-    };
+  // const obtenerPrecio = (categoria) => {
+  //   // Define los precios según la categoría y el período
+  //   const precios = {
+  //     gratis: {
+  //       mensual: "$0",
+  //       anual: "$0",
+  //     },
+  //     estandar: {
+  //       mensual: "$99",
+  //       anual: "$1200",
+  //     },
+  //     profesional: {
+  //       mensual: "$120",
+  //       anual: "$1400", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
+  //     },
+  //   };
 
-    // Obtén el precio según la categoría y el período
-    return precios[categoria][obtenerTextoPeriodo()];
+  //   // Obtén el precio según la categoría y el período
+  //   return precios[categoria][obtenerTextoPeriodo()];
+  // };
+
+  // Define los precios según la categoría y el período
+  //? Posteriormente se podria borrar este objeto y usar el de traduciones
+  const precios = {
+    gratis: {
+      mensual: "precios.free.monthly",
+      anual: "precios.free.yearly",
+    },
+    estandar: {
+      mensual: "precios.standard.monthly",
+      anual: "precios.standard.yearly",
+    },
+    profesional: {
+      mensual: "precios.professional.monthly",
+      anual: "precios.professional.yearly",
+    },
   };
+
   return (
     <section id="precios">
       <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
@@ -49,111 +72,50 @@ function Precios() {
         </div>
         <div className="text-center"></div>
         <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">Gratis</h3>
-            <p className="font-light sm:text-lg text-gray-400">
-              La mejor opción para comenzar tu siguiente proyecto de
-              digitalización
-            </p>
-            <div
-              id="precios1"
-              className="flex justify-center items-baseline my-8 mt-14"
-            >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("gratis")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Solicita una licencia de evaluación para una pantalla.
-                </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>La licencia de evaluación se activara por 21 días.</span>
-              </li>
-            </ul>
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center rounded-lg border shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">
-              Estándar
-            </h3>
-            <p className="font-light sm:text-lg text-gray-400 ">
-              Lo mejor para usuarios que buscan incorporar la señalización
-              digital como parte de su estrategia de negocio
-            </p>
-            <div
-              id="precios2"
-              className="flex justify-center items-baseline my-8"
-            >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("estandar")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Licencia para aquellos negocios que inician con Señalización
-                  Digital
-                </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>Costo mensual por pantalla.</span>
-              </li>
-            </ul>
-
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">
-              Profesional
-            </h3>
-            <p className="font-light sm:text-lg text-gray-400 ">
-              La mejor opción para organizaciones con requerimientos avanzados
-            </p>
-            <div
-              id="precios3"
-              className="flex justify-center items-baseline my-8 mt-14"
-            >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("profesional")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Licencia para aquellos negocios que requieren licencias y
-                  servicios de diseño personalizado
-                </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Registrase para ser contactados y definir alcance de servicios
-                </span>
-              </li>
-            </ul>
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
+        {/* Card Gratis */}
+        <CardPrice
+          title={t("precios.free.title")}
+          description={t("precios.free.description")}
+          mensualTitle={t("precios.monthly")}
+          mensualPrice={"$ 0"}
+          // anualTitle={t("precios.yearly")}
+          // anualPrice={"$ 0"}
+          featureList={[
+            t("precios.free.features.item1"),
+            t("precios.free.features.item2"),
+          ]}
+          btnTitle={t("precios.btnStart")}
+        />
+        {/* Card Estandar */}
+        <CardPrice
+          title={t("precios.standard.title")}
+          description={t("precios.standard.description")}
+          mensualTitle={t("precios.monthly")}
+          mensualPrice={"$ 99"}
+          anualTitle={t("precios.yearly")}
+          anualPrice={"$ 1200"}
+          featureList={[
+            t("precios.standard.features.item1"),
+            t("precios.standard.features.item2"),
+          ]}
+          btnTitle={t("precios.btnStart")}
+        />
+        {/* Card Profesional */}
+        <CardPrice
+          title={t("precios.professional.title")}
+          description={t("precios.professional.description")}
+          mensualTitle={t("precios.monthly")}
+          mensualPrice={"$ 120"}
+          anualTitle={t("precios.yearly")}
+          anualPrice={"$ 1400"}
+          featureList={[
+            t("precios.professional.features.item1"),
+            t("precios.professional.features.item2"),
+          ]}
+          btnTitle={t("precios.btnStart")}
+        />
         </div>
+
 
         <p className="mb-5 font-light  text-gray-400 text-center">
           *Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos

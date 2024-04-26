@@ -98,6 +98,41 @@
             "contactSupport": "Contacta a soporte"
         }
     },
+    "precios": {
+        "free": {
+            "title": "Gratis",
+            "description": "La mejor opción para comenzar tu siguiente proyecto de digitalización",
+            "monthly": "$0 Mx",
+            "yearly": "$0 Mx",
+            "features": {
+                "item1": "Solicita una licencia de evaluación para una pantalla.",
+                "item2": "La licencia de evaluación se activara por 21 días."
+            }
+        },
+        "standard": {
+            "title": "Estandar",
+            "description": "Lo mejor para usuarios que buscan incorporar la señalización digital como parte de su estrategia de negocio",
+            "monthly": "$990 Mx",
+            "yearly": "$12000 Mx",
+            "features": {
+                "item1": "Licencia para aquellos negocios que inician con Señalización Digital",
+                "item2": "Costo mensual por pantalla."
+            }
+        },
+        "professional": {
+            "title": "Profesional",
+            "description": "La mejor opción para organizaciones con requerimientos avanzados",
+            "monthly": "$1200 Mx",
+            "yearly": "$14000 Mx",
+            "features": {
+                "item1": "Licencia para aquellos negocios que requieren licencias y servicios de diseño personalizado",
+                "item2": "Registrase para ser contactados y definir alcance de servicios"
+            }
+        },
+        "btnStart": "Comienza ya",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+    },
     "aboutUs": {
         "title": "Sobre nosotros",
         "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."

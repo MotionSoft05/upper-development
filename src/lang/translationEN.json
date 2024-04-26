@@ -98,6 +98,41 @@
             "contactSupport": "Contact support"
         }
     },
+    "precios": {
+        "free": {
+            "title": "Free",
+            "description": "The best choice for organizations with advanced requirements.",
+            "monthly": "$0 usd",
+            "yearly": "$0 usd",
+            "features": {
+                "item1": "Request an evaluation license for a screen.",
+                "item2": "The evaluation license will be activated for 21 days."
+            }
+        },
+        "standard": {
+            "title": "Standard",
+            "description": "Ideal for users looking to incorporate digital signage as part of their business strategy.",
+            "monthly": "$99 usd",
+            "yearly": "$1200 usd",
+            "features": {
+                "item1": "License for businesses starting with Digital Signage.",
+                "item2": "Monthly cost per screen."
+            }
+        },
+        "professional": {
+            "title": "Professional",
+            "description": "The perfect option to kickstart your next digitization project.",
+            "monthly": "$120 usd",
+            "yearly": "$1400 usd",
+            "features": {
+                "item1": "License for businesses requiring custom design services and licenses.",
+                "item2": "Register to be contacted and define service scope."
+            }
+        },
+        "btnStart": "Start Now",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+    },
     "aboutUs": {
         "title": "About Us",
         "content": "Learn more about our company and our mission to help businesses grow."
