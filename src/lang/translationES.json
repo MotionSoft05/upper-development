@@ -131,7 +131,9 @@
         },
         "btnStart": "Comienza ya",
         "monthly": "Monthly",
-        "yearly": "Yearly"
+        "yearly": "Yearly",
+        "pricesNote": "*Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos"
+
     },
     "aboutUs": {
         "title": "Sobre nosotros",

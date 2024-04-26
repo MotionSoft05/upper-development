@@ -118,7 +118,7 @@ function Precios() {
 
 
         <p className="mb-5 font-light  text-gray-400 text-center">
-          *Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos
+          {t("precios.pricesNote")}
         </p>
       </div>
     </section>

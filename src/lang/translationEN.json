@@ -131,7 +131,8 @@
         },
         "btnStart": "Start Now",
         "monthly": "Monthly",
-        "yearly": "Yearly"
+        "yearly": "Yearly",
+        "pricesNote": "*Prices are expressed in Mexican pesos (MXN) before taxes."
     },
     "aboutUs": {
         "title": "About Us",
