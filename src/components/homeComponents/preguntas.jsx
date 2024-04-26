@@ -1,57 +1,44 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function Preguntas() {
+  const { t } = useTranslation()
   //  FAQ
   const faqData = [
     {
-      question: "¿Qué es el software de señalización digital y cómo funciona?",
-      answer:
-        "El software de señalización digital Upper DS es una plataforma que permite crear, programar y gestionar contenido multimedia (imágenes y videos.) en pantallas digitales. Funciona mediante la carga de contenido en la plataforma web, la programación de reproducción y la distribución a pantallas conectadas.",
-    },
-    // Agrega más preguntas y respuestas aquí
-    {
-      question:
-        "¿Cuáles son los beneficios de usar software de señalización digital?",
-      answer:
-        "Los beneficios incluyen la capacidad de transmitir información en tiempo real, la flexibilidad para cambiar contenido de forma remota, la mejora de la experiencia del cliente, el aumento de la visibilidad de la marca y la capacidad de medir el rendimiento del contenido.",
+      question: "preguntas.faq.question1",
+      answer: "preguntas.faq.answer1"
     },
     {
-      question:
-        "¿Qué tipo de contenido se puede mostrar con el software de señalización digital?",
-      answer:
-        "Se puede mostrar una amplia variedad de contenido, como anuncios publicitarios, promociones, información de productos, noticias, clima, horarios, contenido educativo, entretenimiento, y más. La versatilidad es una de las fortalezas de la señalización digital.",
+      question: "preguntas.faq.question2",
+      answer: "preguntas.faq.answer2"
     },
     {
-      question:
-        "¿Qué hardware se necesita para utilizar el software de señalización digital?",
-      answer:
-        "El hardware necesario incluye pantallas digitales (monitores, videowalls, etc.), reproductores de medios digitales (como reproductores multimedia, computadoras o TV Box) los cuales requieren estar conectados a Internet​",
+      question: "preguntas.faq.question3",
+      answer: "preguntas.faq.answer3"
     },
     {
-      question:
-        "¿Cómo se gestiona el contenido en el software de señalización digital en Upper DS?",
-      answer:
-        "El contenido se gestiona a través de una interfaz de usuario en una plataforma web. Los usuarios pueden cargar, organizar y programar contenido para que se reproduzca en las pantallas. ",
+      question: "preguntas.faq.question4",
+      answer: "preguntas.faq.answer4"
     },
     {
-      question:
-        "¿Es seguro el uso del software de señalización digital en términos de privacidad y seguridad?",
-      answer:
-        "La seguridad y privacidad son preocupaciones importantes. Upper DS ofrece características de seguridad, como autenticación de usuarios, certificado de seguridad y gestión de permisos para proteger la privacidad y prevenir el acceso no autorizado.",
+      question: "preguntas.faq.question5",
+      answer: "preguntas.faq.answer5"
     },
     {
-      question:
-        "¿Cuál es la diferencia entre señalización digital basada en la nube y en sitio?",
-      answer:
-        "La señalización digital basada en la nube almacena y gestiona contenido en servidores remotos, lo que permite un acceso más fácil y la gestión desde cualquier lugar con conexión a Internet. La señalización en sitio, en cambio, utiliza servidores locales y suele ser adecuada para redes cerradas.",
+      question: "preguntas.faq.question6",
+      answer: "preguntas.faq.answer6"
     },
     {
-      question:
-        "¿Cómo se pueden medir los resultados y el impacto del contenido de señalización digital?",
-      answer:
-        "Puedes medir el impacto mediante métricas como el número de reproducciones, la interacción del usuario (si es interactivo), el tiempo de visualización y el retorno de inversión (ROI) si estás utilizando la señalización digital con fines comerciales. ",
+      question: "preguntas.faq.question7",
+      answer: "preguntas.faq.answer7"
+    },
+    {
+      question: "preguntas.faq.question8",
+      answer: "preguntas.faq.answer8"
     },
   ];
+  
 
   const [openIndex, setOpenIndex] = useState(null);
 
@@ -68,11 +55,10 @@ function Preguntas() {
       <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
         <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
           <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom">
-            Preguntas frecuentes
+          {t("preguntas.commonQuestions.title")}
           </h2>
           <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
-            Aquí encontrarás respuestas a las dudas más comunes que nuestros
-            clientes suelen tener.
+          {t("preguntas.commonQuestions.description")}
           </p>
         </div>
 
@@ -88,7 +74,7 @@ function Preguntas() {
                 className="flex justify-between items-center w-full px-4 py-5 sm:p-6"
               >
                 <span className="text-sm font-semibold text-black">
-                  {item.question}
+                {t(item.question)}
                 </span>
 
                 <svg
@@ -111,7 +97,7 @@ function Preguntas() {
 
               {openIndex === index && (
                 <div className="px-4 pb-5 sm:px-6 sm:pb-6">
-                  <p>{item.answer}</p>
+                  <p>{t(item.answer)}</p>
                 </div>
               )}
             </div>
@@ -119,13 +105,13 @@ function Preguntas() {
         </div>
 
         <p className="text-center text-gray-600 text-sm md:text-base mt-9">
-          No encontraste una respuesta para tus preguntas?
+          {t("preguntas.commonQuestions.noAnswer")}
           <a
             href="#contacto"
             title=""
-            className="font-medium text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
+            className="pl-2 font-medium text-blue-600 transition-all duration-200 hover:text-blue-700 focus:text-blue-700 hover:underline"
           >
-            Contacta a el soporte
+            {t("preguntas.commonQuestions.contactSupport")}
           </a>
         </p>
       </div>

@@ -1,16 +1,16 @@
 {
     "navbar": {
-      "title": "Bienvenido a Upperds",
-      "products": "Productos",
-      "solutions": "Soluciones",
-      "resources": "Recursos",
-      "pricing": "Precios",
-      "faq": "FAQ",
-      "logout": "Cerrar sesión",
-      "register": "Registrarse",
-      "login": "Iniciar sesión",
-      "greeting": "¡Hola,",
-      "language": "Idioma"
+        "title": "Bienvenido a Upperds",
+        "products": "Productos",
+        "solutions": "Soluciones",
+        "resources": "Recursos",
+        "pricing": "Precios",
+        "faq": "FAQ",
+        "logout": "Cerrar sesión",
+        "register": "Registrarse",
+        "login": "Iniciar sesión",
+        "greeting": "¡Hola,",
+        "language": "Idioma"
     },
     "homeSliderData": {
         "sliderTag1": "Impulsa tu negocio",
@@ -22,70 +22,92 @@
         "sliderDescription1": "TechWizard ofrece servicios de desarrollo de software de alta calidad y confiables relacionados. Nos enfocamos en tus necesidades específicas que se ajustan al presupuesto y al marco de tiempo.",
         "sliderDescription2": "TechWizard está poniendo la inteligencia artificial y el aprendizaje automático al alcance de las organizaciones comerciales, gubernamentales y sin fines de lucro.",
         "sliderDescription3": "Libera el poder del código y la creatividad para convertir tus ideas innovadoras en aplicaciones móviles interactivas y funcionales. Explora el mundo del desarrollo de aplicaciones y descubre cómo dar vida a tus visiones digitales en teléfonos inteligentes y tabletas."
-      },
-
-      "home": {
+    },
+    "home": {
         "title": "Existe una diversidad de industrias para Soluciones de Señalización Digital, donde Upper DS será tu mejor aliado para transmitir su mensaje a las personas adecuadas y en el momento adecuado",
         "restaurantAndBars": {
-          "title": "Restaurantes y Bares",
-          "description1": "Ofrezca menús atractivos, programe promociones y actualice precios de forma sencilla"
+            "title": "Restaurantes y Bares",
+            "description1": "Ofrezca menús atractivos, programe promociones y actualice precios de forma sencilla"
         },
-        "transport":{
+        "transport": {
             "title": "Transporte",
             "description1": "Informe a los viajeros con actualizaciones de transporte en tiempo real y con contenido útil"
         },
-        "offices":{
+        "offices": {
             "title": "Oficinas",
             "description1": "Promueva la comunicación hacia sus clientes de firma optima y ágil"
         },
         "eventVenues": {
-          "title": "Salones de Eventos",
-          "description1": "Brinde orientación e información oportuna de sus eventos"
+            "title": "Salones de Eventos",
+            "description1": "Brinde orientación e información oportuna de sus eventos"
         },
         "hotels": {
             "title": "Hoteles",
             "description1": "Genere una experiencia de señalización digital para los huéspedes que le permita maximizar sus ingresos"
         },
         "retailersAndMedicalCenters": {
-          "title": "Minoristas y Centros Médicos​",
-          "description1": "De a conocer las ofertas y novedades en su tienda para estimular las compras"
+            "title": "Minoristas y Centros Médicos​",
+            "description1": "De a conocer las ofertas y novedades en su tienda para estimular las compras"
         },
         "startToday": {
-          "title": "Comienza hoy",
-          "description1": "Regístrate y comienza a elevar tu negocio"
+            "title": "Comienza hoy",
+            "description1": "Regístrate y comienza a elevar tu negocio"
         },
-
         "btnRegister": "Registrarse",
         "title1": "Publique contenido de alto impacto para sus​ clientes de forma rapida, sencilla y profesional",
-
         "publishHighImpactContent": {
-          "title": "Personalice el diseño de sus pantallas",
-          "description1": "Muestre contenido interesante que sus clientes apreciarán instantáneamente. Agréguelos a nuestras plantillas de diseño de pantalla gratuitas y personalizables"
+            "title": "Personalice el diseño de sus pantallas",
+            "description1": "Muestre contenido interesante que sus clientes apreciarán instantáneamente. Agréguelos a nuestras plantillas de diseño de pantalla gratuitas y personalizables"
         },
         "easyContentScheduling": {
-          "title": "Fácil programación de contenido",
-          "description1": "Administre decenas de pantallas, cargue, edite y muestre contenido de forma remota desde cualquier dispositivo, utilizando nuestra plataforma en la nube"
+            "title": "Fácil programación de contenido",
+            "description1": "Administre decenas de pantallas, cargue, edite y muestre contenido de forma remota desde cualquier dispositivo, utilizando nuestra plataforma en la nube"
         },
         "generateImpactWithVersatileContent": {
-          "title": "Genera impacto por contenido versátil",
-          "description1": "Ofrece una versatilidad cuando se trate de generar contenido. Las posibilidades son infinitas, desde anuncios de eventos, promociones, actualizaciones meteorológicas y noticias"
+            "title": "Genera impacto por contenido versátil",
+            "description1": "Ofrece una versatilidad cuando se trate de generar contenido. Las posibilidades son infinitas, desde anuncios de eventos, promociones, actualizaciones meteorológicas y noticias"
         },
         "toolSecurityAndHighAvailability": {
-          "title": "Seguridad y alta disponibilidad de herramienta",
-          "description1": "Upper DS opera en plataformas que están certificadas con los principales estándares de seguridad y privacidad (Cumplimiento de ISO y SOC)"
+            "title": "Seguridad y alta disponibilidad de herramienta",
+            "description1": "Upper DS opera en plataformas que están certificadas con los principales estándares de seguridad y privacidad (Cumplimiento de ISO y SOC)"
         }
-      },
-
+    },
+    "preguntas": {
+        "faq": {
+            "question1": "¿Qué es el software de señalización digital y cómo funciona?",
+            "answer1": "El software de señalización digital Upper DS es una plataforma que te permite crear, programar y gestionar contenido multimedia (imágenes y videos) en pantallas digitales. Funciona mediante la carga de contenido en la plataforma web, la programación de reproducción y la distribución a pantallas conectadas.",
+            "question2": "¿Cuáles son los beneficios de usar software de señalización digital?",
+            "answer2": "Los beneficios incluyen la capacidad de transmitir información en tiempo real, flexibilidad para cambiar contenido de forma remota, mejora de la experiencia del cliente, aumento de la visibilidad de la marca y capacidad de medir el rendimiento del contenido.",
+            "question3": "¿Qué tipo de contenido se puede mostrar con software de señalización digital?",
+            "answer3": "Se puede mostrar una amplia variedad de contenido, como anuncios publicitarios, promociones, información de productos, noticias, clima, horarios, contenido educativo, entretenimiento, y más. La versatilidad es una de las fortalezas de la señalización digital.",
+            "question4": "¿Qué hardware se necesita para utilizar software de señalización digital?",
+            "answer4": "El hardware necesario incluye pantallas digitales (monitores, videowalls, etc.), reproductores de medios digitales (como reproductores multimedia, computadoras, o TV Box) que necesitan estar conectados a Internet.",
+            "question5": "¿Cómo se gestiona el contenido en el software de señalización digital en Upper DS?",
+            "answer5": "El contenido se gestiona a través de una interfaz de usuario en una plataforma web. Los usuarios pueden cargar, organizar, y programar contenido para que se reproduzca en pantallas.",
+            "question6": "¿Es seguro el uso del software de señalización digital en términos de privacidad y seguridad?",
+            "answer6": "La seguridad y privacidad son preocupaciones importantes. Upper DS ofrece características de seguridad como autenticación de usuarios, certificado de seguridad, y gestión de permisos para proteger la privacidad y prevenir el acceso no autorizado.",
+            "question7": "¿Cuál es la diferencia entre señalización digital basada en la nube y en sitio?",
+            "answer7": "La señalización digital basada en la nube almacena y gestiona contenido en servidores remotos, lo que permite un acceso más fácil y gestión desde cualquier lugar con conexión a Internet. La señalización en sitio, en cambio, utiliza servidores locales y suele ser adecuada para redes cerradas.",
+            "question8": "¿Cómo se pueden medir los resultados y el impacto del contenido de señalización digital?",
+            "answer8": "Puedes medir el impacto mediante métricas como el número de reproducciones, la interacción del usuario (si es interactivo), el tiempo de visualización, y el retorno de inversión (ROI) si estás utilizando señalización digital con fines comerciales."
+        },
+        "commonQuestions": {
+            "title": "Preguntas frecuentes",
+            "description": "Aquí encontrarás respuestas a las preguntas más comunes que nuestros clientes suelen tener.",
+            "noAnswer": "¿No encontraste una respuesta para tus preguntas?",
+            "contactSupport": "Contacta a soporte"
+        }
+    },
     "aboutUs": {
-      "title": "Sobre nosotros",
-      "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."
+        "title": "Sobre nosotros",
+        "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."
     },
     "contactUs": {
-      "title": "Contáctanos",
-      "content": "Ponte en contacto con nosotros para discutir cómo podemos ayudarte con tus necesidades comerciales."
+        "title": "Contáctanos",
+        "content": "Ponte en contacto con nosotros para discutir cómo podemos ayudarte con tus necesidades comerciales."
     },
     "footer": {
-      "privacyPolicy": "Política de privacidad",
-      "termsOfService": "Términos de servicio"
+        "privacyPolicy": "Política de privacidad",
+        "termsOfService": "Términos de servicio"
     }
-  }
+}
