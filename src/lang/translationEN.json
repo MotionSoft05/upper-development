@@ -98,7 +98,6 @@
             "contactSupport": "Contact support"
         }
     },
-
     "precios": {
         "free": {
             "title": "Free",
@@ -130,12 +129,13 @@
                 "item2": "Register to be contacted and define service scope."
             }
         },
+        "title1": "Boost Your Business Success with Upper DS",
+        "description1": "Find the digital signage plan that gives you the most benefits​",
         "btnStart": "Start Now",
         "monthly": "Monthly",
         "yearly": "Yearly",
         "pricesNote": "*Prices are expressed in Mexican pesos (MXN) before taxes."
     },
-
     "contacto": {
         "title": "Contact Us",
         "description": "Our contact section is the direct channel to connect with Upper DS. Below, you'll find options to request a quote and contract our services.",
@@ -153,8 +153,7 @@
         "validationMessage": "Please fill out all required fields",
         "validEmailError": "Please enter a valid email address.",
         "validationNumber": "Please enter only numbers in the phone field."
-
-      },
+    },
     "aboutUs": {
         "title": "About Us",
         "content": "Learn more about our company and our mission to help businesses grow."

@@ -63,11 +63,10 @@ function Precios() {
       <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
         <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
           <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom ">
-            Impulsa el éxito de tu negocio con Upper DS
+            {t("precios.title1")}
           </h2>
           <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
-            Encuentre el plan de señalización digital que te de mayores
-            beneficios​
+            {t("precios.description1")}
           </p>
         </div>
         <div className="text-center"></div>
