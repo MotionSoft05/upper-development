@@ -1,6 +1,8 @@
 "use client";
+import { useTranslation } from 'react-i18next';
 import { usePathname } from "next/navigation"; // Captura la url
 function Footer() {
+  const { t } = useTranslation();
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
 
   if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
@@ -22,8 +24,8 @@ function Footer() {
 
         <div className="my-2">
           <p className="font-light sm:text-lg text-gray-400 text-center">
-            El contenido de este sitio está protegido por copyright y es
-            propiedad de Upper Digital Signage.
+          {/* Title Footer */}
+            {t('footer.title')}
           </p>
         </div>
         <div className="sm:flex sm:items-center sm:justify-between my-2">
