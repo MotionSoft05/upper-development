@@ -166,5 +166,22 @@
         "title": "The content of this site is protected by copyright and is owned by Upper Digital Signage.",
         "privacyPolicy": "Privacy Policy",
         "termsOfService": "Terms of Service"
-    }
+    },
+
+    "sidebar": {
+        "title": "Customize your screens",
+        "admin": "Admin",
+        "dashboard": "Dashboard",
+        "eventRegistration": "Event Registration",
+        "eventQuery": "Event Query",
+        "screenSettings": "Screen Settings",
+        "roomScreens": "Room Screens",
+        "directoryScreens": "Directory Screens",
+        "advertisement": "Advertisement",
+        "moreInformation": "More Information",
+        "myData": "My Data",
+        "userGuides": "User Guides",
+        "supportContact": "Support Contact",
+        "logout": "Logout"
+      }
 }

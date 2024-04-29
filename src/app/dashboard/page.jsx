@@ -68,6 +68,7 @@ function DashBoard() {
         : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
     });
   };
+  
   return (
     // <!-- component -->
     <div className="flex flex-row min-h-screen  ">

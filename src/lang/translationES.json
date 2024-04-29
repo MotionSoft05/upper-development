@@ -171,5 +171,22 @@
         "title": "El contenido de este sitio está protegido por copyright y es propiedad de Upper Digital Signage.",
         "privacyPolicy": "Política de privacidad",
         "termsOfService": "Términos de servicio"
-    }
+    },
+
+    "sidebar": {
+        "title": "Personalice sus pantallas",
+        "admin": "Admin",
+        "dashboard": "Tablero",
+        "eventRegistration": "Alta de eventos",
+        "eventQuery": "Consulta de eventos",
+        "screenSettings": "Ajustes pantallas",
+        "roomScreens": "Pantallas salón",
+        "directoryScreens": "Pantallas directorio",
+        "advertisement": "Publicidad",
+        "moreInformation": "Más información",
+        "myData": "Mis datos",
+        "userGuides": "Guías de Usuario",
+        "supportContact": "Contacto Soporte",
+        "logout": "Salir"
+      }
 }

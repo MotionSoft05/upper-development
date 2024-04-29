@@ -1,3 +1,4 @@
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 
 function Sidebar({
@@ -15,12 +16,15 @@ function Sidebar({
   setShowUserAdmin,
   toggleSidebar,
 }) {
+  const { t } = useTranslation();
+
   return (
     <div className="sidebar-content  ">
       <ul className="flex flex-col w-full">
         <div className="my-px">
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
-            Principal
+            {/* Titulo */}
+            {t("sidebar.title")}
           </span>
         </div>
         {(userEmail === "uppermex10@gmail.com" ||
@@ -46,7 +50,8 @@ function Sidebar({
                 href="#"
                 className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
               >
-                <span className="ml-3">Admin</span>
+                {/* Admin */}
+                <span className="ml-3"> {t("sidebar.admin")}</span>
               </a>
             </button>
           </li>
@@ -75,7 +80,8 @@ function Sidebar({
               <span className="flex items-center justify-center text-lg text-gray-400">
                 <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" />
               </span>
-              <span className="ml-3">DashBoard</span>
+              {/* DashBoard */}
+              <span className="ml-3"> {t("sidebar.dashboard")}</span>
             </a>
           </button>
         </li>
@@ -113,7 +119,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Alta de eventos</span>
+              {/* Alta de eventos */}
+              <span className="ml-3">{t("sidebar.eventRegistration")}</span>
             </a>
           </button>
         </li>
@@ -150,13 +157,15 @@ function Sidebar({
                   <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                 </svg>
               </span>
-              <span className="ml-3">Consulta de eventos</span>
+              {/* Consulta de eventos */}
+              <span className="ml-3">{t("sidebar.eventQuery")}</span>
             </a>
           </button>
         </li>
         <li className="my-px">
+          {/* Ajustes pantallas */}
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
-            Ajustes pantallas
+          {t("sidebar.screenSettings")}
           </span>
         </li>
 
@@ -193,7 +202,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Pantallas salon</span>
+              {/* Pantallas salon */}
+              <span className="ml-3">{t("sidebar.roomScreens")}</span>
             </a>
           </button>
         </li>
@@ -230,7 +240,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Pantallas directorio</span>
+              {/* Pantallas directorio */}
+              <span className="ml-3">{t("sidebar.directoryScreens")}</span>
             </a>
           </button>
         </li>
@@ -267,14 +278,16 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Publicidad</span>
+              {/* Publicidad */}
+              <span className="ml-3">{t("sidebar.advertisement")}</span>
             </a>
           </button>
         </li>
 
         <li className="my-px">
+          {/* Mas información */}
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
-            Mas información
+          {t("sidebar.moreInformation")}
           </span>
         </li>
         <li className="my-px">
@@ -310,7 +323,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Mis datos</span>
+              {/* Mis datos */}
+              <span className="ml-3">{t("sidebar.myData")}</span>
             </a>
           </button>
         </li>
@@ -347,7 +361,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Guías de Usuario</span>
+              {/* Guías de Usuario */}
+              <span className="ml-3">{t("sidebar.userGuides")}</span>
             </a>
           </button>
         </li>
@@ -384,7 +399,8 @@ function Sidebar({
                   />
                 </svg>
               </span>
-              <span className="ml-3">Contacto Soporte</span>
+              {/* Contacto Soporte */}
+              <span className="ml-3">{t("sidebar.supportContact")}</span>
             </a>
           </button>
         </li>
@@ -406,7 +422,8 @@ function Sidebar({
                 <path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
               </svg>
             </span>
-            <span className="ml-3">Salir</span>
+            {/* Salir */}
+            <span className="ml-3">{t("sidebar.logout")}</span>
           </Link>
         </li>
       </ul>
