@@ -10,7 +10,11 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import { useTranslation } from "react-i18next";
+
 function UserAdmin() {
+  const {t} = useTranslation() // Traducciones i18N
+
   const [cantidadPd, setCantidadPd] = useState(0);
   const [cantidadPs, setCantidadPs] = useState(0);
   const [nombreUsuario, setNombreUsuario] = useState("");
@@ -147,7 +151,8 @@ function UserAdmin() {
   return (
     <section className="pl-10 md:px-32">
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6x2">
-        Bienvenido
+        {/* Bienvenido */}
+        {t("userAdmin.welcome")}
         <span className="text-blue-600 "> {nombreUsuario}</span>
       </h1>
       <div className=" mb-6 ">
@@ -161,7 +166,8 @@ function UserAdmin() {
                       <tr>
                         <th className="px-4 py-2 text-left border-b-2 w-full">
                           <h2 className="text-ml font-bold ">
-                            Información de eventos
+                            {/* Información de eventos */}
+                            {t("userAdmin.eventInfo")}
                           </h2>
                         </th>
                       </tr>
@@ -170,7 +176,8 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Eventos Hoy</h2>
+                            {/* Eventos Hoy */}
+                            <h2>{t("userAdmin.todayEvents")}</h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -199,7 +206,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Eventos Semana</h2>
+                            <h2>
+                              {/* Eventos Semana */}
+                            {t("userAdmin.weekEvents")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -230,7 +240,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Eventos finalizados</h2>
+                            <h2>
+                              {/* Eventos finalizados */}
+                            {t("userAdmin.finishedEvents")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -262,14 +275,14 @@ function UserAdmin() {
                       <tr>
                         <th className="px-4 py-2 text-left border-b-2 w-full">
                           <h2 className="text-ml font-bold ">
-                            Plan de suscripción
+                            {/* Plan de suscripción */}
+                            {t("userAdmin.subscriptionPlan")}
                           </h2>
                           <p className="text-ml font-bold text-gray-600">
-                            Actualmente tienes{" "}
-                            <span className=" text-cyan-500 w-1/2">
+                          {t("userAdmin.currentSubscriptions")}
+                            <span className="ml-2 text-cyan-500 w-1/2">
                               {total}
-                            </span>{" "}
-                            suscripciones{" "}
+                            </span>
                           </p>
                         </th>
                       </tr>
@@ -278,7 +291,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Pantalla salon</h2>
+                            <h2>
+                              {/* Pantalla salon */}
+                            {t("userAdmin.roomScreen")}
+                              </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -290,7 +306,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Pantalla directorio</h2>
+                            <h2>
+                              {/* Pantalla directorio */}
+                              {t("userAdmin.directoryScreen")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -302,7 +321,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Publicidad Salón</h2>
+                            <h2>
+                              {/* Publicidad Salón */}
+                              {t("userAdmin.roomScreen")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -314,7 +336,10 @@ function UserAdmin() {
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
-                            <h2>Publicidad Directorio</h2>
+                            <h2>
+                              {/* Publicidad Directorio */}
+                              {t("userAdmin.directoryAdvertisement")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">

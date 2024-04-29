@@ -183,5 +183,19 @@
         "userGuides": "User Guides",
         "supportContact": "Support Contact",
         "logout": "Logout"
+      },
+
+      "userAdmin": {
+        "welcome": "Welcome",
+        "eventInfo": "Event Information",
+        "todayEvents": "Today's Events",
+        "weekEvents": "Weekly Events",
+        "finishedEvents": "Finished Events",
+        "subscriptionPlan": "Subscription Plan",
+        "currentSubscriptions": "Current Subscriptions",
+        "roomScreen": "Room Screen",
+        "directoryScreen": "Directory Screen",
+        "roomAdvertisement": "Room Advertisement",
+        "directoryAdvertisement": "Directory Advertisement"
       }
 }

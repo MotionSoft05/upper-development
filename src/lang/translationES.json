@@ -188,5 +188,19 @@
         "userGuides": "Guías de Usuario",
         "supportContact": "Contacto Soporte",
         "logout": "Salir"
+      },
+
+      "userAdmin": {
+        "welcome": "Bienvenido",
+        "eventInfo": "Información de eventos",
+        "todayEvents": "Eventos Hoy",
+        "weekEvents": "Eventos Semana",
+        "finishedEvents": "Eventos finalizados",
+        "subscriptionPlan": "Plan de suscripción",
+        "currentSubscriptions": "Suscripciones Actualmente",
+        "roomScreen": "Pantalla salón",
+        "directoryScreen": "Pantalla directorio",
+        "roomAdvertisement": "Publicidad Salón",
+        "directoryAdvertisement": "Publicidad Directorio"
       }
 }
