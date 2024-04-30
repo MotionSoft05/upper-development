@@ -18,6 +18,7 @@ import {
 } from "firebase/firestore";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -35,6 +36,7 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
+  const {t} = useTranslation() // Traduccion con i18N
   const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
     []
   );
@@ -519,19 +521,22 @@ function PantallasDirectorio() {
       <div>
         <div className="p-5 text-center">
           <h2 className="text-4xl font-extrabold text-gray-900">
-            AJUSTES DE PANTALLAS DIRECTORIO
+            {/* AJUSTES DE PANTALLAS DIRECTORIO */}
+            {t("screensDirectory.title")}
           </h2>
         </div>
 
         {/* Sección de personalización */}
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
-            Personalización del Template
+            {/* templateCustomization */}
+            {t("screensDirectory.templateCustomization")}
           </h1>
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div className="flex flex-col">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Logo
+                {/* Logo */}
+                {t("screensDirectory.logo")}
               </label>
               <div className="flex items-center">
                 <input
@@ -544,7 +549,8 @@ function PantallasDirectorio() {
 
             <div className="flex flex-col">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Publicidad
+                {/* Publicidad */}
+                {t("screensDirectory.advertisement")}
               </label>
               <div className="flex items-center">
                 <input
@@ -554,13 +560,15 @@ function PantallasDirectorio() {
                 />
               </div>
               <p className="text-white dark:text-gray-200 block text-sm">
-                Desktop: (440px x 660x max) portrait: (520px x 1040px max)
+                {/* Desktop: (440px x 660x max) portrait: (520px x 1040px max) */}
+                {t("screensDirectory.sizeInfo")}
               </p>
             </div>
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Logo actual
+                {/* Logo actual */}
+                {t("screensDirectory.currentLogo")}
               </label>
               {selectedLogo && (
                 <img src={selectedLogo} alt="Logo Actual" className="w-48" />
@@ -568,7 +576,8 @@ function PantallasDirectorio() {
             </div>
             <div>
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Publicidad actual
+                {/* Publicidad actual */}
+                {t("screensDirectory.currentAdvertisement")}
               </label>
               {selectedPublicidad && (
                 <img
@@ -581,7 +590,8 @@ function PantallasDirectorio() {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
-                Estilo de texto
+                {/* Estilo de texto */}
+                {t("screensDirectory.textStyle")}
               </label>
               <Select
                 options={fontStyleOptions}
@@ -593,14 +603,16 @@ function PantallasDirectorio() {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
-                Color de letra
+                {/* Color de letra */}
+                {t("screensDirectory.fontColor")}
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleFontColorChange}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                 >
-                  Seleccionar Color
+                  {/* Seleccionar Color */}
+                  {t("screensDirectory.selectColor")}
                 </button>
                 {showFontColorPicker && (
                   <div className="absolute z-10">
@@ -612,7 +624,8 @@ function PantallasDirectorio() {
                       onClick={handleFontColorChange}
                       className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                     >
-                      Listo
+                      {/* Listo */}
+                      {t("screensDirectory.confirm")}
                     </button>
                   </div>
                 )}
@@ -627,7 +640,8 @@ function PantallasDirectorio() {
           <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
             <div className="mb-4 flex flex-col">
               <label className="text-white dark:text-gray-200">
-                Seleccionar Ciudad
+                {/* Seleccionar Ciudad */}
+                {t("screensDirectory.selectCity")}
               </label>
               <Select
                 options={cityOptions}
@@ -643,14 +657,16 @@ function PantallasDirectorio() {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
-                Color de la plantilla
+                {/* Color de la plantilla */}
+                {t("screensDirectory.templateColor")}
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleTemplateColorChange}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                 >
-                  Seleccionar Color
+                  {/* Seleccionar Color */}
+                  {t("screensDirectory.selectColor")}
                 </button>
                 {showColorPicker && (
                   <div className="absolute z-10">
@@ -662,7 +678,8 @@ function PantallasDirectorio() {
                       onClick={handleTemplateColorChange}
                       className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                     >
-                      Listo
+                      {/* Listo */}
+                      {t("screensDirectory.confirm")}
                     </button>
                   </div>
                 )}
@@ -677,7 +694,8 @@ function PantallasDirectorio() {
             {/* Nombres de pantallas */}
             <div className="flex flex-col mr-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Nombres de pantallas
+                {/* Nombres de pantallas */}
+                {t("screensDirectory.screenNames")}
               </label>
               {Array.from({ length: pd }, (_, index) => (
                 <div className="flex items-center mb-2" key={index}>
@@ -726,7 +744,8 @@ function PantallasDirectorio() {
               }}
               className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
-              Guardar
+              {/* Guardar */}
+              {t("screensDirectory.save")}
             </button>
           </div>
         </section>

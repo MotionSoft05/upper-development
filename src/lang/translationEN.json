@@ -256,5 +256,23 @@
         "screenNames": "Screen Names",
         "templateColor": "Template Color",
         "save": "Save"
+      },
+
+      "screensDirectory": {
+        "title": "DIRECTORY SCREENS SETTINGS",
+        "templateCustomization": "Template Customization",
+        "logo": "Logo",
+        "advertisement": "Advertisement",
+        "sizeInfo": "Desktop: (440px x 660px max) portrait: (520px x 1040px max)",
+        "currentLogo": "Current Logo",
+        "currentAdvertisement": "Current Advertisement",
+        "textStyle": "Text Style",
+        "fontColor": "Font Color",
+        "selectColor": "Select Color",
+        "confirm": "Confirm",
+        "selectCity": "Select City",
+        "templateColor": "Template Color",
+        "screenNames": "Screen Names",
+        "save": "Save"
       }
 }

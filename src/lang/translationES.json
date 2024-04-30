@@ -261,5 +261,25 @@
         "screenNames": "Nombres de pantallas",
         "templateColor": "Color de la plantilla",
         "save": "Guardar"
+      },
+
+      "screensDirectory": {
+        "title": "AJUSTES DE PANTALLAS DIRECTORIO",
+        "templateCustomization": "Personalización del Template",
+        "logo": "Logo",
+        "advertisement": "Publicidad",
+        "sizeInfo": "Desktop: (440px x 660px máx) portrait: (520px x 1040px máx)",
+        "currentLogo": "Logo actual",
+        "currentAdvertisement": "Publicidad actual",
+        "textStyle": "Estilo de texto",
+        "fontColor": "Color de letra",
+        "selectColor": "Seleccionar Color",
+        "confirm": "Listo",
+        "selectCity": "Seleccionar Ciudad",
+        "templateColor": "Color de la plantilla",
+        "screenNames": "Nombres de pantallas",
+        "save": "Guardar"
       }
+
+
 }
