@@ -1,6 +1,6 @@
 "use client";
 import { usePathname } from "next/navigation"; // Captura la url
-function footer() {
+function Footer() {
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
 
   if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
@@ -46,4 +46,4 @@ function footer() {
     </footer>
   );
 }
-export default footer;
+export default Footer;

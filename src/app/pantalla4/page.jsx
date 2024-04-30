@@ -376,10 +376,33 @@ function Pantalla4() {
 
     return () => clearTimeout(timeoutId);
   }, [currentMediaIndex, publicidadesUsuario]);
+  // Iniciar cuenta regresiva
+  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
+  useEffect(() => {
+    let timer;
+    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+      if (countdown > 0) {
+        timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      } else {
+        window.location.reload(); // Reiniciar página al llegar a cero
+      }
+    }
 
+    return () => clearTimeout(timer);
+  }, [countdown, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      return "No hay publicidad ni eventos";
+      // Renderizar cuenta regresiva
+      return (
+        <>
+          <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+            <p>
+              No se a encontrado ningún evento o publicidad. La pagina se
+              reiniciara en {countdown} segundos
+            </p>
+          </section>
+        </>
+      );
     }
 
     const currentAd = publicidadesUsuario[currentMediaIndex];
