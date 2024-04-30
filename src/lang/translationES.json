@@ -202,5 +202,38 @@
         "directoryScreen": "Pantalla directorio",
         "roomAdvertisement": "Publicidad Salón",
         "directoryAdvertisement": "Publicidad Directorio"
+      },
+
+      "consultaModEventos": {
+        "title": "Consulta de Eventos",
+        "activeEvents": "Eventos Activos",
+        "finishedEvents": "Eventos Finalizados",
+        "user": "USUARIO",
+        "number": "N",
+        "name": "NOMBRE",
+        "type": "TIPO",
+        "roomName": "NOMBRE DE SALON",
+        "dates": "FECHA/S",
+        "roomTime": "HORA SALON",
+        "actions": "ACCIONES",
+        "editEvent": "Editar Evento",
+        "eventName": "Nombre del Evento",
+        "eventType": "Tipo del Evento",
+        "eventLocation": "Lugar del Evento",
+        "eventDescription": "Descripción del Evento",
+        "startDate": "Fecha de Inicio",
+        "endDate": "Fecha de Finalización",
+        "eventSchedule": "Horario en que se tiene programado el evento",
+        "realStartTime": "Hora Inicial Real",
+        "realEndTime": "Hora Final Real",
+        "screenSchedule": "Horario en que se mostrara la información del evento en pantallas",
+        "roomStartTime": "Hora Inicial Salon",
+        "roomEndTime": "Hora Final Salon",
+        "eventImages": "Imágenes del Evento (Máximo 3)",
+        "delete": "Eliminar",
+        "selectedDevices": "Dispositivos Seleccionados",
+        "saveChanges": "Guardar Cambios",
+        "close": "Cerrar",
+        "viewEdit": "Ver más/Editar"
       }
 }

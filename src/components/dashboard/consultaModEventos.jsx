@@ -3,6 +3,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
+import { useTranslation } from "react-i18next";
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
   authDomain: "upper-8c817.firebaseapp.com",
@@ -19,6 +20,7 @@ if (!firebase.apps.length) {
 const storage = firebase.storage();
 
 function ConsultaModEvento() {
+  const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
   const [user, setUser] = useState(null);
   const [eventos, setEventos] = useState([]);
@@ -343,7 +345,8 @@ function ConsultaModEvento() {
       <div>
         <div className="p-5">
           <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            Consulta de Eventos
+            {/* Consulta de Eventos */}
+            {t("consultaModEventos.title")}
           </h1>
         </div>
         <div className="mb-4">
@@ -353,7 +356,8 @@ function ConsultaModEvento() {
               filtro === "activos" ? "bg-blue-500" : "bg-gray-300"
             } text-white px-4 py-2 rounded mr-2`}
           >
-            Eventos Activos
+            {/* Eventos Activos */}
+            {t("consultaModEventos.activeEvents")}
           </button>
           <button
             onClick={() => setFiltro("finalizados")}
@@ -361,7 +365,8 @@ function ConsultaModEvento() {
               filtro === "finalizados" ? "bg-red-500" : "bg-gray-300"
             } text-white px-4 py-2 rounded`}
           >
-            Eventos Finalizados
+            {/* Eventos Finalizados */}
+            {t("consultaModEventos.finishedEvents")}
           </button>
         </div>
         <div className=" ">
@@ -375,7 +380,8 @@ function ConsultaModEvento() {
                     scope="col"
                     className="px-0.5 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                   >
-                    USUARIO
+                    {/* USUARIO */}
+                    {t("consultaModEventos.user")}
                   </th>
                 )}
                 <th
@@ -388,38 +394,44 @@ function ConsultaModEvento() {
                   scope="col"
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  NOMBRE
+                  {/* NOMBRE */}
+                  {t("consultaModEventos.name")}
                 </th>
                 <th
                   scope="col"
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  TIPO
+                  {/* TIPO */}
+                  {t("consultaModEventos.type")}
                 </th>
                 <th
                   scope="col"
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  NOMBRE DE SALON
+                  {/* NOMBRE DE SALON */}
+                  {t("consultaModEventos.roomName")}
                 </th>
                 <th
                   scope="col"
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  FECHA/S
+                  {/* FECHA/S */}
+                  {t("consultaModEventos.date")}
                 </th>
                 <th
                   scope="col"
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
-                  HORA SALON
+                  {/* HORA SALON */}
+                  {t("consultaModEventos.roomTime")}
                 </th>
 
                 <th
                   scope="col"
                   className="px-0.5 py-1 md:px-3 md:py-3 text-center text-xs font-medium text-gray-500 "
                 >
-                  ACCIONES
+                  {/* ACCIONES */}
+                  {t("consultaModEventos.actions")}
                 </th>
               </tr>
             </thead>
@@ -643,13 +655,15 @@ function ConsultaModEvento() {
                             <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
                             <div className="bg-white p-1 md:p-4 rounded shadow-lg z-50 w-full max-w-screen-md overflow-y-auto">
                               <h2 className="text-xl font-bold mb-4">
-                                Editar Evento
+                                {/* Editar Evento */}
+                                {t("consultaModEventos.editEvent")}
                               </h2>
                               <div className="grid grid-cols-2 space-x-3">
                                 <div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
-                                      Nombre del Evento
+                                      {/* Nombre del Evento */}
+                                      {t("consultaModEventos.eventName")}
                                     </label>
                                     <input
                                       type="text"
@@ -665,7 +679,8 @@ function ConsultaModEvento() {
                                   </div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
-                                      Tipo del Evento
+                                      {/* Tipo del Evento */}
+                                      {t("consultaModEventos.eventType")}
                                     </label>
                                     <input
                                       type="text"
@@ -681,7 +696,8 @@ function ConsultaModEvento() {
                                   </div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
-                                      Lugar del Evento
+                                      {/* Lugar del Evento */}
+                                      {t("consultaModEventos.eventLocation")}
                                     </label>
                                     <input
                                       type="text"
@@ -693,13 +709,10 @@ function ConsultaModEvento() {
                                     />
                                   </div>
                                   <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      Descripción del Evento (
-                                      {255 -
-                                        (eventoEditado.description || "")
-                                          .length}
-                                      )
-                                    </label>
+                                    {t("consultaModEventos.eventDescription")} (
+                                    {255 -
+                                      (eventoEditado.description || "").length}
+                                    )
                                     <textarea
                                       value={eventoEditado?.description || ""}
                                       onChange={(e) => {
@@ -720,7 +733,8 @@ function ConsultaModEvento() {
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Fecha de Inicio
+                                        {/* Fecha de Inicio */}
+                                        {t("consultaModEventos.startDate")}
                                       </label>
                                       <input
                                         type="date"
@@ -736,7 +750,8 @@ function ConsultaModEvento() {
                                     </div>
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Fecha de Finalización
+                                        {/* Fecha de Finalización */}
+                                        {t("consultaModEventos.endDate")}
                                       </label>
                                       <input
                                         type="date"
@@ -752,13 +767,15 @@ function ConsultaModEvento() {
                                     </div>
                                   </div>
                                   <p className="md:text-sm">
-                                    Horario en que se tiene programado el evento
+                                    {/* Horario en que se tiene programado el evento */}
+                                    {t("consultaModEventos.eventSchedule")}
                                   </p>
                                   {/* Horas Real */}
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Hora Inicial Real
+                                        {/* Hora Inicial Real */}
+                                        {t("consultaModEventos.realEndTime")}
                                       </label>
                                       <input
                                         type="time"
@@ -771,7 +788,8 @@ function ConsultaModEvento() {
                                     </div>
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Hora Final Real
+                                        {/* Hora Final Real */}
+                                        {t("consultaModEventos.realEndTime")}
                                       </label>
                                       <input
                                         type="time"
@@ -785,13 +803,14 @@ function ConsultaModEvento() {
                                   </div>
                                   {/* Horas Salon */}{" "}
                                   <p className="md:text-sm">
-                                    Horario en que se mostrara la información
-                                    del evento en pantallas
+                                    {/* Horario en que se mostrara... */}
+                                    {t("consultaModEventos.eventSchedule")}
                                   </p>
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Hora Inicial Salon
+                                        {/* Hora Inicial Salon */}
+                                        {t("consultaModEventos.roomStartTime")}
                                       </label>
                                       <input
                                         type="time"
@@ -809,7 +828,8 @@ function ConsultaModEvento() {
                                     </div>
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
-                                        Hora Final Salon
+                                        {/* Hora Final Salon */}
+                                        {t("consultaModEventos.roomEndTime")}
                                       </label>
                                       <input
                                         type="time"
@@ -828,7 +848,8 @@ function ConsultaModEvento() {
                                   </div>
                                   <div className="mb-2">
                                     <label className="block text-sm font-medium text-gray-700">
-                                      Imágenes del Evento (Máximo 3)
+                                      {/* Imágenes del Evento (Máximo 3) */}
+                                      {t("consultaModEventos.eventImages")}
                                     </label>
                                     <div className="flex items-center">
                                       {imagenesEvento.map((imagen, index) => (
@@ -844,7 +865,8 @@ function ConsultaModEvento() {
                                             }
                                             className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg mt-2"
                                           >
-                                            Eliminar
+                                            {/* Eliminar */}
+                                            {t("consultaModEventos.delete")}
                                           </button>
                                         </div>
                                       ))}
@@ -863,7 +885,8 @@ function ConsultaModEvento() {
 
                               <div className="mb-2">
                                 <label className="block text-sm font-medium text-gray-700">
-                                  Dispositivos Seleccionados
+                                  {/* Dispositivos Seleccionados */}
+                                  {t("consultaModEventos.selectedDevices")}
                                 </label>
                                 <div className="flex flex-wrap justify-start items-start">
                                   {pantallas
@@ -962,13 +985,15 @@ function ConsultaModEvento() {
                                   onClick={guardarCambios}
                                   className="text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg mr-2"
                                 >
-                                  Guardar Cambios
+                                  {/* Guardar Cambios */}
+                                  {t("consultaModEventos.saveChanges")}
                                 </button>
                                 <button
                                   onClick={cerrarModal}
                                   className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
                                 >
-                                  Cerrar
+                                  {/* Cerrar */}
+                                  {t("consultaModEventos.close")}
                                 </button>
                               </div>
                             </div>
@@ -978,13 +1003,15 @@ function ConsultaModEvento() {
                           onClick={() => abrirModalEdicion(evento)}
                           className="text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-lg "
                         >
-                          Ver más/Editar
+                          {/* Ver más/Editar */}
+                          {t("consultaModEventos.viewEdit")}
                         </button>
                         <button
                           onClick={() => eliminarEvento(evento.id)}
                           className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg"
                         >
-                          Eliminar
+                          {/* Eliminar */}
+                          {t("consultaModEventos.delete")}
                         </button>
                       </td>
                     </tr>

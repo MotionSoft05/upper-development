@@ -197,5 +197,38 @@
         "directoryScreen": "Directory Screen",
         "roomAdvertisement": "Room Advertisement",
         "directoryAdvertisement": "Directory Advertisement"
+      },
+
+      "consultaModEventos": {
+        "title": "Event Query",
+        "activeEvents": "Active Events",
+        "finishedEvents": "Finished Events",
+        "user": "USER",
+        "number": "N",
+        "name": "NAME",
+        "type": "TYPE",
+        "roomName": "ROOM NAME",
+        "dates": "DATES",
+        "roomTime": "ROOM TIME",
+        "actions": "ACTIONS",
+        "editEvent": "Edit Event",
+        "eventName": "Event Name",
+        "eventType": "Event Type",
+        "eventLocation": "Event Location",
+        "eventDescription": "Event Description",
+        "startDate": "Start Date",
+        "endDate": "End Date",
+        "eventSchedule": "Event Schedule",
+        "realStartTime": "Real Start Time",
+        "realEndTime": "Real End Time",
+        "screenSchedule": "Screen Schedule",
+        "roomStartTime": "Room Start Time",
+        "roomEndTime": "Room End Time",
+        "eventImages": "Event Images (Max 3)",
+        "delete": "Delete",
+        "selectedDevices": "Selected Devices",
+        "saveChanges": "Save Changes",
+        "close": "Close",
+        "viewEdit": "View/Edit"
       }
 }
