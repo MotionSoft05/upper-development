@@ -279,6 +279,14 @@
         "templateColor": "Color de la plantilla",
         "screenNames": "Nombres de pantallas",
         "save": "Guardar"
+      },
+
+      "advertisement": {
+        "title": "ADVERTISING CONFIGURATION",
+        "description1": "Enter images that will be displayed when there are no events.",
+        "description2": "The recommended size is that of your screen. Maximum of 10 advertisements per section.",
+        "eventRoom": "Event Room",
+        "eventDirectory": "Event Directory"
       }
 
 
