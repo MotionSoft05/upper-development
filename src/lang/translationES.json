@@ -235,5 +235,31 @@
         "saveChanges": "Guardar Cambios",
         "close": "Cerrar",
         "viewEdit": "Ver más/Editar"
+      },
+
+      "screenSalon": {
+        "licenseError": "No hay licencias activas. No se pueden personalizar las pantallas.",
+        "unauthenticatedUserError": "Usuario no autenticado. No se puede enviar a Firestore.",
+        "logoSelectionError": "Por favor, selecciona un logo.",
+        "fontStyleSelectionError": "Por favor, selecciona un estilo de texto.",
+        "templateColorSelectionError": "Por favor, selecciona un color de plantilla.",
+        "fontColorSelectionError": "Por favor, selecciona un color de letra.",
+        "screenNameCompletionError": "Por favor, completa todos los nombres de pantallas.",
+        "nullLogoError": "selectedLogo es null. No se puede enviar a Firestore.",
+        "invalidEventReferenceError": "Referencia de evento no válida:",
+        "customizationSavedSuccess": "Información de personalización guardada con éxito.",
+        "customizationSaveError": "Error al guardar la información de personalización y URL del logo:",
+        
+        "title": "AJUSTES DE PANTALLAS SALÓN",
+        "templateCustomization": "Personalización del Template",
+        "logo": "Logo",
+        "textStyle": "Estilo de texto",
+        "currentLogo": "Logo Actual",
+        "fontColor": "Color de letra",
+        "selectColor": "Seleccionar Color",
+        "done": "Listo",
+        "screenNames": "Nombres de pantallas",
+        "templateColor": "Color de la plantilla",
+        "save": "Guardar"
       }
 }

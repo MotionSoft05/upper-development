@@ -21,6 +21,7 @@ import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -46,6 +47,8 @@ const obtenerHora = () => {
 };
 
 function PantallasSalon() {
+
+  const {t} = useTranslation()
   const [nombrePantallas, setNombrePantallas] = useState([]);
   const [ps, setPs] = useState(0);
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -275,31 +278,32 @@ function PantallasSalon() {
       const authUser = firebase.auth().currentUser;
 
       if (ps === 0) {
-        alert(
-          "No hay licencias activas. No se pueden personalizar las pantallas."
-        );
+        // "No hay licencias activas. No se pueden personalizar las pantallas."
+        alert(t("screenSalon.licenseError"));
         return;
       }
 
       if (!authUser) {
-        console.error(
-          "Usuario no autenticado. No se puede enviar a Firestore."
-        );
+        // "Usuario no autenticado. No se puede enviar a Firestore."
+        console.error(t("screenSalon.unauthenticatedUserError"));
         return;
       }
 
       if (!selectedLogo) {
-        alert("Por favor, selecciona un logo.");
+        // "Por favor, selecciona un logo."
+        alert(t("screenSalon.logoSelectionError"));
         return;
       }
 
       if (!selectedFontStyle) {
-        alert("Por favor, selecciona un estilo de texto.");
+        // Por favor, selecciona un estilo de texto.
+        alert(t("screenSalon.fontStyleSelectionError"));
         return;
       }
 
       if (!templateColor) {
-        alert("Por favor, selecciona un color de plantilla.");
+        // Por favor, selecciona un color de plantilla.
+        alert(t("screenSalon.templateColorSelectionError"));
         return;
       }
 
@@ -309,12 +313,14 @@ function PantallasSalon() {
       }
 
       if (nombrePantallas.some((nombre) => !nombre)) {
-        alert("Por favor, completa todos los nombres de pantallas.");
+        // Por favor, completa todos los nombres de pantallas.
+        alert(t("screenSalon.fontColorSelectionError"));
         return;
       }
 
       if (!selectedLogo) {
-        console.error("selectedLogo es null. No se puede enviar a Firestore.");
+        // selectedLogo es null. No se puede enviar a Firestore.
+        alert(t("screenSalon.screenNameCompletionError"));
         return;
       }
 
@@ -392,16 +398,19 @@ function PantallasSalon() {
             );
           }
         } else {
-          console.error("Referencia de evento no válida:", doc.id);
+          // "Referencia de evento no válida:"
+          console.error(t("screenSalon.invalidEventReferenceError"), doc.id);
         }
       });
 
       await Promise.all(updatePromises);
 
-      alert("Información de personalización guardada con éxito.");
+      // "Información de personalización guardada con éxito."
+      alert(t("screenSalon.customizationSavedSuccess"));
     } catch (error) {
+      // "Error al guardar la información de personalización y URL del logo:",
       console.error(
-        "Error al guardar la información de personalización y URL del logo:",
+        t("screenSalon.customizationSaveError"),
         error
       );
     }
@@ -467,18 +476,21 @@ function PantallasSalon() {
       <div>
         <div className="p-5 text-center">
           <h2 className="text-4xl font-extrabold text-gray-900">
-            AJUSTES DE PANTALLAS SALON
+            {/* AJUSTES DE PANTALLAS SALON */}
+            {t("screenSalon.title")}
           </h2>
         </div>
 
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
-            Personalización del Template
+            {/* Personalización del Template */}
+            {t("screenSalon.templateCustomization")}
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Logo
+                {/* Logo */}
+                {t("screenSalon.logo")}
               </label>
               <div className="flex items-center">
                 <input
@@ -490,7 +502,8 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Estilo de texto
+                {/* Estilo de texto */}
+                {t("screenSalon.textStyle")}
               </label>
               <Select
                 options={fontStyleOptions}
@@ -501,7 +514,8 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Logo Actual
+                {/* Logo Actual */}
+                {t("screenSalon.currentLogo")}
               </label>
               {selectedLogo && (
                 <img src={selectedLogo} alt="Logo Actual" className="w-48" />
@@ -511,14 +525,16 @@ function PantallasSalon() {
             <div className="mb-4">
               <div>
                 <label className="text-white dark:text-gray-200">
-                  Color de letra
+                  {/* Color de letra */}
+                  {t("screenSalon.fontColor")}
                 </label>
                 <div className="flex items-center relative">
                   <button
                     onClick={handleFontColorChange}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                   >
-                    Seleccionar Color
+                    {/* Seleccionar Color */}
+                    {t("screenSalon.selectColor")}
                   </button>
                   {showFontColorPicker && (
                     <div className="absolute z-10 -top-40">
@@ -530,7 +546,8 @@ function PantallasSalon() {
                         onClick={handleFontColorChange}
                         className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                       >
-                        Listo
+                        {/* Listo */}
+                        {t("screenSalon.done")}
                       </button>
                     </div>
                   )}
@@ -544,7 +561,8 @@ function PantallasSalon() {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
-                Nombres de pantallas
+                {/* Nombres de pantallas */}
+                {t("screenSalon.screenNames")}
               </label>
               <div className="flex flex-col">
                 {Array.from({ length: ps }, (_, index) => (
@@ -575,14 +593,16 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
-                Color de la plantilla
+                {/* Color de la plantilla */}
+                {t("screenSalon.templateColor")}
               </label>
               <div className="flex items-center">
                 <button
                   onClick={handleTemplateColorChange}
                   className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                 >
-                  Seleccionar Color
+                  {/* Seleccionar Color */}
+                  {t("screenSalon.selectColor")}
                 </button>
                 {showColorPicker && (
                   <div className="absolute z-10">
@@ -594,7 +614,8 @@ function PantallasSalon() {
                       onClick={handleTemplateColorChange}
                       className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                     >
-                      Listo
+                      {/* Listo */}
+                      {t("screenSalon.done")}
                     </button>
                   </div>
                 )}
@@ -613,7 +634,8 @@ function PantallasSalon() {
               }}
               className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
-              Guardar
+              {/* Guardar */}
+              {t("screenSalon.save")}
             </button>
           </div>
         </section>

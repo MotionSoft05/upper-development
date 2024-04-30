@@ -230,5 +230,31 @@
         "saveChanges": "Save Changes",
         "close": "Close",
         "viewEdit": "View/Edit"
+      },
+
+      "screenSalon": {
+        "licenseError": "No active licenses. Screens cannot be customized.",
+        "unauthenticatedUserError": "Unauthenticated user. Cannot send to Firestore.",
+        "logoSelectionError": "Please select a logo.",
+        "fontStyleSelectionError": "Please select a text style.",
+        "templateColorSelectionError": "Please select a template color.",
+        "fontColorSelectionError": "Please select a font color.",
+        "screenNameCompletionError": "Please complete all screen names.",
+        "nullLogoError": "selectedLogo is null. Cannot send to Firestore.",
+        "invalidEventReferenceError": "Invalid event reference:",
+        "customizationSavedSuccess": "Customization information saved successfully.",
+        "customizationSaveError": "Error saving customization information and logo URL:",
+        
+        "title": "ROOM SCREEN SETTINGS",
+        "templateCustomization": "Template Customization",
+        "logo": "Logo",
+        "textStyle": "Text Style",
+        "currentLogo": "Current Logo",
+        "fontColor": "Font Color",
+        "selectColor": "Select Color",
+        "done": "Done",
+        "screenNames": "Screen Names",
+        "templateColor": "Template Color",
+        "save": "Save"
       }
 }
