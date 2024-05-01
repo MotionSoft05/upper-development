@@ -135,9 +135,7 @@
         "monthly": "Monthly",
         "yearly": "Yearly",
         "pricesNote": "*Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos"
-
     },
-
     "contacto": {
         "title": "Contáctenos",
         "description": "Nuestra sección de contacto es el canal directo para conectarte con Upper DS. A continuación, encontrarás las opciones para cotizar y contratar nuestros servicios​",
@@ -155,10 +153,7 @@
         "validationMessage": "Por favor, complete todos los campos requeridos",
         "validEmailError": "Por favor, ingresa un correo electrónico válido.",
         "validationNumber": "Por favor, ingresa solo números en el campo de teléfono."
-
-
-      },
-
+    },
     "aboutUs": {
         "title": "Sobre nosotros",
         "content": "Obtén más información sobre nuestra empresa y nuestra misión de ayudar a crecer a los negocios."
@@ -172,7 +167,6 @@
         "privacyPolicy": "Política de privacidad",
         "termsOfService": "Términos de servicio"
     },
-
     "sidebar": {
         "title": "Personalice sus pantallas",
         "admin": "Admin",
@@ -188,9 +182,8 @@
         "userGuides": "Guías de Usuario",
         "supportContact": "Contacto Soporte",
         "logout": "Salir"
-      },
-
-      "userAdmin": {
+    },
+    "userAdmin": {
         "welcome": "Bienvenido",
         "eventInfo": "Información de eventos",
         "todayEvents": "Eventos Hoy",
@@ -202,9 +195,8 @@
         "directoryScreen": "Pantalla directorio",
         "roomAdvertisement": "Publicidad Salón",
         "directoryAdvertisement": "Publicidad Directorio"
-      },
-
-      "consultaModEventos": {
+    },
+    "consultaModEventos": {
         "title": "Consulta de Eventos",
         "activeEvents": "Eventos Activos",
         "finishedEvents": "Eventos Finalizados",
@@ -235,9 +227,8 @@
         "saveChanges": "Guardar Cambios",
         "close": "Cerrar",
         "viewEdit": "Ver más/Editar"
-      },
-
-      "screenSalon": {
+    },
+    "screenSalon": {
         "licenseError": "No hay licencias activas. No se pueden personalizar las pantallas.",
         "unauthenticatedUserError": "Usuario no autenticado. No se puede enviar a Firestore.",
         "logoSelectionError": "Por favor, selecciona un logo.",
@@ -249,7 +240,6 @@
         "invalidEventReferenceError": "Referencia de evento no válida:",
         "customizationSavedSuccess": "Información de personalización guardada con éxito.",
         "customizationSaveError": "Error al guardar la información de personalización y URL del logo:",
-        
         "title": "AJUSTES DE PANTALLAS SALÓN",
         "templateCustomization": "Personalización del Template",
         "logo": "Logo",
@@ -261,9 +251,8 @@
         "screenNames": "Nombres de pantallas",
         "templateColor": "Color de la plantilla",
         "save": "Guardar"
-      },
-
-      "screensDirectory": {
+    },
+    "screensDirectory": {
         "title": "AJUSTES DE PANTALLAS DIRECTORIO",
         "templateCustomization": "Personalización del Template",
         "logo": "Logo",
@@ -279,15 +268,37 @@
         "templateColor": "Color de la plantilla",
         "screenNames": "Nombres de pantallas",
         "save": "Guardar"
-      },
-
-      "advertisement": {
-        "title": "ADVERTISING CONFIGURATION",
-        "description1": "Enter images that will be displayed when there are no events.",
-        "description2": "The recommended size is that of your screen. Maximum of 10 advertisements per section.",
-        "eventRoom": "Event Room",
-        "eventDirectory": "Event Directory"
-      }
-
-
+    },
+    "advertisement": {
+        "title": "CONFIGURACIÓN DE PUBLICIDAD",
+        "description1": "Ingresar imágenes que serán desplegadas cuando no se cuente con eventos.",
+        "description2": "El tamaño recomendado es el de tu pantalla. Como máximo 10 publicidades por sección.",
+        "eventRoom": "Salón de Eventos",
+        "eventDirectory": "Directorio de Eventos",
+        "salon": {
+            "userNull": "El objeto user es nulo.",
+            "userNullUidProperty": "¡Advertencia! El objeto user es nulo o no tiene la propiedad uid.",
+            "errorFetchingAdvertisements": "Error al obtener publicidades:",
+            "noNewMediaSelected": "¡Advertencia! No se ha seleccionado un nuevo archivo de media.",
+            "completeAtLeastOneField": "¡Alerta! Completa por lo menos uno de los tres campos.",
+            "errorLoadingMedia": "¡Error! Error durante la carga de la media:",
+            "errorSavingChanges": "Error al guardar cambios:",
+            "noValidDataToAdd": "¡Advertencia! No hay datos válidos para agregar.",
+            "errorAddAdvertising": "Error al agregar publicidad:",
+            "errorDeleteAdvertising": "Error al eliminar publicidad:",
+            "confirmDeleteAdvertisement": "¿Estás seguro de que quieres eliminar esta publicidad?",
+            
+            "title": "Salón de Eventos",
+            "selectMedia": "Seleccionar Imagen o Video",
+            "displayTime": "Tiempo de visualización:",
+            "edit": "Editar",
+            "delete": "Eliminar",
+            "cancel": "Cancelar",
+            "saveChanges": "Guardar Cambios",
+            "saveAdvertisement": "Guardar Publicidad",
+            "horas": "horas",
+            "minutos": "minutos",
+            "segundos": "segundos"
+        }
+    }
 }

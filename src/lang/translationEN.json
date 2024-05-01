@@ -281,6 +281,32 @@
         "description1": "Enter images that will be displayed when there are no events.",
         "description2": "The recommended size is that of your screen. Maximum of 10 advertisements per section.",
         "eventRoom": "Event Room",
-        "eventDirectory": "Event Directory"
+        "eventDirectory": "Event Directory",
+
+        "salon": {
+            "userNull": "The user object is null.",
+            "userNullUidProperty": "Warning! The user object is null or does not have the uid property.",
+            "errorFetchingAdvertisements": "Error fetching advertisements:",
+            "noNewMediaSelected": "Warning! No new media file has been selected.",
+            "completeAtLeastOneField": "Alert! Complete at least one of the three fields.",
+            "errorLoadingMedia": "Error loading media:",
+            "errorSavingChanges": "Error saving changes:",
+            "noValidDataToAdd": "Warning! No valid data to add.",
+            "errorAddAdvertising": "Error adding advertising:",
+            "errorDeleteAdvertising": "Error when removing advertising:",
+            "confirmDeleteAdvertisement": "Are you sure you want to delete this advertisement?",
+
+            "title": "Event Hall",
+            "selectMedia": "Select Image or Video",
+            "displayTime": "Display Time:",
+            "edit": "Edit",
+            "delete": "Delete",
+            "cancel": "Cancel",
+            "saveChanges": "Save Changes",
+            "saveAdvertisement": "Save Advertisement",
+            "horas": "hours",
+            "minutos": "minutes",
+            "segundos": "seconds"
+          }
       }
 }
