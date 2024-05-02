@@ -11,6 +11,7 @@ import {
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
 import "firebase/compat/auth";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -25,6 +26,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const Guia = () => {
+
+  const {t} = useTranslation()
   const [pdfFile, setPdfFile] = useState(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -85,7 +88,8 @@ const Guia = () => {
       pdfRef
         .put(pdfFile)
         .then((snapshot) => {
-          console.log("PDF subido con éxito", snapshot);
+          // "PDF cargado con éxito"
+          console.log(t("guia.uploadSuccess"), snapshot);
 
           pdfRef.getDownloadURL().then((url) => {
             setPdfFile({ ...pdfFile, url });
@@ -99,11 +103,13 @@ const Guia = () => {
           });
         })
         .catch((error) => {
-          console.error("Error al subir el PDF:", error);
+          // "Error al subir el PDF:";
+          console.error(t("guia.uploadError"), error);
           setIsUploading(false);
         });
     } else {
-      console.error("Selecciona un archivo PDF antes de subirlo.");
+      // console.error("Selecciona un archivo PDF antes de subirlo.");
+      console.error(t("guia.selectPdfFile"));
     }
   };
 
@@ -115,7 +121,8 @@ const Guia = () => {
     pdfRef
       .delete()
       .then(() => {
-        console.log("PDF eliminado con éxito");
+        // console.log("PDF eliminado con éxito");
+        console.log(t("guia.deleteSuccess"));
         // Actualizar localmente el estado de los archivos eliminando el PDF correspondiente
         setUploadedFiles((prevFiles) =>
           prevFiles.filter((file) => file.name !== fileName)
@@ -123,7 +130,8 @@ const Guia = () => {
         setFileUploaded(false);
       })
       .catch((error) => {
-        console.error("Error al eliminar el PDF:", error);
+        // "Error al eliminar el PDF:"
+        console.error(t("guia.deleteError"), error);
       });
   };
 
@@ -146,7 +154,8 @@ const Guia = () => {
       <div>
         <div className="p-5">
           <h1 className=" text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
-            Guía de usuario
+            {/* Guía de usuario */}
+            {t("guia.pageTitle")}
           </h1>
 
           {user &&
@@ -163,7 +172,8 @@ const Guia = () => {
                   {isUploading ? (
                     <FontAwesomeIcon icon={faSync} spin size="lg" />
                   ) : (
-                    "Subir PDF"
+                    // "Subir PDF"
+                    t("guia.uploadButton")
                   )}
                 </button>
               </div>

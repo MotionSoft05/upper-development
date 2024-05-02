@@ -334,5 +334,15 @@
         "membershipType": "Tipo de membresía",
         "licenseNumber": "Número de licencias",
         "companyName": "Nombre de la empresa"
-    }
+    },
+
+    "guia": {
+        "uploadSuccess": "PDF cargado con éxito",
+        "uploadError": "Error al subir el PDF:",
+        "selectPdfFile": "Selecciona un archivo PDF antes de subirlo.",
+        "deleteSuccess": "PDF eliminado con éxito",
+        "deleteError": "Error al eliminar el PDF:",
+        "pageTitle": "Guía de usuario",
+        "uploadButton": "Subir PDF"
+      }
 }

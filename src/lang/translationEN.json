@@ -334,5 +334,15 @@
         "membershipType": "Membership Type",
         "licenseNumber": "License Number",
         "companyName": "Company Name"
-    }
+    },
+
+    "guia": {
+        "uploadSuccess": "PDF uploaded successfully",
+        "uploadError": "Error uploading the PDF:",
+        "selectPdfFile": "Select a PDF file before uploading.",
+        "deleteSuccess": "PDF deleted successfully",
+        "deleteError": "Error deleting the PDF:",
+        "pageTitle": "User Guide",
+        "uploadButton": "Upload PDF"
+      }
 }
