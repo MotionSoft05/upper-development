@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -19,6 +20,8 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function Licencia() {
+
+  const {t} = useTranslation()
   const [currentUser, setCurrentUser] = useState(null);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
 
@@ -47,7 +50,8 @@ function Licencia() {
             setCurrentUser(userData);
           }
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          // "Error al obtener datos del usuario:"
+          console.error(t("licencia.messages.userFetch"), error);
         }
       } else {
         setCurrentUser(null);
@@ -61,7 +65,8 @@ function Licencia() {
     <section className="px-5 md:px-32">
       <div className="p-5">
         <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-          Mis datos
+          {/* Mis datos */}
+          {t("licencia.myData")}
         </h1>
       </div>
       <div className="text-lg font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
@@ -75,7 +80,10 @@ function Licencia() {
                   : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
               } inline-block p-4 rounded-t-lg`}
             >
-              <span className="ml-3">Mi cuenta</span>
+              <span className="ml-3">
+                {/* Mi cuenta */}
+                {t("licencia.account")}
+                </span>
             </button>
           </li>
           <li className="mr-2">
@@ -87,7 +95,10 @@ function Licencia() {
                   : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
               } inline-block p-4 rounded-t-lg`}
             >
-              <span className="ml-3">Datos de facturación</span>
+              <span className="ml-3">
+                {/* Datos de facturación */}
+                {t("licencia.billingData")}
+              </span>
             </button>
           </li>
         </ul>
@@ -109,6 +120,8 @@ function Licencia() {
 }
 
 function DatosFiscales({ currentUser }) {
+  const {t} = useTranslation()
+
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [datosFiscales, setDatosFiscales] = useState({
     rfc: "",
@@ -132,13 +145,16 @@ function DatosFiscales({ currentUser }) {
           if (datosFiscalesDocSnap.exists()) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
             setDatosFiscales(datosFiscalesData);
-            console.log("Datos Fiscales recibidos:", datosFiscalesData);
+            // "Datos Fiscales recibidos:"
+            console.log(t("licencia.messages.fiscalDataReceived"), datosFiscalesData);
           } else {
-            console.log("No se encontraron datos fiscales para el usuario.");
+            // "No se encontraron datos fiscales para el usuario."
+            console.log(t("licencia.messages.noFiscalData"));
           }
         }
       } catch (error) {
-        console.error("Error al obtener datos fiscales:", error);
+        // "Error al obtener datos fiscales:"
+        console.error(t("licencia.messages.fiscalDataFetch"), error);
       }
     };
 
@@ -150,14 +166,16 @@ function DatosFiscales({ currentUser }) {
     const user = auth.currentUser;
 
     if (!user) {
-      console.error("No se ha obtenido el usuario actual.");
+      // "No se ha obtenido el usuario actual."
+      console.error(t("licencia.messages.currentUserFetch"));
       return;
     }
 
     const userId = user.uid;
 
     if (!userId) {
-      console.error("No se ha obtenido el UID del usuario actual.");
+      // "No se ha obtenido el UID del usuario actual."
+      console.error(t("licencia.messages.uidFetch"));
       return;
     }
 
@@ -176,7 +194,8 @@ function DatosFiscales({ currentUser }) {
       !usoCdfi ||
       !email
     ) {
-      console.error("Por favor, completa todos los campos.");
+      // "Por favor, completa todos los campos."
+      console.error(t("licencia.messages.fieldsIncomplete"));
       return;
     }
 
@@ -194,17 +213,23 @@ function DatosFiscales({ currentUser }) {
     try {
       await setDoc(datosFiscalesDocRef, datosFiscalesData);
       setGuardadoExitoso(true);
-      console.log("Datos fiscales enviados correctamente.");
+      // "Datos fiscales enviados correctamente."
+      console.log(t("licencia.messages.fiscalDataSent"));
     } catch (error) {
-      console.error("Error al enviar datos fiscales:", error);
+      // "Error al enviar datos fiscales:"
+      console.error(t("licencia.messages.fiscalDataError"), error);
     }
   };
   return (
     <section className="px-8 py-12">
-      <h1>Datos Fiscales</h1>
+      <h1>
+        {/* Datos Fiscales */}
+        {t("licencia.fiscalData")}
+      </h1>
       {guardadoExitoso && (
         <div className="text-green-500 font-bold mb-4">
-          ¡Datos fiscales guardados correctamente!
+          {/* ¡Datos fiscales guardados correctamente! */}
+          {t("licencia.fiscalDataSaved")}
         </div>
       )}
       <form onSubmit={handleSubmit}>
@@ -230,7 +255,8 @@ function DatosFiscales({ currentUser }) {
             htmlFor="razonSocial"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Nombre/Razón social
+            {/* Nombre/Razón social */}
+            {t("licencia.nameOrBusiness")}
           </label>
           <input
             type="text"
@@ -247,7 +273,8 @@ function DatosFiscales({ currentUser }) {
             htmlFor="codigoPostal"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Código postal
+            {/* Código postal */}
+            {t("licencia.postalCode")}
           </label>
           <input
             type="text"
@@ -264,7 +291,8 @@ function DatosFiscales({ currentUser }) {
             htmlFor="regimenFiscal"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Régimen fiscal
+            {/* Régimen fiscal */}
+            {t("licencia.taxRegime")}
           </label>
           <input
             type="text"
@@ -281,7 +309,8 @@ function DatosFiscales({ currentUser }) {
             htmlFor="usoCdfi"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Uso de CDFI
+            {/* Uso de CDFI */}
+            {t("licencia.cfdiUsage")}
           </label>
           <input
             type="text"
@@ -298,7 +327,8 @@ function DatosFiscales({ currentUser }) {
             htmlFor="email"
             className="block mb-2 text-sm font-medium text-gray-900"
           >
-            Tu correo electrónico
+            {/* Tu correo electrónico */}
+            {t("licencia.youEmail")}
           </label>
           <input
             type="email"
@@ -313,7 +343,8 @@ function DatosFiscales({ currentUser }) {
           type="submit"
           className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
         >
-          Guardar
+          {/* Guardar */}
+          {t("licencia.save")}
         </button>
       </form>
     </section>
@@ -321,9 +352,13 @@ function DatosFiscales({ currentUser }) {
 }
 
 function DatosNegocio({ currentUser }) {
+  const {t} = useTranslation()
   return (
     <section className="px-8 py-12">
-      <h1>Datos de Negocio</h1>
+      <h1>
+        {/* Datos de Negocio */}
+        {t("licencia.businessData")}
+      </h1>
       <div className="relative overflow-x-auto">
         <table className="w-full text-sm text-left text-gray-500">
           <tbody>
@@ -332,7 +367,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Nombre
+                {/* Nombre */}
+                {t("licencia.name")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.nombre : ""}
@@ -343,7 +379,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Apellido
+                {/* Apellido */}
+                {t("licencia.surname")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.apellido : ""}
@@ -354,7 +391,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Correo
+                {/* Correo */}
+                {t("licencia.email")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.email : ""}
@@ -365,7 +403,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Teléfono de contacto
+                {/* Teléfono de contacto */}
+                {t("licencia.contactPhone")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.telefono : ""}
@@ -376,7 +415,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Fecha de Inicio
+                {/* Fecha de Inicio */}
+                {t("licencia.startDate")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.inicio : ""}
@@ -387,7 +427,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Fecha de expiración
+                {/* Fecha de expiración */}
+                {t("licencia.expirationDate")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.final : ""}
@@ -398,7 +439,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Tipo de membresía
+                {/* Tipo de membresía */}
+                {t("licencia.membershipType")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.tipoPlan : ""}
@@ -409,7 +451,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Número de licencias
+                {/* Número de licencias */}
+                {t("licencia.licenseNumber")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.total : ""}
@@ -420,7 +463,8 @@ function DatosNegocio({ currentUser }) {
                 scope="row"
                 className="px-6 py-4 font-extrabold text-gray-900"
               >
-                Nombre de la empresa
+                {/* Nombre de la empresa */}
+                {t("licencia.companyName")}
               </th>
               <td className="px-6 py-4">
                 {currentUser ? currentUser.empresa : ""}

@@ -287,7 +287,6 @@
             "errorAddAdvertising": "Error al agregar publicidad:",
             "errorDeleteAdvertising": "Error al eliminar publicidad:",
             "confirmDeleteAdvertisement": "¿Estás seguro de que quieres eliminar esta publicidad?",
-            
             "title": "Salón de Eventos",
             "title2": "Directorio de Eventos",
             "selectMedia": "Seleccionar Imagen o Video",
@@ -301,5 +300,39 @@
             "minutos": "minutos",
             "segundos": "segundos"
         }
+    },
+    "licencia": {
+        "messages": {
+            "userFetch": "Error al obtener datos del usuario:",
+            "fiscalDataFetch": "Error al obtener datos fiscales:",
+            "noFiscalData": "No se encontraron datos fiscales para el usuario.",
+            "currentUserFetch": "No se ha obtenido el usuario actual.",
+            "uidFetch": "No se ha obtenido el UID del usuario actual.",
+            "fieldsIncomplete": "Por favor, completa todos los campos.",
+            "fiscalDataSent": "Datos fiscales enviados correctamente.",
+            "fiscalDataError": "Error al enviar datos fiscales:",
+            "fiscalDataReceived": "Datos Fiscales recibidos:"
+        },
+        "myData": "Mis datos",
+        "account": "Mi cuenta",
+        "billingData": "Datos de facturación",
+        "fiscalData": "Datos Fiscales",
+        "fiscalDataSaved": "¡Datos fiscales guardados correctamente!",
+        "businessData": "Datos de Negocio",
+        "nameOrBusiness": "Nombre/Razón social",
+        "postalCode": "Código postal",
+        "taxRegime": "Régimen fiscal",
+        "cfdiUsage": "Uso de CFDI",
+        "youEmail": "Tu correo electrónico",
+        "save": "Guardar",
+        "name": "Nombre",
+        "surname": "Apellido",
+        "email": "Correo",
+        "contactPhone": "Teléfono de contacto",
+        "startDate": "Fecha de Inicio",
+        "expirationDate": "Fecha de expiración",
+        "membershipType": "Tipo de membresía",
+        "licenseNumber": "Número de licencias",
+        "companyName": "Nombre de la empresa"
     }
 }
