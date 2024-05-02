@@ -216,7 +216,8 @@ function PublicidadSalon() {
         segundos <= 59;
 
       if (!hasValidData) {
-        window.alert("Completa por lo menos uno de los tres campos");
+        // "Completa por lo menos uno de los tres campos"
+        console.alert(t("advertisement.salon.completeAtLeastOneField"));
         return;
       }
 

@@ -5,6 +5,7 @@ import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
 import "firebase/compat/firestore";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -25,6 +26,8 @@ const storage = firebase.storage();
 const db = firebase.firestore();
 
 function PublicidadDirec() {
+
+  const {t} = useTranslation()
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
@@ -54,7 +57,8 @@ function PublicidadDirec() {
         setUser(user);
         await obtenerPublicidades(user, "directorio");
       } else {
-        console.warn("El objeto user es nulo.");
+        // El objeto user es nulo.
+        console.warn(t("advertisement.salon.userNull"));
       }
     });
 
@@ -149,10 +153,12 @@ function PublicidadDirec() {
 
         setImagenesSalonOriginales(publicidadesData.map(() => null));
       } else {
-        console.warn("El objeto user es nulo o no tiene la propiedad uid.");
+        // El objeto user es nulo o no tiene la propiedad uid.
+        console.warn(t("advertisement.salon.userNullUidProperty"));
       }
     } catch (error) {
-      console.error("Error al obtener publicidades:", error);
+      // Error al obtener publicidades:
+      console.error(t("advertisement.salon.errorFetchingAdvertisements"), error);
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +204,8 @@ function PublicidadDirec() {
       const hasNewMedia = nuevaImagen && nuevaImagen.name !== undefined;
 
       if (!isEditingExistingPublicidad && !hasNewMedia) {
-        console.warn("No se ha seleccionado un nuevo archivo de media");
+        // "No se ha seleccionado un nuevo archivo de media"
+        console.warn(t("advertisement.salon.noNewMediaSelected"));
         return;
       }
 
@@ -210,7 +217,8 @@ function PublicidadDirec() {
         segundos <= 59;
 
       if (!hasValidData) {
-        window.alert("Completa por lo menos uno de los tres campos");
+        // "Completa por lo menos uno de los tres campos"
+        console.alert(t("advertisement.salon.completeAtLeastOneField"));
         return;
       }
 
@@ -240,7 +248,8 @@ function PublicidadDirec() {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           },
           (error) => {
-            console.error("Error durante la carga de la media:", error);
+            // "Error durante la carga de la media:"
+            console.error(t("advertisement.salon.errorLoadingMedia"), error);
           },
           async () => {
             mediaUrl = await mediaRef.getDownloadURL();
@@ -279,7 +288,8 @@ function PublicidadDirec() {
         setIsUploading(false);
       }
     } catch (error) {
-      console.error("Error al guardar cambios:", error);
+      // "Error al guardar cambios:"
+      console.error(t("advertisement.salon.errorSavingChanges"), error);
       setIsUploading(false);
     } finally {
       setIsLoading(false);
@@ -395,7 +405,8 @@ function PublicidadDirec() {
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
-        console.warn("No hay datos válidos para agregar");
+        // "No hay datos válidos para agregar"
+        console.warn(t("advertisement.salon.noValidDataToAdd"));
       }
 
       setImagenesSalon((prevImages) => [...prevImages, null]);
@@ -405,7 +416,8 @@ function PublicidadDirec() {
       ]);
       setPreviewImages((prevPreviews) => [...prevPreviews, null]);
     } catch (error) {
-      console.error("Error al agregar publicidad:", error);
+      // "Error al agregar publicidad:"
+      console.error(t("advertisement.salon.errorAddAdvertising"), error);
     } finally {
       setCurrentAction(null);
       setIsUploading(false);
@@ -416,7 +428,8 @@ function PublicidadDirec() {
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
       const confirmacion = window.confirm(
-        "¿Estás seguro de que quieres eliminar esta publicidad?"
+          // "¿Estás seguro de que quieres eliminar esta publicidad?"
+          t("advertisement.salon.confirmDeleteAdvertisement")
       );
       setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
@@ -437,7 +450,8 @@ function PublicidadDirec() {
       setTiemposSalon(newTiemposSalon);
       setPublicidadesIds(newIds);
     } catch (error) {
-      console.error("Error al eliminar publicidad:", error);
+      // "Error al eliminar publicidad:"
+      console.error(t("advertisement.salon.errorDeleteAdvertising"), error);
     } finally {
       setIsLoading(false);
     }
@@ -469,11 +483,13 @@ function PublicidadDirec() {
         {imagenesSalon.slice(0, 10).map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
-              Directorio de Eventos {index + 1}
+              {/* Directorio de Eventos {index + 1} */}
+              {`${t("advertisement.salon.title2")}  ${index + 1}`}
             </h3>
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
-                Seleccionar Imagen o Video
+                {/* Seleccionar Imagen o Video */}
+                {t("advertisement.salon.selectMedia")} 
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -510,7 +526,10 @@ function PublicidadDirec() {
             )}
 
             <div className="mt-4">
-              <label className="text-gray-800">Tiempo de visualización:</label>
+              <label className="text-gray-800">
+                {/* Tiempo de visualización: */}
+                {t("advertisement.salon.displayTime")} 
+              </label>
               <div className="flex mt-2">
                 {["horas", "minutos", "segundos"].map((unit) => (
                   <div key={unit} className="flex items-center">
@@ -530,7 +549,10 @@ function PublicidadDirec() {
                       }
                       pattern="\d*"
                     />
-                    <span className="text-gray-600 ml-1">{unit}</span>
+                    <span className="text-gray-600 ml-1">
+                      {/* horas / minutos / segundos */}
+                      {t(`advertisement.salon.${unit}`)}
+                      </span>
                   </div>
                 ))}
               </div>
@@ -543,7 +565,8 @@ function PublicidadDirec() {
                       onClick={() => handleEditarPublicidad(index)}
                       className="text-yellow-500 p-2 px-4 bg-white border border-yellow-500 rounded-full cursor-pointer hover:bg-yellow-100 hover:text-yellow-700 mr-4"
                     >
-                      Editar
+                      {/* Editar */}
+                      {t("advertisement.salon.edit")}
                     </button>
                     <button
                       onClick={() =>
@@ -551,7 +574,8 @@ function PublicidadDirec() {
                       }
                       className="text-red-500 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
                     >
-                      Eliminar
+                      {/* Eliminar */}
+                      {t("advertisement.salon.delete")}
                     </button>
                   </>
                 )}
@@ -561,13 +585,15 @@ function PublicidadDirec() {
                       onClick={() => handleCancelarEdicion()}
                       className="text-gray-500 p-2 px-4 bg-white border border-gray-500 rounded-full cursor-pointer hover:bg-gray-100 hover:text-gray-700 mr-4"
                     >
-                      Cancelar
+                      {/* Cancelar */}
+                      {t("advertisement.salon.cancel")}
                     </button>
                     <button
                       onClick={() => handleGuardarCambios(index)}
                       className="text-green-500 p-2 px-4 bg-white border border-green-500 rounded-full cursor-pointer hover:bg-green-100 hover:text-green-700"
                     >
-                      Guardar Cambios
+                      {/* Guardar Cambios */}
+                      {t("advertisement.salon.saveChanges")}
                     </button>
                   </>
                 )}
@@ -609,9 +635,11 @@ function PublicidadDirec() {
                   {isUploading && currentAction === "Guardar Publicidad" ? (
                     <FontAwesomeIcon icon={faSync} spin size="lg" />
                   ) : currentAction === "Guardar Publicidad" ? (
-                    "Guardar Publicidad"
+                    // "Guardar Publicidad"
+                    t("advertisement.salon.saveAdvertisement")
                   ) : (
-                    "Guardar Cambios"
+                    // "Guardar Cambios"
+                    t("advertisement.salon.saveChanges")
                   )}
                 </button>
               </div>

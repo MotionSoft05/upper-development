@@ -297,6 +297,7 @@
             "confirmDeleteAdvertisement": "Are you sure you want to delete this advertisement?",
 
             "title": "Event Hall",
+            "title2": "Event Directory",
             "selectMedia": "Select Image or Video",
             "displayTime": "Display Time:",
             "edit": "Edit",
