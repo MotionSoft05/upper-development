@@ -359,5 +359,42 @@
         "messagePlaceholder": "Su mensaje",
         "sendButton": "Enviar",
         "successMessage": "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto."
-    }
+    },
+
+    "altaEventos": {
+        "noActiveLicenses": "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
+        "noAdvertisementSalonAndDirectory": "Actualmente no cuenta con Publicidad en Salones y Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+        "noAdvertisementSalon": "Actualmente no cuenta con Publicidad en Salones de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+        "noAdvertisementDirectory": "Actualmente no cuenta con Publicidad en Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+        "userDataError": "Error al obtener datos de usuario:",
+        "uploadImageError": "Error al subir imagen:",
+        "templateInfoError": "Error al obtener la información de personalización del template:",
+        "selectDateAlert": "Debes seleccionar una fecha antes de enviar el formulario.",
+        "uploadImageAlert": "Debes subir al menos una imagen antes de enviar el formulario.",
+        "logStartDate": "Fecha Inicio antes de enviar a Firebase:",
+        "logEndDate": "Fecha Final antes de enviar a Firebase:",
+        "firebaseSendError": "Error al enviar datos a Firebase:",
+        "title": "Alta de eventos",
+        "selectCompany": "Seleccionar Empresa",
+        "eventName": "Nombre del evento",
+        "eventType": "Tipo de evento",
+        "location": "Lugar",
+        "description": "Descripción",
+        "characters": "caracteres",
+        "selectDate": "Seleccione la fecha:",
+        "selectHours": "Seleccione las horas:",
+        "realInitialTime": "Horario en que se tiene programado el evento",
+        "realInitialHour": "Hora inicial real:",
+        "realFinalHour": "Hora final real:",
+        "hours": "Horas:",
+        "minutes": "Minutos:",
+        "realFinalTime": "Horario en que se mostrará la información del evento en pantallas",
+        "loungeInitialHour": "Hora inicial salón:",
+        "loungeFinalHour": "Hora final salón:",
+        "sendButton": "Enviar",
+        "successMessage": "Los datos se enviaron correctamente.",
+        "uploadImagesTitle": "Subir Imágenes:",
+        "selectDevicesTitle": "Seleccionar Dispositivos:",
+        "showTitle": "Se muestra en:"
+      }
 }

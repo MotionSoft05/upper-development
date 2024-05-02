@@ -21,6 +21,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
+import { useTranslation } from "react-i18next";
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
   authDomain: "upper-8c817.firebaseapp.com",
@@ -37,6 +38,7 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function AltaEventos() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
   const [nombrePantallas, setNombrePantallas] = useState([]);
@@ -77,7 +79,8 @@ function AltaEventos() {
               Swal.fire({
                 icon: "error",
                 title: "Oops...",
-                text: "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
+                // text: "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
+                text: t("altaEventos.noActiveLicenses"),
                 confirmButtonColor: "#4482F6",
               }).then(() => {
                 window.location.reload();
@@ -113,7 +116,8 @@ function AltaEventos() {
                   Swal.fire({
                     icon: "warning",
                     title: "¡Atención!",
-                    text: "Actualmente no cuenta con Publicidad en Salones y Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    // text: "Actualmente no cuenta con Publicidad en Salones y Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    text: t("altaEventos.noAdvertisementSalonAndDirectory"),
                     confirmButtonColor: "#4482F6",
                   }).then(() => {
                     window.location.reload();
@@ -123,7 +127,8 @@ function AltaEventos() {
                   Swal.fire({
                     icon: "warning",
                     title: "¡Atención!",
-                    text: "Actualmente no cuenta con Publicidad en Salones de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    // text: "Actualmente no cuenta con Publicidad en Salones de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    text:t("altaEventos.noAdvertisementSalon"),
                     confirmButtonColor: "#4482F6",
                   }).then(() => {
                     window.location.reload();
@@ -133,7 +138,8 @@ function AltaEventos() {
                   Swal.fire({
                     icon: "warning",
                     title: "¡Atención!",
-                    text: "Actualmente no cuenta con Publicidad en Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    // text: "Actualmente no cuenta con Publicidad en Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
+                    text:t("altaEventos.noAdvertisementDirectory"),
                     confirmButtonColor: "#4482F6",
                   }).then(() => {
                     window.location.reload();
@@ -146,7 +152,8 @@ function AltaEventos() {
           }
         })
         .catch((error) => {
-          console.error("Error al obtener datos de usuario:", error);
+          // "Error al obtener datos de usuario:"
+          console.error(t("altaEventos.userDataError"), error);
           setDbError(true);
         })
         .finally(() => {
@@ -245,7 +252,8 @@ function AltaEventos() {
         setImages((prevImages) => [...prevImages, imageUrl]);
         setHasImage(true); // Establecer que hay al menos una imagen
       } catch (error) {
-        console.error("Error al subir imagen:", error);
+        // "Error al subir imagen:"
+        console.error(t("altaEventos.uploadImageError"), error);
       }
     }
     e.target.value = null;
@@ -290,7 +298,8 @@ function AltaEventos() {
       }
     } catch (error) {
       console.error(
-        "Error al obtener la información de personalización del template:",
+        // "Error al obtener la información de personalización del template:",
+        t("altaEventos.templateInfoError"),
         error
       );
       return null;
@@ -300,11 +309,13 @@ function AltaEventos() {
   const enviarDatosAFirebase = async () => {
     event.preventDefault();
     if (!value.startDate || value.startDate === 0) {
-      alert("Debes seleccionar una fecha antes de enviar el formulario.");
+      // alert("Debes seleccionar una fecha antes de enviar el formulario.");
+      alert(t("altaEventos.selectDateAlert"));
       return;
     }
     if (!hasImage) {
-      alert("Debes subir al menos una imagen antes de enviar el formulario.");
+      // "Debes subir al menos una imagen antes de enviar el formulario."
+      alert(t("altaEventos.uploadImageAlert"));
       return;
     }
     const nombreEvento = document.getElementById("floating_name").value;
@@ -333,8 +344,11 @@ function AltaEventos() {
       .minute(horaFinalReal.split(":")[1]);
 
     // Agregar líneas de console.log para visualizar las fechas
-    console.log("Fecha Inicio antes de enviar a Firebase:", fechaInicio._i);
-    console.log("Fecha Final antes de enviar a Firebase:", fechaFinal._i);
+    // "Fecha Inicio antes de enviar a Firebase:"
+    console.log(t("altaEventos.logStartDate"), fechaInicio._i);
+
+    // "Fecha Final antes de enviar a Firebase:"
+    console.log(t("altaEventos.logEndDate"), fechaFinal._i);
 
     const devices = selectedDevices;
     setImages([]);
@@ -437,7 +451,8 @@ function AltaEventos() {
         }, 6000);
       })
       .catch((error) => {
-        console.error("Error al enviar datos a Firebase:", error);
+        // "Error al enviar datos a Firebase:"
+        console.error(t("altaEventos.firebaseSendError"), error);
       });
   };
   const [] = useKeenSlider();
@@ -460,7 +475,8 @@ function AltaEventos() {
       <div>
         <div className="p-5">
           <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            Alta de eventos
+            {/* Alta de eventos */}
+            {t("altaEventos.title")}
           </h1>
         </div>
         <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -477,7 +493,8 @@ function AltaEventos() {
                       className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2  appearance-none  border-gray-600  focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                     >
                       <option value="" disabled>
-                        Seleccionar Empresa
+                        {/* Seleccionar Empresa */}
+                        {t("altaEventos.selectCompany")}
                       </option>
                       {allUsers.map((u) => (
                         <option key={u.id} value={u.id}>
@@ -500,7 +517,8 @@ function AltaEventos() {
                   for="floating_name"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
-                  Nombre del evento
+                  {/* Nombre del evento */}
+                  {t("altaEventos.eventName")}
                 </label>
               </div>
               <div className="relative z-0 w-full mb-6 group">
@@ -516,7 +534,8 @@ function AltaEventos() {
                   for="floating_event"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
-                  Tipo de evento
+                  {/* Tipo de evento */}
+                  {t("altaEventos.eventType")}
                 </label>
               </div>
               <div className="relative z-0 w-full mb-6 group">
@@ -532,7 +551,8 @@ function AltaEventos() {
                   for="floating_floor"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
-                  Lugar
+                  {/* Lugar */}
+                  {t("altaEventos.location")}
                 </label>
               </div>
               <div className="relative z-0 w-full mb-6 group">
@@ -550,15 +570,18 @@ function AltaEventos() {
                   for="description"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
-                  Descripción
+                  {/* Descripción */}
+                  {t("altaEventos.description")}
                 </label>
                 <span id="charCount" className="text-sm text-gray-500">
-                  {charCount}/255 caracteres
+                  {/* caracteres */}
+                  {`${charCount} /255 ${t("altaEventos.characters")}`}
                 </span>
               </div>
               <div className="bg-gray-300 p-4">
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900 ">
-                  Seleccione la fecha:
+                  {/* Seleccione la fecha: */}
+                  {t("altaEventos.selectDate")}
                 </h4>
                 <Datepicker
                   useRange={false}
@@ -567,21 +590,25 @@ function AltaEventos() {
                 />
                 <div className="mb-4"></div> <div className="mb-4"></div>{" "}
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900 ">
-                  Seleccione las horas:
+                  {/* Seleccione las horas: */}
+                  {t("altaEventos.selectHours")}
                 </h4>
                 <div className="bg-white p-3 sm:p-4 mb-3 sm:mb-4 rounded-lg shadow-md">
                   <p className="text-gray-700 font-medium text-sm sm:text-base mb-2">
-                    Horario en que se tiene programado el evento
+                    {/* Horario en que se tiene programado el evento */}
+                    {t("altaEventos.realInitialTime")}
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="relative mb-2 sm:mb-0">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                        Hora inicial real:
+                        {/* Hora inicial real: */}
+                        {t("altaEventos.realInitialHour")}
                       </div>
                       <div className="flex items-center space-x-1">
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Horas:
+                            {/* Horas: */}
+                            {t("altaEventos.hours")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -599,7 +626,8 @@ function AltaEventos() {
                         </div>
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Minutos:
+                            {/* Minutos: */}
+                            {t("altaEventos.minutes")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -619,12 +647,14 @@ function AltaEventos() {
                     </div>
                     <div className="relative">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                        Hora final real:
+                        {/* Hora final real: */}
+                        {t("altaEventos.realFinalHour")}
                       </div>
                       <div className="flex items-center space-x-1">
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Horas:
+                            {/* Horas: */}
+                            {t("altaEventos.hours")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -642,7 +672,8 @@ function AltaEventos() {
                         </div>
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Minutos:
+                            {/* Minutos: */}
+                            {t("altaEventos.minutes")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -664,19 +695,21 @@ function AltaEventos() {
                 </div>
                 <div className="bg-white p-3 sm:p-4 mb-3 sm:mb-4 rounded-lg shadow-md">
                   <p className="text-gray-700 font-medium text-sm sm:text-base mb-2">
-                    Horario en que se mostrará la información del evento en
-                    pantallas
+                    {/* Horario en que se mostrará la información ... */}
+                    {t("altaEventos.realFinalTime")}
                   </p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div className="relative mb-2 sm:mb-0">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                        Hora inicial salón:
+                        {/* Hora inicial salón: */}
+                        {t("altaEventos.loungeInitialHour")}
                       </div>
                       <div className="flex items-center space-x-1">
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Horas:
+                            {/* Horas: */}
+                            {t("altaEventos.hours")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -694,7 +727,8 @@ function AltaEventos() {
                         </div>
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Minutos:
+                            {/* Minutos: */}
+                            {t("altaEventos.minutes")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -714,12 +748,14 @@ function AltaEventos() {
                     </div>
                     <div className="relative">
                       <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                        Hora final salón:
+                        {/* Hora final salón: */}
+                        {t("altaEventos.loungeFinalHour")}
                       </div>
                       <div className="flex items-center space-x-1">
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
-                            Horas:
+                            {/* Horas: */}
+                            {t("altaEventos.hours")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -738,7 +774,8 @@ function AltaEventos() {
                         <div className="relative">
                           <div className="text-gray-600 font-medium text-xs sm:text-sm">
                             {" "}
-                            Minutos:
+                            {/* Minutos: */}
+                            {t("altaEventos.minutes")}
                           </div>
                           <select
                             className="block appearance-none w-14 sm:w-16 border border-gray-300 text-gray-700 py-1 sm:py-2 px-1 sm:px-2 rounded leading-tight focus:outline-none focus:bg-white focus:border-gray-500 text-xs sm:text-sm"
@@ -763,11 +800,13 @@ function AltaEventos() {
                     onClick={enviarDatosAFirebase}
                     className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4`}
                   >
-                    Enviar
+                    {/* Enviar */}
+                    {t("altaEventos.sendButton")}
                   </button>
                   {alertaEnviada && (
                     <div className="mt-4 text-green-500">
-                      Los datos se enviaron correctamente.
+                      {/* Los datos se enviaron correctamente. */}
+                      {t("altaEventos.successMessage")}
                     </div>
                   )}
                 </div>
@@ -778,7 +817,8 @@ function AltaEventos() {
             <div className="bg-gray-300 p-4 col-span-2">
               <div className="mb-4">
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900">
-                  Subir Imágenes:
+                  {/* Subir Imágenes: */}
+                  {t("altaEventos.uploadImagesTitle")}
                 </h4>
                 <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                   {[0, 1, 2].map((index) => (
@@ -822,7 +862,8 @@ function AltaEventos() {
               {" "}
               <div className="mb-4">
                 <h4 className="mb-2 text-2xl leading-none tracking-tight text-gray-900">
-                  Seleccionar Dispositivos:
+                  {/* Seleccionar Dispositivos: */}
+                  {t("altaEventos.selectDevicesTitle")}
                 </h4>
                 <div className="mb-4">
                   {(user && user.email !== "uppermex10@gmail.com") ||
@@ -972,7 +1013,8 @@ function AltaEventos() {
             <div className="bg-gray-300 p-4 col-span-2">
               {" "}
               <h4 className="mb-2 text-2xl leading-none tracking-tight text-gray-900">
-                Se muestra en:
+                {/* Se muestra en: */}
+                {t("altaEventos.showTitle")}
               </h4>
               <ul>
                 {selectedDevices.map((device, index) => (
@@ -985,7 +1027,8 @@ function AltaEventos() {
                 onClick={enviarDatosAFirebase}
                 className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded mt-4"
               >
-                Enviar
+                {/* Enviar */}
+                {t("altaEventos.sendButton")}
               </button>
             </div>
           </section>

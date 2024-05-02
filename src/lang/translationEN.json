@@ -335,7 +335,6 @@
         "licenseNumber": "License Number",
         "companyName": "Company Name"
     },
-
     "guia": {
         "errorMessageFields": "Please fill in all fields before sending the message.",
         "uploadSuccess": "PDF uploaded successfully",
@@ -345,9 +344,8 @@
         "deleteError": "Error deleting the PDF:",
         "pageTitle": "User Guide",
         "uploadButton": "Upload PDF"
-      },
-
-      "support": {
+    },
+    "support": {
         "errorMessageFields": "Please fill in all fields before sending the message.",
         "validEmailError": "Please enter a valid email address.",
         "consoleSuccess": "Email sent successfully:",
@@ -362,5 +360,41 @@
         "messagePlaceholder": "Your message",
         "sendButton": "Send",
         "successMessage": "Message sent successfully! We'll get back to you soon."
-      }
+    },
+    "altaEventos": {
+        "noActiveLicenses": "Currently, there are no active licenses, so it's not possible to continue with the event registration.",
+        "noAdvertisementSalonAndDirectory": "Currently, there is no Advertising in Event Halls and Directory, we suggest configuring images/videos for a better experience for your customers.",
+        "noAdvertisementSalon": "Currently, there is no Advertising in Event Halls, we suggest configuring images/videos for a better experience for your customers.",
+        "noAdvertisementDirectory": "Currently, there is no Advertising in the Event Directory, we suggest configuring images/videos for a better experience for your customers.",
+        "userDataError": "Error obtaining user data:",
+        "uploadImageError": "Error uploading image:",
+        "templateInfoError": "Error obtaining template customization information:",
+        "selectDateAlert": "You must select a date before submitting the form.",
+        "uploadImageAlert": "You must upload at least one image before submitting the form.",
+        "logStartDate": "Start Date before sending to Firebase:",
+        "logEndDate": "End Date before sending to Firebase:",
+        "firebaseSendError": "Error sending data to Firebase:",
+        "title": "Event Registration",
+        "selectCompany": "Select Company",
+        "eventName": "Event Name",
+        "eventType": "Event Type",
+        "location": "Location",
+        "description": "Description",
+        "characters": "characters",
+        "selectDate": "Select Date:",
+        "selectHours": "Select Hours:",
+        "realInitialTime": "Schedule when the event is scheduled",
+        "realInitialHour": "Real Initial Hour:",
+        "realFinalHour": "Real final Hour:",
+        "hours": "Hours:",
+        "minutes": "Minutes:",
+        "realFinalTime": "Schedule when the event information will be displayed on screens",
+        "loungeInitialHour": "Lounge initial hour:",
+        "loungeFinalHour": "Lounge final hour:",
+        "sendButton": "Send",
+        "successMessage": "Data sent successfully.",
+        "uploadImagesTitle": "Upload Images:",
+        "selectDevicesTitle": "Select Devices:",
+        "showTitle": "Displayed on:"
+    }
 }
