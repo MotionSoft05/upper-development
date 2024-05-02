@@ -337,6 +337,7 @@
     },
 
     "guia": {
+        "errorMessageFields": "Please fill in all fields before sending the message.",
         "uploadSuccess": "PDF uploaded successfully",
         "uploadError": "Error uploading the PDF:",
         "selectPdfFile": "Select a PDF file before uploading.",
@@ -344,5 +345,22 @@
         "deleteError": "Error deleting the PDF:",
         "pageTitle": "User Guide",
         "uploadButton": "Upload PDF"
+      },
+
+      "support": {
+        "errorMessageFields": "Please fill in all fields before sending the message.",
+        "validEmailError": "Please enter a valid email address.",
+        "consoleSuccess": "Email sent successfully:",
+        "consoleError": "Error sending email:",
+        "errorMessage": "There was an error sending the message. Please try again later.",
+        "contactTitle": "CONTACT SUPPORT",
+        "contactSubtitle1": "Are you experiencing any technical issues that you need to resolve? Don't worry! We're here to help.",
+        "contactSubtitle2": "To streamline the process and provide you with the assistance you need, we invite you to generate a report for our technical support team. It's easy and fast!",
+        "contactSubtitle3": "Simply complete the form with all relevant details about the problem you're facing. The more information you provide, the better we can assist you.",
+        "namePlaceholder": "Name",
+        "emailPlaceholder": "Email",
+        "messagePlaceholder": "Your message",
+        "sendButton": "Send",
+        "successMessage": "Message sent successfully! We'll get back to you soon."
       }
 }

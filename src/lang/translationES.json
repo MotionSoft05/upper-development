@@ -335,7 +335,6 @@
         "licenseNumber": "Número de licencias",
         "companyName": "Nombre de la empresa"
     },
-
     "guia": {
         "uploadSuccess": "PDF cargado con éxito",
         "uploadError": "Error al subir el PDF:",
@@ -344,5 +343,21 @@
         "deleteError": "Error al eliminar el PDF:",
         "pageTitle": "Guía de usuario",
         "uploadButton": "Subir PDF"
-      }
+    },
+    "support": {
+        "errorMessageFields": "Por favor, completa todos los campos antes de enviar el mensaje.",
+        "validEmailError": "Por favor, ingresa un correo electrónico válido.",
+        "consoleSuccess": "Correo electrónico enviado:",
+        "consoleError": "Error al enviar el correo electrónico:",
+        "errorMessage": "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde.",
+        "contactTitle": "CONTACTO SOPORTE",
+        "contactSubtitle1": "¿Estás experimentando algún problema técnico que necesitas resolver? ¡No te preocupes! Estamos aquí para ayudarte.",
+        "contactSubtitle2": "Para agilizar el proceso y brindarte la asistencia que necesitas, te invitamos a generar un reporte para nuestro equipo de soporte técnico. ¡Es fácil y rápido!",
+        "contactSubtitle3": "Simplemente completa el formulario con todos los detalles relevantes sobre el problema que estás enfrentando. Cuanta más información nos proporciones, mejor podremos ayudarte.",
+        "namePlaceholder": "Nombre",
+        "emailPlaceholder": "Correo electrónico",
+        "messagePlaceholder": "Su mensaje",
+        "sendButton": "Enviar",
+        "successMessage": "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto."
+    }
 }
