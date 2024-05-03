@@ -360,7 +360,6 @@
         "sendButton": "Enviar",
         "successMessage": "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto."
     },
-
     "altaEventos": {
         "noActiveLicenses": "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
         "noAdvertisementSalonAndDirectory": "Actualmente no cuenta con Publicidad en Salones y Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
@@ -396,5 +395,66 @@
         "uploadImagesTitle": "Subir Imágenes:",
         "selectDevicesTitle": "Seleccionar Dispositivos:",
         "showTitle": "Se muestra en:"
-      }
+    },
+    "admin": {
+        "messages": {
+            "errorFetchingFiscalData": "Error al obtener los datos fiscales de Firebase:",
+            "allFieldsRequired": "Todos los campos deben estar completos",
+            "errorSavingFiscalChanges": "Error al guardar los cambios en datos fiscales:",
+            "errorSavingChanges": "Error al guardar los cambios:",
+            "successSaveMessage": "Guardado con éxito",
+            "confirmDeleteFiscalData": "¿Estás seguro de que deseas eliminar estos datos fiscales?",
+            "successDeleteMessage": "Eliminado con éxito",
+            "errorDeletingFiscalData": "Error al eliminar datos fiscales:",
+            "errorDeletingFiscalMessage": "Error al eliminar datos fiscales",
+            "alertDeleteFiscalData": "No se eliminaron los datos fiscales.",
+            "alertTransactionFields": "Por favor, completa todos los campos de la transacción.",
+            "errorSavingTransactionFirebase": "Error al guardar la transacción en Firebase:",
+            "errorSavingFirebaseChanges": "Error al guardar los cambios en Firebase:",
+            "errorDeletingTransactionFirebase": "Error al eliminar la transacción de Firebase:",
+            "confirmDeleteUser": "¿Estás seguro de que deseas eliminar este usuario?",
+            "successDeleteUserMessage": "Usuario con ID {{usuarioId}} eliminado correctamente.",
+            "errorDeleteUserBackend": "Error al eliminar usuario del backend:",
+            "errorDeletingFirestoreUser": "Error al eliminar el usuario de Firestore o al hacer la solicitud al backend:",
+            "errorFetchingFirebaseUsers": "Error al obtener los usuarios de Firebase:",
+            "noPermissionMessage": "No tienes permiso para acceder a esta página.",
+            "successEnableUserMessage": "Usuario con ID {{usuarioId}} habilitado correctamente.",
+            "errorEnableUserBackend": "Error al habilitar usuario en el backend:",
+            "errorEnableUser": "Error al habilitar usuario",
+            "errorDisableUser": "Error al deshabilitar usuario",
+            "successDisableUserMessage": "Usuario con ID {{usuarioId}} deshabilitado correctamente.",
+            "errorDisableUserBackend": "Error al deshabilitar usuario en el backend:",
+            "noValidFieldsUpdate": "No hay campos válidos para actualizar."
+        },
+        "titles": {
+            "userDetails": "Datos de Usuarios",
+            "transactions": "Transacciones",
+            "licenses": "Licencias"
+        },
+        "buttons": {
+            "all": "Todos",
+            "licensed": "Licencias",
+            "unlicensed": "Sin Licencias",
+            "save": "Guardar",
+            "saveChanges": "Guardar Cambios",
+            "edit": "Editar",
+            "delete": "Eliminar",
+            "cancel": "Cancelar"
+        },
+        "nameAndSurname": "Nombre y Apellido",
+        "email": "Email",
+        "company": "Empresa",
+        "phone": "Teléfono",
+        "start": "Inicio",
+        "end": "Final",
+        "planType": "Tipo de Plan",
+        "actions": "Acciones",
+        "date": "Fecha",
+        "amount": "Monto",
+        "postalCode": "Código Postal:",
+        "companyName": "Razón Social:",
+        "fiscalRegime": "Régimen Fiscal:",
+        "cdfiUsage": "Uso CDFI:",
+        "selectCompany": "Seleccione Empresa"
+    }
 }

@@ -24,6 +24,7 @@ import {
   faSave,
   faTimes,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -40,6 +41,8 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 function Admin() {
+
+  const {t} = useTranslation()
   const [usuarios, setUsuarios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
@@ -171,7 +174,8 @@ function Admin() {
         });
       } catch (error) {
         console.error(
-          "Error al obtener los datos fiscales de Firebase:",
+          // "Error al obtener los datos fiscales de Firebase:",
+          t("admin.messages.errorFetchingFiscalData"),
           error
         );
       }
@@ -199,7 +203,8 @@ function Admin() {
         !datosFiscalesEditados.codigoPostal
         // Agregar más verificaciones según tus necesidades
       ) {
-        mostrarMensaje("Todos los campos deben estar completos", "red");
+        // ("Todos los campos deben estar completos", "red")
+        mostrarMensaje(t("admin.messages.allFieldsRequired"), "red");
         return;
       }
 
@@ -221,17 +226,22 @@ function Admin() {
         // Otros campos según tu estructura de datos
       });
 
-      mostrarMensaje("Guardado con éxito", "green");
+      // ("Guardado con éxito", "green")
+      mostrarMensaje(t("admin.messages.successSaveMessage"), "green");
     } catch (error) {
-      console.error("Error al guardar los cambios en datos fiscales:", error);
-      mostrarMensaje("Error al guardar los cambios", "red");
+      // "Error al guardar los cambios en datos fiscales:"
+      console.error(t("admin.messages.errorSavingFiscalChanges"), error);
+
+      // ("Error al guardar los cambios", "red")
+      mostrarMensaje(t("admin.messages.errorSavingChanges"), "red");
     }
   };
 
   const handleEliminarDatosFiscales = async (datosFiscalesId) => {
     // Mostrar un alert antes de la confirmación
     const confirmacion = window.confirm(
-      "¿Estás seguro de que deseas eliminar estos datos fiscales?"
+      // "¿Estás seguro de que deseas eliminar estos datos fiscales?"
+      t("admin.messages.confirmDeleteFiscalData")
     );
 
     if (confirmacion) {
@@ -259,14 +269,19 @@ function Admin() {
         );
 
         setDatosFiscalesConNombre(nuevosDatosFiscales);
-        mostrarMensaje("Eliminado con éxito", "green");
+        // ("Eliminado con éxito", "green");
+        mostrarMensaje(t("admin.messages.successDeleteMessage"), "green");
+        
       } catch (error) {
-        console.error("Error al eliminar datos fiscales:", error);
-        mostrarMensaje("Error al eliminar datos fiscales", "red");
+
+        // "Error al eliminar datos fiscales:"
+        console.error(t("admin.messages.errorDeletingFiscalData"), error);
+        // "Error al eliminar datos fiscales", "red"
+        mostrarMensaje(t("admin.messages.errorDeletingFiscalMessage"), "red");
       }
     } else {
-      // Alerta si no se confirma la eliminación
-      alert("No se eliminaron los datos fiscales.");
+      // Alerta si no se confirma la eliminación "No se eliminaron los datos fiscales."
+      alert(t("admin.messages.alertDeleteFiscalData"));
     }
   };
 
@@ -280,7 +295,8 @@ function Admin() {
         !nuevaTransaccion.pd ||
         !nuevaTransaccion.total
       ) {
-        alert("Por favor, completa todos los campos de la transacción.");
+        // "Por favor, completa todos los campos de la transacción."
+        alert(t("admin.messages.alertTransactionFields"));
         return;
       }
 
@@ -303,7 +319,8 @@ function Admin() {
         total: "",
       });
     } catch (error) {
-      console.error("Error al guardar la transacción en Firebase:", error);
+      // "Error al guardar la transacción en Firebase:"
+      console.error(t("admin.messages.errorSavingTransactionFirebase"), error);
     }
   };
 
@@ -330,7 +347,8 @@ function Admin() {
         plan: "",
       });
     } catch (error) {
-      console.error("Error al guardar los cambios en Firebase:", error);
+      // console.error("Error al guardar los cambios en Firebase:", error);
+      console.error(t("admin.messages.errorSavingFirebaseChanges"), error);
     }
   };
 
@@ -343,7 +361,8 @@ function Admin() {
         )
       );
     } catch (error) {
-      console.error("Error al eliminar la transacción de Firebase:", error);
+      // "Error al eliminar la transacción de Firebase:"
+      console.error(t("admin.messages.errorDeletingTransactionFirebase"), error);
     }
   };
 
@@ -407,16 +426,19 @@ function Admin() {
           final: "",
         });
       } else {
-        console.warn("No hay campos válidos para actualizar.");
+        // "No hay campos válidos para actualizar."
+        console.warn(t("admin.messages.noValidFieldsUpdate"));
       }
     } catch (error) {
-      console.error("Error al guardar los cambios en Firebase:", error);
+      // "Error al guardar los cambios en Firebase:"
+      console.error(t("admin.messages.errorSavingFirebaseChanges"), error);
     }
   };
 
   const handleEliminarUsuario = async (usuarioId) => {
     const confirmacion = window.confirm(
-      "¿Estás seguro de que deseas eliminar este usuario?"
+      // "¿Estás seguro de que deseas eliminar este usuario?"
+      t("admin.messages.confirmDeleteUser")
     );
 
     if (confirmacion) {
@@ -433,7 +455,8 @@ function Admin() {
           console.log(`Usuario con ID ${usuarioId} eliminado correctamente.`);
         } else {
           console.error(
-            "Error al eliminar usuario del backend:",
+            // "Error al eliminar usuario del backend:"
+            t("admin.messages.errorDeleteUserBackend"),
             response.statusText
           );
         }
@@ -444,7 +467,8 @@ function Admin() {
         );
       } catch (error) {
         console.error(
-          "Error al eliminar el usuario de Firestore o al hacer la solicitud al backend:",
+          // "Error al eliminar el usuario de Firestore o al hacer la solicitud al backend:"
+          t("admin.messages.errorDeletingFirestoreUser"),
           error
         );
       }
@@ -463,7 +487,8 @@ function Admin() {
         }));
         setUsuarios(usuariosData);
       } catch (error) {
-        console.error("Error al obtener los usuarios de Firebase:", error);
+        // "Error al obtener los usuarios de Firebase:"
+        console.error(t("admin.messages.errorFetchingFirebaseUsers"), error);
       }
     };
 
@@ -499,7 +524,8 @@ function Admin() {
       );
 
       if (response.status === 200) {
-        console.log(`Usuario con ID ${usuarioId} habilitado correctamente.`);
+        // console.log(`Usuario con ID ${usuarioId} habilitado correctamente.`)
+        console.log(t("admin.messages.errorDeletingFiscalData",{ usuarioId: usuarioId }));
         // Actualizar el estado de React para reflejar el cambio
         setUsuarios((prevUsuarios) =>
           prevUsuarios.map((usuario) =>
@@ -512,12 +538,14 @@ function Admin() {
         await updateDoc(usuarioRef, { status: true });
       } else {
         console.error(
-          "Error al habilitar usuario en el backend:",
+          // "Error al habilitar usuario en el backend:",
+          t("admin.messages.errorEnableUserBackend"),
           response.statusText
         );
       }
     } catch (error) {
-      console.error("Error al habilitar el usuario:", error);
+      // "Error al habilitar el usuario:"
+      console.error(t("admin.messages.errorEnableUser"), error);
     }
   };
 
@@ -530,7 +558,8 @@ function Admin() {
       );
 
       if (response.status === 200) {
-        console.log(`Usuario con ID ${usuarioId} deshabilitado correctamente.`);
+        // console.log(`Usuario con ID ${usuarioId} deshabilitado correctamente.`);
+        console.log(t("admin.messages.successDisableUserMessage",{ usuarioId: usuarioId }));
         // Actualizar el estado de React para reflejar el cambio
         setUsuarios((prevUsuarios) =>
           prevUsuarios.map((usuario) =>
@@ -543,12 +572,14 @@ function Admin() {
         await updateDoc(usuarioRef, { status: false });
       } else {
         console.error(
-          "Error al deshabilitar usuario en el backend:",
+          // "Error al deshabilitar usuario en el backend:",
+          t("admin.messages.errorDisableUserBackend"),
           response.statusText
         );
       }
     } catch (error) {
-      console.error("Error al deshabilitar el usuario:", error);
+      // "Error al deshabilitar el usuario:"
+      console.error(t("admin.messages.errorDisableUser"), error);
     }
   };
 
@@ -563,7 +594,8 @@ function Admin() {
           </div>
           <div class="mt-8 bg-white p-4 shadow rounded-lg">
             <h2 class="text-gray-500 text-lg font-semibold pb-4">
-              Datos de Usuarios
+              {/* Datos de Usuarios */}
+              {t("admin.titles.userDetails")}
             </h2>
             <div className="flex space-x-2 mt-4">
               <button
@@ -572,7 +604,8 @@ function Admin() {
                   filtroSeleccionado === "todos" ? "bg-blue-500" : "bg-gray-300"
                 } text-white font-semibold py-2 px-4 rounded`}
               >
-                Todos
+                {/* Todos */}
+                {t("admin.buttons.all")}
               </button>
               <button
                 onClick={() => setFiltroSeleccionado("conNumero")}
@@ -582,7 +615,8 @@ function Admin() {
                     : "bg-gray-300"
                 } text-white font-semibold py-2 px-4 rounded`}
               >
-                Licencias
+                {/* Licencias */}
+                {t("admin.buttons.licensed")}
               </button>
               <button
                 onClick={() => setFiltroSeleccionado("sinNumero")}
@@ -592,7 +626,8 @@ function Admin() {
                     : "bg-gray-300"
                 } text-white font-semibold py-2 px-4 rounded`}
               >
-                Sin Licencias
+                {/* Sin Licencias */}
+                {t("admin.buttons.unlicensed")}
               </button>
             </div>
 
@@ -602,16 +637,20 @@ function Admin() {
               <thead>
                 <tr class="text-sm leading-normal">
                   <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Nombre y Apellido
+                    {/* Nombre y Apellido */}
+                    {t("admin.nameAndSurname")}
                   </th>
                   <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Email
+                    {/* Email */}
+                    {t("admin.email")}
                   </th>
                   <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Empresa
+                    {/* Empresa */}
+                    {t("admin.company")}
                   </th>
                   <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Teléfono
+                    {/* Teléfono */}
+                    {t("admin.phone")}
                   </th>
 
                   <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
@@ -624,16 +663,20 @@ function Admin() {
                     T
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Inicio
+                    {/* Inicio */}
+                    {t("admin.start")}
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Final
+                    {/* Final */}
+                    {t("admin.end")}
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Tipo de Plan
+                    {/* Tipo de Plan */}
+                    {t("admin.planType")}
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                    Acciones
+                    {/* Acciones */}
+                    {t("admin.actions")}
                   </th>
                 </tr>
               </thead>
@@ -870,7 +913,8 @@ function Admin() {
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
-                Transacciones
+                {/* Transacciones */}
+                {t("admin.titles.transactions")}
               </h2>
               <div className="mb-6 border-b border-gray-300"></div>
               <div className="flex items-center mb-4 space-x-2">
@@ -884,7 +928,8 @@ function Admin() {
                       nombre: e.target.value,
                     })
                   }
-                  placeholder="Nombre y Apellido"
+                  // "Nombre y Apellido"
+                  placeholder={t("admin.nameAndSurname")}
                 />
                 <input
                   className="p-2 rounded border border-gray-300 w-40"
@@ -896,7 +941,8 @@ function Admin() {
                       fecha: e.target.value,
                     })
                   }
-                  placeholder="Fecha"
+                  // "Fecha"
+                  placeholder={t("admin.date")}
                 />
                 <input
                   className="p-2 rounded border border-gray-300 w-25"
@@ -908,7 +954,8 @@ function Admin() {
                       monto: e.target.value,
                     })
                   }
-                  placeholder="Monto"
+                  // "Monto"
+                  placeholder={t("admin.amount")}
                 />
                 <input
                   className="p-2 rounded border border-gray-300 w-10"
@@ -950,20 +997,24 @@ function Admin() {
                   onClick={handleGuardarTransaccion}
                   className="bg-green-500 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded"
                 >
-                  Guardar
+                  {/* Guardar */}
+                  {t("admin.buttons.save")}
                 </button>
               </div>
               <table className="w-full table-auto text-sm">
                 <thead>
                   <tr className="text-sm leading-normal">
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Nombre y Apellido
+                      {/* Nombre y Apellido */}
+                      {t("admin.nameAndSurname")}
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Fecha
+                      {/* Fecha */}
+                      {t("admin.date")}
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Monto
+                      {/* Monto */}
+                      {t("admin.amount")}
                     </th>
                     <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       PS
@@ -975,7 +1026,8 @@ function Admin() {
                       T
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      Acciones
+                      {/* Acciones */}
+                      {t("admin.actions")}
                     </th>
                   </tr>
                 </thead>
@@ -1098,7 +1150,8 @@ function Admin() {
                               onClick={handleGuardarCambiosTransaccion}
                               className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              Guardar
+                              {/* Guardar */}
+                              {t("admin.buttons.save")}
                             </button>
                             <button
                               onClick={() => {
@@ -1113,7 +1166,8 @@ function Admin() {
                               }}
                               className="bg-gray-500 hover:bg-gray-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              Cancelar
+                              {/* Cancelar */}
+                              {t("admin.buttons.cancel")}
                             </button>
                           </div>
                         ) : (
@@ -1124,7 +1178,8 @@ function Admin() {
                               }
                               className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              Editar
+                              {/* Editar */}
+                              {t("admin.buttons.edit")}
                             </button>
                             <button
                               onClick={() =>
@@ -1132,7 +1187,8 @@ function Admin() {
                               }
                               className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
                             >
-                              Eliminar
+                              {/* Eliminar */}
+                              {t("admin.buttons.delete")}
                             </button>
                           </div>
                         )}
@@ -1147,7 +1203,8 @@ function Admin() {
           <div className="mt-8 bg-white p-4 shadow rounded-lg">
             <div className="bg-white p-4 rounded-md mt-4">
               <h2 className="text-gray-500 text-lg font-semibold pb-4">
-                Licencias
+                {/* Licencias */}
+                {t("admin.titles.licenses")}
               </h2>
               <div className="mb-6 border-b border-gray-300"></div>
 
@@ -1173,7 +1230,10 @@ function Admin() {
                     });
                   }}
                 >
-                  <option value="">Seleccione Empresa</option>
+                  <option value="">
+                    {/* Seleccione Empresa */}
+                    {t("admin.selectCompany")}
+                  </option>
                   {usuarios.map((usuario) => (
                     <option key={usuario.id} value={usuario.empresa}>
                       {usuario.empresa}
@@ -1185,7 +1245,8 @@ function Admin() {
                 <div className="mt-4">
                   {/* Include input fields for editing */}
                   <label className="block text-sm font-semibold text-gray-600">
-                    Código Postal:
+                    {/* Código Postal: */}
+                    {t("admin.postalCode")}
                   </label>
                   <input
                     type="text"
@@ -1196,12 +1257,14 @@ function Admin() {
                         codigoPostal: e.target.value,
                       })
                     }
-                    placeholder="Código Postal"
+                    // "Código Postal"
+                    placeholder={t("admin.postalCode")}
                     className="p-2 rounded border border-gray-300 mr-2"
                   />
 
                   <label className="block text-sm font-semibold text-gray-600">
-                    Correo Electrónico:
+                    {/* Correo Electrónico: */}
+                    {t("admin.email")}
                   </label>
                   <input
                     type="text"
@@ -1212,12 +1275,14 @@ function Admin() {
                         email: e.target.value,
                       })
                     }
-                    placeholder="Correo Electrónico"
+                    // "Correo Electrónico"
+                    placeholder={t("admin.email")}
                     className="p-2 rounded border border-gray-300 mr-2"
                   />
 
                   <label className="block text-sm font-semibold text-gray-600">
-                    Razón Social:
+                    {/* Razón Social: */}
+                    {t("admin.companyName")}
                   </label>
                   <input
                     type="text"
@@ -1228,12 +1293,14 @@ function Admin() {
                         razonSocial: e.target.value,
                       })
                     }
-                    placeholder="Razón Social"
+                    // "Razón Social"
+                    placeholder={t("admin.companyName")}
                     className="p-2 rounded border border-gray-300 mr-2"
                   />
 
                   <label className="block text-sm font-semibold text-gray-600">
-                    Régimen Fiscal:
+                    {/* Régimen Fiscal: */}
+                    {t("admin.fiscalRegime")}
                   </label>
                   <input
                     type="text"
@@ -1244,7 +1311,8 @@ function Admin() {
                         regimenFiscal: e.target.value,
                       })
                     }
-                    placeholder="Régimen Fiscal"
+                    // "Régimen Fiscal"
+                    placeholder={t("admin.fiscalRegime")}
                     className="p-2 rounded border border-gray-300 mr-2"
                   />
 
@@ -1265,7 +1333,8 @@ function Admin() {
                   />
 
                   <label className="block text-sm font-semibold text-gray-600">
-                    Uso CDFI:
+                    {/* Uso CDFI: */}
+                    {t("admin.cdfiUsage")}
                   </label>
                   <input
                     type="text"
@@ -1276,7 +1345,8 @@ function Admin() {
                         usoCdfi: e.target.value,
                       })
                     }
-                    placeholder="Uso CDFI"
+                    // "Uso CDFI"
+                    placeholder={t("admin.cdfiUsage")}
                     className="p-2 rounded border border-gray-300 mr-2"
                   />
                   <div style={mensajeEstilo}>{mensaje}</div>
@@ -1286,7 +1356,8 @@ function Admin() {
                       onClick={handleGuardarCambiosDatosFiscales}
                       className="bg-green-500 hover:bg-green-700 text-white font-semibold py-1 px-2 rounded"
                     >
-                      Guardar Cambios
+                      {/* Guardar Cambios */}
+                      {t("admin.buttons.saveChanges")}
                     </button>
                     <button
                       onClick={() =>
@@ -1294,7 +1365,8 @@ function Admin() {
                       }
                       className="bg-red-500 hover:bg-red-700 text-white font-semibold py-1 px-2 rounded"
                     >
-                      Eliminar
+                      {/* Eliminar */}
+                      {t("admin.buttons.delete")}
                     </button>
                   </div>
                 </div>
