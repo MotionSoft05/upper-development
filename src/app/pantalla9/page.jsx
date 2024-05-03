@@ -43,7 +43,7 @@ function Pantalla9() {
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const numeroPantallaActual = pathname[pathname.length - 1];
+  const numeroPantallaActual = "9";
 
   const swiperRef = useRef(null);
 

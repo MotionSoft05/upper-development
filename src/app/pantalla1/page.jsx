@@ -43,7 +43,7 @@ function Pantalla1() {
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const numeroPantallaActual = pathname[pathname.length - 1];
+  const numeroPantallaActual = "1";
 
   const swiperRef = useRef(null);
 
@@ -184,11 +184,13 @@ function Pantalla1() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             let dispositivoCoincidente = null;
 
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
+              console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
 
               const pantallasAsignadas = devicesEvento.reduce(
                 (pantallas, device) => {
@@ -207,9 +209,17 @@ function Pantalla1() {
                 const dispositivosCoincidentes = pantallasAsignadas.filter(
                   (pantalla) => pantalla.posicion === posicionActual
                 );
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ dispositivosCoincidentes:",
+                  dispositivosCoincidentes
+                );
 
                 if (dispositivosCoincidentes.length > 0) {
                   dispositivoCoincidente = dispositivosCoincidentes[0].device;
+                  console.log(
+                    "🚀 ~ querySnapshot.forEach ~ dispositivoCoincidente:",
+                    dispositivoCoincidente
+                  );
                   setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
@@ -277,6 +287,10 @@ function Pantalla1() {
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
+              eventosEnCursoEffect
+            );
             // console.log(
             //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
             //   eventosEnCursoEffect
