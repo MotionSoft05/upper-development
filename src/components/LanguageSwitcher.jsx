@@ -8,16 +8,20 @@ function LanguageSwitcher() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem("language");
-    if (storedLanguage) {
-      i18n.changeLanguage(storedLanguage);
+    if (typeof window !== "undefined") {
+      const storedLanguage = localStorage.getItem("language");
+      if (storedLanguage) {
+        i18n.changeLanguage(storedLanguage);
+      }
     }
   }, []);
 
   const changeLanguage = (event) => {
     const selectedLanguage = event.target.value;
-    localStorage.setItem("language", selectedLanguage);
-    i18n.changeLanguage(selectedLanguage);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("language", selectedLanguage);
+      i18n.changeLanguage(selectedLanguage);
+    }
   };
 
   return (
@@ -30,7 +34,7 @@ function LanguageSwitcher() {
         className="ml-2 w-10"
         id="languageSelect"
         onChange={changeLanguage}
-        defaultValue={localStorage.getItem("language")}
+        defaultValue={typeof window !== "undefined" && localStorage.getItem("language")}
       >
         <option value="en" className="px-6">English</option>
         <option value="es" className="px-6">Español</option>
