@@ -384,12 +384,16 @@ function Pantalla3() {
   const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
-    if (!publicidadesUsuario || (publicidadesUsuario.length === 0 && user)) {
-      if (countdown > 0) {
-        timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      } else {
-        window.location.reload(); // Reiniciar página al llegar a cero
+    if (!eventosEnCurso || eventosEnCurso.length === 0) {
+      if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+        if (countdown > 0) {
+          timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        } else {
+          window.location.reload(); // Reiniciar página al llegar a cero
+        }
+        return;
       }
+      return;
     }
 
     return () => clearTimeout(timer);
