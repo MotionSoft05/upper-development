@@ -12,9 +12,9 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
 import { useKeenSlider } from "keen-slider/react";
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
-
+import LogIn from "../login/page"; // Importa el componente LogIn
 import { Swiper, SwiperSlide } from "swiper/react";
-
+import { usePathname } from "next/navigation";
 // Import Swiper styles
 import "../../../node_modules/swiper/swiper-bundle.min.css";
 import "swiper/css";
@@ -32,6 +32,8 @@ const obtenerHora = () => {
 };
 
 function Pantalla8() {
+  const pathname = usePathname();
+
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -41,7 +43,8 @@ function Pantalla8() {
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const numeroPantallaActual = "8";
+  const numeroPantallaActual = pathname[pathname.length - 1];
+
   const swiperRef = useRef(null);
 
   const obtenerFecha = () => {
@@ -381,7 +384,7 @@ function Pantalla8() {
   const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
-    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+    if (!publicidadesUsuario || (publicidadesUsuario.length === 0 && user)) {
       if (countdown > 0) {
         timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       } else {
@@ -391,9 +394,13 @@ function Pantalla8() {
 
     return () => clearTimeout(timer);
   }, [countdown, publicidadesUsuario]);
+  if (!user) {
+    return <LogIn url={pathname} />;
+  }
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
       // Renderizar cuenta regresiva
+
       return (
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
@@ -452,7 +459,7 @@ function Pantalla8() {
     tipoEvento,
     description,
   } = eventoActual;
-
+  // h-screen PONE LA SCROLL BAR?!?!?!?!
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">

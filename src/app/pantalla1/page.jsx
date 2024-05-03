@@ -379,11 +379,12 @@ function Pantalla1() {
 
     return () => clearTimeout(timeoutId);
   }, [currentMediaIndex, publicidadesUsuario]);
+
   // Iniciar cuenta regresiva
-  const [countdown, setCountdown] = useState(30); // Cambia 10 por el tiempo deseado en segundos
+  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
-    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+    if (!publicidadesUsuario || (publicidadesUsuario.length === 0 && user)) {
       if (countdown > 0) {
         timer = setTimeout(() => setCountdown(countdown - 1), 1000);
       } else {
@@ -393,12 +394,13 @@ function Pantalla1() {
 
     return () => clearTimeout(timer);
   }, [countdown, publicidadesUsuario]);
+  if (!user) {
+    return <LogIn url={pathname} />;
+  }
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
       // Renderizar cuenta regresiva
-      if (!user) {
-        return <LogIn url={pathname} />;
-      }
+
       return (
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
