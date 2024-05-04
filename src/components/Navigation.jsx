@@ -52,8 +52,9 @@ const Loader = () => (
 }
 
 function Navigation() {
-  const { t } = useTranslation(); // i18n
 
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
+  const { t } = useTranslation(); // i18n
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(null);
   //const [loading, setLoading] = useState(true);
@@ -127,7 +128,7 @@ function Navigation() {
   const navigateToDashboard = async () => {
     //setLoading(true); // Iniciar la pantalla de carga al dirigirse al dashboard
     // Puedes agregar cualquier lógica adicional aquí antes de redirigir al dashboard
-    window.location.href = "/dashboard.html";
+    window.location.href = `/dashboard${isProduction}`;
   };
 
   if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
@@ -194,7 +195,10 @@ function Navigation() {
 
                       {user.emailVerified && (
                         <>
-                          <Link href="/dashboard.html">
+                          <Link 
+                          // href="/dashboard.html"
+                          href={`/dashboard${isProduction}`}
+                          >
                             <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                               Dashboard
                             </button>
@@ -214,12 +218,13 @@ function Navigation() {
                   )}
                   {!user && (
                     <div className="flex items-center space-x-2">
-                      <Link href="/register.html">
+                      <Link href={`/register${isProduction}`}>
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Registrarse
                         </button>
                       </Link>
-                      <Link href="/login.html">
+                      {/* <Link href="/login.html"> */}
+                      <Link href={`/login${isProduction}`}>
                         <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           Iniciar sesión
                         </button>
@@ -339,7 +344,8 @@ function Navigation() {
                         {user && (
                           <>
                             <Menu.Item>
-                              <Link href="/dashboard.html">
+                              {/* <Link href="/dashboard.html"> */}
+                              <Link href={`/dashboard${isProduction}`}>
                                 <button
                                   onClick={navigateToDashboard}
                                   className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
@@ -365,7 +371,8 @@ function Navigation() {
                           <>
                             <Menu.Item>
                               <Link
-                                href="/register.html"
+                                // href="/register.html"
+                                href={`/register${isProduction}`}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
                                 Registrarse
@@ -373,7 +380,8 @@ function Navigation() {
                             </Menu.Item>
                             <Menu.Item>
                               <Link
-                                href="/login.html"
+                                // href="/login.html"
+                                href={`/login${isProduction}`}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
                                 Iniciar sesión

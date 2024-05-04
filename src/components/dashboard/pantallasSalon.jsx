@@ -48,6 +48,8 @@ const obtenerHora = () => {
 
 function PantallasSalon() {
 
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
+  
   const {t} = useTranslation()
   const [nombrePantallas, setNombrePantallas] = useState([]);
   const [ps, setPs] = useState(0);
@@ -581,7 +583,8 @@ function PantallasSalon() {
                       }}
                     />
                     <Link
-                      href={`/pantalla${index + 1}.html`}
+                      // href={`/pantalla${index + 1}.html`}
+                      href={`/pantalla${index + 1}${isProduction}`}
                       target="_blank"
                       className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                     >

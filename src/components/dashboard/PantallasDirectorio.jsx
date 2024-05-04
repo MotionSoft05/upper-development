@@ -36,6 +36,8 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
+
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
   const {t} = useTranslation() // Traduccion con i18N
   const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
     []
@@ -714,7 +716,8 @@ function PantallasDirectorio() {
                     }}
                   />
                   <Link
-                    href={`/pantallaDirec${index + 1}.html`}
+                    // href={`/pantallaDirec${index + 1}.html`}
+                    href={`/pantallaDirec${index + 1}${isProduction}`}
                     target="_blank"
                     className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >

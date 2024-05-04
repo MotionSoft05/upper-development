@@ -27,6 +27,9 @@ const obtenerHora = () => {
 };
 
 function PantallaDirec1() {
+
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
+
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -49,7 +52,8 @@ function PantallaDirec1() {
       const baseUrl = window.location.origin;
 
       // Actualiza la URL del código QR al cambiar el usuario
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias.html?qr=${user.uid}`);
+      // setQrCodeUrl(`${baseUrl}/paginasAleatorias.html?qr=${user.uid}`);
+      setQrCodeUrl(`${baseUrl}/paginasAleatorias${isProduction}?qr=${user.uid}`);
     }
   }, [user]);
 

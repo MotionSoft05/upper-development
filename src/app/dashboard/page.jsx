@@ -15,6 +15,8 @@ import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { usePathname } from "next/navigation";
+
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -31,6 +33,10 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function DashBoard() {
+
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION;
+  console.log("🚀 ~ DashBoard ~ isProduction:", isProduction)
+
   const [userEmail, setUserEmail] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showUserAdmin, setShowUserAdmin] = useState(true);
