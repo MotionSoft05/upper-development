@@ -48,6 +48,28 @@
         "verificationEmailSent": "A verification email has been sent. Please check your spam folder to ensure it hasn't been overlooked.",
         "goToLogin": "Go to login"
     },
+    "login": {
+        "verifyEmail": "Verify your email before logging in. If you can't find it, check your spam folder.",
+        "resendVerificationEmail": "Haven't received the verification email? Click here to resend.",
+        "incorrectCredentials": "Incorrect credentials. Please try again.",
+        "verificationEmailResent": "Verification email resent successfully",
+        "resetPasswordEmailError": "Error sending password reset email:",
+        "loginTitle": "Login",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Password",
+        "loginButton": "Log in",
+        "password": "Password",
+        "noAccountMessage": "Don't have an account?",
+        "registerLink": "Register here",
+        "forgotPasswordLink": "Forgot your password?",
+        "forgotPasswordTitle": "Forgot Password",
+        "forgotPasswordDescription": "Enter your email to reset your password.",
+        "sendRecoveryEmailButton": "Send Recovery Email",
+        "recoveryEmailSent": "Recovery email sent!",
+        "recoveryEmailInstructions": "We've sent you an email with instructions to update your password. Also, check your spam folder just in case.",
+        "confirmationButton": "Got it!",
+        "cancelButton": "Cancel"
+    },
     "homeSliderData": {
         "sliderTag1": "Boost your business",
         "sliderTag2": "Great visual impact",

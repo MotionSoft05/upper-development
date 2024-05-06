@@ -48,6 +48,28 @@
         "verificationEmailSent": "Se ha enviado un correo de verificación. Revisa tu bandeja de spam para asegurarte de que no se haya pasado por alto.",
         "goToLogin": "Ir a iniciar sesión"
     },
+    "login": {
+        "verifyEmail": "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado.",
+        "resendVerificationEmail": "¿No has recibido el correo de verificación? Haz clic aquí para reenviar.",
+        "incorrectCredentials": "Credenciales incorrectas. Por favor, inténtalo de nuevo.",
+        "verificationEmailResent": "Correo de verificación reenviado exitosamente",
+        "resetPasswordEmailError": "Error al enviar el correo electrónico de restablecimiento de contraseña:",
+        "loginTitle": "Inicio de Sesión",
+        "emailPlaceholder": "Email",
+        "passwordPlaceholder": "Contraseña",
+        "loginButton": "Iniciar Sesión",
+        "password": "Contraseña",
+        "noAccountMessage": "¿No tienes una cuenta?",
+        "registerLink": "Registrate aquí",
+        "forgotPasswordLink": "¿Olvidaste tu contraseña?",
+        "forgotPasswordTitle": "Recuperar Contraseña",
+        "forgotPasswordDescription": "Ingresa tu correo electrónico para restablecer tu contraseña.",
+        "sendRecoveryEmailButton": "Enviar Correo de Recuperación",
+        "recoveryEmailSent": "¡Correo de recuperación enviado!",
+        "recoveryEmailInstructions": "Te enviamos un correo con instrucciones para actualizar tu contraseña. Revisa también tu carpeta de correo no deseado por si acaso.",
+        "confirmationButton": "Listo!",
+        "cancelButton": "Cancelar"
+    },
     "homeSliderData": {
         "sliderTag1": "Impulsa tu negocio",
         "sliderTag2": "Gran impacto visual",

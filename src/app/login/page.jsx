@@ -43,6 +43,7 @@ const sendEmail = async (userID) => {
 };
 
 import { Dialog, Transition } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -58,6 +59,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function LogIn({ url }) {
+
+  const {t} = useTranslation()
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -113,15 +116,17 @@ function LogIn({ url }) {
           window.location.href = "/";
         } else {
           setError(
-            "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
+            // "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
+            t("login.verifyEmail")
           );
           const resendVerificationOption = (
             <button
               className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
               onClick={handleResendVerificationEmail}
             >
-              ¿No has recibido el correo de verificación? Haz clic aquí para
-              reenviar.
+              {/* ¿No has recibido el correo de verificación? Haz clic aquí para
+              reenviar. */}
+              {t("login.resendVerificationEmail")}
             </button>
           );
           //
@@ -133,7 +138,8 @@ function LogIn({ url }) {
           ));
         }
       } catch (error) {
-        setError("Credenciales incorrectas. Por favor, inténtalo de nuevo.");
+        // ("Credenciales incorrectas. Por favor, inténtalo de nuevo.")
+        setError(t("login.incorrectCredentials"));
       }
     }
   };
@@ -143,7 +149,7 @@ function LogIn({ url }) {
       setIsResendingVerificationEmail(true);
       const user = auth.currentUser;
       await sendEmailVerification(user);
-      setSuccessMessage("Correo de verificación reenviado exitosamente");
+      setSuccessMessage(t("login.verificationEmailResent"));// "Correo de verificación reenviado exitosamente"
       setIsResendingVerificationEmail(false);
     } catch (error) {
       setIsResendingVerificationEmail(false);
@@ -161,7 +167,8 @@ function LogIn({ url }) {
       await sendPasswordResetEmail(auth, recoveryEmail);
     } catch (error) {
       console.error(
-        "Error al enviar el correo electrónico de restablecimiento de contraseña:",
+        // "Error al enviar el correo electrónico de restablecimiento de contraseña:",
+        t("login.resetPasswordEmailError"),
         error.message
       );
     }
@@ -193,7 +200,8 @@ function LogIn({ url }) {
           <div className="mb-4 md:mb-0 md:w-full lg:w-5/12 xl:w-5/12 md:ml-auto md:mr-auto lg:ml-0 lg:mr-0">
             <form onSubmit={handleLogin} onKeyDown={handleFormKeyDown}>
               <h2 className="mb-6 text-2xl font-semibold text-gray-900">
-                Inicio de Sesión
+                {/* Inicio de Sesión */}
+                {t("login.loginTitle")}
               </h2>
               {error && <div className="text-red-500 mb-4">{error}</div>}
               {successMessage && (
@@ -218,7 +226,7 @@ function LogIn({ url }) {
                     isFormSubmitted && !password ? "" : ""
                   }`}
                   id="exampleFormControlInput22"
-                  placeholder="Contraseña"
+                  placeholder= {t("login.password")}//"Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -252,20 +260,26 @@ function LogIn({ url }) {
                       : "cursor-not-allowed bg-gray-400 text-gray-200"
                   }`}
                 >
-                  Iniciar Sesión
+                  {/* Iniciar Sesión */}
+                  {t("login.loginTitle")}
                 </button>
 
                 <div className="mt-3 text-sm font-light text-gray-500">
-                  ¿No tienes una cuenta?
+                  {/* ¿No tienes una cuenta? */}
+                  {t("login.noAccountMessage")}
                   <strong>
-                    <Link href="/register"> Registrate aquí</Link>
+                    <Link href="/register"> 
+                    {/* Registrate aquí */}
+                    {t("login.registerLink")}
+                    </Link>
                   </strong>
                 </div>
                 <button
                   onClick={() => setIsForgotPasswordModalOpen(true)}
                   className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
                 >
-                  ¿Olvidaste tu contraseña?
+                  {/* ¿Olvidaste tu contraseña? */}
+                  {t("login.forgotPasswordLink")}
                 </button>
                 {isForgotPasswordModalOpen && (
                   <div className="fixed inset-0 flex items-center justify-center">
@@ -275,11 +289,13 @@ function LogIn({ url }) {
                     ></div>
                     <div className="bg-white p-8 rounded-md shadow-lg z-10">
                       <h2 className="text-2xl font-semibold mb-4">
-                        Recuperar Contraseña
+                        {/* Recuperar Contraseña */}
+                        {t("login.forgotPasswordTitle")}
                       </h2>
                       <p className="text-gray-600 mb-6">
-                        Ingresa tu correo electrónico para restablecer tu
-                        contraseña.
+                        {/* Ingresa tu correo electrónico para restablecer tu
+                        contraseña. */}
+                        {t("login.forgotPasswordDescription")}
                       </p>
                       <input
                         type="email"
@@ -295,7 +311,8 @@ function LogIn({ url }) {
                         }`}
                         disabled={!recoveryEmail}
                       >
-                        Enviar Correo de Recuperación
+                        {/* Enviar Correo de Recuperación */}
+                        {t("login.sendRecoveryEmailButton")}
                       </button>
 
                       <Transition appear show={isOpen} as={Fragment}>
@@ -332,14 +349,14 @@ function LogIn({ url }) {
                                     as="h3"
                                     className="text-lg font-medium leading-6 text-gray-900"
                                   >
-                                    ¡Correo de recuperación enviado!
+                                    {/* ¡Correo de recuperación enviado! */}
+                                    {t("login.recoveryEmailSent")}
                                   </Dialog.Title>
                                   <div className="mt-2">
                                     <p className="text-sm text-gray-500">
-                                      Te enviamos un correo con instrucciones
-                                      para actualizar tu contraseña. Revisa
-                                      también tu carpeta de correo no deseado
-                                      por si acaso.
+                                      {/* Te enviamos un correo con instrucciones
+                                      para actualizar ... */}
+                                      {t("login.recoveryEmailInstructions")}
                                     </p>
                                   </div>
 
@@ -349,7 +366,8 @@ function LogIn({ url }) {
                                       className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                                       onClick={closeModal}
                                     >
-                                      Listo!
+                                      {/* Listo! */}
+                                      {t("login.confirmationButton")}
                                     </button>
                                   </div>
                                 </Dialog.Panel>
@@ -362,7 +380,8 @@ function LogIn({ url }) {
                         onClick={() => setIsForgotPasswordModalOpen(false)}
                         className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
                       >
-                        Cancelar
+                        {/* Cancelar */}
+                        {t("login.cancelButton")}
                       </button>
                     </div>
                   </div>
