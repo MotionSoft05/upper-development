@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import i18n from "@/utils/i18n"; // Importa tu archivo de configuración de i18n
 import { useTranslation } from "react-i18next";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -6,6 +6,20 @@ import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 function LanguageSwitcher() {
   const { t } = useTranslation();
+  const [storedLanguage, setStoredLanguage] = useState("");
+
+
+  useEffect(() => {
+    const storedLanguage = localStorage.getItem("language") || "";
+    setStoredLanguage(storedLanguage);
+  }, []);
+
+  const changeLanguage = (event) => {
+    const selectedLanguage = event.target.value;
+    localStorage.setItem("language", selectedLanguage);
+    i18n.changeLanguage(selectedLanguage);
+    setStoredLanguage(selectedLanguage);
+  };
 
   // useEffect(() => {
   //   if (typeof window !== "undefined") {
@@ -16,17 +30,17 @@ function LanguageSwitcher() {
   //   }
   // }, []);
 
-  const changeLanguage = (event) => {
-    const selectedLanguage = event.target.value;
-    if (typeof window !== "undefined") {
-      localStorage.setItem("language", selectedLanguage);
-      i18n.changeLanguage(selectedLanguage);
-    }
-  };
+  // const changeLanguage = (event) => {
+  //   const selectedLanguage = event.target.value;
+  //   if (typeof window !== "undefined") {
+  //     localStorage.setItem("language", selectedLanguage);
+  //     i18n.changeLanguage(selectedLanguage);
+  //   }
+  // };
 
   // Obtén el idioma almacenado en localStorage solo si estás en el navegador
   // const storedLanguage = typeof window !== "undefined" ? localStorage.getItem("language") : null;
-  const storedLanguage = localStorage.getItem("language") || "";
+  // const storedLanguage = localStorage.getItem("language") || "";
 
   return (
     <div>

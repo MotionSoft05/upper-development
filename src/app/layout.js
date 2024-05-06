@@ -20,14 +20,19 @@ export default function RootLayout({ children }) {
 
   const { t } = useTranslation();
 
-    useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedLanguage = localStorage.getItem("language");
-      if (storedLanguage) {
-        i18n.changeLanguage(storedLanguage);
-      }
-    }
+  useEffect(() => {
+    const storedLanguage = localStorage.getItem("language") || "en";
+    i18n.changeLanguage(storedLanguage);
   }, []);
+
+  //   useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedLanguage = localStorage.getItem("language");
+  //     if (storedLanguage) {
+  //       i18n.changeLanguage(storedLanguage);
+  //     }
+  //   }
+  // }, []);
 
   console.log("i18n.language",i18n.language)
   return (
