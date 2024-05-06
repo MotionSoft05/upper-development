@@ -12,6 +12,42 @@
         "greeting": "¡Hello,",
         "language": "Language"
     },
+    "register": {
+        "title": "Register here",
+        "placeholders": {
+            "name": "Name",
+            "lastName": "Last Name",
+            "email": "Email",
+            "phone": "Phone",
+            "companyName": "Company Name",
+            "password": "Password",
+            "confirmPassword": "Confirm Password"
+        },
+        "errors": {
+            "nameRequired": "Name is required",
+            "lastNameRequired": "Last Name is required",
+            "emailRequired": "Email is required",
+            "emailInvalid": "Email is invalid",
+            "phoneRequired": "Phone is required",
+            "phoneFormat": "Phone number can only contain + - ( ) and numbers",
+            "passwordRequired": "Password is required",
+            "passwordLength": "Password must be at least 8 characters long",
+            "companyNameRequired": "Company Name is required",
+            "termsAgreement": "You must agree to the terms and conditions to register",
+            "passwordsMatchError": "Passwords do not match",
+            "passwordsMatch": "Passwords match",
+            "emailAlreadyExistsError": "Email is already in use",
+            "registrationError": "Error registering user:"
+        },
+        "submitButton": "Create Account",
+        "termsAndConditions": "I agree to the",
+        "termsLink": "terms and conditions",
+        "alreadyHaveAccount": "Already have an account?",
+        "loginLink": "Login here",
+        "registrationSuccess": "User registered successfully.",
+        "verificationEmailSent": "A verification email has been sent. Please check your spam folder to ensure it hasn't been overlooked.",
+        "goToLogin": "Go to login"
+    },
     "homeSliderData": {
         "sliderTag1": "Boost your business",
         "sliderTag2": "Great visual impact",

@@ -9,6 +9,7 @@ import {
 } from "firebase/auth";
 import Link from "next/link";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -24,6 +25,8 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function Register() {
+
+  const {t} = useTranslation()
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -71,13 +74,16 @@ function Register() {
     if (confirmPassword && isConfirmPasswordTouched) {
       const matchError =
         password !== confirmPassword
-          ? "Las contraseñas no coinciden"
-          : "Las contraseñas coinciden";
+          ? t("register.errors.passwordsMatchError") //"Las contraseñas no coinciden"
+          : t("register.errors.passwordsMatch") //"Las contraseñas coinciden";
       setPasswordsMatchError(matchError);
 
       // Actualiza el estado de error de la confirmación de contraseña
       setConfirmPasswordError(
-        matchError !== "Las contraseñas coinciden" ? matchError : null
+        matchError !== 
+        // "Las contraseñas coinciden"
+        t("register.errors.passwordsMatch")
+         ? matchError : null
       );
     } else {
       setPasswordsMatchError("");
@@ -107,7 +113,7 @@ function Register() {
     setIsButtonDisabled(
       hasErrors ||
         !isFieldsCompleted ||
-        passwordsMatchError !== "Las contraseñas coinciden"
+        passwordsMatchError !== t("register.errors.passwordsMatch") //"Las contraseñas coinciden"
     );
   }, [
     firstName,
@@ -167,7 +173,7 @@ function Register() {
 
     const confirmPasswordError =
       isConfirmPasswordTouched && confirmPassword !== password
-        ? "Las contraseñas no coinciden"
+        ? t("register.errors.passwordsMatchError") //"Las contraseñas no coinciden"
         : null;
     setConfirmPasswordError(confirmPasswordError);
 
@@ -236,21 +242,24 @@ function Register() {
         setEmailError("El correo electrónico ya está en uso");
       } else {
         setErrors(error.message);
-        console.error("Error al registrar el usuario:", error.message);
+        // "Error al registrar el usuario:"
+        console.error(t("register.errors.registrationError"), error.message);
       }
     }
   };
 
   const validateFirstName = (value) => {
     if (!value) {
-      return "El nombre es obligatorio";
+      // "El nombre es obligatorio";
+      return t("register.errors.nameRequired");
     }
     return null;
   };
 
   const validateLastName = (value) => {
     if (!value) {
-      return "El apellido es obligatorio";
+      // "El apellido es obligatorio";
+      return t("register.errors.lastNameRequired");
     }
     return null;
   };
@@ -258,23 +267,27 @@ function Register() {
   const validateEmail = (value) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!value) {
-      return "El correo electrónico es obligatorio";
+      // "El correo electrónico es obligatorio";
+      return t("register.errors.emailRequired");
     } else if (!emailRegex.test(value)) {
-      return "El correo electrónico no es válido";
+      // "El correo electrónico no es válido";
+      return t("register.errors.emailInvalid");
     }
     return null;
   };
 
   const validatePhoneNumber = (value) => {
     if (!value) {
-      return "El número de teléfono es obligatorio";
+      // "El número de teléfono es obligatorio";
+      return t("register.errors.phoneRequired");
     }
 
     // Expresión regular para permitir solo + - ( ) y números
     const phoneNumberRegex = /^[+()0-9\-]*$/;
 
     if (!phoneNumberRegex.test(value)) {
-      return "El número de teléfono solo puede contener + - ( ) y números";
+      // "El número de teléfono solo puede contener + - ( ) y números";
+      return t("register.errors.phoneFormat");
     }
 
     return null;
@@ -282,16 +295,19 @@ function Register() {
 
   const validatePassword = (value) => {
     if (!value) {
-      return "La contraseña es obligatoria";
+      // "La contraseña es obligatoria";
+      return t("register.errors.passwordRequired");
     } else if (value.length < 8) {
-      return "La contraseña debe tener al menos 8 caracteres";
+      // "La contraseña debe tener al menos 8 caracteres";
+      return t("register.errors.passwordLength");
     }
     return null;
   };
 
   const validateCompanyName = (value) => {
     if (!value) {
-      return "El nombre de empresa es obligatorio";
+      // "El nombre de empresa es obligatorio";
+      return t("register.errors.companyNameRequired");
     }
     return null;
   };
@@ -308,7 +324,8 @@ function Register() {
         <div className="w-full bg-white rounded-lg shadow md:mt-0 sm:max-w-md xl:p-0 ">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
             <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
-              Registrate aquí
+              {/* Registrate aquí */}
+              {t("register.title")}
             </h1>
             {successMessage && (
               <div className="mt-4 p-3 bg-green-100 text-green-700 rounded">
@@ -321,7 +338,7 @@ function Register() {
                   type="text"
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                   id="firstName"
-                  placeholder="Nombre"
+                  placeholder={t("register.placeholders.name")}
                   value={firstName}
                   onChange={(e) => {
                     setFirstName(e.target.value);
@@ -339,7 +356,7 @@ function Register() {
                   type="text"
                   className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                   id="lastName"
-                  placeholder="Apellido"
+                  placeholder={t("register.placeholders.lastName")}
                   value={lastName}
                   onChange={(e) => {
                     setLastName(e.target.value);
@@ -359,7 +376,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="email"
-                    placeholder="Email"
+                    placeholder={t("register.placeholders.email")}
                     value={email}
                     onChange={(e) => {
                       setEmail(e.target.value);
@@ -381,7 +398,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="phoneNumber"
-                    placeholder="Teléfono"
+                    placeholder={t("register.placeholders.phone")}
                     value={phoneNumber}
                     onChange={(e) => {
                       const inputValue = e.target.value;
@@ -412,7 +429,7 @@ function Register() {
                     type="text"
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="companyName"
-                    placeholder="Nombre de empresa"
+                    placeholder={t("register.placeholders.companyName")}
                     value={companyName}
                     onChange={(e) => {
                       setCompanyName(e.target.value);
@@ -433,7 +450,7 @@ function Register() {
                     type={showPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="password"
-                    placeholder="Contraseña"
+                    placeholder={t("register.placeholders.password")}
                     value={password}
                     onChange={(e) => {
                       setPassword(e.target.value);
@@ -472,7 +489,7 @@ function Register() {
                     type={showConfirmPassword ? "text" : "password"}
                     className="peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none"
                     id="confirmPassword"
-                    placeholder="Confirmar contraseña"
+                    placeholder={t("register.placeholders.confirmPassword")}
                     value={confirmPassword}
                     onFocus={() => setIsConfirmPasswordTouched(true)}
                     onChange={(e) => {
@@ -531,12 +548,14 @@ function Register() {
                   htmlFor="terms"
                   class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                 >
-                  Estoy de acuerdo con los&nbsp;
+                  {/* Estoy de acuerdo con los */}
+                  {t("register.termsAndConditions")}
                   <a
                     href="#"
-                    class="text-blue-600 hover:underline dark:text-blue-500"
+                    class="pl-1 text-blue-600 hover:underline dark:text-blue-500"
                   >
-                    términos y condiciones
+                    {/* términos y condiciones */}
+                    {t("register.termsLink")}
                   </a>
                 </label>
               </div>
@@ -552,30 +571,36 @@ function Register() {
                     isButtonDisabled || !passwordsMatch || !termsChecked
                   }
                 >
-                  Crear cuenta
+                  {/* Crear cuenta */}
+                  {t("register.submitButton")}
                 </button>
 
                 <div className="mt-3 text-sm font-light text-gray-500">
-                  ¿Ya tienes una cuenta?
+                  {/* ¿Ya tienes una cuenta? */}
+                  {t("register.termsAndConditions")}
                   <strong>
-                    <Link href="/login"> Ingresa aquí</Link>
+                    <Link href="/login"> 
+                    {/* Ingresa aquí */}
+                    {t("register.loginLink")}
+                    </Link>
                   </strong>
                 </div>
                 {showVerificationModal && (
                   <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
                     <div className="bg-white p-8 rounded-lg">
                       <p className="text-xl font-semibold mb-4">
-                        Usuario registrado correctamente.
+                        {/* Usuario registrado correctamente. */}
+                        {t("register.registrationSuccess")}
                       </p>
                       <p className="mb-4">
-                        Se ha enviado un correo de verificación. Revisa tu
-                        bandeja de spam para asegurarte de que no se haya pasado
-                        por alto.
+                        {/* Se ha enviado un correo de verificación... */}
+                        {t("register.verificationEmailSent")}
                       </p>
 
                       <Link href="/login" passHref>
                         <p className="text-blue-500 hover:underline">
-                          Ir a iniciar sesión
+                          {/* Ir a iniciar sesión */}
+                          {t("register.goToLogin")}
                         </p>
                       </Link>
                     </div>

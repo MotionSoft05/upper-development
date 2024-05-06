@@ -12,6 +12,42 @@
         "greeting": "¡Hola,",
         "language": "Idioma"
     },
+    "register": {
+        "title": "Regístrate aquí",
+        "placeholders": {
+            "name": "Nombre",
+            "lastName": "Apellido",
+            "email": "Correo electrónico",
+            "phone": "Teléfono",
+            "companyName": "Nombre de empresa",
+            "password": "Contraseña",
+            "confirmPassword": "Confirmar contraseña"
+        },
+        "errors": {
+            "nameRequired": "El nombre es obligatorio",
+            "lastNameRequired": "El apellido es obligatorio",
+            "emailRequired": "El correo electrónico es obligatorio",
+            "emailInvalid": "El correo electrónico no es válido",
+            "phoneRequired": "El número de teléfono es obligatorio",
+            "phoneFormat": "El número de teléfono solo puede contener + - ( ) y números",
+            "passwordRequired": "La contraseña es obligatoria",
+            "passwordLength": "La contraseña debe tener al menos 8 caracteres",
+            "companyNameRequired": "El nombre de empresa es obligatorio",
+            "termsAgreement": "Debes estar de acuerdo con los términos y condiciones para registrarte",
+            "passwordsMatchError": "Las contraseñas no coinciden",
+            "passwordsMatch": "Las contraseñas coinciden",
+            "emailAlreadyExistsError": "El correo electrónico ya está en uso",
+            "registrationError": "Error al registrar el usuario:"
+        },
+        "submitButton": "Crear cuenta",
+        "termsAndConditions": "Estoy de acuerdo con los",
+        "termsLink": "términos y condiciones",
+        "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+        "loginLink": "Ingresa aquí",
+        "registrationSuccess": "Usuario registrado correctamente.",
+        "verificationEmailSent": "Se ha enviado un correo de verificación. Revisa tu bandeja de spam para asegurarte de que no se haya pasado por alto.",
+        "goToLogin": "Ir a iniciar sesión"
+    },
     "homeSliderData": {
         "sliderTag1": "Impulsa tu negocio",
         "sliderTag2": "Gran impacto visual",
