@@ -220,13 +220,15 @@ function Navigation() {
                     <div className="flex items-center space-x-2">
                       <Link href={`/register${isProduction}`}>
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                          Registrarse
+                          {/* Registrarse */}
+                          {t('navbar.register')}
                         </button>
                       </Link>
                       {/* <Link href="/login.html"> */}
                       <Link href={`/login${isProduction}`}>
                         <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                          Iniciar sesión
+                          {/* Iniciar sesión */}
+                          {t('navbar.login')}
                         </button>
                       </Link>
                     </div>
@@ -375,7 +377,8 @@ function Navigation() {
                                 href={`/register${isProduction}`}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
-                                Registrarse
+                                {/* Registrarse */}
+                                {t('navbar.register')}
                               </Link>
                             </Menu.Item>
                             <Menu.Item>
@@ -384,7 +387,8 @@ function Navigation() {
                                 href={`/login${isProduction}`}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
-                                Iniciar sesión
+                                {/* Iniciar sesión */}
+                                {t('navbar.login')}
                               </Link>
                             </Menu.Item>
                           </>
