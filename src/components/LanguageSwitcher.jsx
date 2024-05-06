@@ -24,6 +24,9 @@ function LanguageSwitcher() {
     }
   };
 
+  // Obtén el idioma almacenado en localStorage solo si estás en el navegador
+  const storedLanguage = typeof window !== "undefined" ? localStorage.getItem("language") : null;
+
   return (
     <div>
       <FontAwesomeIcon icon={faGlobe} />
@@ -34,6 +37,7 @@ function LanguageSwitcher() {
         className="ml-2 w-10"
         id="languageSelect"
         onChange={changeLanguage}
+        value={storedLanguage}
         defaultValue={typeof window !== "undefined" && localStorage.getItem("language")}
       >
         <option value="en" className="px-6">English</option>
