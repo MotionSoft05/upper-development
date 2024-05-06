@@ -7,6 +7,7 @@ import Head from "next/head";
 // import i18n from 'i18next';
 import i18n from '@/utils/i18n';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 //! TODO: Agregar metadata
@@ -16,7 +17,17 @@ const inter = Inter({ subsets: ["latin"] });
 // };
 
 export default function RootLayout({ children }) {
+
   const { t } = useTranslation();
+
+    useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedLanguage = localStorage.getItem("language");
+      if (storedLanguage) {
+        i18n.changeLanguage(storedLanguage);
+      }
+    }
+  }, []);
 
   console.log("i18n.language",i18n.language)
   return (

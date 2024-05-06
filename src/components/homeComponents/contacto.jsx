@@ -108,7 +108,7 @@ function Contacto() {
         <form action="#" className="space-y-8">
           <div>
             <label
-              for="email"
+              htmlFor="email"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
               {/* Correo electrónico ​ */}
@@ -144,7 +144,7 @@ function Contacto() {
           </div>
           <div>
             <label
-              for="subject"
+              htmlFor="subject"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
               {/* Asunto */}
@@ -162,7 +162,7 @@ function Contacto() {
           </div>
           <div className="sm:col-span-2">
             <label
-              for="message"
+              htmlFor="message"
               className="block mb-2 text-sm font-medium text-gray-900 "
             >
               {/* Mensaje */}

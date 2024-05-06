@@ -514,7 +514,7 @@ function AltaEventos() {
                   required
                 />
                 <label
-                  for="floating_name"
+                  htmlFor="floating_name"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
                   {/* Nombre del evento */}
@@ -531,7 +531,7 @@ function AltaEventos() {
                   required
                 />
                 <label
-                  for="floating_event"
+                  htmlFor="floating_event"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
                   {/* Tipo de evento */}
@@ -548,7 +548,7 @@ function AltaEventos() {
                   required
                 />
                 <label
-                  for="floating_floor"
+                  htmlFor="floating_floor"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
                   {/* Lugar */}
@@ -567,7 +567,7 @@ function AltaEventos() {
                   onChange={handleDescriptionChange}
                 />
                 <label
-                  for="description"
+                  htmlFor="description"
                   className="peer-focus:font-medium absolute text-sm text-gray-500  duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600  peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6"
                 >
                   {/* Descripción */}

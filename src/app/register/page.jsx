@@ -528,7 +528,7 @@ function Register() {
                   />
                 </div>
                 <label
-                  for="terms"
+                  htmlFor="terms"
                   class="ms-2 text-sm font-medium text-gray-900 dark:text-gray-300"
                 >
                   Estoy de acuerdo con los&nbsp;

@@ -16,7 +16,7 @@ export const SliderHomeData = ({ slider, index, t }) => {
         {slider?.sliderImage && (
           <img
             src={slider?.sliderImage}
-            priority
+            // priority
             alt={slider?.sliderTitle}
             width={1920}
             height={1080}
