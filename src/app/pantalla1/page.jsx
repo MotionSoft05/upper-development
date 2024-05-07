@@ -46,7 +46,7 @@ function Pantalla1() {
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const numeroPantallaActual = pathname[pathname.length - 1];
+  const numeroPantallaActual = "1";
 
   const swiperRef = useRef(null);
 
@@ -171,11 +171,13 @@ function Pantalla1() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             let dispositivoCoincidente = null;
 
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
+              console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
 
               const pantallasAsignadas = devicesEvento.reduce(
                 (pantallas, device) => {
@@ -194,9 +196,17 @@ function Pantalla1() {
                 const dispositivosCoincidentes = pantallasAsignadas.filter(
                   (pantalla) => pantalla.posicion === posicionActual
                 );
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ dispositivosCoincidentes:",
+                  dispositivosCoincidentes
+                );
 
                 if (dispositivosCoincidentes.length > 0) {
                   dispositivoCoincidente = dispositivosCoincidentes[0].device;
+                  console.log(
+                    "🚀 ~ querySnapshot.forEach ~ dispositivoCoincidente:",
+                    dispositivoCoincidente
+                  );
                   setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
@@ -265,6 +275,10 @@ function Pantalla1() {
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
+              eventosEnCursoEffect
+            );
             // console.log(
             //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
             //   eventosEnCursoEffect
@@ -369,26 +383,33 @@ function Pantalla1() {
 
     return () => clearTimeout(timeoutId);
   }, [currentMediaIndex, publicidadesUsuario]);
+
   // Iniciar cuenta regresiva
-  const [countdown, setCountdown] = useState(30); // Cambia 10 por el tiempo deseado en segundos
+  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
-    if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      if (countdown > 0) {
-        timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      } else {
-        window.location.reload(); // Reiniciar página al llegar a cero
+
+    if (eventosEnCurso.length === 0 && user) {
+      if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
+        if (countdown > 0) {
+          timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+        } else {
+          window.location.reload(); // Reiniciar página al llegar a cero
+        }
+        return;
       }
+      return;
     }
 
     return () => clearTimeout(timer);
   }, [countdown, publicidadesUsuario]);
+  if (!user) {
+    return <LogIn url={pathname} />;
+  }
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
       // Renderizar cuenta regresiva
-      if (!user) {
-        return <LogIn url={pathname} />;
-      }
+
       return (
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
