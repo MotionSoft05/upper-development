@@ -20,6 +20,7 @@ import Textra from "react-textra"; // Slider para RSS
 import SliderRSS from "@/components/SliderRSS";
 import LogIn from "../login/page"; // Importa el componente LogIn
 import { usePathname } from "next/navigation";
+import { useTranslation } from "react-i18next";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -529,7 +530,7 @@ function PantallaDirec1() {
             <p>
               {/* No se a encontrado ningún evento o publicidad. La pagina se
               reiniciara en {countdown} segundos */}
-              {t("pantallaDirec.noEventsOrAdvertisements", {countdown})}
+              {t("pantalla.noEventsOrAdvertisements", { countdown })}
             </p>
           </section>
         </>

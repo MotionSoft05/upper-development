@@ -566,7 +566,7 @@
           "weatherInfoUnavailable": "No se pudo obtener la información del clima",
           "fetchingOrParsingDataError": "Error al obtener o analizar los datos:",
           "advertisementFetchError": "Error al obtener las publicidades:",
-          "noEventsOrAdvertisements": "No se ha encontrado ningún evento o publicidad. La página se reiniciará en {countdown} segundos",
+          "noEventsOrAdvertisements": "No se ha encontrado ningún evento o publicidad. La página se reiniciará en {{countdown}} segundos",
           "todaysEvents": "Eventos del día",
           "loadingWeatherData": "Cargando datos del clima...",
           "welcomeTitle": "Bienvenido",
