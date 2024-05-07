@@ -384,7 +384,7 @@ function Pantalla7() {
   const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
-    if (!eventosEnCurso || eventosEnCurso.length === 0) {
+    if (eventosEnCurso.length === 0 && user) {
       if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
         if (countdown > 0) {
           timer = setTimeout(() => setCountdown(countdown - 1), 1000);
