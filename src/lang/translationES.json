@@ -573,5 +573,27 @@
           "eventsTitle": "EVENTOS",
           "newsTitle": "NOTICIAS",
           "deviceEventsDescription": "Eventos en tu dispositivo"
+    },
+    "qrPage": {
+        "weekdays": [
+            "DOMINGO",
+            "LUNES",
+            "MARTES",
+            "MIÉRCOLES",
+            "JUEVES",
+            "VIERNES",
+            "SÁBADO"
+          ],
+        "templateDirectoryNotFound": "No se encontró información en TemplateDirectorios para este usuario.",
+        "noDataFound": "No se encontraron datos para este usuario.",
+        "userDataFetchError": "Error al obtener datos del usuario:",
+        "weatherDataFetchError": "Error al obtener datos del clima:",
+        "weatherInfoUnavailable": "No se pudo obtener la información del clima",
+        "advertisementFetchError": "Error al obtener las publicidades:",
+        "noEventsOrAdvertisements": "No hay publicidad ni eventos",
+        "todaysEventsTitle": "Eventos del día",
+        "loadingWeatherData": "Cargando datos del clima...",
+        "welcomeTitle": "Bienvenido",
+        "eventsTitle": "EVENTOS" 
     }
 }

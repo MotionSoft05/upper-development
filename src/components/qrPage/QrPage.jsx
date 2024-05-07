@@ -16,6 +16,7 @@ import parser from "fast-xml-parser";
 import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
+import { useTranslation } from "react-i18next";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -24,6 +25,8 @@ const obtenerHora = () => {
 };
 
 function QrDinamic({ searchQuery }) {
+
+  const {t} = useTranslation()
   //   console.log("🚀 ~ QrPage ~ params:", searchQuery)
   const [user, setUser] = useState(searchQuery);
   const [eventData, setEventData] = useState(null);
@@ -226,7 +229,8 @@ function QrDinamic({ searchQuery }) {
               setTemplateData(templateData);
             } else {
               console.log(
-                "No se encontró información en TemplateDirectorios para este usuario."
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("qrPage.templateDirectoryNotFound")
               );
             }
             // Filtrar por fecha y hora los eventos filtrados por pantalla
@@ -235,10 +239,12 @@ function QrDinamic({ searchQuery }) {
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
-            console.log("No se encontraron datos para este usuario.");
+            // "No se encontraron datos para este usuario."
+            console.log(t("qrPage.templateDirectoryNotFound"));
           }
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          // "Error al obtener datos del usuario:"
+          console.error(t("qrPage.userDataFetchError"), error);
         }
       };
 
@@ -269,8 +275,8 @@ function QrDinamic({ searchQuery }) {
           setIsLoading(false);
         })
         .catch((error) => {
-          console.error("Error al obtener datos del clima:", error);
-          setError("No se pudo obtener la información del clima");
+          console.error(t("qrPage.weatherDataFetchError"), error); // "Error al obtener datos del clima:"
+          setError(t("qrPage.weatherInfoUnavailable")); // "No se pudo obtener la información del clima"
           setIsLoading(false);
         });
     }
@@ -300,7 +306,8 @@ function QrDinamic({ searchQuery }) {
             setPublicidadesUsuario(publicidades);
           })
           .catch((error) => {
-            console.error("Error al obtener las publicidades:", error);
+            // "Error al obtener las publicidades:"
+            console.error(t("qrPage.advertisementFetchError"), error);
           });
       }
     };
@@ -314,15 +321,7 @@ function QrDinamic({ searchQuery }) {
   }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
+    const diasSemana = t("qrPage.weekdays", { returnObjects : true})
 
     const meses = [
       "1",
@@ -374,7 +373,8 @@ function QrDinamic({ searchQuery }) {
   }, [currentImageIndex, publicidadesUsuario]);
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
-      return "No hay publicidad ni eventos"; // O cualquier elemento que quieras mostrar cuando no haya publicidades
+      // "No hay publicidad ni eventos";  O cualquier elemento que quieras mostrar cuando no haya publicidades
+      return t("qrPage.noEventsOrAdvertisements") 
     }
 
     return (
@@ -455,14 +455,18 @@ function QrDinamic({ searchQuery }) {
                 {obtenerFecha()} Hr: {currentHour}
               </p>
               <h1 className="text-2xl lg:text-4xl font-bold">
-                Eventos del día
+                {/* Eventos del día */}
+                {t("qrPage.todaysEventsTitle")}
               </h1>
             </div>
 
             {/* Clima e Icono */}
             <div className="flex flex-col md:flex-row text-color items-center md:ml-4">
               {isLoading ? (
-                <p>Cargando datos del clima...</p>
+                <p>
+                  {/* Cargando datos del clima... */}
+                  {t("qrPage.loadingWeatherData")}
+                </p>
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
@@ -477,7 +481,10 @@ function QrDinamic({ searchQuery }) {
                   </p>
                 </div>
               ) : (
-                <h2 className="text-2xl mr-16">Bienvenido</h2>
+                <h2 className="text-2xl mr-16">
+                  {/* Bienvenido */}
+                  {t("qrPage.welcomeTitle")}
+                </h2>
               )}
             </div>
           </div>
@@ -498,7 +505,8 @@ function QrDinamic({ searchQuery }) {
                   color: templateActual.fontColor,
                 }}
               >
-                EVENTOS
+                {/* EVENTOS */}
+                {t("qrPage.eventsTitle")}
               </h2>
             </div>
 

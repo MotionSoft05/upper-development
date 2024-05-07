@@ -554,5 +554,27 @@
           "eventsTitle": "EVENTS",
           "newsTitle": "NEWS",
           "deviceEventsDescription": "Events on your device"      
+    },
+    "qrPage": {
+        "weekdays": [
+            "SUNDAY",
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY"
+          ],
+        "templateDirectoryNotFound": "No information found in TemplateDirectories for this user.",
+        "noDataFound": "No data found for this user.",
+        "userDataFetchError": "Error fetching user data:",
+        "weatherDataFetchError": "Error fetching weather data:",
+        "weatherInfoUnavailable": "Weather information unavailable",
+        "advertisementFetchError": "Error fetching advertisements:",
+        "noEventsOrAdvertisements": "No events or advertisements",
+        "todaysEventsTitle": "Today's Events",
+        "loadingWeatherData": "Loading weather data...",
+        "welcomeTitle": "Welcome",
+        "eventsTitle": "EVENTS"
     }
 }
