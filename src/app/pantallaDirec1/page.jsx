@@ -18,6 +18,7 @@ import axios from "axios";
 import QRCode from "qrcode.react";
 import Textra from "react-textra"; // Slider para RSS
 import SliderRSS from "@/components/SliderRSS";
+import { useTranslation } from "react-i18next";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -29,7 +30,7 @@ const obtenerHora = () => {
 function PantallaDirec1() {
 
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
-
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
@@ -53,7 +54,9 @@ function PantallaDirec1() {
 
       // Actualiza la URL del código QR al cambiar el usuario
       // setQrCodeUrl(`${baseUrl}/paginasAleatorias.html?qr=${user.uid}`);
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias${isProduction}?qr=${user.uid}`);
+      setQrCodeUrl(
+        `${baseUrl}/paginasAleatorias${isProduction}?qr=${user.uid}`
+      );
     }
   }, [user]);
 
@@ -295,16 +298,19 @@ function PantallaDirec1() {
               setTemplateData(templateData);
             } else {
               console.log(
-                "No se encontró información en TemplateDirectorios para este usuario."
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantallaDirec.templateDirectoryNotFound")
               );
             }
 
             setEventosEnCurso(eventosOrdenados);
           } else {
-            console.log("No se encontraron datos para este usuario.");
+            // "No se encontraron datos para este usuario."
+            console.log(t("pantallaDirec.noDataFound"));
           }
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          // "Error al obtener datos del usuario:"
+          console.error(t("pantallaDirec.userDataFetchError"), error);
         }
       };
 
@@ -332,8 +338,9 @@ function PantallaDirec1() {
           setIsLoading(false);
         })
         .catch((error) => {
-          console.error("Error al obtener datos del clima:", error);
-          setError("No se pudo obtener la información del clima");
+          
+          console.error(t("pantallaDirec.weatherDataFetchError"), error);// "Error al obtener datos del clima:"
+          setError(t("pantallaDirec.weatherInfoUnavailable")); // "No se pudo obtener la información del clima"
           setIsLoading(false);
         });
     }
@@ -353,7 +360,8 @@ function PantallaDirec1() {
         setRssItems(items);
       })
       .catch((error) =>
-        console.error("Error fetching or parsing data:", error)
+        // "Error fetching or parsing data:"
+        console.error(t("pantallaDirec.fetchingOrParsingDataError"), error)
       );
   }, []);
 
@@ -423,7 +431,8 @@ function PantallaDirec1() {
             setPublicidadesUsuario(publicidades);
           })
           .catch((error) => {
-            console.error("Error al obtener las publicidades:", error);
+            // "Error al obtener las publicidades:"
+            console.error(t("pantallaDirec.advertisementFetchError"), error);
           });
       }
     };
@@ -438,15 +447,7 @@ function PantallaDirec1() {
   }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
+    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true })
 
     const meses = [
       "1",
@@ -518,8 +519,9 @@ function PantallaDirec1() {
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
             <p>
-              No se a encontrado ningún evento o publicidad. La pagina se
-              reiniciara en {countdown} segundos
+              {/* No se a encontrado ningún evento o publicidad. La pagina se
+              reiniciara en {countdown} segundos */}
+              {t("pantallaDirec.noEventsOrAdvertisements")}
             </p>
           </section>
         </>
@@ -623,7 +625,10 @@ function PantallaDirec1() {
               <p className="text-3xl text-center  mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
-              <h1 className="text-5xl font-bold">Eventos del día</h1>
+              <h1 className="text-5xl font-bold">
+                {/* Eventos del día */}
+                {t("pantallaDirec.todaysEvents")}
+              </h1>
             </div>
 
             {/* ---- Clima e Icono ---- */}
@@ -634,7 +639,10 @@ function PantallaDirec1() {
               }}
             >
               {isLoading ? (
-                <p>Cargando datos del clima...</p>
+                <p>
+                  {/* Cargando datos del clima... */}
+                  {t("pantallaDirec.loadingWeatherData")}
+                </p>
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
@@ -649,7 +657,11 @@ function PantallaDirec1() {
                   </p>
                 </div>
               ) : (
-                <h2 className="text-4xl mr-16">Bienvenido</h2> //si no da el Clima muestra un mensaje de Bienvenida
+                  //si no da el Clima muestra un mensaje de Bienvenida
+                <h2 className="text-4xl mr-16">
+                  {/* Bienvenido */}
+                  {t("pantallaDirec.welcomeTitle")}
+                </h2> 
               )}
             </div>
           </div>
@@ -667,7 +679,10 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2 className=" text-4xl text-center">EVENTOS</h2>
+                  <h2 className=" text-4xl text-center">
+                    {/* EVENTOS */}
+                    {t("pantallaDirec.eventsTitle")}
+                  </h2>
                 </div>
                 {/* contenido principal */}
                 <div
@@ -885,7 +900,8 @@ function PantallaDirec1() {
                     className="text-color text-4xl text-center align-bottom "
                     style={{ color: templateActual.fontColor }}
                   >
-                    NOTICIAS
+                    {/* NOTICIAS */}
+                    {t("pantallaDirec.newsTitle")}
                   </h2>
                 </div>
               </div>
@@ -932,7 +948,8 @@ function PantallaDirec1() {
                     color: templateActual.fontColor,
                   }}
                 >
-                  EVENTOS
+                  {/* EVENTOS */}
+                  {t("pantallaDirec.eventsTitle")}
                 </h2>
               </div>
               {/* contenido principal */}
@@ -1158,7 +1175,8 @@ function PantallaDirec1() {
                     color: templateActual.fontColor,
                   }}
                 >
-                  NOTICIAS
+                  {/* NOTICIAS */}
+                  {t("pantallaDirec.newsTitle")}
                 </h2>
               </div>
             </div>
@@ -1192,7 +1210,8 @@ function PantallaDirec1() {
                 }}
               >
                 <p style={{ marginBottom: "10px" }}>
-                  Eventos en tu dispositivo
+                  {/* Eventos en tu dispositivo */}
+                  {t("pantallaDirec.deviceEventsDescription")}
                 </p>
                 {qrCodeUrl && (
                   <a

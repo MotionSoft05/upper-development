@@ -529,5 +529,30 @@
         "noImagesAvailable": "No images available",
         "noEventsOrAdvertisements": "No events or advertisements found. The page will refresh in {{countdown}} seconds.",
         "session": "Session:"
+    },
+    "pantallaDirec": {
+        "weekdays": [
+            "SUNDAY",
+            "MONDAY",
+            "TUESDAY",
+            "WEDNESDAY",
+            "THURSDAY",
+            "FRIDAY",
+            "SATURDAY"
+          ],
+          "templateDirectoryNotFound": "No information found in TemplateDirectories for this user.",
+          "noDataFound": "No data found for this user.",
+          "userDataFetchError": "Error fetching user data:",
+          "weatherDataFetchError": "Error fetching weather data:",
+          "weatherInfoUnavailable": "Weather information unavailable",
+          "fetchingOrParsingDataError": "Error fetching or parsing data:",
+          "advertisementFetchError": "Error fetching advertisements:",
+          "noEventsOrAdvertisements": "No events or advertisements found. The page will refresh in {countdown} seconds.",
+          "todaysEvents": "Today's Events",
+          "loadingWeatherData": "Loading weather data...",
+          "welcomeTitle": "Welcome",
+          "eventsTitle": "EVENTS",
+          "newsTitle": "NEWS",
+          "deviceEventsDescription": "Events on your device"      
     }
 }
