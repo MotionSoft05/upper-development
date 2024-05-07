@@ -514,5 +514,19 @@
         "fiscalRegime": "Régimen Fiscal:",
         "cdfiUsage": "Uso CDFI:",
         "selectCompany": "Seleccione Empresa"
+    },
+    "pantalla": {
+        "error": {
+            "advertisements": "Error al obtener las publicidades",
+            "templateDirectoryNotFound": "No se encontró información en TemplateDirectorios para este usuario.",
+            "noDataFound": "No se encontraron datos para este usuario.",
+            "userDataFetchError": "Error al obtener datos del usuario."
+        },
+        "weekdays": ["DOMINGO", "LUNES", "MARTES", "MIÉRCOLES", "JUEVES", "VIERNES", "SÁBADO"],
+        "months": ["ENERO", "FEBRERO", "MARZO", "ABRIL", "MAYO", "JUNIO", "JULIO", "AGOSTO", "SEPTIEMBRE", "OCTUBRE", "NOVIEMBRE", "DICIEMBRE"],
+      
+        "noImagesAvailable": "No hay imágenes disponibles",
+        "noEventsOrAdvertisements": "No se ha encontrado ningún evento o publicidad. La página se reiniciará en {{countdown}} segundos.",
+        "session": "Sesión:"
     }
 }

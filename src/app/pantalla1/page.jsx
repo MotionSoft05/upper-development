@@ -23,6 +23,7 @@ import "swiper/css/navigation";
 
 // import required modules
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import { useTranslation } from "react-i18next";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -32,6 +33,8 @@ const obtenerHora = () => {
 };
 
 function Pantalla1() {
+
+  const {t,ready} = useTranslation()
   const pathname = usePathname();
 
   const [user, setUser] = useState(null);
@@ -48,30 +51,12 @@ function Pantalla1() {
   const swiperRef = useRef(null);
 
   const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
+    const storedLanguage = localStorage.getItem("language") // "es" o "en"
 
-    const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ];
+    const diasSemana = t("pantalla.weekdays",{ returnObjects: true }) // { returnObjects: true } trae el array completo de las traducciones
+    const meses = t("pantalla.months",{ returnObjects: true }) 
+
+    if (!ready) return "loading translations...";
 
     const now = new Date();
     const diaSemana = diasSemana[now.getDay()];
@@ -79,8 +64,9 @@ function Pantalla1() {
     const mes = meses[now.getMonth()];
     const año = now.getFullYear();
 
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
+    return storedLanguage === "es"? `${diaSemana} ${dia} DE ${mes} ${año}` : `${diaSemana}, ${mes} ${dia}, ${año}`;
   };
+  
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
@@ -147,7 +133,8 @@ function Pantalla1() {
             setPublicidadesUsuario(publicidades);
           })
           .catch((error) => {
-            console.error("Error al obtener las publicidades:", error);
+            // "Error al obtener las publicidades:"
+            console.error(t("pantalla.error.advertisements"), error);
           });
       }
     };
@@ -272,7 +259,8 @@ function Pantalla1() {
               setTemplateData(templateData);
             } else {
               console.log(
-                "No se encontró información en TemplateDirectorios para este usuario."
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantalla.error.templateDirectoryNotFound")
               );
             }
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
@@ -284,10 +272,12 @@ function Pantalla1() {
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
-            console.log("No se encontraron datos para este usuario.");
+            // console.log("No se encontraron datos para este usuario.");
+            console.log(t("pantalla.error.noDataFound"));
           }
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          // console.error("Error al obtener datos del usuario:", error);
+          console.error(t("pantalla.error.userDataFetchError"), error);
         }
       };
 
@@ -403,8 +393,9 @@ function Pantalla1() {
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
             <p>
-              No se a encontrado ningún evento o publicidad. La pagina se
-              reiniciara en {countdown} segundos
+              {/* No se a encontrado ningún evento o publicidad. La pagina se
+              reiniciara en {countdown} segundos */}
+              {t("pantalla.noEventsOrAdvertisements", {countdown})}
             </p>
           </section>
         </>
@@ -539,7 +530,8 @@ function Pantalla1() {
                     display: images.length === 0 ? "" : "none",
                   }}
                 >
-                  No hay imágenes disponibles
+                  {/* No hay imágenes disponibles */}
+                  {t("pantalla.error.noImagesAvailable")}
                 </p>
               </div>
 
@@ -549,7 +541,8 @@ function Pantalla1() {
                     className={`text-3xl md:text-4xl text-color font-bold`}
                     style={{ fontFamily: templateActual.fontStyle }}
                   >
-                    Sesión:
+                    {/* Sesión: */}
+                    {t("pantalla.session")}
                   </p>
                   <p
                     className={`text-3xl md:text-4xl text-color font-bold`}

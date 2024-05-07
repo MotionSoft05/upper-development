@@ -515,5 +515,19 @@
         "fiscalRegime": "Fiscal Regime:",
         "cdfiUsage": "CDFI Usage:",
         "selectCompany": "Select Company"
+    },
+    "pantalla": {
+        "error": {
+            "advertisements": "Error fetching advertisements",
+            "templateDirectoryNotFound": "No information found in TemplateDirectories for this user.",
+            "noDataFound": "No data found for this user.",
+            "userDataFetchError": "Error fetching user data."
+        },
+        "weekdays": ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"],
+        "months": ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"],
+
+        "noImagesAvailable": "No images available",
+        "noEventsOrAdvertisements": "No events or advertisements found. The page will refresh in {{countdown}} seconds.",
+        "session": "Session:"
     }
 }
