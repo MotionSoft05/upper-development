@@ -10,6 +10,7 @@ import {
 import Link from "next/link";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
+import { v4 as uuidv4 } from "uuid";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -25,8 +26,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function Register() {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -75,15 +75,16 @@ function Register() {
       const matchError =
         password !== confirmPassword
           ? t("register.errors.passwordsMatchError") //"Las contraseñas no coinciden"
-          : t("register.errors.passwordsMatch") //"Las contraseñas coinciden";
+          : t("register.errors.passwordsMatch"); //"Las contraseñas coinciden";
       setPasswordsMatchError(matchError);
 
       // Actualiza el estado de error de la confirmación de contraseña
       setConfirmPasswordError(
-        matchError !== 
-        // "Las contraseñas coinciden"
-        t("register.errors.passwordsMatch")
-         ? matchError : null
+        matchError !==
+          // "Las contraseñas coinciden"
+          t("register.errors.passwordsMatch")
+          ? matchError
+          : null
       );
     } else {
       setPasswordsMatchError("");
@@ -211,12 +212,14 @@ function Register() {
       const userUid = userCredential.user.uid;
       const db = getFirestore();
       const userRef = doc(db, "usuarios", userUid);
+      const idEmpresa = uuidv4().substr(0, 12);
       await setDoc(userRef, {
         nombre: firstName,
         apellido: lastName,
         email: email,
         telefono: phoneNumber,
         empresa: companyName,
+        Idempresa: idEmpresa,
         sesion: 0,
         status: true,
         pd: 0,
@@ -579,9 +582,9 @@ function Register() {
                   {/* ¿Ya tienes una cuenta? */}
                   {t("register.termsAndConditions")}
                   <strong>
-                    <Link href="/login"> 
-                    {/* Ingresa aquí */}
-                    {t("register.loginLink")}
+                    <Link href="/login">
+                      {/* Ingresa aquí */}
+                      {t("register.loginLink")}
                     </Link>
                   </strong>
                 </div>
