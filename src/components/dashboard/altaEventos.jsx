@@ -128,7 +128,7 @@ function AltaEventos() {
                     icon: "warning",
                     title: "¡Atención!",
                     // text: "Actualmente no cuenta con Publicidad en Salones de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
-                    text:t("altaEventos.noAdvertisementSalon"),
+                    text: t("altaEventos.noAdvertisementSalon"),
                     confirmButtonColor: "#4482F6",
                   }).then(() => {
                     window.location.reload();
@@ -139,7 +139,7 @@ function AltaEventos() {
                     icon: "warning",
                     title: "¡Atención!",
                     // text: "Actualmente no cuenta con Publicidad en Directorio de Eventos, sugerimos configurar imágenes/videos para una mejor experiencia para sus clientes.",
-                    text:t("altaEventos.noAdvertisementDirectory"),
+                    text: t("altaEventos.noAdvertisementDirectory"),
                     confirmButtonColor: "#4482F6",
                   }).then(() => {
                     window.location.reload();
@@ -362,99 +362,108 @@ function AltaEventos() {
     });
     const status = fechaHoraActual <= fechaHoraFinalSalon.toDate();
 
-    const eventoData = {
-      nombreEvento,
-      tipoEvento,
-      lugar,
-      description,
-      horaInicialReal,
-      horaFinalReal,
-      horaInicialSalon,
-      horaFinalSalon,
-      fechaInicio: fechaInicio._i,
-      fechaFinal: fechaFinal._i,
-      images,
-      devices,
-      userId: userId,
-      userId: user.uid,
-      status,
-      uuid: `${uuidv4().slice(0, 4)}-${uuidv4().slice(0, 4)}-${uuidv4().slice(
-        0,
-        3
-      )}`,
-    };
+    const usuarioRef = doc(db, "usuarios", userId);
+    const usuarioDoc = await getDoc(usuarioRef);
 
-    if (selectedUser) {
-      eventoData.userId = selectedUser;
-    }
+    if (usuarioDoc.exists()) {
+      const userData = usuarioDoc.data();
+      const empresa = userData.empresa;
 
-    const personalizacionTemplate = await obtenerInformacionPersonalizacion(
-      userId
-    );
-
-    if (personalizacionTemplate) {
-      eventoData.personalizacionTemplate = {
-        fontColor: personalizacionTemplate.fontColor,
-        templateColor: personalizacionTemplate.templateColor,
-        fontStyle: personalizacionTemplate.fontStyle,
-        logo: personalizacionTemplate.logo,
+      const eventoData = {
+        nombreEvento,
+        tipoEvento,
+        lugar,
+        description,
+        horaInicialReal,
+        horaFinalReal,
+        horaInicialSalon,
+        horaFinalSalon,
+        fechaInicio: fechaInicio._i,
+        fechaFinal: fechaFinal._i,
+        images,
+        devices,
+        userId: userId,
+        status,
+        uuid: `${uuidv4().slice(0, 4)}-${uuidv4().slice(0, 4)}-${uuidv4().slice(
+          0,
+          3
+        )}`,
+        empresa: empresa,
       };
-    }
 
-    const resetFormState = () => {
-      setValue({
-        startDate: 0,
-        endDate: new Date().setMonth(11),
-      });
-      setImages([]);
-      setDescription("");
-      setHasImage(false);
-    };
+      if (selectedUser) {
+        eventoData.userId = selectedUser;
+      }
 
-    firebase
-      .firestore()
-      .collection("eventos")
-      .add(eventoData)
-      .then((docRef) => {
-        document.getElementById("floating_name").value = "";
-        document.getElementById("floating_event").value = "";
-        document.getElementById("floating_floor").value = "";
-        document.getElementById("description").value = "";
-        document.getElementById("hourSelectorInicio").value = "00";
-        document.getElementById("minuteSelectorInicio").value = "00";
-        document.getElementById("hourSelectorFinal").value = "00";
-        document.getElementById("minuteSelectorFinal").value = "00";
-        document.getElementById("hourSelectorInicioSalon").value = "00";
-        document.getElementById("minuteSelectorInicioSalon").value = "00";
-        document.getElementById("hourSelectorFinalSalon").value = "00";
-        document.getElementById("minuteSelectorFinalSalon").value = "00";
+      const personalizacionTemplate = await obtenerInformacionPersonalizacion(
+        userId
+      );
 
-        setRepeatingDays({
-          Lunes: false,
-          Martes: false,
-          Miércoles: false,
-          Jueves: false,
-          Viernes: false,
-          Sábado: false,
-          Domingo: false,
+      if (personalizacionTemplate) {
+        eventoData.personalizacionTemplate = {
+          fontColor: personalizacionTemplate.fontColor,
+          templateColor: personalizacionTemplate.templateColor,
+          fontStyle: personalizacionTemplate.fontStyle,
+          logo: personalizacionTemplate.logo,
+        };
+      }
+
+      const resetFormState = () => {
+        setValue({
+          startDate: 0,
+          endDate: new Date().setMonth(11),
         });
-
-        setAlertaEnviada(true);
-        setSelectedDevices([]);
         setImages([]);
-        resetFormState();
         setDescription("");
         setHasImage(false);
-        resetFormState();
-        setTimeout(() => {
-          setAlertaEnviada(false);
-        }, 6000);
-      })
-      .catch((error) => {
-        // "Error al enviar datos a Firebase:"
-        console.error(t("altaEventos.firebaseSendError"), error);
-      });
+      };
+
+      firebase
+        .firestore()
+        .collection("eventos")
+        .add(eventoData)
+        .then((docRef) => {
+          document.getElementById("floating_name").value = "";
+          document.getElementById("floating_event").value = "";
+          document.getElementById("floating_floor").value = "";
+          document.getElementById("description").value = "";
+          document.getElementById("hourSelectorInicio").value = "00";
+          document.getElementById("minuteSelectorInicio").value = "00";
+          document.getElementById("hourSelectorFinal").value = "00";
+          document.getElementById("minuteSelectorFinal").value = "00";
+          document.getElementById("hourSelectorInicioSalon").value = "00";
+          document.getElementById("minuteSelectorInicioSalon").value = "00";
+          document.getElementById("hourSelectorFinalSalon").value = "00";
+          document.getElementById("minuteSelectorFinalSalon").value = "00";
+
+          setRepeatingDays({
+            Lunes: false,
+            Martes: false,
+            Miércoles: false,
+            Jueves: false,
+            Viernes: false,
+            Sábado: false,
+            Domingo: false,
+          });
+
+          setAlertaEnviada(true);
+          setSelectedDevices([]);
+          setImages([]);
+          resetFormState();
+          setDescription("");
+          setHasImage(false);
+          resetFormState();
+          setTimeout(() => {
+            setAlertaEnviada(false);
+          }, 6000);
+        })
+        .catch((error) => {
+          // "Error al enviar datos a Firebase:"
+          console.error(t("altaEventos.firebaseSendError"), error);
+        });
+    }
   };
+
   const [] = useKeenSlider();
 
   const [selectedDevices, setSelectedDevices] = useState([]);
