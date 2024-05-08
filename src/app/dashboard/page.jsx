@@ -103,7 +103,11 @@ function DashBoard() {
               userEmail === "contacto@upperds.mx") && <Admin />}
 
           {showUserAdmin && <UserAdmin />}
-          {showEdiciondeempresa && <Ediciondeempresa />}
+          {showEdiciondeempresa &&
+            (userEmail === "uppermex10@gmail.com" ||
+              userEmail === "ulises.jacobo@hotmail.com" ||
+              userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
+
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
 
