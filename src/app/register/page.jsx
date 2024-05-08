@@ -53,9 +53,9 @@ function Register() {
     useState(false);
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
-  const [companyName, setCompanyName] = useState("");
-  const [companyNameError, setCompanyNameError] = useState(null);
-  const [registeredCompanyName, setRegisteredCompanyName] = useState("");
+  //const [companyName, setCompanyName] = useState("");
+  //const [companyNameError, setCompanyNameError] = useState(null);
+  // const [registeredCompanyName, setRegisteredCompanyName] = useState("");
   const [termsChecked, setTermsChecked] = useState(false);
   const [errors, setErrors] = useState({
     firstName: "",
@@ -64,7 +64,7 @@ function Register() {
     phoneNumber: "",
     password: "",
     confirmPassword: "",
-    companyName: "",
+    // companyName: "",
   });
 
   useEffect(() => {
@@ -99,8 +99,8 @@ function Register() {
       emailError ||
       phoneNumberError ||
       passwordError ||
-      confirmPasswordError ||
-      companyNameError;
+      confirmPasswordError;
+    //  companyNameError;
 
     const isFieldsCompleted =
       firstName &&
@@ -108,8 +108,8 @@ function Register() {
       email &&
       phoneNumber &&
       password &&
-      confirmPassword &&
-      companyName;
+      confirmPassword;
+    //   companyName;
 
     setIsButtonDisabled(
       hasErrors ||
@@ -129,7 +129,7 @@ function Register() {
     phoneNumberError,
     passwordError,
     confirmPasswordError,
-    companyNameError,
+    // companyNameError,
     passwordsMatchError,
   ]);
 
@@ -212,14 +212,14 @@ function Register() {
       const userUid = userCredential.user.uid;
       const db = getFirestore();
       const userRef = doc(db, "usuarios", userUid);
-      const idEmpresa = uuidv4().substr(0, 12);
+      //const idEmpresa = uuidv4().substr(0, 12);
       await setDoc(userRef, {
         nombre: firstName,
         apellido: lastName,
         email: email,
         telefono: phoneNumber,
-        empresa: companyName,
-        Idempresa: idEmpresa,
+        //empresa: companyName,
+        //Idempresa: idEmpresa,
         sesion: 0,
         status: true,
         pd: 0,
@@ -228,7 +228,7 @@ function Register() {
       });
 
       setShowVerificationModal(true);
-      setRegisteredCompanyName(companyName);
+      // setRegisteredCompanyName(companyName);
 
       setTimeout(() => {
         setFirstName("");
@@ -236,7 +236,7 @@ function Register() {
         setPhoneNumber("");
         setEmail("");
         setPassword("");
-        setCompanyName("");
+        //setCompanyName("");
         setConfirmPassword("");
         //window.location.href = "/login";
       }, 2300);
@@ -307,13 +307,13 @@ function Register() {
     return null;
   };
 
-  const validateCompanyName = (value) => {
-    if (!value) {
-      // "El nombre de empresa es obligatorio";
-      return t("register.errors.companyNameRequired");
-    }
-    return null;
-  };
+  // const validateCompanyName = (value) => {
+  //   if (!value) {
+  //     // "El nombre de empresa es obligatorio";
+  //     return t("register.errors.companyNameRequired");
+  //   }
+  //   return null;
+  // };
 
   return (
     <section className="">
@@ -425,7 +425,7 @@ function Register() {
                   )}
                 </div>
               </div>
-
+              {/*
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
                   <input
@@ -446,6 +446,7 @@ function Register() {
                   )}
                 </div>
               </div>
+              */}
 
               <div className="mb-6">
                 <div className="relative" data-te-input-wrapper-init>
