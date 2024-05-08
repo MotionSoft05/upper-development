@@ -121,7 +121,7 @@ function Sidebar({
                   />
                 </span>
                 {/* Edicion de empresas */}
-                <span className="ml-3"> {t("sidebar.ediciondeempresas")}</span>
+                <span className="ml-3"> {t("sidebar.eventEditing")}</span>
               </a>
             </button>
           )}
