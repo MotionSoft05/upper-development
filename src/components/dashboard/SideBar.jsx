@@ -5,7 +5,7 @@ function Sidebar({
   userEmail,
   setShowAltaEvento,
   setShowConsultaEvento,
-
+  setShowEdiciondeempresa,
   setShowPantallaSalon,
   setShowPantallaDirectorio,
   setShowPublicidad,
@@ -35,6 +35,7 @@ function Sidebar({
               onClick={() => {
                 setShowAdmin(true);
                 setShowUserAdmin(false);
+                setShowEdiciondeempresa(false);
                 setShowAltaEvento(false);
                 setShowConsultaEvento(false);
                 setShowPantallaSalon(false);
@@ -62,6 +63,7 @@ function Sidebar({
             onClick={() => {
               setShowAdmin(false);
               setShowUserAdmin(true);
+              setShowEdiciondeempresa(false);
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -91,6 +93,37 @@ function Sidebar({
             onClick={() => {
               setShowAdmin(false);
               setShowUserAdmin(false);
+              setShowEdiciondeempresa(true);
+              setShowAltaEvento(false);
+              setShowConsultaEvento(false);
+              setShowPantallaSalon(false);
+              setShowPantallaDirectorio(false);
+              setShowPublicidad(false);
+              setShowlicencia(false);
+              setShowGuia(false);
+              setShowSoporte(false);
+              toggleSidebar();
+            }}
+          >
+            <a
+              href="#"
+              className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+            >
+              <span className="flex items-center justify-center text-lg text-gray-400">
+                <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" />
+              </span>
+              {/* Edicion de empresas */}
+              <span className="ml-3"> {t("sidebar.ediciondeempresas")}</span>
+            </a>
+          </button>
+        </li>
+
+        <li className="my-px">
+          <button
+            onClick={() => {
+              setShowAdmin(false);
+              setShowUserAdmin(false);
+              setShowEdiciondeempresa(false);
               setShowAltaEvento(true);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
@@ -130,6 +163,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(true);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
@@ -165,7 +199,7 @@ function Sidebar({
         <li className="my-px">
           {/* Ajustes pantallas */}
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
-          {t("sidebar.screenSettings")}
+            {t("sidebar.screenSettings")}
           </span>
         </li>
 
@@ -174,8 +208,10 @@ function Sidebar({
             onClick={() => {
               setShowAdmin(false);
               setShowUserAdmin(false);
+
               setShowAltaEvento(false);
               setShowConsultaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowPantallaSalon(true);
               setShowPantallaDirectorio(false);
               setShowPublicidad(false);
@@ -213,6 +249,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(true);
@@ -251,6 +288,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
@@ -287,7 +325,7 @@ function Sidebar({
         <li className="my-px">
           {/* Mas información */}
           <span className="flex font-medium text-sm text-gray-300 px-4 my-4 uppercase">
-          {t("sidebar.moreInformation")}
+            {t("sidebar.moreInformation")}
           </span>
         </li>
         <li className="my-px">
@@ -296,6 +334,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
@@ -334,6 +373,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
@@ -372,6 +412,7 @@ function Sidebar({
               setShowAdmin(false);
               setShowUserAdmin(false);
               setShowAltaEvento(false);
+              setShowEdiciondeempresa(false);
               setShowConsultaEvento(false);
               setShowPantallaSalon(false);
               setShowPantallaDirectorio(false);
