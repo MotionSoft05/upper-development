@@ -89,33 +89,42 @@ function Sidebar({
         </li>
 
         <li className="my-px">
-          <button
-            onClick={() => {
-              setShowAdmin(false);
-              setShowUserAdmin(false);
-              setShowEdiciondeempresa(true);
-              setShowAltaEvento(false);
-              setShowConsultaEvento(false);
-              setShowPantallaSalon(false);
-              setShowPantallaDirectorio(false);
-              setShowPublicidad(false);
-              setShowlicencia(false);
-              setShowGuia(false);
-              setShowSoporte(false);
-              toggleSidebar();
-            }}
-          >
-            <a
-              href="#"
-              className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+          {[
+            "uppermex10@gmail.com",
+            "ulises.jacobo@hotmail.com",
+            "contacto@upperds.mx",
+          ].includes(userEmail) && (
+            <button
+              onClick={() => {
+                setShowAdmin(false);
+                setShowUserAdmin(false);
+                setShowEdiciondeempresa(true);
+                setShowAltaEvento(false);
+                setShowConsultaEvento(false);
+                setShowPantallaSalon(false);
+                setShowPantallaDirectorio(false);
+                setShowPublicidad(false);
+                setShowlicencia(false);
+                setShowGuia(false);
+                setShowSoporte(false);
+                toggleSidebar();
+              }}
             >
-              <span className="flex items-center justify-center text-lg text-gray-400">
-                <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" />
-              </span>
-              {/* Edicion de empresas */}
-              <span className="ml-3"> {t("sidebar.ediciondeempresas")}</span>
-            </a>
-          </button>
+              <a
+                href="#"
+                className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+              >
+                <span className="flex items-center justify-center text-lg text-gray-400">
+                  <img
+                    src="/img/dashboard-svgrepo-com.svg"
+                    className="p-1 h-8"
+                  />
+                </span>
+                {/* Edicion de empresas */}
+                <span className="ml-3"> {t("sidebar.ediciondeempresas")}</span>
+              </a>
+            </button>
+          )}
         </li>
 
         <li className="my-px">
