@@ -569,7 +569,7 @@
     "weatherInfoUnavailable": "Weather information unavailable",
     "fetchingOrParsingDataError": "Error fetching or parsing data:",
     "advertisementFetchError": "Error fetching advertisements:",
-    "noEventsOrAdvertisements": "No events or advertisements found. The page will refresh in {countdown} seconds.",
+    "noEventsOrAdvertisements": "No events or advertisements found. The page will refresh in {{countdown}} seconds.",
     "todaysEvents": "Today's Events",
     "loadingWeatherData": "Loading weather data...",
     "welcomeTitle": "Welcome",

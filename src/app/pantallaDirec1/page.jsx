@@ -530,7 +530,7 @@ function PantallaDirec1() {
             <p>
               {/* No se a encontrado ningún evento o publicidad. La pagina se
               reiniciara en {countdown} segundos */}
-              {t("pantalla.noEventsOrAdvertisements", { countdown })}
+              {t("pantallaDirec.noEventsOrAdvertisements", {countdown})}
             </p>
           </section>
         </>
