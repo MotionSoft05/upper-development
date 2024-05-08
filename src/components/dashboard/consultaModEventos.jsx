@@ -416,7 +416,7 @@ function ConsultaModEvento() {
                   className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
                 >
                   {/* FECHA/S */}
-                  {t("consultaModEventos.date")}
+                  {t("consultaModEventos.dates")}
                 </th>
                 <th
                   scope="col"
