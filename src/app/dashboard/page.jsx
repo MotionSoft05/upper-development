@@ -10,13 +10,13 @@ import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin";
 import UserAdmin from "@/components/dashboard/userAdmin";
+import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { usePathname } from "next/navigation";
-
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -33,12 +33,12 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 function DashBoard() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION;
-  console.log("🚀 ~ DashBoard ~ isProduction:", isProduction)
+  console.log("🚀 ~ DashBoard ~ isProduction:", isProduction);
 
   const [userEmail, setUserEmail] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showEdiciondeempresa, setShowEdiciondeempresa] = useState(false);
   const [showUserAdmin, setShowUserAdmin] = useState(true);
   const [showConsultaEvento, setShowConsultaEvento] = useState(false);
 
@@ -74,7 +74,7 @@ function DashBoard() {
         : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
     });
   };
-  
+
   return (
     // <!-- component -->
     <div className="flex flex-row min-h-screen  ">
@@ -82,6 +82,7 @@ function DashBoard() {
         <Sidebar
           userEmail={userEmail}
           setShowAdmin={setShowAdmin}
+          setShowEdiciondeempresa={setShowEdiciondeempresa}
           setShowUserAdmin={setShowUserAdmin}
           setShowAltaEvento={setShowAltaEvento}
           setShowConsultaEvento={setShowConsultaEvento}
@@ -100,7 +101,9 @@ function DashBoard() {
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Admin />}
+
           {showUserAdmin && <UserAdmin />}
+          {showEdiciondeempresa && <Ediciondeempresa />}
           {showAltaEvento && <AltaEventos />}
           {showConsultaEvento && <ConsultaModEvento />}
 
