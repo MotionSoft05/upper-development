@@ -206,41 +206,6 @@ function PantallasSalon() {
     cargarDatosPersonalizacion();
   }, []);
 
-  const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
-
-    const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ];
-
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
-
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
-  };
-
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
   };
