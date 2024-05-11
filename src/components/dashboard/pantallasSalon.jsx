@@ -47,10 +47,9 @@ const obtenerHora = () => {
 };
 
 function PantallasSalon() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
-  
-  const {t} = useTranslation()
+
+  const { t } = useTranslation();
   const [nombrePantallas, setNombrePantallas] = useState([]);
   const [ps, setPs] = useState(0);
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
@@ -331,7 +330,21 @@ function PantallasSalon() {
         templateColor: templateColor,
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
+        empresa: "",
       };
+
+      // Obtener el valor de la empresa del usuario autenticado
+      const usuariosRef = collection(db, "usuarios");
+      const usuariosQuery = query(
+        usuariosRef,
+        where("email", "==", authUser.email)
+      );
+      const usuariosSnapshot = await getDocs(usuariosQuery);
+
+      let empresa = "";
+      if (!usuariosSnapshot.empty) {
+        empresa = usuariosSnapshot.docs[0].data().empresa || "";
+      }
 
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
@@ -347,6 +360,7 @@ function PantallasSalon() {
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
+          empresa: empresa,
           timestamp: serverTimestamp(),
         });
       } else {
@@ -356,6 +370,7 @@ function PantallasSalon() {
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
+          empresa: empresa,
           timestamp: serverTimestamp(),
         });
       }
@@ -411,10 +426,7 @@ function PantallasSalon() {
       alert(t("screenSalon.customizationSavedSuccess"));
     } catch (error) {
       // "Error al guardar la información de personalización y URL del logo:",
-      console.error(
-        t("screenSalon.customizationSaveError"),
-        error
-      );
+      console.error(t("screenSalon.customizationSaveError"), error);
     }
   };
 
