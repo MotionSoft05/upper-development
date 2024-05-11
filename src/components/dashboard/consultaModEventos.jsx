@@ -112,10 +112,18 @@ function ConsultaModEvento() {
       ) {
         eventosRef = firebase.firestore().collection("eventos");
       } else if (user) {
+        // Obtener el nombre de la empresa del usuario actual
+        const usuarioData = await firebase
+          .firestore()
+          .collection("usuarios")
+          .doc(user.uid)
+          .get();
+        const empresaUsuario = usuarioData.data().empresa;
+
         eventosRef = firebase
           .firestore()
           .collection("eventos")
-          .where("userId", "==", user.uid);
+          .where("empresa", "==", empresaUsuario);
       }
 
       eventosRef.onSnapshot((snapshot) => {
