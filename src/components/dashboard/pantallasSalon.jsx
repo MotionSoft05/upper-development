@@ -170,10 +170,24 @@ function PantallasSalon() {
         const authUser = firebase.auth().currentUser;
 
         if (authUser) {
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosQuery = query(
+            usuariosRef,
+            where("email", "==", authUser.email)
+          );
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+
+          let empresa = ""; // Inicializa la variable empresa
+
+          if (!usuariosSnapshot.empty) {
+            empresa = usuariosSnapshot.docs[0].data().empresa || ""; // Obtiene el nombre de la empresa
+          }
+
+          // Ahora, busca el documento correspondiente en TemplateSalones utilizando el nombre de la empresa
           const templateSalonesRef = collection(db, "TemplateSalones");
           const templateSalonesQuery = query(
             templateSalonesRef,
-            where("userId", "==", authUser.uid)
+            where("empresa", "==", empresa)
           );
           const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -311,10 +325,11 @@ function PantallasSalon() {
         empresa = usuariosSnapshot.docs[0].data().empresa || "";
       }
 
+      // Buscar el documento correspondiente en TemplateSalones utilizando el nombre de la empresa
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
         templateSalonesRef,
-        where("userId", "==", authUser.uid)
+        where("empresa", "==", empresa)
       );
       const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -329,13 +344,13 @@ function PantallasSalon() {
           timestamp: serverTimestamp(),
         });
       } else {
+        // Si no hay documento existente para esta empresa, crea uno nuevo
         await addDoc(templateSalonesRef, {
-          userId: authUser.uid,
+          empresa: empresa,
           fontColor: fontColor,
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
-          empresa: empresa,
           timestamp: serverTimestamp(),
         });
       }
