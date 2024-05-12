@@ -36,9 +36,8 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
-  const {t} = useTranslation() // Traduccion con i18N
+  const { t } = useTranslation(); // Traduccion con i18N
   const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
     []
   );
@@ -51,6 +50,8 @@ function PantallasDirectorio() {
   const [currentTime, setCurrentTime] = useState(obtenerHora());
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedPublicidad, setSelectedPublicidad] = useState(null);
+  const [nombreEmpresa, setNombreEmpresa] = useState("");
+
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México" },
     { value: "Tijuana", label: "Tijuana" },
@@ -185,6 +186,9 @@ function PantallasDirectorio() {
 
             setNombrePantallasDirectorio(namesArray);
             setPd(numberOfScreens);
+
+            const empresa = user.empresa || "";
+            setNombreEmpresa(empresa);
 
             const unsubscribe = onSnapshot(usuarioRef, (doc) => {
               const data = doc.data();
@@ -403,6 +407,7 @@ function PantallasDirectorio() {
         ciudad: selectedCity.value,
         setPortrait: setPortrait, // Agrega setPortrait al objeto
         publicidad: selectedPublicidad,
+        empresa: nombreEmpresa,
       };
 
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
@@ -425,7 +430,7 @@ function PantallasDirectorio() {
           ciudad: selectedCity.value,
           setPortrait: setPortrait, // Agrega setPortrait al objeto
           publicidad: selectedPublicidad,
-
+          empresa: nombreEmpresa,
           timestamp: serverTimestamp(),
         });
       } else {
@@ -438,7 +443,7 @@ function PantallasDirectorio() {
           ciudad: selectedCity.value,
           setPortrait: setPortrait, // Agrega setPortrait al objeto
           publicidad: selectedPublicidad,
-
+          empresa: nombreEmpresa,
           timestamp: serverTimestamp(),
         });
       }
