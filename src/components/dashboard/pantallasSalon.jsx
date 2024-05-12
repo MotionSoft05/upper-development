@@ -325,6 +325,35 @@ function PantallasSalon() {
         empresa = usuariosSnapshot.docs[0].data().empresa || "";
       }
 
+      // Actualizar los nombres de pantalla para todos los usuarios que pertenecen a la misma empresa
+      const usuariosEmpresaQuery = query(
+        usuariosRef,
+        where("empresa", "==", empresa)
+      );
+      const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+
+      const updateNombrePantallasPromises = [];
+
+      usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
+        const usuarioRef = usuarioDoc.ref;
+        const usuarioData = usuarioDoc.data();
+
+        if (usuarioRef && usuarioData) {
+          const userId = usuarioData.userId;
+          const nombrePantallasObject = {};
+          nombrePantallas.forEach((nombre, index) => {
+            nombrePantallasObject[`nombrePantallas.${index}`] = nombre;
+          });
+          updateNombrePantallasPromises.push(
+            updateDoc(usuarioRef, nombrePantallasObject)
+          );
+        } else {
+          console.error("Documento de usuario no válido:", usuarioDoc.id);
+        }
+      });
+
+      await Promise.all(updateNombrePantallasPromises);
+
       // Buscar el documento correspondiente en TemplateSalones utilizando el nombre de la empresa
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
