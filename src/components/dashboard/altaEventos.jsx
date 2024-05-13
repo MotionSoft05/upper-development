@@ -90,7 +90,7 @@ function AltaEventos() {
               const publicidadRef = collection(db, "Publicidad");
               const publicidadQuery = query(
                 publicidadRef,
-                where("userId", "==", userId)
+                where("empresa", "==", userData.empresa)
               );
 
               getDocs(publicidadQuery).then((snapshot) => {
