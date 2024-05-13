@@ -26,8 +26,7 @@ const storage = firebase.storage();
 const db = firebase.firestore();
 
 function PublicidadDirec() {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
@@ -50,12 +49,18 @@ function PublicidadDirec() {
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
+  const [empresaUsuario, setEmpresaUsuario] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        await obtenerPublicidades(user, "directorio");
+        // Obtener datos del usuario
+        const usuarioDoc = await db.collection("usuarios").doc(user.uid).get();
+        const usuarioData = usuarioDoc.data();
+        const empresaUsuario = usuarioData.empresa;
+        setEmpresaUsuario(empresaUsuario); // Guardar el nombre de la empresa en el estado
+        await obtenerPublicidades(empresaUsuario, "directorio"); // Pasar la empresa del usuario a la función obtenerPublicidades
       } else {
         // El objeto user es nulo.
         console.warn(t("advertisement.salon.userNull"));
@@ -65,15 +70,14 @@ function PublicidadDirec() {
     return () => unsubscribe();
   }, []);
 
-  const obtenerPublicidades = async (currentUser, tipo) => {
+  const obtenerPublicidades = async (empresa, tipo) => {
     try {
       setIsLoading(true);
 
-      if (currentUser && currentUser.uid) {
-        const userUid = currentUser.uid;
+      if (empresa) {
         const publicidadesSnapshot = await db
           .collection("Publicidad")
-          .where("userId", "==", userUid)
+          .where("empresa", "==", empresa)
           .where("tipo", "==", tipo)
           .get();
 
@@ -158,7 +162,10 @@ function PublicidadDirec() {
       }
     } catch (error) {
       // Error al obtener publicidades:
-      console.error(t("advertisement.salon.errorFetchingAdvertisements"), error);
+      console.error(
+        t("advertisement.salon.errorFetchingAdvertisements"),
+        error
+      );
     } finally {
       setIsLoading(false);
     }
@@ -353,6 +360,11 @@ function PublicidadDirec() {
       let hasValidData = false;
       let newIds = [];
 
+      // Obtener los datos del usuario
+      const usuarioDoc = await db.collection("usuarios").doc(userUid).get();
+      const usuarioData = usuarioDoc.data();
+      const empresaUsuario = usuarioData.empresa;
+
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
 
@@ -380,7 +392,7 @@ function PublicidadDirec() {
               minutos,
               segundos,
               tipo: "directorio",
-              userId: userUid,
+              empresa: empresaUsuario,
               fechaDeSubida,
             });
 
@@ -428,8 +440,8 @@ function PublicidadDirec() {
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
       const confirmacion = window.confirm(
-          // "¿Estás seguro de que quieres eliminar esta publicidad?"
-          t("advertisement.salon.confirmDeleteAdvertisement")
+        // "¿Estás seguro de que quieres eliminar esta publicidad?"
+        t("advertisement.salon.confirmDeleteAdvertisement")
       );
       setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
@@ -489,7 +501,7 @@ function PublicidadDirec() {
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
                 {/* Seleccionar Imagen o Video */}
-                {t("advertisement.salon.selectMedia")} 
+                {t("advertisement.salon.selectMedia")}
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -528,7 +540,7 @@ function PublicidadDirec() {
             <div className="mt-4">
               <label className="text-gray-800">
                 {/* Tiempo de visualización: */}
-                {t("advertisement.salon.displayTime")} 
+                {t("advertisement.salon.displayTime")}
               </label>
               <div className="flex mt-2">
                 {["horas", "minutos", "segundos"].map((unit) => (
@@ -552,7 +564,7 @@ function PublicidadDirec() {
                     <span className="text-gray-600 ml-1">
                       {/* horas / minutos / segundos */}
                       {t(`advertisement.salon.${unit}`)}
-                      </span>
+                    </span>
                   </div>
                 ))}
               </div>

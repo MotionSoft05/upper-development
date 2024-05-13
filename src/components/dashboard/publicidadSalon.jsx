@@ -26,7 +26,7 @@ const storage = firebase.storage();
 const db = firebase.firestore();
 
 function PublicidadSalon() {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
@@ -49,12 +49,18 @@ function PublicidadSalon() {
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
+  const [empresaUsuario, setEmpresaUsuario] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        await obtenerPublicidades(user, "salon");
+        // Obtener datos del usuario
+        const usuarioDoc = await db.collection("usuarios").doc(user.uid).get();
+        const usuarioData = usuarioDoc.data();
+        const empresaUsuario = usuarioData.empresa;
+        setEmpresaUsuario(empresaUsuario); // Guardar el nombre de la empresa en el estado
+        await obtenerPublicidades(empresaUsuario, "salon"); // Pasar la empresa del usuario a la función obtenerPublicidades
       } else {
         // El objeto user es nulo.
         console.warn(t("advertisement.salon.userNull"));
@@ -64,15 +70,14 @@ function PublicidadSalon() {
     return () => unsubscribe();
   }, []);
 
-  const obtenerPublicidades = async (currentUser, tipo) => {
+  const obtenerPublicidades = async (empresa, tipo) => {
     try {
       setIsLoading(true);
 
-      if (currentUser && currentUser.uid) {
-        const userUid = currentUser.uid;
+      if (empresa) {
         const publicidadesSnapshot = await db
           .collection("Publicidad")
-          .where("userId", "==", userUid)
+          .where("empresa", "==", empresa)
           .where("tipo", "==", tipo)
           .get();
 
@@ -157,7 +162,10 @@ function PublicidadSalon() {
       }
     } catch (error) {
       // Error al obtener publicidades:
-      console.error(t("advertisement.salon.errorFetchingAdvertisements"), error);
+      console.error(
+        t("advertisement.salon.errorFetchingAdvertisements"),
+        error
+      );
     } finally {
       setIsLoading(false);
     }
@@ -352,6 +360,11 @@ function PublicidadSalon() {
       let hasValidData = false;
       let newIds = [];
 
+      // Obtener los datos del usuario
+      const usuarioDoc = await db.collection("usuarios").doc(userUid).get();
+      const usuarioData = usuarioDoc.data();
+      const empresaUsuario = usuarioData.empresa;
+
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
 
@@ -379,7 +392,7 @@ function PublicidadSalon() {
               minutos,
               segundos,
               tipo: "salon",
-              userId: userUid,
+              empresa: empresaUsuario,
               fechaDeSubida,
             });
 
@@ -483,12 +496,12 @@ function PublicidadSalon() {
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
               {/* Salón de Eventos */}
-               {`${t("advertisement.salon.title")}  ${index + 1}`}
+              {`${t("advertisement.salon.title")}  ${index + 1}`}
             </h3>
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
                 {/* Seleccionar Imagen o Video */}
-                {t("advertisement.salon.selectMedia")} 
+                {t("advertisement.salon.selectMedia")}
                 <input
                   type="file"
                   accept="image/*,video/*"
@@ -527,8 +540,8 @@ function PublicidadSalon() {
             <div className="mt-4">
               <label className="text-gray-800">
                 {/* Tiempo de visualización: */}
-                {t("advertisement.salon.displayTime")} 
-                </label>
+                {t("advertisement.salon.displayTime")}
+              </label>
               <div className="flex mt-2">
                 {["horas", "minutos", "segundos"].map((unit) => (
                   <div key={unit} className="flex items-center">
@@ -548,7 +561,9 @@ function PublicidadSalon() {
                       }
                       pattern="\d*"
                     />
-                    <span className="text-gray-600 ml-1">{t(`advertisement.salon.${unit}`)}</span>
+                    <span className="text-gray-600 ml-1">
+                      {t(`advertisement.salon.${unit}`)}
+                    </span>
                   </div>
                 ))}
               </div>
