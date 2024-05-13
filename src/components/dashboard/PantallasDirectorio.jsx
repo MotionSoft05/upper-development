@@ -211,38 +211,58 @@ function PantallasDirectorio() {
         const authUser = firebase.auth().currentUser;
 
         if (authUser) {
-          const templateDirectoriosRef = collection(db, "TemplateDirectorios");
-          const templateDirectoriosQuery = query(
-            templateDirectoriosRef,
-            where("userId", "==", authUser.uid)
-          );
-          const templateDirectoriosSnapshot = await getDocs(
-            templateDirectoriosQuery
-          );
+          const usuarioRef = doc(db, "usuarios", authUser.uid);
+          const usuarioSnapshot = await getDoc(usuarioRef);
 
-          if (!templateDirectoriosSnapshot.empty) {
-            const templateDirectoriosDoc =
-              templateDirectoriosSnapshot.docs[0].data();
-            const {
-              fontColor,
-              fontStyle,
-              logo,
-              templateColor,
-              ciudad,
-              setPortrait, // Asegúrate de que esta propiedad se llame 'setPortrait' en la base de datos
-              publicidad, // Asegúrate de que esta propiedad se llame 'publicidad' en la base de datos
-            } = templateDirectoriosDoc;
+          if (usuarioSnapshot.exists()) {
+            const user = usuarioSnapshot.data();
+            const empresa = user.empresa || "";
 
-            setFontColor(fontColor || "#000000");
-            setSelectedFontStyle({
-              value: fontStyle || "Arial",
-              label: fontStyle || "Arial",
-            });
-            setSelectedLogo(logo || null);
-            setTemplateColor(templateColor || "#D1D5DB");
-            setSelectedCity({ value: ciudad, label: ciudad });
-            setSetPortrait(setPortrait || false);
-            setSelectedPublicidad(publicidad || null);
+            console.log("Empresa:", empresa); // Console log de la empresa
+
+            const templateDirectoriosRef = collection(
+              db,
+              "TemplateDirectorios"
+            );
+            const templateDirectoriosQuery = query(
+              templateDirectoriosRef,
+              where("empresa", "==", empresa) // Buscar por empresa en lugar de userId
+            );
+            const templateDirectoriosSnapshot = await getDocs(
+              templateDirectoriosQuery
+            );
+
+            if (!templateDirectoriosSnapshot.empty) {
+              console.log(
+                "Se encontró información en TemplateDirectorios por empresa."
+              );
+              const templateDirectoriosDoc =
+                templateDirectoriosSnapshot.docs[0].data();
+              const {
+                fontColor,
+                fontStyle,
+                logo,
+                templateColor,
+                ciudad,
+                setPortrait,
+                publicidad,
+              } = templateDirectoriosDoc;
+
+              setFontColor(fontColor || "#000000");
+              setSelectedFontStyle({
+                value: fontStyle || "Arial",
+                label: fontStyle || "Arial",
+              });
+              setSelectedLogo(logo || null);
+              setTemplateColor(templateColor || "#D1D5DB");
+              setSelectedCity({ value: ciudad, label: ciudad });
+              setSetPortrait(setPortrait || false);
+              setSelectedPublicidad(publicidad || null);
+            } else {
+              console.log(
+                "No se encontró información en TemplateDirectorios por empresa."
+              );
+            }
           }
         }
       } catch (error) {
@@ -413,7 +433,7 @@ function PantallasDirectorio() {
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
       const templateDirectoriosQuery = query(
         templateDirectoriosRef,
-        where("userId", "==", authUser.uid)
+        where("empresa", "==", nombreEmpresa)
       );
       const templateDirectoriosSnapshot = await getDocs(
         templateDirectoriosQuery
@@ -435,7 +455,6 @@ function PantallasDirectorio() {
         });
       } else {
         await addDoc(templateDirectoriosRef, {
-          userId: authUser.uid,
           fontColor: fontColor,
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
@@ -460,10 +479,27 @@ function PantallasDirectorio() {
       });
       await updateDoc(usuarioRef, nombresPantallasObject);
 
+      // Actualizar nombres de pantalla para todos los usuarios con la misma empresa
+      const usuariosEmpresaQuery = query(
+        collection(db, "usuarios"),
+        where("empresa", "==", nombreEmpresa)
+      );
+      const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+      const updateUsuariosPromises = [];
+
+      usuariosEmpresaSnapshot.forEach(async (usuarioDoc) => {
+        const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
+        updateUsuariosPromises.push(
+          updateDoc(usuarioEmpresaRef, nombresPantallasObject)
+        );
+      });
+
+      await Promise.all(updateUsuariosPromises);
+
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(
         eventosRef,
-        where("userId", "==", authUser.uid)
+        where("empresa", "==", nombreEmpresa)
       );
       const eventosSnapshot = await getDocs(eventosQuery);
 
