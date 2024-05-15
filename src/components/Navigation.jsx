@@ -148,9 +148,10 @@ function Navigation() {
               />
             </Link>
           </div>
+          {/* menu y register Desktop */}
           <div className="hidden md:block">
             <div className="ml-auto flex items-baseline space-x-4">
-              {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
+              {/* Se renderiza menu solo en el inicio de la pagina */}
               {(pathname === "/" || pathname === "/upper.mx") && (
                 <ul className="flex font-bold rounded-lg flex-row space-x-8">
                   <li>
@@ -311,6 +312,7 @@ function Navigation() {
               )}
             </div>
           </div>
+          {/* Logo Mobile */}
           <div className="  md:hidden flex-shrink-0  items-center ">
             <Link href="/">
               <img
@@ -320,7 +322,11 @@ function Navigation() {
               />
             </Link>
           </div>
-          <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
+          {/* login, dashboard y register Mobile */}
+          <div className=" flex justify-between items-center lg:hidden md:hidden top-16 w-56 text-right z-10">
+            <div className="ml-4">
+              <LanguageSwitcher/>
+            </div>
             <div className="">
               {(pathname === "/" || pathname === "/upperds.mx") && (
                 <Menu as="div" className=" ">
