@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
   const { t } = useTranslation();
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem("language") || "en";
+    const storedLanguage = localStorage.getItem("language") || "es";
     i18n.changeLanguage(storedLanguage);
   }, []);
 
