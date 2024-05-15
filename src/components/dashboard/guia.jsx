@@ -7,6 +7,8 @@ import {
   faTimes,
   faEye,
   faFile,
+  faDownload,
+  faFileZipper,
 } from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/storage";
@@ -26,8 +28,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 
 const Guia = () => {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [pdfFile, setPdfFile] = useState(null);
   const [fileUploaded, setFileUploaded] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -137,18 +138,18 @@ const Guia = () => {
 
   //Función que renderiza el icono dependiendo la extensión del archivo
   const getExtensionIcon = (fileName) => {
-    const extension = fileName.split('.').pop().toLowerCase();
+    const extension = fileName.split(".").pop().toLowerCase();
     switch (extension) {
-      case 'pdf':
-        return <FontAwesomeIcon icon={faFilePdf} size="3x" color="red" />;
-      case 'zip':
-      case 'rar':
-        return <FontAwesomeIcon icon={faBook} size="3x" color="red" />;
+      case "pdf":
+        return <FontAwesomeIcon icon={faFilePdf} size="2x" color="red" />;
+      case "zip":
+      case "rar":
+        return <FontAwesomeIcon icon={faFileZipper} size="2x" color="red" />;
       default:
-        return <FontAwesomeIcon icon={faFile} size="3x" color="red" />;
+        return <FontAwesomeIcon icon={faFile} size="2x" color="red" />;
     }
   };
-  
+
   return (
     <section className="px-5 md:px-32">
       <div>
@@ -181,36 +182,44 @@ const Guia = () => {
 
           <div className="mt-4">
             {uploadedFiles.map((file, index) => (
-              <div key={index} className="flex items-center space-x-4 mb-3">
-                {/* Funcion "getExtensionIcon" para mostar icono segun el tipo de archivo */}
-                {getExtensionIcon(file.name)}
-                <span>{file.name}</span>
-                {user &&
-                (user.email === "uppermex10@gmail.com" ||
-                  user.email === "ulises.jacobo@hotmail.com" ||
-                  user.email === "contacto@upperds.mx") ? (
-                  <>
-                    <button
-                      onClick={() => window.open(file.url, "_blank")}
-                      className="text-blue-600 ml-2 cursor-pointer"
-                    >
-                      <FontAwesomeIcon icon={faEye} size="lg" />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(file.name)}
-                      className="text-red-600 ml-2 cursor-pointer"
-                    >
-                      <FontAwesomeIcon icon={faTimes} size="lg" />
-                    </button>
-                  </>
-                ) : (
+              <div
+                key={index}
+                className="flex justify-between items-center space-x-4 mb-3 p-2 rounded-md bg-slate-100"
+              >
+                {/* Icono y Nombre del archivo */}
+                <div>
+                  {/* Funcion "getExtensionIcon" para mostar icono segun el tipo de archivo */}
+                  {getExtensionIcon(file.name)}
+                  <span className="ml-2">{file.name}</span>
+                </div>
+                {/* Boton para ver o descargar */}
+                <div>
                   <button
                     onClick={() => window.open(file.url, "_blank")}
                     className="text-blue-600 ml-2 cursor-pointer"
                   >
-                    <FontAwesomeIcon icon={faEye} size="lg" />
+                    {/* Si es RAR, se muestra el icono de descarga, sino, se muestra el icono de ver */}
+                    <FontAwesomeIcon
+                      icon={file.name.slice(-4) === ".rar" ? faDownload : faEye}
+                      size="lg"
+                    />
                   </button>
-                )}
+
+                  {/* Si es Admin, se muestra el boton para eliminar archivos*/}
+                  {user &&
+                    (user.email === "uppermex10@gmail.com" ||
+                      user.email === "ulises.jacobo@hotmail.com" ||
+                      user.email === "contacto@upperds.mx") && (
+                      <>
+                        <button
+                          onClick={() => handleDelete(file.name)}
+                          className="text-red-600 ml-2 cursor-pointer"
+                        >
+                          <FontAwesomeIcon icon={faTimes} size="lg" />
+                        </button>
+                      </>
+                    )}
+                </div>
               </div>
             ))}
           </div>
