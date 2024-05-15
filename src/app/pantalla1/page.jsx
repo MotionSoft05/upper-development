@@ -33,8 +33,7 @@ const obtenerHora = () => {
 };
 
 function Pantalla1() {
-
-  const {t,ready} = useTranslation()
+  const { t, ready } = useTranslation();
   const pathname = usePathname();
 
   const [user, setUser] = useState(null);
@@ -51,10 +50,10 @@ function Pantalla1() {
   const swiperRef = useRef(null);
 
   const obtenerFecha = () => {
-    const storedLanguage = localStorage.getItem("language") // "es" o "en"
+    const storedLanguage = localStorage.getItem("language"); // "es" o "en"
 
-    const diasSemana = t("pantalla.weekdays",{ returnObjects: true }) // { returnObjects: true } trae el array completo de las traducciones
-    const meses = t("pantalla.months",{ returnObjects: true }) 
+    const diasSemana = t("pantalla.weekdays", { returnObjects: true }); // { returnObjects: true } trae el array completo de las traducciones
+    const meses = t("pantalla.months", { returnObjects: true });
 
     if (!ready) return "loading translations...";
 
@@ -64,9 +63,11 @@ function Pantalla1() {
     const mes = meses[now.getMonth()];
     const año = now.getFullYear();
 
-    return storedLanguage === "es"? `${diaSemana} ${dia} DE ${mes} ${año}` : `${diaSemana}, ${mes} ${dia}, ${año}`;
+    return storedLanguage === "es"
+      ? `${diaSemana} ${dia} DE ${mes} ${año}`
+      : `${diaSemana}, ${mes} ${dia}, ${año}`;
   };
-  
+
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
@@ -109,44 +110,44 @@ function Pantalla1() {
     return () => unsubscribe();
   }, []);
   // Publicidades-------------------------------------------
-  const pantalla = "salon";
-  useEffect(() => {
-    const fetchPublicidades = () => {
-      if (user && firestore) {
-        const publicidadesRef = collection(firestore, "Publicidad");
-        const publicidadesQuery = query(
-          publicidadesRef,
-          where("userId", "==", user.uid)
-        );
 
-        getDocs(publicidadesQuery)
-          .then((querySnapshot) => {
-            const publicidades = [];
-            querySnapshot.forEach((doc) => {
-              const publicidad = { id: doc.id, ...doc.data() };
-              // Comparar el tipo de la publicidad con la pantalla deseada
-              if (publicidad.tipo === pantalla) {
-                publicidades.push(publicidad);
-              }
-            });
+  // useEffect(() => {
+  //   const fetchPublicidades = () => {
+  //     if (user && firestore) {
+  //       const publicidadesRef = collection(firestore, "Publicidad");
+  //       const publicidadesQuery = query(
+  //         publicidadesRef,
+  //         where("userId", "==", user.uid)
+  //       );
 
-            setPublicidadesUsuario(publicidades);
-          })
-          .catch((error) => {
-            // "Error al obtener las publicidades:"
-            console.error(t("pantalla.error.advertisements"), error);
-          });
-      }
-    };
+  //       getDocs(publicidadesQuery)
+  //         .then((querySnapshot) => {
+  //           const publicidades = [];
+  //           querySnapshot.forEach((doc) => {
+  //             const publicidad = { id: doc.id, ...doc.data() };
+  //             // Comparar el tipo de la publicidad con la pantalla deseada
+  //             if (publicidad.tipo === pantalla) {
+  //               publicidades.push(publicidad);
+  //             }
+  //           });
 
-    const interval = setInterval(() => {
-      fetchPublicidades();
-    }, 120000);
+  //           setPublicidadesUsuario(publicidades);
+  //         })
+  //         .catch((error) => {
+  //           // "Error al obtener las publicidades:"
+  //           console.error(t("pantalla.error.advertisements"), error);
+  //         });
+  //     }
+  //   };
 
-    fetchPublicidades(); // Llamar inicialmente
+  //   const interval = setInterval(() => {
+  //     fetchPublicidades();
+  //   }, 120000);
 
-    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  }, [user, firestore, pantalla]);
+  //   fetchPublicidades(); // Llamar inicialmente
+
+  //   return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+  // }, [user, firestore, pantalla]);
   // Eventos------------------------------------------------
   useEffect(() => {
     if (user && firestore) {
@@ -156,6 +157,7 @@ function Pantalla1() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
+            const userCompany = userData.empresa;
             const nombrePantallasUsuario = userData.nombrePantallas || {};
             const pantallasNumeradas = {};
 
@@ -166,18 +168,17 @@ function Pantalla1() {
             const eventosRef = collection(firestore, "eventos");
             const eventosQuery = query(
               eventosRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
-            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
+
             let dispositivoCoincidente = null;
 
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
-              console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
 
               const pantallasAsignadas = devicesEvento.reduce(
                 (pantallas, device) => {
@@ -196,17 +197,10 @@ function Pantalla1() {
                 const dispositivosCoincidentes = pantallasAsignadas.filter(
                   (pantalla) => pantalla.posicion === posicionActual
                 );
-                console.log(
-                  "🚀 ~ querySnapshot.forEach ~ dispositivosCoincidentes:",
-                  dispositivosCoincidentes
-                );
 
                 if (dispositivosCoincidentes.length > 0) {
                   dispositivoCoincidente = dispositivosCoincidentes[0].device;
-                  console.log(
-                    "🚀 ~ querySnapshot.forEach ~ dispositivoCoincidente:",
-                    dispositivoCoincidente
-                  );
+
                   setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
@@ -236,23 +230,19 @@ function Pantalla1() {
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
-              console.log("evento", evento);
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ horaActualEnRango:",
-                horaActualEnRango
-              );
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
-                fechaActualEnRango
-              );
 
-              return fechaActualEnRango && horaActualEnRango;
+              // Filtrar eventos por empresa
+              const empresaCoincidente = evento.empresa === userCompany;
+
+              return (
+                fechaActualEnRango && horaActualEnRango && empresaCoincidente
+              );
             });
-
+            //  Sección template
             const templateRef = collection(firestore, "TemplateSalones");
             const templateQuery = query(
               templateRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
             const templateSnapshot = await getDocs(templateQuery);
 
@@ -260,7 +250,9 @@ function Pantalla1() {
               const templateData = [];
               templateSnapshot.forEach((doc) => {
                 const template = { id: doc.id, ...doc.data() };
+
                 templateData.push(template);
+
                 setSelectedCity({
                   value: template.ciudad,
                   label: template.ciudad,
@@ -273,12 +265,46 @@ function Pantalla1() {
                 t("pantalla.error.templateDirectoryNotFound")
               );
             }
+            //  Sección template
+            //  Sección publicidad
+            const pantalla = "salon";
+            const publicidadesRef = collection(firestore, "Publicidad");
+            const publicidadesQuery = query(
+              publicidadesRef,
+              where("empresa", "==", userCompany)
+            );
+            const publicidadesSnapshot = await getDocs(publicidadesQuery);
+            console.log(
+              "🚀 ~ obtenerUsuario ~ publicidadesSnapshot:",
+              publicidadesSnapshot
+            );
+
+            if (!publicidadesSnapshot.empty) {
+              const publicidades = [];
+              publicidadesSnapshot.forEach((doc) => {
+                const publicidad = { id: doc.id, ...doc.data() };
+                // Comparar el tipo de la publicidad con la pantalla deseada
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ publicidad:",
+                  publicidad
+                );
+
+                if (publicidad.tipo === pantalla) {
+                  publicidades.push(publicidad);
+                }
+              });
+
+              setPublicidadesUsuario(publicidades);
+            } else {
+              console.log(
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantalla.error.publicidadesDirectoryNotFound")
+              );
+            }
+            //  Sección publicidad
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
-            console.log(
-              "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
-              eventosEnCursoEffect
-            );
+
             // console.log(
             //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
             //   eventosEnCursoEffect
@@ -289,6 +315,7 @@ function Pantalla1() {
             // console.log("No se encontraron datos para este usuario.");
             console.log(t("pantalla.error.noDataFound"));
           }
+          console.log("🚀 ~ obtenerUsuario ~ Seccion:", Seccion);
         } catch (error) {
           // console.error("Error al obtener datos del usuario:", error);
           console.error(t("pantalla.error.userDataFetchError"), error);
@@ -385,7 +412,7 @@ function Pantalla1() {
   }, [currentMediaIndex, publicidadesUsuario]);
 
   // Iniciar cuenta regresiva
-  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
+  const [countdown, setCountdown] = useState(60); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
 
@@ -416,7 +443,7 @@ function Pantalla1() {
             <p>
               {/* No se a encontrado ningún evento o publicidad. La pagina se
               reiniciara en {countdown} segundos */}
-              {t("pantalla.noEventsOrAdvertisements", {countdown})}
+              {t("pantalla.noEventsOrAdvertisements", { countdown })}
             </p>
           </section>
         </>
@@ -428,7 +455,7 @@ function Pantalla1() {
 
     return (
       <>
-        <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+        <section className="relative ">
           <div className="slider-container">
             <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
               {isVideo ? (
