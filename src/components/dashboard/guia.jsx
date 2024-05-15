@@ -184,7 +184,7 @@ const Guia = () => {
             {uploadedFiles.map((file, index) => (
               <div
                 key={index}
-                className="flex justify-between items-center space-x-4 mb-3 p-2 rounded-md bg-slate-100"
+                className="flex justify-between items-center max-w-2xl space-x-4 mb-3 p-2 rounded-md bg-slate-100"
               >
                 {/* Icono y Nombre del archivo */}
                 <div>
