@@ -16,6 +16,8 @@ import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { onSnapshot, doc } from "firebase/firestore";
+
 import { usePathname } from "next/navigation";
 
 const firebaseConfig = {
@@ -51,15 +53,54 @@ function DashBoard() {
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
+  const [userPermisos, setUserPermisos] = useState([]);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
-      setShowUserAdmin(true); // Muestra ConsultaModEvento por defecto
+      if (user) {
+        setUserEmail(user.email);
+      } else {
+        setUserEmail(null);
+      }
     });
 
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (userEmail) {
+      const unsubscribe = onSnapshot(doc(db, "usuarios", userEmail), (doc) => {
+        if (doc.exists()) {
+          const userData = doc.data();
+          const userPermisos = userData.permisos;
+          setUserPermisos(userPermisos);
+
+          setShowAltaEvento(userPermisos.includes(1));
+          setShowConsultaEvento(userPermisos.includes(1));
+          setShowPantallaSalon(userPermisos.includes(2));
+          setShowPantallaDirectorio(userPermisos.includes(2));
+          setShowPublicidad(userPermisos.includes(2));
+          setShowlicencia(userPermisos.includes(3));
+          setShowGuia(userPermisos.includes(3));
+          setShowSoporte(userPermisos.includes(3));
+
+          // Verificar si el usuario tiene permisos de admin o edición de empresa
+          const allowedEmails = [
+            "uppermex10@gmail.com",
+            "ulises.jacobo@hotmail.com",
+            "contacto@upperds.mx",
+          ];
+
+          if (allowedEmails.includes(userEmail)) {
+            setShowAdmin(true);
+            setShowEdiciondeempresa(true);
+          }
+        }
+      });
+
+      return () => unsubscribe();
+    }
+  }, [userEmail]);
 
   const [sidebarClasses, setSidebarClasses] = useState(
     "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 "
@@ -81,6 +122,7 @@ function DashBoard() {
       <aside className={sidebarClasses}>
         <Sidebar
           userEmail={userEmail}
+          userPermisos={userPermisos}
           setShowAdmin={setShowAdmin}
           setShowEdiciondeempresa={setShowEdiciondeempresa}
           setShowUserAdmin={setShowUserAdmin}
