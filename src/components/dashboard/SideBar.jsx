@@ -44,11 +44,6 @@ function Sidebar(props) {
       return "flex flex-row items-center h-10 px-3 rounded-e-xl transition duration-300 text-gray-300 hover:bg-stone-200 hover:text-gray-700";
     }
   };
-  {
-    `flex items-center justify-center transition duration-300 ${
-      props.showAdmin ? "text-gray-700" : "text-gray-400"
-    } text-lg p-1`;
-  }
 
   const efectLogo = (prop) => {
     if (prop) {
