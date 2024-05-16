@@ -213,7 +213,7 @@ const Guia = () => {
                       <>
                         <button
                           onClick={() => handleDelete(file.name)}
-                          className="text-red-600 ml-2 cursor-pointer"
+                          className="text-red-600 ml-4 cursor-pointer"
                         >
                           <FontAwesomeIcon icon={faTimes} size="lg" />
                         </button>

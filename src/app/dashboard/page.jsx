@@ -66,7 +66,7 @@ function DashBoard() {
   );
 
   const toggleSidebar = () => {
-    // Cambia las clases del sidebar al hacer clic en el botón
+    // Cambia las clases del sidebar al hacer clic en el botón para ocultar o mostrar la barra lateral
     setSidebarClasses((prevClasses) => {
       // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
       return prevClasses.includes("-translate-x-full")
@@ -77,7 +77,7 @@ function DashBoard() {
 
   return (
     // <!-- component -->
-    <div className="flex flex-row min-h-screen  ">
+    <div className="flex flex-row min-h-screen ">
       <aside className={sidebarClasses}>
         <Sidebar
           userEmail={userEmail}
@@ -120,6 +120,7 @@ function DashBoard() {
           {showSoporte && <Soporte />}
         </div>
       </main>
+      {/* boton para abrir el sidebar en Mobile */}
       <button
         className="fixed bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-3xl shadow md:hidden"
         onClick={toggleSidebar}
