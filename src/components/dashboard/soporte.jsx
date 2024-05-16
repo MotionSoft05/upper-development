@@ -60,9 +60,9 @@ function Soporte() {
   }
 
   return (
-    <section className="px-5 md:px-32">
+    <section className="px-5 md:px-12">
       <div className="p-5">
-        <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
+        <h1 className="mb-4 px-6 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
           {/* CONTACTO SOPORTE */}
           {t("support.contactTitle")}
         </h1>

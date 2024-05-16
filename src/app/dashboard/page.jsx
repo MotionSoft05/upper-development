@@ -66,7 +66,7 @@ function DashBoard() {
   );
 
   const toggleSidebar = () => {
-    // Cambia las clases del sidebar al hacer clic en el botón para ocultar o mostrar la barra lateral
+    // Cambia las clases del sidebar al hacer clic en el botón para ocultar o mostrar la barra
     setSidebarClasses((prevClasses) => {
       // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
       return prevClasses.includes("-translate-x-full")
@@ -82,16 +82,27 @@ function DashBoard() {
         <Sidebar
           userEmail={userEmail}
           setShowAdmin={setShowAdmin}
+          showAdmin={showAdmin}
           setShowEdiciondeempresa={setShowEdiciondeempresa}
+          showEdiciondeempresa={showEdiciondeempresa}
           setShowUserAdmin={setShowUserAdmin}
+          showUserAdmin={showUserAdmin}
           setShowAltaEvento={setShowAltaEvento}
+          showAltaEvento={showAltaEvento}
           setShowConsultaEvento={setShowConsultaEvento}
+          showConsultaEvento={showConsultaEvento}
           setShowPantallaSalon={setShowPantallaSalon}
+          showPantallaSalon={showPantallaSalon}
           setShowPantallaDirectorio={setShowPantallaDirectorio}
+          showPantallaDirectorio={showPantallaDirectorio}
           setShowPublicidad={setShowPublicidad}
+          showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
+          showlicencia={showlicencia}
           setShowGuia={setShowGuia}
+          showGuia={showGuia}
           setShowSoporte={setShowSoporte}
+          showSoporte={showSoporte}
           toggleSidebar={toggleSidebar}
         />
       </aside>
@@ -108,7 +119,7 @@ function DashBoard() {
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
 
-          {showAltaEvento && <AltaEventos />}
+          {showAltaEvento && <AltaEventos setShowAltaEvento={setShowAltaEvento}/>}
           {showConsultaEvento && <ConsultaModEvento />}
 
           {showPantallaSalon && <PantallasSalon />}
