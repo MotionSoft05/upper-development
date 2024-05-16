@@ -119,7 +119,7 @@ function DashBoard() {
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
 
-          {showAltaEvento && <AltaEventos setShowAltaEvento={setShowAltaEvento}/>}
+          {showAltaEvento && <AltaEventos setShowAltaEvento={setShowAltaEvento} setShowUserAdmin={setShowUserAdmin}/>}
           {showConsultaEvento && <ConsultaModEvento />}
 
           {showPantallaSalon && <PantallasSalon />}

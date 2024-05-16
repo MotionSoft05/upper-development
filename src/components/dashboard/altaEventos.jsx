@@ -37,7 +37,7 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-function AltaEventos({setShowAltaEvento}) {
+function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -85,6 +85,7 @@ function AltaEventos({setShowAltaEvento}) {
               }).then(() => {
                 // window.location.reload();
                 setShowAltaEvento(false);
+                setShowUserAdmin(true)
               });
             } else {
               // Verificar si hay publicidad para el usuario
@@ -123,6 +124,7 @@ function AltaEventos({setShowAltaEvento}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
+                    setShowUserAdmin(true)
                   });
                 } else if (!tienePublicidadSalon && userData.ps >= 1) {
                   // Si no tiene publicidad en salones y ps es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
@@ -135,6 +137,7 @@ function AltaEventos({setShowAltaEvento}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
+                    setShowUserAdmin(true)
                   });
                 } else if (!tienePublicidadDirectorio && userData.pd >= 1) {
                   // Si no tiene publicidad en directorio y pd es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
@@ -147,6 +150,7 @@ function AltaEventos({setShowAltaEvento}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
+                    setShowUserAdmin(true)
                   });
                 }
               });
