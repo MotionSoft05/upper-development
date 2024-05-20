@@ -61,6 +61,41 @@ function PantallasSalon() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [selectedEventImageUrl, setSelectedEventImageUrl] = useState(null);
+  const [empresas, setEmpresas] = useState([]);
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
+  const [configuracionTemplate, setConfiguracionTemplate] = useState(null);
+
+  useEffect(() => {
+    const obtenerEmpresas = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+        const usuariosRef = firebase.firestore().collection("usuarios");
+        const usuariosSnapshot = await usuariosRef.get();
+
+        const empresasArray = [];
+        usuariosSnapshot.forEach((doc) => {
+          const empresa = doc.data().empresa;
+          if (empresa && !empresasArray.includes(empresa)) {
+            empresasArray.push(empresa);
+          }
+        });
+
+        setEmpresas(empresasArray);
+      } catch (error) {
+        console.error("Error al obtener empresas:", error);
+      }
+    };
+
+    obtenerEmpresas();
+  }, []);
+
+  const usuarioAutorizado =
+    firebase.auth().currentUser &&
+    [
+      "uppermex10@gmail.com",
+      "ulises.jacobo@hotmail.com",
+      "contacto@upperds.mx",
+    ].includes(firebase.auth().currentUser.email);
 
   useEffect(() => {
     if (selectedEvent && selectedEvent.imagenUrl) {
@@ -132,10 +167,22 @@ function PantallasSalon() {
 
         if (authUser) {
           const usuariosRef = collection(db, "usuarios");
-          const usuariosQuery = query(
-            usuariosRef,
-            where("email", "==", authUser.email)
-          );
+          let usuariosQuery;
+
+          // Cambio aquí: Si hay una empresa seleccionada, buscar usuarios con esa empresa
+          if (empresaSeleccionada) {
+            usuariosQuery = query(
+              usuariosRef,
+              where("empresa", "==", empresaSeleccionada)
+            );
+          } else {
+            // Si no hay una empresa seleccionada, buscar usuarios por correo electrónico
+            usuariosQuery = query(
+              usuariosRef,
+              where("email", "==", authUser.email)
+            );
+          }
+
           const usuariosSnapshot = await getDocs(usuariosQuery);
 
           if (!usuariosSnapshot.empty) {
@@ -162,7 +209,7 @@ function PantallasSalon() {
     };
 
     fetchUserData();
-  }, []);
+  }, [empresaSeleccionada]); // Ahora, el useEffect se ejecutará nuevamente cuando la empresa seleccionada cambie
 
   useEffect(() => {
     const cargarDatosPersonalizacion = async () => {
@@ -183,33 +230,69 @@ function PantallasSalon() {
             empresa = usuariosSnapshot.docs[0].data().empresa || ""; // Obtiene el nombre de la empresa
           }
 
-          // Ahora, busca el documento correspondiente en TemplateSalones utilizando el nombre de la empresa
-          const templateSalonesRef = collection(db, "TemplateSalones");
-          const templateSalonesQuery = query(
-            templateSalonesRef,
-            where("empresa", "==", empresa)
-          );
-          const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
-
-          if (!templateSalonesSnapshot.empty) {
-            const templateSalonesDocData =
-              templateSalonesSnapshot.docs[0].data();
-
-            // Establecer datos de personalización en el estado
-            setFontColor(templateSalonesDocData.fontColor || "#000000");
-            setTemplateColor(templateSalonesDocData.templateColor || "#D1D5DB");
-
-            // Manejar la lógica para establecer la fuente, si es necesario
-            // Puedes modificar esto según tus necesidades específicas
-            const selectedFontStyleOption = fontStyleOptions.find(
-              (option) => option.value === templateSalonesDocData.fontStyle
+          // Si no hay una empresa seleccionada, cargar los datos de personalización del usuario actual
+          if (!empresaSeleccionada) {
+            // Ahora, busca el documento correspondiente en TemplateSalones utilizando el nombre de la empresa
+            const templateSalonesRef = collection(db, "TemplateSalones");
+            const templateSalonesQuery = query(
+              templateSalonesRef,
+              where("empresa", "==", empresa)
             );
-            setSelectedFontStyle(
-              selectedFontStyleOption || fontStyleOptions[0]
-            );
+            const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
-            // Establecer el logo
-            setSelectedLogo(templateSalonesDocData.logo || null);
+            if (!templateSalonesSnapshot.empty) {
+              const templateSalonesDocData =
+                templateSalonesSnapshot.docs[0].data();
+
+              // Establecer datos de personalización en el estado
+              setFontColor(templateSalonesDocData.fontColor || "#000000");
+              setTemplateColor(
+                templateSalonesDocData.templateColor || "#D1D5DB"
+              );
+
+              // Manejar la lógica para establecer la fuente, si es necesario
+              // Puedes modificar esto según tus necesidades específicas
+              const selectedFontStyleOption = fontStyleOptions.find(
+                (option) => option.value === templateSalonesDocData.fontStyle
+              );
+              setSelectedFontStyle(
+                selectedFontStyleOption || fontStyleOptions[0]
+              );
+
+              // Establecer el logo
+              setSelectedLogo(templateSalonesDocData.logo || null);
+            }
+          } else {
+            // Si hay una empresa seleccionada, cargar los datos de personalización para esa empresa específica
+            const templateSalonesRef = collection(db, "TemplateSalones");
+            const templateSalonesQuery = query(
+              templateSalonesRef,
+              where("empresa", "==", empresaSeleccionada)
+            );
+            const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
+
+            if (!templateSalonesSnapshot.empty) {
+              const templateSalonesDocData =
+                templateSalonesSnapshot.docs[0].data();
+
+              // Establecer datos de personalización en el estado
+              setFontColor(templateSalonesDocData.fontColor || "#000000");
+              setTemplateColor(
+                templateSalonesDocData.templateColor || "#D1D5DB"
+              );
+
+              // Manejar la lógica para establecer la fuente, si es necesario
+              // Puedes modificar esto según tus necesidades específicas
+              const selectedFontStyleOption = fontStyleOptions.find(
+                (option) => option.value === templateSalonesDocData.fontStyle
+              );
+              setSelectedFontStyle(
+                selectedFontStyleOption || fontStyleOptions[0]
+              );
+
+              // Establecer el logo
+              setSelectedLogo(templateSalonesDocData.logo || null);
+            }
           }
         }
       } catch (error) {
@@ -218,7 +301,7 @@ function PantallasSalon() {
     };
 
     cargarDatosPersonalizacion();
-  }, []);
+  }, [empresaSeleccionada]);
 
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
@@ -312,23 +395,31 @@ function PantallasSalon() {
         empresa: "",
       };
 
-      // Obtener el valor de la empresa del usuario autenticado
-      const usuariosRef = collection(db, "usuarios");
-      const usuariosQuery = query(
-        usuariosRef,
-        where("email", "==", authUser.email)
-      );
-      const usuariosSnapshot = await getDocs(usuariosQuery);
+      // Obtener la empresa a actualizar, ya sea la empresa seleccionada o la del usuario autenticado
+      let empresaToUpdate = empresaSeleccionada;
 
-      let empresa = "";
-      if (!usuariosSnapshot.empty) {
-        empresa = usuariosSnapshot.docs[0].data().empresa || "";
+      if (!empresaToUpdate) {
+        // Si no hay empresa seleccionada, obtener la empresa del usuario autenticado
+        const usuariosRef = collection(db, "usuarios");
+        const usuariosQuery = query(
+          usuariosRef,
+          where("email", "==", authUser.email)
+        );
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+
+        if (!usuariosSnapshot.empty) {
+          empresaToUpdate = usuariosSnapshot.docs[0].data().empresa || "";
+        } else {
+          console.error("No se encontró la empresa del usuario autenticado.");
+          return;
+        }
       }
 
       // Actualizar los nombres de pantalla para todos los usuarios que pertenecen a la misma empresa
+      const usuariosRef = collection(db, "usuarios");
       const usuariosEmpresaQuery = query(
         usuariosRef,
-        where("empresa", "==", empresa)
+        where("empresa", "==", empresaToUpdate)
       );
       const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
 
@@ -358,7 +449,7 @@ function PantallasSalon() {
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
         templateSalonesRef,
-        where("empresa", "==", empresa)
+        where("empresa", "==", empresaToUpdate)
       );
       const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -369,13 +460,13 @@ function PantallasSalon() {
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
-          empresa: empresa,
+          empresa: empresaToUpdate,
           timestamp: serverTimestamp(),
         });
       } else {
         // Si no hay documento existente para esta empresa, crea uno nuevo
         await addDoc(templateSalonesRef, {
-          empresa: empresa,
+          empresa: empresaToUpdate,
           fontColor: fontColor,
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
@@ -410,19 +501,11 @@ function PantallasSalon() {
         const eventoData = doc.data();
 
         if (eventoRef && eventoData) {
-          if (eventoData.personalizacionTemplate) {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          } else {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          }
+          updatePromises.push(
+            updateDoc(eventoRef, {
+              personalizacionTemplate: personalizacionTemplate,
+            })
+          );
         } else {
           // "Referencia de evento no válida:"
           console.error(t("screenSalon.invalidEventReferenceError"), doc.id);
@@ -503,6 +586,45 @@ function PantallasSalon() {
             {t("screenSalon.title")}
           </h2>
         </div>
+        {usuarioAutorizado && (
+          <div className="mb-4">
+            <label
+              htmlFor="empresa"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Seleccionar Empresa:
+            </label>
+            <div className="relative">
+              <select
+                id="empresa"
+                value={empresaSeleccionada}
+                onChange={(e) => setEmpresaSeleccionada(e.target.value)}
+                className="block w-full bg-white border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              >
+                <option value="">Seleccionar...</option>
+                {empresas.map((empresa) => (
+                  <option key={empresa} value={empresa}>
+                    {empresa}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="h-5 w-5"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 3a1 1 0 011 1v11.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 15.586V4a1 1 0 011-1z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
 
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
