@@ -50,25 +50,45 @@ function PublicidadSalon() {
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
   const [empresaUsuario, setEmpresaUsuario] = useState(null);
+  const [empresas, setEmpresas] = useState([]); // Estado para almacenar las empresas disponibles
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null); // Estado para la empresa seleccionada
+  const [publicidadesSalon, setPublicidadesSalon] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        // Obtener datos del usuario
         const usuarioDoc = await db.collection("usuarios").doc(user.uid).get();
         const usuarioData = usuarioDoc.data();
         const empresaUsuario = usuarioData.empresa;
-        setEmpresaUsuario(empresaUsuario); // Guardar el nombre de la empresa en el estado
-        await obtenerPublicidades(empresaUsuario, "salon"); // Pasar la empresa del usuario a la función obtenerPublicidades
+        await obtenerEmpresas(); // Obtener empresas disponibles
+        await obtenerPublicidades(empresaUsuario, "salon");
       } else {
-        // El objeto user es nulo.
         console.warn(t("advertisement.salon.userNull"));
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  const obtenerEmpresas = async () => {
+    try {
+      const empresasSnapshot = await db.collection("usuarios").get();
+      const empresasData = empresasSnapshot.docs.map(
+        (doc) => doc.data().empresa
+      );
+      const empresasUnicas = Array.from(new Set(empresasData)); // Eliminar repeticiones
+      setEmpresas(empresasUnicas);
+    } catch (error) {
+      console.error("Error al obtener empresas:", error);
+    }
+  };
+
+  const handleEmpresaChange = async (event) => {
+    const empresaSeleccionada = event.target.value;
+    setEmpresaSeleccionada(empresaSeleccionada);
+    await obtenerPublicidades(empresaSeleccionada, "salon");
+  };
 
   const obtenerPublicidades = async (empresa, tipo) => {
     try {
@@ -365,6 +385,11 @@ function PublicidadSalon() {
       const usuarioData = usuarioDoc.data();
       const empresaUsuario = usuarioData.empresa;
 
+      // Obtener la empresa seleccionada
+      const empresa = empresaSeleccionada
+        ? empresaSeleccionada
+        : empresaUsuario;
+
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
 
@@ -392,7 +417,7 @@ function PublicidadSalon() {
               minutos,
               segundos,
               tipo: "salon",
-              empresa: empresaUsuario,
+              empresa: empresa, // Usar la empresa seleccionada o la del usuario logueado
               fechaDeSubida,
             });
 
@@ -619,6 +644,42 @@ function PublicidadSalon() {
   return (
     <section className="md:mt-3 ">
       <div>
+        <div className="mb-4">
+          {user &&
+            (user.email === "uppermex10@gmail.com" ||
+              user.email === "ulises.jacobo@hotmail.com" ||
+              user.email === "contacto@upperds.mx") && (
+              <>
+                <label htmlFor="empresa" className="text-gray-800">
+                  Seleccionar empresa
+                </label>
+                <select
+                  id="empresa"
+                  name="empresa"
+                  className="block w-full mt-1 p-2 border rounded-md"
+                  onChange={handleEmpresaChange}
+                  disabled={
+                    !(
+                      user &&
+                      (user.email === "uppermex10@gmail.com" ||
+                        user.email === "ulises.jacobo@hotmail.com" ||
+                        user.email === "contacto@upperds.mx")
+                    )
+                  }
+                >
+                  <option value="" disabled selected>
+                    Seleccionar...
+                  </option>
+                  {empresas.map((empresa, index) => (
+                    <option key={index} value={empresa}>
+                      {empresa}
+                    </option>
+                  ))}
+                </select>
+              </>
+            )}
+        </div>
+
         <section className="">
           {successMessage && (
             <div className="bg-green-500 text-white p-2 mb-4 rounded-md">
