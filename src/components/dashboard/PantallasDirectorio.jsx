@@ -166,18 +166,41 @@ function PantallasDirectorio() {
 
   const [selectedCity, setSelectedCity] = useState(null);
 
+  const [empresaOptions, setEmpresaOptions] = useState([]);
+  const [selectedEmpresa, setSelectedEmpresa] = useState(null);
+
+  const authorizedEmails = [
+    "uppermex10@gmail.com",
+    "ulises.jacobo@hotmail.com",
+    "contacto@upperds.mx",
+  ];
+
+  const usuarioAutorizado =
+    firebase.auth().currentUser &&
+    [
+      "uppermex10@gmail.com",
+      "ulises.jacobo@hotmail.com",
+      "contacto@upperds.mx",
+    ].includes(firebase.auth().currentUser.email);
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
 
         if (authUser) {
-          // Obtener información del usuario desde Firestore
+          // Obtener referencia al usuario autenticado
           const usuarioRef = doc(db, "usuarios", authUser.uid);
           const usuarioSnapshot = await getDoc(usuarioRef);
 
-          if (usuarioSnapshot.exists()) {
+          let empresa;
+          if (selectedEmpresa) {
+            // Si hay una empresa seleccionada, usar esa
+            empresa = selectedEmpresa.value;
+          } else if (usuarioSnapshot.exists()) {
+            // Si no hay una empresa seleccionada, usar la empresa del usuario autenticado
             const user = usuarioSnapshot.data();
+            empresa = user.empresa || "";
             const numberOfScreens = user.pd || 0;
             const namesArray = Array.from(
               { length: numberOfScreens },
@@ -186,8 +209,6 @@ function PantallasDirectorio() {
 
             setNombrePantallasDirectorio(namesArray);
             setPd(numberOfScreens);
-
-            const empresa = user.empresa || "";
             setNombreEmpresa(empresa);
 
             const unsubscribe = onSnapshot(usuarioRef, (doc) => {
@@ -195,10 +216,36 @@ function PantallasDirectorio() {
               if (data && data.nombrePantallasDirectorio) {
                 const nombres = Object.values(data.nombrePantallasDirectorio);
                 setNombrePantallasDirectorio(nombres);
+                console.log(
+                  "Nombres de pantallas (usuario autenticado):",
+                  nombres
+                );
               }
             });
 
             return () => unsubscribe();
+          }
+
+          if (empresa) {
+            // Obtener todos los usuarios que pertenecen a la empresa seleccionada
+            const usuariosRef = collection(db, "usuarios");
+            const usuariosSnapshot = await getDocs(usuariosRef);
+
+            const nombresPantallas = [];
+
+            usuariosSnapshot.forEach((doc) => {
+              const data = doc.data();
+              if (data.empresa === empresa && data.nombrePantallasDirectorio) {
+                const nombres = Object.values(data.nombrePantallasDirectorio);
+                nombresPantallas.push(...nombres);
+              }
+            });
+
+            setNombrePantallasDirectorio(nombresPantallas);
+            console.log(
+              "Nombres de pantallas (empresa seleccionada):",
+              nombresPantallas
+            );
           }
         }
       } catch (error) {
@@ -209,6 +256,7 @@ function PantallasDirectorio() {
     const fetchTemplateData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
+        let empresa = "";
 
         if (authUser) {
           const usuarioRef = doc(db, "usuarios", authUser.uid);
@@ -216,7 +264,9 @@ function PantallasDirectorio() {
 
           if (usuarioSnapshot.exists()) {
             const user = usuarioSnapshot.data();
-            const empresa = user.empresa || "";
+            empresa = selectedEmpresa
+              ? selectedEmpresa.value
+              : user.empresa || "";
 
             console.log("Empresa:", empresa); // Console log de la empresa
 
@@ -260,8 +310,18 @@ function PantallasDirectorio() {
               setSelectedPublicidad(publicidad || null);
             } else {
               console.log(
-                "No se encontró información en TemplateDirectorios por empresa."
+                "No se encontró información en TemplateDirectorios por empresa. Usando valores iniciales."
               );
+              setFontColor("#000000");
+              setSelectedFontStyle({
+                value: "Arial",
+                label: "Arial",
+              });
+              setSelectedLogo(null);
+              setTemplateColor("#D1D5DB");
+              setSelectedCity(null);
+              setSetPortrait(false);
+              setSelectedPublicidad(null);
             }
           }
         }
@@ -270,12 +330,105 @@ function PantallasDirectorio() {
       }
     };
 
+    const fetchEmpresaData = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
+
+        if (authUser && authorizedEmails.includes(authUser.email)) {
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosSnapshot = await getDocs(usuariosRef);
+          const empresasSet = new Set();
+
+          usuariosSnapshot.forEach((doc) => {
+            const data = doc.data();
+            if (data.empresa) {
+              empresasSet.add(data.empresa);
+            }
+          });
+
+          const empresasArray = Array.from(empresasSet).map((empresa) => ({
+            value: empresa,
+            label: empresa,
+          }));
+          setEmpresaOptions(empresasArray);
+        }
+      } catch (error) {
+        console.error("Error al obtener datos de las empresas:", error);
+      }
+    };
+
     fetchUserData();
     fetchTemplateData();
-  }, []);
+    fetchEmpresaData();
+  }, [selectedEmpresa]);
 
   const handleCityChange = (selectedOption) => {
     setSelectedCity(selectedOption);
+  };
+
+  const handleEmpresaChange = async (selectedOption) => {
+    setSelectedEmpresa(selectedOption); // Actualiza el estado con la empresa seleccionada
+
+    try {
+      const empresa = selectedOption.value; // Obtiene el valor de la empresa seleccionada
+
+      const templateDirectoriosRef = collection(db, "TemplateDirectorios");
+      const templateDirectoriosQuery = query(
+        templateDirectoriosRef,
+        where("empresa", "==", empresa) // Busca documentos con la empresa seleccionada
+      );
+      const templateDirectoriosSnapshot = await getDocs(
+        templateDirectoriosQuery
+      );
+
+      if (!templateDirectoriosSnapshot.empty) {
+        console.log(
+          "Se encontró información en TemplateDirectorios para la empresa seleccionada."
+        );
+        const templateDirectoriosDoc =
+          templateDirectoriosSnapshot.docs[0].data();
+        const {
+          fontColor,
+          fontStyle,
+          logo,
+          templateColor,
+          ciudad,
+          setPortrait,
+          publicidad,
+        } = templateDirectoriosDoc;
+
+        // Actualiza el estado con la información obtenida
+        setFontColor(fontColor || "#000000");
+        setSelectedFontStyle({
+          value: fontStyle || "Arial",
+          label: fontStyle || "Arial",
+        });
+        setSelectedLogo(logo || null);
+        setTemplateColor(templateColor || "#D1D5DB");
+        setSelectedCity({ value: ciudad, label: ciudad });
+        setSetPortrait(setPortrait || false);
+        setSelectedPublicidad(publicidad || null);
+      } else {
+        console.log(
+          "No se encontró información en TemplateDirectorios para la empresa seleccionada."
+        );
+        // Si no hay información para la empresa seleccionada, puedes limpiar los estados o mostrar un mensaje
+        // Limpiar los estados
+        setFontColor("#000000");
+        setSelectedFontStyle({ value: "Arial", label: "Arial" });
+        setSelectedLogo(null);
+        setTemplateColor("#D1D5DB");
+        setSelectedCity(null);
+        setSetPortrait(false);
+        setSelectedPublicidad(null);
+        // O mostrar un mensaje al usuario
+      }
+    } catch (error) {
+      console.error(
+        "Error al obtener datos del template para la empresa seleccionada:",
+        error
+      );
+    }
   };
 
   const fontStyleOptions = [
@@ -425,15 +578,19 @@ function PantallasDirectorio() {
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
         ciudad: selectedCity.value,
-        setPortrait: setPortrait, // Agrega setPortrait al objeto
+        setPortrait: setPortrait,
         publicidad: selectedPublicidad,
-        empresa: nombreEmpresa,
+        empresa: selectedEmpresa ? selectedEmpresa.value : nombreEmpresa,
       };
+
+      const empresaToUse = selectedEmpresa
+        ? selectedEmpresa.value
+        : nombreEmpresa;
 
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
       const templateDirectoriosQuery = query(
         templateDirectoriosRef,
-        where("empresa", "==", nombreEmpresa)
+        where("empresa", "==", empresaToUse)
       );
       const templateDirectoriosSnapshot = await getDocs(
         templateDirectoriosQuery
@@ -443,63 +600,69 @@ function PantallasDirectorio() {
         const templateDirectoriosDocRef =
           templateDirectoriosSnapshot.docs[0].ref;
         await updateDoc(templateDirectoriosDocRef, {
-          fontColor: fontColor,
-          templateColor: templateColor,
-          fontStyle: selectedFontStyle.value,
-          logo: selectedLogo,
-          ciudad: selectedCity.value,
-          setPortrait: setPortrait, // Agrega setPortrait al objeto
-          publicidad: selectedPublicidad,
-          empresa: nombreEmpresa,
+          ...personalizacionTemplate,
           timestamp: serverTimestamp(),
         });
       } else {
         await addDoc(templateDirectoriosRef, {
-          fontColor: fontColor,
-          templateColor: templateColor,
-          fontStyle: selectedFontStyle.value,
-          logo: selectedLogo,
-          ciudad: selectedCity.value,
-          setPortrait: setPortrait, // Agrega setPortrait al objeto
-          publicidad: selectedPublicidad,
-          empresa: nombreEmpresa,
+          ...personalizacionTemplate,
           timestamp: serverTimestamp(),
         });
       }
-
-      const usuarioRef = doc(db, "usuarios", authUser.uid);
-
-      await updateDoc(usuarioRef, {
-        nombrePantallasDirectorio: firebase.firestore.FieldValue.delete(),
-      });
 
       const nombresPantallasObject = {};
       nombrePantallasDirectorio.forEach((nombre, index) => {
         nombresPantallasObject[`nombrePantallasDirectorio.${index}`] = nombre;
       });
-      await updateDoc(usuarioRef, nombresPantallasObject);
 
-      // Actualizar nombres de pantalla para todos los usuarios con la misma empresa
-      const usuariosEmpresaQuery = query(
-        collection(db, "usuarios"),
-        where("empresa", "==", nombreEmpresa)
-      );
-      const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
-      const updateUsuariosPromises = [];
-
-      usuariosEmpresaSnapshot.forEach(async (usuarioDoc) => {
-        const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
-        updateUsuariosPromises.push(
-          updateDoc(usuarioEmpresaRef, nombresPantallasObject)
+      if (selectedEmpresa) {
+        // Actualizar nombres de pantalla para todos los usuarios con la empresa seleccionada
+        const usuariosEmpresaQuery = query(
+          collection(db, "usuarios"),
+          where("empresa", "==", empresaToUse)
         );
-      });
+        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+        const updateUsuariosPromises = [];
 
-      await Promise.all(updateUsuariosPromises);
+        usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
+          const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
+          updateUsuariosPromises.push(
+            updateDoc(usuarioEmpresaRef, nombresPantallasObject)
+          );
+        });
+
+        await Promise.all(updateUsuariosPromises);
+      } else {
+        const usuarioRef = doc(db, "usuarios", authUser.uid);
+
+        await updateDoc(usuarioRef, {
+          nombrePantallasDirectorio: firebase.firestore.FieldValue.delete(),
+        });
+
+        await updateDoc(usuarioRef, nombresPantallasObject);
+
+        // Actualizar nombres de pantalla para todos los usuarios con la misma empresa
+        const usuariosEmpresaQuery = query(
+          collection(db, "usuarios"),
+          where("empresa", "==", nombreEmpresa)
+        );
+        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+        const updateUsuariosPromises = [];
+
+        usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
+          const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
+          updateUsuariosPromises.push(
+            updateDoc(usuarioEmpresaRef, nombresPantallasObject)
+          );
+        });
+
+        await Promise.all(updateUsuariosPromises);
+      }
 
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(
         eventosRef,
-        where("empresa", "==", nombreEmpresa)
+        where("empresa", "==", empresaToUse)
       );
       const eventosSnapshot = await getDocs(eventosQuery);
 
@@ -510,19 +673,11 @@ function PantallasDirectorio() {
         const eventoData = doc.data();
 
         if (eventoRef && eventoData) {
-          if (eventoData.personalizacionTemplate) {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          } else {
-            updatePromises.push(
-              updateDoc(eventoRef, {
-                personalizacionTemplate: personalizacionTemplate,
-              })
-            );
-          }
+          updatePromises.push(
+            updateDoc(eventoRef, {
+              personalizacionTemplate: personalizacionTemplate,
+            })
+          );
         } else {
           console.error("Referencia de evento no válida:", doc.id);
         }
@@ -568,6 +723,27 @@ function PantallasDirectorio() {
             {t("screensDirectory.title")}
           </h2>
         </div>
+        {usuarioAutorizado && (
+          <div className="mb-4">
+            <label
+              htmlFor="empresa"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
+              Seleccionar Empresa:
+            </label>
+            <div className="relative">
+              <Select
+                id="empresa"
+                value={selectedEmpresa}
+                onChange={handleEmpresaChange}
+                options={empresaOptions}
+                placeholder="Seleccionar Empresa"
+                isClearable
+                className="block w-40 sm:w-48 bg-white border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              />
+            </div>
+          </div>
+        )}
 
         {/* Sección de personalización */}
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
