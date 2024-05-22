@@ -78,7 +78,6 @@ const Ediciondeempresa = () => {
 
   // Función para asignar permisos a un usuario
   const asignarPermisos = (email, permiso) => {
-    console.log("Correo electrónico:", email);
     // Verificar que el correo electrónico sea válido
     if (!email) {
       console.error("Error: Correo electrónico no válido.");
@@ -156,15 +155,17 @@ const Ediciondeempresa = () => {
           <h2 className="text-2xl font-bold text-gray-800 p-4">
             Personas asociadas a {empresaSeleccionada}
           </h2>
+          {/* PERMISOS */}
           <div className="p-4">
             <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {personas.map((persona, index) => (
-                <li key={index} className="p-4 bg-gray-50 rounded-lg">
+                <li key={index} className="p-4 bg-gray-50 rounded-lg border border-blue-500">
                   <p className="text-lg font-semibold text-gray-800">
                     {persona.nombre} {persona.apellido}
                   </p>
-                  <p className="text-gray-600">{persona.email}</p>
-                  <div className="mt-2">
+                  <p className="text-gray-600 ">{persona.email}</p>
+                  {persona.permisos !== 10 ? <div className="mt-2">
+                    {/* Boton Permiso 1 */}
                     <button
                       className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center ${
                         persona.permisos === 1
@@ -180,9 +181,10 @@ const Ediciondeempresa = () => {
                       {persona.permisos === 1 ? (
                         <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
                       ) : (
-                        <FontAwesomeIcon icon={faToggleOff} className="ml-2" />
+                        <FontAwesomeIcon icon={faToggleOff} className="ml-2 " />
                       )}
                     </button>
+                    {/* Boton Permiso 2 */}
                     <button
                       className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center ${
                         persona.permisos === 2
@@ -201,6 +203,7 @@ const Ediciondeempresa = () => {
                         <FontAwesomeIcon icon={faToggleOff} className="ml-2" />
                       )}
                     </button>
+                    {/* Boton Permiso 3 */}
                     <button
                       className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center ${
                         persona.permisos === 3
@@ -219,7 +222,8 @@ const Ediciondeempresa = () => {
                         <FontAwesomeIcon icon={faToggleOff} className="ml-2" />
                       )}
                     </button>
-                  </div>
+                  </div> : <p className="mt-10 p-3 w-min cut italic uppercase whitespace-nowrap bg-slate-200 ">Usuario SuperAdmin</p>}
+                  {/* <p className="mt-10 p-3 w-min cut italic uppercase whitespace-nowrap bg-slate-200 ">Usuario SuperAdmin</p> */}
                 </li>
               ))}
             </ul>
