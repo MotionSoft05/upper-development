@@ -15,7 +15,7 @@ import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
 import { usePathname } from "next/navigation";
 
 const firebaseConfig = {
@@ -37,6 +37,7 @@ function DashBoard() {
   console.log("🚀 ~ DashBoard ~ isProduction:", isProduction);
 
   const [userEmail, setUserEmail] = useState(null);
+  const [userData, setUserData] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [showEdiciondeempresa, setShowEdiciondeempresa] = useState(false);
   const [showUserAdmin, setShowUserAdmin] = useState(true);
@@ -50,13 +51,30 @@ function DashBoard() {
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
-  const [showSoporte, setShowSoporte] = useState(false);
+  const [showSoporte, setShowSoporte] = useState(false);  
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try{
+          const docRef = doc(db, "usuarios", user.uid);
+          const docSnap = await getDoc(docRef);
+
+          if (docSnap.exists()) {
+            // Accede a los datos del usuario y se guardan en 'userData'
+            setUserData(docSnap.data());
+          } else {
+            // El documento del usuario no existe
+            console.log("No se encontraron datos para este usuario.");
+          }
+        }
+        catch(error){
+          console.log("Error al obtener los datos del usuario:", error);
+        }
+      }
       setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
       setShowUserAdmin(true); // Muestra ConsultaModEvento por defecto
-    });
+    });    
 
     return () => unsubscribe();
   }, []);
@@ -81,6 +99,7 @@ function DashBoard() {
       <aside className={sidebarClasses}>
         <Sidebar
           userEmail={userEmail}
+          userData={userData}
           setShowAdmin={setShowAdmin}
           showAdmin={showAdmin}
           setShowEdiciondeempresa={setShowEdiciondeempresa}
