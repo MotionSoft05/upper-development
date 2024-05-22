@@ -17,6 +17,7 @@ import {
   collection as firestoreCollection,
   serverTimestamp,
 } from "firebase/firestore";
+import Swal from "sweetalert2";
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
@@ -342,48 +343,73 @@ function PantallasSalon() {
 
       if (ps === 0) {
         // "No hay licencias activas. No se pueden personalizar las pantallas."
-        alert(t("screenSalon.licenseError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.licenseError"),
+        });
         return;
       }
 
       if (!authUser) {
         // "Usuario no autenticado. No se puede enviar a Firestore."
-        console.error(t("screenSalon.unauthenticatedUserError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.unauthenticatedUserError"),
+          text: t("screenSalon.unauthenticatedUserError"),
+        });
         return;
       }
 
       if (!selectedLogo) {
         // "Por favor, selecciona un logo."
-        alert(t("screenSalon.logoSelectionError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.logoSelectionError"),
+        });
         return;
       }
 
       if (!selectedFontStyle) {
         // Por favor, selecciona un estilo de texto.
-        alert(t("screenSalon.fontStyleSelectionError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.fontStyleSelectionError"),
+        });
         return;
       }
 
       if (!templateColor) {
         // Por favor, selecciona un color de plantilla.
-        alert(t("screenSalon.templateColorSelectionError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.templateColorSelectionError"),
+        });
         return;
       }
 
       if (!fontColor) {
-        alert("Por favor, selecciona un color de letra.");
+        Swal.fire({
+          icon: "error",
+          title: "Por favor, selecciona un color de letra.",
+        });
         return;
       }
 
       if (nombrePantallas.some((nombre) => !nombre)) {
         // Por favor, completa todos los nombres de pantallas.
-        alert(t("screenSalon.fontColorSelectionError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.fontColorSelectionError"),
+        });
         return;
       }
 
       if (!selectedLogo) {
         // selectedLogo es null. No se puede enviar a Firestore.
-        alert(t("screenSalon.screenNameCompletionError"));
+        Swal.fire({
+          icon: "error",
+          title: t("screenSalon.screenNameCompletionError"),
+        });
         return;
       }
 
@@ -515,10 +541,19 @@ function PantallasSalon() {
       await Promise.all(updatePromises);
 
       // "Información de personalización guardada con éxito."
-      alert(t("screenSalon.customizationSavedSuccess"));
+      Swal.fire({
+        icon: "success",
+        title: t("screenSalon.customizationSavedSuccess"),
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } catch (error) {
       // "Error al guardar la información de personalización y URL del logo:",
-      console.error(t("screenSalon.customizationSaveError"), error);
+      Swal.fire({
+        icon: "error",
+        title: t("screenSalon.customizationSaveError"),
+        text: error.message, // Suponiendo que `error` es un objeto que contiene el mensaje de error
+      });
     }
   };
 
