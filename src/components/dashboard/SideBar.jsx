@@ -43,9 +43,9 @@ function Sidebar(props) {
   //? -- Permisos --
   const permisos = props.userData?.permisos || 0;
   const showAdministrador = [10].includes(permisos)
-  const showPersonalicePantallas = [10, 3, 2, 1].includes(permisos)
-  const showAjustesPantalla = [10, 1].includes(permisos)
-  const showInformacion = [10, 3, 1].includes(permisos)
+  const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos)
+  const showAjustesPantalla = [10, 3].includes(permisos)
+  const showInformacion = [10, 2, 3].includes(permisos)
   //? --------------
 
   //? -- Efectos Style --

@@ -150,86 +150,130 @@ const Ediciondeempresa = () => {
           </div>
         </div>
       )}
-      {userHasAccess && empresaSeleccionada && (
-        <div className="mt-8 bg-white shadow rounded-lg">
-          <h2 className="text-2xl font-bold text-gray-800 p-4">
+      {/* {userHasAccess && empresaSeleccionada && ( */}
+   
+
+      {/* TABLA USUARIOS Y PERMISOS */}
+      <div className="col-span-full xl:col-span-8 bg-white  shadow-lg rounded-sm border border-slate-200 ">
+        <header className="px-5 py-4 border-b border-slate-100 ">
+          <h2 className="font-semibold text-slate-800 ">
             Personas asociadas a {empresaSeleccionada}
           </h2>
-          {/* PERMISOS */}
-          <div className="p-4">
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        </header>
+        {/* Table */}
+        <div className="overflow-x-auto p-2">
+          <table className="table-auto w-full ">
+            {/* Table header */}
+            <thead className="text-xs uppercase text-slate-800  bg-slate-200 border-b-2 border-slate-300 rounded-sm">
+              <tr>
+                <th className="p-2">
+                  <div className="font-semibold text-left">Nombre</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">Email</div>
+                </th>
+                <th className="p-2">
+                  <div className="font-semibold text-center">Permisos</div>
+                </th>
+              </tr>
+            </thead>
+            {/* Table body */}
+            <tbody className="text-sm font-medium divide-y divide-slate-300">
+              {/* Usuarios */}
               {personas.map((persona, index) => (
-                <li key={index} className="p-4 bg-gray-50 rounded-lg border border-blue-500">
-                  <p className="text-lg font-semibold text-gray-800">
-                    {persona.nombre} {persona.apellido}
-                  </p>
-                  <p className="text-gray-600 ">{persona.email}</p>
-                  {persona.permisos !== 10 ? <div className="mt-2">
-                    {/* Boton Permiso 1 */}
-                    <button
-                      className={`bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded flex items-center ${
-                        persona.permisos === 1
-                      }`}
-                      onClick={() =>
-                        asignarPermisos(
-                          persona.email,
-                          persona.permisos === 1 ? 0 : 1
-                        )
-                      }
-                    >
-                      Permiso 1
-                      {persona.permisos === 1 ? (
-                        <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                      ) : (
-                        <FontAwesomeIcon icon={faToggleOff} className="ml-2 " />
-                      )}
-                    </button>
-                    {/* Boton Permiso 2 */}
-                    <button
-                      className={`bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded flex items-center ${
-                        persona.permisos === 2
-                      }`}
-                      onClick={() =>
-                        asignarPermisos(
-                          persona.email,
-                          persona.permisos === 2 ? 0 : 2
-                        )
-                      }
-                    >
-                      Permiso 2
-                      {persona.permisos === 2 ? (
-                        <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                      ) : (
-                        <FontAwesomeIcon icon={faToggleOff} className="ml-2" />
-                      )}
-                    </button>
-                    {/* Boton Permiso 3 */}
-                    <button
-                      className={`bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded flex items-center ${
-                        persona.permisos === 3
-                      }`}
-                      onClick={() =>
-                        asignarPermisos(
-                          persona.email,
-                          persona.permisos === 3 ? 0 : 3
-                        )
-                      }
-                    >
-                      Permiso 3
-                      {persona.permisos === 3 ? (
-                        <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                      ) : (
-                        <FontAwesomeIcon icon={faToggleOff} className="ml-2" />
-                      )}
-                    </button>
-                  </div> : <p className="mt-10 p-3 w-min cut italic uppercase whitespace-nowrap bg-slate-200 ">Usuario SuperAdmin</p>}
-                  {/* <p className="mt-10 p-3 w-min cut italic uppercase whitespace-nowrap bg-slate-200 ">Usuario SuperAdmin</p> */}
-                </li>
+                <tr key={index} className="bg-slate-100">
+                  <td className="p-2">
+                    <div className="flex items-center">
+                      <div className="text-slate-800">{persona.nombre}</div>
+                    </div>
+                  </td>
+                  <td className="p-2">
+                    <div className="text-center">{persona.email}</div>
+                  </td>
+                  {/* Permisos */}
+                  <td className="p-2 ">
+                    {persona.permisos !== 10 ? (
+                    <div className="mt-2 flex justify-center">
+                      {/* Boton Permiso 1 */}
+                      <button
+                        className={` hover:bg-blue-600 h-min p-1 text-white font-bold  rounded flex items-center ${
+                          persona.permisos === 1? 'bg-blue-500' : 'bg-blue-200'
+                        }`}
+                        onClick={() =>
+                          asignarPermisos(
+                            persona.email,
+                            persona.permisos === 1 ? 0 : 1
+                          )
+                        }
+                      >
+                        1
+                        {persona.permisos === 1 ? (
+                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
+                        ) : (
+                          <FontAwesomeIcon
+                            icon={faToggleOff}
+                            className="ml-2 "
+                          />
+                        )}
+                      </button>
+                      {/* Boton Permiso 2 */}
+                      <button
+                        className={` hover:bg-green-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
+                          persona.permisos === 2 ? 'bg-green-500' : 'bg-green-200'
+                        }`}
+                        onClick={() =>
+                          asignarPermisos(
+                            persona.email,
+                            persona.permisos === 2 ? 0 : 2
+                          )
+                        }
+                      >
+                        2
+                        {persona.permisos === 2 ? (
+                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
+                        ) : (
+                          <FontAwesomeIcon
+                            icon={faToggleOff}
+                            className="ml-2"
+                          />
+                        )}
+                      </button>
+                      {/* Boton Permiso 3 */}
+                      <button
+                        className={`hover:bg-red-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
+                          persona.permisos === 3 ? 'bg-red-500' : 'bg-red-200'
+                        }`}
+                        onClick={() =>
+                          asignarPermisos(
+                            persona.email,
+                            persona.permisos === 3 ? 0 : 3
+                          )
+                        }
+                      >
+                        3
+                        {persona.permisos === 3 ? (
+                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
+                        ) : (
+                          <FontAwesomeIcon
+                            icon={faToggleOff}
+                            className="ml-2"
+                          />
+                        )}
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="p-1 w-min m-auto italic uppercase whitespace-nowrap bg-slate-200 ">
+                      Usuario SuperAdmin
+                    </p>
+                  )}
+                  </td>
+                </tr>
               ))}
-            </ul>
-          </div>
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
+      {/* TABLA USUARIOS */}
     </div>
   );
 };
