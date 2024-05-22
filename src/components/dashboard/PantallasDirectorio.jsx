@@ -4,6 +4,7 @@ import { ChromePicker } from "react-color";
 import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
+import Swal from "sweetalert2";
 import {
   collection,
   onSnapshot,
@@ -544,31 +545,48 @@ function PantallasDirectorio() {
       const authUser = firebase.auth().currentUser;
 
       if (pd === 0) {
-        alert(
-          "No hay licencias activas. No se pueden personalizar las pantallas."
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "No hay licencias activas. No se pueden personalizar las pantallas.",
+        });
         return;
       }
 
       if (!authUser) {
-        console.error(
-          "Usuario no autenticado. No se puede enviar a Firestore."
-        );
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Usuario no autenticado. No se puede enviar a Firestore.",
+        });
         return;
       }
 
       if (!selectedCity) {
-        alert("Por favor, seleccione una ciudad.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Por favor, seleccione una ciudad.",
+        });
         return;
       }
 
       if (!selectedLogo) {
-        alert("Por favor, seleccione un logo.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Por favor, seleccione un logo.",
+        });
         return;
       }
 
       if (!selectedPublicidad) {
-        alert("Por favor, seleccione una imagen para Publicidad.");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Por favor, seleccione una imagen para Publicidad.",
+        });
+
         return;
       }
 
@@ -685,7 +703,13 @@ function PantallasDirectorio() {
 
       await Promise.all(updatePromises);
 
-      alert("Información de personalización guardada con éxito.");
+      Swal.fire({
+        icon: "success",
+        title: "¡Éxito!",
+        showConfirmButton: false,
+        text: "Información de personalización guardada con éxito.",
+        timer: 2000,
+      });
     } catch (error) {
       console.error(
         "Error al guardar la información de personalización y URL del logo:",
