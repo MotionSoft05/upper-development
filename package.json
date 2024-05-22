@@ -44,7 +44,7 @@
     "react-image-crop": "^10.1.8",
     "react-modal": "^3.16.1",
     "react-router-dom": "^6.21.1",
-    "react-select": "^5.7.4",
+    "react-select": "^5.8.0",
     "react-tailwindcss-datepicker": "^1.6.6",
     "react-textra": "^0.2.0",
     "sweetalert2": "^11.10.8",

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Select from "react-select";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -24,8 +25,9 @@ const auth = firebase.auth();
 const Ediciondeempresa = () => {
   const [empresas, setEmpresas] = useState([]);
   const [personas, setPersonas] = useState([]);
-  const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [userEmail, setUserEmail] = useState(null);
+  const [isClearable, setIsClearable] = useState(true); //React Select
 
   useEffect(() => {
     // Observador para verificar la autenticación del usuario
@@ -72,8 +74,12 @@ const Ediciondeempresa = () => {
     }
   }, [empresaSeleccionada, userEmail]);
 
+  //? Se ejecuta para seleccionar una empresa y al apretas la cruz para eliminar la seleccion
   const handleEmpresaSeleccionada = (empresa) => {
-    setEmpresaSeleccionada(empresa);
+    console.log("EMPRESA>>> ", empresa);
+    empresa
+      ? setEmpresaSeleccionada(empresa.value)
+      : setEmpresaSeleccionada(null);
   };
 
   // Función para asignar permisos a un usuario
@@ -83,8 +89,6 @@ const Ediciondeempresa = () => {
       console.error("Error: Correo electrónico no válido.");
       return;
     }
-
-    console.log("Correo electrónico:", email);
 
     // Actualizar el documento del usuario solo si existe
     db.collection("usuarios")
@@ -119,6 +123,16 @@ const Ediciondeempresa = () => {
       });
   };
 
+  console.log(
+    "🚀 ~ Ediciondeempresa ~ empresaSeleccionada:",
+    empresaSeleccionada
+  );
+
+  const options = empresas.map((empresa) => ({
+    value: empresa,
+    label: empresa,
+  }));
+
   // Verificar si el usuario actual tiene acceso
   const userHasAccess =
     userEmail &&
@@ -126,35 +140,78 @@ const Ediciondeempresa = () => {
       userEmail === "ulises.jacobo@hotmail.com" ||
       userEmail === "contacto@upperds.mx");
 
+  //* ---------------------- RETURN --------------------------
   return (
-    <div className="container mx-auto px-4 py-8">
-      {userHasAccess && (
-        <div className="bg-white shadow rounded-lg">
-          <h1 className="text-3xl font-bold text-gray-800 p-4">
-            Lista de Empresas
+    <div className="container mx-auto px-4 py-2">
+      {/* LISTA DE EMPRESAS Y PERMISOS */}
+      <div className=" ">
+        {/* LISTA DE EMPRESAS */}
+        {userHasAccess && (
+          <div className="bg-white shadow-lg rounded-lg mb-6 h-min">
+            <h1 className="text-3xl font-bold text-gray-800 p-4">
+              Lista de Empresas
+            </h1>
+            <div className="p-4">
+              <Select
+                options={options}
+                value={empresaSeleccionada?.value}
+                onChange={handleEmpresaSeleccionada}
+                isSearchable={true}
+                isClearable={isClearable}
+                placeholder="Buscar empresa..."
+                classNamePrefix="select"
+                className="text-sm font-semibold text-blue-900 max-w-md"
+              />
+            </div>
+          </div>
+        )}
+        {/* PERMISOS */}
+        <div className=" font-normal mb-6 shadow-lg rounded-lg pb-3">
+          <h1 className="text-3xl font-extralight italic text-gray-800 px-4 py-2 my-3 border-b-2 border-gray-600">
+            Permisos de Usuarios
           </h1>
-          <div className="p-4">
-            <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {empresas.map((empresa, index) => (
-                <li
-                  key={index}
-                  className="p-4 bg-blue-50 rounded-lg cursor-pointer hover:bg-blue-100"
-                  onClick={() => handleEmpresaSeleccionada(empresa)}
-                >
-                  <p className="text-lg font-semibold text-blue-900">
-                    {empresa}
-                  </p>
-                </li>
-              ))}
-            </ul>
+          {/* Permiso 1 */}
+          <div className="bg- m-2 text-sm border-l-4 pl-1 border-blue-500 flex">
+            <p className="font-medium">Permiso 1: </p>
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              PERSONALICE SUS PANTALLAS
+            </p>
+          </div>
+          {/* Permiso 2 */}
+          <div className="bg- m-2 text-sm border-l-4 pl-1 border-green-500 flex">
+            <p className="font-medium">Permiso 2: </p>
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              PERSONALICE SUS PANTALLAS
+            </p>
+            {" - "}
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              MÁS INFORMACIÓN
+            </p>
+          </div>
+          {/* Permiso 3 */}
+          <div className="bg- m-2 text-sm border-l-4 pl-1 border-red-500 flex">
+            <p className="font-medium">Permiso 1: </p>
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              PERSONALICE SUS PANTALLAS
+            </p>
+            {" - "}
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              AJUSTES PANTALLAS
+            </p>
+            {" - "}
+            <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
+              MÁS INFORMACIÓN
+            </p>
           </div>
         </div>
-      )}
-      {/* {userHasAccess && empresaSeleccionada && ( */}
-   
+      </div>
 
       {/* TABLA USUARIOS Y PERMISOS */}
-      <div className="col-span-full xl:col-span-8 bg-white  shadow-lg rounded-sm border border-slate-200 ">
+      <div
+        className={`col-span-full xl:col-span-8 ${
+          empresaSeleccionada ? "" : "opacity-40"
+        } bg-white shadow-lg border border-slate-200 rounded-lg`}
+      >
         <header className="px-5 py-4 border-b border-slate-100 ">
           <h2 className="font-semibold text-slate-800 ">
             Personas asociadas a {empresaSeleccionada}
@@ -193,79 +250,92 @@ const Ediciondeempresa = () => {
                   {/* Permisos */}
                   <td className="p-2 ">
                     {persona.permisos !== 10 ? (
-                    <div className="mt-2 flex justify-center">
-                      {/* Boton Permiso 1 */}
-                      <button
-                        className={` hover:bg-blue-600 h-min p-1 text-white font-bold  rounded flex items-center ${
-                          persona.permisos === 1? 'bg-blue-500' : 'bg-blue-200'
-                        }`}
-                        onClick={() =>
-                          asignarPermisos(
-                            persona.email,
-                            persona.permisos === 1 ? 0 : 1
-                          )
-                        }
-                      >
-                        1
-                        {persona.permisos === 1 ? (
-                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                        ) : (
-                          <FontAwesomeIcon
-                            icon={faToggleOff}
-                            className="ml-2 "
-                          />
-                        )}
-                      </button>
-                      {/* Boton Permiso 2 */}
-                      <button
-                        className={` hover:bg-green-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
-                          persona.permisos === 2 ? 'bg-green-500' : 'bg-green-200'
-                        }`}
-                        onClick={() =>
-                          asignarPermisos(
-                            persona.email,
-                            persona.permisos === 2 ? 0 : 2
-                          )
-                        }
-                      >
-                        2
-                        {persona.permisos === 2 ? (
-                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                        ) : (
-                          <FontAwesomeIcon
-                            icon={faToggleOff}
-                            className="ml-2"
-                          />
-                        )}
-                      </button>
-                      {/* Boton Permiso 3 */}
-                      <button
-                        className={`hover:bg-red-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
-                          persona.permisos === 3 ? 'bg-red-500' : 'bg-red-200'
-                        }`}
-                        onClick={() =>
-                          asignarPermisos(
-                            persona.email,
-                            persona.permisos === 3 ? 0 : 3
-                          )
-                        }
-                      >
-                        3
-                        {persona.permisos === 3 ? (
-                          <FontAwesomeIcon icon={faToggleOn} className="ml-2" />
-                        ) : (
-                          <FontAwesomeIcon
-                            icon={faToggleOff}
-                            className="ml-2"
-                          />
-                        )}
-                      </button>
-                    </div>
-                  ) : (
-                    <p className="p-1 w-min m-auto italic uppercase whitespace-nowrap bg-slate-200 ">
-                      Usuario SuperAdmin
-                    </p>
-                  )}
+                      <div className="mt-2 flex justify-center">
+                        {/* Boton Permiso 1 */}
+                        <button
+                          className={` hover:bg-blue-600 h-min p-1 text-white font-bold  rounded flex items-center ${
+                            persona.permisos === 1
+                              ? "bg-blue-500"
+                              : "bg-blue-200"
+                          }`}
+                          onClick={() =>
+                            asignarPermisos(
+                              persona.email,
+                              persona.permisos === 1 ? 0 : 1
+                            )
+                          }
+                        >
+                          1
+                          {persona.permisos === 1 ? (
+                            <FontAwesomeIcon
+                              icon={faToggleOn}
+                              className="ml-2"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faToggleOff}
+                              className="ml-2 "
+                            />
+                          )}
+                        </button>
+                        {/* Boton Permiso 2 */}
+                        <button
+                          className={` hover:bg-green-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
+                            persona.permisos === 2
+                              ? "bg-green-500"
+                              : "bg-green-200"
+                          }`}
+                          onClick={() =>
+                            asignarPermisos(
+                              persona.email,
+                              persona.permisos === 2 ? 0 : 2
+                            )
+                          }
+                        >
+                          2
+                          {persona.permisos === 2 ? (
+                            <FontAwesomeIcon
+                              icon={faToggleOn}
+                              className="ml-2"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faToggleOff}
+                              className="ml-2"
+                            />
+                          )}
+                        </button>
+                        {/* Boton Permiso 3 */}
+                        <button
+                          className={`hover:bg-red-600 text-white font-bold h-min p-1 ml-2 rounded flex items-center ${
+                            persona.permisos === 3 ? "bg-red-500" : "bg-red-200"
+                          }`}
+                          onClick={() =>
+                            asignarPermisos(
+                              persona.email,
+                              persona.permisos === 3 ? 0 : 3
+                            )
+                          }
+                        >
+                          3
+                          {persona.permisos === 3 ? (
+                            <FontAwesomeIcon
+                              icon={faToggleOn}
+                              className="ml-2"
+                            />
+                          ) : (
+                            <FontAwesomeIcon
+                              icon={faToggleOff}
+                              className="ml-2"
+                            />
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <p className="p-1 w-min m-auto italic uppercase whitespace-nowrap bg-slate-200 ">
+                        Usuario SuperAdmin
+                      </p>
+                    )}
                   </td>
                 </tr>
               ))}
@@ -273,7 +343,6 @@ const Ediciondeempresa = () => {
           </table>
         </div>
       </div>
-      {/* TABLA USUARIOS */}
     </div>
   );
 };
