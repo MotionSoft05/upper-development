@@ -11,6 +11,7 @@ import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin";
 import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
+import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
 
 import React, { useState, useEffect } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -47,6 +48,7 @@ function DashBoard() {
 
   const [showPantallaSalon, setShowPantallaSalon] = useState(false);
   const [showPantallaDirectorio, setShowPantallaDirectorio] = useState(false);
+  const [showPantallaServicio, setShowPantallaServicio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
 
   const [showlicencia, setShowlicencia] = useState(false);
@@ -114,6 +116,8 @@ function DashBoard() {
           showPantallaSalon={showPantallaSalon}
           setShowPantallaDirectorio={setShowPantallaDirectorio}
           showPantallaDirectorio={showPantallaDirectorio}
+          setShowPantallaServicio={setShowPantallaServicio}
+          showPantallaServicio={showPantallaServicio}
           setShowPublicidad={setShowPublicidad}
           showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
@@ -143,6 +147,7 @@ function DashBoard() {
 
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
+          {showPantallaServicio && <EditPantallaServicio />}
           {showPublicidad && <Publicidad />}
 
           {showlicencia && <Licencia />}

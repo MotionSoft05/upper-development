@@ -35,6 +35,7 @@ function Sidebar(props) {
     props.setShowlicencia(false);
     props.setShowGuia(false);
     props.setShowSoporte(false);
+    props.setShowPantallaServicio(false);
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
@@ -189,6 +190,20 @@ function Sidebar(props) {
                 </span>
                 {/* Pantallas directorio */}
                 <span className="ml-3">{t("sidebar.directoryScreens")}</span>
+              </button>
+            </div>
+            {/* Pantalla de Servicio  */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showPantallaServicio)}
+                onClick={() => changePanel("setShowPantallaServicio")}
+              >
+                <span className={efectLogo(props.showPantallaServicio)}>
+                  <FontAwesomeIcon icon={faDisplay} className="h-5" />
+                </span>
+                {/* Pantallas Servicio */}
+                {/* //! ToDo traduccion pendiente */}
+                <span className="ml-3">Pantalla de Servicio</span>
               </button>
             </div>
             {/* Publicidad */}
