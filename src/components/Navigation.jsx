@@ -27,7 +27,7 @@ const firebaseConfig = {
   appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
   measurementId: "G-6VHX927GH1",
 };
-import { useTranslation } from 'react-i18next'; // Traducciones
+import { useTranslation } from "react-i18next"; // Traducciones
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
@@ -52,17 +52,15 @@ const Loader = () => (
 }
 
 function Navigation() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
   const { t } = useTranslation(); // i18n
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(null);
   //const [loading, setLoading] = useState(true);
 
-  const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
-  // const isVisible = !pathname.includes("/paginasAleatorias"); // Cuando este para la Vista Qr va a desaparecer el Navbar
-  // console.log("🚀 ~ Navigation ~ isVisible:", isVisible);
+  const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar
 
+  //* --- FUNCIONES ---
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.emailVerified) {
@@ -109,7 +107,15 @@ function Navigation() {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, []); //? Podria ir [pathname] para actualizar en cada url?
+
+  // No muestra Navigation en algunas URL determinadas
+  const hideNavigation = () => {
+    const hideRoutes = ["/paginasAleatorias", "/pantallaDeServicio"];
+    return (
+      hideRoutes.includes(pathname) || pathname.match(/\/pantalla[1-9]|10/)
+    );
+  };
 
   const handleLogout = async () => {
     try {
@@ -130,8 +136,9 @@ function Navigation() {
     // Puedes agregar cualquier lógica adicional aquí antes de redirigir al dashboard
     window.location.href = `/dashboard${isProduction}`;
   };
+  //* --- FUNCIONES ---
 
-  if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
+  if (hideNavigation()) {
     return null;
   }
 
@@ -160,22 +167,22 @@ function Navigation() {
                       className="hover:text-custom md:p-0"
                       aria-current="page"
                     >
-                      {t('navbar.products')}
+                      {t("navbar.products")}
                     </a>
                   </li>
                   <li>
                     <a href="#soluciones" className="hover:text-custom md:p-0">
-                      {t('navbar.solutions')}
+                      {t("navbar.solutions")}
                     </a>
                   </li>
                   <li>
                     <a href="#recursos" className="hover:text-custom md:p-0">
-                      {t('navbar.resources')}
+                      {t("navbar.resources")}
                     </a>
                   </li>
                   <li>
                     <a href="#precios" className="hover:text-custom md:p-0">
-                      {t('navbar.pricing')}
+                      {t("navbar.pricing")}
                     </a>
                   </li>
                   <li>
@@ -191,14 +198,14 @@ function Navigation() {
                   {user && (
                     <div className="flex items-center space-x-2">
                       <span className="text-3x2 font-bold text-black">
-                      {t('navbar.greeting')} {userName}!
+                        {t("navbar.greeting")} {userName}!
                       </span>
 
                       {user.emailVerified && (
                         <>
-                          <Link 
-                          // href="/dashboard.html"
-                          href={`/dashboard${isProduction}`}
+                          <Link
+                            // href="/dashboard.html"
+                            href={`/dashboard${isProduction}`}
                           >
                             <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                               Dashboard
@@ -211,7 +218,7 @@ function Navigation() {
                             }}
                             className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
                           >
-                            {t('navbar.logout')}
+                            {t("navbar.logout")}
                           </button>
                         </>
                       )}
@@ -222,19 +229,19 @@ function Navigation() {
                       <Link href={`/register${isProduction}`}>
                         <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           {/* Registrarse */}
-                          {t('navbar.register')}
+                          {t("navbar.register")}
                         </button>
                       </Link>
                       {/* <Link href="/login.html"> */}
                       <Link href={`/login${isProduction}`}>
                         <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
                           {/* Iniciar sesión */}
-                          {t('navbar.login')}
+                          {t("navbar.login")}
                         </button>
                       </Link>
                     </div>
                   )}
-                  <LanguageSwitcher/>
+                  <LanguageSwitcher />
                 </div>
               </div>
             </div>
@@ -268,7 +275,7 @@ function Navigation() {
                             href="#"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            {t('navbar.products')}
+                            {t("navbar.products")}
                           </a>
                         </Menu.Item>
                         <Menu.Item>
@@ -276,7 +283,7 @@ function Navigation() {
                             href="/#soluciones"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            {t('navbar.solutions')}
+                            {t("navbar.solutions")}
                           </Link>
                         </Menu.Item>
                       </div>
@@ -286,7 +293,7 @@ function Navigation() {
                             href="/#recursos"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            {t('navbar.resources')}
+                            {t("navbar.resources")}
                           </Link>
                         </Menu.Item>
                         <Menu.Item>
@@ -294,7 +301,7 @@ function Navigation() {
                             href="/#precios"
                             className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                           >
-                            {t('navbar.pricing')}
+                            {t("navbar.pricing")}
                           </Link>
                         </Menu.Item>
                         <Menu.Item>
@@ -325,7 +332,7 @@ function Navigation() {
           {/* login, dashboard y register Mobile */}
           <div className=" flex justify-between items-center lg:hidden md:hidden top-16 w-56 text-right z-10">
             <div className="ml-4">
-              <LanguageSwitcher/>
+              <LanguageSwitcher />
             </div>
             <div className="">
               {(pathname === "/" || pathname === "/upperds.mx") && (
@@ -370,7 +377,7 @@ function Navigation() {
                                 }}
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
-                                {t('navbar.logout')}
+                                {t("navbar.logout")}
                               </button>
                             </Menu.Item>
                           </>
@@ -384,7 +391,7 @@ function Navigation() {
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
                                 {/* Registrarse */}
-                                {t('navbar.register')}
+                                {t("navbar.register")}
                               </Link>
                             </Menu.Item>
                             <Menu.Item>
@@ -394,7 +401,7 @@ function Navigation() {
                                 className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
                               >
                                 {/* Iniciar sesión */}
-                                {t('navbar.login')}
+                                {t("navbar.login")}
                               </Link>
                             </Menu.Item>
                           </>

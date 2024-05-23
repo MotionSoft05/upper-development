@@ -1,11 +1,19 @@
 "use client";
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation"; // Captura la url
 function Footer() {
   const { t } = useTranslation();
   const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar solo al inicio de la pagina
 
-  if (pathname.match(/\/pantalla[1-9]|10|\/paginasAleatorias/)) {
+  // No muestra Navigation en algunas URL determinadas
+  const hideFooter = () => {
+    const hideRoutes = ["/paginasAleatorias", "/pantallaDeServicio"];
+    return (
+      hideRoutes.includes(pathname) || pathname.match(/\/pantalla[1-9]|10/)
+    );
+  };
+
+  if (hideFooter()) {
     return null;
   }
 
@@ -24,8 +32,8 @@ function Footer() {
 
         <div className="my-2">
           <p className="font-light sm:text-lg text-gray-400 text-center">
-          {/* Title Footer */}
-            {t('footer.title')}
+            {/* Title Footer */}
+            {t("footer.title")}
           </p>
         </div>
         <div className="sm:flex sm:items-center sm:justify-between my-2">
