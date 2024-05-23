@@ -82,7 +82,7 @@ function Admin() {
     telefono: "",
     ps: "",
     pd: "",
-    total: "",
+    pservice: "",
     tipoPlan: "",
     empresa: "",
     inicio: "",
@@ -94,7 +94,7 @@ function Admin() {
     monto: "",
     ps: "", // Cambiado de "plan" a "ps"
     pd: "", // Nuevo campo "pd"
-    total: "", // Nuevo campo "numero"
+    pservice: "", // Nuevo campo "numero"
     tipoPlan: "",
   });
 
@@ -105,7 +105,7 @@ function Admin() {
     monto: "",
     ps: "", // Cambiado de "plan" a "ps"
     pd: "", // Nuevo campo "pd"
-    total: "", // Nuevo campo "numero"
+    pservice: "", // Nuevo campo "numero"
   });
   const [transacciones, setTransacciones] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
@@ -290,7 +290,7 @@ function Admin() {
         !nuevaTransaccion.monto ||
         !nuevaTransaccion.ps || // Cambiado de "plan" a "ps"
         !nuevaTransaccion.pd ||
-        !nuevaTransaccion.total
+        !nuevaTransaccion.pservice
       ) {
         // "Por favor, completa todos los campos de la transacción."
         alert(t("admin.messages.alertTransactionFields"));
@@ -313,7 +313,7 @@ function Admin() {
         monto: "",
         ps: "", // Cambiado de "plan" a "ps"
         pd: "",
-        total: "",
+        pservice: "",
       });
     } catch (error) {
       // "Error al guardar la transacción en Firebase:"
@@ -377,15 +377,15 @@ function Admin() {
 
       const psNumber = parseInt(usuarioEditado.ps || 0);
       const pdNumber = parseInt(usuarioEditado.pd || 0);
+      const pserviceNumber = parseInt(usuarioEditado.pservice || 0);
 
       const updateData = {
         nombre: usuarioEditado.nombre,
         apellido: usuarioEditado.apellido,
         telefono: usuarioEditado.telefono,
-        ps: isNaN(psNumber) ? undefined : psNumber,
-        pd: isNaN(pdNumber) ? undefined : pdNumber,
-        total:
-          isNaN(psNumber) || isNaN(pdNumber) ? undefined : psNumber + pdNumber,
+        ps: usuarioEditado.ps,
+        pd: usuarioEditado.pd,
+        pservice: usuarioEditado.pservice,
         tipoPlan: usuarioEditado.tipoPlan,
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
@@ -419,7 +419,7 @@ function Admin() {
           telefono: "",
           ps: "",
           pd: "",
-          total: "",
+          pservice: "",
           tipoPlan: "",
           empresa: "",
           inicio: "",
@@ -508,7 +508,7 @@ function Admin() {
         (usuario) =>
           (usuario.ps === "" || usuario.ps === 0) &&
           (usuario.pd === "" || usuario.pd === 0) &&
-          (usuario.total === "" || usuario.total === 0)
+          (usuario.pservice === "" || usuario.pservice === 0)
       );
     } else {
       return usuarios;
@@ -666,7 +666,7 @@ function Admin() {
                     PD
                   </th>
                   <th className="bg-grey-lightest px-2 text-center font-bold uppercase text-sm text-grey-light border-b border-grey-light">
-                    T
+                    PDS
                   </th>
                   <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Inicio */}
@@ -688,7 +688,14 @@ function Admin() {
               </thead>
               <tbody>
                 {aplicarFiltro().map((usuario) => (
-                  <tr className={`hover:bg-gray-200 ${modoEdicion && usuarioEditado.id === usuario.id && 'bg-stone-100'}`} key={usuario.id}>
+                  <tr
+                    className={`hover:bg-gray-200 ${
+                      modoEdicion &&
+                      usuarioEditado.id === usuario.id &&
+                      "bg-stone-100"
+                    }`}
+                    key={usuario.id}
+                  >
                     {/* NOMBRE Y APELLIDO */}
                     <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
@@ -793,36 +800,40 @@ function Admin() {
                           type="text"
                           value={usuarioEditado.pd}
                           className="max-w-[30px] text-center bg-stone-100"
-                          onChange={(e) =>
-                            setUsuarioEditado({
-                              ...usuarioEditado,
-                              pd: e.target.value,
-                              total:
-                                parseInt(usuarioEditado.ps) +
-                                parseInt(e.target.value),
-                            })
-                          }
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            if (value === "1" || value === "") {
+                              setUsuarioEditado({
+                                ...usuarioEditado,
+                                pd: value,
+                                total:
+                                  parseInt(usuarioEditado.ps) +
+                                  parseInt(value || 0),
+                              });
+                            }
+                          }}
                         />
                       ) : (
                         usuario.pd
                       )}
                     </td>
+
                     {/* TOTAL */}
                     <td className="border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
-                          value={usuarioEditado.total}
+                          value={usuarioEditado.pservice}
                           className="max-w-[30px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
-                              total: e.target.value,
+                              pservice: e.target.value,
                             })
                           }
                         />
                       ) : (
-                        usuario.total
+                        usuario.pservice
                       )}
                     </td>
                     {/* INICIO */}
@@ -1010,14 +1021,14 @@ function Admin() {
                 <input
                   className="p-2 rounded border border-gray-300 w-20"
                   type="text"
-                  value={nuevaTransaccion.total}
+                  value={nuevaTransaccion.pservice}
                   onChange={(e) =>
                     setNuevaTransaccion({
                       ...nuevaTransaccion,
-                      total: e.target.value,
+                      pservice: e.target.value,
                     })
                   }
-                  placeholder="Total"
+                  placeholder="PDS"
                 />
                 <button
                   onClick={handleGuardarTransaccion}
@@ -1049,7 +1060,7 @@ function Admin() {
                       PD
                     </th>
                     <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
-                      T
+                      PDS
                     </th>
                     <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                       {/* Acciones */}
@@ -1155,17 +1166,17 @@ function Admin() {
                         transaccionEditada.id === transaccion.id ? (
                           <input
                             type="text"
-                            value={transaccionEditada.total}
+                            value={transaccionEditada.pservice}
                             onChange={(e) =>
                               setTransaccionEditada({
                                 ...transaccionEditada,
-                                total: e.target.value,
+                                pservice: e.target.value,
                               })
                             }
                             className="p-2 rounded border border-gray-300 -mx-1"
                           />
                         ) : (
-                          transaccion.total
+                          transaccion.pservice
                         )}
                       </td>
                       <td className="py-2 px-4 border-b border-grey-light">

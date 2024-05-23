@@ -53,12 +53,12 @@ function DashBoard() {
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
-  const [showSoporte, setShowSoporte] = useState(false);  
+  const [showSoporte, setShowSoporte] = useState(false);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        try{
+        try {
           const docRef = doc(db, "usuarios", user.uid);
           const docSnap = await getDoc(docRef);
 
@@ -69,14 +69,13 @@ function DashBoard() {
             // El documento del usuario no existe
             console.log("No se encontraron datos para este usuario.");
           }
-        }
-        catch(error){
+        } catch (error) {
           console.log("Error al obtener los datos del usuario:", error);
         }
       }
       setUserEmail(user ? user.email : null); // Actualiza el estado del correo electrónico del usuario
       setShowUserAdmin(true); // Muestra ConsultaModEvento por defecto
-    });    
+    });
 
     return () => unsubscribe();
   }, []);
@@ -142,7 +141,12 @@ function DashBoard() {
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
 
-          {showAltaEvento && <AltaEventos setShowAltaEvento={setShowAltaEvento} setShowUserAdmin={setShowUserAdmin}/>}
+          {showAltaEvento && (
+            <AltaEventos
+              setShowAltaEvento={setShowAltaEvento}
+              setShowUserAdmin={setShowUserAdmin}
+            />
+          )}
           {showConsultaEvento && <ConsultaModEvento />}
 
           {showPantallaSalon && <PantallasSalon />}
