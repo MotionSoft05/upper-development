@@ -190,7 +190,7 @@ const Ediciondeempresa = () => {
           </div>
           {/* Permiso 3 */}
           <div className="bg- m-2 text-sm border-l-4 pl-1 border-red-500 flex">
-            <p className="font-medium">Permiso 1: </p>
+            <p className="font-medium">Permiso 3: </p>
             <p className="pl-2 bg-slate-100 mx-1 px-1 rounded-md">
               PERSONALICE SUS PANTALLAS
             </p>
