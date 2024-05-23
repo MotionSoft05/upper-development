@@ -41,8 +41,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 function Admin() {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
@@ -271,9 +270,7 @@ function Admin() {
         setDatosFiscalesConNombre(nuevosDatosFiscales);
         // ("Eliminado con éxito", "green");
         mostrarMensaje(t("admin.messages.successDeleteMessage"), "green");
-        
       } catch (error) {
-
         // "Error al eliminar datos fiscales:"
         console.error(t("admin.messages.errorDeletingFiscalData"), error);
         // "Error al eliminar datos fiscales", "red"
@@ -362,7 +359,10 @@ function Admin() {
       );
     } catch (error) {
       // "Error al eliminar la transacción de Firebase:"
-      console.error(t("admin.messages.errorDeletingTransactionFirebase"), error);
+      console.error(
+        t("admin.messages.errorDeletingTransactionFirebase"),
+        error
+      );
     }
   };
 
@@ -525,7 +525,9 @@ function Admin() {
 
       if (response.status === 200) {
         // console.log(`Usuario con ID ${usuarioId} habilitado correctamente.`)
-        console.log(t("admin.messages.errorDeletingFiscalData",{ usuarioId: usuarioId }));
+        console.log(
+          t("admin.messages.errorDeletingFiscalData", { usuarioId: usuarioId })
+        );
         // Actualizar el estado de React para reflejar el cambio
         setUsuarios((prevUsuarios) =>
           prevUsuarios.map((usuario) =>
@@ -559,7 +561,11 @@ function Admin() {
 
       if (response.status === 200) {
         // console.log(`Usuario con ID ${usuarioId} deshabilitado correctamente.`);
-        console.log(t("admin.messages.successDisableUserMessage",{ usuarioId: usuarioId }));
+        console.log(
+          t("admin.messages.successDisableUserMessage", {
+            usuarioId: usuarioId,
+          })
+        );
         // Actualizar el estado de React para reflejar el cambio
         setUsuarios((prevUsuarios) =>
           prevUsuarios.map((usuario) =>
@@ -636,45 +642,45 @@ function Admin() {
             <table class="w-full table-auto text-sm">
               <thead>
                 <tr class="text-sm leading-normal">
-                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Nombre y Apellido */}
                     {t("admin.nameAndSurname")}
                   </th>
-                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest font-bold px-2 uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Email */}
                     {t("admin.email")}
                   </th>
-                  <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 bg-grey-lightest px-2 font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Empresa */}
                     {t("admin.company")}
                   </th>
-                  <th className="py-2 px-0 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 bg-grey-lightest  px-2 font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Teléfono */}
                     {t("admin.phone")}
                   </th>
 
-                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest  px-2 text-center font-bold uppercase text-sm text-grey-light border-b border-grey-light">
                     PS
                   </th>
-                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest  px-2 text-center font-bold uppercase text-sm text-grey-light border-b border-grey-light">
                     PD
                   </th>
-                  <th className="bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="bg-grey-lightest px-2 text-center font-bold uppercase text-sm text-grey-light border-b border-grey-light">
                     T
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
                     {/* Inicio */}
                     {t("admin.start")}
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-center">
                     {/* Final */}
                     {t("admin.end")}
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-center">
                     {/* Tipo de Plan */}
                     {t("admin.planType")}
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-center">
                     {/* Acciones */}
                     {t("admin.actions")}
                   </th>
@@ -682,12 +688,14 @@ function Admin() {
               </thead>
               <tbody>
                 {aplicarFiltro().map((usuario) => (
-                  <tr className="hover:bg-grey-lighter" key={usuario.id}>
+                  <tr className={`hover:bg-gray-200 ${modoEdicion && usuarioEditado.id === usuario.id && 'bg-stone-100'}`} key={usuario.id}>
+                    {/* NOMBRE Y APELLIDO */}
                     <td className="border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={`${usuarioEditado.nombre} ${usuarioEditado.apellido}`}
+                          className="bg-stone-100"
                           onChange={(e) => {
                             const [nombre, apellido] =
                               e.target.value.split(" ");
@@ -702,11 +710,13 @@ function Admin() {
                         `${usuario.nombre} ${usuario.apellido}`
                       )}
                     </td>
-                    <td className="border-b border-grey-light">
+                    {/* EMAIL */}
+                    <td className="border-b  px-2 border-grey-light ">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.email}
+                          className="bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -719,11 +729,13 @@ function Admin() {
                         <div>{usuario.email}</div>
                       )}
                     </td>
-                    <td className="py-2 px-0 border-b border-grey-light">
+                    {/* EMPRESA */}
+                    <td className="py-2 px-2 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.empresa}
+                          className="bg-stone-100 max-w-[180px]"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -735,11 +747,13 @@ function Admin() {
                         usuario.empresa
                       )}
                     </td>
-                    <td className="py-2 px-0 border-b border-grey-light">
+                    {/* TELEFONO */}
+                    <td className="py-2 px-2 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.telefono}
+                          className="w-36 bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -751,11 +765,13 @@ function Admin() {
                         usuario.telefono
                       )}
                     </td>
-                    <td className="border-b border-grey-light">
+                    {/* PS */}
+                    <td className="border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.ps}
+                          className="max-w-[30px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -770,12 +786,13 @@ function Admin() {
                         usuario.ps
                       )}
                     </td>
-
-                    <td className="border-b border-grey-light">
+                    {/* PD */}
+                    <td className="border-b border-grey-light text-center ">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.pd}
+                          className="max-w-[30px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -790,11 +807,13 @@ function Admin() {
                         usuario.pd
                       )}
                     </td>
-                    <td className="border-b border-grey-light">
+                    {/* TOTAL */}
+                    <td className="border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.total}
+                          className="max-w-[30px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -806,11 +825,13 @@ function Admin() {
                         usuario.total
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    {/* INICIO */}
+                    <td className="border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.inicio}
+                          className="max-w-[70px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -822,11 +843,13 @@ function Admin() {
                         usuario.inicio
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    {/* FINAL */}
+                    <td className="py-2 px-4 border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.final}
+                          className="max-w-[70px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -838,11 +861,13 @@ function Admin() {
                         usuario.final
                       )}
                     </td>
-                    <td className="py-2 px-4 border-b border-grey-light">
+                    {/* TIPO DE PLAN */}
+                    <td className="py-2 px-4 border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
                           type="text"
                           value={usuarioEditado.tipoPlan}
+                          className="max-w-[80px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
@@ -854,6 +879,7 @@ function Admin() {
                         usuario.tipoPlan
                       )}
                     </td>
+                    {/* ACCIONES */}
                     <td className="py-2 px-4 border-b border-grey-light">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <div className="flex space-x-2">

@@ -20,7 +20,6 @@ function Sidebar(props) {
 
   // const {permisos} = props.userData
 
-
   const { t } = useTranslation();
 
   const changePanel = (setVisible) => {
@@ -42,10 +41,10 @@ function Sidebar(props) {
 
   //? -- Permisos --
   const permisos = props.userData?.permisos || 0;
-  const showAdministrador = [10].includes(permisos)
-  const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos)
-  const showAjustesPantalla = [10, 3].includes(permisos)
-  const showInformacion = [10, 2, 3].includes(permisos)
+  const showAdministrador = [10].includes(permisos);
+  const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos);
+  const showAjustesPantalla = [10, 3].includes(permisos);
+  const showInformacion = [10, 2, 3].includes(permisos);
   //? --------------
 
   //? -- Efectos Style --
@@ -56,7 +55,7 @@ function Sidebar(props) {
       return "flex flex-row items-center h-10 px-3 rounded-e-xl transition duration-300 text-gray-300 hover:bg-stone-200 hover:text-gray-700";
     }
   };
-  
+
   const efectLogo = (prop) => {
     if (prop) {
       return "flex items-center justify-center transition duration-300 text-gray-700 text-lg p-1";
@@ -109,146 +108,152 @@ function Sidebar(props) {
         )}
 
         {/* PERSONALICE SUS PANTALLAS */}
-        {(showPersonalicePantallas && <li className="my-px">
-          <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
-            {/* Personalice sus pantallas */}
-            {t("sidebar.title")}
-          </span>
-          {/* Tablero */}
-          <div className="my-px ">
-            <button
-              // className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
-              className={efectSelect(props.showUserAdmin)}
-              onClick={() => changePanel("setShowUserAdmin")}
-            >
-              <span className={efectLogo(props.showUserAdmin)}>
-                {/* <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" /> */}
-                <FontAwesomeIcon icon={faTableColumns} className="h-5" />
-              </span>
-              {/* Tablero DashBoard */}
-              <span className="ml-3"> {t("sidebar.dashboard")}</span>
-            </button>
-          </div>
-          {/* Alta de eventos */}
-          <div className="my-px">
-            <button
-              // className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
-              className={efectSelect(props.showAltaEvento)}
-              onClick={() => changePanel("setShowAltaEvento")}
-            >
-              <span className={efectLogo(props.showAltaEvento)}>
-                <FontAwesomeIcon icon={faCalendarPlus} className="h-5" />
-              </span>
-              {/* Alta de eventos */}
-              <span className="ml-3">{t("sidebar.eventRegistration")}</span>
-            </button>
-          </div>
-          {/* Consulta de eventos */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showConsultaEvento)}
-              onClick={() => changePanel("setShowConsultaEvento")}
-            >
-              <span className={efectLogo(props.showConsultaEvento)}>
-                <FontAwesomeIcon icon={faClipboardQuestion} className="h-5" />
-              </span>
-              {/* Consulta de eventos */}
-              <span className="ml-3">{t("sidebar.eventQuery")}</span>
-            </button>
-          </div>
-        </li>)}
+        {showPersonalicePantallas && (
+          <li className="my-px">
+            <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
+              {/* Personalice sus pantallas */}
+              {t("sidebar.title")}
+            </span>
+            {/* Tablero */}
+            <div className="my-px ">
+              <button
+                // className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                className={efectSelect(props.showUserAdmin)}
+                onClick={() => changePanel("setShowUserAdmin")}
+              >
+                <span className={efectLogo(props.showUserAdmin)}>
+                  {/* <img src="/img/dashboard-svgrepo-com.svg" className="p-1 h-8" /> */}
+                  <FontAwesomeIcon icon={faTableColumns} className="h-5" />
+                </span>
+                {/* Tablero DashBoard */}
+                <span className="ml-3"> {t("sidebar.dashboard")}</span>
+              </button>
+            </div>
+            {/* Alta de eventos */}
+            <div className="my-px">
+              <button
+                // className="flex flex-row items-center h-10 px-3 rounded-lg text-gray-300 hover:bg-gray-100 hover:text-gray-700"
+                className={efectSelect(props.showAltaEvento)}
+                onClick={() => changePanel("setShowAltaEvento")}
+              >
+                <span className={efectLogo(props.showAltaEvento)}>
+                  <FontAwesomeIcon icon={faCalendarPlus} className="h-5" />
+                </span>
+                {/* Alta de eventos */}
+                <span className="ml-3">{t("sidebar.eventRegistration")}</span>
+              </button>
+            </div>
+            {/* Consulta de eventos */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showConsultaEvento)}
+                onClick={() => changePanel("setShowConsultaEvento")}
+              >
+                <span className={efectLogo(props.showConsultaEvento)}>
+                  <FontAwesomeIcon icon={faClipboardQuestion} className="h-5" />
+                </span>
+                {/* Consulta de eventos */}
+                <span className="ml-3">{t("sidebar.eventQuery")}</span>
+              </button>
+            </div>
+          </li>
+        )}
 
         {/* AJUSTES PANTALLAS */}
-        {(showAjustesPantalla && <li className="my-px">
-          <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
-            {t("sidebar.screenSettings")}
-          </span>
-          {/* Pantallas salon */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showPantallaSalon)}
-              onClick={() => changePanel("setShowPantallaSalon")}
-            >
-              <span className={efectLogo(props.showPantallaSalon)}>
-                <FontAwesomeIcon icon={faSolarPanel} className="h-5" />
-              </span>
-              {/* Pantallas salon */}
-              <span className="ml-3">{t("sidebar.roomScreens")}</span>
-            </button>
-          </div>
-          {/* Pantallas Directorio */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showPantallaDirectorio)}
-              onClick={() => changePanel("setShowPantallaDirectorio")}
-            >
-              <span className={efectLogo(props.showPantallaDirectorio)}>
-                <FontAwesomeIcon icon={faDisplay} className="h-5" />
-              </span>
-              {/* Pantallas directorio */}
-              <span className="ml-3">{t("sidebar.directoryScreens")}</span>
-            </button>
-          </div>
-          {/* Publicidad */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showPublicidad)}
-              onClick={() => changePanel("setShowPublicidad")}
-            >
-              <span className={efectLogo(props.showPublicidad)}>
-                <FontAwesomeIcon icon={faBullhorn} className="h-5" />
-              </span>
-              {/* Publicidad */}
-              <span className="ml-3">{t("sidebar.advertisement")}</span>
-            </button>
-          </div>
-        </li>)}
+        {showAjustesPantalla && (
+          <li className="my-px">
+            <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
+              {t("sidebar.screenSettings")}
+            </span>
+            {/* Pantallas salon */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showPantallaSalon)}
+                onClick={() => changePanel("setShowPantallaSalon")}
+              >
+                <span className={efectLogo(props.showPantallaSalon)}>
+                  <FontAwesomeIcon icon={faSolarPanel} className="h-5" />
+                </span>
+                {/* Pantallas salon */}
+                <span className="ml-3">{t("sidebar.roomScreens")}</span>
+              </button>
+            </div>
+            {/* Pantallas Directorio */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showPantallaDirectorio)}
+                onClick={() => changePanel("setShowPantallaDirectorio")}
+              >
+                <span className={efectLogo(props.showPantallaDirectorio)}>
+                  <FontAwesomeIcon icon={faDisplay} className="h-5" />
+                </span>
+                {/* Pantallas directorio */}
+                <span className="ml-3">{t("sidebar.directoryScreens")}</span>
+              </button>
+            </div>
+            {/* Publicidad */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showPublicidad)}
+                onClick={() => changePanel("setShowPublicidad")}
+              >
+                <span className={efectLogo(props.showPublicidad)}>
+                  <FontAwesomeIcon icon={faBullhorn} className="h-5" />
+                </span>
+                {/* Publicidad */}
+                <span className="ml-3">{t("sidebar.advertisement")}</span>
+              </button>
+            </div>
+          </li>
+        )}
 
         {/* MAS INFORMACION */}
-        {(showInformacion && <li className="my-px">
-          <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
-            {t("sidebar.moreInformation")}
-          </span>
-          {/* Mis Datos */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showlicencia)}
-              onClick={() => changePanel("setShowlicencia")}
-            >
-              <span className={efectLogo(props.showlicencia)}>
-                <FontAwesomeIcon icon={faBookOpenReader} className="h-5" />
-              </span>
-              {/* Mis datos */}
-              <span className="ml-3">{t("sidebar.myData")}</span>
-            </button>
-          </div>
-          {/* Guia de Usuario */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showGuia)}
-              onClick={() => changePanel("setShowGuia")}
-            >
-              <span className={efectLogo(props.showGuia)}>
-                <FontAwesomeIcon icon={faCircleQuestion} className="h-5" />
-              </span>
-              {/* Guías de Usuario */}
-              <span className="ml-3">{t("sidebar.userGuides")}</span>
-            </button>
-          </div>
-          {/* Contacto soporte */}
-          <div className="my-px">
-            <button
-              className={efectSelect(props.showSoporte)}
-              onClick={() => changePanel("setShowSoporte")}
-            >
-              <span className={efectLogo(props.showSoporte)}>
-                <FontAwesomeIcon icon={faHeadset} className="h-5" />
-              </span>
-              {/* Contacto Soporte */}
-              <span className="ml-3">{t("sidebar.supportContact")}</span>
-            </button>
-          </div>
-        </li>)}
+        {showInformacion && (
+          <li className="my-px">
+            <span className="flex font-medium italic text-sm text-gray-300 px-4 mt-4 uppercase border-b-2 border-blue-400">
+              {t("sidebar.moreInformation")}
+            </span>
+            {/* Mis Datos */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showlicencia)}
+                onClick={() => changePanel("setShowlicencia")}
+              >
+                <span className={efectLogo(props.showlicencia)}>
+                  <FontAwesomeIcon icon={faBookOpenReader} className="h-5" />
+                </span>
+                {/* Mis datos */}
+                <span className="ml-3">{t("sidebar.myData")}</span>
+              </button>
+            </div>
+            {/* Guia de Usuario */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showGuia)}
+                onClick={() => changePanel("setShowGuia")}
+              >
+                <span className={efectLogo(props.showGuia)}>
+                  <FontAwesomeIcon icon={faCircleQuestion} className="h-5" />
+                </span>
+                {/* Guías de Usuario */}
+                <span className="ml-3">{t("sidebar.userGuides")}</span>
+              </button>
+            </div>
+            {/* Contacto soporte */}
+            <div className="my-px">
+              <button
+                className={efectSelect(props.showSoporte)}
+                onClick={() => changePanel("setShowSoporte")}
+              >
+                <span className={efectLogo(props.showSoporte)}>
+                  <FontAwesomeIcon icon={faHeadset} className="h-5" />
+                </span>
+                {/* Contacto Soporte */}
+                <span className="ml-3">{t("sidebar.supportContact")}</span>
+              </button>
+            </div>
+          </li>
+        )}
 
         {/* SALIR */}
         <li className="my-px">
