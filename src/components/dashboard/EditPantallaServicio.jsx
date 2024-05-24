@@ -1,16 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { ChromePicker } from "react-color";
+import { initializeApp } from "firebase/app";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  doc,
+  addDoc,
+  setDoc,
+  getDocs,
+} from "firebase/firestore";
+import { getAuth } from "firebase/auth";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
+  authDomain: "upper-8c817.firebaseapp.com",
+  projectId: "upper-8c817",
+  storageBucket: "upper-8c817.appspot.com",
+  messagingSenderId: "798455798906",
+  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
+  measurementId: "G-6VHX927GH1",
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
 const EditPantallaServicio = () => {
   const [fontColor, setFontColor] = useState("#000000");
   const [templateColor, setTemplateColor] = useState("#ffffff");
   const [selectedFontStyle, setSelectedFontStyle] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
-  const [screenNames, setScreenNames] = useState(["", "", ""]);
+  const [screenNames, setScreenNames] = useState([]);
   const [view, setView] = useState("personalization");
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [showTemplateColorPicker, setShowTemplateColorPicker] = useState(false);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        const userEmail = user.email;
+        console.log("Email del usuario logeado:", userEmail);
+
+        const usersRef = collection(db, "usuarios");
+        const q = query(usersRef, where("email", "==", userEmail));
+        const snapshot = await getDocs(q);
+        if (!snapshot.empty) {
+          const userData = snapshot.docs[0].data();
+          console.log("PDS del usuario:", userData.pservice);
+          const pdsCount = userData.pservice;
+
+          // Crear un array de longitud igual a pdsCount y llenarlo con valores vacíos
+          const newScreenNames = Array.from({ length: pdsCount }, () => "");
+          setScreenNames(newScreenNames);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  const guardarConfiguracion = async () => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        const templateServiciosRef = collection(db, "TemplateServicios");
+
+        await addDoc(templateServiciosRef, {
+          colorLetra: fontColor,
+          colorPlantilla: templateColor,
+          estilodetexto: selectedFontStyle?.value || "", // Estilo de texto
+          ciudad: selectedCity?.value || "", // Ciudad seleccionada
+          userId: user.uid,
+        });
+
+        console.log("Datos de configuración guardados correctamente.");
+      } else {
+        console.log("Usuario no autenticado.");
+      }
+    } catch (error) {
+      console.error("Error al guardar datos de configuración:", error);
+    }
+  };
 
   const fontStyleOptions = [
     { value: "Arial", label: "Arial" },
@@ -195,7 +269,7 @@ const EditPantallaServicio = () => {
               </label>
               <Select
                 options={fontStyleOptions}
-                value={selectedFontStyle}
+                value={selectedFontStyle} // Aquí estableces el valor seleccionado
                 onChange={handleFontStyleChange}
               />
             </div>
@@ -235,7 +309,10 @@ const EditPantallaServicio = () => {
             </div>
           </div>
           <div className="flex justify-end mt-6">
-            <button className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600">
+            <button
+              onClick={guardarConfiguracion}
+              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
+            >
               Guardar
             </button>
           </div>
