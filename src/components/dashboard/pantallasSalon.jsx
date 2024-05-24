@@ -621,47 +621,36 @@ function PantallasSalon() {
             {t("screenSalon.title")}
           </h2>
         </div>
-        {usuarioAutorizado && (
-          <div className="mb-4">
-            <label
-              htmlFor="empresa"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Seleccionar Empresa:
-            </label>
-            <div className="relative">
-              <select
-                id="empresa"
-                value={empresaSeleccionada}
-                onChange={(e) => setEmpresaSeleccionada(e.target.value)}
-                className="block w-full bg-white border border-gray-300 rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              >
-                <option value="">Seleccionar...</option>
-                {empresas.map((empresa) => (
-                  <option key={empresa} value={empresa}>
-                    {empresa}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                <svg
-                  className="h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fillRule="evenodd"
-                    d="M10 3a1 1 0 011 1v11.586l3.293-3.293a1 1 0 111.414 1.414l-5 5a1 1 0 01-1.414 0l-5-5a1 1 0 111.414-1.414L9 15.586V4a1 1 0 011-1z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        )}
 
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
+          {/* // TODO: Supongo que solo deberia cambiar su propia empresa y no otras ajenas */}
+          {/* SELECT DE EMPRESA */}
+          {usuarioAutorizado && (
+            <div className="mb-4 ">
+              <div className=" flex justify-center">
+                <label
+                  htmlFor="empresa"
+                  className="text-base font-semibold text-white mr-4 my-auto"
+                >
+                  Empresa:
+                </label>
+                <select
+                  id="empresa"
+                  value={empresaSeleccionada}
+                  onChange={(e) => setEmpresaSeleccionada(e.target.value)}
+                  className="block w-72 pl-2 bg-white border border-gray-300 rounded-sm shadow-sm  focus:outline-none focus:ring-indigo-400 focus:border-indigo-400 sm:text-sm"
+                >
+                  <option value="">Seleccionar...</option>
+                  {empresas.map((empresa) => (
+                    <option key={empresa} value={empresa}>
+                      {empresa}
+                    </option>
+                  ))}
+              
+                </select>
+              </div>
+            </div>
+          )}
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             {/* Personalización del Template */}
             {t("screenSalon.templateCustomization")}
