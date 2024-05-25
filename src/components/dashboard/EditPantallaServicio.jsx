@@ -37,6 +37,7 @@ const EditPantallaServicio = () => {
   const [view, setView] = useState("personalization");
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [showTemplateColorPicker, setShowTemplateColorPicker] = useState(false);
+  const [userData, setUserData] = useState(null); // Agregamos estado para almacenar los datos del usuario
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -50,7 +51,8 @@ const EditPantallaServicio = () => {
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const userData = snapshot.docs[0].data();
-          console.log("PDS del usuario:", userData.pservice);
+          console.log("Datos del usuario:", userData);
+          setUserData(userData); // Almacenamos los datos del usuario en el estado
           const pdsCount = userData.pservice;
 
           // Crear un array de longitud igual a pdsCount y llenarlo con valores vacíos
@@ -74,7 +76,7 @@ const EditPantallaServicio = () => {
           colorPlantilla: templateColor,
           estilodetexto: selectedFontStyle?.value || "", // Estilo de texto
           ciudad: selectedCity?.value || "", // Ciudad seleccionada
-          userId: user.uid,
+          empresa: userData.empresa, // Utilizamos el campo "empresa" del estado userData
         });
 
         console.log("Datos de configuración guardados correctamente.");
