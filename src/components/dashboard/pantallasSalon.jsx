@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @next/next/no-img-element */
 import React, { useState, useEffect, useRef } from "react";
 import { ChromePicker } from "react-color";
@@ -646,7 +647,6 @@ function PantallasSalon() {
                       {empresa}
                     </option>
                   ))}
-              
                 </select>
               </div>
             </div>

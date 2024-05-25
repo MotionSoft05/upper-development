@@ -361,6 +361,7 @@ function PantallasDirectorio() {
     fetchUserData();
     fetchTemplateData();
     fetchEmpresaData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEmpresa]);
 
   const handleCityChange = (selectedOption) => {
@@ -739,13 +740,13 @@ function PantallasDirectorio() {
   };
 
   // Estilos personalizados de React Select
-const customStyles = {
-  control: (provided) => ({
-    ...provided,
-    height: '20px', // Ajusta la altura del select
-    minHeight: '40px', // Asegura que la altura mínima sea consistente
-  }),
-};
+  const customStyles = {
+    control: (provided) => ({
+      ...provided,
+      height: "20px", // Ajusta la altura del select
+      minHeight: "40px", // Asegura que la altura mínima sea consistente
+    }),
+  };
 
   return (
     <section className="pl-16 md:px-8 py-2">

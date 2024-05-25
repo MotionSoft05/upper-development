@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { initializeApp } from "firebase/app";
 import {
   getFirestore,
@@ -188,6 +189,7 @@ function Admin() {
         unsubscribe();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleGuardarCambiosDatosFiscales = async () => {
