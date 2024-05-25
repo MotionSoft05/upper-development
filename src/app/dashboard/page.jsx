@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import Sidebar from "@/components/dashboard/SideBar";
 import PantallasDirectorio from "@/components/dashboard/PantallasDirectorio";

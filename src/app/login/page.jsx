@@ -59,8 +59,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
 function LogIn({ url }) {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -149,7 +148,7 @@ function LogIn({ url }) {
       setIsResendingVerificationEmail(true);
       const user = auth.currentUser;
       await sendEmailVerification(user);
-      setSuccessMessage(t("login.verificationEmailResent"));// "Correo de verificación reenviado exitosamente"
+      setSuccessMessage(t("login.verificationEmailResent")); // "Correo de verificación reenviado exitosamente"
       setIsResendingVerificationEmail(false);
     } catch (error) {
       setIsResendingVerificationEmail(false);
@@ -226,7 +225,7 @@ function LogIn({ url }) {
                     isFormSubmitted && !password ? "" : ""
                   }`}
                   id="exampleFormControlInput22"
-                  placeholder= {t("login.password")}//"Contraseña"
+                  placeholder={t("login.password")} //"Contraseña"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -268,9 +267,9 @@ function LogIn({ url }) {
                   {/* ¿No tienes una cuenta? */}
                   {t("login.noAccountMessage")}
                   <strong>
-                    <Link href="/register"> 
-                    {/* Registrate aquí */}
-                    {t("login.registerLink")}
+                    <Link href="/register">
+                      {/* Registrate aquí */}
+                      {t("login.registerLink")}
                     </Link>
                   </strong>
                 </div>
