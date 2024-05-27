@@ -264,6 +264,9 @@ function PantallasSalon() {
 
               // Establecer el logo
               setSelectedLogo(templateSalonesDocData.logo || null);
+
+              // Establecer el idioma
+              setSelectedLanguage(templateSalonesDocData.idioma || "español");
             }
           } else {
             // Si hay una empresa seleccionada, cargar los datos de personalización para esa empresa específica
@@ -295,6 +298,8 @@ function PantallasSalon() {
 
               // Establecer el logo
               setSelectedLogo(templateSalonesDocData.logo || null);
+              // Establecer el idioma
+              setSelectedLanguage(templateSalonesDocData.idioma || "español");
             }
           }
         }
@@ -709,6 +714,57 @@ function PantallasSalon() {
             </div>
 
             <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-1">
+                {/* Idiomas */}
+                {t("screenSalon.languages")}
+              </label>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="spanish"
+                    value="español"
+                    checked={selectedLanguage === "español"}
+                    onChange={handleLanguageChange}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label htmlFor="spanish" className="ml-2 mr-4 text-white">
+                    {/* Español */}
+                    {t("screenSalon.idspanish")}
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="english"
+                    value="ingles"
+                    checked={selectedLanguage === "ingles"}
+                    onChange={handleLanguageChange}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label htmlFor="english" className="ml-2 mr-4 text-white">
+                    {/* Inglés */}
+                    {t("screenSalon.idenglish")}
+                  </label>
+                </div>
+                <div className="flex items-center">
+                  <input
+                    type="radio"
+                    id="both"
+                    value="ambos"
+                    checked={selectedLanguage === "ambos"}
+                    onChange={handleLanguageChange}
+                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                  />
+                  <label htmlFor="both" className="ml-2 text-white">
+                    {/* Español/Inglés */}
+                    {t("screenSalon.idspanish/english")}
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-4">
               <div>
                 <label className="text-white dark:text-gray-200">
                   {/* Color de letra */}
@@ -778,6 +834,7 @@ function PantallasSalon() {
                 ))}
               </div>
             </div>
+
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 {/* Color de la plantilla */}
@@ -810,56 +867,6 @@ function PantallasSalon() {
                   className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
-              </div>
-            </div>
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Idiomas */}
-                {t("screenSalon.languages")}
-              </label>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="spanish"
-                    value="español"
-                    checked={selectedLanguage === "español"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="spanish" className="ml-2 mr-4 text-white">
-                    {/* Español */}
-                    {t("screenSalon.idspanish")}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="english"
-                    value="ingles"
-                    checked={selectedLanguage === "ingles"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="english" className="ml-2 mr-4 text-white">
-                    {/* Inglés */}
-                    {t("screenSalon.idenglish")}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="both"
-                    value="ambos"
-                    checked={selectedLanguage === "ambos"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="both" className="ml-2 text-white">
-                    {/* Español/Inglés */}
-                    {t("screenSalon.idspanish/english")}
-                  </label>
-                </div>
               </div>
             </div>
           </div>

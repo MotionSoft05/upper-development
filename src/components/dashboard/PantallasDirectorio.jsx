@@ -52,6 +52,7 @@ function PantallasDirectorio() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedPublicidad, setSelectedPublicidad] = useState(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("español");
 
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México" },
@@ -297,6 +298,7 @@ function PantallasDirectorio() {
                 ciudad,
                 setPortrait,
                 publicidad,
+                idioma,
               } = templateDirectoriosDoc;
 
               setFontColor(fontColor || "#000000");
@@ -309,6 +311,7 @@ function PantallasDirectorio() {
               setSelectedCity({ value: ciudad, label: ciudad });
               setSetPortrait(setPortrait || false);
               setSelectedPublicidad(publicidad || null);
+              setSelectedLanguage(idioma || "español");
             } else {
               console.log(
                 "No se encontró información en TemplateDirectorios por empresa. Usando valores iniciales."
@@ -397,6 +400,7 @@ function PantallasDirectorio() {
           ciudad,
           setPortrait,
           publicidad,
+          idioma,
         } = templateDirectoriosDoc;
 
         // Actualiza el estado con la información obtenida
@@ -410,6 +414,7 @@ function PantallasDirectorio() {
         setSelectedCity({ value: ciudad, label: ciudad });
         setSetPortrait(setPortrait || false);
         setSelectedPublicidad(publicidad || null);
+        setSelectedLanguage(idioma || "español");
       } else {
         console.log(
           "No se encontró información en TemplateDirectorios para la empresa seleccionada."
@@ -423,6 +428,7 @@ function PantallasDirectorio() {
         setSelectedCity(null);
         setSetPortrait(false);
         setSelectedPublicidad(null);
+        setSelectedLanguage("español");
         // O mostrar un mensaje al usuario
       }
     } catch (error) {
@@ -591,6 +597,16 @@ function PantallasDirectorio() {
         return;
       }
 
+      if (!selectedLanguage) {
+        // Si no se ha seleccionado ningún idioma
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: "Por favor, seleccione un idioma.",
+        });
+        return;
+      }
+
       const personalizacionTemplate = {
         fontColor: fontColor,
         templateColor: templateColor,
@@ -599,6 +615,7 @@ function PantallasDirectorio() {
         ciudad: selectedCity.value,
         setPortrait: setPortrait,
         publicidad: selectedPublicidad,
+        idioma: selectedLanguage,
         empresa: selectedEmpresa ? selectedEmpresa.value : nombreEmpresa,
       };
 
@@ -706,9 +723,8 @@ function PantallasDirectorio() {
 
       Swal.fire({
         icon: "success",
-        title: "¡Éxito!",
+        title: t("screenSalon.customizationSavedSuccess"),
         showConfirmButton: false,
-        text: "Información de personalización guardada con éxito.",
         timer: 2000,
       });
     } catch (error) {
@@ -746,6 +762,10 @@ function PantallasDirectorio() {
       height: "20px", // Ajusta la altura del select
       minHeight: "40px", // Asegura que la altura mínima sea consistente
     }),
+  };
+
+  const handleLanguageChange = (e) => {
+    setSelectedLanguage(e.target.value);
   };
 
   return (
@@ -945,6 +965,56 @@ function PantallasDirectorio() {
                   className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-white dark:text-gray-200 block mb-1">
+              {/* Idiomas */}
+              {t("screenSalon.languages")}
+            </label>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="spanish"
+                  value="español"
+                  checked={selectedLanguage === "español"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="spanish" className="ml-2 mr-4 text-white">
+                  {/* Español */}
+                  {t("screenSalon.idspanish")}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="english"
+                  value="ingles"
+                  checked={selectedLanguage === "ingles"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="english" className="ml-2 mr-4 text-white">
+                  {/* Inglés */}
+                  {t("screenSalon.idenglish")}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="both"
+                  value="ambos"
+                  checked={selectedLanguage === "ambos"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="both" className="ml-2 text-white">
+                  {/* Español/Inglés */}
+                  {t("screenSalon.idspanish/english")}
+                </label>
               </div>
             </div>
           </div>
