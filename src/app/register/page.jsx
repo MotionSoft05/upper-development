@@ -11,7 +11,6 @@ import Link from "next/link";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
-// import terminosYCondiciones from '../../../public/Terminos-y-Condiciones.pdf'
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -253,6 +252,7 @@ function Register() {
     }
   };
 
+  //* --- Validaciones ---
   const validateFirstName = (value) => {
     if (!value) {
       // "El nombre es obligatorio";
@@ -308,10 +308,8 @@ function Register() {
     }
     return null;
   };
+  //* --- Validaciones ---
 
-  // const openTermsAndConditions = () => {
-  //   window.open('../../../public/Terminos-y-Condiciones.pdf', "_blank");
-  // };
   const openTermsAndConditions = () => {
     window.open("/Terminos-y-Condiciones.pdf", "_blank");
   };
@@ -573,31 +571,6 @@ function Register() {
                     {t("register.termsLink")}
                   </button>
                 </label>
-                {/* POPUP TERMINOS Y CONDICIONES */}
-                {showTermsAndConditions && (
-                  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-8 rounded-lg">
-                      <p className="text-xl font-semibold mb-4">
-                        {/* Usuario registrado correctamente. */}
-                        {t("register.registrationSuccess")}
-                      </p>
-                      <p className="mb-4">
-                        {/* Se ha enviado un correo de verificación... */}
-                        {t("register.verificationEmailSent")}
-                      </p>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowTermsAndConditions(false)}
-                      >
-                        <p className="text-blue-500 hover:underline">
-                          {/* Cerrar terminos y condiciones */}
-                          Cerrar
-                        </p>
-                      </button>
-                    </div>
-                  </div>
-                )}
               </div>
               <div className="flex items-start flex-col">
                 <button
