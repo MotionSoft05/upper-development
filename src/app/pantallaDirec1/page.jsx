@@ -29,7 +29,6 @@ const obtenerHora = () => {
 };
 
 function PantallaDirec1() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
@@ -215,6 +214,7 @@ function PantallaDirec1() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
+            const userCompany = userData.empresa;
             const nombrePantallasUsuario =
               userData.nombrePantallasDirectorio || {};
             const pantallasNumeradas = {};
@@ -226,7 +226,7 @@ function PantallaDirec1() {
             const eventosRef = collection(firestore, "eventos");
             const eventosQuery = query(
               eventosRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
             const querySnapshot = await getDocs(eventosQuery);
 
@@ -279,10 +279,12 @@ function PantallaDirec1() {
             });
 
             const templateRef = collection(firestore, "TemplateDirectorios");
+
             const templateQuery = query(
               templateRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
+
             const templateSnapshot = await getDocs(templateQuery);
 
             if (!templateSnapshot.empty) {
@@ -339,8 +341,7 @@ function PantallaDirec1() {
           setIsLoading(false);
         })
         .catch((error) => {
-          
-          console.error(t("pantallaDirec.weatherDataFetchError"), error);// "Error al obtener datos del clima:"
+          console.error(t("pantallaDirec.weatherDataFetchError"), error); // "Error al obtener datos del clima:"
           setError(t("pantallaDirec.weatherInfoUnavailable")); // "No se pudo obtener la información del clima"
           setIsLoading(false);
         });
@@ -448,7 +449,7 @@ function PantallaDirec1() {
   }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
-    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true })
+    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
 
     const meses = [
       "1",
@@ -530,7 +531,7 @@ function PantallaDirec1() {
             <p>
               {/* No se a encontrado ningún evento o publicidad. La pagina se
               reiniciara en {countdown} segundos */}
-              {t("pantallaDirec.noEventsOrAdvertisements", {countdown})}
+              {t("pantallaDirec.noEventsOrAdvertisements", { countdown })}
             </p>
           </section>
         </>
@@ -666,11 +667,11 @@ function PantallaDirec1() {
                   </p>
                 </div>
               ) : (
-                  //si no da el Clima muestra un mensaje de Bienvenida
+                //si no da el Clima muestra un mensaje de Bienvenida
                 <h2 className="text-4xl mr-16">
                   {/* Bienvenido */}
                   {t("pantallaDirec.welcomeTitle")}
-                </h2> 
+                </h2>
               )}
             </div>
           </div>
