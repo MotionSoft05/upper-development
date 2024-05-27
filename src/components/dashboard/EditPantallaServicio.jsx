@@ -49,12 +49,32 @@ const EditPantallaServicio = () => {
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const userData = snapshot.docs[0].data();
-          setUserData(userData); // Almacenamos los datos del usuario en el estado
+          setUserData(userData);
           const pdsCount = userData.pservice;
 
-          // Crear un array de longitud igual a pdsCount y llenarlo con valores vacíos
           const newScreenNames = Array.from({ length: pdsCount }, () => "");
           setScreenNames(newScreenNames);
+
+          // Buscar la empresa del usuario en la colección "TemplateServicios"
+          const templateServiciosRef = collection(db, "TemplateServicios");
+          const qEmpresa = query(
+            templateServiciosRef,
+            where("empresa", "==", userData.empresa)
+          );
+          const snapshotEmpresa = await getDocs(qEmpresa);
+          if (!snapshotEmpresa.empty) {
+            const templateData = snapshotEmpresa.docs[0].data();
+            setFontColor(templateData.colorLetra);
+            setTemplateColor(templateData.colorPlantilla);
+            setSelectedFontStyle({
+              value: templateData.estilodetexto,
+              label: templateData.estilodetexto,
+            });
+            setSelectedCity({
+              value: templateData.ciudad,
+              label: templateData.ciudad,
+            });
+          }
         }
       }
     };
