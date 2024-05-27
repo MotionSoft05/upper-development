@@ -4,6 +4,7 @@ import "firebase/compat/firestore";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
 import { useTranslation } from "react-i18next";
+import Select from "react-select";
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
   authDomain: "upper-8c817.firebaseapp.com",
@@ -40,6 +41,49 @@ function ConsultaModEvento() {
     []
   );
   const [cambiosPendientes, setCambiosPendientes] = useState(false);
+  const [empresas, setEmpresas] = useState([]); // Estado para almacenar las opciones del filtro de empresas
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
+
+  useEffect(() => {
+    const fetchEmpresas = async () => {
+      try {
+        const empresasSnapshot = await firebase
+          .firestore()
+          .collection("usuarios")
+          .get();
+        const empresasData = empresasSnapshot.docs.map((doc) => ({
+          value: doc.data().empresa,
+          label: doc.data().empresa,
+        }));
+        // Eliminar duplicados de empresas
+        const uniqueEmpresas = empresasData.filter(
+          (empresa, index, self) =>
+            index ===
+            self.findIndex(
+              (t) => t.value === empresa.value && t.label === empresa.label
+            )
+        );
+        setEmpresas(uniqueEmpresas);
+      } catch (error) {
+        console.error("Error al obtener las empresas:", error);
+      }
+    };
+    fetchEmpresas();
+  }, []);
+
+  const handleEmpresaChange = (selectedOption) => {
+    setEmpresaSeleccionada(selectedOption);
+  };
+
+  // Filtrar eventos según la empresa seleccionada
+  // Filtrar eventos según la empresa seleccionada
+  const eventosFiltradosPorEmpresa = eventos.filter((evento) => {
+    if (empresaSeleccionada === null || empresaSeleccionada.value === null) {
+      return true; // Mostrar todos los eventos si no hay empresa seleccionada
+    } else {
+      return evento.empresa === empresaSeleccionada.value;
+    }
+  });
 
   useEffect(() => {
     const unsubscribeEventos = firebase.auth().onAuthStateChanged((user) => {
@@ -357,6 +401,24 @@ function ConsultaModEvento() {
             {t("consultaModEventos.title")}
           </h1>
         </div>
+        {/* Agregar React Select para filtrar por empresa */}
+        {user && // Verificar si user no es null antes de acceder a sus propiedades
+          (user.email === "uppermex10@gmail.com" ||
+            user.email === "ulises.jacobo@hotmail.com" ||
+            user.email === "contacto@upperds.mx") && (
+            <div className="mb-4">
+              <Select
+                options={[
+                  { value: null, label: "VER TODOS" }, // Opción "Ver Todos"
+                  ...empresas, // Otras opciones de empresas
+                ]}
+                onChange={handleEmpresaChange}
+                value={empresaSeleccionada}
+                placeholder={"Seleccionar empresa..."}
+              />
+            </div>
+          )}
+
         <div className="mb-4">
           <button
             onClick={() => setFiltro("activos")}
@@ -444,7 +506,7 @@ function ConsultaModEvento() {
               </tr>
             </thead>
             <tbody className="bg-white">
-              {eventos
+              {eventosFiltradosPorEmpresa
                 .filter((evento) => {
                   if (filtro === "activos") {
                     return evento.status === true;
@@ -478,7 +540,6 @@ function ConsultaModEvento() {
 
                   return ordenPorUsuario;
                 })
-
                 .map((evento, index) => {
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
