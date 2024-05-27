@@ -250,10 +250,11 @@
     "finishedEvents": "Eventos finalizados",
     "subscriptionPlan": "Plan de suscripción",
     "currentSubscriptions": "Suscripciones Actualmente",
-    "roomScreen": "Pantalla salón",
-    "directoryScreen": "Pantalla directorio",
+    "roomScreen": "Pantalla Salón",
+    "directoryScreen": "Pantalla Directorio",
     "roomAdvertisement": "Publicidad Salón",
-    "directoryAdvertisement": "Publicidad Directorio"
+    "directoryAdvertisement": "Publicidad Directorio",
+    "servicescreen": "Pantalla Servicio"
   },
   "consultaModEventos": {
     "title": "Consulta de Eventos",

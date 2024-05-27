@@ -13,10 +13,11 @@ import { initializeApp } from "firebase/app";
 import { useTranslation } from "react-i18next";
 
 function UserAdmin() {
-  const {t} = useTranslation() // Traducciones i18N
+  const { t } = useTranslation(); // Traducciones i18N
 
   const [cantidadPd, setCantidadPd] = useState(0);
   const [cantidadPs, setCantidadPs] = useState(0);
+  const [cantidadPservice, setCantidadPservice] = useState(0);
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
@@ -25,7 +26,7 @@ function UserAdmin() {
   const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
     useState(0);
 
-  let total = cantidadPd + cantidadPs;
+  let total = cantidadPd + cantidadPs + cantidadPservice;
 
   useEffect(() => {
     const firebaseConfig = {
@@ -54,9 +55,11 @@ function UserAdmin() {
 
             const cantidadPd = userData.pd || 0;
             const cantidadPs = userData.ps || 0;
+            const cantidadPservice = userData.pservice || 0;
 
             setCantidadPd(cantidadPd);
             setCantidadPs(cantidadPs);
+            setCantidadPservice(cantidadPservice);
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
@@ -65,7 +68,7 @@ function UserAdmin() {
 
             const publicidadSalonQuery = query(
               collection(db, "Publicidad"),
-              where("userId", "==", user.uid),
+              where("empresa", "==", userData.empresa),
               where("tipo", "==", "salon")
             );
             const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
@@ -76,7 +79,7 @@ function UserAdmin() {
             // Bloque de inicialización de publicidad de directorio
             const publicidadDirectorioQuery = query(
               collection(db, "Publicidad"),
-              where("userId", "==", user.uid),
+              where("empresa", "==", userData.empresa),
               where("tipo", "==", "directorio")
             );
             const publicidadDirectorioSnapshot = await getDocs(
@@ -107,7 +110,7 @@ function UserAdmin() {
 
             const eventsQuery = query(
               collection(db, "eventos"),
-              where("userId", "==", user.uid)
+              where("empresa", "==", userData.empresa) // Modifica aquí para usar el campo "empresa"
             );
             const eventsSnapshot = await getDocs(eventsQuery);
             const userEventsData = eventsSnapshot.docs.map((doc) => doc.data());
@@ -208,7 +211,7 @@ function UserAdmin() {
                           <div>
                             <h2>
                               {/* Eventos Semana */}
-                            {t("userAdmin.weekEvents")}
+                              {t("userAdmin.weekEvents")}
                             </h2>
                           </div>
                         </td>
@@ -242,7 +245,7 @@ function UserAdmin() {
                           <div>
                             <h2>
                               {/* Eventos finalizados */}
-                            {t("userAdmin.finishedEvents")}
+                              {t("userAdmin.finishedEvents")}
                             </h2>
                           </div>
                         </td>
@@ -279,7 +282,7 @@ function UserAdmin() {
                             {t("userAdmin.subscriptionPlan")}
                           </h2>
                           <p className="text-ml font-bold text-gray-600">
-                          {t("userAdmin.currentSubscriptions")}
+                            {t("userAdmin.currentSubscriptions")}
                             <span className="ml-2 text-cyan-500 w-1/2">
                               {total}
                             </span>
@@ -293,8 +296,8 @@ function UserAdmin() {
                           <div>
                             <h2>
                               {/* Pantalla salon */}
-                            {t("userAdmin.roomScreen")}
-                              </h2>
+                              {t("userAdmin.roomScreen")}
+                            </h2>
                           </div>
                         </td>
                         <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
@@ -303,6 +306,7 @@ function UserAdmin() {
                           </p>
                         </td>
                       </tr>
+
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
@@ -322,8 +326,23 @@ function UserAdmin() {
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>
                             <h2>
+                              {/* Pantalla directorio */}
+                              {t("userAdmin.servicescreen")}
+                            </h2>
+                          </div>
+                        </td>
+                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
+                          <p>
+                            <span>{cantidadPservice}</span>
+                          </p>
+                        </td>
+                      </tr>
+                      <tr className="border-b w-full">
+                        <td className="px-4 py-2 text-left align-top w-1/2">
+                          <div>
+                            <h2>
                               {/* Publicidad Salón */}
-                              {t("userAdmin.roomScreen")}
+                              {t("userAdmin.roomAdvertisement")}
                             </h2>
                           </div>
                         </td>
@@ -333,6 +352,7 @@ function UserAdmin() {
                           </p>
                         </td>
                       </tr>
+
                       <tr className="border-b w-full">
                         <td className="px-4 py-2 text-left align-top w-1/2">
                           <div>

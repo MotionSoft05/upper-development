@@ -253,7 +253,8 @@
     "roomScreen": "Room Screen",
     "directoryScreen": "Directory Screen",
     "roomAdvertisement": "Room Advertisement",
-    "directoryAdvertisement": "Directory Advertisement"
+    "directoryAdvertisement": "Directory Advertisement",
+    "servicescreen": "Service Screen"
   },
   "consultaModEventos": {
     "title": "Event Query",
