@@ -1,3 +1,5 @@
+// src/components/EditPantallaServicio.js
+
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 import { ChromePicker } from "react-color";
@@ -13,6 +15,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import PantallaServicio from "./PreviewTemplate";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -37,7 +40,7 @@ const EditPantallaServicio = () => {
   const [view, setView] = useState("personalization");
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [showTemplateColorPicker, setShowTemplateColorPicker] = useState(false);
-  const [userData, setUserData] = useState(null); // Agregamos estado para almacenar los datos del usuario
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -55,14 +58,12 @@ const EditPantallaServicio = () => {
           const newScreenNames = Array.from({ length: pdsCount }, () => "");
           setScreenNames(newScreenNames);
 
-          // Obtener los nombres de las pantallas del usuario
           const nombresPantallas = userData.NombrePantallasServicios;
           if (nombresPantallas) {
             const nombresPantallasArray = Object.values(nombresPantallas);
             setScreenNames(nombresPantallasArray);
           }
 
-          // Buscar la empresa del usuario en la colección "TemplateServicios"
           const templateServiciosRef = collection(db, "TemplateServicios");
           const qEmpresa = query(
             templateServiciosRef,
@@ -102,7 +103,6 @@ const EditPantallaServicio = () => {
         const snapshot = await getDocs(q);
 
         if (!snapshot.empty) {
-          // Si hay un documento con la misma empresa, actualiza ese documento
           const docId = snapshot.docs[0].id;
           await setDoc(doc(templateServiciosRef, docId), {
             colorLetra: fontColor,
@@ -112,7 +112,6 @@ const EditPantallaServicio = () => {
             empresa: userData.empresa,
           });
 
-          // Guardar los nombres de las pantallas en la colección de usuarios
           const usersRef = collection(db, "usuarios");
           const userDoc = doc(usersRef, user.uid);
           const pantallaServiciosMap = {};
@@ -125,9 +124,8 @@ const EditPantallaServicio = () => {
               NombrePantallasServicios: pantallaServiciosMap,
             },
             { merge: true }
-          ); // Utilizar merge para no sobrescribir otros datos del usuario
+          );
         } else {
-          // Si no hay documentos con la misma empresa, crea un nuevo documento
           await addDoc(templateServiciosRef, {
             colorLetra: fontColor,
             colorPlantilla: templateColor,
@@ -136,7 +134,6 @@ const EditPantallaServicio = () => {
             empresa: userData.empresa,
           });
         }
-      } else {
       }
     } catch (error) {
       console.error("Error al guardar datos de configuración:", error);
@@ -183,38 +180,6 @@ const EditPantallaServicio = () => {
     const updatedScreenNames = [...screenNames];
     updatedScreenNames[index] = e.target.value;
     setScreenNames(updatedScreenNames);
-  };
-
-  const PantallaServicio = () => {
-    return (
-      <div
-        className="w-full h-full bg-red-100 grid grid-rows-6 gap-1"
-        style={{ aspectRatio: "16 / 9" }}
-      >
-        <div className="grid grid-cols-3 gap-1 mb-1 h-full row-span-5">
-          <div className="grid grid-rows-2 gap-1">
-            <div className="bg-cyan-200 border-2 border-slate-300 p-1">
-              IMAGEN
-            </div>
-            <div className="bg-cyan-200 border-2 border-slate-300 p-1">
-              IMAGEN
-            </div>
-          </div>
-          <div className="bg-green-100 col-span-2 border-2 border-slate-300 p-1">
-            IMAGEN O VIDEO
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-1 h-full flex-grow row-span-1">
-          <div className="bg-orange-200 border-2 border-slate-300 p-1">
-            FECHA
-          </div>
-          <div className="bg-orange-200 border-2 border-slate-300 p-1">RSS</div>
-          <div className="bg-orange-200 border-2 border-slate-300 p-1">
-            CLIMA
-          </div>
-        </div>
-      </div>
-    );
   };
 
   return (
@@ -326,7 +291,7 @@ const EditPantallaServicio = () => {
               </label>
               <Select
                 options={fontStyleOptions}
-                value={selectedFontStyle} // Aquí estableces el valor seleccionado
+                value={selectedFontStyle}
                 onChange={handleFontStyleChange}
               />
             </div>
@@ -376,29 +341,7 @@ const EditPantallaServicio = () => {
         </section>
       )}
 
-      {view === "preview" && (
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7">
-          <h1 className="text-3xl font-bold text-white capitalize mb-4">
-            Vista Previa del Template
-          </h1>
-          <div
-            className="w-full h-0"
-            style={{ paddingBottom: "56.25%", position: "relative" }}
-          >
-            <div
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-              }}
-            >
-              <PantallaServicio />
-            </div>
-          </div>
-        </section>
-      )}
+      {view === "preview" && <PantallaServicio />}
     </div>
   );
 };
