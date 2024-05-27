@@ -104,6 +104,21 @@ const EditPantallaServicio = () => {
             ciudad: selectedCity?.value || "",
             empresa: userData.empresa,
           });
+
+          // Guardar los nombres de las pantallas en la colección de usuarios
+          const usersRef = collection(db, "usuarios");
+          const userDoc = doc(usersRef, user.uid);
+          const pantallaServiciosMap = {};
+          screenNames.forEach((name, index) => {
+            pantallaServiciosMap[index] = name;
+          });
+          await setDoc(
+            userDoc,
+            {
+              NombrePantallasServicios: pantallaServiciosMap,
+            },
+            { merge: true }
+          ); // Utilizar merge para no sobrescribir otros datos del usuario
         } else {
           // Si no hay documentos con la misma empresa, crea un nuevo documento
           await addDoc(templateServiciosRef, {
