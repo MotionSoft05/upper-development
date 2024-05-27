@@ -490,9 +490,7 @@ function ConsultaModEvento() {
                         usuarioLogeado === "ulises.jacobo@hotmail.com" ||
                         usuarioLogeado === "contacto@upperds.mx") && (
                         <td className="md:px-2 md:py-4 ">
-                          {usuario
-                            ? `${usuario.nombre} ${usuario.apellido}`
-                            : "N/A"}
+                          {usuario ? `${usuario.empresa}` : "N/A"}
                         </td>
                       )}
                       {/* Contador */}
