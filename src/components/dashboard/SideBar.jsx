@@ -202,8 +202,8 @@ function Sidebar(props) {
                   <FontAwesomeIcon icon={faDisplay} className="h-5" />
                 </span>
                 {/* Pantallas Servicio */}
-                {/* //! ToDo traduccion pendiente */}
-                <span className="ml-3">Pantalla de Servicio</span>
+
+                <span className="ml-3">{t("sidebar.servicescreen")}</span>
               </button>
             </div>
             {/* Publicidad */}

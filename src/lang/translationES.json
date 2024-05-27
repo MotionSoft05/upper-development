@@ -226,20 +226,21 @@
     "termsOfService": "Términos de servicio"
   },
   "sidebar": {
-    "title": "Personalice sus pantallas",
-    "admin": "Admin",
+    "title": "GESTIÓN DE PANTALLAS",
+    "admin": "Usuarios y licencias",
     "dashboard": "Tablero",
     "eventEditing": "Edición de empresas",
     "eventRegistration": "Alta de eventos",
     "eventQuery": "Consulta de eventos",
-    "screenSettings": "Ajustes pantallas",
+    "screenSettings": "CONFIGURACIÓN PANTALLAS",
     "roomScreens": "Pantallas salón",
     "directoryScreens": "Pantallas directorio",
-    "advertisement": "Publicidad",
-    "moreInformation": "Más información",
+    "servicescreen": "Pantalla servicios",
+    "advertisement": "Publicidad salones",
+    "moreInformation": "INFORMACIÓN CLIENTES",
     "myData": "Mis datos",
-    "userGuides": "Guías de Usuario",
-    "supportContact": "Contacto Soporte",
+    "userGuides": "Guías de usuario",
+    "supportContact": "Contacto soporte",
     "logout": "Salir"
   },
   "userAdmin": {
