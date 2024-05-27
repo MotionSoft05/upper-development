@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useState, Fragment } from "react";
@@ -31,7 +32,8 @@ const sendEmail = async (userID) => {
 
     // Configura los datos del correo electrónico que deseas enviar
     const emailParams = {
-      to_empresa: userData.empresa,
+      to_name: userData.nombre,
+      to_lastName: userData.apellido,
       to_correo: userData.email,
     };
 
