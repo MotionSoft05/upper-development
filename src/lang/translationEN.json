@@ -301,6 +301,7 @@
     "invalidEventReferenceError": "Invalid event reference:",
     "customizationSavedSuccess": "Customization information saved successfully.",
     "customizationSaveError": "Error saving customization information and logo URL:",
+    "screenPleaseselectalanguage": "Please select a language.",
     "title": "ROOM SCREEN SETTINGS",
     "templateCustomization": "Template Customization",
     "logo": "Logo",
@@ -311,7 +312,11 @@
     "done": "Done",
     "screenNames": "Screen Names",
     "templateColor": "Template Color",
-    "save": "Save"
+    "save": "Save",
+    "languages": "Languages",
+    "idspanish": "Spanish",
+    "idenglish": "English",
+    "idspanish/english": "Spanish/English"
   },
   "screensDirectory": {
     "title": "DIRECTORY SCREENS SETTINGS",

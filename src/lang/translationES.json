@@ -301,6 +301,7 @@
     "invalidEventReferenceError": "Referencia de evento no válida:",
     "customizationSavedSuccess": "Información de personalización guardada con éxito.",
     "customizationSaveError": "Error al guardar la información de personalización y URL del logo:",
+    "screenPleaseselectalanguage": "Por favor, selecciona un idioma.",
     "title": "AJUSTES DE PANTALLAS SALÓN",
     "templateCustomization": "Personalización del Template",
     "logo": "Logo",
@@ -311,7 +312,11 @@
     "done": "Listo",
     "screenNames": "Nombres de pantallas",
     "templateColor": "Color de la plantilla",
-    "save": "Guardar"
+    "save": "Guardar",
+    "languages": "Idiomas",
+    "idspanish": "Español",
+    "idenglish": "Inglés",
+    "idspanish/english": "Español/Inglés"
   },
   "screensDirectory": {
     "title": "AJUSTES DE PANTALLAS DIRECTORIO",
