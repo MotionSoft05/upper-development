@@ -44,14 +44,11 @@ const EditPantallaServicio = () => {
       const user = auth.currentUser;
       if (user) {
         const userEmail = user.email;
-        console.log("Email del usuario logeado:", userEmail);
-
         const usersRef = collection(db, "usuarios");
         const q = query(usersRef, where("email", "==", userEmail));
         const snapshot = await getDocs(q);
         if (!snapshot.empty) {
           const userData = snapshot.docs[0].data();
-          console.log("Datos del usuario:", userData);
           setUserData(userData); // Almacenamos los datos del usuario en el estado
           const pdsCount = userData.pservice;
 
@@ -71,17 +68,33 @@ const EditPantallaServicio = () => {
       if (user) {
         const templateServiciosRef = collection(db, "TemplateServicios");
 
-        await addDoc(templateServiciosRef, {
-          colorLetra: fontColor,
-          colorPlantilla: templateColor,
-          estilodetexto: selectedFontStyle?.value || "", // Estilo de texto
-          ciudad: selectedCity?.value || "", // Ciudad seleccionada
-          empresa: userData.empresa, // Utilizamos el campo "empresa" del estado userData
-        });
+        const q = query(
+          templateServiciosRef,
+          where("empresa", "==", userData.empresa)
+        );
+        const snapshot = await getDocs(q);
 
-        console.log("Datos de configuración guardados correctamente.");
+        if (!snapshot.empty) {
+          // Si hay un documento con la misma empresa, actualiza ese documento
+          const docId = snapshot.docs[0].id;
+          await setDoc(doc(templateServiciosRef, docId), {
+            colorLetra: fontColor,
+            colorPlantilla: templateColor,
+            estilodetexto: selectedFontStyle?.value || "",
+            ciudad: selectedCity?.value || "",
+            empresa: userData.empresa,
+          });
+        } else {
+          // Si no hay documentos con la misma empresa, crea un nuevo documento
+          await addDoc(templateServiciosRef, {
+            colorLetra: fontColor,
+            colorPlantilla: templateColor,
+            estilodetexto: selectedFontStyle?.value || "",
+            ciudad: selectedCity?.value || "",
+            empresa: userData.empresa,
+          });
+        }
       } else {
-        console.log("Usuario no autenticado.");
       }
     } catch (error) {
       console.error("Error al guardar datos de configuración:", error);
