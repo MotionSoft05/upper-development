@@ -41,6 +41,11 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+/**
+ * Usuarios y Licencias
+ * Esta función representa la administración de usuarios y licencias.
+ * @returns {JSX.Element} El componente de administración de usuarios.
+ */
 function Admin() {
   const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
@@ -53,6 +58,7 @@ function Admin() {
   const [editMode, setEditMode] = useState(false);
   const [mensaje, setMensaje] = useState(null);
   const [mensajeEstilo, setMensajeEstilo] = useState(null);
+ 
 
   // Función para mostrar un mensaje y ocultarlo después de 3 segundos
   const mostrarMensaje = (mensaje, estilo) => {
@@ -670,7 +676,7 @@ function Admin() {
                   <th className="bg-grey-lightest px-2 text-center font-bold uppercase text-sm text-grey-light border-b border-grey-light">
                     PDS
                   </th>
-                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-left">
+                  <th className="py-2 px-4 bg-grey-lightest  font-bold uppercase text-sm text-grey-light border-b border-grey-light text-center">
                     {/* Inicio */}
                     {t("admin.start")}
                   </th>
@@ -842,15 +848,15 @@ function Admin() {
                     <td className="border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
-                          type="text"
+                          type="date"
                           value={usuarioEditado.inicio}
-                          className="max-w-[70px] text-center bg-stone-100"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,
                               inicio: e.target.value,
                             })
                           }
+                          className="w-auto px-1 py-1 border rounded-lg text-center"
                         />
                       ) : (
                         usuario.inicio
@@ -860,9 +866,10 @@ function Admin() {
                     <td className="py-2 px-4 border-b border-grey-light text-center">
                       {modoEdicion && usuarioEditado.id === usuario.id ? (
                         <input
-                          type="text"
+                          type="date"
                           value={usuarioEditado.final}
-                          className="max-w-[70px] text-center bg-stone-100"
+                          // className="max-w-[70px] text-center bg-stone-100"
+                          className="w-auto px-1 py-1 border rounded-lg text-center"
                           onChange={(e) =>
                             setUsuarioEditado({
                               ...usuarioEditado,

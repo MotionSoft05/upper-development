@@ -134,7 +134,7 @@ function DashBoard() {
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />}
+              userEmail === "contacto@upperds.mx") && <Admin />} {/* Usuarios y Licencias */}
 
           {showUserAdmin && <UserAdmin />}
           {showEdiciondeempresa &&

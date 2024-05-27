@@ -12,6 +12,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { useTranslation } from "react-i18next";
 
+
 function UserAdmin() {
   const { t } = useTranslation(); // Traducciones i18N
 
