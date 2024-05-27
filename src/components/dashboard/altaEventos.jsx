@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useState, useContext, useEffect } from "react";
 import Datepicker from "react-tailwindcss-datepicker";
 import "keen-slider/keen-slider.min.css";
@@ -37,7 +38,7 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
+function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [userId, setUserId] = useState(null);
@@ -85,7 +86,7 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
               }).then(() => {
                 // window.location.reload();
                 setShowAltaEvento(false);
-                setShowUserAdmin(true)
+                setShowUserAdmin(true);
               });
             } else {
               // Verificar si hay publicidad para el usuario
@@ -124,7 +125,7 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
-                    setShowUserAdmin(true)
+                    setShowUserAdmin(true);
                   });
                 } else if (!tienePublicidadSalon && userData.ps >= 1) {
                   // Si no tiene publicidad en salones y ps es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
@@ -137,7 +138,7 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
-                    setShowUserAdmin(true)
+                    setShowUserAdmin(true);
                   });
                 } else if (!tienePublicidadDirectorio && userData.pd >= 1) {
                   // Si no tiene publicidad en directorio y pd es distinto de 0, muestra la alerta correspondiente con SweetAlert y recarga la página
@@ -150,7 +151,7 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
                   }).then(() => {
                     // window.location.reload();
                     setShowAltaEvento(false);
-                    setShowUserAdmin(true)
+                    setShowUserAdmin(true);
                   });
                 }
               });
@@ -168,6 +169,7 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
           setLoading(false);
         });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId]);
 
   useEffect(() => {
@@ -513,14 +515,21 @@ function AltaEventos({setShowAltaEvento, setShowUserAdmin}) {
                         {/* Seleccionar Empresa */}
                         {t("altaEventos.selectCompany")}
                       </option>
-                      {allUsers.map((u) => (
-                        <option key={u.id} value={u.id}>
-                          {`${u.empresa}`}
-                        </option>
-                      ))}
+                      {allUsers
+                        .filter(
+                          (u, index, self) =>
+                            self.findIndex((t) => t.empresa === u.empresa) ===
+                            index
+                        )
+                        .map((u) => (
+                          <option key={u.id} value={u.id}>
+                            {`${u.empresa}`}
+                          </option>
+                        ))}
                     </select>
                   </div>
                 )}
+
               <div className="relative z-0 w-full mb-6 group">
                 <input
                   type="text"
