@@ -55,6 +55,13 @@ const EditPantallaServicio = () => {
           const newScreenNames = Array.from({ length: pdsCount }, () => "");
           setScreenNames(newScreenNames);
 
+          // Obtener los nombres de las pantallas del usuario
+          const nombresPantallas = userData.NombrePantallasServicios;
+          if (nombresPantallas) {
+            const nombresPantallasArray = Object.values(nombresPantallas);
+            setScreenNames(nombresPantallasArray);
+          }
+
           // Buscar la empresa del usuario en la colección "TemplateServicios"
           const templateServiciosRef = collection(db, "TemplateServicios");
           const qEmpresa = query(
@@ -101,7 +108,7 @@ const EditPantallaServicio = () => {
             colorLetra: fontColor,
             colorPlantilla: templateColor,
             estilodetexto: selectedFontStyle?.value || "",
-            ciudad: selectedCity?.value || "",
+            ciudad: selectedCity ? selectedCity.label : "",
             empresa: userData.empresa,
           });
 
