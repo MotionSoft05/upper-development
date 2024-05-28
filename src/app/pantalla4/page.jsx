@@ -23,6 +23,7 @@ import "swiper/css/navigation";
 
 // import required modules
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import GetLanguageDate from "@/components/getLanguageDate";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -47,40 +48,6 @@ function Pantalla4() {
 
   const swiperRef = useRef(null);
 
-  const obtenerFecha = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
-
-    const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ];
-
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
-
-    return `${diaSemana} ${dia} DE ${mes} ${año}`;
-  };
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
@@ -602,7 +569,8 @@ function Pantalla4() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              {obtenerFecha()}
+              {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
+              <GetLanguageDate idioma={templateData[0].idioma}/>
             </p>
             <div className="flex items-center justify-center mb-1">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" />

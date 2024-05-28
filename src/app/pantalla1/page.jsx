@@ -24,6 +24,7 @@ import "swiper/css/navigation";
 // import required modules
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
 import { useTranslation } from "react-i18next";
+import GetLanguageDate from "@/components/getLanguageDate";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -49,25 +50,6 @@ function Pantalla1() {
 
   const swiperRef = useRef(null);
 
-  const obtenerFecha = () => {
-    const storedLanguage = localStorage.getItem("language"); // "es" o "en"
-
-    const diasSemana = t("pantalla.weekdays", { returnObjects: true }); // { returnObjects: true } trae el array completo de las traducciones
-    const meses = t("pantalla.months", { returnObjects: true });
-
-    if (!ready) return "loading translations...";
-
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
-    const año = now.getFullYear();
-
-    return storedLanguage === "es"
-      ? `${diaSemana} ${dia} DE ${mes} ${año}`
-      : `${diaSemana}, ${mes} ${dia}, ${año}`;
-  };
-
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
   }
@@ -83,6 +65,8 @@ function Pantalla1() {
   }, []);
   // Datos Firebase------------------------------------------
   useEffect(() => {
+    
+
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
       apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -497,6 +481,8 @@ function Pantalla1() {
     description,
   } = eventoActual;
   // h-screen PONE LA SCROLL BAR?!?!?!?!
+  // console.log("🚀 ~ IDIOMA ~ templateData:", templateData[0].idioma)
+
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
@@ -637,7 +623,8 @@ function Pantalla1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              {obtenerFecha()}
+              {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
+              <GetLanguageDate idioma={templateData[0].idioma}/>
             </p>
             <div className="flex items-center justify-center mb-1">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
