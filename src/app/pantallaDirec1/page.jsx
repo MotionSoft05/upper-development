@@ -46,6 +46,7 @@ function PantallaDirec1() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
+  const [ languageTemplate, setLanguageTemplate] = useState(null) // Idioma que va a tener el template que luego alamacena el objeto traducido
   const pathname = usePathname();
   useEffect(() => {
     if (user) {
@@ -103,7 +104,7 @@ function PantallaDirec1() {
     // Actualizar la configuración de loop cuando eventosEnCurso cambia
     sliderRef.current?.refresh();
   }, [eventosEnCurso]);
-  console.log("🚀 ~ PantallaDirec1 ~ eventosEnCurso:", eventosEnCurso);
+  // console.log("🚀 ~ PantallaDirec1 ~ eventosEnCurso:", eventosEnCurso);
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
@@ -299,6 +300,7 @@ function PantallaDirec1() {
               });
               console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
               setTemplateData(templateData);
+              getLanguageData(templateData[0].idioma)
             } else {
               console.log(
                 // "No se encontró información en TemplateDirectorios para este usuario."
@@ -448,31 +450,31 @@ function PantallaDirec1() {
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, [user, firestore, pantalla]);
 
-  const obtenerFecha = () => {
-    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
+  // const obtenerFecha = () => {
+  //   const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
 
-    const meses = [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-    ];
+  //   const meses = [
+  //     "1",
+  //     "2",
+  //     "3",
+  //     "4",
+  //     "5",
+  //     "6",
+  //     "7",
+  //     "8",
+  //     "9",
+  //     "10",
+  //     "11",
+  //     "12",
+  //   ];
 
-    const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
-    const dia = now.getDate();
-    const mes = meses[now.getMonth()];
+  //   const now = new Date();
+  //   const diaSemana = diasSemana[now.getDay()];
+  //   const dia = now.getDate();
+  //   const mes = meses[now.getMonth()];
 
-    return `${diaSemana} ${dia}/${mes} `;
-  };
+  //   return `${diaSemana} ${dia}/${mes} `;
+  // };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
@@ -573,12 +575,128 @@ function PantallaDirec1() {
   }
 
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
+  // console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
   // console.log("CLIMA", weatherData.current.condition.icon);
+
+  //* --- Render para idiomas ---
+  console.log('templateData.idioma >>> :', templateData[0].idioma)
+  console.log('languageTemplate >>> :', languageTemplate)
+
+  // -- Retorna el idioma correspondiente  o pordefecto "es" -> ESPAÑOL--
+  function getLanguageData  (languageCode) {
+ // Idiomas para seleccion de templates
+  const es = {
+    weekdays: [
+      "DOMINGO",
+      "LUNES",
+      "MARTES",
+      "MIÉRCOLES",
+      "JUEVES",
+      "VIERNES",
+      "SÁBADO"
+    ],
+    title: 'Eventos del día',
+    event: 'Evento',
+    news: 'Noticias',
+    qr: "Eventos en tu dispositivo"
+  }
+  const en = {
+    weekdays: [
+      "SUNDAY",
+      "MONDAY",
+      "TUESDAY",
+      "WEDNESDAY",
+      "THURSDAY",
+      "FRIDAY",
+      "SATURDAY"
+    ],
+    title: 'Today\'s Events',
+    event: 'Event',
+    news: 'News',
+    qr: "Events on your device"
+  };
+  const esEn = {
+    weekdays: [
+      "DOMINGO / SUNDAY",
+      "LUNES /MONDAY",
+      "MARTES / TUESDAY",
+      "MIÉRCOLES / WEDNESDAY",
+      "JUEVES / THURSDAY",
+      "VIERNES / FRIDAY",
+      "SÁBADO / SATURDAY"
+    ],
+    title: "Eventos del día / Today's Events",
+    event: 'Eventos / Event',
+    news: 'Noticias / News',
+    qr: "Eventos en tu dispositivo / Events on your device"
+  };
+    switch (languageCode) {
+      case 'es':
+        return setLanguageTemplate(es);
+
+      case 'en':
+        return setLanguageTemplate(en);
+
+      case 'es-en':
+        return setLanguageTemplate(esEn);
+
+      default:
+        return setLanguageTemplate(es);
+    }
+  };
+
+  /* ---- Titulo Eventos del dia y Fecha---- */
+  function titleEventAndDate() {
+    // const language = getLanguageData(templateData[0].idioma);
+    // getLanguageData(templateData[0].idioma);
+    
+    const obtenerFecha = () => {
+      const meses = [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "10",
+        "11",
+        "12",
+      ];
+      const now = new Date();
+
+      const diaSemana = languageTemplate.weekdays[now.getDay()];
+      const dia = now.getDate();
+      const mes = meses[now.getMonth()];
+  
+      return `${diaSemana} ${dia}/${mes} `;
+    };
+
+    return (
+      <div
+        className="flex flex-col text-color items-center"
+        style={{
+          fontFamily: templateActual.fontStyle,
+        }}
+      >
+        <p className="text-3xl text-center  mb-2">
+          {obtenerFecha()}-{currentHour}
+        </p>
+        <h1 className="text-5xl font-bold">
+          {/* Eventos del día */}
+          {languageTemplate.title}
+          {/* {t("pantallaDirec.todaysEvents")} */}
+        </h1>
+      </div>
+    );
+  }
+  //* --- Render para idiomas ---
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
@@ -625,21 +743,8 @@ function PantallaDirec1() {
                 </>
               )}
             </div>
-            {/* ---- Titulo Eventos del dia y Fecha---- */}
-            <div
-              className="flex flex-col text-color items-center"
-              style={{
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              <p className="text-3xl text-center  mb-2">
-                {obtenerFecha()}-{currentHour}
-              </p>
-              <h1 className="text-5xl font-bold">
-                {/* Eventos del día */}
-                {t("pantallaDirec.todaysEvents")}
-              </h1>
-            </div>
+            {/* ---- Funcion -> Titulo Eventos del dia y Fecha ---- */}
+            {titleEventAndDate()}
 
             {/* ---- Clima e Icono ---- */}
             <div
@@ -679,7 +784,7 @@ function PantallaDirec1() {
           {!templateData[0]?.setPortrait ? (
             <div className="grid grid-cols-4 bg-white">
               <div className="col-span-3 md:col-span-3  mx-3">
-                {/* Linea arriba */}{" "}
+                {/* BARRA SUPERIOR */}{" "}
                 <div
                   className={` text-black py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                   style={{
@@ -691,7 +796,8 @@ function PantallaDirec1() {
                   {/* Título */}
                   <h2 className=" text-4xl text-center">
                     {/* EVENTOS */}
-                    {t("pantallaDirec.eventsTitle")}
+                    {languageTemplate.event}
+                    {/* {t("pantallaDirec.eventsTitle")} */}
                   </h2>
                 </div>
                 {/* contenido principal */}
@@ -896,7 +1002,7 @@ function PantallaDirec1() {
                     </div>
                   </div>
                 </div>
-                {/* Linea abajo */}
+                {/* BARRA INFERIOR */}
                 <div
                   className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
                   style={{
@@ -911,7 +1017,8 @@ function PantallaDirec1() {
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
-                    {t("pantallaDirec.newsTitle")}
+                    {languageTemplate.news}
+                    {/* {t("pantallaDirec.newsTitle")} */}
                   </h2>
                 </div>
               </div>
@@ -1212,7 +1319,7 @@ function PantallaDirec1() {
               </div>
               {/* --- QR image --- */}
               <div
-                className="flex flex-col items-center"
+                className="flex flex-col items-center "
                 style={{
                   marginTop: "20px",
                   marginRight: "20px",
@@ -1221,7 +1328,8 @@ function PantallaDirec1() {
               >
                 <p style={{ marginBottom: "10px" }}>
                   {/* Eventos en tu dispositivo */}
-                  {t("pantallaDirec.deviceEventsDescription")}
+                  {languageTemplate.qr}
+                  {/* {t("pantallaDirec.deviceEventsDescription")} */}
                 </p>
                 {qrCodeUrl && (
                   <a

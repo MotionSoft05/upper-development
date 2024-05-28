@@ -54,7 +54,7 @@ function PantallasDirectorio() {
   const [selectedLogo, setSelectedLogo] = useState(null);
   const [selectedPublicidad, setSelectedPublicidad] = useState(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
-  const [selectedLanguage, setSelectedLanguage] = useState("español");
+  const [selectedLanguage, setSelectedLanguage] = useState("es");
 
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México" },
@@ -317,7 +317,7 @@ function PantallasDirectorio() {
               setSelectedCity({ value: ciudad, label: ciudad });
               setSetPortrait(setPortrait || false);
               setSelectedPublicidad(publicidad || null);
-              setSelectedLanguage(idioma || "español");
+              setSelectedLanguage(idioma || "es");
             } else {
               console.log(
                 "No se encontró información en TemplateDirectorios por empresa. Usando valores iniciales."
@@ -421,7 +421,7 @@ function PantallasDirectorio() {
         setSelectedCity({ value: ciudad, label: ciudad });
         setSetPortrait(setPortrait || false);
         setSelectedPublicidad(publicidad || null);
-        setSelectedLanguage(idioma || "español");
+        setSelectedLanguage(idioma || "es");
       } else {
         console.log(
           "No se encontró información en TemplateDirectorios para la empresa seleccionada."
@@ -435,7 +435,7 @@ function PantallasDirectorio() {
         setSelectedCity(null);
         setSetPortrait(false);
         setSelectedPublicidad(null);
-        setSelectedLanguage("español");
+        setSelectedLanguage("es");
         // O mostrar un mensaje al usuario
       }
     } catch (error) {
@@ -985,8 +985,8 @@ function PantallasDirectorio() {
                 <input
                   type="radio"
                   id="spanish"
-                  value="español"
-                  checked={selectedLanguage === "español"}
+                  value="es"
+                  checked={selectedLanguage === "es"}
                   onChange={handleLanguageChange}
                   className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                 />
@@ -999,8 +999,8 @@ function PantallasDirectorio() {
                 <input
                   type="radio"
                   id="english"
-                  value="ingles"
-                  checked={selectedLanguage === "ingles"}
+                  value="en"
+                  checked={selectedLanguage === "en"}
                   onChange={handleLanguageChange}
                   className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                 />
@@ -1013,8 +1013,8 @@ function PantallasDirectorio() {
                 <input
                   type="radio"
                   id="both"
-                  value="ambos"
-                  checked={selectedLanguage === "ambos"}
+                  value="es-en"
+                  checked={selectedLanguage === "es-en"}
                   onChange={handleLanguageChange}
                   className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                 />

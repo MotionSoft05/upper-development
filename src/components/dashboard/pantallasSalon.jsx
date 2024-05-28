@@ -66,7 +66,7 @@ function PantallasSalon() {
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [configuracionTemplate, setConfiguracionTemplate] = useState(null);
-  const [selectedLanguage, setSelectedLanguage] = useState("español");
+  const [selectedLanguage, setSelectedLanguage] = useState("es");
 
   useEffect(() => {
     const obtenerEmpresas = async () => {
@@ -266,7 +266,7 @@ function PantallasSalon() {
               setSelectedLogo(templateSalonesDocData.logo || null);
 
               // Establecer el idioma
-              setSelectedLanguage(templateSalonesDocData.idioma || "español");
+              setSelectedLanguage(templateSalonesDocData.idioma || "es");
             }
           } else {
             // Si hay una empresa seleccionada, cargar los datos de personalización para esa empresa específica
@@ -299,7 +299,7 @@ function PantallasSalon() {
               // Establecer el logo
               setSelectedLogo(templateSalonesDocData.logo || null);
               // Establecer el idioma
-              setSelectedLanguage(templateSalonesDocData.idioma || "español");
+              setSelectedLanguage(templateSalonesDocData.idioma || "es");
             }
           }
         }
@@ -723,8 +723,8 @@ function PantallasSalon() {
                   <input
                     type="radio"
                     id="spanish"
-                    value="español"
-                    checked={selectedLanguage === "español"}
+                    value="es"
+                    checked={selectedLanguage === "es"}
                     onChange={handleLanguageChange}
                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
@@ -737,8 +737,8 @@ function PantallasSalon() {
                   <input
                     type="radio"
                     id="english"
-                    value="ingles"
-                    checked={selectedLanguage === "ingles"}
+                    value="en"
+                    checked={selectedLanguage === "en"}
                     onChange={handleLanguageChange}
                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
@@ -751,8 +751,8 @@ function PantallasSalon() {
                   <input
                     type="radio"
                     id="both"
-                    value="ambos"
-                    checked={selectedLanguage === "ambos"}
+                    value="es-en"
+                    checked={selectedLanguage === "es-en"}
                     onChange={handleLanguageChange}
                     className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
                   />
