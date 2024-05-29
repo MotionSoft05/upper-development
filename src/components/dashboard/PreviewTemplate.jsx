@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import Datepicker from "react-tailwindcss-datepicker";
+import "keen-slider/keen-slider.min.css";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -44,6 +46,8 @@ const PantallaServicio = () => {
   const [screenNames, setScreenNames] = useState([]);
   const [selectedScreen, setSelectedScreen] = useState(null);
   const [empresa, setEmpresa] = useState("");
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDateFin, setSelectedDateFin] = useState(new Date());
 
   useEffect(() => {
     const fetchScreenNames = async () => {
@@ -180,6 +184,12 @@ const PantallaServicio = () => {
         urls.imgovideo3 = url3;
       }
 
+      // Crear objeto para almacenar las fechas inicial y final
+      const fechas = {
+        fechaInicial: selectedDate,
+        fechaFinal: selectedDateFin, // Asegúrate de tener selectedDateFin como estado
+      };
+
       // Buscar si ya existe un documento con la misma empresa y nombre de pantalla
       const templatesCollection = collection(db, "TemplateSalonesVista");
       const q = query(
@@ -200,6 +210,7 @@ const PantallaServicio = () => {
             seconds,
           },
           ...urls,
+          ...fechas, // Agregar fechas al documento
         });
       } else {
         // Si existe, actualizar el documento existente
@@ -216,6 +227,7 @@ const PantallaServicio = () => {
                 seconds,
               },
               ...urls,
+              ...fechas, // Agregar fechas al documento
             },
             { merge: true }
           );
@@ -226,6 +238,17 @@ const PantallaServicio = () => {
     } catch (error) {
       console.error("Error al guardar la configuración:", error);
     }
+  };
+
+  const [dateRange, setDateRange] = useState({
+    startDate: selectedDate,
+    endDate: selectedDateFin,
+  });
+
+  const handleDateChange = (newDateRange) => {
+    setSelectedDate(newDateRange.startDate);
+    setSelectedDateFin(newDateRange.endDate);
+    setDateRange(newDateRange);
   };
 
   return (
@@ -315,6 +338,17 @@ const PantallaServicio = () => {
             />
           )}
         </div>
+        <div className="mb-6">
+          <label className="text-white dark:text-gray-200 block mb-0.5">
+            Seleccionar Fecha
+          </label>
+          <Datepicker
+            useRange={true}
+            value={dateRange}
+            onChange={handleDateChange}
+          />
+        </div>
+
         <div className="mb-6">
           <label className="text-white dark:text-gray-200 block mb-0.5">
             Tiempo de visualización (HH:MM:SS)
