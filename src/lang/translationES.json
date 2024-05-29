@@ -21,7 +21,8 @@
       "phone": "Teléfono",
       "companyName": "Nombre de empresa",
       "password": "Contraseña",
-      "confirmPassword": "Confirmar contraseña"
+      "confirmPassword": "Confirmar contraseña",
+      "comprobation": "¿Ya tienes una cuenta?"
     },
     "errors": {
       "nameRequired": "El nombre es obligatorio",
