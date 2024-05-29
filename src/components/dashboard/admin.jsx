@@ -58,7 +58,6 @@ function Admin() {
   const [editMode, setEditMode] = useState(false);
   const [mensaje, setMensaje] = useState(null);
   const [mensajeEstilo, setMensajeEstilo] = useState(null);
- 
 
   // Función para mostrar un mensaje y ocultarlo después de 3 segundos
   const mostrarMensaje = (mensaje, estilo) => {
@@ -378,14 +377,9 @@ function Admin() {
     setModoEdicion(true);
     setUsuarioEditado(usuario);
   };
-
   const handleGuardarCambios = async () => {
     try {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
-
-      const psNumber = parseInt(usuarioEditado.ps || 0);
-      const pdNumber = parseInt(usuarioEditado.pd || 0);
-      const pserviceNumber = parseInt(usuarioEditado.pservice || 0);
 
       const updateData = {
         nombre: usuarioEditado.nombre,
@@ -408,16 +402,23 @@ function Admin() {
       if (Object.keys(validUpdateData).length > 0) {
         await updateDoc(usuarioDocRef, validUpdateData);
 
-        setUsuarios((prevUsuarios) =>
-          prevUsuarios.map((usuario) =>
+        // Actualizar estado local
+        setUsuarios((prevUsuarios) => {
+          // Actualizar usuario modificado
+          const updatedUsuarios = prevUsuarios.map((usuario) =>
             usuario.id === usuarioEditado.id
               ? {
                   ...usuario,
                   ...validUpdateData,
                 }
               : usuario
-          )
-        );
+          );
+
+          // Ordenar usuarios nuevamente
+          const usuariosOrdenados =
+            ordenarUsuariosAlfabeticamente(updatedUsuarios);
+          return usuariosOrdenados;
+        });
 
         setModoEdicion(false);
         setUsuarioEditado({
@@ -434,13 +435,28 @@ function Admin() {
           final: "",
         });
       } else {
-        // "No hay campos válidos para actualizar."
         console.warn(t("admin.messages.noValidFieldsUpdate"));
       }
     } catch (error) {
-      // "Error al guardar los cambios en Firebase:"
       console.error(t("admin.messages.errorSavingFirebaseChanges"), error);
     }
+  };
+
+  // Función para ordenar usuarios alfabéticamente por empresa y nombre
+  const ordenarUsuariosAlfabeticamente = (usuarios) => {
+    const usuariosPorEmpresa = usuarios.reduce((acc, usuario) => {
+      const empresa = usuario.empresa.toLowerCase();
+      acc[empresa] = acc[empresa] || [];
+      acc[empresa].push(usuario);
+      return acc;
+    }, {});
+
+    const usuariosOrdenados = Object.keys(usuariosPorEmpresa)
+      .sort()
+      .map((empresa) => usuariosPorEmpresa[empresa])
+      .flat();
+
+    return usuariosOrdenados;
   };
 
   const handleEliminarUsuario = async (usuarioId) => {
@@ -493,15 +509,30 @@ function Admin() {
           ...doc.data(),
           status: doc.data().status,
         }));
-        setUsuarios(usuariosData);
+
+        // Agrupar usuarios por empresa
+        const usuariosPorEmpresa = usuariosData.reduce((acc, usuario) => {
+          const empresa = usuario.empresa.toLowerCase(); // Convertir a minúsculas para ordenar correctamente
+          acc[empresa] = acc[empresa] || [];
+          acc[empresa].push(usuario);
+          return acc;
+        }, {});
+
+        // Ordenar los grupos alfabéticamente por empresa
+        const usuariosOrdenados = Object.keys(usuariosPorEmpresa)
+          .sort()
+          .map((empresa) => usuariosPorEmpresa[empresa])
+          .flat(); // Convertir de nuevo en un array plano
+
+        setUsuarios(usuariosOrdenados);
       } catch (error) {
-        // "Error al obtener los usuarios de Firebase:"
         console.error(t("admin.messages.errorFetchingFirebaseUsers"), error);
       }
     };
 
     obtenerUsuarios();
   }, []);
+
   if (currentUser && currentUser.email !== "uppermex10@gmail.com") {
     return <p>No tienes permiso para acceder a esta página.</p>;
   }
