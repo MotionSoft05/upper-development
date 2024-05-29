@@ -33,6 +33,9 @@ const PantallaServicio = () => {
   const [image2, setImage2] = useState(null);
   const [imageOrVideo3, setImageOrVideo3] = useState(null);
   const [type3, setType3] = useState(null); // Estado adicional para el tipo de archivo
+  const [hours, setHours] = useState(0);
+  const [minutes, setMinutes] = useState(0);
+  const [seconds, setSeconds] = useState(10); // Siempre establecido en 10 segundos
 
   const [imagePreview1, setImagePreview1] = useState(null);
   const [imagePreview2, setImagePreview2] = useState(null);
@@ -93,6 +96,9 @@ const PantallaServicio = () => {
     setImagePreview2(null);
     setPreview3(null);
     setType3(null);
+    setHours(0);
+    setMinutes(0);
+    setSeconds(10);
 
     try {
       const templatesCollection = collection(db, "TemplateSalonesVista");
@@ -106,6 +112,7 @@ const PantallaServicio = () => {
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
+
           if (data.img1) setImagePreview1(data.img1);
           if (data.img2) setImagePreview2(data.img2);
           if (data.imgovideo3) {
@@ -124,6 +131,14 @@ const PantallaServicio = () => {
             setType3(isVideo ? "video" : "image");
 
             console.log("Tipo de archivo:", isVideo ? "video" : "image"); // Agregar registro
+          }
+
+          if (data.tiempoDeVisualizacion) {
+            const { hours, minutes, seconds } = data.tiempoDeVisualizacion;
+            console.log("Tiempo de visualización:", hours, minutes, seconds);
+            setHours(hours || 0);
+            setMinutes(minutes || 0);
+            setSeconds(seconds || 10);
           }
         });
       }
@@ -179,6 +194,11 @@ const PantallaServicio = () => {
         await setDoc(doc(templatesCollection), {
           empresa: empresa,
           nombreDePantalla: selectedScreen.value,
+          tiempoDeVisualizacion: {
+            hours,
+            minutes,
+            seconds,
+          },
           ...urls,
         });
       } else {
@@ -190,6 +210,11 @@ const PantallaServicio = () => {
             {
               empresa: empresa,
               nombreDePantalla: selectedScreen.value,
+              tiempoDeVisualizacion: {
+                hours,
+                minutes,
+                seconds,
+              },
               ...urls,
             },
             { merge: true }
@@ -229,7 +254,7 @@ const PantallaServicio = () => {
           </label>
           <input
             type="file"
-            accept="image/*"
+            accept="image/"
             onChange={(event) =>
               handleFileChange(event, setImage1, setImagePreview1)
             }
@@ -249,7 +274,7 @@ const PantallaServicio = () => {
           </label>
           <input
             type="file"
-            accept="image/*"
+            accept="image/"
             onChange={(event) =>
               handleFileChange(event, setImage2, setImagePreview2)
             }
@@ -269,7 +294,7 @@ const PantallaServicio = () => {
           </label>
           <input
             type="file"
-            accept="image/*,video/*"
+            accept="image/,video/"
             onChange={(event) =>
               handleFileChange(event, setImageOrVideo3, setPreview3, setType3)
             }
@@ -289,6 +314,35 @@ const PantallaServicio = () => {
               className="mt-2 rounded-lg"
             />
           )}
+        </div>
+        <div className="mb-6">
+          <label className="text-white dark:text-gray-200 block mb-0.5">
+            Tiempo de visualización (HH:MM:SS)
+          </label>
+          <div className="flex">
+            <input
+              type="number"
+              min="0"
+              value={hours}
+              onChange={(e) => setHours(e.target.value)}
+              className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full"
+            />
+            <input
+              type="number"
+              min="0"
+              max="59"
+              value={minutes}
+              onChange={(e) => setMinutes(e.target.value)}
+              className="bg-gray-700 text-white py-2 px-3 border w-full"
+            />
+            <input
+              type="number"
+              min="10"
+              value={seconds}
+              onChange={(e) => setSeconds(e.target.value)}
+              className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
+            />
+          </div>
         </div>
       </div>
       <div className="flex justify-end mt-6">
