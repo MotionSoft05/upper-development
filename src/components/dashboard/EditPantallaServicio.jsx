@@ -13,6 +13,7 @@ import {
   addDoc,
   setDoc,
   getDocs,
+  updateDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import PantallaServicio from "./PreviewTemplate";
@@ -55,14 +56,25 @@ const EditPantallaServicio = () => {
           setUserData(userData);
           const pdsCount = userData.pservice;
 
-          const newScreenNames = Array.from({ length: pdsCount }, () => "");
-          setScreenNames(newScreenNames);
+          console.log("pservice count:", pdsCount); // Log the count of pservice
+
+          let newScreenNames = Array.from({ length: pdsCount }, () => "");
 
           const nombresPantallas = userData.NombrePantallasServicios;
           if (nombresPantallas) {
             const nombresPantallasArray = Object.values(nombresPantallas);
-            setScreenNames(nombresPantallasArray);
+            // Ensure the length of nombresPantallasArray matches pdsCount
+            for (let i = 0; i < pdsCount; i++) {
+              newScreenNames[i] = nombresPantallasArray[i] || "";
+            }
+            console.log(
+              "Updated number of screen name fields:",
+              nombresPantallasArray.length
+            ); // Log the updated number of screen name fields
           }
+
+          setScreenNames(newScreenNames);
+          console.log("Number of screen name fields:", newScreenNames.length); // Log the number of screen name fields
 
           const templateServiciosRef = collection(db, "TemplateServicios");
           const qEmpresa = query(
@@ -118,13 +130,11 @@ const EditPantallaServicio = () => {
           screenNames.forEach((name, index) => {
             pantallaServiciosMap[index] = name;
           });
-          await setDoc(
-            userDoc,
-            {
-              NombrePantallasServicios: pantallaServiciosMap,
-            },
-            { merge: true }
-          );
+
+          // Usar update() en lugar de setDoc() para sobrescribir solo el campo NombrePantallasServicios
+          await updateDoc(userDoc, {
+            NombrePantallasServicios: pantallaServiciosMap,
+          });
         } else {
           await addDoc(templateServiciosRef, {
             colorLetra: fontColor,
