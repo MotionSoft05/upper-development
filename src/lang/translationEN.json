@@ -71,15 +71,12 @@
     "cancelButton": "Cancel"
   },
   "homeSliderData": {
-    "sliderTag1": "Boost your business",
-    "sliderTag2": "Great visual impact",
-    "sliderTag3": "Easy and simple to use",
-    "sliderTitle1": "UPPER DS, the Digital Signage system",
-    "sliderTitle2": "Artificial Intelligence",
-    "sliderTitle3": "App Development",
-    "sliderDescription1": "TechWizard offers high-quality and reliable software development services. We focus on your specific needs that fit the budget and time frame.",
-    "sliderDescription2": "TechWizard is bringing artificial intelligence and machine learning within reach of commercial, government, and nonprofit organizations.",
-    "sliderDescription3": "Unleash the power of code and creativity to turn your innovative ideas into interactive and functional mobile applications. Explore the world of app development and discover how to bring your digital visions to life on smartphones and tablets."
+    "sliderTitle1": "Boost Your Brand with Personalized Experiences",
+    "sliderTitle2": "Manage Your Message in Real-Time",
+    "sliderTitle3": "Transform Your Spaces with Dynamic Content",
+    "sliderDescription1": "Creation of personalized brand experiences. Companies can segment their audience and tailor their content to meet customer preferences, thus enhancing the relevance and impact of their messages.",
+    "sliderDescription2": "The software's ability to update and manage content in real-time. Users can quickly adjust their message according to the needs of the moment, whether for last-minute promotions, event updates, or important alerts.",
+    "sliderDescription3": "Turn any space into a visually appealing and dynamic experience. Companies can easily create and deploy high-quality multimedia content, from videos and animations to interactive graphics, effectively capturing their audience's attention."
   },
   "home": {
     "title": "There is a diversity of industries for Digital Signage Solutions, where Upper DS will be your best ally to convey your message to the right people at the right time",

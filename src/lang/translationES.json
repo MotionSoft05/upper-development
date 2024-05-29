@@ -71,15 +71,12 @@
     "cancelButton": "Cancelar"
   },
   "homeSliderData": {
-    "sliderTag1": "Impulsa tu negocio",
-    "sliderTag2": "Gran impacto visual",
-    "sliderTag3": "Uso fácil y sencillo",
-    "sliderTitle1": "UPPER DS, el sistema de Señalización Digital",
-    "sliderTitle2": "Inteligencia Artificial",
-    "sliderTitle3": "Desarrollo de Aplicaciones",
-    "sliderDescription1": "TechWizard ofrece servicios de desarrollo de software de alta calidad y confiables relacionados. Nos enfocamos en tus necesidades específicas que se ajustan al presupuesto y al marco de tiempo.",
-    "sliderDescription2": "TechWizard está poniendo la inteligencia artificial y el aprendizaje automático al alcance de las organizaciones comerciales, gubernamentales y sin fines de lucro.",
-    "sliderDescription3": "Libera el poder del código y la creatividad para convertir tus ideas innovadoras en aplicaciones móviles interactivas y funcionales. Explora el mundo del desarrollo de aplicaciones y descubre cómo dar vida a tus visiones digitales en teléfonos inteligentes y tabletas."
+    "sliderTitle1": "Impulsa tu Marca con Experiencias Personalizadas",
+    "sliderTitle2": "Gestiona tu Mensaje en Tiempo Real",
+    "sliderTitle3": "Transforma tus Espacios con Contenido Dinámico",
+    "sliderDescription1": "Creación de experiencias de marca personalizadas. Las empresas pueden segmentar su audiencia y adaptar su contenido para satisfacer las preferencias de clientes, mejorando así la relevancia y el impacto de sus mensajes.",
+    "sliderDescription2": "Capacidad del software para actualizar y gestionar contenido en tiempo real. Los usuarios pueden ajustar rápidamente su mensaje según las necesidades del momento, ya sea para promociones de último minuto, actualizaciones de eventos o alertas importantes.",
+    "sliderDescription3": "Convierte cualquier espacio en una experiencia visualmente atractiva y dinámica. Las empresas pueden fácilmente crear y desplegar contenido multimedia de alta calidad, desde videos y animaciones hasta gráficos interactivos, capturando la atención de su audiencia de manera efectiva."
   },
   "home": {
     "title": "Existe una diversidad de industrias para Soluciones de Señalización Digital, donde Upper DS será tu mejor aliado para transmitir su mensaje a las personas adecuadas y en el momento adecuado",
