@@ -7,8 +7,11 @@ import {
   query,
   where,
   getDocs,
+  setDoc,
+  doc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -23,33 +26,38 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 const PantallaServicio = () => {
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [imageOrVideo3, setImageOrVideo3] = useState(null);
+  const [type3, setType3] = useState(null); // Estado adicional para el tipo de archivo
+
+  const [imagePreview1, setImagePreview1] = useState(null);
+  const [imagePreview2, setImagePreview2] = useState(null);
+  const [preview3, setPreview3] = useState(null);
+
   const [screenNames, setScreenNames] = useState([]);
   const [selectedScreen, setSelectedScreen] = useState(null);
+  const [empresa, setEmpresa] = useState("");
 
   useEffect(() => {
     const fetchScreenNames = async () => {
       try {
-        const auth = getAuth();
         const user = auth.currentUser;
         const userEmail = user ? user.email : null;
 
         if (userEmail) {
-          console.log("Correo electrónico del usuario logueado:", userEmail);
-
-          const usersCollection = collection(db, "usuarios"); // Utiliza db en lugar de firestore
+          const usersCollection = collection(db, "usuarios");
           const q = query(usersCollection, where("email", "==", userEmail));
           const querySnapshot = await getDocs(q);
 
           querySnapshot.forEach((doc) => {
             const user = doc.data();
             const nombresPantallas = user.NombrePantallasServicios || [];
-            console.log("Nombres de las pantallas:", nombresPantallas);
             setScreenNames(nombresPantallas);
+            setEmpresa(user.empresa);
           });
         }
       } catch (error) {
@@ -58,27 +66,141 @@ const PantallaServicio = () => {
     };
 
     fetchScreenNames();
-  }, []);
+  }, [auth, db]);
 
-  const handleImage1Change = (event) => {
-    setImage1(URL.createObjectURL(event.target.files[0]));
+  const handleFileChange = (event, setFile, setPreview, setType = null) => {
+    const file = event.target.files[0];
+    setFile(file);
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      setPreview(reader.result);
+      if (setType) {
+        // Detectar el tipo de archivo por su extensión
+        const isVideo = file.name.match(/\.(mp4|webm|ogg)$/i);
+        setType(isVideo ? "video" : "image");
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
-  const handleImage2Change = (event) => {
-    setImage2(URL.createObjectURL(event.target.files[0]));
-  };
-
-  const handleImageOrVideo3Change = (event) => {
-    setImageOrVideo3(URL.createObjectURL(event.target.files[0]));
-  };
-
-  const handleScreenChange = (selectedOption) => {
+  const handleScreenChange = async (selectedOption) => {
     setSelectedScreen(selectedOption);
-    // Aquí podrías realizar alguna acción adicional al seleccionar una pantalla
+    setImage1(null);
+    setImage2(null);
+    setImageOrVideo3(null);
+    setImagePreview1(null);
+    setImagePreview2(null);
+    setPreview3(null);
+    setType3(null);
+
+    try {
+      const templatesCollection = collection(db, "TemplateSalonesVista");
+      const q = query(
+        templatesCollection,
+        where("empresa", "==", empresa),
+        where("nombreDePantalla", "==", selectedOption.value)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.img1) setImagePreview1(data.img1);
+          if (data.img2) setImagePreview2(data.img2);
+          if (data.imgovideo3) {
+            console.log("Data imgovideo3:", data.imgovideo3); // Agregar registro
+            setPreview3(data.imgovideo3);
+
+            // Extraer la extensión del archivo de la URL
+            const fileExtension = data.imgovideo3
+              .split("?alt=")[0]
+              .split(".")
+              .pop()
+              .toLowerCase();
+
+            // Verificar si la extensión del archivo corresponde a una extensión de video
+            const isVideo = ["mp4", "webm", "ogg"].includes(fileExtension);
+            setType3(isVideo ? "video" : "image");
+
+            console.log("Tipo de archivo:", isVideo ? "video" : "image"); // Agregar registro
+          }
+        });
+      }
+    } catch (error) {
+      console.error("Error al obtener la configuración de la pantalla:", error);
+    }
   };
 
-  const guardarConfiguracion = () => {
-    // Lógica para guardar la configuración
+  const guardarConfiguracion = async () => {
+    try {
+      const uploadFile = async (file, path) => {
+        const storageRef = ref(storage, path);
+        await uploadBytes(storageRef, file);
+        return getDownloadURL(storageRef);
+      };
+
+      const urls = {};
+      if (image1) {
+        const url1 = await uploadFile(
+          image1,
+          `TemplateSalonesVistaimg/${image1.name}`
+        );
+        urls.img1 = url1;
+      }
+
+      if (image2) {
+        const url2 = await uploadFile(
+          image2,
+          `TemplateSalonesVistaimg/${image2.name}`
+        );
+        urls.img2 = url2;
+      }
+
+      if (imageOrVideo3) {
+        const url3 = await uploadFile(
+          imageOrVideo3,
+          `TemplateSalonesVistaimg/${imageOrVideo3.name}`
+        );
+        urls.imgovideo3 = url3;
+      }
+
+      // Buscar si ya existe un documento con la misma empresa y nombre de pantalla
+      const templatesCollection = collection(db, "TemplateSalonesVista");
+      const q = query(
+        templatesCollection,
+        where("empresa", "==", empresa),
+        where("nombreDePantalla", "==", selectedScreen.value)
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        // Si no existe, crear uno nuevo
+        await setDoc(doc(templatesCollection), {
+          empresa: empresa,
+          nombreDePantalla: selectedScreen.value,
+          ...urls,
+        });
+      } else {
+        // Si existe, actualizar el documento existente
+        querySnapshot.forEach(async (docSnapshot) => {
+          const docRef = doc(db, "TemplateSalonesVista", docSnapshot.id);
+          await setDoc(
+            docRef,
+            {
+              empresa: empresa,
+              nombreDePantalla: selectedScreen.value,
+              ...urls,
+            },
+            { merge: true }
+          );
+        });
+      }
+
+      console.log("Configuración guardada correctamente.");
+    } catch (error) {
+      console.error("Error al guardar la configuración:", error);
+    }
   };
 
   return (
@@ -108,14 +230,19 @@ const PantallaServicio = () => {
           <input
             type="file"
             accept="image/*"
-            onChange={handleImage1Change}
+            onChange={(event) =>
+              handleFileChange(event, setImage1, setImagePreview1)
+            }
             className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
           />
-          {image1 && (
-            <img src={image1} alt="Imagen 1" className="mt-2 rounded-lg" />
+          {imagePreview1 && (
+            <img
+              src={imagePreview1}
+              alt="Vista previa"
+              className="mt-2 rounded-lg"
+            />
           )}
         </div>
-
         <div className="mb-6">
           <label className="text-white dark:text-gray-200 block mb-0.5">
             Seleccionar Imagen 2
@@ -123,37 +250,47 @@ const PantallaServicio = () => {
           <input
             type="file"
             accept="image/*"
-            onChange={handleImage2Change}
+            onChange={(event) =>
+              handleFileChange(event, setImage2, setImagePreview2)
+            }
             className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
           />
-          {image2 && (
-            <img src={image2} alt="Imagen 2" className="mt-2 rounded-lg" />
+          {imagePreview2 && (
+            <img
+              src={imagePreview2}
+              alt="Vista previa"
+              className="mt-2 rounded-lg"
+            />
           )}
         </div>
-
         <div className="mb-6">
           <label className="text-white dark:text-gray-200 block mb-0.5">
             Seleccionar Imagen o Video 3
           </label>
           <input
             type="file"
-            accept="image/*, video/*"
-            onChange={handleImageOrVideo3Change}
+            accept="image/*,video/*"
+            onChange={(event) =>
+              handleFileChange(event, setImageOrVideo3, setPreview3, setType3)
+            }
             className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
           />
-          {imageOrVideo3 && (
-            <video
-              controls
+          {preview3 && type3 === "video" && (
+            <div className="mt-2">
+              <video src={preview3} controls className="rounded-lg">
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+          {preview3 && type3 === "image" && (
+            <img
+              src={preview3}
+              alt="Vista previa"
               className="mt-2 rounded-lg"
-              style={{ width: "100%" }}
-            >
-              <source src={imageOrVideo3} type="video/mp4" />
-              Tu navegador no admite el elemento de video.
-            </video>
+            />
           )}
         </div>
       </div>
-
       <div className="flex justify-end mt-6">
         <button
           onClick={guardarConfiguracion}
