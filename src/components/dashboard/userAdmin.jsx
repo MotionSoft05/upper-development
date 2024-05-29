@@ -11,7 +11,7 @@ import {
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
 import { useTranslation } from "react-i18next";
-
+import Select from "react-select";
 
 function UserAdmin() {
   const { t } = useTranslation(); // Traducciones i18N
@@ -26,8 +26,11 @@ function UserAdmin() {
   const [cantidadPublicidadSalon, setCantidadPublicidadSalon] = useState(0);
   const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
     useState(0);
+  const [empresas, setEmpresas] = useState([]);
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
 
-  let total = cantidadPd + cantidadPs + cantidadPservice;
+  const total =
+    parseInt(cantidadPd) + parseInt(cantidadPs) + parseInt(cantidadPservice);
 
   useEffect(() => {
     const firebaseConfig = {
@@ -152,6 +155,95 @@ function UserAdmin() {
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    const obtenerEmpresas = async () => {
+      const firebaseConfig = {
+        /* Configuración de Firebase */
+      };
+      const db = getFirestore();
+      const usuariosRef = collection(db, "usuarios");
+      const usuariosSnapshot = await getDocs(usuariosRef);
+      const empresas = usuariosSnapshot.docs.map((doc) => doc.data().empresa);
+      const empresasFiltradas = [...new Set(empresas)];
+      setEmpresas(empresasFiltradas);
+    };
+
+    obtenerEmpresas();
+  }, []);
+
+  useEffect(() => {
+    const obtenerEventos = async () => {
+      if (empresaSeleccionada) {
+        const firebaseConfig = {
+          /* Configuración de Firebase */
+        };
+        const db = getFirestore();
+        const eventosRef = collection(db, "eventos");
+        const eventosQuery = query(
+          eventosRef,
+          where("empresa", "==", empresaSeleccionada)
+        );
+        const eventosSnapshot = await getDocs(eventosQuery);
+        const eventos = eventosSnapshot.docs.map((doc) => doc.data());
+        setUserEvents(eventos);
+      }
+    };
+
+    obtenerEventos();
+  }, [empresaSeleccionada]);
+
+  useEffect(() => {
+    const obtenerDatosEmpresa = async () => {
+      if (empresaSeleccionada) {
+        const firebaseConfig = {
+          /* Configuración de Firebase */
+        };
+        const db = getFirestore();
+
+        // Obtener datos de la empresa seleccionada
+        const usuariosRef = collection(db, "usuarios");
+        const usuariosQuery = query(
+          usuariosRef,
+          where("empresa", "==", empresaSeleccionada)
+        );
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+        const datosEmpresa = usuariosSnapshot.docs[0].data();
+
+        setCantidadPd(datosEmpresa.pd || 0);
+        setCantidadPs(datosEmpresa.ps || 0);
+        setCantidadPservice(datosEmpresa.pservice || 0);
+
+        // Obtener cantidad de publicidades de salón
+        const publicidadSalonQuery = query(
+          collection(db, "Publicidad"),
+          where("empresa", "==", empresaSeleccionada),
+          where("tipo", "==", "salon")
+        );
+        const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
+        setCantidadPublicidadSalon(publicidadSalonSnapshot.docs.length);
+
+        // Obtener cantidad de publicidades de directorio
+        const publicidadDirectorioQuery = query(
+          collection(db, "Publicidad"),
+          where("empresa", "==", empresaSeleccionada),
+          where("tipo", "==", "directorio")
+        );
+        const publicidadDirectorioSnapshot = await getDocs(
+          publicidadDirectorioQuery
+        );
+        setCantidadPublicidadDirectorio(
+          publicidadDirectorioSnapshot.docs.length
+        );
+      }
+    };
+
+    obtenerDatosEmpresa();
+  }, [empresaSeleccionada]);
+
+  const handleChangeEmpresa = (e) => {
+    setEmpresaSeleccionada(e.target.value);
+  };
+
   return (
     <section className="pl-10 md:px-32">
       <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6x2">
@@ -161,6 +253,27 @@ function UserAdmin() {
       </h1>
       <div className=" mb-6 ">
         <div className="h-full py-8 px-6 space-y-6 rounded-xl border border-gray-200 bg-white">
+          <div className="px-6 pt-6 2xl:container">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
+              {/* Selector de empresas */}
+              {userInfo && userInfo.permisos === 10 && (
+                <div className="md:col-span-2 lg:col-span-1">
+                  <select
+                    className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm"
+                    onChange={handleChangeEmpresa}
+                    value={empresaSeleccionada}
+                  >
+                    <option value="">{t("userAdmin.selectCompany")}</option>
+                    {empresas.map((empresa, index) => (
+                      <option key={index} value={empresa}>
+                        {empresa}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+          </div>
           <div className="px-6 pt-6 2xl:container">
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
               <div className="md:col-span-2 lg:col-span-1">

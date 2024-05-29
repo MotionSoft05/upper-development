@@ -243,6 +243,7 @@
   },
   "userAdmin": {
     "welcome": "Welcome",
+    "selectCompany": "Select Company",
     "eventInfo": "Event Information",
     "todayEvents": "Today's Events",
     "weekEvents": "Weekly Events",
