@@ -392,7 +392,6 @@ function Admin() {
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
         final: usuarioEditado.final,
-        // Agrega otros campos opcionales aquí...
       };
 
       const validUpdateData = Object.fromEntries(
@@ -400,7 +399,52 @@ function Admin() {
       );
 
       if (Object.keys(validUpdateData).length > 0) {
+        // Actualizar el usuario en Firestore
         await updateDoc(usuarioDocRef, validUpdateData);
+
+        // Verificar si el nombre de la empresa ya existe
+        const empresaExistente = usuarios.find(
+          (usuario) =>
+            usuario.empresa.toLowerCase() ===
+              usuarioEditado.empresa.toLowerCase() &&
+            usuario.id !== usuarioEditado.id
+        );
+
+        if (empresaExistente) {
+          // Obtener el dato nombrePantallas y nombrePantallasDirectorio del usuario existente
+          const empresaExistenteDocRef = doc(
+            db,
+            "usuarios",
+            empresaExistente.id
+          );
+          const empresaExistenteDoc = await getDoc(empresaExistenteDocRef);
+
+          if (empresaExistenteDoc.exists()) {
+            const { nombrePantallas, nombrePantallasDirectorio } =
+              empresaExistenteDoc.data();
+
+            // Crear un objeto para almacenar los campos que se deben actualizar
+            const updateFields = {};
+
+            // Solo actualizar si nombrePantallas existe y no es undefined
+            if (nombrePantallas !== undefined) {
+              updateFields.nombrePantallas = nombrePantallas;
+            }
+
+            // Solo actualizar si nombrePantallasDirectorio existe y no es undefined
+            if (nombrePantallasDirectorio !== undefined) {
+              updateFields.nombrePantallasDirectorio =
+                nombrePantallasDirectorio;
+            }
+
+            if (Object.keys(updateFields).length > 0) {
+              await updateDoc(usuarioDocRef, updateFields);
+
+              // Actualizar el estado local del usuario editado
+              Object.assign(validUpdateData, updateFields);
+            }
+          }
+        }
 
         // Actualizar estado local
         setUsuarios((prevUsuarios) => {
