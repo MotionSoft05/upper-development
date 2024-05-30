@@ -338,7 +338,7 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("personalization")}
         >
-          Personalización del Template
+          Personalización general
         </button>
         <button
           className={`mx-5 px-6 py-2 leading-5 transition-colors duration-200 transform rounded-md ${
@@ -348,7 +348,7 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("preview")}
         >
-          Vista Previa del Template
+          Personalización avanzada
         </button>
       </div>
 

@@ -37,14 +37,14 @@ function PublicidadDirec() {
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [tiemposSalon, setTiemposSalon] = useState([
-    { horas: 0, minutos: 0, segundos: 0 },
+    { horas: 0, minutos: 0, segundos: 10 },
   ]);
   const [successMessage, setSuccessMessage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [originalTiemposSalon, setOriginalTiemposSalon] = useState({
     horas: 0,
     minutos: 0,
-    segundos: 0,
+    segundos: 10,
   });
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
@@ -149,7 +149,7 @@ function PublicidadDirec() {
           () => ({
             horas: 0,
             minutos: 0,
-            segundos: 0,
+            segundos: 10,
           })
         );
 
@@ -164,7 +164,7 @@ function PublicidadDirec() {
           ...publicidadesData.map((publicidad) => ({
             horas: publicidad.horas || 0,
             minutos: publicidad.minutos || 0,
-            segundos: publicidad.segundos || 0,
+            segundos: publicidad.segundos || 10,
           })),
           ...nuevosTiempos,
         ]);
@@ -328,11 +328,14 @@ function PublicidadDirec() {
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
-    const newValue = parseInt(value) || 0;
+    let newValue = parseInt(value) || 0;
 
     if (name === "horas" || name === "minutos" || name === "segundos") {
       // Verificar que el valor esté dentro del rango permitido
       const max = name === "horas" ? 23 : 59;
+      if (name === "segundos") {
+        newValue = Math.max(newValue, 10);
+      }
       const validValue = Math.min(Math.max(newValue, 0), max);
 
       const newValues = [...type];
@@ -433,7 +436,7 @@ function PublicidadDirec() {
 
             setTiemposSalon((prevTiempos) => [
               ...prevTiempos,
-              { horas: 0, minutos: 0, segundos: 0 },
+              { horas: 0, minutos: 0, segundos: 10 },
             ]);
 
             setPreviewImages((prevPreviews) => [...prevPreviews, null]);
@@ -451,7 +454,7 @@ function PublicidadDirec() {
       setImagenesSalon((prevImages) => [...prevImages, null]);
       setTiemposSalon((prevTiempos) => [
         ...prevTiempos,
-        { horas: 0, minutos: 0, segundos: 0 },
+        { horas: 0, minutos: 0, segundos: 10 },
       ]);
       setPreviewImages((prevPreviews) => [...prevPreviews, null]);
     } catch (error) {
