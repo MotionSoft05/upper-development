@@ -14,6 +14,8 @@ import { getAuth } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Datepicker from "react-tailwindcss-datepicker";
 import "keen-slider/keen-slider.min.css";
+import { useTranslation } from "react-i18next";
+import Swal from "sweetalert2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -31,6 +33,7 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 
 const PantallaServicio = () => {
+  const { t } = useTranslation();
   const [image1, setImage1] = useState(null);
   const [image2, setImage2] = useState(null);
   const [imageOrVideo3, setImageOrVideo3] = useState(null);
@@ -146,7 +149,7 @@ const PantallaServicio = () => {
     ]);
 
     try {
-      const templatesCollection = collection(db, "TemplateSalonesVista");
+      const templatesCollection = collection(db, "TemplateServiciosVista");
       const q = query(
         templatesCollection,
         where("empresa", "==", empresa),
@@ -184,6 +187,28 @@ const PantallaServicio = () => {
 
   const guardarConfiguracion = async () => {
     try {
+      if (!selectedScreen) {
+        Swal.fire({
+          icon: "error",
+          title: t("screenService.selectScreen"),
+        });
+        return;
+      }
+
+      for (const event of events) {
+        if (
+          !event.dateRange ||
+          !event.dateRange.startDate ||
+          !event.dateRange.endDate
+        ) {
+          Swal.fire({
+            icon: "error",
+            title: t("screenService.selectDate"),
+          });
+          return;
+        }
+      }
+
       const uploadFile = async (file, path) => {
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
@@ -196,7 +221,7 @@ const PantallaServicio = () => {
           if (event.image1) {
             const url1 = await uploadFile(
               event.image1,
-              `TemplateSalonesVistaimg/event${index + 1}/${event.image1.name}`
+              `TemplateServiciosVistaimg/event${index + 1}/${event.image1.name}`
             );
             urls.img1 = url1;
           }
@@ -204,7 +229,7 @@ const PantallaServicio = () => {
           if (event.image2) {
             const url2 = await uploadFile(
               event.image2,
-              `TemplateSalonesVistaimg/event${index + 1}/${event.image2.name}`
+              `TemplateServiciosVistaimg/event${index + 1}/${event.image2.name}`
             );
             urls.img2 = url2;
           }
@@ -212,7 +237,7 @@ const PantallaServicio = () => {
           if (event.imageOrVideo3) {
             const url3 = await uploadFile(
               event.imageOrVideo3,
-              `TemplateSalonesVistaimg/event${index + 1}/${
+              `TemplateServiciosVistaimg/event${index + 1}/${
                 event.imageOrVideo3.name
               }`
             );
@@ -232,7 +257,7 @@ const PantallaServicio = () => {
         })
       );
 
-      const templatesCollection = collection(db, "TemplateSalonesVista");
+      const templatesCollection = collection(db, "TemplateServiciosVista");
       const q = query(
         templatesCollection,
         where("empresa", "==", empresa),
@@ -250,7 +275,7 @@ const PantallaServicio = () => {
       } else {
         // Si existe, actualizar el documento existente
         querySnapshot.forEach(async (docSnapshot) => {
-          const docRef = doc(db, "TemplateSalonesVista", docSnapshot.id);
+          const docRef = doc(db, "TemplateServiciosVista", docSnapshot.id);
           await setDoc(
             docRef,
             {
@@ -262,10 +287,20 @@ const PantallaServicio = () => {
           );
         });
       }
+      Swal.fire({
+        icon: "success",
+        title: t("screenService.customizationSavedSuccess"),
+        showConfirmButton: false,
+        timer: 2000,
+      });
 
       console.log("Configuración guardada correctamente.");
     } catch (error) {
       console.error("Error al guardar la configuración:", error);
+      Swal.fire({
+        icon: "error",
+        title: t("Error saving configuration"),
+      });
     }
   };
 
@@ -296,11 +331,13 @@ const PantallaServicio = () => {
   return (
     <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
       <h1 className="text-3xl font-bold text-white capitalize mb-4">
-        Personalización del Template
+        {/* Personalización del Template*/}
+        {t("screenService.templatecustomization")}
       </h1>
       <div className="mb-6">
         <label className="text-white dark:text-gray-200 block mb-0.5">
-          Seleccionar Pantalla del Servicio
+          {/* Seleccionar Pantalla del Servicio */}
+          {t("screenService.selectServiceScreen")}
         </label>
         <Select
           options={Object.values(screenNames).map((name) => ({
@@ -309,18 +346,20 @@ const PantallaServicio = () => {
           }))}
           value={selectedScreen}
           onChange={handleScreenChange}
-          placeholder="Seleccione una pantalla"
+          placeholder={t("screenService.selectScreen")}
         />
       </div>
       {events.map((event, index) => (
         <div key={index} className="mb-6 border-t border-gray-700 pt-6">
           <h2 className="text-2xl font-bold text-white capitalize mb-4">
-            Evento {index + 1}
+            {/* Evento {index + 1} */}
+            {`${t("screenService.event")} ${index + 1}`}
           </h2>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="mb-6">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Seleccionar Imagen 1
+                {/* Seleccionar Imagen 1 */}
+                {t("screenService.selectImage1")}
               </label>
               <input
                 type="file"
@@ -333,14 +372,15 @@ const PantallaServicio = () => {
               {event.imagePreview1 && (
                 <img
                   src={event.imagePreview1}
-                  alt="Vista previa"
+                  alt={t("screenService.preview")}
                   className="mt-2 rounded-lg"
                 />
               )}
             </div>
             <div className="mb-6">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Seleccionar Imagen 2
+                {/* Seleccionar Imagen 2 */}
+                {t("screenService.selectImage2")}
               </label>
               <input
                 type="file"
@@ -353,14 +393,15 @@ const PantallaServicio = () => {
               {event.imagePreview2 && (
                 <img
                   src={event.imagePreview2}
-                  alt="Vista previa"
+                  alt={t("screenService.preview")}
                   className="mt-2 rounded-lg"
                 />
               )}
             </div>
             <div className="mb-6">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Seleccionar Imagen o Video 3
+                {/* Seleccionar Imagen o Video 3 */}
+                {t("screenService.selectImageOrVideo3")}
               </label>
               <input
                 type="file"
@@ -379,21 +420,22 @@ const PantallaServicio = () => {
               {event.preview3 && event.type3 === "video" && (
                 <div className="mt-2">
                   <video src={event.preview3} controls className="rounded-lg">
-                    Your browser does not support the video tag.
+                    {t("screenService.videoNotSupported")}
                   </video>
                 </div>
               )}
               {event.preview3 && event.type3 === "image" && (
                 <img
                   src={event.preview3}
-                  alt="Vista previa"
+                  alt={t("screenService.preview")}
                   className="mt-2 rounded-lg"
                 />
               )}
             </div>
             <div className="mb-6">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Seleccionar Fecha
+                {/* Seleccionar Fecha */}
+                {t("screenService.selectDate")}
               </label>
               <Datepicker
                 useRange={true}
@@ -405,7 +447,8 @@ const PantallaServicio = () => {
             </div>
             <div className="mb-6">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Tiempo de visualización (HH:MM:SS)
+                {/* Tiempo de visualización (HH:MM:SS) */}
+                {t("screenService.viewingTime")}
               </label>
               <div className="flex">
                 <input
@@ -446,7 +489,7 @@ const PantallaServicio = () => {
           onClick={addEvent}
           className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
         >
-          Agregar Evento
+          {t("screenService.addEvent")}
         </button>
       )}
       <div className="flex justify-end mt-6">
@@ -454,7 +497,7 @@ const PantallaServicio = () => {
           onClick={guardarConfiguracion}
           className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
         >
-          Guardar
+          {t("screenService.save")}
         </button>
       </div>
     </section>

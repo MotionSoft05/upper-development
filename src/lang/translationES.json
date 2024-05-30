@@ -350,7 +350,19 @@
     "selectCity": "Seleccione una ciudad",
     "fontStyleError": "Por favor, seleccione un estilo de texto.",
     "cityError": "Por favor, seleccione una ciudad.",
-    "customizationSavedSuccess": "Información de personalización guardada con éxito."
+
+    "customizationSavedSuccess": "Información de personalización guardada con éxito.",
+    "selectServiceScreen": "Seleccionar Pantalla del Servicio",
+    "selectScreen": "Por favor, seleccione una pantalla",
+    "event": "Evento",
+    "selectImage1": "Por favor, seleccionar Imagen 1",
+    "selectImage2": "Seleccionar Imagen 2",
+    "selectImageOrVideo3": "Seleccionar Imagen o Video 3",
+    "preview": "Vista previa",
+    "videoNotSupported": "Su navegador no soporta la etiqueta de video.",
+    "selectDate": "Seleccionar Fecha",
+    "viewingTime": "Tiempo de visualización (HH:MM:SS)",
+    "addEvent": "Agregar Evento"
   },
   "advertisement": {
     "title": "CONFIGURACIÓN DE PUBLICIDAD",
