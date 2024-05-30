@@ -49,6 +49,25 @@ const PantallaServicio = () => {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedDateFin, setSelectedDateFin] = useState(new Date());
 
+  const [events, setEvents] = useState([
+    {
+      image1: null,
+      image2: null,
+      imageOrVideo3: null,
+      type3: null,
+      imagePreview1: null,
+      imagePreview2: null,
+      preview3: null,
+      dateRange: {
+        startDate: new Date(),
+        endDate: new Date(),
+      },
+      hours: 0,
+      minutes: 0,
+      seconds: 10,
+    },
+  ]);
+
   useEffect(() => {
     const fetchScreenNames = async () => {
       try {
@@ -75,34 +94,56 @@ const PantallaServicio = () => {
     fetchScreenNames();
   }, [auth, db]);
 
-  const handleFileChange = (event, setFile, setPreview, setType = null) => {
+  const handleFileChange = (
+    event,
+    index,
+    field,
+    previewField,
+    setType = null
+  ) => {
     const file = event.target.files[0];
-    setFile(file);
+    const newEvents = [...events];
+    newEvents[index][field] = file;
 
     const reader = new FileReader();
     reader.onload = () => {
-      setPreview(reader.result);
+      newEvents[index][previewField] = reader.result;
       if (setType) {
         // Detectar el tipo de archivo por su extensión
         const isVideo = file.name.match(/\.(mp4|webm|ogg)$/i);
-        setType(isVideo ? "video" : "image");
+        newEvents[index][setType] = isVideo ? "video" : "image";
       }
+      setEvents(newEvents);
     };
     reader.readAsDataURL(file);
   };
 
+  const handleEventChange = (index, field, value) => {
+    const newEvents = [...events];
+    newEvents[index][field] = value;
+    setEvents(newEvents);
+  };
+
   const handleScreenChange = async (selectedOption) => {
     setSelectedScreen(selectedOption);
-    setImage1(null);
-    setImage2(null);
-    setImageOrVideo3(null);
-    setImagePreview1(null);
-    setImagePreview2(null);
-    setPreview3(null);
-    setType3(null);
-    setHours(0);
-    setMinutes(0);
-    setSeconds(10);
+    setEvents([
+      {
+        image1: null,
+        image2: null,
+        imageOrVideo3: null,
+        type3: null,
+        imagePreview1: null,
+        imagePreview2: null,
+        preview3: null,
+        dateRange: {
+          startDate: new Date(),
+          endDate: new Date(),
+        },
+        hours: 0,
+        minutes: 0,
+        seconds: 10,
+      },
+    ]);
 
     try {
       const templatesCollection = collection(db, "TemplateSalonesVista");
@@ -116,34 +157,24 @@ const PantallaServicio = () => {
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
-
-          if (data.img1) setImagePreview1(data.img1);
-          if (data.img2) setImagePreview2(data.img2);
-          if (data.imgovideo3) {
-            console.log("Data imgovideo3:", data.imgovideo3); // Agregar registro
-            setPreview3(data.imgovideo3);
-
-            // Extraer la extensión del archivo de la URL
-            const fileExtension = data.imgovideo3
-              .split("?alt=")[0]
-              .split(".")
-              .pop()
-              .toLowerCase();
-
-            // Verificar si la extensión del archivo corresponde a una extensión de video
-            const isVideo = ["mp4", "webm", "ogg"].includes(fileExtension);
-            setType3(isVideo ? "video" : "image");
-
-            console.log("Tipo de archivo:", isVideo ? "video" : "image"); // Agregar registro
-          }
-
-          if (data.tiempoDeVisualizacion) {
-            const { hours, minutes, seconds } = data.tiempoDeVisualizacion;
-            console.log("Tiempo de visualización:", hours, minutes, seconds);
-            setHours(hours || 0);
-            setMinutes(minutes || 0);
-            setSeconds(seconds || 10);
-          }
+          // Aquí debes cargar la configuración de los eventos
+          const newEvents = data.events.map((event) => ({
+            image1: null,
+            image2: null,
+            imageOrVideo3: null,
+            type3: null,
+            imagePreview1: event.img1 || null,
+            imagePreview2: event.img2 || null,
+            preview3: event.imgovideo3 || null,
+            dateRange: {
+              startDate: event.fechaInicial.toDate(),
+              endDate: event.fechaFinal.toDate(),
+            },
+            hours: event.tiempoDeVisualizacion.hours || 0,
+            minutes: event.tiempoDeVisualizacion.minutes || 0,
+            seconds: event.tiempoDeVisualizacion.seconds || 10,
+          }));
+          setEvents(newEvents);
         });
       }
     } catch (error) {
@@ -159,38 +190,48 @@ const PantallaServicio = () => {
         return getDownloadURL(storageRef);
       };
 
-      const urls = {};
-      if (image1) {
-        const url1 = await uploadFile(
-          image1,
-          `TemplateSalonesVistaimg/${image1.name}`
-        );
-        urls.img1 = url1;
-      }
+      const newEvents = await Promise.all(
+        events.map(async (event, index) => {
+          const urls = {};
+          if (event.image1) {
+            const url1 = await uploadFile(
+              event.image1,
+              `TemplateSalonesVistaimg/event${index + 1}/${event.image1.name}`
+            );
+            urls.img1 = url1;
+          }
 
-      if (image2) {
-        const url2 = await uploadFile(
-          image2,
-          `TemplateSalonesVistaimg/${image2.name}`
-        );
-        urls.img2 = url2;
-      }
+          if (event.image2) {
+            const url2 = await uploadFile(
+              event.image2,
+              `TemplateSalonesVistaimg/event${index + 1}/${event.image2.name}`
+            );
+            urls.img2 = url2;
+          }
 
-      if (imageOrVideo3) {
-        const url3 = await uploadFile(
-          imageOrVideo3,
-          `TemplateSalonesVistaimg/${imageOrVideo3.name}`
-        );
-        urls.imgovideo3 = url3;
-      }
+          if (event.imageOrVideo3) {
+            const url3 = await uploadFile(
+              event.imageOrVideo3,
+              `TemplateSalonesVistaimg/event${index + 1}/${
+                event.imageOrVideo3.name
+              }`
+            );
+            urls.imgovideo3 = url3;
+          }
 
-      // Crear objeto para almacenar las fechas inicial y final
-      const fechas = {
-        fechaInicial: selectedDate,
-        fechaFinal: selectedDateFin, // Asegúrate de tener selectedDateFin como estado
-      };
+          return {
+            ...urls,
+            fechaInicial: event.dateRange.startDate,
+            fechaFinal: event.dateRange.endDate,
+            tiempoDeVisualizacion: {
+              hours: event.hours,
+              minutes: event.minutes,
+              seconds: event.seconds,
+            },
+          };
+        })
+      );
 
-      // Buscar si ya existe un documento con la misma empresa y nombre de pantalla
       const templatesCollection = collection(db, "TemplateSalonesVista");
       const q = query(
         templatesCollection,
@@ -204,13 +245,7 @@ const PantallaServicio = () => {
         await setDoc(doc(templatesCollection), {
           empresa: empresa,
           nombreDePantalla: selectedScreen.value,
-          tiempoDeVisualizacion: {
-            hours,
-            minutes,
-            seconds,
-          },
-          ...urls,
-          ...fechas, // Agregar fechas al documento
+          events: newEvents,
         });
       } else {
         // Si existe, actualizar el documento existente
@@ -221,13 +256,7 @@ const PantallaServicio = () => {
             {
               empresa: empresa,
               nombreDePantalla: selectedScreen.value,
-              tiempoDeVisualizacion: {
-                hours,
-                minutes,
-                seconds,
-              },
-              ...urls,
-              ...fechas, // Agregar fechas al documento
+              events: newEvents,
             },
             { merge: true }
           );
@@ -240,15 +269,28 @@ const PantallaServicio = () => {
     }
   };
 
-  const [dateRange, setDateRange] = useState({
-    startDate: selectedDate,
-    endDate: selectedDateFin,
-  });
-
-  const handleDateChange = (newDateRange) => {
-    setSelectedDate(newDateRange.startDate);
-    setSelectedDateFin(newDateRange.endDate);
-    setDateRange(newDateRange);
+  const addEvent = () => {
+    if (events.length < 3) {
+      setEvents([
+        ...events,
+        {
+          image1: null,
+          image2: null,
+          imageOrVideo3: null,
+          type3: null,
+          imagePreview1: null,
+          imagePreview2: null,
+          preview3: null,
+          dateRange: {
+            startDate: new Date(),
+            endDate: new Date(),
+          },
+          hours: 0,
+          minutes: 0,
+          seconds: 10,
+        },
+      ]);
+    }
   };
 
   return (
@@ -270,115 +312,143 @@ const PantallaServicio = () => {
           placeholder="Seleccione una pantalla"
         />
       </div>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="mb-6">
-          <label className="text-white dark:text-gray-200 block mb-0.5">
-            Seleccionar Imagen 1
-          </label>
-          <input
-            type="file"
-            accept="image/"
-            onChange={(event) =>
-              handleFileChange(event, setImage1, setImagePreview1)
-            }
-            className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
-          />
-          {imagePreview1 && (
-            <img
-              src={imagePreview1}
-              alt="Vista previa"
-              className="mt-2 rounded-lg"
-            />
-          )}
-        </div>
-        <div className="mb-6">
-          <label className="text-white dark:text-gray-200 block mb-0.5">
-            Seleccionar Imagen 2
-          </label>
-          <input
-            type="file"
-            accept="image/"
-            onChange={(event) =>
-              handleFileChange(event, setImage2, setImagePreview2)
-            }
-            className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
-          />
-          {imagePreview2 && (
-            <img
-              src={imagePreview2}
-              alt="Vista previa"
-              className="mt-2 rounded-lg"
-            />
-          )}
-        </div>
-        <div className="mb-6">
-          <label className="text-white dark:text-gray-200 block mb-0.5">
-            Seleccionar Imagen o Video 3
-          </label>
-          <input
-            type="file"
-            accept="image/,video/"
-            onChange={(event) =>
-              handleFileChange(event, setImageOrVideo3, setPreview3, setType3)
-            }
-            className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
-          />
-          {preview3 && type3 === "video" && (
-            <div className="mt-2">
-              <video src={preview3} controls className="rounded-lg">
-                Your browser does not support the video tag.
-              </video>
+      {events.map((event, index) => (
+        <div key={index} className="mb-6 border-t border-gray-700 pt-6">
+          <h2 className="text-2xl font-bold text-white capitalize mb-4">
+            Evento {index + 1}
+          </h2>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="mb-6">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Seleccionar Imagen 1
+              </label>
+              <input
+                type="file"
+                accept="image/"
+                onChange={(event) =>
+                  handleFileChange(event, index, "image1", "imagePreview1")
+                }
+                className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
+              />
+              {event.imagePreview1 && (
+                <img
+                  src={event.imagePreview1}
+                  alt="Vista previa"
+                  className="mt-2 rounded-lg"
+                />
+              )}
             </div>
-          )}
-          {preview3 && type3 === "image" && (
-            <img
-              src={preview3}
-              alt="Vista previa"
-              className="mt-2 rounded-lg"
-            />
-          )}
-        </div>
-        <div className="mb-6">
-          <label className="text-white dark:text-gray-200 block mb-0.5">
-            Seleccionar Fecha
-          </label>
-          <Datepicker
-            useRange={true}
-            value={dateRange}
-            onChange={handleDateChange}
-          />
-        </div>
-
-        <div className="mb-6">
-          <label className="text-white dark:text-gray-200 block mb-0.5">
-            Tiempo de visualización (HH:MM:SS)
-          </label>
-          <div className="flex">
-            <input
-              type="number"
-              min="0"
-              value={hours}
-              onChange={(e) => setHours(e.target.value)}
-              className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full"
-            />
-            <input
-              type="number"
-              min="0"
-              max="59"
-              value={minutes}
-              onChange={(e) => setMinutes(e.target.value)}
-              className="bg-gray-700 text-white py-2 px-3 border w-full"
-            />
-            <input
-              type="number"
-              min="10"
-              value={seconds}
-              onChange={(e) => setSeconds(e.target.value)}
-              className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
-            />
+            <div className="mb-6">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Seleccionar Imagen 2
+              </label>
+              <input
+                type="file"
+                accept="image/"
+                onChange={(event) =>
+                  handleFileChange(event, index, "image2", "imagePreview2")
+                }
+                className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
+              />
+              {event.imagePreview2 && (
+                <img
+                  src={event.imagePreview2}
+                  alt="Vista previa"
+                  className="mt-2 rounded-lg"
+                />
+              )}
+            </div>
+            <div className="mb-6">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Seleccionar Imagen o Video 3
+              </label>
+              <input
+                type="file"
+                accept="image/,video/"
+                onChange={(event) =>
+                  handleFileChange(
+                    event,
+                    index,
+                    "imageOrVideo3",
+                    "preview3",
+                    "type3"
+                  )
+                }
+                className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
+              />
+              {event.preview3 && event.type3 === "video" && (
+                <div className="mt-2">
+                  <video src={event.preview3} controls className="rounded-lg">
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+              {event.preview3 && event.type3 === "image" && (
+                <img
+                  src={event.preview3}
+                  alt="Vista previa"
+                  className="mt-2 rounded-lg"
+                />
+              )}
+            </div>
+            <div className="mb-6">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Seleccionar Fecha
+              </label>
+              <Datepicker
+                useRange={true}
+                value={event.dateRange}
+                onChange={(newDateRange) =>
+                  handleEventChange(index, "dateRange", newDateRange)
+                }
+              />
+            </div>
+            <div className="mb-6">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
+                Tiempo de visualización (HH:MM:SS)
+              </label>
+              <div className="flex">
+                <input
+                  type="number"
+                  min="0"
+                  value={event.hours}
+                  onChange={(e) =>
+                    handleEventChange(index, "hours", e.target.value)
+                  }
+                  className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  value={event.minutes}
+                  onChange={(e) =>
+                    handleEventChange(index, "minutes", e.target.value)
+                  }
+                  className="bg-gray-700 text-white py-2 px-3 border w-full"
+                />
+                <input
+                  type="number"
+                  min="10"
+                  value={event.seconds}
+                  onChange={(e) =>
+                    handleEventChange(index, "seconds", e.target.value)
+                  }
+                  className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      ))}
+      {events.length < 3 && (
+        <button
+          onClick={addEvent}
+          className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+        >
+          Agregar Evento
+        </button>
+      )}
       <div className="flex justify-end mt-6">
         <button
           onClick={guardarConfiguracion}
