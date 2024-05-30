@@ -67,6 +67,7 @@ function PantallasSalon() {
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [configuracionTemplate, setConfiguracionTemplate] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("es");
+  const [ nombreEmpresa, setNombreEmpresa] = useState(null)
 
   useEffect(() => {
     const obtenerEmpresas = async () => {
@@ -202,6 +203,7 @@ function PantallasSalon() {
                 nombresPantallasColeccion[index] || `Pantalla ${index + 1}`
             );
 
+            setNombreEmpresa(user)
             setNombrePantallas(namesArray);
             setPs(numberOfScreens);
           }
@@ -824,7 +826,7 @@ function PantallasSalon() {
                     />
                     <Link
                       // href={`/pantalla${index + 1}.html`}
-                      href={`/pantalla${index + 1}${isProduction}`}
+                      href={`/pantalla${index + 1}?emp=${nombreEmpresa?.empresa}${isProduction}`}
                       target="_blank"
                       className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                     >
