@@ -590,7 +590,7 @@ function Register() {
 
                 <div className="mt-3 text-sm font-light text-gray-500">
                   {/* ¿Ya tienes una cuenta? */}
-                  ¿Ya tienes una cuenta?{" "}
+                  {t("register.comprobation")}
                   <strong>
                     <Link href="/login">
                       {/* Ingresa aquí */}
