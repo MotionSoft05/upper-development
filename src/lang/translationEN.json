@@ -334,6 +334,24 @@
     "screenNames": "Screen Names",
     "save": "Save"
   },
+  "screenService": {
+    "generalcustomization": "General Customization",
+    "advancedcustomization": "Advanced Customization",
+    "templatecustomization": "Template Customization",
+    "fontColor": "Font Color",
+    "templateColor": "Template Color",
+    "fontStyle": "Font Style",
+    "styletext": "Select a text style",
+    "city": "Select City",
+    "screenName": "Screen Name",
+    "save": "Save",
+    "selectColor": "Select Color",
+    "done": "Done",
+    "selectCity": "Select a City",
+    "fontStyleError": "Please select a font style.",
+    "cityError": "Please select a city.",
+    "customizationSavedSuccess": "Customization information saved successfully."
+  },
   "advertisement": {
     "title": "ADVERTISING CONFIGURATION",
     "description1": "Enter images that will be displayed when there are no events.",

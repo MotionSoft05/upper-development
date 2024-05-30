@@ -17,6 +17,8 @@ import {
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
 import PantallaServicio from "./PreviewTemplate";
+import { useTranslation } from "react-i18next";
+import Swal from "sweetalert2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -33,6 +35,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 const EditPantallaServicio = () => {
+  const { t } = useTranslation();
   const [fontColor, setFontColor] = useState("#000000");
   const [templateColor, setTemplateColor] = useState("#ffffff");
   const [selectedFontStyle, setSelectedFontStyle] = useState(null);
@@ -106,6 +109,20 @@ const EditPantallaServicio = () => {
     try {
       const user = auth.currentUser;
       if (user) {
+        if (!selectedFontStyle) {
+          Swal.fire({
+            icon: "error",
+            title: t("screenService.fontStyleError"),
+          });
+          return;
+        }
+        if (!selectedCity) {
+          Swal.fire({
+            icon: "error",
+            title: t("screenService.cityError"),
+          });
+          return;
+        }
         const templateServiciosRef = collection(db, "TemplateServicios");
 
         const q = query(
@@ -135,6 +152,12 @@ const EditPantallaServicio = () => {
           await updateDoc(userDoc, {
             NombrePantallasServicios: pantallaServiciosMap,
           });
+          Swal.fire({
+            icon: "success",
+            title: t("screenService.customizationSavedSuccess"),
+            showConfirmButton: false,
+            timer: 2000,
+          });
         } else {
           await addDoc(templateServiciosRef, {
             colorLetra: fontColor,
@@ -142,6 +165,12 @@ const EditPantallaServicio = () => {
             estilodetexto: selectedFontStyle?.value || "",
             ciudad: selectedCity?.value || "",
             empresa: userData.empresa,
+          });
+          Swal.fire({
+            icon: "success",
+            title: t("screenService.customizationSavedSuccess"),
+            showConfirmButton: false,
+            timer: 2000,
           });
         }
       }
@@ -338,7 +367,8 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("personalization")}
         >
-          Personalización general
+          {/* Personalización general */}
+          {t("screenService.generalcustomization")}
         </button>
         <button
           className={`mx-5 px-6 py-2 leading-5 transition-colors duration-200 transform rounded-md ${
@@ -348,27 +378,31 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("preview")}
         >
-          Personalización avanzada
+          {/* Personalización avanzada */}
+          {t("screenService.advancedcustomization")}
         </button>
       </div>
 
       {view === "personalization" && (
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3xl font-bold text-white capitalize mb-4">
-            Personalización del Template
+            {/* Personalización del Template*/}
+            {t("screenService.templatecustomization")}
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="mb-4">
               <div>
                 <label className="text-white dark:text-gray-200">
-                  Color de letra
+                  {/* Color de letra*/}
+                  {t("screenService.fontColor")}
                 </label>
                 <div className="flex items-center relative">
                   <button
                     onClick={handleFontColorChange}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                   >
-                    Seleccionar Color
+                    {/* Seleccionar Color*/}
+                    {t("screenService.selectColor")}
                   </button>
                   {showFontColorPicker && (
                     <div className="absolute z-10 mt-2">
@@ -382,7 +416,8 @@ const EditPantallaServicio = () => {
                         onClick={handleFontColorChange}
                         className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                       >
-                        Listo
+                        {/* Listo*/}
+                        {t("screenService.done")}
                       </button>
                     </div>
                   )}
@@ -397,14 +432,16 @@ const EditPantallaServicio = () => {
             <div className="mb-4">
               <div>
                 <label className="text-white dark:text-gray-200">
-                  Color de la plantilla
+                  {/* Color de la plantilla*/}
+                  {t("screenService.templateColor")}
                 </label>
                 <div className="flex items-center relative">
                   <button
                     onClick={handleTemplateColorChange}
                     className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                   >
-                    Seleccionar Color
+                    {/* Seleccionar Color*/}
+                    {t("screenService.selectColor")}
                   </button>
                   {showTemplateColorPicker && (
                     <div className="absolute z-10 mt-2">
@@ -418,7 +455,8 @@ const EditPantallaServicio = () => {
                         onClick={handleTemplateColorChange}
                         className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
                       >
-                        Listo
+                        {/* Listo*/}
+                        {t("screenService.done")}
                       </button>
                     </div>
                   )}
@@ -432,24 +470,27 @@ const EditPantallaServicio = () => {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Estilo de texto
+                {/*Estilo de texto*/}
+                {t("screenService.fontStyle")}
               </label>
               <Select
                 options={fontStyleOptions}
                 value={selectedFontStyle}
                 onChange={handleFontStyleChange}
+                placeholder={t("screenService.styletext")}
               />
             </div>
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200">
-                Seleccionar Ciudad
+                {/*  Seleccionar Ciudad*/}
+                {t("screenService.city")}
               </label>
               <Select
                 options={cityOptions}
                 value={selectedCity}
                 onChange={handleCityChange}
-                placeholder="Seleccione una ciudad"
+                placeholder={t("screenService.selectCity")}
                 className="w-full"
                 isSearchable
                 isClearable={false}
@@ -459,7 +500,8 @@ const EditPantallaServicio = () => {
 
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
-                Nombres de pantallas
+                {/*  Nombres de pantallas*/}
+                {t("screenService.screenName")}
               </label>
               <div className="flex flex-col">
                 {screenNames.map((name, index) => (
@@ -467,7 +509,9 @@ const EditPantallaServicio = () => {
                     key={index}
                     type="text"
                     value={name}
-                    placeholder={`Pantalla ${index + 1}`}
+                    placeholder={`${t("screenService.screenName")} ${
+                      index + 1
+                    }`}
                     onChange={(e) => handleScreenNameChange(e, index)}
                     className="mb-2 w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
                   />
@@ -480,7 +524,8 @@ const EditPantallaServicio = () => {
               onClick={guardarConfiguracion}
               className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
-              Guardar
+              {/*Guardar*/}
+              {t("screenService.save")}
             </button>
           </div>
         </section>

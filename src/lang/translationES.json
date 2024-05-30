@@ -334,6 +334,24 @@
     "screenNames": "Nombres de pantallas",
     "save": "Guardar"
   },
+  "screenService": {
+    "generalcustomization": "Personalización general",
+    "advancedcustomization": "Personalización avanzada",
+    "templatecustomization": "Personalización del Template",
+    "fontColor": "Color de letra",
+    "templateColor": "Color de la plantilla",
+    "fontStyle": "Estilo de texto",
+    "styletext": "Seleccione un estilo de texto",
+    "city": "Seleccionar Ciudad",
+    "screenName": "Nombre de la pantalla",
+    "save": "Guardar",
+    "selectColor": "Seleccionar Color",
+    "done": "Listo",
+    "selectCity": "Seleccione una ciudad",
+    "fontStyleError": "Por favor, seleccione un estilo de texto.",
+    "cityError": "Por favor, seleccione una ciudad.",
+    "customizationSavedSuccess": "Información de personalización guardada con éxito."
+  },
   "advertisement": {
     "title": "CONFIGURACIÓN DE PUBLICIDAD",
     "description1": "Ingresar imágenes que serán desplegadas cuando no se cuente con eventos.",
