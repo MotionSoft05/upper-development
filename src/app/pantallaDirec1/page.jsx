@@ -19,7 +19,7 @@ import QRCode from "qrcode.react";
 import Textra from "react-textra"; // Slider para RSS
 import SliderRSS from "@/components/SliderRSS";
 import LogIn from "../login/page"; // Importa el componente LogIn
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useTranslation } from "react-i18next";
 const obtenerHora = () => {
   const now = new Date();
@@ -29,6 +29,9 @@ const obtenerHora = () => {
 };
 
 function PantallaDirec1() {
+  const searchParams = useSearchParams();
+  const empresaNombre = searchParams.get("emp");
+
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
   const { t } = useTranslation();
   const [user, setUser] = useState(null);
@@ -46,7 +49,6 @@ function PantallaDirec1() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
-  const [ languageTemplate, setLanguageTemplate] = useState(null) // Idioma que va a tener el template que luego alamacena el objeto traducido
   const pathname = usePathname();
   useEffect(() => {
     if (user) {
@@ -104,7 +106,7 @@ function PantallaDirec1() {
     // Actualizar la configuración de loop cuando eventosEnCurso cambia
     sliderRef.current?.refresh();
   }, [eventosEnCurso]);
-  // console.log("🚀 ~ PantallaDirec1 ~ eventosEnCurso:", eventosEnCurso);
+  console.log("🚀 ~ PantallaDirec1 ~ eventosEnCurso:", eventosEnCurso);
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
@@ -215,7 +217,14 @@ function PantallaDirec1() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            const userCompany = userData.empresa;
+            let userCompany = "";
+
+            if (userData.empresa === empresaNombre) {
+              userCompany = userData.empresa;
+            } else {
+              userCompany = empresaNombre;
+            }
+            console.log("🚀 ~ obtenerUsuario ~ userCompany:", userCompany);
             const nombrePantallasUsuario =
               userData.nombrePantallasDirectorio || {};
             const pantallasNumeradas = {};
@@ -232,36 +241,12 @@ function PantallaDirec1() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
-              const devicesEvento = evento.devices || [];
 
-              const pantallaCoincidente = devicesEvento.find((device) =>
-                Object.keys(pantallasNumeradas).includes(device)
-              );
-
-              if (pantallaCoincidente) {
-                const posicionPantalla =
-                  pantallasNumeradas[pantallaCoincidente];
-                const posicionActual = parseInt(numeroPantallaActual, 10);
-                if (posicionPantalla === posicionActual) {
-                  // Agregar el filtro para eventos del día en curso
-
-                  const fechaInicio = new Date(
-                    `${evento.fechaInicio}T00:00:00`
-                  );
-                  fechaInicio.setDate(fechaInicio.getDate()); // Sumar 1 día
-
-                  const fechaFinal = new Date(`${evento.fechaFinal}T23:59:59`);
-                  fechaFinal.setDate(fechaFinal.getDate()); // Sumar 1 día
-
-                  const hoy = new Date();
-
-                  if (fechaInicio <= hoy && hoy <= fechaFinal) {
-                    eventosData.push(evento);
-                  }
-                }
-              }
+              console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
+              eventosData.push(evento);
             });
 
             const eventosOrdenados = eventosData.slice().sort((a, b) => {
@@ -300,14 +285,16 @@ function PantallaDirec1() {
               });
               console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
               setTemplateData(templateData);
-              getLanguageData(templateData[0].idioma)
             } else {
               console.log(
                 // "No se encontró información en TemplateDirectorios para este usuario."
                 t("pantallaDirec.templateDirectoryNotFound")
               );
             }
-
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosOrdenados:",
+              eventosOrdenados
+            );
             setEventosEnCurso(eventosOrdenados);
           } else {
             // "No se encontraron datos para este usuario."
@@ -450,31 +437,31 @@ function PantallaDirec1() {
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, [user, firestore, pantalla]);
 
-  // const obtenerFecha = () => {
-  //   const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
+  const obtenerFecha = () => {
+    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
 
-  //   const meses = [
-  //     "1",
-  //     "2",
-  //     "3",
-  //     "4",
-  //     "5",
-  //     "6",
-  //     "7",
-  //     "8",
-  //     "9",
-  //     "10",
-  //     "11",
-  //     "12",
-  //   ];
+    const meses = [
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10",
+      "11",
+      "12",
+    ];
 
-  //   const now = new Date();
-  //   const diaSemana = diasSemana[now.getDay()];
-  //   const dia = now.getDate();
-  //   const mes = meses[now.getMonth()];
+    const now = new Date();
+    const diaSemana = diasSemana[now.getDay()];
+    const dia = now.getDate();
+    const mes = meses[now.getMonth()];
 
-  //   return `${diaSemana} ${dia}/${mes} `;
-  // };
+    return `${diaSemana} ${dia}/${mes} `;
+  };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
 
@@ -503,7 +490,7 @@ function PantallaDirec1() {
   }, [currentMediaIndex, publicidadesUsuario]);
 
   // Iniciar cuenta regresiva
-  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
+  const [countdown, setCountdown] = useState(60); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
     if (eventosEnCurso.length === 0 && user) {
@@ -575,128 +562,12 @@ function PantallaDirec1() {
   }
 
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  // console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
+  console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
 
   // console.log("CLIMA", weatherData.current.condition.icon);
-
-  //* --- Render para idiomas ---
-  console.log('templateData.idioma >>> :', templateData[0].idioma)
-  console.log('languageTemplate >>> :', languageTemplate)
-
-  // -- Retorna el idioma correspondiente  o pordefecto "es" -> ESPAÑOL--
-  function getLanguageData  (languageCode) {
- // Idiomas para seleccion de templates
-  const es = {
-    weekdays: [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO"
-    ],
-    title: 'Eventos del día',
-    event: 'Evento',
-    news: 'Noticias',
-    qr: "Eventos en tu dispositivo"
-  }
-  const en = {
-    weekdays: [
-      "SUNDAY",
-      "MONDAY",
-      "TUESDAY",
-      "WEDNESDAY",
-      "THURSDAY",
-      "FRIDAY",
-      "SATURDAY"
-    ],
-    title: 'Today\'s Events',
-    event: 'Event',
-    news: 'News',
-    qr: "Events on your device"
-  };
-  const esEn = {
-    weekdays: [
-      "DOMINGO / SUNDAY",
-      "LUNES /MONDAY",
-      "MARTES / TUESDAY",
-      "MIÉRCOLES / WEDNESDAY",
-      "JUEVES / THURSDAY",
-      "VIERNES / FRIDAY",
-      "SÁBADO / SATURDAY"
-    ],
-    title: "Eventos del día / Today's Events",
-    event: 'Eventos / Event',
-    news: 'Noticias / News',
-    qr: "Eventos en tu dispositivo / Events on your device"
-  };
-    switch (languageCode) {
-      case 'es':
-        return setLanguageTemplate(es);
-
-      case 'en':
-        return setLanguageTemplate(en);
-
-      case 'es-en':
-        return setLanguageTemplate(esEn);
-
-      default:
-        return setLanguageTemplate(es);
-    }
-  };
-
-  /* ---- Titulo Eventos del dia y Fecha---- */
-  function titleEventAndDate() {
-    // const language = getLanguageData(templateData[0].idioma);
-    // getLanguageData(templateData[0].idioma);
-    
-    const obtenerFecha = () => {
-      const meses = [
-        "1",
-        "2",
-        "3",
-        "4",
-        "5",
-        "6",
-        "7",
-        "8",
-        "9",
-        "10",
-        "11",
-        "12",
-      ];
-      const now = new Date();
-
-      const diaSemana = languageTemplate.weekdays[now.getDay()];
-      const dia = now.getDate();
-      const mes = meses[now.getMonth()];
-  
-      return `${diaSemana} ${dia}/${mes} `;
-    };
-
-    return (
-      <div
-        className="flex flex-col text-color items-center"
-        style={{
-          fontFamily: templateActual.fontStyle,
-        }}
-      >
-        <p className="text-3xl text-center  mb-2">
-          {obtenerFecha()}-{currentHour}
-        </p>
-        <h1 className="text-5xl font-bold">
-          {/* Eventos del día */}
-          {languageTemplate.title}
-          {/* {t("pantallaDirec.todaysEvents")} */}
-        </h1>
-      </div>
-    );
-  }
-  //* --- Render para idiomas ---
 
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
@@ -743,8 +614,21 @@ function PantallaDirec1() {
                 </>
               )}
             </div>
-            {/* ---- Funcion -> Titulo Eventos del dia y Fecha ---- */}
-            {titleEventAndDate()}
+            {/* ---- Titulo Eventos del dia y Fecha---- */}
+            <div
+              className="flex flex-col text-color items-center"
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              <p className="text-3xl text-center  mb-2">
+                {obtenerFecha()}-{currentHour}
+              </p>
+              <h1 className="text-5xl font-bold">
+                {/* Eventos del día */}
+                {t("pantallaDirec.todaysEvents")}
+              </h1>
+            </div>
 
             {/* ---- Clima e Icono ---- */}
             <div
@@ -784,7 +668,7 @@ function PantallaDirec1() {
           {!templateData[0]?.setPortrait ? (
             <div className="grid grid-cols-4 bg-white">
               <div className="col-span-3 md:col-span-3  mx-3">
-                {/* BARRA SUPERIOR */}{" "}
+                {/* Linea arriba */}{" "}
                 <div
                   className={` text-black py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
                   style={{
@@ -796,8 +680,7 @@ function PantallaDirec1() {
                   {/* Título */}
                   <h2 className=" text-4xl text-center">
                     {/* EVENTOS */}
-                    {languageTemplate.event}
-                    {/* {t("pantallaDirec.eventsTitle")} */}
+                    {t("pantallaDirec.eventsTitle")}
                   </h2>
                 </div>
                 {/* contenido principal */}
@@ -1002,7 +885,7 @@ function PantallaDirec1() {
                     </div>
                   </div>
                 </div>
-                {/* BARRA INFERIOR */}
+                {/* Linea abajo */}
                 <div
                   className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
                   style={{
@@ -1017,8 +900,7 @@ function PantallaDirec1() {
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
-                    {languageTemplate.news}
-                    {/* {t("pantallaDirec.newsTitle")} */}
+                    {t("pantallaDirec.newsTitle")}
                   </h2>
                 </div>
               </div>
@@ -1319,7 +1201,7 @@ function PantallaDirec1() {
               </div>
               {/* --- QR image --- */}
               <div
-                className="flex flex-col items-center "
+                className="flex flex-col items-center"
                 style={{
                   marginTop: "20px",
                   marginRight: "20px",
@@ -1328,8 +1210,7 @@ function PantallaDirec1() {
               >
                 <p style={{ marginBottom: "10px" }}>
                   {/* Eventos en tu dispositivo */}
-                  {languageTemplate.qr}
-                  {/* {t("pantallaDirec.deviceEventsDescription")} */}
+                  {t("pantallaDirec.deviceEventsDescription")}
                 </p>
                 {qrCodeUrl && (
                   <a
