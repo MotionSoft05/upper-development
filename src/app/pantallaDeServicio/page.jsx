@@ -1,4 +1,7 @@
 function PantallaServicio() {
+
+
+  //* ------------------- RETURN ----------------------------
   return (
     <div className="min-h-screen bg-red-100 grid grid-rows-6 gap-1">
 
@@ -22,11 +25,11 @@ function PantallaServicio() {
       </div>
 
       {/* SECCION FECHA, RSS, CLIMA */}
-      <div className="grid grid-cols-3 gap-1 h-full flex-grow row-span-1">
+      <div className="grid grid-cols-4 gap-1 h-full flex-grow row-span-1">
         <div className="bg-orange-200 border-2 border-slate-300 p-1">
           FECHA
         </div>
-        <div className="bg-orange-200 border-2 border-slate-300 p-1">
+        <div className="bg-orange-200 border-2 col-span-2 border-slate-300 p-1">
           RSS
         </div>
         <div className="bg-orange-200 border-2 border-slate-300 p-1">
