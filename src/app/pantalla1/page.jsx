@@ -65,8 +65,6 @@ function Pantalla1() {
   }, []);
   // Datos Firebase------------------------------------------
   useEffect(() => {
-    
-
     // Importar Firebase solo en el lado del cliente
     const firebaseConfig = {
       apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
@@ -624,7 +622,7 @@ function Pantalla1() {
               }}
             >
               {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
-              <GetLanguageDate idioma={templateData[0].idioma}/>
+              <GetLanguageDate idioma={templateData[0].idioma} />
             </p>
             <div className="flex items-center justify-center mb-1">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
