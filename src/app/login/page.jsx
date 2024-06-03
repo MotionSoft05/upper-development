@@ -2,16 +2,15 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useState, Fragment } from "react";
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  sendEmailVerification,
-} from "firebase/auth";
 import Link from "next/link";
-import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore";
 import emailjs from "emailjs-com";
+import { initializeApp } from "firebase/app";
+import { Dialog, Transition } from "@headlessui/react";
+import { useTranslation } from "react-i18next";
+import auth, { loginUser, logoutUser } from "@/firebase/auth";
+import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore";
+import { sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
+
 
 // Esta función enviará un correo electrónico utilizando Email.js
 const sendEmail = async (userID) => {
@@ -44,34 +43,16 @@ const sendEmail = async (userID) => {
   }
 };
 
-import { Dialog, Transition } from "@headlessui/react";
-import { useTranslation } from "react-i18next";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
 function LogIn({ url }) {
   const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [error, setError] = useState(null);
-  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] =
-    useState(false);
+  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [isResendingVerificationEmail, setIsResendingVerificationEmail] =
-    useState(false);
+  const [isResendingVerificationEmail, setIsResendingVerificationEmail] = useState(false);
   let [isOpen, setIsOpen] = useState(false);
   const [recoveryEmail, setRecoveryEmail] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
@@ -84,12 +65,7 @@ function LogIn({ url }) {
 
     if (isFormValid) {
       try {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-
+        const userCredential = await loginUser(email, password);
         const user = userCredential.user;
 
         if (user && user.emailVerified) {
@@ -116,10 +92,8 @@ function LogIn({ url }) {
 
           window.location.href = "/";
         } else {
-          setError(
-            // "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
-            t("login.verifyEmail")
-          );
+          // "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
+          setError(t("login.verifyEmail"));
           const resendVerificationOption = (
             <button
               className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
@@ -161,17 +135,15 @@ function LogIn({ url }) {
     setIsOpen(false);
     setIsForgotPasswordModalOpen(false);
   }
+
   const handleForgotPassword = async () => {
     setIsOpen(true);
 
     try {
       await sendPasswordResetEmail(auth, recoveryEmail);
     } catch (error) {
-      console.error(
-        // "Error al enviar el correo electrónico de restablecimiento de contraseña:",
-        t("login.resetPasswordEmailError"),
-        error.message
-      );
+      // "Error al enviar el correo electrónico de restablecimiento de contraseña:",
+      console.error(t("login.resetPasswordEmailError"), error.message );
     }
   };
 

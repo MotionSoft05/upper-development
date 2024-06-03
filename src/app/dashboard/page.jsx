@@ -15,24 +15,14 @@ import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
 
 import React, { useState, useEffect } from "react";
+
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
+import auth from "@/firebase/auth";
+import db from "@/firebase/firestore";
 import { getFirestore, collection, doc, getDoc } from "firebase/firestore";
+
 import { usePathname } from "next/navigation";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
 
 function DashBoard() {
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION;

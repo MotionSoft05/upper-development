@@ -1,6 +1,5 @@
 "use client";
 import {
-  getFirestore,
   collection,
   getDocs,
   where,
@@ -8,8 +7,10 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
+import { onAuthStateChanged } from "firebase/auth";
+import auth from "@/firebase/auth";
+import db, { getUserData, getEventsByCompany } from "@/firebase/firestore";
+
 import { useKeenSlider } from "keen-slider/react";
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import LogIn from "../login/page"; // Importa el componente LogIn
@@ -40,7 +41,6 @@ function Pantalla1() {
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
-  const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
@@ -63,24 +63,8 @@ function Pantalla1() {
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
-  // Datos Firebase------------------------------------------
+  
   useEffect(() => {
-    // Importar Firebase solo en el lado del cliente
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-      authDomain: "upper-8c817.firebaseapp.com",
-      projectId: "upper-8c817",
-      storageBucket: "upper-8c817.appspot.com",
-      messagingSenderId: "798455798906",
-      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-      measurementId: "G-6VHX927GH1",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const firestoreInstance = getFirestore(app); // Save the reference to firestore
-    setFirestore(firestoreInstance); // Set the firestore variable
-
-    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -91,49 +75,11 @@ function Pantalla1() {
 
     return () => unsubscribe();
   }, []);
-  // Publicidades-------------------------------------------
 
-  // useEffect(() => {
-  //   const fetchPublicidades = () => {
-  //     if (user && firestore) {
-  //       const publicidadesRef = collection(firestore, "Publicidad");
-  //       const publicidadesQuery = query(
-  //         publicidadesRef,
-  //         where("userId", "==", user.uid)
-  //       );
-
-  //       getDocs(publicidadesQuery)
-  //         .then((querySnapshot) => {
-  //           const publicidades = [];
-  //           querySnapshot.forEach((doc) => {
-  //             const publicidad = { id: doc.id, ...doc.data() };
-  //             // Comparar el tipo de la publicidad con la pantalla deseada
-  //             if (publicidad.tipo === pantalla) {
-  //               publicidades.push(publicidad);
-  //             }
-  //           });
-
-  //           setPublicidadesUsuario(publicidades);
-  //         })
-  //         .catch((error) => {
-  //           // "Error al obtener las publicidades:"
-  //           console.error(t("pantalla.error.advertisements"), error);
-  //         });
-  //     }
-  //   };
-
-  //   const interval = setInterval(() => {
-  //     fetchPublicidades();
-  //   }, 120000);
-
-  //   fetchPublicidades(); // Llamar inicialmente
-
-  //   return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  // }, [user, firestore, pantalla]);
-  // Eventos------------------------------------------------
+  
   useEffect(() => {
-    if (user && firestore) {
-      const userRef = doc(firestore, "usuarios", user.uid);
+    if (user && db) {
+      const userRef = doc(db, "usuarios", user.uid);
       const obtenerUsuario = async () => {
         try {
           const docSnap = await getDoc(userRef);
@@ -147,7 +93,7 @@ function Pantalla1() {
               pantallasNumeradas[nombrePantallasUsuario[key]] = index + 1;
             });
 
-            const eventosRef = collection(firestore, "eventos");
+            const eventosRef = collection(db, "eventos");
             const eventosQuery = query(
               eventosRef,
               where("empresa", "==", userCompany)
@@ -221,7 +167,7 @@ function Pantalla1() {
               );
             });
             //  Sección template
-            const templateRef = collection(firestore, "TemplateSalones");
+            const templateRef = collection(db, "TemplateSalones");
             const templateQuery = query(
               templateRef,
               where("empresa", "==", userCompany)
@@ -250,7 +196,7 @@ function Pantalla1() {
             //  Sección template
             //  Sección publicidad
             const pantalla = "salon";
-            const publicidadesRef = collection(firestore, "Publicidad");
+            const publicidadesRef = collection(db, "Publicidad");
             const publicidadesQuery = query(
               publicidadesRef,
               where("empresa", "==", userCompany)
@@ -312,7 +258,7 @@ function Pantalla1() {
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
-  }, [user, firestore]);
+  }, [user, db]);
   // console.log("publicidadesUsuario.", publicidadesUsuario);
   const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 

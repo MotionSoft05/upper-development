@@ -3,21 +3,8 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
 import { useTranslation } from "react-i18next";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import auth from "@/firebase/auth";
+import db from "@/firebase/firestore";
 
 function Licencia() {
 

@@ -5,20 +5,12 @@ import "firebase/compat/auth";
 import "firebase/compat/storage";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
+import storage from "@/firebase/storage";
 
-if (!firebase.apps.length) {
-  firebase.initializeApp(firebaseConfig);
-}
-const storage = firebase.storage();
+// if (!firebase.apps.length) {
+//   firebase.initializeApp(firebaseConfig);
+// }
+// const storage = firebase.storage();
 
 function ConsultaModEvento() {
   const { t } = useTranslation();

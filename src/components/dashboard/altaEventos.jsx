@@ -6,7 +6,6 @@ import "keen-slider/keen-slider.min.css";
 import { useKeenSlider } from "keen-slider/react";
 import firebase from "firebase/compat/app";
 import "firebase/compat/firestore";
-import { initializeApp } from "firebase/app";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getAuth, currentUser, onAuthStateChanged } from "firebase/auth";
 import Swal from "sweetalert2";
@@ -23,20 +22,14 @@ import {
 } from "firebase/firestore";
 import { v4 as uuidv4 } from "uuid";
 import { useTranslation } from "react-i18next";
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
+import db from "@/firebase/firestore";
+import auth from "@/firebase/auth";
+import storage from "@/firebase/storage";
 
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
-const auth = getAuth(app);
-const db = getFirestore(app);
+// const app = initializeApp(firebaseConfig);
+// const storage = getStorage(app);
+// const auth = getAuth(app);
+// const db = getFirestore(app);
 
 function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
   const { t } = useTranslation();

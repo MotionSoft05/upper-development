@@ -9,9 +9,10 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { initializeApp } from "firebase/app";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
+import db from "@/firebase/firestore";
+import auth from "@/firebase/auth";
 
 function UserAdmin() {
   const { t } = useTranslation(); // Traducciones i18N
@@ -33,19 +34,6 @@ function UserAdmin() {
     parseInt(cantidadPd) + parseInt(cantidadPs) + parseInt(cantidadPservice);
 
   useEffect(() => {
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-      authDomain: "upper-8c817.firebaseapp.com",
-      projectId: "upper-8c817",
-      storageBucket: "upper-8c817.appspot.com",
-      messagingSenderId: "798455798906",
-      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-      measurementId: "G-6VHX927GH1",
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth(app);
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
