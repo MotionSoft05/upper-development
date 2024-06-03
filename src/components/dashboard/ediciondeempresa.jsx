@@ -5,13 +5,14 @@ import "firebase/compat/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faToggleOn, faToggleOff } from "@fortawesome/free-solid-svg-icons";
-import db from "@/firebase/firestore";
-import auth from "@/firebase/auth";
+import { firebaseConfig } from "@/firebase/firebaseConfig";
+// import db from "@/firebase/firestore";
+// import auth from "@/firebase/auth";
 
 
-// firebase.initializeApp(firebaseConfig);
-// const db = firebase.firestore();
-// const auth = firebase.auth();
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
 
 // Componente Ediciondeempresa
 const Ediciondeempresa = () => {
