@@ -34,6 +34,7 @@ const storage = getStorage(app);
 const PantallaServicio = () => {
   const [screenNames, setScreenNames] = useState([]);
   const [selectedScreen, setSelectedScreen] = useState(null);
+  const [selectedImage, setSelectedImage] = useState("A"); // Agregar selectedImage al estado
   const [empresa, setEmpresa] = useState("");
   const [eventsA, setEventsA] = useState([
     {
@@ -205,6 +206,7 @@ const PantallaServicio = () => {
               minutes: event.minutes,
               seconds: event.seconds,
             },
+            tipo: "A", // Agregar el campo 'tipo' para el tipo A
           };
         })
       );
@@ -229,6 +231,7 @@ const PantallaServicio = () => {
               minutes: event.minutes,
               seconds: event.seconds,
             },
+            tipo: "B", // Agregar el campo 'tipo' para el tipo B
           };
         })
       );
@@ -343,206 +346,269 @@ const PantallaServicio = () => {
       </div>
       {selectedScreen && (
         <>
+          <div className="mb-6">
+            <label className="text-white dark:text-gray-200 block mb-0.5">
+              Seleccione la Imagen
+            </label>
+            <div className="flex justify-between">
+              <button
+                className={`px-4 py-2 ${
+                  selectedImage === "A" ? "bg-blue-500" : "bg-gray-400"
+                } rounded-l-md text-white transition-colors duration-200 transform hover:bg-blue-700 focus:outline-none focus:bg-blue-600`}
+                onClick={() => setSelectedImage("A")}
+              >
+                Imagen A
+              </button>
+              <button
+                className={`px-4 py-2 ${
+                  selectedImage === "B" ? "bg-blue-500" : "bg-gray-400"
+                } rounded-r-md text-white transition-colors duration-200 transform hover:bg-blue-700 focus:outline-none focus:bg-blue-600`}
+                onClick={() => setSelectedImage("B")}
+              >
+                Imagen B
+              </button>
+            </div>
+          </div>
           <h2 className="text-2xl font-bold text-white capitalize mb-4">
-            IMAGEN A
+            {`IMAGEN ${selectedImage.toUpperCase()}`}
           </h2>
-          {eventsA.map((event, index) => (
-            <div key={index} className="mb-6 border-t border-gray-700 pt-6">
-              <h3 className="text-xl font-bold text-white capitalize mb-4">
-                {`Imagen ${index + 1}`}
-              </h3>
-              <div className="flex flex-col md:flex-row">
-                <div className="mb-6 md:mr-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Seleccione la Imagen
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/"
-                    onChange={(e) => handleFileChange(e, index, "A")}
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
-                  />
-                  {event.imagePreview && (
-                    <img
-                      src={event.imagePreview}
-                      alt="Vista previa"
-                      className="mt-2 rounded-lg"
-                      style={{ maxWidth: "150px", maxHeight: "150px" }}
-                    />
+          {selectedImage === "A" && (
+            <>
+              {eventsA.map((event, index) => (
+                <div key={index} className="mb-6 border-t border-gray-700 pt-6">
+                  <h3 className="text-xl font-bold text-white capitalize mb-4">
+                    {`Imagen ${index + 1}`}
+                  </h3>
+                  <div className="flex flex-col md:flex-row">
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Imagen
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/"
+                        onChange={(e) => handleFileChange(e, index, "A")}
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                      {event.imagePreview && (
+                        <img
+                          src={event.imagePreview}
+                          alt="Vista previa"
+                          className="mt-2 rounded-lg"
+                          style={{ maxWidth: "150px", maxHeight: "150px" }}
+                        />
+                      )}
+                    </div>
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Fecha
+                      </label>
+                      <Datepicker
+                        useRange={true}
+                        value={event.dateRange}
+                        onChange={(newDateRange) =>
+                          handleEventChange(
+                            index,
+                            "dateRange",
+                            newDateRange,
+                            "A"
+                          )
+                        }
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                    </div>
+                    <div className="mb-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Tiempo de visualización (HH:MM:SS)
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="number"
+                          min="0"
+                          value={event.hours}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "hours",
+                              e.target.value,
+                              "A"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={event.minutes}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "minutes",
+                              e.target.value,
+                              "A"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="10"
+                          value={event.seconds}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "seconds",
+                              e.target.value,
+                              "A"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {eventsA.length < 3 && (
+                    <button
+                      onClick={() => addEvent("A")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+                    >
+                      Agregar Imagen
+                    </button>
+                  )}
+
+                  {index > 0 && (
+                    <button
+                      onClick={() => removeEvent(index, "A")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
+                    >
+                      Eliminar Imagen
+                    </button>
                   )}
                 </div>
-                <div className="mb-6 md:mr-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Seleccione la Fecha
-                  </label>
-                  <Datepicker
-                    useRange={true}
-                    value={event.dateRange}
-                    onChange={(newDateRange) =>
-                      handleEventChange(index, "dateRange", newDateRange, "A")
-                    }
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
-                  />
-                </div>
-                <div className="mb-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Tiempo de visualización (HH:MM:SS)
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="number"
-                      min="0"
-                      value={event.hours}
-                      onChange={(e) =>
-                        handleEventChange(index, "hours", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={event.minutes}
-                      onChange={(e) =>
-                        handleEventChange(index, "minutes", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
-                    />
-                    <input
-                      type="number"
-                      min="10"
-                      value={event.seconds}
-                      onChange={(e) =>
-                        handleEventChange(index, "seconds", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
-                    />
+              ))}
+            </>
+          )}
+          {selectedImage === "B" && (
+            <>
+              {eventsB.map((event, index) => (
+                <div key={index} className="mb-6 border-t border-gray-700 pt-6">
+                  <h3 className="text-xl font-bold text-white capitalize mb-4">
+                    {`Imagen ${index + 1}`}
+                  </h3>
+                  <div className="flex flex-col md:flex-row">
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Imagen
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/"
+                        onChange={(e) => handleFileChange(e, index, "B")}
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                      {event.imagePreview && (
+                        <img
+                          src={event.imagePreview}
+                          alt="Vista previa"
+                          className="mt-2 rounded-lg"
+                          style={{ maxWidth: "150px", maxHeight: "150px" }}
+                        />
+                      )}
+                    </div>
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Fecha
+                      </label>
+                      <Datepicker
+                        useRange={true}
+                        value={event.dateRange}
+                        onChange={(newDateRange) =>
+                          handleEventChange(
+                            index,
+                            "dateRange",
+                            newDateRange,
+                            "B"
+                          )
+                        }
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                    </div>
+                    <div className="mb-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Tiempo de visualización (HH:MM:SS)
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="number"
+                          min="0"
+                          value={event.hours}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "hours",
+                              e.target.value,
+                              "B"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={event.minutes}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "minutes",
+                              e.target.value,
+                              "B"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="10"
+                          value={event.seconds}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "seconds",
+                              e.target.value,
+                              "B"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              {eventsA.length < 3 && (
-                <button
-                  onClick={() => addEvent("A")}
-                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
-                >
-                  Agregar Imagen
-                </button>
-              )}
+                  {eventsB.length < 3 && (
+                    <button
+                      onClick={() => addEvent("B")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+                    >
+                      Agregar Imagen
+                    </button>
+                  )}
 
-              {index > 0 && (
-                <button
-                  onClick={() => removeEvent(index, "A")}
-                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
-                >
-                  Eliminar Imagen
-                </button>
-              )}
-            </div>
-          ))}
-        </>
-      )}
-
-      {selectedScreen && (
-        <>
-          <h2 className="text-2xl font-bold text-white capitalize mb-4">
-            IMAGEN B
-          </h2>
-          {eventsB.map((event, index) => (
-            <div key={index} className="mb-6 border-t border-gray-700 pt-6">
-              <h3 className="text-xl font-bold text-white capitalize mb-4">
-                {`Imagen ${index + 1}`}
-              </h3>
-              <div className="flex flex-col md:flex-row">
-                <div className="mb-6 md:mr-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Seleccione la Imagen
-                  </label>
-                  <input
-                    type="file"
-                    accept="image/"
-                    onChange={(e) => handleFileChange(e, index, "A")}
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
-                  />
-                  {event.imagePreview && (
-                    <img
-                      src={event.imagePreview}
-                      alt="Vista previa"
-                      className="mt-2 rounded-lg"
-                      style={{ maxWidth: "150px", maxHeight: "150px" }}
-                    />
+                  {index > 0 && (
+                    <button
+                      onClick={() => removeEvent(index, "B")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
+                    >
+                      Eliminar Imagen
+                    </button>
                   )}
                 </div>
-                <div className="mb-6 md:mr-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Seleccione la Fecha
-                  </label>
-                  <Datepicker
-                    useRange={true}
-                    value={event.dateRange}
-                    onChange={(newDateRange) =>
-                      handleEventChange(index, "dateRange", newDateRange, "A")
-                    }
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
-                  />
-                </div>
-                <div className="mb-6 flex flex-col">
-                  <label className="text-white dark:text-gray-200 block mb-0.5">
-                    Tiempo de visualización (HH:MM:SS)
-                  </label>
-                  <div className="flex">
-                    <input
-                      type="number"
-                      min="0"
-                      value={event.hours}
-                      onChange={(e) =>
-                        handleEventChange(index, "hours", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      max="59"
-                      value={event.minutes}
-                      onChange={(e) =>
-                        handleEventChange(index, "minutes", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
-                    />
-                    <input
-                      type="number"
-                      min="10"
-                      value={event.seconds}
-                      onChange={(e) =>
-                        handleEventChange(index, "seconds", e.target.value, "A")
-                      }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
-                    />
-                  </div>
-                </div>
-              </div>
-              {eventsA.length < 3 && (
-                <button
-                  onClick={() => addEvent("A")}
-                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
-                >
-                  Agregar Imagen
-                </button>
-              )}
-
-              {index > 0 && (
-                <button
-                  onClick={() => removeEvent(index, "A")}
-                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
-                >
-                  Eliminar Imagen
-                </button>
-              )}
-            </div>
-          ))}
+              ))}
+            </>
+          )}
+          {/* Buttons and other controls */}
         </>
       )}
-
       <div className="flex justify-end mt-6">
         <button
           onClick={guardarConfiguracion}
