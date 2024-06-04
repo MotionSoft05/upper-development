@@ -323,7 +323,7 @@ const PantallaServicio = () => {
   };
 
   return (
-    <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
+    <section className="max-w-4xl p-2 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-5">
       <h1 className="text-3xl font-bold text-white capitalize mb-4">
         Personalización de Plantilla
       </h1>
@@ -351,8 +351,8 @@ const PantallaServicio = () => {
               <h3 className="text-xl font-bold text-white capitalize mb-4">
                 {`Imagen ${index + 1}`}
               </h3>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="mb-6">
+              <div className="flex flex-col md:flex-row">
+                <div className="mb-6 md:mr-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Seleccione la Imagen
                   </label>
@@ -360,17 +360,18 @@ const PantallaServicio = () => {
                     type="file"
                     accept="image/"
                     onChange={(e) => handleFileChange(e, index, "A")}
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
+                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                   />
                   {event.imagePreview && (
                     <img
                       src={event.imagePreview}
                       alt="Vista previa"
                       className="mt-2 rounded-lg"
+                      style={{ maxWidth: "150px", maxHeight: "150px" }}
                     />
                   )}
                 </div>
-                <div className="mb-6">
+                <div className="mb-6 md:mr-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Seleccione la Fecha
                   </label>
@@ -380,9 +381,10 @@ const PantallaServicio = () => {
                     onChange={(newDateRange) =>
                       handleEventChange(index, "dateRange", newDateRange, "A")
                     }
+                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                   />
                 </div>
-                <div className="mb-6">
+                <div className="mb-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Tiempo de visualización (HH:MM:SS)
                   </label>
@@ -394,7 +396,7 @@ const PantallaServicio = () => {
                       onChange={(e) =>
                         handleEventChange(index, "hours", e.target.value, "A")
                       }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full"
+                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
                     />
                     <input
                       type="number"
@@ -404,7 +406,7 @@ const PantallaServicio = () => {
                       onChange={(e) =>
                         handleEventChange(index, "minutes", e.target.value, "A")
                       }
-                      className="bg-gray-700 text-white py-2 px-3 border w-full"
+                      className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
                     />
                     <input
                       type="number"
@@ -418,6 +420,15 @@ const PantallaServicio = () => {
                   </div>
                 </div>
               </div>
+              {eventsA.length < 3 && (
+                <button
+                  onClick={() => addEvent("A")}
+                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+                >
+                  Agregar Imagen
+                </button>
+              )}
+
               {index > 0 && (
                 <button
                   onClick={() => removeEvent(index, "A")}
@@ -428,16 +439,9 @@ const PantallaServicio = () => {
               )}
             </div>
           ))}
-          {eventsA.length < 3 && (
-            <button
-              onClick={() => addEvent("A")}
-              className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
-            >
-              Agregar Imagen
-            </button>
-          )}
         </>
       )}
+
       {selectedScreen && (
         <>
           <h2 className="text-2xl font-bold text-white capitalize mb-4">
@@ -448,26 +452,27 @@ const PantallaServicio = () => {
               <h3 className="text-xl font-bold text-white capitalize mb-4">
                 {`Imagen ${index + 1}`}
               </h3>
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <div className="mb-6">
+              <div className="flex flex-col md:flex-row">
+                <div className="mb-6 md:mr-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Seleccione la Imagen
                   </label>
                   <input
                     type="file"
                     accept="image/"
-                    onChange={(e) => handleFileChange(e, index, "B")}
-                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full"
+                    onChange={(e) => handleFileChange(e, index, "A")}
+                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                   />
                   {event.imagePreview && (
                     <img
                       src={event.imagePreview}
                       alt="Vista previa"
                       className="mt-2 rounded-lg"
+                      style={{ maxWidth: "150px", maxHeight: "150px" }}
                     />
                   )}
                 </div>
-                <div className="mb-6">
+                <div className="mb-6 md:mr-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Seleccione la Fecha
                   </label>
@@ -475,11 +480,12 @@ const PantallaServicio = () => {
                     useRange={true}
                     value={event.dateRange}
                     onChange={(newDateRange) =>
-                      handleEventChange(index, "dateRange", newDateRange, "B")
+                      handleEventChange(index, "dateRange", newDateRange, "A")
                     }
+                    className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                   />
                 </div>
-                <div className="mb-6">
+                <div className="mb-6 flex flex-col">
                   <label className="text-white dark:text-gray-200 block mb-0.5">
                     Tiempo de visualización (HH:MM:SS)
                   </label>
@@ -489,9 +495,9 @@ const PantallaServicio = () => {
                       min="0"
                       value={event.hours}
                       onChange={(e) =>
-                        handleEventChange(index, "hours", e.target.value, "B")
+                        handleEventChange(index, "hours", e.target.value, "A")
                       }
-                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full"
+                      className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
                     />
                     <input
                       type="number"
@@ -499,25 +505,34 @@ const PantallaServicio = () => {
                       max="59"
                       value={event.minutes}
                       onChange={(e) =>
-                        handleEventChange(index, "minutes", e.target.value, "B")
+                        handleEventChange(index, "minutes", e.target.value, "A")
                       }
-                      className="bg-gray-700 text-white py-2 px-3 border w-full"
+                      className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
                     />
                     <input
                       type="number"
                       min="10"
                       value={event.seconds}
                       onChange={(e) =>
-                        handleEventChange(index, "seconds", e.target.value, "B")
+                        handleEventChange(index, "seconds", e.target.value, "A")
                       }
                       className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
                     />
                   </div>
                 </div>
               </div>
+              {eventsA.length < 3 && (
+                <button
+                  onClick={() => addEvent("A")}
+                  className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+                >
+                  Agregar Imagen
+                </button>
+              )}
+
               {index > 0 && (
                 <button
-                  onClick={() => removeEvent(index, "B")}
+                  onClick={() => removeEvent(index, "A")}
                   className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
                 >
                   Eliminar Imagen
@@ -525,16 +540,9 @@ const PantallaServicio = () => {
               )}
             </div>
           ))}
-          {eventsB.length < 3 && (
-            <button
-              onClick={() => addEvent("B")}
-              className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
-            >
-              Agregar Imagen
-            </button>
-          )}
         </>
       )}
+
       <div className="flex justify-end mt-6">
         <button
           onClick={guardarConfiguracion}
