@@ -436,6 +436,9 @@
     "deleteSuccess": "PDF eliminado con éxito",
     "deleteError": "Error al eliminar el PDF:",
     "pageTitle": "Guía de usuario",
+    "termsAndConditions" : "Terminos y Condiciones",
+    "downloads" : "Instalables",
+    "usageGuides" : "Guías de uso",
     "uploadButton": "Subir PDF"
   },
   "support": {

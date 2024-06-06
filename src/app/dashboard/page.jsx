@@ -146,7 +146,7 @@ function DashBoard() {
           {showPublicidad && <Publicidad />}
 
           {showlicencia && <Licencia />}
-          {showGuia && <Guia />}
+          {showGuia && <Guia userData={userData}/>}
           {showSoporte && <Soporte />}
         </div>
       </main>

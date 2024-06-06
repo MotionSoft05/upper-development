@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useReducer } from "react";
+import React, { useState, useEffect, useReducer, useCallback } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faSync,
   faFilePdf,
-  faBook,
   faTimes,
   faEye,
   faFile,
@@ -16,7 +15,6 @@ import "firebase/compat/auth";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig"; // .env
 
-
 firebase.initializeApp(firebaseConfig);
 
 const Guia = () => {
@@ -26,7 +24,24 @@ const Guia = () => {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadedFiles, setUploadedFiles] = useState([]);
   const [user, setUser] = useState(null);
+  const [selectedFolder, setSelectedFolder] = useState("guiaDeUsuario");
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
+
+  const fetchFiles = useCallback(() => {
+    const storageRef = firebase.storage().ref(selectedFolder);
+
+    storageRef.listAll().then((result) => {
+      const files = result.items.map((item) => {
+        return { name: item.name, url: item.getDownloadURL() };
+      });
+
+      Promise.all(files.map(async (file) => ({ ...file, url: await file.url })))
+        .then((filesWithUrls) => setUploadedFiles(filesWithUrls))
+        .catch((error) =>
+          console.error("Error al obtener las URL de los archivos:", error)
+        );
+    });
+  }, [selectedFolder]);
 
   useEffect(() => {
     const unsubscribe = firebase.auth().onAuthStateChanged((authUser) => {
@@ -37,29 +52,10 @@ const Guia = () => {
       }
     });
 
-    const storageRef = firebase.storage().ref("pdfs");
-
-    storageRef.listAll().then((result) => {
-      const files = result.items.map((item) => {
-        return { name: item.name, url: item.getDownloadURL() };
-      });
-
-      // files.sort((a, b) => {
-      //   const regex = /(\d+)\.pdf/;
-      //   const numberA = parseInt(a.name.match(regex)[1]);
-      //   const numberB = parseInt(b.name.match(regex)[1]);
-      //   return numberA - numberB;
-      // });
-
-      Promise.all(files.map(async (file) => ({ ...file, url: await file.url })))
-        .then((filesWithUrls) => setUploadedFiles(filesWithUrls))
-        .catch((error) =>
-          console.error("Error al obtener las URL de los archivos:", error)
-        );
-    });
+    fetchFiles();
 
     return () => unsubscribe();
-  }, [fileUploaded]);
+  }, [fileUploaded, fetchFiles]);
 
   const handleFileChange = (event) => {
     const file = event.target.files[0];
@@ -71,17 +67,13 @@ const Guia = () => {
     if (pdfFile) {
       setIsUploading(true);
 
-      //     const fileName = `${pdfFile.name.replace(".pdf", "")}_${
-      //       uploadedFiles.length + 1
-      //     }.pdf`;
       const fileName = pdfFile.name;
       const storageRef = firebase.storage().ref();
-      const pdfRef = storageRef.child(`pdfs/${fileName}`);
+      const pdfRef = storageRef.child(`${selectedFolder}/${fileName}`);
 
       pdfRef
         .put(pdfFile)
         .then((snapshot) => {
-          // "PDF cargado con éxito"
           console.log(t("guia.uploadSuccess"), snapshot);
 
           pdfRef.getDownloadURL().then((url) => {
@@ -96,39 +88,32 @@ const Guia = () => {
           });
         })
         .catch((error) => {
-          // "Error al subir el PDF:";
           console.error(t("guia.uploadError"), error);
           setIsUploading(false);
         });
     } else {
-      // console.error("Selecciona un archivo PDF antes de subirlo.");
       console.error(t("guia.selectPdfFile"));
     }
   };
 
   const handleDelete = (fileName) => {
-    // Manejar la eliminación de PDF
     const storageRef = firebase.storage().ref();
-    const pdfRef = storageRef.child(`pdfs/${fileName}`);
+    const pdfRef = storageRef.child(`${selectedFolder}/${fileName}`);
 
     pdfRef
       .delete()
       .then(() => {
-        // console.log("PDF eliminado con éxito");
         console.log(t("guia.deleteSuccess"));
-        // Actualizar localmente el estado de los archivos eliminando el PDF correspondiente
         setUploadedFiles((prevFiles) =>
           prevFiles.filter((file) => file.name !== fileName)
         );
         setFileUploaded(false);
       })
       .catch((error) => {
-        // "Error al eliminar el PDF:"
         console.error(t("guia.deleteError"), error);
       });
   };
 
-  //Función que renderiza el icono dependiendo la extensión del archivo
   const getExtensionIcon = (fileName) => {
     const extension = fileName.split(".").pop().toLowerCase();
     switch (extension) {
@@ -142,79 +127,130 @@ const Guia = () => {
     }
   };
 
+  const handleFolderChange = (folder) => {
+    setSelectedFolder(folder);
+    setFileUploaded(false); // Trigger the effect to fetch files
+  };
+
   return (
     <section className="px-5 md:px-32">
       <div>
         <div className="p-5">
-          <h1 className=" text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
-            {/* Guía de usuario */}
+          <h1 className="text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl mb-10">
             {t("guia.pageTitle")}
           </h1>
 
-          {user &&
-            (user.email === "uppermex10@gmail.com" ||
-              user.email === "ulises.jacobo@hotmail.com" ||
-              user.email === "contacto@upperds.mx") && (
-              <div className="flex items-center space-x-4">
-                <input type="file" onChange={handleFileChange} />
-                <button
-                  onClick={handleUpload}
-                  className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-                  disabled={isUploading}
-                >
-                  {isUploading ? (
-                    <FontAwesomeIcon icon={faSync} spin size="lg" />
-                  ) : (
-                    // "Subir PDF"
-                    t("guia.uploadButton")
-                  )}
-                </button>
-              </div>
-            )}
-
-          <div className="mt-4">
-            {uploadedFiles.map((file, index) => (
-              <div
-                key={index}
-                className="flex justify-between items-center max-w-2xl space-x-4 mb-3 p-2 rounded-md bg-slate-100"
-              >
-                {/* Icono y Nombre del archivo */}
-                <div>
-                  {/* Funcion "getExtensionIcon" para mostar icono segun el tipo de archivo */}
-                  {getExtensionIcon(file.name)}
-                  <span className="ml-2">{file.name}</span>
-                </div>
-                {/* Boton para ver o descargar */}
-                <div>
+          <main className="shadow-2xl p-4 rounded-lg">
+            <div className="text-lg font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
+              <ul className="flex flex-wrap -mb-px">
+                <li className="mr-2">
                   <button
-                    onClick={() => window.open(file.url, "_blank")}
-                    className="text-blue-600 ml-2 cursor-pointer"
+                    name="guiaDeUsuario"
+                    onClick={() => handleFolderChange("guiaDeUsuario")}
+                    className={`${
+                      selectedFolder === "guiaDeUsuario"
+                        ? "border-b-2 border-blue-500"
+                        : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                    } inline-block p-4 rounded-t-lg`}
                   >
-                    {/* Si es RAR, se muestra el icono de descarga, sino, se muestra el icono de ver */}
-                    <FontAwesomeIcon
-                      icon={file.name.slice(-4) === ".rar" ? faDownload : faEye}
-                      size="lg"
-                    />
+                    <span className="ml-3">{t("guia.usageGuides")}</span>
                   </button>
+                </li>
+                <li className="mr-2">
+                  <button
+                    name="downloads"
+                    onClick={() => handleFolderChange("downloads")}
+                    className={`${
+                      selectedFolder === "downloads"
+                        ? "border-b-2 border-blue-500"
+                        : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                    } inline-block p-4 rounded-t-lg`}
+                  >
+                    <span className="ml-3">{t("guia.downloads")}</span>
+                  </button>
+                </li>
+                <li className="mr-2">
+                  <button
+                    name="termsAndConditions"
+                    onClick={() => handleFolderChange("termsAndConditions")}
+                    className={`${
+                      selectedFolder === "termsAndConditions"
+                        ? "border-b-2 border-blue-500"
+                        : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
+                    } inline-block p-4 rounded-t-lg`}
+                  >
+                    <span className="ml-3">{t("guia.termsAndConditions")}</span>
+                  </button>
+                </li>
+              </ul>
+            </div>
 
-                  {/* Si es Admin, se muestra el boton para eliminar archivos*/}
-                  {user &&
-                    (user.email === "uppermex10@gmail.com" ||
-                      user.email === "ulises.jacobo@hotmail.com" ||
-                      user.email === "contacto@upperds.mx") && (
-                      <>
-                        <button
-                          onClick={() => handleDelete(file.name)}
-                          className="text-red-600 ml-4 cursor-pointer"
-                        >
-                          <FontAwesomeIcon icon={faTimes} size="lg" />
-                        </button>
-                      </>
-                    )}
-                </div>
+            <div className="mt-4">
+              {/* SUBIR ARCHIVOS CON ADMIN */}
+              <div className="mb-4">
+                {user &&
+                  (user.email === "uppermex10@gmail.com" ||
+                    user.email === "ulises.jacobo@hotmail.com" ||
+                    user.email === "contacto@upperds.mx") && (
+                    <div className="flex items-center space-x-4">
+                      <input type="file" onChange={handleFileChange} />
+                      <button
+                        onClick={handleUpload}
+                        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        disabled={isUploading}
+                      >
+                        {isUploading ? (
+                          <FontAwesomeIcon icon={faSync} spin size="lg" />
+                        ) : (
+                          t("guia.uploadButton")
+                        )}
+                      </button>
+                    </div>
+                  )}
               </div>
-            ))}
-          </div>
+              {/* LISTADO DE ARCHIVOS */}
+              <div>
+                {uploadedFiles.map((file, index) => (
+                  <div
+                    key={index}
+                    className="flex justify-between items-center max-w-2xl space-x-4 mb-3 p-2 rounded-md bg-slate-100"
+                  >
+                    <div>
+                      {getExtensionIcon(file.name)}
+                      <span className="ml-2">{file.name}</span>
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => window.open(file.url, "_blank")}
+                        className="text-blue-600 ml-2 cursor-pointer"
+                      >
+                        <FontAwesomeIcon
+                          icon={
+                            file.name.slice(-4) === ".rar" ? faDownload : faEye
+                          }
+                          size="lg"
+                        />
+                      </button>
+
+                      {user &&
+                        (user.email === "uppermex10@gmail.com" ||
+                          user.email === "ulises.jacobo@hotmail.com" ||
+                          user.email === "contacto@upperds.mx") && (
+                          <>
+                            <button
+                              onClick={() => handleDelete(file.name)}
+                              className="text-red-600 ml-4 cursor-pointer"
+                            >
+                              <FontAwesomeIcon icon={faTimes} size="lg" />
+                            </button>
+                          </>
+                        )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </main>
         </div>
       </div>
     </section>
