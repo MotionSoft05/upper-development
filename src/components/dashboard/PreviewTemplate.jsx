@@ -62,6 +62,19 @@ const PantallaServicio = () => {
       seconds: 10,
     },
   ]);
+  const [eventsC, setEventsC] = useState([
+    {
+      image: null,
+      imagePreview: null,
+      dateRange: {
+        startDate: new Date(),
+        endDate: new Date(),
+      },
+      hours: 0,
+      minutes: 0,
+      seconds: 10,
+    },
+  ]);
 
   useEffect(() => {
     const fetchScreenNames = async () => {
@@ -91,21 +104,39 @@ const PantallaServicio = () => {
 
   const handleFileChange = (event, index, type) => {
     const file = event.target.files[0];
-    const newEvents = type === "A" ? [...eventsA] : [...eventsB];
+    const newEvents =
+      type === "A" ? [...eventsA] : type === "B" ? [...eventsB] : [...eventsC]; // Selecciona el arreglo adecuado basado en el tipo
+
     newEvents[index].image = file;
 
     const reader = new FileReader();
     reader.onload = () => {
       newEvents[index].imagePreview = reader.result;
-      type === "A" ? setEventsA(newEvents) : setEventsB(newEvents);
+      // Establece el arreglo adecuado basado en el tipo
+      if (type === "A") {
+        setEventsA(newEvents);
+      } else if (type === "B") {
+        setEventsB(newEvents);
+      } else {
+        setEventsC(newEvents);
+      }
     };
     reader.readAsDataURL(file);
   };
 
   const handleEventChange = (index, field, value, type) => {
-    const newEvents = type === "A" ? [...eventsA] : [...eventsB];
+    const newEvents =
+      type === "A" ? [...eventsA] : type === "B" ? [...eventsB] : [...eventsC]; // Selecciona el arreglo adecuado basado en el tipo
     newEvents[index][field] = value;
-    type === "A" ? setEventsA(newEvents) : setEventsB(newEvents);
+
+    // Establece el arreglo adecuado basado en el tipo
+    if (type === "A") {
+      setEventsA(newEvents);
+    } else if (type === "B") {
+      setEventsB(newEvents);
+    } else {
+      setEventsC(newEvents);
+    }
   };
 
   const handleScreenChange = async (selectedOption) => {
@@ -147,8 +178,21 @@ const PantallaServicio = () => {
               minutes: event.tiempoDeVisualizacion.minutes || 0,
               seconds: event.tiempoDeVisualizacion.seconds || 10,
             })) || [];
+          const newEventsC =
+            data.eventsC?.map((event) => ({
+              image: null,
+              imagePreview: event.img1 || null,
+              dateRange: {
+                startDate: event.fechaInicial.toDate(),
+                endDate: event.fechaFinal.toDate(),
+              },
+              hours: event.tiempoDeVisualizacion.hours || 0,
+              minutes: event.tiempoDeVisualizacion.minutes || 0,
+              seconds: event.tiempoDeVisualizacion.seconds || 10,
+            })) || [];
           setEventsA(newEventsA);
           setEventsB(newEventsB);
+          setEventsC(newEventsC);
         });
       }
     } catch (error) {
@@ -166,7 +210,8 @@ const PantallaServicio = () => {
         return;
       }
 
-      for (const event of [...eventsA, ...eventsB]) {
+      // Verifica que se hayan seleccionado fechas para todos los eventos
+      for (const event of [...eventsA, ...eventsB, ...eventsC]) {
         if (
           !event.dateRange ||
           !event.dateRange.startDate ||
@@ -174,18 +219,20 @@ const PantallaServicio = () => {
         ) {
           Swal.fire({
             icon: "error",
-            title: "Por favor, seleccione una fecha",
+            title: "Por favor, seleccione una fecha para todos los eventos",
           });
           return;
         }
       }
 
+      // Función para subir archivos al almacenamiento
       const uploadFile = async (file, path) => {
         const storageRef = ref(storage, path);
         await uploadBytes(storageRef, file);
         return getDownloadURL(storageRef);
       };
 
+      // Procesamiento de eventosA
       const newEventsA = await Promise.all(
         eventsA.map(async (event, index) => {
           const urls = {};
@@ -199,8 +246,12 @@ const PantallaServicio = () => {
 
           return {
             ...urls,
-            fechaInicial: event.dateRange.startDate,
-            fechaFinal: event.dateRange.endDate,
+            fechaInicial: event.dateRange.startDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
+            fechaFinal: event.dateRange.endDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
             tiempoDeVisualizacion: {
               hours: event.hours,
               minutes: event.minutes,
@@ -211,6 +262,7 @@ const PantallaServicio = () => {
         })
       );
 
+      // Procesamiento de eventosB
       const newEventsB = await Promise.all(
         eventsB.map(async (event, index) => {
           const urls = {};
@@ -224,8 +276,12 @@ const PantallaServicio = () => {
 
           return {
             ...urls,
-            fechaInicial: event.dateRange.startDate,
-            fechaFinal: event.dateRange.endDate,
+            fechaInicial: event.dateRange.startDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
+            fechaFinal: event.dateRange.endDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
             tiempoDeVisualizacion: {
               hours: event.hours,
               minutes: event.minutes,
@@ -236,6 +292,37 @@ const PantallaServicio = () => {
         })
       );
 
+      // Procesamiento de eventosC
+      const newEventsC = await Promise.all(
+        eventsC.map(async (event, index) => {
+          const urls = {};
+          if (event.image) {
+            const url = await uploadFile(
+              event.image,
+              `TemplateServiciosVistaimg/eventC${index + 1}/${event.image.name}`
+            );
+            urls.img1 = url;
+          }
+
+          return {
+            ...urls,
+            fechaInicial: event.dateRange.startDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
+            fechaFinal: event.dateRange.endDate.toLocaleString("es-AR", {
+              timeZone: "America/Argentina/Buenos_Aires",
+            }),
+            tiempoDeVisualizacion: {
+              hours: event.hours,
+              minutes: event.minutes,
+              seconds: event.seconds,
+            },
+            tipo: "C", // Agregar el campo 'tipo' para el tipo C
+          };
+        })
+      );
+
+      // Consulta y actualización de la configuración en la base de datos
       const templatesCollection = collection(db, "TemplateServiciosVista");
       const q = query(
         templatesCollection,
@@ -251,6 +338,7 @@ const PantallaServicio = () => {
           nombreDePantalla: selectedScreen.value,
           eventsA: newEventsA,
           eventsB: newEventsB,
+          eventsC: newEventsC,
         });
       } else {
         // Si existe, actualizar el documento existente
@@ -263,11 +351,14 @@ const PantallaServicio = () => {
               nombreDePantalla: selectedScreen.value,
               eventsA: newEventsA,
               eventsB: newEventsB,
+              eventsC: newEventsC,
             },
             { merge: true }
           );
         });
       }
+
+      // Notificación de éxito
       Swal.fire({
         icon: "success",
         title: "Configuración guardada exitosamente",
@@ -277,6 +368,7 @@ const PantallaServicio = () => {
 
       console.log("Configuración guardada correctamente.");
     } catch (error) {
+      // Manejo de errores
       console.error("Error al guardar la configuración:", error);
       Swal.fire({
         icon: "error",
@@ -289,7 +381,7 @@ const PantallaServicio = () => {
     if (type === "A" && eventsA.length >= 3) {
       Swal.fire({
         icon: "error",
-        title: "No puedes agregar más de 3 imágenes",
+        title: "No puedes agregar más de 3 imágenes para el tipo A",
       });
       return;
     }
@@ -297,7 +389,15 @@ const PantallaServicio = () => {
     if (type === "B" && eventsB.length >= 3) {
       Swal.fire({
         icon: "error",
-        title: "No puedes agregar más de 3 imágenes",
+        title: "No puedes agregar más de 3 imágenes para el tipo B",
+      });
+      return;
+    }
+
+    if (type === "C" && eventsC.length >= 3) {
+      Swal.fire({
+        icon: "error",
+        title: "No puedes agregar más de 3 imágenes para el tipo C",
       });
       return;
     }
@@ -314,15 +414,23 @@ const PantallaServicio = () => {
       seconds: 10,
     };
 
-    type === "A"
-      ? setEventsA([...eventsA, newEvent])
-      : setEventsB([...eventsB, newEvent]);
+    if (type === "A") {
+      setEventsA([...eventsA, newEvent]);
+    } else if (type === "B") {
+      setEventsB([...eventsB, newEvent]);
+    } else {
+      setEventsC([...eventsC, newEvent]);
+    }
   };
 
   const removeEvent = (index, type) => {
-    type === "A"
-      ? setEventsA(eventsA.filter((_, i) => i !== index))
-      : setEventsB(eventsB.filter((_, i) => i !== index));
+    if (type === "A") {
+      setEventsA(eventsA.filter((_, i) => i !== index));
+    } else if (type === "B") {
+      setEventsB(eventsB.filter((_, i) => i !== index));
+    } else {
+      setEventsC(eventsC.filter((_, i) => i !== index));
+    }
   };
 
   return (
@@ -346,6 +454,7 @@ const PantallaServicio = () => {
       </div>
       {selectedScreen && (
         <>
+          {/* Resto del código existente */}
           <div className="mb-6">
             <label className="text-white dark:text-gray-200 block mb-0.5">
               Seleccione la Imagen
@@ -362,10 +471,18 @@ const PantallaServicio = () => {
               <button
                 className={`px-4 py-2 ${
                   selectedImage === "B" ? "bg-blue-500" : "bg-gray-400"
-                } rounded-r-md text-white transition-colors duration-200 transform hover:bg-blue-700 focus:outline-none focus:bg-blue-600`}
+                } rounded-md text-white transition-colors duration-200 transform hover:bg-blue-700 focus:outline-none focus:bg-blue-600`}
                 onClick={() => setSelectedImage("B")}
               >
                 Imagen B
+              </button>
+              <button
+                className={`px-4 py-2 ${
+                  selectedImage === "C" ? "bg-blue-500" : "bg-gray-400"
+                } rounded-r-md text-white transition-colors duration-200 transform hover:bg-blue-700 focus:outline-none focus:bg-blue-600`}
+                onClick={() => setSelectedImage("C")}
+              >
+                Imagen o Video C
               </button>
             </div>
           </div>
@@ -598,6 +715,123 @@ const PantallaServicio = () => {
                   {index > 0 && (
                     <button
                       onClick={() => removeEvent(index, "B")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
+                    >
+                      Eliminar Imagen
+                    </button>
+                  )}
+                </div>
+              ))}
+            </>
+          )}
+          {selectedImage === "C" && (
+            <>
+              {eventsC.map((event, index) => (
+                <div key={index} className="mb-6 border-t border-gray-700 pt-6">
+                  <h3 className="text-xl font-bold text-white capitalize mb-4">
+                    {`Imagen o Video ${index + 1}`}
+                  </h3>
+                  <div className="flex flex-col md:flex-row">
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Imagen o Video
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/png, image/jpeg, image/jpg"
+                        onChange={(e) => handleFileChange(e, index, "C")}
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                      {event.imagePreview && (
+                        <img
+                          src={event.imagePreview}
+                          alt="Vista previa"
+                          className="mt-2 rounded-lg"
+                          style={{ maxWidth: "150px", maxHeight: "150px" }}
+                        />
+                      )}
+                    </div>
+                    <div className="mb-6 md:mr-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Seleccione la Fecha
+                      </label>
+                      <Datepicker
+                        useRange={true}
+                        value={event.dateRange}
+                        onChange={(newDateRange) =>
+                          handleEventChange(
+                            index,
+                            "dateRange",
+                            newDateRange,
+                            "C"
+                          )
+                        }
+                        className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
+                      />
+                    </div>
+                    <div className="mb-6 flex flex-col">
+                      <label className="text-white dark:text-gray-200 block mb-0.5">
+                        Tiempo de visualización (HH:MM:SS)
+                      </label>
+                      <div className="flex">
+                        <input
+                          type="number"
+                          min="0"
+                          value={event.hours}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "hours",
+                              e.target.value,
+                              "C"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-l-lg w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          value={event.minutes}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "minutes",
+                              e.target.value,
+                              "C"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border w-full mr-1"
+                        />
+                        <input
+                          type="number"
+                          min="10"
+                          value={event.seconds}
+                          onChange={(e) =>
+                            handleEventChange(
+                              index,
+                              "seconds",
+                              e.target.value,
+                              "C"
+                            )
+                          }
+                          className="bg-gray-700 text-white py-2 px-3 border rounded-r-lg w-full"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  {eventsC.length < 3 && (
+                    <button
+                      onClick={() => addEvent("C")}
+                      className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
+                    >
+                      Agregar nueva imagen
+                    </button>
+                  )}
+
+                  {index > 0 && (
+                    <button
+                      onClick={() => removeEvent(index, "C")}
                       className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-red-500 rounded-md hover:bg-red-700 focus:outline-none focus:bg-red-600"
                     >
                       Eliminar Imagen
