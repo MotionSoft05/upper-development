@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
-import { initializeApp } from "firebase/app";
+import "firebase/compat/firestore";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -8,10 +8,21 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import Link from "next/link";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import {
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import { v4 as uuidv4 } from "uuid";
 import auth from "@/firebase/auth";
+import { firebaseConfig } from "@/firebase/firebaseConfig";
+import getFileUrl from "@/hook/getFileUrl";
 
 function Register() {
   const { t } = useTranslation();
@@ -39,6 +50,7 @@ function Register() {
   const [isPasswordTouched, setIsPasswordTouched] = useState(false);
   const [isConfirmPasswordTouched, setIsConfirmPasswordTouched] =
     useState(false);
+  const [termsUrl, setTermsUrl] = useState("");
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [showTermsAndConditions, setShowTermsAndConditions] = useState(false);
@@ -55,6 +67,32 @@ function Register() {
     confirmPassword: "",
     // companyName: "",
   });
+
+  const [fileUrl, setFileUrl] = useState(null);
+  // console.log("🚀 ~ Register ~ fileUrl:", fileUrl[0].url);
+
+  useEffect(() => { // Trae los URL de los archivos de Términos y Condiciones
+    const keyword = "terminos";
+    const folderPath = "termsAndConditions";
+    const fetchFileUrl = async () => {
+      try {
+        const url = await getFileUrl(folderPath, keyword);
+        setFileUrl(url);
+      } catch (error) {
+        console.error("Error fetching file URL:", error);
+      }
+    };
+
+    fetchFileUrl();
+  }, []);
+
+  const openTermsAndConditions = () => {
+    if (fileUrl.length > 0) {
+      window.open(fileUrl[0].url, "_blank");
+    } else {
+      console.error("Términos y condiciones no disponibles.");
+    }
+  };
 
   useEffect(() => {
     setIsConfirmPasswordTouched(true);
@@ -298,9 +336,9 @@ function Register() {
   };
   //* --- Validaciones ---
 
-  const openTermsAndConditions = () => {
-    window.open("/Terminos-y-Condiciones.pdf", "_blank");
-  };
+  // const openTermsAndConditions = () => {
+  //   window.open("/Terminos-y-Condiciones.pdf", "_blank");
+  // };
 
   // const validateCompanyName = (value) => {
   //   if (!value) {
