@@ -439,7 +439,7 @@
     "termsAndConditions" : "Terminos y Condiciones",
     "downloads" : "Instalables",
     "usageGuides" : "Guías de uso",
-    "uploadButton": "Subir PDF"
+    "uploadButton": "Subir Archivo"
   },
   "support": {
     "errorMessageFields": "Por favor, completa todos los campos antes de enviar el mensaje.",

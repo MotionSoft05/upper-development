@@ -441,7 +441,7 @@
     "termsAndConditions" : "Terms And Conditions",
     "downloads" : "Installable",
     "usageGuides" : "Usage Guides",
-    "uploadButton": "Upload PDF"
+    "uploadButton": "Upload File"
   },
   "support": {
     "errorMessageFields": "Please fill in all fields before sending the message.",
