@@ -386,10 +386,11 @@ const PantallaServicio = () => {
                       </label>
                       <input
                         type="file"
-                        accept="image/"
+                        accept="image/png, image/jpeg, image/jpg" // Cambiado para aceptar solo imágenes
                         onChange={(e) => handleFileChange(e, index, "A")}
                         className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                       />
+
                       {event.imagePreview && (
                         <img
                           src={event.imagePreview}
@@ -473,7 +474,7 @@ const PantallaServicio = () => {
                       onClick={() => addEvent("A")}
                       className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
                     >
-                      Agregar Imagen
+                      Agregar nueva imagen
                     </button>
                   )}
 
@@ -503,7 +504,7 @@ const PantallaServicio = () => {
                       </label>
                       <input
                         type="file"
-                        accept="image/"
+                        accept="image/png, image/jpeg, image/jpg" // Cambiado para aceptar solo imágenes
                         onChange={(e) => handleFileChange(e, index, "B")}
                         className="bg-gray-700 text-white py-2 px-3 border rounded-lg w-full mr-2"
                       />
@@ -590,7 +591,7 @@ const PantallaServicio = () => {
                       onClick={() => addEvent("B")}
                       className="px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-blue-500 rounded-md hover:bg-blue-700 focus:outline-none focus:bg-blue-600 mt-6"
                     >
-                      Agregar Imagen
+                      Agregar nueva imagen
                     </button>
                   )}
 
