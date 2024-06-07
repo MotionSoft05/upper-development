@@ -448,7 +448,7 @@ function UserAdmin() {
                             </h2>
                           </div>
                         </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
+                        <td className="px-4 py-2 text-right text-black w-1/2">
                           <p>
                             <span>{cantidadPublicidadSalon}</span>
                           </p>
@@ -464,7 +464,7 @@ function UserAdmin() {
                             </h2>
                           </div>
                         </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
+                        <td className="px-4 py-2 text-right text-black w-1/2">
                           <p>
                             <span>{cantidadPublicidadDirectorio}</span>
                           </p>
