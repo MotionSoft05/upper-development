@@ -16,7 +16,7 @@ import {
   updateDoc,
 } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import PantallaServicio from "./PreviewTemplate";
+import PantallaServicio from "./serviciosconfig";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import db from "@/firebase/firestore";
