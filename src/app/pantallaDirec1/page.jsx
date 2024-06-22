@@ -310,7 +310,7 @@ function PantallaDirec1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 50000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }

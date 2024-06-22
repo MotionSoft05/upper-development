@@ -262,7 +262,7 @@ function Pantalla3() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 10000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }

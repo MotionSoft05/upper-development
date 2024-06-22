@@ -63,7 +63,7 @@ function Pantalla1() {
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
-  
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -76,7 +76,6 @@ function Pantalla1() {
     return () => unsubscribe();
   }, []);
 
-  
   useEffect(() => {
     if (user && db) {
       const userRef = doc(db, "usuarios", user.uid);
@@ -254,7 +253,7 @@ function Pantalla1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 10000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }

@@ -262,7 +262,7 @@ function Pantalla9() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 10000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -570,7 +570,7 @@ function Pantalla9() {
               }}
             >
               {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
-              <GetLanguageDate idioma={templateData[0].idioma}/>
+              <GetLanguageDate idioma={templateData[0].idioma} />
             </p>
             <div className="flex items-center justify-center mb-1">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" />

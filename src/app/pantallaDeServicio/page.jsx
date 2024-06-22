@@ -13,6 +13,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState, useRef } from "react";
 import SliderRSS from "@/components/SliderRSS";
 import axios from "axios";
+import { firebaseConfig } from "@/firebase/firebaseConfig";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -50,16 +51,6 @@ function PantallaServicio() {
   //* ----------------- Datos Firebase ---------------------------
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-      authDomain: "upper-8c817.firebaseapp.com",
-      projectId: "upper-8c817",
-      storageBucket: "upper-8c817.appspot.com",
-      messagingSenderId: "798455798906",
-      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-      measurementId: "G-6VHX927GH1",
-    };
-
     const app = initializeApp(firebaseConfig);
     const firestoreInstance = getFirestore(app); // Save the reference to firestore
     setFirestore(firestoreInstance); // Set the firestore variable
@@ -75,7 +66,7 @@ function PantallaServicio() {
 
     return () => unsubscribe();
   }, []);
-  // *----------------- Datos Firebase ---------------------------
+  // *----------------- //Datos Firebase ---------------------------
   //* ----------------- Eventos ---------------------------
 
   useEffect(() => {
@@ -235,12 +226,12 @@ function PantallaServicio() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 10000);
+      }, 100000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
-  // *----------------- Eventos ---------------------------
+  // *----------------- //Eventos ---------------------------
   // *----------------- Timer de los eventos ---------------------------
 
   useEffect(() => {
@@ -260,7 +251,7 @@ function PantallaServicio() {
       }
     }
   }, [tiempoRestante, eventosEnCurso, eventoActualIndex]);
-  // *----------------- Timer de los eventos ---------------------------
+  // *----------------- //Timer de los eventos ---------------------------
   // *----------------- RSS ---------------------------
   useEffect(() => {
     axios
