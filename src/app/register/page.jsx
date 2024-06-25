@@ -71,7 +71,8 @@ function Register() {
   const [fileUrl, setFileUrl] = useState(null);
   // console.log("🚀 ~ Register ~ fileUrl:", fileUrl[0].url);
 
-  useEffect(() => { // Trae los URL de los archivos de Términos y Condiciones
+  useEffect(() => {
+    // Trae los URL de los archivos de Términos y Condiciones
     const keyword = "terminos";
     const folderPath = "termsAndConditions";
     const fetchFileUrl = async () => {
@@ -245,6 +246,7 @@ function Register() {
         apellido: lastName,
         email: email,
         telefono: phoneNumber,
+        //! empresa: "empresa" IMPORTANTE,
         //empresa: companyName,
         //Idempresa: idEmpresa,
         sesion: 0,
@@ -616,9 +618,9 @@ function Register() {
 
                 <div className="mt-3 text-sm font-light text-gray-500">
                   {/* ¿Ya tienes una cuenta? */}
-                  {t("register.comprobation")}
+                  {t("register.alreadyHaveAccount")}
                   <strong>
-                    <Link href="/login">
+                    <Link href="/login" className="ml-1">
                       {/* Ingresa aquí */}
                       {t("register.loginLink")}
                     </Link>

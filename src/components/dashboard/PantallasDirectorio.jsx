@@ -20,16 +20,7 @@ import {
 import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-  authDomain: "upper-8c817.firebaseapp.com",
-  projectId: "upper-8c817",
-  storageBucket: "upper-8c817.appspot.com",
-  messagingSenderId: "798455798906",
-  appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-  measurementId: "G-6VHX927GH1",
-};
+import { firebaseConfig } from "@/firebase/firebaseConfig";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -37,7 +28,6 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
 
   const { t } = useTranslation(); // Traduccion con i18N
@@ -172,7 +162,7 @@ function PantallasDirectorio() {
 
   const [empresaOptions, setEmpresaOptions] = useState([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState(null);
-  const [ empresaQr, setEmpresaQR] = useState(null);
+  const [empresaQr, setEmpresaQR] = useState(null);
 
   const authorizedEmails = [
     "uppermex10@gmail.com",
@@ -206,7 +196,7 @@ function PantallasDirectorio() {
             // Si no hay una empresa seleccionada, usar la empresa del usuario autenticado
             const user = usuarioSnapshot.data();
             empresa = user.empresa || "";
-            
+
             const numberOfScreens = user.pd || 0;
             const namesArray = Array.from(
               { length: numberOfScreens },
@@ -276,7 +266,7 @@ function PantallasDirectorio() {
               : user.empresa || "";
 
             console.log("Empresa >>>: ", empresa); // Console log de la empresa
-            setEmpresaQR(empresa)
+            setEmpresaQR(empresa);
 
             const templateDirectoriosRef = collection(
               db,
@@ -334,22 +324,21 @@ function PantallasDirectorio() {
               setSelectedPublicidad(null);
             }
           }
-          
         }
       } catch (error) {
         console.error("Error al obtener datos del template:", error);
       }
     };
-    
+
     const fetchEmpresaData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
-        
+
         if (authUser && authorizedEmails.includes(authUser.email)) {
           const usuariosRef = collection(db, "usuarios");
           const usuariosSnapshot = await getDocs(usuariosRef);
           const empresasSet = new Set();
-          
+
           usuariosSnapshot.forEach((doc) => {
             const data = doc.data();
             if (data.empresa) {
@@ -1051,7 +1040,9 @@ function PantallasDirectorio() {
                   <Link
                     // href={`/pantallaDirec${index + 1}.html`}
                     // TODO cambiar UPPER por el usuario logeado
-                    href={`/pantallaDirec${index + 1}?emp=${empresaQr}${isProduction}`}
+                    href={`/pantallaDirec${
+                      index + 1
+                    }${isProduction}?emp=${empresaQr}`}
                     target="_blank"
                     className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
                   >

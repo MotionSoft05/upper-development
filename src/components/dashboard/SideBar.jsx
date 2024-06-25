@@ -193,6 +193,7 @@ function Sidebar(props) {
               </button>
             </div>
             {/* Pantalla de Servicio  */}
+            {/* Comentar para que no se vea */}
             <div className="my-px">
               <button
                 className={efectSelect(props.showPantallaServicio)}
@@ -201,7 +202,6 @@ function Sidebar(props) {
                 <span className={efectLogo(props.showPantallaServicio)}>
                   <FontAwesomeIcon icon={faDisplay} className="h-5" />
                 </span>
-                {/* Pantallas Servicio */}
 
                 <span className="ml-3">{t("sidebar.servicescreen")}</span>
               </button>

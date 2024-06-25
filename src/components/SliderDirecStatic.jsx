@@ -17,6 +17,7 @@ import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
 import Textra from "react-textra"; // Slider para RSS
+import { firebaseConfig } from "@/firebase/firebaseConfig";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -25,7 +26,6 @@ const obtenerHora = () => {
 };
 
 export default function SliderDirecStatic() {
-
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
@@ -51,7 +51,9 @@ export default function SliderDirecStatic() {
 
       // Actualiza la URL del código QR al cambiar el usuario
       // setQrCodeUrl(`${baseUrl}/paginasAleatorias.html?qr=${user.uid}`);
-      setQrCodeUrl(`${baseUrl}/paginasAleatorias${isProduction}?qr=${user.uid}`);
+      setQrCodeUrl(
+        `${baseUrl}/paginasAleatorias${isProduction}?qr=${user.uid}`
+      );
     }
   }, [user]);
 
@@ -160,15 +162,7 @@ export default function SliderDirecStatic() {
 
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-      authDomain: "upper-8c817.firebaseapp.com",
-      projectId: "upper-8c817",
-      storageBucket: "upper-8c817.appspot.com",
-      messagingSenderId: "798455798906",
-      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-      measurementId: "G-6VHX927GH1",
-    };
+
     const app = initializeApp(firebaseConfig);
     const firestoreInstance = getFirestore(app); // Save the reference to firestore
     setFirestore(firestoreInstance); // Set the firestore variable

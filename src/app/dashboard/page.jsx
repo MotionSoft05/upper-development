@@ -124,14 +124,13 @@ function DashBoard() {
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />} {/* Usuarios y Licencias */}
-
+              userEmail === "contacto@upperds.mx") && <Admin />}{" "}
+          {/* Usuarios y Licencias */}
           {showUserAdmin && <UserAdmin />}
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
-
           {showAltaEvento && (
             <AltaEventos
               setShowAltaEvento={setShowAltaEvento}
@@ -139,14 +138,12 @@ function DashBoard() {
             />
           )}
           {showConsultaEvento && <ConsultaModEvento />}
-
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
           {showPublicidad && <Publicidad />}
-
           {showlicencia && <Licencia />}
-          {showGuia && <Guia userData={userData}/>}
+          {showGuia && <Guia userData={userData} />}
           {showSoporte && <Soporte />}
         </div>
       </main>

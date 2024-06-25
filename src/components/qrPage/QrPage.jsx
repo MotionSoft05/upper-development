@@ -17,6 +17,7 @@ import "keen-slider/keen-slider.min.css";
 import axios from "axios";
 import QRCode from "qrcode.react";
 import { useTranslation } from "react-i18next";
+import { firebaseConfig } from "@/firebase/firebaseConfig";
 const obtenerHora = () => {
   const now = new Date();
   const hours = String(now.getHours()).padStart(2, "0");
@@ -25,8 +26,7 @@ const obtenerHora = () => {
 };
 
 function QrDinamic({ searchQuery }) {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   //   console.log("🚀 ~ QrPage ~ params:", searchQuery)
   const [user, setUser] = useState(searchQuery);
   const [eventData, setEventData] = useState(null);
@@ -99,15 +99,6 @@ function QrDinamic({ searchQuery }) {
   });
   useEffect(() => {
     // Importar Firebase solo en el lado del cliente
-    const firebaseConfig = {
-      apiKey: "AIzaSyAiP1248hBEZt3iS2H4UVVjdf_xbuJHD3k",
-      authDomain: "upper-8c817.firebaseapp.com",
-      projectId: "upper-8c817",
-      storageBucket: "upper-8c817.appspot.com",
-      messagingSenderId: "798455798906",
-      appId: "1:798455798906:web:f58a3e51b42eebb6436fc3",
-      measurementId: "G-6VHX927GH1",
-    };
 
     const app = initializeApp(firebaseConfig);
     const firestoreInstance = getFirestore(app); // Save the reference to firestore
@@ -145,6 +136,7 @@ function QrDinamic({ searchQuery }) {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
+            const userCompany = userData.empresa;
             const nombrePantallasUsuario =
               userData.nombrePantallasDirectorio || {};
             const pantallasNumeradas = {};
@@ -156,7 +148,7 @@ function QrDinamic({ searchQuery }) {
             const eventosRef = collection(firestore, "eventos");
             const eventosQuery = query(
               eventosRef,
-              where("userId", "==", searchQuery)
+              where("empresa", "==", userCompany)
             ); //! revisar antes era ("userId", "==", user)
             const querySnapshot = await getDocs(eventosQuery);
 
@@ -212,8 +204,9 @@ function QrDinamic({ searchQuery }) {
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
               templateRef,
-              where("userId", "==", searchQuery) //! revisar antes era ("userId", "==", user)
+              where("empresa", "==", userCompany) //! revisar antes era ("userId", "==", user)
             );
+            console.log("🚀 ~ obtenerUsuario ~ searchQuery:", searchQuery);
             const templateSnapshot = await getDocs(templateQuery);
 
             if (!templateSnapshot.empty) {
@@ -321,7 +314,7 @@ function QrDinamic({ searchQuery }) {
   }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
-    const diasSemana = t("qrPage.weekdays", { returnObjects : true})
+    const diasSemana = t("qrPage.weekdays", { returnObjects: true });
 
     const meses = [
       "1",
@@ -374,7 +367,7 @@ function QrDinamic({ searchQuery }) {
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
       // "No hay publicidad ni eventos";  O cualquier elemento que quieras mostrar cuando no haya publicidades
-      return t("qrPage.noEventsOrAdvertisements") 
+      return t("qrPage.noEventsOrAdvertisements");
     }
 
     return (
