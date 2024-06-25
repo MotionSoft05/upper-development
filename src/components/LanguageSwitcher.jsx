@@ -6,11 +6,12 @@ import { faGlobe } from "@fortawesome/free-solid-svg-icons";
 
 function LanguageSwitcher() {
   const { t } = useTranslation();
-  const [storedLanguage, setStoredLanguage] = useState("");
+  const [storedLanguage, setStoredLanguage] = useState("es");
 
 
   useEffect(() => {
-    const storedLanguage = localStorage.getItem("language") || "";
+    const storedLanguage = localStorage.getItem("language") || "es";
+    console.log("🚀 ~ useEffect ~ storedLanguage:", storedLanguage)
     setStoredLanguage(storedLanguage);
   }, []);
 
