@@ -42,7 +42,7 @@ function Precios() {
   // };
 
   // Define los precios según la categoría y el período
-  //? Posteriormente se podria borrar este objeto y usar el de traduciones
+  //? Posteriormente se podria borrar este objeto y usar el de traducciones
   const precios = {
     gratis: {
       mensual: "precios.free.monthly",
@@ -91,8 +91,8 @@ function Precios() {
           description={t("precios.standard.description")}
           mensualTitle={t("precios.monthly")}
           mensualPrice={"$ 99"}
-          anualTitle={t("precios.yearly")}
-          anualPrice={"$ 1200"}
+          // anualTitle={t("precios.yearly")}
+          // anualPrice={"$ 1200"}
           featureList={[
             t("precios.standard.features.item1"),
             t("precios.standard.features.item2"),
@@ -104,9 +104,9 @@ function Precios() {
           title={t("precios.professional.title")}
           description={t("precios.professional.description")}
           mensualTitle={t("precios.monthly")}
-          mensualPrice={"$ 120"}
-          anualTitle={t("precios.yearly")}
-          anualPrice={"$ 1400"}
+          mensualPrice={t("precios.professional.contact")}
+          // anualTitle={t("precios.yearly")}
+          // anualPrice={"$ 1400"}
           featureList={[
             t("precios.professional.features.item1"),
             t("precios.professional.features.item2"),

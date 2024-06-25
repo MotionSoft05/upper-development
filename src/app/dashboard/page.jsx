@@ -121,16 +121,19 @@ function DashBoard() {
       </aside>
       <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
         <div className="">
+          {/* ADMINISTRACIÓN */}
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />}{" "}
-          {/* Usuarios y Licencias */}
-          {showUserAdmin && <UserAdmin />}
+              userEmail === "contacto@upperds.mx") && <Admin />} {/* Usuarios y Licencias */}
+
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
+          
+          {/* GESTION DE USUARIOS */}
+          {showUserAdmin && <UserAdmin />}
           {showAltaEvento && (
             <AltaEventos
               setShowAltaEvento={setShowAltaEvento}
@@ -138,10 +141,14 @@ function DashBoard() {
             />
           )}
           {showConsultaEvento && <ConsultaModEvento />}
+
+          {/* CONFIGURACION DE PANTALLAS */}
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
           {showPublicidad && <Publicidad />}
+          
+          {/* INFORMACION DE USUARIO */}
           {showlicencia && <Licencia />}
           {showGuia && <Guia userData={userData} />}
           {showSoporte && <Soporte />}
