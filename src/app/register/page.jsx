@@ -246,7 +246,7 @@ function Register() {
         apellido: lastName,
         email: email,
         telefono: phoneNumber,
-        //! empresa: "empresa" IMPORTANTE,
+        empresa: "", //! BETA
         //empresa: companyName,
         //Idempresa: idEmpresa,
         sesion: 0,
