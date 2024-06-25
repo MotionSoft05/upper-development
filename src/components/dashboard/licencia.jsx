@@ -10,6 +10,7 @@ function Licencia() {
 
   const {t} = useTranslation()
   const [currentUser, setCurrentUser] = useState(null);
+  console.log("🚀 ~ Licencia ~ currentUser:", currentUser)
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
 
   useEffect(() => {
@@ -442,7 +443,7 @@ function DatosNegocio({ currentUser }) {
                 {t("licencia.licenseNumber")}
               </th>
               <td className="px-6 py-4">
-                {currentUser ? currentUser.total : ""}
+                {currentUser ? (+currentUser.pd + +currentUser.ps + +currentUser.pservice) : ""}
               </td>
             </tr>
             <tr className="bg-white border-b">
