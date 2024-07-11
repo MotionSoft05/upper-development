@@ -49,6 +49,10 @@ function PantallaDirec1() {
   const [error, setError] = useState(null);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
+  console.log(
+    "🚀 ~ PantallaDirec1 ~ publicidadesUsuario:",
+    publicidadesUsuario
+  );
   const [rssItems, setRssItems] = useState([]); // Estado para almacenar los elementos del RSS
   const pathname = usePathname();
   useEffect(() => {
@@ -63,6 +67,22 @@ function PantallaDirec1() {
       );
     }
   }, [user]);
+
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Obtener el tamaño inicial
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const cambiarOrientacion = () => {
     setIsPortrait((prevState) => !prevState); // Cambia el estado de portrait a landscape y viceversa
@@ -100,7 +120,7 @@ function PantallaDirec1() {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 7 : 5
+    templateData[0]?.setPortrait ? 7 : 4
   );
 
   useEffect(() => {
@@ -111,18 +131,18 @@ function PantallaDirec1() {
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
-    const limite = isPortrait ? 7 : 5;
+    const limite = isPortrait ? 6 : 4;
     if (!eventos || eventos.length === 0) {
       return true;
     }
 
-    if (isPortrait && eventos.length > 7) {
+    if (isPortrait && eventos.length > 6) {
       // Si es portrait y supera los 8 eventos, recargar la página
 
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
     }
 
-    if (!isPortrait && eventos.length > 5) {
+    if (!isPortrait && eventos.length > 4) {
       // Si no es portrait y supera los 5 eventos, recargar la página
 
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
@@ -236,9 +256,19 @@ function PantallaDirec1() {
             console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
-
               console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
-              eventosData.push(evento);
+
+              // Validación de devices y status
+              const { devices, status } = evento;
+
+              // Verificar si el array de devices no está vacío y al menos un device es válido
+              const hasValidDevice =
+                devices.length > 0 &&
+                devices.some((device) => device in pantallasNumeradas);
+
+              if (hasValidDevice && status) {
+                eventosData.push(evento);
+              }
             });
 
             const eventosOrdenados = eventosData.slice().sort((a, b) => {
@@ -283,10 +313,41 @@ function PantallaDirec1() {
                 t("pantallaDirec.templateDirectoryNotFound")
               );
             }
+            //  Sección template
+            //  Sección publicidad
+            const pantalla = "directorio";
+            console.log("🚀 ~ obtenerUsuario ~ pantalla:", pantalla);
+            const publicidadesRef = collection(firestore, "Publicidad");
             console.log(
-              "🚀 ~ obtenerUsuario ~ eventosOrdenados:",
-              eventosOrdenados
+              "🚀 ~ obtenerUsuario ~ publicidadesRef:",
+              publicidadesRef
             );
+
+            const publicidadesQuery = query(
+              publicidadesRef,
+              where("empresa", "==", userCompany)
+            );
+            const publicidadesSnapshot = await getDocs(publicidadesQuery);
+
+            if (!publicidadesSnapshot.empty) {
+              const publicidades = [];
+              console.log("🚀 ~ obtenerUsuario ~ publicidades:", publicidades);
+              publicidadesSnapshot.forEach((doc) => {
+                const publicidad = { id: doc.id, ...doc.data() };
+                // Comparar el tipo de la publicidad con la pantalla deseada
+
+                if (publicidad.tipo === pantalla) {
+                  publicidades.push(publicidad);
+                }
+              });
+
+              setPublicidadesUsuario(publicidades);
+            } else {
+              console.log(
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantalla.error.publicidadesDirectoryNotFound")
+              );
+            }
             setEventosEnCurso(eventosOrdenados);
           } else {
             // "No se encontraron datos para este usuario."
@@ -390,44 +451,6 @@ function PantallaDirec1() {
   // ----------------- RSS ---------------------------
 
   const pantalla = "directorio";
-
-  useEffect(() => {
-    const fetchPublicidades = () => {
-      if (user && firestore) {
-        const publicidadesRef = collection(firestore, "Publicidad");
-        const publicidadesQuery = query(
-          publicidadesRef,
-          where("userId", "==", user.uid)
-        );
-
-        getDocs(publicidadesQuery)
-          .then((querySnapshot) => {
-            const publicidades = [];
-            querySnapshot.forEach((doc) => {
-              const publicidad = { id: doc.id, ...doc.data() };
-              // Comparar el tipo de la publicidad con la pantalla deseada
-              if (publicidad.tipo === pantalla) {
-                publicidades.push(publicidad);
-              }
-            });
-
-            setPublicidadesUsuario(publicidades);
-          })
-          .catch((error) => {
-            // "Error al obtener las publicidades:"
-            console.error(t("pantallaDirec.advertisementFetchError"), error);
-          });
-      }
-    };
-
-    const interval = setInterval(() => {
-      fetchPublicidades();
-    }, 120000);
-
-    fetchPublicidades(); // Llamar inicialmente
-
-    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  }, [user, firestore, pantalla]);
 
   const obtenerFecha = () => {
     const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
@@ -564,7 +587,7 @@ function PantallaDirec1() {
   return (
     <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
       <div
-        className="bg-white text-black h-screen flex flex-col justify-center  "
+        className="  "
         style={{
           transform: templateData[0]?.setPortrait
             ? "rotate(90deg)"
@@ -573,33 +596,24 @@ function PantallaDirec1() {
           height: templateData[0]?.setPortrait ? "100vh" : "", // Ajustar la altura según la orientación
           width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
           marginLeft: templateData[0]?.setPortrait ? "auto" : "",
-          marginRight: templateData[0]?.setPortrait ? "auto" : "",
+          marginRight: templateData[0]?.setPortrait ? "0px" : "",
         }}
       >
-        <div
-          id="Content"
-          className="flex-grow flex flex-col justify-center mx-2 my-2 "
-        >
+        <div id="Content" className=" ">
           {/* Header */}
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
             <div className=" ">
               {templateActual.logo && (
                 <>
-                  <div
-                    style={{
-                      width: "15vw",
-                      height: "8vw",
-                      overflow: "hidden",
-                      marginBottom: "20px",
-                    }}
-                  >
+                  <div className="ml-5" style={{ height: "100%" }}>
                     <img
                       src={templateActual.logo}
                       alt="Logo"
                       className="rounded-lg object-contain w-full h-full  "
-                      onClick={() => {
-                        cambiarOrientacion();
+                      style={{
+                        width: windowSize.width / 7, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                        height: windowSize.height / 7, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
                       }}
                     />
                   </div>
@@ -613,10 +627,10 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              <p className="text-3xl text-center  mb-2">
+              <p className="text-base text-center  mb-2">
                 {obtenerFecha()}-{currentHour}
               </p>
-              <h1 className="text-5xl font-bold">
+              <h1 className="text-2xl font-bold">
                 {/* Eventos del día */}
                 {t("pantallaDirec.todaysEvents")}
               </h1>
@@ -641,9 +655,9 @@ function PantallaDirec1() {
                   <img
                     src={weatherData.current.condition.icon}
                     alt="Clima"
-                    className="w-28"
+                    className="w-16"
                   />
-                  <p className="text-5xl font-bold ml-2 mr-6">
+                  <p className="text-2xl font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -662,7 +676,7 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={` text-black py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-11`}
                   style={{
                     background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
@@ -670,7 +684,7 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2 className=" text-4xl text-center">
+                  <h2 className=" text-2xl text-center">
                     {/* EVENTOS */}
                     {t("pantallaDirec.eventsTitle")}
                   </h2>
@@ -680,206 +694,193 @@ function PantallaDirec1() {
                   className=" bg-gradient-to-t from-white to-gray-200  relative z-20"
                   style={{}}
                 >
-                  <div className=" ">
-                    <div className="flex flex-col">
-                      <div className="space-y-5 pl-5 flex-grow">
-                        <div className="">
-                          {/* Parte con slider horizontal  ------------------------------------------------------------------ */}
-                          <div
-                            className=""
-                            style={{
-                              display:
-                                (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 8) ||
-                                (!templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 6)
-                                  ? "none"
-                                  : "",
-                            }}
-                          >
-                            <div ref={sliderRef} className="keen-slider">
-                              {eventosPorSlide.map((slideEventos, index) => (
-                                <div
-                                  key={index}
-                                  className="keen-slider__slide my-2"
-                                >
-                                  {Array.from({
-                                    length: templateData[0]?.setPortrait
-                                      ? 7
-                                      : 5,
-                                  }).map((_, innerIndex) => {
-                                    const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+                  <div className="flex flex-col text-black">
+                    <div className=" pl-5 flex-grow">
+                      {/* Parte con slider horizontal  ------------------------------------------------------------------ */}
+                      <div
+                        className=""
+                        style={{
+                          display:
+                            (templateData[0]?.setPortrait &&
+                              eventosEnCurso.length < 6) ||
+                            (!templateData[0]?.setPortrait &&
+                              eventosEnCurso.length < 5)
+                              ? "none"
+                              : "",
+                        }}
+                      >
+                        <div ref={sliderRef} className="keen-slider">
+                          {eventosPorSlide.map((slideEventos, index) => (
+                            <div key={index} className="keen-slider__slide ">
+                              {Array.from({
+                                length: templateData[0]?.setPortrait ? 6 : 4,
+                              }).map((_, innerIndex) => {
+                                const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
-                                    return (
-                                      <div
-                                        key={innerIndex}
-                                        className="flex items-center space-x-4 space-y-5 border-b pr-8"
-                                        style={{
-                                          height: evento ? "auto" : "110px",
-                                          borderColor:
-                                            templateActual.templateColor,
-                                        }} // Establecer la altura dependiendo de si hay evento o no
-                                      >
-                                        {/* ---- Evento ---- */}
-                                        {evento ? (
-                                          // Si hay evento, mostrar los detalles
-                                          <>
-                                            <div
-                                              style={{
-                                                position: "relative",
-                                                overflow: "hidden",
+                                return (
+                                  <div
+                                    key={innerIndex}
+                                    className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                    style={{
+                                      height: evento ? "auto" : "110px",
+                                      borderColor: templateActual.templateColor,
+                                    }} // Establecer la altura dependiendo de si hay evento o no
+                                  >
+                                    {/* ---- Evento ---- */}
+                                    {evento ? (
+                                      // Si hay evento, mostrar los detalles
+                                      <>
+                                        <div
+                                          style={{
+                                            position: "relative",
+                                            overflow: "hidden",
 
-                                                width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                                height: "5vw", // Ajusta el alto del contenedor según sea necesario
-                                              }}
-                                            >
-                                              <img
-                                                style={{
-                                                  width: "5vw",
-                                                  height: "5vw",
-                                                  objectFit: "cover",
-                                                }}
-                                                src={evento.images[0]}
-                                                alt={evento.nombreEvento}
-                                              />
-                                            </div>
-
-                                            <div className="w-full ">
-                                              <h3 className="font-bold mb-4 text-3xl">
-                                                {evento.nombreEvento}
-                                              </h3>
-                                              <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
-                                                {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3">
-                                                  {evento.tipoEvento}
-                                                </p>
-                                                <p className=" ">
-                                                  {evento.devices[0]}
-                                                </p>
-                                                {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="text-center ">
-                                                  {evento.lugar}
-                                                </p>
-
-                                                {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className=" text-right ">
-                                                  {evento.horaInicialSalon +
-                                                    " a "}
-                                                  {evento.horaFinalSalon}
-                                                  {"HRS"}
-                                                </p>
-                                              </div>
-                                            </div>
-                                          </>
-                                        ) : (
-                                          // Si no hay evento, mostrar el mensaje de casillero vacío
-                                          <p></p>
-                                        )}
-                                      </div>
-                                    );
-                                  })}
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                          {/* Parte sin slider horizontal ------------------------------------------------------------------ */}
-                          <div
-                            className=""
-                            style={{
-                              display:
-                                (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 7) ||
-                                (!templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 5)
-                                  ? "none"
-                                  : "",
-                            }}
-                          >
-                            {eventosPorSlide.map((slideEventos, index) => (
-                              <div key={index} className="my-2 ">
-                                {Array.from({
-                                  length: templateData[0]?.setPortrait ? 7 : 5,
-                                }).map((_, innerIndex) => {
-                                  const evento = slideEventos[innerIndex]; // Obtener el evento si existe
-
-                                  return (
-                                    <div
-                                      key={innerIndex}
-                                      className="flex items-center space-x-4 space-y-5 border-b pr-8"
-                                      style={{
-                                        height: evento ? "auto" : "110px",
-                                        borderColor:
-                                          templateActual.templateColor,
-                                      }} // Establecer la altura dependiendo de si hay evento o no
-                                    >
-                                      {/* ---- Evento ---- */}
-                                      {evento ? (
-                                        // Si hay evento, mostrar los detalles
-                                        <>
-                                          <div
+                                            width: "5vw", // Ajusta el ancho del contenedor según sea necesario
+                                            height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                          }}
+                                        >
+                                          <img
                                             style={{
-                                              position: "relative",
-                                              overflow: "hidden",
-                                              width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                              height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                              width: "5vw",
+                                              height: "5vw",
+                                              objectFit: "cover",
                                             }}
-                                          >
-                                            <img
-                                              style={{
-                                                width: "5vw",
-                                                height: "5vw",
-                                                objectFit: "cover",
-                                              }}
-                                              src={evento.images[0]}
-                                              alt={evento.nombreEvento}
-                                            />
-                                          </div>
+                                            src={evento.images[0]}
+                                            alt={evento.nombreEvento}
+                                          />
+                                        </div>
 
-                                          <div className="w-full ">
-                                            <h3 className="font-bold mb-4 text-3xl">
-                                              {evento.nombreEvento}
-                                            </h3>
-                                            <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
-                                              {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3">
-                                                {evento.tipoEvento}
-                                              </p>
-                                              <p className=" ">
-                                                {evento.devices[0]}
-                                              </p>
-                                              {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="text-center ">
-                                                {evento.lugar}
-                                              </p>
+                                        <div className="w-full ">
+                                          <h3 className="font-bold mb-4 text-lg">
+                                            {evento.nombreEvento}
+                                          </h3>
+                                          <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
+                                            {/* Columna 1: Nombre (a la izquierda) */}
+                                            <p className="col-span-3 text-sm">
+                                              {evento.tipoEvento}
+                                            </p>
+                                            <p className="text-sm ">
+                                              {evento.devices[0]}
+                                            </p>
+                                            {/* Columna 2: Lugar (en el centro) */}
+                                            <p className="text-center text-sm ">
+                                              {evento.lugar}
+                                            </p>
 
-                                              {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className=" text-right ">
-                                                {evento.horaInicialSalon +
-                                                  " a "}
-                                                {evento.horaFinalSalon}
-                                                {"HRS"}
-                                              </p>
-                                            </div>
+                                            {/* Columna 3: Rango de horas (a la derecha) */}
+                                            <p className=" text-right text-sm ">
+                                              {evento.horaInicialReal + " a "}
+                                              {evento.horaFinalReal}
+                                              {"HRS"}
+                                            </p>
                                           </div>
-                                        </>
-                                      ) : (
-                                        // Si no hay evento, mostrar el mensaje de casillero vacío
-                                        <p></p>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            ))}
-                          </div>
+                                        </div>
+                                      </>
+                                    ) : (
+                                      // Si no hay evento, mostrar el mensaje de casillero vacío
+                                      <p></p>
+                                    )}
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          ))}
                         </div>
+                      </div>
+                      {/* Parte sin slider horizontal ------------------------------------------------------------------ */}
+                      <div
+                        className=""
+                        style={{
+                          display:
+                            (templateData[0]?.setPortrait &&
+                              eventosEnCurso.length > 6) ||
+                            (!templateData[0]?.setPortrait &&
+                              eventosEnCurso.length > 4)
+                              ? "none"
+                              : "",
+                        }}
+                      >
+                        {eventosPorSlide.map((slideEventos, index) => (
+                          <div key={index}>
+                            {Array.from({
+                              length: templateData[0]?.setPortrait ? 6 : 4,
+                            }).map((_, innerIndex) => {
+                              const evento = slideEventos[innerIndex]; // Obtener el evento si existe
+
+                              return (
+                                <div
+                                  key={innerIndex}
+                                  className="flex items-center space-x-4 space-y-3 border-b pr-8"
+                                  style={{
+                                    height: evento ? "auto" : "110px",
+                                    borderColor: templateActual.templateColor,
+                                  }} // Establecer la altura dependiendo de si hay evento o no
+                                >
+                                  {/* ---- Evento ---- */}
+                                  {evento ? (
+                                    // Si hay evento, mostrar los detalles
+                                    <>
+                                      <div
+                                        style={{
+                                          position: "relative",
+                                          overflow: "hidden",
+                                          width: "5vw", // Ajusta el ancho del contenedor según sea necesario
+                                          height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                        }}
+                                      >
+                                        <img
+                                          style={{
+                                            width: "5vw",
+                                            height: "5vw",
+                                            objectFit: "cover",
+                                          }}
+                                          src={evento.images[0]}
+                                          alt={evento.nombreEvento}
+                                        />
+                                      </div>
+
+                                      <div className="w-full ">
+                                        <h3 className="font-bold mb-4 text-lg">
+                                          {evento.nombreEvento}
+                                        </h3>
+                                        <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
+                                          {/* Columna 1: Nombre (a la izquierda) */}
+                                          <p className="col-span-3 text-sm">
+                                            {evento.tipoEvento}
+                                          </p>
+                                          <p className="text-sm ">
+                                            {evento.devices[0]}
+                                          </p>
+                                          {/* Columna 2: Lugar (en el centro) */}
+                                          <p className="text-center text-sm ">
+                                            {evento.lugar}
+                                          </p>
+
+                                          {/* Columna 3: Rango de horas (a la derecha) */}
+                                          <p className=" text-right text-sm ">
+                                            {evento.horaInicialReal + " a "}
+                                            {evento.horaFinalReal}
+                                            {"HRS"}
+                                          </p>
+                                        </div>
+                                      </div>
+                                    </>
+                                  ) : (
+                                    // Si no hay evento, mostrar el mensaje de casillero vacío
+                                    <p></p>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end`}
+                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-11 flex justify-center items-end`}
                   style={{
                     background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
 
@@ -888,7 +889,7 @@ function PantallaDirec1() {
                 >
                   {/* Título */}
                   <h2
-                    className="text-color text-4xl text-center align-bottom "
+                    className="text-color text-2xl text-center align-bottom "
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
@@ -896,20 +897,17 @@ function PantallaDirec1() {
                   </h2>
                 </div>
               </div>
-              <div className="col-span-3 md:col-span-1 flex items-center justify-center  m-3">
+              <div className="col-span-1 md:col-span-1 flex items-center justify-center  m-3">
                 <div
                   style={{
-                    position: "relative",
-                    overflow: "hidden",
-                    width: "100%", // Hacer que ocupe el 100% del ancho del contenedor
-                    height: "100%", // Hacer que ocupe el 100% del alto del contenedor
+                    height: "100%",
                     borderRadius: "10px", // Redondear las esquinas
                   }}
                 >
                   <img
                     style={{
-                      width: "100%", // Hacer que la imagen ocupe el 100% del ancho del contenedor
-                      height: "100%", // Hacer que la imagen ocupe el 100% del alto del contenedor
+                      width: windowSize.width / 4, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 1.5, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
                       borderRadius: "10px", // Redondear las esquinas objectFit: "cover",
                     }}
                     src={templateData[0].publicidad}
@@ -922,29 +920,22 @@ function PantallaDirec1() {
             <div className="">
               {/* Linea arriba */}{" "}
               <div
-                className={` py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl h-16`}
+                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-11`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
-
+                  color: templateActual.fontColor,
                   fontFamily: templateActual.fontStyle,
                 }}
               >
                 {/* Título */}
-                <h2
-                  className=" text-4xl text-center"
-                  style={{
-                    // backgroundColor: templateActual.templateColor,
-
-                    color: templateActual.fontColor,
-                  }}
-                >
+                <h2 className=" text-2xl text-center">
                   {/* EVENTOS */}
                   {t("pantallaDirec.eventsTitle")}
                 </h2>
               </div>
               {/* contenido principal */}
-              <div className="bg-gradient-to-t from-white  to-gray-200 text-gray-50 ">
+              <div className=" bg-gradient-to-t from-white to-gray-200  relative z-20 ">
                 <div className=" text-black">
                   {/* Imagen a la izquierda */}
                   <div
@@ -977,7 +968,7 @@ function PantallaDirec1() {
                                 >
                                   {Array.from({
                                     length: templateData[0]?.setPortrait
-                                      ? 7
+                                      ? 6
                                       : 5,
                                   }).map((_, innerIndex) => {
                                     const evento = slideEventos[innerIndex]; // Obtener el evento si existe
@@ -1034,9 +1025,9 @@ function PantallaDirec1() {
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
                                                 <p className=" text-right ">
-                                                  {evento.horaInicialSalon +
+                                                  {evento.horaInicialReal +
                                                     " a "}
-                                                  {evento.horaFinalSalon}
+                                                  {evento.horaFinalReal}
                                                   {"HRS"}
                                                 </p>
                                               </div>
@@ -1059,7 +1050,7 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 7) ||
+                                  eventosEnCurso.length > 6) ||
                                 (!templateData[0]?.setPortrait &&
                                   eventosEnCurso.length > 5)
                                   ? "none"
@@ -1067,16 +1058,16 @@ function PantallaDirec1() {
                             }}
                           >
                             {eventosPorSlide.map((slideEventos, index) => (
-                              <div key={index} className="my-2 ">
+                              <div key={index} className=" ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 7 : 5,
+                                  length: templateData[0]?.setPortrait ? 6 : 4,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
                                   return (
                                     <div
                                       key={innerIndex}
-                                      className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                      className="flex items-center space-x-4 space-y-3 border-b pr-8"
                                       style={{
                                         height: evento ? "auto" : "110px",
                                         borderColor:
@@ -1107,27 +1098,26 @@ function PantallaDirec1() {
                                           </div>
 
                                           <div className="w-full ">
-                                            <h3 className="font-bold mb-4 text-3xl">
+                                            <h3 className="font-bold mb-4 text-lg">
                                               {evento.nombreEvento}
                                             </h3>
-                                            <div className="grid grid-cols-3 gap-4 font-bold text-2xl ">
+                                            <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3">
+                                              <p className="col-span-3 text-sm">
                                                 {evento.tipoEvento}
                                               </p>
-                                              <p className=" ">
+                                              <p className=" text-sm">
                                                 {evento.devices[0]}
                                               </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="text-center ">
+                                              <p className="text-center text-sm ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className=" text-right ">
-                                                {evento.horaInicialSalon +
-                                                  " a "}
-                                                {evento.horaFinalSalon}
+                                              <p className=" text-right text-sm ">
+                                                {evento.horaInicialReal + " a "}
+                                                {evento.horaFinalReal}
                                                 {"HRS"}
                                               </p>
                                             </div>
@@ -1151,7 +1141,7 @@ function PantallaDirec1() {
               </div>
               {/* Linea abajo */}
               <div
-                className={`text-white py-1 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-b-xl h-16`}
+                className={`text-white uppercase font-bold px-20 rounded-b-xl h-11 flex justify-center items-end`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -1161,7 +1151,7 @@ function PantallaDirec1() {
               >
                 {/* Título */}
                 <h2
-                  className="text-color text-4xl text-center"
+                  className="text-color text-2xl text-center align-bottom"
                   style={{
                     color: templateActual.fontColor,
                   }}

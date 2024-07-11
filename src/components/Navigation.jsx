@@ -103,9 +103,20 @@ function Navigation() {
 
   // No muestra Navigation en algunas URL determinadas
   const hideNavigation = () => {
-    const hideRoutes = ["/paginasAleatorias", "/pantallaDeServicio"];
+    const hideRoutes = [
+      "/paginasAleatorias",
+      "/pantallaDeServicio",
+      "/pantallaDirec1",
+    ];
+
+    // Elimina el .html del pathname si está presente
+    const sanitizedPathname = pathname.replace(".html", "");
+
+    console.log("Sanitized Pathname: ", sanitizedPathname);
+
     return (
-      hideRoutes.includes(pathname) || pathname.match(/\/pantalla[1-9]|10/)
+      hideRoutes.includes(sanitizedPathname) ||
+      sanitizedPathname.match(/\/pantalla[1-9]|10/)
     );
   };
 

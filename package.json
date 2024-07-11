@@ -19,6 +19,7 @@
     "antd": "^5.9.0",
     "autoprefixer": "10.4.15",
     "axios": "^1.6.3",
+    "browser-image-compression": "^2.0.2",
     "date-fns": "^2.30.0",
     "dayjs": "^1.11.9",
     "dotenv": "^16.4.5",

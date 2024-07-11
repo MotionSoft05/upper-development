@@ -16,9 +16,9 @@ export default function SliderRSS() {
       .get("https://upperds.onrender.com/fetch-rss")
       .then((response) => {
         const items = response.data.items.map((item) => ({
-          title: removeSymbols(item.title),
+          title: removeSymbols(decodeEntities(item.title)),
           link: item.link,
-          description: removeSymbols(item.description),
+          description: removeSymbols(decodeEntities(item.description)),
         }));
         setRssItems(items);
       })
@@ -29,12 +29,17 @@ export default function SliderRSS() {
 
   // Función para eliminar símbolos de una cadena de texto
   const removeSymbols = (text) => {
-    // Expresión regular para eliminar símbolos
-    const regex = /[^a-zA-Z0-9\s,.:-]/g;
-    // Aplicar el regex y reemplazar los símbolos con una cadena vacía
+    // Expresión regular para eliminar símbolos no deseados
+    const regex = /[^\w\s.,'”áéíóúÁÉÍÓÚñÑ:-]/g;
+    // Aplicar el regex y reemplazar los símbolos no deseados con una cadena vacía
     return text.replace(regex, "");
   };
-
+  // Función para decodificar entidades HTML
+  const decodeEntities = (encodedString) => {
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = encodedString;
+    return textArea.value;
+  };
   const [sliderRef] = useKeenSlider({
     loop: true,
     renderMode: "performance",

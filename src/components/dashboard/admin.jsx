@@ -36,6 +36,7 @@ import auth from "@/firebase/auth";
 function Admin() {
   const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
+  console.log("🚀 ~ Admin ~ usuarios:", usuarios);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [filtroSeleccionado, setFiltroSeleccionado] = useState("todos");
   const [modoEdiciontransaccion, setModoEdiciontransaccion] = useState(false);
@@ -577,8 +578,8 @@ function Admin() {
       return usuarios.filter(
         (usuario) =>
           (usuario.ps === "" || usuario.ps === 0) &&
-          (usuario.pd === "" || usuario.pd === 0) &&
-          (usuario.pservice === "" || usuario.pservice === 0)
+          (usuario.pd === "" || usuario.pd === 0)
+        // (usuario.pservice === "" || usuario.pservice === 0)
       );
     } else {
       return usuarios;
@@ -589,7 +590,7 @@ function Admin() {
     try {
       // Hacer la solicitud PUT al backend usando Axios
       const response = await axios.put(
-        `http://localhost:8000/usuarios/${usuarioId}`,
+        `https://upperds.onrender.com/usuarios/${usuarioId}`,
         { habilitar: true }
       );
 
@@ -625,7 +626,7 @@ function Admin() {
     try {
       // Hacer la solicitud PUT al backend usando Axios
       const response = await axios.put(
-        `http://localhost:8000/usuarios/${usuarioId}`,
+        `https://upperds.onrender.com/usuarios/${usuarioId}`,
         { habilitar: false }
       );
 

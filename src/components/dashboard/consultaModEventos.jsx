@@ -834,7 +834,7 @@ function ConsultaModEvento() {
                                     <div className="w-1/2">
                                       <label className="block text-sm font-medium text-gray-700">
                                         {/* Hora Inicial Real */}
-                                        {t("consultaModEventos.realEndTime")}
+                                        {t("consultaModEventos.realStartTime")}
                                       </label>
                                       <input
                                         type="time"
@@ -863,7 +863,7 @@ function ConsultaModEvento() {
                                   {/* Horas Salon */}{" "}
                                   <p className="md:text-sm">
                                     {/* Horario en que se mostrara... */}
-                                    {t("consultaModEventos.eventSchedule")}
+                                    {t("consultaModEventos.screenSchedule")}
                                   </p>
                                   <div className="mb-2 flex space-x-3">
                                     <div className="w-1/2">

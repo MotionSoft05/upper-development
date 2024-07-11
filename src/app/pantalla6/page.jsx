@@ -1,6 +1,5 @@
 "use client";
 import {
-  getFirestore,
   collection,
   getDocs,
   where,
@@ -8,8 +7,10 @@ import {
   doc,
   getDoc,
 } from "firebase/firestore";
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth"; // Add this line
+import { onAuthStateChanged } from "firebase/auth";
+import auth from "@/firebase/auth";
+import db, { getUserData, getEventsByCompany } from "@/firebase/firestore";
+
 import { useKeenSlider } from "keen-slider/react";
 import React, { useEffect, useState, useRef, useLayoutEffect } from "react";
 import LogIn from "../login/page"; // Importa el componente LogIn
@@ -23,8 +24,8 @@ import "swiper/css/navigation";
 
 // import required modules
 import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import { useTranslation } from "react-i18next";
 import GetLanguageDate from "@/components/getLanguageDate";
-import { firebaseConfig } from "@/firebase/firebaseConfig";
 
 const obtenerHora = () => {
   const now = new Date();
@@ -34,12 +35,12 @@ const obtenerHora = () => {
 };
 
 function Pantalla6() {
+  const { t, ready } = useTranslation();
   const pathname = usePathname();
 
   const [user, setUser] = useState(null);
   const [eventData, setEventData] = useState(null);
   const [currentHour, setCurrentHour] = useState(obtenerHora());
-  const [firestore, setFirestore] = useState(null);
   const [eventosEnCurso, setEventosEnCurso] = useState([]); // Nuevo estado
   const [publicidadesUsuario, setPublicidadesUsuario] = useState([]);
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
@@ -62,15 +63,8 @@ function Pantalla6() {
 
     return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
   }, []);
-  // Datos Firebase------------------------------------------
+
   useEffect(() => {
-    // Importar Firebase solo en el lado del cliente
-
-    const app = initializeApp(firebaseConfig);
-    const firestoreInstance = getFirestore(app); // Save the reference to firestore
-    setFirestore(firestoreInstance); // Set the firestore variable
-
-    const auth = getAuth(app);
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
@@ -81,53 +75,32 @@ function Pantalla6() {
 
     return () => unsubscribe();
   }, []);
-  // Publicidades-------------------------------------------
-  const pantalla = "salon";
+
+  const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
+
   useEffect(() => {
-    const fetchPublicidades = () => {
-      if (user && firestore) {
-        const publicidadesRef = collection(firestore, "Publicidad");
-        const publicidadesQuery = query(
-          publicidadesRef,
-          where("userId", "==", user.uid)
-        );
-
-        getDocs(publicidadesQuery)
-          .then((querySnapshot) => {
-            const publicidades = [];
-            querySnapshot.forEach((doc) => {
-              const publicidad = { id: doc.id, ...doc.data() };
-              // Comparar el tipo de la publicidad con la pantalla deseada
-              if (publicidad.tipo === pantalla) {
-                publicidades.push(publicidad);
-              }
-            });
-
-            setPublicidadesUsuario(publicidades);
-          })
-          .catch((error) => {
-            console.error("Error al obtener las publicidades:", error);
-          });
-      }
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
     };
 
-    const interval = setInterval(() => {
-      fetchPublicidades();
-    }, 120000);
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Obtener el tamaño inicial
 
-    fetchPublicidades(); // Llamar inicialmente
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
-    return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
-  }, [user, firestore, pantalla]);
-  // Eventos------------------------------------------------
   useEffect(() => {
-    if (user && firestore) {
-      const userRef = doc(firestore, "usuarios", user.uid);
+    if (user && db) {
+      const userRef = doc(db, "usuarios", user.uid);
       const obtenerUsuario = async () => {
         try {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
+            const userCompany = userData.empresa;
             const nombrePantallasUsuario = userData.nombrePantallas || {};
             const pantallasNumeradas = {};
 
@@ -135,14 +108,15 @@ function Pantalla6() {
               pantallasNumeradas[nombrePantallasUsuario[key]] = index + 1;
             });
 
-            const eventosRef = collection(firestore, "eventos");
+            const eventosRef = collection(db, "eventos");
             const eventosQuery = query(
               eventosRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
+
             let dispositivoCoincidente = null;
 
             querySnapshot.forEach((doc) => {
@@ -169,6 +143,7 @@ function Pantalla6() {
 
                 if (dispositivosCoincidentes.length > 0) {
                   dispositivoCoincidente = dispositivosCoincidentes[0].device;
+
                   setDispositivoCoincidente(dispositivoCoincidente);
                   eventosData.push(evento);
                 }
@@ -198,23 +173,19 @@ function Pantalla6() {
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
-              console.log("evento", evento);
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ horaActualEnRango:",
-                horaActualEnRango
-              );
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
-                fechaActualEnRango
-              );
 
-              return fechaActualEnRango && horaActualEnRango;
+              // Filtrar eventos por empresa
+              const empresaCoincidente = evento.empresa === userCompany;
+
+              return (
+                fechaActualEnRango && horaActualEnRango && empresaCoincidente
+              );
             });
-
-            const templateRef = collection(firestore, "TemplateSalones");
+            //  Sección template
+            const templateRef = collection(db, "TemplateSalones");
             const templateQuery = query(
               templateRef,
-              where("userId", "==", user.uid)
+              where("empresa", "==", userCompany)
             );
             const templateSnapshot = await getDocs(templateQuery);
 
@@ -222,7 +193,9 @@ function Pantalla6() {
               const templateData = [];
               templateSnapshot.forEach((doc) => {
                 const template = { id: doc.id, ...doc.data() };
+
                 templateData.push(template);
+
                 setSelectedCity({
                   value: template.ciudad,
                   label: template.ciudad,
@@ -231,11 +204,50 @@ function Pantalla6() {
               setTemplateData(templateData);
             } else {
               console.log(
-                "No se encontró información en TemplateDirectorios para este usuario."
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantalla.error.templateDirectoryNotFound")
               );
             }
+            //  Sección template
+            //  Sección publicidad
+            const pantalla = "salon";
+            const publicidadesRef = collection(db, "Publicidad");
+            const publicidadesQuery = query(
+              publicidadesRef,
+              where("empresa", "==", userCompany)
+            );
+            const publicidadesSnapshot = await getDocs(publicidadesQuery);
+            console.log(
+              "🚀 ~ obtenerUsuario ~ publicidadesSnapshot:",
+              publicidadesSnapshot
+            );
+
+            if (!publicidadesSnapshot.empty) {
+              const publicidades = [];
+              publicidadesSnapshot.forEach((doc) => {
+                const publicidad = { id: doc.id, ...doc.data() };
+                // Comparar el tipo de la publicidad con la pantalla deseada
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ publicidad:",
+                  publicidad
+                );
+
+                if (publicidad.tipo === pantalla) {
+                  publicidades.push(publicidad);
+                }
+              });
+
+              setPublicidadesUsuario(publicidades);
+            } else {
+              console.log(
+                // "No se encontró información en TemplateDirectorios para este usuario."
+                t("pantalla.error.publicidadesDirectoryNotFound")
+              );
+            }
+            //  Sección publicidad
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
             setEventosEnCurso(eventosEnCursoEffect);
+
             // console.log(
             //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
             //   eventosEnCursoEffect
@@ -243,10 +255,13 @@ function Pantalla6() {
             // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
             // setEventData(eventosEnCurso);
           } else {
-            console.log("No se encontraron datos para este usuario.");
+            // console.log("No se encontraron datos para este usuario.");
+            console.log(t("pantalla.error.noDataFound"));
           }
+          console.log("🚀 ~ obtenerUsuario ~ Seccion:", Seccion);
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          // console.error("Error al obtener datos del usuario:", error);
+          console.error(t("pantalla.error.userDataFetchError"), error);
         }
       };
 
@@ -258,7 +273,7 @@ function Pantalla6() {
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
-  }, [user, firestore]);
+  }, [user, db]);
   // console.log("publicidadesUsuario.", publicidadesUsuario);
   const eventoActualCopy = eventosEnCurso[0]; // Obtener el primer evento de la lista
 
@@ -340,9 +355,10 @@ function Pantalla6() {
   }, [currentMediaIndex, publicidadesUsuario]);
 
   // Iniciar cuenta regresiva
-  const [countdown, setCountdown] = useState(15); // Cambia 10 por el tiempo deseado en segundos
+  const [countdown, setCountdown] = useState(60); // Cambia 10 por el tiempo deseado en segundos
   useEffect(() => {
     let timer;
+
     if (eventosEnCurso.length === 0 && user) {
       if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
         if (countdown > 0) {
@@ -368,8 +384,9 @@ function Pantalla6() {
         <>
           <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
             <p>
-              No se a encontrado ningún evento o publicidad. La pagina se
-              reiniciara en {countdown} segundos
+              {/* No se a encontrado ningún evento o publicidad. La pagina se
+              reiniciara en {countdown} segundos */}
+              {t("pantalla.noEventsOrAdvertisements", { countdown })}
             </p>
           </section>
         </>
@@ -381,7 +398,7 @@ function Pantalla6() {
 
     return (
       <>
-        <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+        <section className="relative ">
           <div className="slider-container">
             <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
               {isVideo ? (
@@ -411,7 +428,6 @@ function Pantalla6() {
   }
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
-  // console.log("🚀 ~ Pantalla1 ~ templateActual:", templateActual);
 
   const {
     personalizacionTemplate,
@@ -423,36 +439,42 @@ function Pantalla6() {
     description,
   } = eventoActual;
   // h-screen PONE LA SCROLL BAR?!?!?!?!
+  // console.log("🚀 ~ IDIOMA ~ templateData:", templateData[0].idioma)
+
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white  text-black h-full flex flex-col justify-center mx-2 my-2">
-        <div id="Content" className="flex-grow flex flex-col justify-center ">
-          {/* Header */}
-          <div className="flex items-center justify-between ">
-            {templateActual.logo && (
-              <>
-                {" "}
-                <div
-                  style={{
-                    width: "18vw",
-                    height: "10vw",
-                    overflow: "hidden",
-                  }}
-                >
-                  <img src={templateActual.logo} alt="Logo" className="w-72" />
-                </div>{" "}
-              </>
-            )}
-            <h1
-              className={`font-bold uppercase text-6xl md:text-8xl text-color mr-16`}
-              style={{ fontFamily: templateActual.fontStyle }}
-            >
-              {dispositivoCoincidenteLAL}
-            </h1>
-          </div>
+    <section className="flex flex-col p-4 bg-gray-100 h-screen flex-grow flex-shrink-0 overflow-hidden">
+      {/* Línea superior: Logo, título y clima */}
+      <div className="flex justify-between items-center mb-4">
+        {templateActual.logo && (
+          <>
+            <div style={{ height: "100%" }}>
+              <img
+                src={templateActual.logo}
+                alt="Logo"
+                className=" object-cover"
+                style={{
+                  width: windowSize.width / 6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                  height: windowSize.height / 6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                }}
+              />
+            </div>
+          </>
+        )}
+        <h1
+          className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl   text-color `}
+          style={{ fontFamily: templateActual.fontStyle }}
+        >
+          {dispositivoCoincidenteLAL}
+        </h1>
+      </div>
+
+      {/* Línea inferior */}
+      <div className="flex flex-col flex-grow">
+        {/* Nombre del evento */}
+        <div className="mb-4">
           {/* Linea arriba */}
           <div
-            className={`text-white py-5 uppercase text-5xl  md:text-7xl font-bold px-20 rounded-t-xl`}
+            className={`text-white  py-3 uppercase  sm:text-xs md:text-3xl lg:text-5xl xl:text-7xl  font-bold px-20 rounded-t-xl`}
             style={{
               backgroundColor: templateActual.templateColor,
               color: templateActual.fontColor,
@@ -461,80 +483,80 @@ function Pantalla6() {
           >
             <h2>{nombreEvento}</h2>
           </div>
+        </div>
+
+        <div className="flex-grow mb-4">
           {/* contenido principal */}
-          <div className="bg-gradient-to-b from-gray-100  via-white to-gray-100 text-gray-50 py-5">
-            <div className="grid grid-cols-3 gap-x-4 text-black">
-              <div className="col-span-1  mr-4 my-auto">
-                <div className="col-span-1  mr-4 my-auto">
-                  <Swiper
-                    ref={swiperRef}
-                    spaceBetween={30}
-                    effect={"fade"}
-                    autoplay={{
-                      delay: 2500,
-                      disableOnInteraction: false,
-                    }}
-                    loop={true}
-                    modules={[Autoplay, Pagination, EffectFade]}
-                    className="mySwiper"
+          <div className="bg-gradient-to-b from-gray-100 via-white to-gray-100 text-gray-50 h-full flex flex-col">
+            <div className="grid grid-cols-3 gap-x-4 text-black flex-grow">
+              <div className="col-span-1 mr-4 my-auto flex justify-center items-center">
+                <Swiper
+                  ref={swiperRef}
+                  spaceBetween={30}
+                  effect="fade"
+                  autoplay={{
+                    delay: 2500,
+                    disableOnInteraction: false,
+                  }}
+                  loop
+                  modules={[Autoplay, Pagination, EffectFade]}
+                  className="mySwiper"
+                  style={{ width: "100%", height: "100%" }}
+                >
+                  {images.map((image, index) => (
+                    <SwiperSlide key={index + 1}>
+                      <img
+                        src={image}
+                        alt={index + 1}
+                        className="object-cover"
+                        style={{
+                          width: windowSize.width / 2.5, // Dividir por 2 o cualquier otro factor para ajustar el tamaño
+                          height: windowSize.height / 2.5, // Dividir por 2 o cualquier otro factor para ajustar el tamaño
+                          maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
+                        }}
+                      />
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+                {images.length === 0 && (
+                  <p
                     style={{
-                      position: "relative",
-                      overflow: "hidden",
-                      width: "30vw",
-                      height: "30vw",
+                      color: templateActual.fontColor,
+                      fontFamily: templateActual.fontStyle,
                     }}
                   >
-                    {images.map((image, index) => (
-                      <SwiperSlide key={index + 1} style={{}}>
-                        <img
-                          src={image}
-                          alt={index + 1}
-                          className="w-full h-full object-cover"
-                          style={{}}
-                        />
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-                </div>
-
-                <p
-                  style={{
-                    color: templateActual.fontColor,
-                    fontFamily: templateActual.fontStyle,
-                    display: images.length === 0 ? "" : "none",
-                  }}
-                >
-                  No hay imágenes disponibles
-                </p>
+                    No hay imágenes disponibles
+                  </p>
+                )}
               </div>
 
-              <div className="col-span-2 space-y-8  my-4">
+              <div className="col-span-2 space-y-8 my-4">
                 <div>
                   <p
-                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    className="text-3xl md:text-4xl text-color font-bold"
                     style={{ fontFamily: templateActual.fontStyle }}
                   >
-                    Sesión:
+                    {/* Sesión: */}
+                    {t("pantalla.session")}
                   </p>
                   <p
-                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    className="text-3xl md:text-4xl text-color font-bold"
                     style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {horaInicialReal}
                     <span className="text-2x1"> hrs.</span>
                   </p>
                 </div>
-                <div className="">
-                  {/* Tipo de evento y descripción */}
+                <div>
                   <h1
-                    className={`text-3xl md:text-4xl text-color font-bold`}
+                    className="text-3xl md:text-4xl text-color font-bold"
                     style={{ fontFamily: templateActual.fontStyle }}
                   >
                     {tipoEvento}
                   </h1>
                   <div className="text-center flex px-0 mt-6">
                     <p
-                      className={`text-3xl text-color md:text-4xl`}
+                      className="text-3xl text-color md:text-4xl"
                       style={{ fontFamily: templateActual.fontStyle }}
                     >
                       {description}
@@ -544,10 +566,14 @@ function Pantalla6() {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Fecha */}
+        <div className="mt-auto">
           {/* Linea abajo */}
           <div
             id="Abajo"
-            className={` text-3xl md:text-4xl  py-4 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+            className={` text-3xl md:text-4xl md:py-4 py-2 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
             style={{
               backgroundColor: templateActual.templateColor,
               color: templateActual.fontColor,
