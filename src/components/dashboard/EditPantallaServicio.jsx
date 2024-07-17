@@ -2,10 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
-import { ChromePicker } from "react-color";
-import { initializeApp } from "firebase/app";
 import {
-  getFirestore,
   collection,
   query,
   where,
@@ -15,12 +12,16 @@ import {
   getDocs,
   updateDoc,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import PantallaServicio from "./serviciosconfig";
 import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import db from "@/firebase/firestore";
 import auth from "@/firebase/auth";
+import {
+  ColorPicker,
+  FontStyleSelector,
+  CitySelector,
+  ScreenNameInputs,
+} from "./EditPantallaServicioComponents";
 
 const EditPantallaServicio = () => {
   const { t } = useTranslation();
@@ -33,6 +34,8 @@ const EditPantallaServicio = () => {
   const [showFontColorPicker, setShowFontColorPicker] = useState(false);
   const [showTemplateColorPicker, setShowTemplateColorPicker] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [selectedScreenName, setSelectedScreenName] = useState(null); // Nuevo estado para el nombre de pantalla seleccionado
+  const [selectedSection, setSelectedSection] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -318,30 +321,24 @@ const EditPantallaServicio = () => {
     { value: "Washington, D.C.", label: "Washington, D.C." },
   ]);
 
-  const handleFontColorChange = () => {
-    setShowFontColorPicker(!showFontColorPicker);
-  };
-
-  const handleTemplateColorChange = () => {
-    setShowTemplateColorPicker(!showTemplateColorPicker);
-  };
-
-  const handleColorChange = (color, setColor) => {
-    setColor(color.hex);
-  };
-
-  const handleFontStyleChange = (selectedOption) => {
-    setSelectedFontStyle(selectedOption);
-  };
-
-  const handleCityChange = (selectedOption) => {
-    setSelectedCity(selectedOption);
-  };
+  const sectionOptions = [
+    { value: "Sección 1", label: "Sección 1" },
+    { value: "Sección 2", label: "Sección 2" },
+    { value: "Sección 3", label: "Sección 3" },
+  ];
 
   const handleScreenNameChange = (e, index) => {
     const updatedScreenNames = [...screenNames];
     updatedScreenNames[index] = e.target.value;
     setScreenNames(updatedScreenNames);
+  };
+
+  const handleScreenNameSelectChange = (selectedOption) => {
+    setSelectedScreenName(selectedOption);
+  };
+
+  const handleSectionSelectChange = (selectedOption) => {
+    setSelectedSection(selectedOption);
   };
 
   return (
@@ -355,7 +352,6 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("personalization")}
         >
-          {/* Personalización general */}
           {t("screenService.generalcustomization")}
         </button>
         <button
@@ -366,7 +362,6 @@ const EditPantallaServicio = () => {
           } focus:outline-none`}
           onClick={() => setView("preview")}
         >
-          {/* Personalización avanzada */}
           {t("screenService.advancedcustomization")}
         </button>
       </div>
@@ -374,137 +369,82 @@ const EditPantallaServicio = () => {
       {view === "personalization" && (
         <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
           <h1 className="text-3xl font-bold text-white capitalize mb-4">
-            {/* Personalización del Template*/}
             {t("screenService.templatecustomization")}
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            <div className="mb-4">
-              <div>
-                <label className="text-white dark:text-gray-200">
-                  {/* Color de letra*/}
-                  {t("screenService.fontColor")}
-                </label>
-                <div className="flex items-center relative">
-                  <button
-                    onClick={handleFontColorChange}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                  >
-                    {/* Seleccionar Color*/}
-                    {t("screenService.selectColor")}
-                  </button>
-                  {showFontColorPicker && (
-                    <div className="absolute z-10 mt-2">
-                      <ChromePicker
-                        color={fontColor}
-                        onChange={(color) =>
-                          handleColorChange(color, setFontColor)
-                        }
-                      />
-                      <button
-                        onClick={handleFontColorChange}
-                        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                      >
-                        {/* Listo*/}
-                        {t("screenService.done")}
-                      </button>
-                    </div>
-                  )}
-                  <div
-                    className="w-8 h-8 rounded-full ml-4"
-                    style={{ backgroundColor: fontColor }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <ColorPicker
+              label={t("screenService.fontColor")}
+              color={fontColor}
+              setColor={setFontColor}
+              showPicker={showFontColorPicker}
+              setShowPicker={setShowFontColorPicker}
+            />
 
-            <div className="mb-4">
-              <div>
-                <label className="text-white dark:text-gray-200">
-                  {/* Color de la plantilla*/}
-                  {t("screenService.templateColor")}
-                </label>
-                <div className="flex items-center relative">
-                  <button
-                    onClick={handleTemplateColorChange}
-                    className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                  >
-                    {/* Seleccionar Color*/}
-                    {t("screenService.selectColor")}
-                  </button>
-                  {showTemplateColorPicker && (
-                    <div className="absolute z-10 mt-2">
-                      <ChromePicker
-                        color={templateColor}
-                        onChange={(color) =>
-                          handleColorChange(color, setTemplateColor)
-                        }
-                      />
-                      <button
-                        onClick={handleTemplateColorChange}
-                        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                      >
-                        {/* Listo*/}
-                        {t("screenService.done")}
-                      </button>
-                    </div>
-                  )}
-                  <div
-                    className="w-8 h-8 rounded-full ml-4"
-                    style={{ backgroundColor: templateColor }}
-                  ></div>
-                </div>
-              </div>
-            </div>
+            <ColorPicker
+              label={t("screenService.templateColor")}
+              color={templateColor}
+              setColor={setTemplateColor}
+              showPicker={showTemplateColorPicker}
+              setShowPicker={setShowTemplateColorPicker}
+            />
 
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                {/*Estilo de texto*/}
-                {t("screenService.fontStyle")}
+            <FontStyleSelector
+              selectedFontStyle={selectedFontStyle}
+              setSelectedFontStyle={setSelectedFontStyle}
+              fontStyleOptions={fontStyleOptions}
+            />
+
+            <CitySelector
+              selectedCity={selectedCity}
+              setSelectedCity={setSelectedCity}
+              cityOptions={cityOptions}
+            />
+
+            <ScreenNameInputs
+              screenNames={screenNames}
+              handleScreenNameChange={handleScreenNameChange}
+            />
+          </div>
+          <div className="flex justify-end mt-6">
+            <button
+              onClick={guardarConfiguracion}
+              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
+            >
+              {t("screenService.save")}
+            </button>
+          </div>
+        </section>
+      )}
+
+      {view === "preview" && (
+        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-7 pl-10 md:px-32">
+          <h1 className="text-3xl font-bold text-white capitalize mb-4">
+            {t("screenService.advancedcustomization")}
+          </h1>
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="flex flex-col">
+              <label className="text-white text-lg mb-2">
+                {t("screenService.selectScreenName")}
               </label>
               <Select
-                options={fontStyleOptions}
-                value={selectedFontStyle}
-                onChange={handleFontStyleChange}
-                placeholder={t("screenService.styletext")}
+                value={selectedScreenName}
+                onChange={handleScreenNameSelectChange}
+                options={screenNames.map((name, index) => ({
+                  value: index,
+                  label: name || `Pantalla ${index + 1}`,
+                }))}
               />
             </div>
 
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                {/*  Seleccionar Ciudad*/}
-                {t("screenService.city")}
+            <div className="flex flex-col">
+              <label className="text-white text-lg mb-2">
+                {t("screenService.selectSection")}
               </label>
               <Select
-                options={cityOptions}
-                value={selectedCity}
-                onChange={handleCityChange}
-                placeholder={t("screenService.selectCity")}
-                className="w-full"
-                isSearchable
-                isClearable={false}
-                required
+                value={selectedSection}
+                onChange={handleSectionSelectChange}
+                options={sectionOptions}
               />
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                {/*  Nombres de pantallas*/}
-                {t("screenService.screenName")}
-              </label>
-              <div className="flex flex-col">
-                {screenNames.map((name, index) => (
-                  <input
-                    key={index}
-                    type="text"
-                    value={name}
-                    placeholder={`${t("screenService.screenName")} ${
-                      index + 1
-                    }`}
-                    onChange={(e) => handleScreenNameChange(e, index)}
-                    className="mb-2 w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  />
-                ))}
-              </div>
             </div>
           </div>
           <div className="flex justify-end mt-6">
@@ -512,14 +452,11 @@ const EditPantallaServicio = () => {
               onClick={guardarConfiguracion}
               className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
             >
-              {/*Guardar*/}
               {t("screenService.save")}
             </button>
           </div>
         </section>
       )}
-
-      {view === "preview" && <PantallaServicio />}
     </div>
   );
 };
