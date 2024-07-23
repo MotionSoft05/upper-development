@@ -22,6 +22,7 @@ import {
   CitySelector,
   ScreenNameInputs,
 } from "./EditPantallaServicioComponents";
+import SectionDetails from "./EditPantallaServicioavanzado";
 
 const EditPantallaServicio = () => {
   const { t } = useTranslation();
@@ -424,7 +425,7 @@ const EditPantallaServicio = () => {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="flex flex-col">
               <label className="text-white text-lg mb-2">
-                {t("screenService.selectScreenName")}
+                Seleccionar pantalla
               </label>
               <Select
                 value={selectedScreenName}
@@ -437,16 +438,21 @@ const EditPantallaServicio = () => {
             </div>
 
             <div className="flex flex-col">
-              <label className="text-white text-lg mb-2">
-                {t("screenService.selectSection")}
-              </label>
+              <label className="text-white text-lg mb-2">Elegir sección</label>
               <Select
                 value={selectedSection}
                 onChange={handleSectionSelectChange}
                 options={sectionOptions}
+                isDisabled={!selectedScreenName} // Deshabilitar si no hay pantalla seleccionada
               />
             </div>
           </div>
+          {selectedScreenName && selectedSection && (
+            <SectionDetails
+              selectedScreenName={selectedScreenName}
+              selectedSection={selectedSection}
+            />
+          )}
           <div className="flex justify-end mt-6">
             <button
               onClick={guardarConfiguracion}
