@@ -406,6 +406,7 @@ const EditPantallaServicio = () => {
               handleScreenNameChange={handleScreenNameChange}
             />
           </div>
+
           <div className="flex justify-end mt-6">
             <button
               onClick={guardarConfiguracion}
@@ -453,14 +454,6 @@ const EditPantallaServicio = () => {
               selectedSection={selectedSection}
             />
           )}
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={guardarConfiguracion}
-              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
-            >
-              {t("screenService.save")}
-            </button>
-          </div>
         </section>
       )}
     </div>
