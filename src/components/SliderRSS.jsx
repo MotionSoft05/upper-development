@@ -43,7 +43,7 @@ export default function SliderRSS() {
   const [sliderRef] = useKeenSlider({
     loop: true,
     renderMode: "performance",
-    drag: false,
+    drag: true,
 
     created(s) {
       s.moveToIdx(5, true, animation);
@@ -63,8 +63,8 @@ export default function SliderRSS() {
         rssItems.map((rss, index) => {
           return (
             <div key={index} className="keen-slider__slide number-slide1">
-              <h1 className="text-2xl">{rss?.title}</h1>
-              <p className="font-bold text-xl"> {rss?.description}</p>
+              <h1 className="text-lg">{rss?.title}</h1>
+              <p className="font-bold text-base"> {rss?.description}</p>
             </div>
           );
         })}

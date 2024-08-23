@@ -271,19 +271,41 @@ function PantallaDirec1() {
               }
             });
 
-            const eventosOrdenados = eventosData.slice().sort((a, b) => {
-              const fechaFinalA = new Date(a.fechaFinal);
-              const fechaFinalB = new Date(b.fechaFinal);
+            const eventosOrdenados = eventosData.filter((evento) => {
+              // Obtener fecha actual (solo día)
+              const fechaActual = new Date();
 
-              // Ordenar por fechaFinal más cercana a la actual
-              if (fechaFinalA > fechaFinalB) return 1;
-              if (fechaFinalA < fechaFinalB) return -1;
+              // Obtener fechas de inicio y finalización del evento (solo día)
+              const fechaInicioEvento = new Date(evento.fechaInicio);
+              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
-              // Si la fecha final es la misma, ordenar por horaInicialSalon
-              const horaInicioA = new Date(`2000-01-01T${a.horaInicialSalon}`);
-              const horaInicioB = new Date(`2000-01-01T${b.horaInicialSalon}`);
+              const fechaFinalEvento = new Date(evento.fechaFinal);
+              fechaFinalEvento.setHours(23, 59, 59, 999); // Establecer hora, minutos, segundos y milisegundos a cero
 
-              return horaInicioA - horaInicioB;
+              const horaActual = obtenerHora();
+              const horaInicialEvento = evento.horaInicialSalon;
+              const horaFinalEvento = evento.horaFinalSalon;
+
+              const fechaActualEnRango =
+                fechaActual >= fechaInicioEvento &&
+                fechaActual <= fechaFinalEvento;
+
+              const horaActualEnRango =
+                horaActual >= horaInicialEvento &&
+                horaActual <= horaFinalEvento;
+
+              // Filtrar eventos por empresa
+              const empresaCoincidente = evento.empresa === userCompany;
+
+              // Si la fecha final es mayor a la fecha actual, el evento sigue apareciendo.
+              const mostrarPorFecha = fechaFinalEvento > fechaActual;
+
+              return (
+                (fechaActualEnRango &&
+                  horaActualEnRango &&
+                  empresaCoincidente) ||
+                (mostrarPorFecha && empresaCoincidente)
+              );
             });
 
             const templateRef = collection(firestore, "TemplateDirectorios");
@@ -315,39 +337,46 @@ function PantallaDirec1() {
             }
             //  Sección template
             //  Sección publicidad
-            const pantalla = "directorio";
-            console.log("🚀 ~ obtenerUsuario ~ pantalla:", pantalla);
-            const publicidadesRef = collection(firestore, "Publicidad");
-            console.log(
-              "🚀 ~ obtenerUsuario ~ publicidadesRef:",
-              publicidadesRef
-            );
-
-            const publicidadesQuery = query(
-              publicidadesRef,
-              where("empresa", "==", userCompany)
-            );
-            const publicidadesSnapshot = await getDocs(publicidadesQuery);
-
-            if (!publicidadesSnapshot.empty) {
-              const publicidades = [];
-              console.log("🚀 ~ obtenerUsuario ~ publicidades:", publicidades);
-              publicidadesSnapshot.forEach((doc) => {
-                const publicidad = { id: doc.id, ...doc.data() };
-                // Comparar el tipo de la publicidad con la pantalla deseada
-
-                if (publicidad.tipo === pantalla) {
-                  publicidades.push(publicidad);
-                }
-              });
-
-              setPublicidadesUsuario(publicidades);
-            } else {
+            if (eventosOrdenados.length === 0) {
+              console.log("🚀 ~ Entro a publicidad:");
+              const pantalla = "directorio";
+              console.log("🚀 ~ obtenerUsuario ~ pantalla:", pantalla);
+              const publicidadesRef = collection(firestore, "Publicidad");
               console.log(
-                // "No se encontró información en TemplateDirectorios para este usuario."
-                t("pantalla.error.publicidadesDirectoryNotFound")
+                "🚀 ~ obtenerUsuario ~ publicidadesRef:",
+                publicidadesRef
               );
+
+              const publicidadesQuery = query(
+                publicidadesRef,
+                where("empresa", "==", userCompany)
+              );
+              const publicidadesSnapshot = await getDocs(publicidadesQuery);
+
+              if (!publicidadesSnapshot.empty) {
+                const publicidades = [];
+                console.log(
+                  "🚀 ~ obtenerUsuario ~ publicidades:",
+                  publicidades
+                );
+                publicidadesSnapshot.forEach((doc) => {
+                  const publicidad = { id: doc.id, ...doc.data() };
+                  // Comparar el tipo de la publicidad con la pantalla deseada
+
+                  if (publicidad.tipo === pantalla) {
+                    publicidades.push(publicidad);
+                  }
+                });
+
+                setPublicidadesUsuario(publicidades);
+              } else {
+                console.log(
+                  // "No se encontró información en TemplateDirectorios para este usuario."
+                  t("pantalla.error.publicidadesDirectoryNotFound")
+                );
+              }
             }
+
             setEventosEnCurso(eventosOrdenados);
           } else {
             // "No se encontraron datos para este usuario."
@@ -363,7 +392,7 @@ function PantallaDirec1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 60000);
+      }, 240000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -485,7 +514,7 @@ function PantallaDirec1() {
 
     const changeMedia = () => {
       setCurrentMediaIndex(
-        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
+        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length || 0
       );
     };
 
@@ -676,7 +705,7 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-11`}
+                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
                   style={{
                     background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
@@ -684,7 +713,7 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2 className=" text-2xl text-center">
+                  <h2 className=" text-xl text-center">
                     {/* EVENTOS */}
                     {t("pantallaDirec.eventsTitle")}
                   </h2>
@@ -810,7 +839,7 @@ function PantallaDirec1() {
                               return (
                                 <div
                                   key={innerIndex}
-                                  className="flex items-center space-x-4 space-y-3 border-b pr-8"
+                                  className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                   style={{
                                     height: evento ? "auto" : "110px",
                                     borderColor: templateActual.templateColor,
@@ -880,7 +909,7 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-11 flex justify-center items-end`}
+                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
                   style={{
                     background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
 
@@ -889,7 +918,7 @@ function PantallaDirec1() {
                 >
                   {/* Título */}
                   <h2
-                    className="text-color text-2xl text-center align-bottom "
+                    className="text-color text-xl text-center align-bottom "
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
@@ -897,7 +926,7 @@ function PantallaDirec1() {
                   </h2>
                 </div>
               </div>
-              <div className="col-span-1 md:col-span-1 flex items-center justify-center  m-3">
+              <div className="col-span-1 md:col-span-1 flex items-center justify-center  mx-3">
                 <div
                   style={{
                     height: "100%",
@@ -920,7 +949,7 @@ function PantallaDirec1() {
             <div className="">
               {/* Linea arriba */}{" "}
               <div
-                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-11`}
+                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -929,7 +958,7 @@ function PantallaDirec1() {
                 }}
               >
                 {/* Título */}
-                <h2 className=" text-2xl text-center">
+                <h2 className=" text-xl text-center">
                   {/* EVENTOS */}
                   {t("pantallaDirec.eventsTitle")}
                 </h2>
@@ -953,9 +982,9 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 8) ||
+                                  eventosEnCurso.length < 6) ||
                                 (!templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 6)
+                                  eventosEnCurso.length < 5)
                                   ? "none"
                                   : "",
                             }}
@@ -1067,7 +1096,7 @@ function PantallaDirec1() {
                                   return (
                                     <div
                                       key={innerIndex}
-                                      className="flex items-center space-x-4 space-y-3 border-b pr-8"
+                                      className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                       style={{
                                         height: evento ? "auto" : "110px",
                                         borderColor:
@@ -1141,7 +1170,7 @@ function PantallaDirec1() {
               </div>
               {/* Linea abajo */}
               <div
-                className={`text-white uppercase font-bold px-20 rounded-b-xl h-11 flex justify-center items-end`}
+                className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -1151,7 +1180,7 @@ function PantallaDirec1() {
               >
                 {/* Título */}
                 <h2
-                  className="text-color text-2xl text-center align-bottom"
+                  className="text-color text-xl text-center align-bottom"
                   style={{
                     color: templateActual.fontColor,
                   }}
@@ -1167,7 +1196,7 @@ function PantallaDirec1() {
             <div className="flex justify-between text-color items-center">
               {/* --- RSS --- */}
               <div className="w-9/12 ">
-                <div className="flex ml-3  items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h-36 rounded-md">
+                <div className="flex ml-3  items-center my-3 font-black bg-gradient-to-r from-gray-300 to-white w-full h- rounded-md">
                   <SliderRSS />
                 </div>
                 {/* {rssItems.map((item, index) => (
@@ -1182,15 +1211,8 @@ function PantallaDirec1() {
               ))} */}
               </div>
               {/* --- QR image --- */}
-              <div
-                className="flex flex-col items-center"
-                style={{
-                  marginTop: "20px",
-                  marginRight: "20px",
-                  marginBottom: "20px",
-                }}
-              >
-                <p style={{ marginBottom: "10px" }}>
+              <div className="flex flex-col items-center mx-2 ">
+                <p className="mb-2 text-center">
                   {/* Eventos en tu dispositivo */}
                   {t("pantallaDirec.deviceEventsDescription")}
                 </p>
@@ -1202,13 +1224,13 @@ function PantallaDirec1() {
                     style={{ cursor: "pointer" }}
                   >
                     {/* Muestra el código QR */}
-                    <QRCode value={qrCodeUrl} size={100} />
+                    <QRCode value={qrCodeUrl} size={90} />
                   </a>
                 )}
               </div>
             </div>
             <div
-              className={`col-span-3 md:col-span-1 flex items-center justify-center m-3 ${
+              className={`col-span-3 md:col-span-1 flex items-center justify-center mx-3 ${
                 !templateData[0]?.setPortrait ? "hidden" : ""
               }`}
             >
@@ -1217,7 +1239,7 @@ function PantallaDirec1() {
                   position: "relative",
                   overflow: "hidden",
                   width: "100%", // Ajusta el ancho del contenedor según sea necesario
-                  height: "27vw", // Ajusta el alto del contenedor según sea necesario
+                  height: "22vw", // Ajusta el alto del contenedor según sea necesario
                   borderRadius: "10px", // Redondear las esquinas
                 }}
               >

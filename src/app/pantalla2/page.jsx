@@ -210,39 +210,42 @@ function Pantalla2() {
             }
             //  Sección template
             //  Sección publicidad
-            const pantalla = "salon";
-            const publicidadesRef = collection(db, "Publicidad");
-            const publicidadesQuery = query(
-              publicidadesRef,
-              where("empresa", "==", userCompany)
-            );
-            const publicidadesSnapshot = await getDocs(publicidadesQuery);
-            console.log(
-              "🚀 ~ obtenerUsuario ~ publicidadesSnapshot:",
-              publicidadesSnapshot
-            );
 
-            if (!publicidadesSnapshot.empty) {
-              const publicidades = [];
-              publicidadesSnapshot.forEach((doc) => {
-                const publicidad = { id: doc.id, ...doc.data() };
-                // Comparar el tipo de la publicidad con la pantalla deseada
-                console.log(
-                  "🚀 ~ querySnapshot.forEach ~ publicidad:",
-                  publicidad
-                );
-
-                if (publicidad.tipo === pantalla) {
-                  publicidades.push(publicidad);
-                }
-              });
-
-              setPublicidadesUsuario(publicidades);
-            } else {
-              console.log(
-                // "No se encontró información en TemplateDirectorios para este usuario."
-                t("pantalla.error.publicidadesDirectoryNotFound")
+            if (eventosEnCursoEffect.length === 0) {
+              const pantalla = "salon";
+              const publicidadesRef = collection(db, "Publicidad");
+              const publicidadesQuery = query(
+                publicidadesRef,
+                where("empresa", "==", userCompany)
               );
+              const publicidadesSnapshot = await getDocs(publicidadesQuery);
+
+              if (!publicidadesSnapshot.empty) {
+                const publicidades = [];
+                console.log(
+                  "🚀 ~ obtenerUsuario ~ publicidades:",
+                  publicidades
+                );
+                publicidadesSnapshot.forEach((doc) => {
+                  const publicidad = { id: doc.id, ...doc.data() };
+                  // Comparar el tipo de la publicidad con la pantalla deseada
+                  console.log(
+                    "🚀 ~ querySnapshot.forEach ~ publicidad:",
+                    publicidad
+                  );
+
+                  if (publicidad.tipo === pantalla) {
+                    publicidades.push(publicidad);
+                  }
+                });
+
+                setPublicidadesUsuario(publicidades);
+              } else {
+                console.log(
+                  // "No se encontró información en TemplateDirectorios para este usuario."
+                  t("pantalla.error.publicidadesDirectoryNotFound")
+                );
+              }
             }
             //  Sección publicidad
             // console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
@@ -258,7 +261,6 @@ function Pantalla2() {
             // console.log("No se encontraron datos para este usuario.");
             console.log(t("pantalla.error.noDataFound"));
           }
-          console.log("🚀 ~ obtenerUsuario ~ Seccion:", Seccion);
         } catch (error) {
           // console.error("Error al obtener datos del usuario:", error);
           console.error(t("pantalla.error.userDataFetchError"), error);
@@ -269,7 +271,7 @@ function Pantalla2() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 60000);
+      }, 240000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -335,7 +337,7 @@ function Pantalla2() {
 
     const changeMedia = () => {
       setCurrentMediaIndex(
-        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
+        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length || 0
       );
     };
 
@@ -394,7 +396,7 @@ function Pantalla2() {
     }
 
     const currentAd = publicidadesUsuario[currentMediaIndex];
-    const isVideo = !!currentAd.videoUrl;
+    const isVideo = !!currentAd?.videoUrl;
 
     return (
       <>
@@ -415,7 +417,7 @@ function Pantalla2() {
               ) : (
                 // Si no es un video, muestra una imagen
                 <img
-                  src={currentAd.imageUrl}
+                  src={currentAd?.imageUrl}
                   alt={`Image ${currentMediaIndex}`}
                   style={{ width: "100%", height: "100%", objectFit: "cover" }}
                 />

@@ -7,10 +7,9 @@ import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
 
 function Licencia() {
-
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState(null);
-  console.log("🚀 ~ Licencia ~ currentUser:", currentUser)
+  console.log("🚀 ~ Licencia ~ currentUser:", currentUser);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
 
   useEffect(() => {
@@ -71,7 +70,7 @@ function Licencia() {
               <span className="ml-3">
                 {/* Mi cuenta */}
                 {t("licencia.account")}
-                </span>
+              </span>
             </button>
           </li>
           <li className="mr-2">
@@ -108,7 +107,7 @@ function Licencia() {
 }
 
 function DatosFiscales({ currentUser }) {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
 
   const [guardadoExitoso, setGuardadoExitoso] = useState(false);
   const [datosFiscales, setDatosFiscales] = useState({
@@ -134,7 +133,10 @@ function DatosFiscales({ currentUser }) {
             const datosFiscalesData = datosFiscalesDocSnap.data();
             setDatosFiscales(datosFiscalesData);
             // "Datos Fiscales recibidos:"
-            console.log(t("licencia.messages.fiscalDataReceived"), datosFiscalesData);
+            console.log(
+              t("licencia.messages.fiscalDataReceived"),
+              datosFiscalesData
+            );
           } else {
             // "No se encontraron datos fiscales para el usuario."
             console.log(t("licencia.messages.noFiscalData"));
@@ -340,7 +342,7 @@ function DatosFiscales({ currentUser }) {
 }
 
 function DatosNegocio({ currentUser }) {
-  const {t} = useTranslation()
+  const { t } = useTranslation();
   return (
     <section className="px-8 py-12">
       <h1>
@@ -442,8 +444,9 @@ function DatosNegocio({ currentUser }) {
                 {/* Número de licencias */}
                 {t("licencia.licenseNumber")}
               </th>
+              {/* Esto es con pantalla servicios o sin esto? */}
               <td className="px-6 py-4">
-                {currentUser ? (+currentUser.pd + +currentUser.ps + +currentUser.pservice) : ""}
+                {currentUser ? +currentUser.pd + +currentUser.ps : ""}
               </td>
             </tr>
             <tr className="bg-white border-b">

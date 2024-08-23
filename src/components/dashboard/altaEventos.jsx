@@ -833,7 +833,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
             </form>
           </div>
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className="bg-gray-300 p-4 col-span-2">
+            <div className="bg-gray-300 p-4 flex justify-between flex-col col-span-2 ">
               <div className="mb-4">
                 <h4 className="mb-4 text-2xl leading-none tracking-tight text-gray-900">
                   {/* Subir Imágenes: */}
@@ -876,6 +876,13 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                   ))}
                 </div>
               </div>
+              {/* Boton para adelante */}
+              {/* <div className="mt-4 flex items-center">
+                <input id="fullscreenImage" type="checkbox" className="mr-2" />
+                <label htmlFor="fullscreenImage" className="text-gray-900">
+                  Poner primera imagen en pantalla completa
+                </label>
+              </div> */}
             </div>
             <div className="bg-gray-300 p-4 col-span-2">
               {" "}

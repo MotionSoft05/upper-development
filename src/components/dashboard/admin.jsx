@@ -27,7 +27,7 @@ import {
 import { useTranslation } from "react-i18next";
 import db from "@/firebase/firestore";
 import auth from "@/firebase/auth";
-
+import Datepicker from "react-tailwindcss-datepicker";
 /**
  * Usuarios y Licencias
  * Esta función representa la administración de usuarios y licencias.
@@ -277,17 +277,23 @@ function Admin() {
     }
   };
 
+  const handleValueChange = (newValue) => {
+    setNuevaTransaccion({
+      ...nuevaTransaccion,
+      fecha: newValue.startDate, // Asignar la fecha seleccionada
+    });
+  };
+
   const handleGuardarTransaccion = async () => {
     try {
       if (
         !nuevaTransaccion.nombre ||
         !nuevaTransaccion.fecha ||
         !nuevaTransaccion.monto ||
-        !nuevaTransaccion.ps || // Cambiado de "plan" a "ps"
+        !nuevaTransaccion.ps ||
         !nuevaTransaccion.pd ||
         !nuevaTransaccion.pservice
       ) {
-        // "Por favor, completa todos los campos de la transacción."
         alert(t("admin.messages.alertTransactionFields"));
         return;
       }
@@ -304,14 +310,13 @@ function Admin() {
 
       setNuevaTransaccion({
         nombre: "",
-        fecha: "",
+        fecha: "", // Reiniciar la fecha
         monto: "",
-        ps: "", // Cambiado de "plan" a "ps"
+        ps: "",
         pd: "",
         pservice: "",
       });
     } catch (error) {
-      // "Error al guardar la transacción en Firebase:"
       console.error(t("admin.messages.errorSavingTransactionFirebase"), error);
     }
   };
@@ -1040,19 +1045,19 @@ function Admin() {
                   // "Nombre y Apellido"
                   placeholder={t("admin.nameAndSurname")}
                 />
-                <input
-                  className="p-2 rounded border border-gray-300 w-40"
-                  type="text"
-                  value={nuevaTransaccion.fecha}
-                  onChange={(e) =>
-                    setNuevaTransaccion({
-                      ...nuevaTransaccion,
-                      fecha: e.target.value,
-                    })
-                  }
-                  // "Fecha"
-                  placeholder={t("admin.date")}
-                />
+                <div className=" rounded  border-gray-300 w-40">
+                  <Datepicker
+                    primaryColor="blue"
+                    asSingle={true}
+                    useRange={false}
+                    value={{
+                      startDate: nuevaTransaccion.fecha,
+                      endDate: nuevaTransaccion.fecha,
+                    }}
+                    onChange={handleValueChange}
+                  />
+                </div>
+
                 <input
                   className="p-2 rounded border border-gray-300 w-25"
                   type="text"

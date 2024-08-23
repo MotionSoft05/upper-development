@@ -71,50 +71,49 @@ function Precios() {
         </div>
         <div className="text-center"></div>
         <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-        {/* Card Gratis */}
-        <CardPrice
-          title={t("precios.free.title")}
-          description={t("precios.free.description")}
-          mensualTitle={t("precios.monthly")}
-          mensualPrice={"$ 0"}
-          // anualTitle={t("precios.yearly")}
-          // anualPrice={"$ 0"}
-          featureList={[
-            t("precios.free.features.item1"),
-            t("precios.free.features.item2"),
-          ]}
-          btnTitle={t("precios.btnStart")}
-        />
-        {/* Card Estandar */}
-        <CardPrice
-          title={t("precios.standard.title")}
-          description={t("precios.standard.description")}
-          mensualTitle={t("precios.monthly")}
-          mensualPrice={"$ 99"}
-          // anualTitle={t("precios.yearly")}
-          // anualPrice={"$ 1200"}
-          featureList={[
-            t("precios.standard.features.item1"),
-            t("precios.standard.features.item2"),
-          ]}
-          btnTitle={t("precios.btnStart")}
-        />
-        {/* Card Profesional */}
-        <CardPrice
-          title={t("precios.professional.title")}
-          description={t("precios.professional.description")}
-          mensualTitle={t("precios.monthly")}
-          mensualPrice={t("precios.professional.contact")}
-          // anualTitle={t("precios.yearly")}
-          // anualPrice={"$ 1400"}
-          featureList={[
-            t("precios.professional.features.item1"),
-            t("precios.professional.features.item2"),
-          ]}
-          btnTitle={t("precios.btnStart")}
-        />
+          {/* Card Gratis */}
+          <CardPrice
+            title={t("precios.free.title")}
+            description={t("precios.free.description")}
+            mensualTitle={t("precios.monthly")}
+            mensualPrice={"$ 0"}
+            // anualTitle={t("precios.yearly")}
+            // anualPrice={"$ 0"}
+            featureList={[
+              t("precios.free.features.item1"),
+              t("precios.free.features.item2"),
+            ]}
+            btnTitle={t("precios.btnStart")}
+          />
+          {/* Card Estandar */}
+          <CardPrice
+            title={t("precios.standard.title")}
+            description={t("precios.standard.description")}
+            mensualTitle={t("precios.monthly")}
+            mensualPrice={"$ 150"}
+            // anualTitle={t("precios.yearly")}
+            // anualPrice={"$ 1200"}
+            featureList={[
+              t("precios.standard.features.item1"),
+              t("precios.standard.features.item2"),
+            ]}
+            btnTitle={t("precios.btnStart")}
+          />
+          {/* Card Profesional */}
+          <CardPrice
+            title={t("precios.professional.title")}
+            description={t("precios.professional.description")}
+            mensualTitle={t("precios.monthly")}
+            mensualPrice={t("precios.professional.contact")}
+            // anualTitle={t("precios.yearly")}
+            // anualPrice={"$ 1400"}
+            featureList={[
+              t("precios.professional.features.item1"),
+              t("precios.professional.features.item2"),
+            ]}
+            btnTitle={t("precios.btnStart")}
+          />
         </div>
-
 
         <p className="mb-5 font-light  text-gray-400 text-center">
           {t("precios.pricesNote")}
