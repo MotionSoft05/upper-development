@@ -526,7 +526,7 @@ function PublicidadDirec() {
                 {t("advertisement.salon.selectMedia")}
                 <input
                   type="file"
-                  accept="image/*,video/*"
+                  accept="image/*"
                   className="hidden"
                   id={`imagenSalon-${index}`}
                   onChange={(event) => handleImagenSelect(event, index)}

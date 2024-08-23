@@ -384,7 +384,7 @@
       "confirmDeleteAdvertisement": "¿Estás seguro de que quieres eliminar esta publicidad?",
       "title": "Salón de Eventos",
       "title2": "Directorio de Eventos",
-      "selectMedia": "Seleccionar Imagen o Video",
+      "selectMedia": "Seleccionar Imagen",
       "displayTime": "Tiempo de visualización:",
       "edit": "Editar",
       "delete": "Eliminar",
@@ -437,9 +437,9 @@
     "deleteSuccess": "PDF eliminado con éxito",
     "deleteError": "Error al eliminar el PDF:",
     "pageTitle": "Guía de usuario",
-    "termsAndConditions" : "Terminos y Condiciones",
-    "downloads" : "Instalables",
-    "usageGuides" : "Guías de uso",
+    "termsAndConditions": "Terminos y Condiciones",
+    "downloads": "Instalables",
+    "usageGuides": "Guías de uso",
     "uploadButton": "Subir Archivo"
   },
   "support": {
