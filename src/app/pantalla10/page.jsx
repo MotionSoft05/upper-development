@@ -612,4 +612,4 @@ function Pantalla10() {
   );
 }
 
-export default Pantalla1;
+export default Pantalla10;
