@@ -6,6 +6,12 @@ import "firebase/compat/storage";
 import { useTranslation } from "react-i18next";
 import Select from "react-select";
 import storage from "@/firebase/storage";
+import {
+  ref,
+  uploadBytes,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
 
 // if (!firebase.apps.length) {
 //   firebase.initializeApp(firebaseConfig);
@@ -295,7 +301,13 @@ function ConsultaModEvento() {
         if (imagenesPendientesEliminar.length > 0) {
           await Promise.all(
             imagenesPendientesEliminar.map(async (imagen) => {
-              const imagenRef = storage.refFromURL(imagen);
+              // Extraer el path relativo del archivo desde la URL
+              const path = decodeURIComponent(
+                imagen.split("/o/")[1].split("?alt=media")[0]
+              );
+
+              // Crear la referencia al archivo en Firebase Storage
+              const imagenRef = ref(storage, path);
 
               try {
                 // Verificar si la imagen existe antes de intentar eliminarla
@@ -357,12 +369,12 @@ function ConsultaModEvento() {
       const randomString = Math.random().toString(36).substring(7);
       const uniqueName = `${randomString}_${nuevaImagen.name}`;
 
-      const storageRef = storage.ref(`imagenes/${uniqueName}`);
+      const storageRef = ref(storage, `imagenes/${uniqueName}`);
 
       try {
-        const snapshot = await storageRef.put(nuevaImagen);
-        const url = await snapshot.ref.getDownloadURL();
-        setImagenesEvento([...imagenesEvento, url]);
+        const snapshot = await uploadBytes(storageRef, nuevaImagen);
+        const url = await getDownloadURL(snapshot.ref);
+        setImagenesEvento((prev) => [...prev, url]);
       } catch (error) {
         console.error("Error al subir imagen:", error);
       }
