@@ -57,6 +57,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
     useState([]);
   const [dbError, setDbError] = useState(false); // Nuevo estado para manejar errores de base de datos
   const [loading, setLoading] = useState(true); // Nuevo estado para manejar la carga inicial
+  const [primeraImagen, setPrimeraImagen] = useState(false);
 
   useEffect(() => {
     const usuariosRef = collection(db, "usuarios");
@@ -392,6 +393,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
           3
         )}`,
         empresa: empresa,
+        primeraImagen,
       };
 
       if (selectedUser) {
@@ -480,6 +482,10 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
 
       return updatedDevices;
     });
+  };
+
+  const handleCheckboxChange = (e) => {
+    setPrimeraImagen(e.target.checked);
   };
 
   return (
@@ -877,12 +883,18 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                 </div>
               </div>
               {/* Boton para adelante */}
-              {/* <div className="mt-4 flex items-center">
-                <input id="fullscreenImage" type="checkbox" className="mr-2" />
+              <div className="mt-4 flex items-center">
+                <input
+                  id="fullscreenImage"
+                  type="checkbox"
+                  className="mr-2"
+                  checked={primeraImagen} // Asegúrate de que el checkbox refleje el estado actual
+                  onChange={(e) => setPrimeraImagen(e.target.checked)} // Actualiza el estado según la selección
+                />
                 <label htmlFor="fullscreenImage" className="text-gray-900">
                   Poner primera imagen en pantalla completa
                 </label>
-              </div> */}
+              </div>
             </div>
             <div className="bg-gray-300 p-4 col-span-2">
               {" "}
