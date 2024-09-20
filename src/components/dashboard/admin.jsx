@@ -1355,6 +1355,7 @@ function Admin() {
                     setSelectedEmpresa(e.target.value);
 
                     try {
+                      // Hacer consulta a la colección "DatosFiscales" en base a la empresa seleccionada
                       const datosFiscalesCollection = collection(
                         db,
                         "DatosFiscales"
@@ -1366,13 +1367,10 @@ function Admin() {
                       const querySnapshot = await getDocs(q);
 
                       if (!querySnapshot.empty) {
+                        // Extraer los datos fiscales de la empresa seleccionada
                         const selectedCompany = querySnapshot.docs[0].data();
 
-                        console.log(
-                          "Datos fiscales de la empresa seleccionada:",
-                          selectedCompany
-                        );
-
+                        // Actualizar el estado con los datos fiscales obtenidos
                         setEmpresaSeleccionada(selectedCompany);
                         setDatosFiscalesEditados({
                           codigoPostal: selectedCompany.codigoPostal || "",
@@ -1384,15 +1382,30 @@ function Admin() {
                           empresa: selectedCompany.empresa || "",
                         });
                       } else {
-                        console.log(
-                          "No se encontraron datos fiscales para la empresa seleccionada."
-                        );
+                        // Si no se encuentran datos fiscales, mostrar campos vacíos
+                        setEmpresaSeleccionada({});
+                        setDatosFiscalesEditados({
+                          codigoPostal: "",
+                          email: "",
+                          razonSocial: "",
+                          regimenFiscal: "",
+                          rfc: "",
+                          usoCdfi: "",
+                          empresa: e.target.value, // Mantener el nombre de la empresa seleccionada
+                        });
                       }
                     } catch (error) {
-                      console.error(
-                        "Error al obtener los datos fiscales:",
-                        error
-                      );
+                      // Si hay un error, mostrar los campos vacíos también
+                      setEmpresaSeleccionada({});
+                      setDatosFiscalesEditados({
+                        codigoPostal: "",
+                        email: "",
+                        razonSocial: "",
+                        regimenFiscal: "",
+                        rfc: "",
+                        usoCdfi: "",
+                        empresa: e.target.value, // Mantener el nombre de la empresa seleccionada
+                      });
                     }
                   }}
                 >
