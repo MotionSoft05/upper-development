@@ -11,6 +11,8 @@ import {
   updateData,
   getDoc,
   onSnapshot,
+  query,
+  where,
 } from "firebase/firestore";
 import { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -57,8 +59,6 @@ function Admin() {
   };
 
   const [datosFiscalesEditados, setDatosFiscalesEditados] = useState({
-    userId: "",
-    id: "",
     codigoPostal: "",
     usoCdfi: "",
     email: "",
@@ -139,7 +139,16 @@ function Admin() {
           };
         });
 
-        setDatosFiscalesConNombre(datosFiscalesConNombreData);
+        // Usar un Set para eliminar duplicados
+        const uniqueDatosFiscalesConNombreData = Array.from(
+          new Set(datosFiscalesConNombreData.map((item) => item.nombreEmpresa))
+        ).map((nombreEmpresa) => {
+          return datosFiscalesConNombreData.find(
+            (item) => item.nombreEmpresa === nombreEmpresa
+          );
+        });
+
+        setDatosFiscalesConNombre(uniqueDatosFiscalesConNombreData);
 
         // Escucha cambios en DatosFiscales
         unsubscribe = onSnapshot(datosFiscalesCollection, (snapshot) => {
@@ -163,20 +172,28 @@ function Admin() {
             }
           );
 
-          setDatosFiscalesConNombre(updatedDatosFiscalesConNombreData);
+          // Usar un Set para eliminar duplicados en datos actualizados
+          const uniqueUpdatedDatosFiscalesConNombreData = Array.from(
+            new Set(
+              updatedDatosFiscalesConNombreData.map(
+                (item) => item.nombreEmpresa
+              )
+            )
+          ).map((nombreEmpresa) => {
+            return updatedDatosFiscalesConNombreData.find(
+              (item) => item.nombreEmpresa === nombreEmpresa
+            );
+          });
+
+          setDatosFiscalesConNombre(uniqueUpdatedDatosFiscalesConNombreData);
         });
       } catch (error) {
-        console.error(
-          // "Error al obtener los datos fiscales de Firebase:",
-          t("admin.messages.errorFetchingFiscalData"),
-          error
-        );
+        console.error(t("admin.messages.errorFetchingFiscalData"), error);
       }
     };
 
     obtenerDatosFiscales();
 
-    // Asegúrate de llamar a unsubscribe cuando dejes de necesitar la escucha en tiempo real
     return () => {
       if (unsubscribe) {
         unsubscribe();
@@ -195,38 +212,42 @@ function Admin() {
         !datosFiscalesEditados.regimenFiscal ||
         !datosFiscalesEditados.rfc ||
         !datosFiscalesEditados.codigoPostal
-        // Agregar más verificaciones según tus necesidades
       ) {
-        // ("Todos los campos deben estar completos", "red")
         mostrarMensaje(t("admin.messages.allFieldsRequired"), "red");
         return;
       }
 
       const datosFiscalesCollection = collection(db, "DatosFiscales");
 
-      // Verificar si el documento existe
-      const datosFiscalesDocRef = datosFiscalesEditados.id
-        ? doc(db, "DatosFiscales", datosFiscalesEditados.id)
-        : doc(db, "DatosFiscales", datosFiscalesEditados.userId); // Usar userId como id del documento
+      // Buscar si ya existe un documento con el mismo nombre de empresa
+      const querySnapshot = await getDocs(
+        query(datosFiscalesCollection, where("empresa", "==", selectedEmpresa))
+      );
 
+      let datosFiscalesDocRef;
+      if (!querySnapshot.empty) {
+        // Si existe, usa el primer documento encontrado
+        const docFound = querySnapshot.docs[0];
+        datosFiscalesDocRef = doc(db, "DatosFiscales", docFound.id);
+      } else {
+        // Si no existe, crea un nuevo documento
+        datosFiscalesDocRef = doc(datosFiscalesCollection);
+      }
+
+      // Sobrescribir el documento
       await setDoc(datosFiscalesDocRef, {
-        userId: datosFiscalesEditados.userId,
-        usoCdfi: datosFiscalesEditados.usoCdfi,
-        email: datosFiscalesEditados.email,
         codigoPostal: datosFiscalesEditados.codigoPostal,
+        email: datosFiscalesEditados.email,
         razonSocial: datosFiscalesEditados.razonSocial,
         regimenFiscal: datosFiscalesEditados.regimenFiscal,
         rfc: datosFiscalesEditados.rfc,
-        // Otros campos según tu estructura de datos
+        usoCdfi: datosFiscalesEditados.usoCdfi,
+        empresa: selectedEmpresa,
       });
 
-      // ("Guardado con éxito", "green")
       mostrarMensaje(t("admin.messages.successSaveMessage"), "green");
     } catch (error) {
-      // "Error al guardar los cambios en datos fiscales:"
       console.error(t("admin.messages.errorSavingFiscalChanges"), error);
-
-      // ("Error al guardar los cambios", "red")
       mostrarMensaje(t("admin.messages.errorSavingChanges"), "red");
     }
   };
@@ -664,6 +685,10 @@ function Admin() {
       console.error(t("admin.messages.errorDisableUser"), error);
     }
   };
+
+  const uniqueEmpresas = [
+    ...new Set(usuarios.map((usuario) => usuario.empresa)),
+  ];
 
   return (
     <div class="flex flex-col  bg-gray-100">
@@ -1326,31 +1351,55 @@ function Admin() {
                 <select
                   className="p-2 rounded border border-gray-300 w-90"
                   value={selectedEmpresa}
-                  onChange={(e) => {
+                  onChange={async (e) => {
                     setSelectedEmpresa(e.target.value);
-                    const selectedCompany = datosFiscalesConNombre.find(
-                      (empresa) => empresa.nombreEmpresa === e.target.value
-                    );
-                    setEmpresaSeleccionada(selectedCompany);
-                    setDatosFiscalesEditados({
-                      userId: selectedCompany?.userId || "", // Añadir userId
-                      id: selectedCompany?.id || "",
-                      codigoPostal: selectedCompany?.codigoPostal || "",
-                      email: selectedCompany?.email || "",
-                      razonSocial: selectedCompany?.razonSocial || "",
-                      regimenFiscal: selectedCompany?.regimenFiscal || "",
-                      rfc: selectedCompany?.rfc || "",
-                      usoCdfi: selectedCompany?.usoCdfi || "",
-                    });
+
+                    try {
+                      const datosFiscalesCollection = collection(
+                        db,
+                        "DatosFiscales"
+                      );
+                      const q = query(
+                        datosFiscalesCollection,
+                        where("empresa", "==", e.target.value)
+                      );
+                      const querySnapshot = await getDocs(q);
+
+                      if (!querySnapshot.empty) {
+                        const selectedCompany = querySnapshot.docs[0].data();
+
+                        console.log(
+                          "Datos fiscales de la empresa seleccionada:",
+                          selectedCompany
+                        );
+
+                        setEmpresaSeleccionada(selectedCompany);
+                        setDatosFiscalesEditados({
+                          codigoPostal: selectedCompany.codigoPostal || "",
+                          email: selectedCompany.email || "",
+                          razonSocial: selectedCompany.razonSocial || "",
+                          regimenFiscal: selectedCompany.regimenFiscal || "",
+                          rfc: selectedCompany.rfc || "",
+                          usoCdfi: selectedCompany.usoCdfi || "",
+                          empresa: selectedCompany.empresa || "",
+                        });
+                      } else {
+                        console.log(
+                          "No se encontraron datos fiscales para la empresa seleccionada."
+                        );
+                      }
+                    } catch (error) {
+                      console.error(
+                        "Error al obtener los datos fiscales:",
+                        error
+                      );
+                    }
                   }}
                 >
-                  <option value="">
-                    {/* Seleccione Empresa */}
-                    {t("admin.selectCompany")}
-                  </option>
-                  {usuarios.map((usuario) => (
-                    <option key={usuario.id} value={usuario.empresa}>
-                      {usuario.empresa}
+                  <option value="">{t("admin.selectCompany")}</option>
+                  {uniqueEmpresas.map((empresa, index) => (
+                    <option key={index} value={empresa}>
+                      {empresa}
                     </option>
                   ))}
                 </select>

@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  query,
+  collection,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { useTranslation } from "react-i18next";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
@@ -9,7 +16,6 @@ import db from "@/firebase/firestore";
 function Licencia() {
   const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState(null);
-  console.log("🚀 ~ Licencia ~ currentUser:", currentUser);
   const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
 
   useEffect(() => {
@@ -20,14 +26,22 @@ function Licencia() {
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
-            setCurrentUser(userDocSnap.data());
+            const userData = userDocSnap.data();
+            setCurrentUser(userData);
 
-            // Obtener datos fiscales si existen
-            const datosFiscalesDocRef = doc(db, "DatosFiscales", user.uid);
-            const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
-
-            if (datosFiscalesDocSnap.exists()) {
-              DatosFiscales(datosFiscalesDocSnap.data());
+            // Fetch all fiscal data for the company
+            const empresa = userData.empresa;
+            if (empresa) {
+              const q = query(
+                collection(db, "DatosFiscales"),
+                where("empresa", "==", empresa)
+              );
+              const querySnapshot = await getDocs(q);
+              const fetchedFiscalData = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              setFiscalData(fetchedFiscalData);
             }
           } else {
             const userData = {
@@ -37,16 +51,16 @@ function Licencia() {
             setCurrentUser(userData);
           }
         } catch (error) {
-          // "Error al obtener datos del usuario:"
           console.error(t("licencia.messages.userFetch"), error);
         }
       } else {
         setCurrentUser(null);
+        setFiscalData([]);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [t]);
 
   return (
     <section className="px-5 md:px-32">
@@ -122,50 +136,42 @@ function DatosFiscales({ currentUser }) {
   useEffect(() => {
     const fetchDatosFiscales = async () => {
       try {
-        const user = getAuth().currentUser;
+        if (currentUser && currentUser.empresa) {
+          const empresa = currentUser.empresa;
+          console.log("Nombre de empresa del usuario:", empresa); // Verificar nombre de empresa
 
-        if (user) {
-          const userId = user.uid;
-          const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
-          const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+          const q = query(
+            collection(db, "DatosFiscales"),
+            where("empresa", "==", empresa)
+          );
+          const querySnapshot = await getDocs(q);
 
-          if (datosFiscalesDocSnap.exists()) {
-            const datosFiscalesData = datosFiscalesDocSnap.data();
+          if (!querySnapshot.empty) {
+            const datosFiscalesData = querySnapshot.docs[0].data();
             setDatosFiscales(datosFiscalesData);
-            // "Datos Fiscales recibidos:"
             console.log(
               t("licencia.messages.fiscalDataReceived"),
               datosFiscalesData
             );
           } else {
-            // "No se encontraron datos fiscales para el usuario."
             console.log(t("licencia.messages.noFiscalData"));
           }
         }
       } catch (error) {
-        // "Error al obtener datos fiscales:"
         console.error(t("licencia.messages.fiscalDataFetch"), error);
       }
     };
 
     fetchDatosFiscales();
-  }, []);
+  }, [currentUser, t]);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const user = auth.currentUser;
 
     if (!user) {
-      // "No se ha obtenido el usuario actual."
       console.error(t("licencia.messages.currentUserFetch"));
-      return;
-    }
-
-    const userId = user.uid;
-
-    if (!userId) {
-      // "No se ha obtenido el UID del usuario actual."
-      console.error(t("licencia.messages.uidFetch"));
       return;
     }
 
@@ -176,40 +182,60 @@ function DatosFiscales({ currentUser }) {
     const usoCdfi = event.target.usoCdfi.value;
     const email = event.target.email.value;
 
+    // Usa la empresa del currentUser o datosFiscales
+    const empresa = currentUser?.empresa || datosFiscales.empresa;
+
     if (
       !rfc ||
       !razonSocial ||
       !codigoPostal ||
       !regimenFiscal ||
       !usoCdfi ||
-      !email
+      !email ||
+      !empresa
     ) {
-      // "Por favor, completa todos los campos."
       console.error(t("licencia.messages.fieldsIncomplete"));
       return;
     }
 
-    const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
-    const datosFiscalesData = {
-      userId,
-      rfc,
-      razonSocial,
-      codigoPostal,
-      regimenFiscal,
-      usoCdfi,
-      email,
-    };
-
     try {
-      await setDoc(datosFiscalesDocRef, datosFiscalesData);
+      // Consulta para verificar si ya existe un documento con el nombre de la empresa
+      const q = query(
+        collection(db, "DatosFiscales"),
+        where("empresa", "==", empresa)
+      );
+      const querySnapshot = await getDocs(q);
+
+      let docRef;
+      if (!querySnapshot.empty) {
+        // Si encontramos la empresa, obtenemos la referencia del primer documento
+        const existingDoc = querySnapshot.docs[0];
+        docRef = doc(db, "DatosFiscales", existingDoc.id); // Referencia al documento existente
+      } else {
+        // Si no hay documentos para esa empresa, creamos un nuevo documento con un ID único
+        docRef = doc(collection(db, "DatosFiscales"));
+      }
+
+      const datosFiscalesData = {
+        rfc,
+        razonSocial,
+        codigoPostal,
+        regimenFiscal,
+        usoCdfi,
+        email,
+        empresa,
+      };
+
+      // Sobreescribimos o creamos el documento
+      await setDoc(docRef, datosFiscalesData);
+
       setGuardadoExitoso(true);
-      // "Datos fiscales enviados correctamente."
       console.log(t("licencia.messages.fiscalDataSent"));
     } catch (error) {
-      // "Error al enviar datos fiscales:"
       console.error(t("licencia.messages.fiscalDataError"), error);
     }
   };
+
   return (
     <section className="px-8 py-12">
       <h1>
