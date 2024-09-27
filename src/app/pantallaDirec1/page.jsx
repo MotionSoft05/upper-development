@@ -339,7 +339,10 @@ function PantallaDirec1() {
                 (fechaActualEnRango &&
                   horaActualEnRango &&
                   empresaCoincidente) ||
-                (mostrarPorFecha && empresaCoincidente)
+                (mostrarPorFecha &&
+                  fechaActualEnRango &&
+                  horaActualEnRango &&
+                  empresaCoincidente)
               );
             });
 
