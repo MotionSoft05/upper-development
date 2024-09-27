@@ -271,7 +271,7 @@ function Pantalla1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 240000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -429,6 +429,18 @@ function Pantalla1() {
     );
   }
   const eventoActual = eventosEnCurso[0]; // Obtener el primer evento de la lista
+  if (eventoActual.primeraImagen && eventoActual.images.length > 0) {
+    return (
+      <div className="fixed top-0 left-0 w-screen h-screen z-50">
+        <img
+          src={eventoActual.images[0]} // Mostrar la primera imagen
+          alt="Primera imagen del evento"
+          className="w-full h-full object-cover"
+        />
+      </div>
+    );
+  }
+
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
   const {
@@ -444,7 +456,7 @@ function Pantalla1() {
   // console.log("🚀 ~ IDIOMA ~ templateData:", templateData[0].idioma)
 
   return (
-    <section className="flex flex-col p-4 bg-gray-100 h-screen flex-grow flex-shrink-0 overflow-hidden">
+    <section className="flex flex-col p-4  h-screen flex-grow flex-shrink-0 overflow-hidden">
       {/* Línea superior: Logo, título y clima */}
       <div className="flex justify-between items-center mb-4">
         {templateActual.logo && (
@@ -512,8 +524,6 @@ function Pantalla1() {
                         alt={index + 1}
                         className="object-cover"
                         style={{
-                          width: windowSize.width / 2.5, // Dividir por 2 o cualquier otro factor para ajustar el tamaño
-                          height: windowSize.height / 2.5, // Dividir por 2 o cualquier otro factor para ajustar el tamaño
                           maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
                         }}
                       />

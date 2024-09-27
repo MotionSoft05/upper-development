@@ -589,6 +589,7 @@
     "noEventsOrAdvertisements": "No se ha encontrado ningún evento o publicidad. La página se reiniciará en {{countdown}} segundos.",
     "session": "Sesión:"
   },
+  "screensDirectoryURL": {},
   "pantallaDirec": {
     "weekdays": [
       "DOMINGO",

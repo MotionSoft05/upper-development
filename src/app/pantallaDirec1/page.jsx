@@ -120,7 +120,7 @@ function PantallaDirec1() {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 7 : 4
+    templateData[0]?.setPortrait ? 7 : 5
   );
 
   useEffect(() => {
@@ -131,7 +131,7 @@ function PantallaDirec1() {
 
   // Función para determinar la condición de loop
   const determineLoopCondition = (isPortrait, eventos) => {
-    const limite = isPortrait ? 6 : 4;
+    const limite = isPortrait ? 6 : 5;
     if (!eventos || eventos.length === 0) {
       return true;
     }
@@ -142,7 +142,7 @@ function PantallaDirec1() {
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
     }
 
-    if (!isPortrait && eventos.length > 4) {
+    if (!isPortrait && eventos.length > 5) {
       // Si no es portrait y supera los 5 eventos, recargar la página
 
       return false; // No es necesario volver a habilitar el loop, ya que la página se recargará
@@ -272,33 +272,68 @@ function PantallaDirec1() {
             });
 
             const eventosOrdenados = eventosData.filter((evento) => {
+              console.log("🚀 ~ eventosOrdenados ~ evento:", evento);
               // Obtener fecha actual (solo día)
               const fechaActual = new Date();
+              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              console.log(
+                "🚀 ~ eventosOrdenados ~ fechaActual (sin hora):",
+                fechaActual
+              );
 
               // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
+
+              // Ajustar fecha de inicio al día correcto sumando 24 horas (un día completo)
+              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1);
               fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
-              const fechaFinalEvento = new Date(evento.fechaFinal);
-              fechaFinalEvento.setHours(23, 59, 59, 999); // Establecer hora, minutos, segundos y milisegundos a cero
+              console.log(
+                "🚀 ~ eventosOrdenados ~ fechaInicioEvento:",
+                fechaInicioEvento
+              );
 
+              const fechaFinalEvento = new Date(evento.fechaFinal);
+
+              // Ajustar fecha de finalización al día correcto sumando 24 horas (un día completo)
+              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1);
+              fechaFinalEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+
+              console.log(
+                "🚀 ~ eventosOrdenados ~ fechaFinalEvento:",
+                fechaFinalEvento
+              );
               const horaActual = obtenerHora();
               const horaInicialEvento = evento.horaInicialSalon;
-              const horaFinalEvento = evento.horaFinalSalon;
+              const horaFinalEvento = evento.horaFinalReal;
 
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
-
+              console.log(
+                "🚀 ~ eventosOrdenados ~ fechaActualEnRango:",
+                fechaActualEnRango
+              );
               const horaActualEnRango =
                 horaActual >= horaInicialEvento &&
                 horaActual <= horaFinalEvento;
-
+              console.log(
+                "🚀 ~ eventosOrdenados ~ horaActualEnRango:",
+                horaActualEnRango
+              );
               // Filtrar eventos por empresa
               const empresaCoincidente = evento.empresa === userCompany;
+              console.log(
+                "🚀 ~ eventosOrdenados ~ empresaCoincidente:",
+                empresaCoincidente
+              );
 
               // Si la fecha final es mayor a la fecha actual, el evento sigue apareciendo.
               const mostrarPorFecha = fechaFinalEvento > fechaActual;
+              console.log(
+                "🚀 ~ eventosOrdenados ~ mostrarPorFecha:",
+                mostrarPorFecha
+              );
 
               return (
                 (fechaActualEnRango &&
@@ -392,7 +427,7 @@ function PantallaDirec1() {
 
       const interval = setInterval(() => {
         obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 240000);
+      }, 60000);
 
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
@@ -421,47 +456,47 @@ function PantallaDirec1() {
   // Publicidades-------------------------------------------
 
   // ----------------- RSS ---------------------------
-  useEffect(() => {
-    axios
-      .get("https://upperds.onrender.com/fetch-rss")
-      .then((response) => {
-        const items = response.data.items.map((item) => ({
-          title: removeSymbols(item.title),
-          link: item.link,
-          description: removeSymbols(item.description),
-        }));
-        setRssItems(items);
-      })
-      .catch((error) =>
-        // "Error fetching or parsing data:"
-        console.error(t("pantallaDirec.fetchingOrParsingDataError"), error)
-      );
-  }, []);
+  // useEffect(() => {
+  //   axios
+  //     .get("https://upperds.onrender.com/fetch-rss")
+  //     .then((response) => {
+  //       const items = response.data.items.map((item) => ({
+  //         title: removeSymbols(item.title),
+  //         link: item.link,
+  //         description: removeSymbols(item.description),
+  //       }));
+  //       setRssItems(items);
+  //     })
+  //     .catch((error) =>
+  //       // "Error fetching or parsing data:"
+  //       console.error(t("pantallaDirec.fetchingOrParsingDataError"), error)
+  //     );
+  // }, []);
 
-  // Función para eliminar símbolos de una cadena de texto
-  const removeSymbols = (text) => {
-    // Expresión regular para eliminar símbolos
-    const regex = /[^a-zA-Z0-9\s,.:-]/g;
-    // Aplicar el regex y reemplazar los símbolos con una cadena vacía
-    return text.replace(regex, "");
-  };
+  // // Función para eliminar símbolos de una cadena de texto
+  // const removeSymbols = (text) => {
+  //   // Expresión regular para eliminar símbolos
+  //   const regex = /[^a-zA-Z0-9\s,.:-]/g;
+  //   // Aplicar el regex y reemplazar los símbolos con una cadena vacía
+  //   return text.replace(regex, "");
+  // };
 
-  let timeOutRss = 7000; // valor de cambio de animacion de RSS
-  const [displayedItem, setDisplayedItem] = useState("");
+  // let timeOutRss = 7000; // valor de cambio de animacion de RSS
+  // const [displayedItem, setDisplayedItem] = useState("");
 
-  useEffect(() => {
-    let currentIndex = 0;
+  // useEffect(() => {
+  //   let currentIndex = 0;
 
-    const interval = setInterval(() => {
-      setDisplayedItem(rssItems[currentIndex].title);
+  //   const interval = setInterval(() => {
+  //     setDisplayedItem(rssItems[currentIndex].title);
 
-      // Cambiar al siguiente índice, o volver al principio si llegamos al final
-      currentIndex = (currentIndex + 1) % rssItems.length;
-    }, 7000); // Cambia cada 2000 milisegundos (2 segundos)
+  //     // Cambiar al siguiente índice, o volver al principio si llegamos al final
+  //     currentIndex = (currentIndex + 1) % rssItems.length;
+  //   }, 7000); // Cambia cada 2000 milisegundos (2 segundos)
 
-    // Limpiar el intervalo cuando el componente se desmonta
-    return () => clearInterval(interval);
-  }, [rssItems]);
+  //   // Limpiar el intervalo cuando el componente se desmonta
+  //   return () => clearInterval(interval);
+  // }, [rssItems]);
 
   // const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -554,6 +589,7 @@ function PantallaDirec1() {
   if (!user) {
     return <LogIn url={pathname} />;
   }
+  const templateActual = templateData[0]; // Obtener el primer evento de la lista
   if (!eventosEnCurso || eventosEnCurso.length === 0) {
     if (!publicidadesUsuario || publicidadesUsuario.length === 0) {
       // Renderizar cuenta regresiva
@@ -576,9 +612,81 @@ function PantallaDirec1() {
 
     return (
       <>
-        <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+        <section>
+          <div className="flex items-center justify-between ">
+            {/* Logo en la esquina superior izquierda */}
+            <div className=" ">
+              {templateActual.logo && (
+                <>
+                  <div className="ml-5" style={{ height: "100%" }}>
+                    <img
+                      src={templateActual.logo}
+                      alt="Logo"
+                      className="rounded-lg object-contain w-full h-full  "
+                      style={{
+                        width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                        height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            {/* ---- Titulo Eventos del dia y Fecha---- */}
+            <div
+              className="flex flex-col text-color items-center"
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              <p className="text-base text-center  mb-2">
+                {obtenerFecha()}-{currentHour}
+              </p>
+              <h1 className="text-2xl font-bold">
+                {/* Eventos del día */}
+                {t("pantallaDirec.todaysEvents")}
+              </h1>
+            </div>
+
+            {/* ---- Clima e Icono ---- */}
+            <div
+              className="flex text-color flex-col"
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {isLoading ? (
+                <p>
+                  {/* Cargando datos del clima... */}
+                  {t("pantallaDirec.loadingWeatherData")}
+                </p>
+              ) : weatherData &&
+                weatherData.current &&
+                weatherData.current.temp_c ? (
+                <div className="flex items-center  justify-center mr-4">
+                  <img
+                    src={weatherData.current.condition.icon}
+                    alt="Clima"
+                    className="w-16"
+                  />
+                  <p className="text-2xl font-bold ml-2 mr-6">
+                    {weatherData.current.temp_c} °C
+                  </p>
+                </div>
+              ) : (
+                //si no da el Clima muestra un mensaje de Bienvenida
+                <h2 className="text-4xl mr-16">
+                  {/* Bienvenido */}
+                  {t("pantallaDirec.welcomeTitle")}
+                </h2>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative inset-0    bg-white">
           <div className="slider-container">
-            <div ref={sliderRef} className="fader" style={{ height: "100vh" }}>
+            <div ref={sliderRef} className="fader " style={{ height: "88vh" }}>
               {isVideo ? (
                 // Si es un video, muestra un elemento de video
                 <video
@@ -605,7 +713,96 @@ function PantallaDirec1() {
     );
   }
 
-  const templateActual = templateData[0]; // Obtener el primer evento de la lista
+  // Filtrar el primer evento que tenga "primeraImagen" en true
+  const eventoConPrimeraImagen = eventosEnCurso.find(
+    (evento) => evento.primeraImagen === true && evento.images.length > 0
+  );
+  if (eventoConPrimeraImagen) {
+    return (
+      <div>
+        <section>
+          <div className="flex items-center justify-between ">
+            {/* Logo en la esquina superior izquierda */}
+            <div className=" ">
+              {templateActual.logo && (
+                <>
+                  <div className="ml-5" style={{ height: "100%" }}>
+                    <img
+                      src={templateActual.logo}
+                      alt="Logo"
+                      className="rounded-lg object-contain w-full h-full  "
+                      style={{
+                        width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                        height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                      }}
+                    />
+                  </div>
+                </>
+              )}
+            </div>
+            {/* ---- Titulo Eventos del dia y Fecha---- */}
+            <div
+              className="flex flex-col text-color items-center"
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              <p className="text-base text-center  mb-2">
+                {obtenerFecha()}-{currentHour}
+              </p>
+              <h1 className="text-2xl font-bold">
+                {/* Eventos del día */}
+                {t("pantallaDirec.todaysEvents")}
+              </h1>
+            </div>
+
+            {/* ---- Clima e Icono ---- */}
+            <div
+              className="flex text-color flex-col"
+              style={{
+                fontFamily: templateActual.fontStyle,
+              }}
+            >
+              {isLoading ? (
+                <p>
+                  {/* Cargando datos del clima... */}
+                  {t("pantallaDirec.loadingWeatherData")}
+                </p>
+              ) : weatherData &&
+                weatherData.current &&
+                weatherData.current.temp_c ? (
+                <div className="flex items-center  justify-center mr-4">
+                  <img
+                    src={weatherData.current.condition.icon}
+                    alt="Clima"
+                    className="w-16"
+                  />
+                  <p className="text-2xl font-bold ml-2 mr-6">
+                    {weatherData.current.temp_c} °C
+                  </p>
+                </div>
+              ) : (
+                //si no da el Clima muestra un mensaje de Bienvenida
+                <h2 className="text-4xl mr-16">
+                  {/* Bienvenido */}
+                  {t("pantallaDirec.welcomeTitle")}
+                </h2>
+              )}
+            </div>
+          </div>
+        </section>
+        <div className=" z-50">
+          <img
+            src={eventoConPrimeraImagen.images[0]} // Mostrar la primera imagen del evento
+            alt="Primera imagen del evento"
+            className="w-full h-full object-cover"
+            style={{ height: "89vh" }}
+          />
+        </div>
+      </div>
+    );
+  }
+
   console.log("🚀 ~ PantallaDirec1 ~ templateActual:", templateActual);
 
   const screenWidth = window.innerWidth;
@@ -641,8 +838,8 @@ function PantallaDirec1() {
                       alt="Logo"
                       className="rounded-lg object-contain w-full h-full  "
                       style={{
-                        width: windowSize.width / 7, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                        height: windowSize.height / 7, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                        width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                        height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
                       }}
                     />
                   </div>
@@ -733,7 +930,7 @@ function PantallaDirec1() {
                             (templateData[0]?.setPortrait &&
                               eventosEnCurso.length < 6) ||
                             (!templateData[0]?.setPortrait &&
-                              eventosEnCurso.length < 5)
+                              eventosEnCurso.length < 6)
                               ? "none"
                               : "",
                         }}
@@ -742,16 +939,16 @@ function PantallaDirec1() {
                           {eventosPorSlide.map((slideEventos, index) => (
                             <div key={index} className="keen-slider__slide ">
                               {Array.from({
-                                length: templateData[0]?.setPortrait ? 6 : 4,
+                                length: templateData[0]?.setPortrait ? 6 : 5,
                               }).map((_, innerIndex) => {
                                 const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
                                 return (
                                   <div
                                     key={innerIndex}
-                                    className="flex items-center space-x-4 space-y-5 border-b pr-8"
+                                    className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                     style={{
-                                      height: evento ? "auto" : "110px",
+                                      height: evento ? "auto" : "92px",
                                       borderColor: templateActual.templateColor,
                                     }} // Establecer la altura dependiendo de si hay evento o no
                                   >
@@ -759,19 +956,9 @@ function PantallaDirec1() {
                                     {evento ? (
                                       // Si hay evento, mostrar los detalles
                                       <>
-                                        <div
-                                          style={{
-                                            position: "relative",
-                                            overflow: "hidden",
-
-                                            width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                            height: "5vw", // Ajusta el alto del contenedor según sea necesario
-                                          }}
-                                        >
+                                        <div className="my-auto flex justify-center items-center relative overflow-hidden w-[7vw] h-[7vw]">
                                           <img
                                             style={{
-                                              width: "5vw",
-                                              height: "5vw",
                                               objectFit: "cover",
                                             }}
                                             src={evento.images[0]}
@@ -824,7 +1011,7 @@ function PantallaDirec1() {
                             (templateData[0]?.setPortrait &&
                               eventosEnCurso.length > 6) ||
                             (!templateData[0]?.setPortrait &&
-                              eventosEnCurso.length > 4)
+                              eventosEnCurso.length > 5)
                               ? "none"
                               : "",
                         }}
@@ -832,7 +1019,7 @@ function PantallaDirec1() {
                         {eventosPorSlide.map((slideEventos, index) => (
                           <div key={index}>
                             {Array.from({
-                              length: templateData[0]?.setPortrait ? 6 : 4,
+                              length: templateData[0]?.setPortrait ? 6 : 5,
                             }).map((_, innerIndex) => {
                               const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
@@ -841,7 +1028,7 @@ function PantallaDirec1() {
                                   key={innerIndex}
                                   className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                   style={{
-                                    height: evento ? "auto" : "110px",
+                                    height: evento ? "auto" : "92px",
                                     borderColor: templateActual.templateColor,
                                   }} // Establecer la altura dependiendo de si hay evento o no
                                 >
@@ -849,20 +1036,9 @@ function PantallaDirec1() {
                                   {evento ? (
                                     // Si hay evento, mostrar los detalles
                                     <>
-                                      <div
-                                        style={{
-                                          position: "relative",
-                                          overflow: "hidden",
-                                          width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                          height: "5vw", // Ajusta el alto del contenedor según sea necesario
-                                        }}
-                                      >
+                                      <div className="my-auto flex justify-center items-center relative overflow-hidden w-[6vw] h-[6vw]">
                                         <img
-                                          style={{
-                                            width: "5vw",
-                                            height: "5vw",
-                                            objectFit: "cover",
-                                          }}
+                                          className="object-cover"
                                           src={evento.images[0]}
                                           alt={evento.nombreEvento}
                                         />
@@ -917,13 +1093,13 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2
+                  <h2z
                     className="text-color text-xl text-center align-bottom "
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
                     {t("pantallaDirec.newsTitle")}
-                  </h2>
+                  </h2z>
                 </div>
               </div>
               <div className="col-span-1 md:col-span-1 flex items-center justify-center  mx-3">
@@ -936,7 +1112,7 @@ function PantallaDirec1() {
                   <img
                     style={{
                       width: windowSize.width / 4, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                      height: windowSize.height / 1.5, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 1.41, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
                       borderRadius: "10px", // Redondear las esquinas objectFit: "cover",
                     }}
                     src={templateData[0].publicidad}
@@ -982,9 +1158,9 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 6) ||
+                                  eventosEnCurso.length < 7) ||
                                 (!templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length < 5)
+                                  eventosEnCurso.length < 6)
                                   ? "none"
                                   : "",
                             }}
@@ -1020,14 +1196,14 @@ function PantallaDirec1() {
                                               style={{
                                                 position: "relative",
                                                 overflow: "hidden",
-                                                width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                                height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                                width: "7vw", // Ajusta el ancho del contenedor según sea necesario
+                                                height: "7vw", // Ajusta el alto del contenedor según sea necesario
                                               }}
                                             >
                                               <img
                                                 style={{
-                                                  width: "5vw",
-                                                  height: "5vw",
+                                                  width: "7vw",
+                                                  height: "7vw",
                                                   objectFit: "cover",
                                                 }}
                                                 src={evento.images[0]}
@@ -1079,9 +1255,9 @@ function PantallaDirec1() {
                             style={{
                               display:
                                 (templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 6) ||
+                                  eventosEnCurso.length > 5) ||
                                 (!templateData[0]?.setPortrait &&
-                                  eventosEnCurso.length > 5)
+                                  eventosEnCurso.length > 4)
                                   ? "none"
                                   : "",
                             }}
@@ -1089,16 +1265,16 @@ function PantallaDirec1() {
                             {eventosPorSlide.map((slideEventos, index) => (
                               <div key={index} className=" ">
                                 {Array.from({
-                                  length: templateData[0]?.setPortrait ? 6 : 4,
+                                  length: templateData[0]?.setPortrait ? 6 : 5,
                                 }).map((_, innerIndex) => {
                                   const evento = slideEventos[innerIndex]; // Obtener el evento si existe
 
                                   return (
                                     <div
                                       key={innerIndex}
-                                      className="flex items-center space-x-4 space-y-1 border-b pr-8"
+                                      className="flex items-center space-x-4 space-y-1 border-b pr-16"
                                       style={{
-                                        height: evento ? "auto" : "110px",
+                                        height: evento ? "150px" : "150px",
                                         borderColor:
                                           templateActual.templateColor,
                                       }} // Establecer la altura dependiendo de si hay evento o no
@@ -1111,14 +1287,14 @@ function PantallaDirec1() {
                                             style={{
                                               position: "relative",
                                               overflow: "hidden",
-                                              width: "5vw", // Ajusta el ancho del contenedor según sea necesario
-                                              height: "5vw", // Ajusta el alto del contenedor según sea necesario
+                                              width: "7vw", // Ajusta el ancho del contenedor según sea necesario
+                                              height: "7vw", // Ajusta el alto del contenedor según sea necesario
                                             }}
                                           >
                                             <img
                                               style={{
-                                                width: "5vw",
-                                                height: "5vw",
+                                                width: "7vw",
+                                                height: "7vw",
                                                 objectFit: "cover",
                                               }}
                                               src={evento.images[0]}
@@ -1224,7 +1400,7 @@ function PantallaDirec1() {
                     style={{ cursor: "pointer" }}
                   >
                     {/* Muestra el código QR */}
-                    <QRCode value={qrCodeUrl} size={90} />
+                    <QRCode value={qrCodeUrl} size={78} />
                   </a>
                 )}
               </div>

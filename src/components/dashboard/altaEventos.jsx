@@ -892,7 +892,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                   onChange={(e) => setPrimeraImagen(e.target.checked)} // Actualiza el estado según la selección
                 />
                 <label htmlFor="fullscreenImage" className="text-gray-900">
-                  Poner primera imagen en pantalla completa
+                  Activar Pantalla Completa (1280 x 720 px)
                 </label>
               </div>
             </div>
