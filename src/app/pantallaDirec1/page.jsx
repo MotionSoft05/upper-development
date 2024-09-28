@@ -304,8 +304,17 @@ function PantallaDirec1() {
                 fechaFinalEvento
               );
               const horaActual = obtenerHora();
+              console.log("🚀 ~ eventosOrdenados ~ horaActual:", horaActual);
               const horaInicialEvento = evento.horaInicialSalon;
-              const horaFinalEvento = evento.horaFinalReal;
+              console.log(
+                "🚀 ~ eventosOrdenados ~ horaInicialEvento:",
+                horaInicialEvento
+              );
+              const horaFinalEvento = evento.horaFinalSalon;
+              console.log(
+                "🚀 ~ eventosOrdenados ~ horaFinalEvento:",
+                horaFinalEvento
+              );
 
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
@@ -314,9 +323,7 @@ function PantallaDirec1() {
                 "🚀 ~ eventosOrdenados ~ fechaActualEnRango:",
                 fechaActualEnRango
               );
-              const horaActualEnRango =
-                horaActual >= horaInicialEvento &&
-                horaActual <= horaFinalEvento;
+              const horaActualEnRango = horaActual <= horaFinalEvento;
               console.log(
                 "🚀 ~ eventosOrdenados ~ horaActualEnRango:",
                 horaActualEnRango
