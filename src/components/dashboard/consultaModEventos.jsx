@@ -951,6 +951,24 @@ function ConsultaModEvento() {
                                       />
                                     )}
                                   </div>
+                                  <div className="mb-2">
+                                    <label className="flex items-center text-sm font-medium text-gray-700">
+                                      <input
+                                        type="checkbox"
+                                        checked={
+                                          eventoEditado?.primeraImagen || false
+                                        }
+                                        onChange={(e) =>
+                                          handleFieldEdit(
+                                            "primeraImagen",
+                                            e.target.checked
+                                          )
+                                        }
+                                        className="mr-2"
+                                      />
+                                      Activar Pantalla Completa (1280 x 720 px)
+                                    </label>
+                                  </div>
                                 </div>
                               </div>
 
