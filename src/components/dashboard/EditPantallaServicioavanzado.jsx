@@ -10,12 +10,19 @@ import {
   where,
   getDocs,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 import db from "@/firebase/firestore";
 import auth from "@/firebase/auth";
 import Swal from "sweetalert2";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-const guardarConfiguracionAvanzada = async (config, lugar, docId) => {
+const guardarConfiguracionAvanzada = async (
+  config,
+  lugar,
+  docId,
+  imageFile
+) => {
   try {
     const user = auth.currentUser;
     if (user) {
@@ -39,31 +46,55 @@ const guardarConfiguracionAvanzada = async (config, lugar, docId) => {
         "TemplateServiciosAvanzado"
       );
 
-      if (docId) {
-        const docRef = doc(templateServiciosAvanzadoRef, docId);
-        await updateDoc(docRef, {
-          ...config,
-          userId: user.uid,
-          userEmail: user.email,
-          empresa: empresa,
-          lugar: lugar,
-        });
-      } else {
-        await addDoc(templateServiciosAvanzadoRef, {
-          ...config,
-          userId: user.uid,
-          userEmail: user.email,
-          empresa: empresa,
-          lugar: lugar,
-        });
+      let imageUrl = config.image;
+      if (imageFile) {
+        imageUrl = await uploadImageToStorage(
+          imageFile,
+          user.uid,
+          docId || "new"
+        );
       }
 
-      Swal.fire({
-        icon: "success",
-        title: "Configuración avanzada guardada con éxito",
-        showConfirmButton: false,
-        timer: 2000,
+      const formatDate = (date) => {
+        if (date instanceof Date) {
+          return date.toISOString().split("T")[0]; // Esto dará el formato "YYYY-MM-DD"
+        }
+        return null;
+      };
+
+      // Prepare the data to be saved
+      const dataToSave = {
+        ...config,
+        userId: user.uid,
+        userEmail: user.email,
+        empresa: empresa,
+        lugar: lugar,
+        startDate: formatDate(config.startDate),
+        endDate: formatDate(config.endDate),
+        visualizationTime: {
+          hours: parseInt(config.visualizationTime.hours) || 0,
+          minutes: parseInt(config.visualizationTime.minutes) || 0,
+          seconds: parseInt(config.visualizationTime.seconds) || 0,
+        },
+        image: imageUrl,
+      };
+
+      // Remove undefined values and the imageFile property
+      Object.keys(dataToSave).forEach((key) => {
+        if (dataToSave[key] === undefined) {
+          delete dataToSave[key];
+        }
       });
+      delete dataToSave.imageFile;
+
+      if (docId) {
+        const docRef = doc(templateServiciosAvanzadoRef, docId);
+        await updateDoc(docRef, dataToSave);
+        return docId;
+      } else {
+        const docRef = await addDoc(templateServiciosAvanzadoRef, dataToSave);
+        return docRef.id; // Return the new document ID
+      }
     }
   } catch (error) {
     console.error("Error al guardar datos avanzados de configuración:", error);
@@ -72,14 +103,30 @@ const guardarConfiguracionAvanzada = async (config, lugar, docId) => {
       title: "Error al guardar configuración avanzada",
       text: error.message,
     });
+    return false; // Indica que hubo un error al guardar
   }
 };
 
-const cargarConfiguraciones = async (
-  selectedScreenName,
-  selectedSection,
-  setConfigurations
-) => {
+const uploadImageToStorage = async (imageFile, userId, configId) => {
+  if (!imageFile) return null;
+
+  const storage = getStorage();
+  const imageRef = ref(
+    storage,
+    `configurations/${userId}/${configId}/${imageFile.name}`
+  );
+
+  try {
+    const snapshot = await uploadBytes(imageRef, imageFile);
+    const downloadURL = await getDownloadURL(snapshot.ref);
+    return downloadURL;
+  } catch (error) {
+    console.error("Error uploading image:", error);
+    throw error;
+  }
+};
+
+const cargarConfiguraciones = async (selectedScreenName, selectedSection) => {
   try {
     const user = auth.currentUser;
     if (user) {
@@ -96,55 +143,58 @@ const cargarConfiguraciones = async (
 
       const querySnapshot = await getDocs(q);
       if (querySnapshot.empty) {
-        setConfigurations([
+        return [
           {
             startDate: null,
             endDate: null,
             image: null,
-            visualizationTime: { hours: 0, minutes: 0, seconds: 0 },
+            visualizationTime: { hours: 0, minutes: 0, seconds: 10 },
             docId: null,
           },
-        ]);
+        ];
       } else {
-        const configurations = querySnapshot.docs.map((doc) => {
+        return querySnapshot.docs.map((doc) => {
           const data = doc.data();
           return {
             ...data,
-            startDate: data.startDate
-              ? new Date(data.startDate.seconds * 1000)
-              : null,
-            endDate: data.endDate
-              ? new Date(data.endDate.seconds * 1000)
-              : null,
+            startDate: data.startDate ? data.startDate : null,
+            endDate: data.endDate ? data.endDate : null,
+            visualizationTime: data.visualizationTime || {
+              hours: 0,
+              minutes: 0,
+              seconds: 10,
+            },
             docId: doc.id,
           };
         });
-        setConfigurations(configurations);
       }
     }
+    return []; // Retorna un array vacío si no hay usuario autenticado
   } catch (error) {
     console.error("Error al cargar configuraciones avanzadas:", error);
+    return []; // Retorna un array vacío en caso de error
   }
 };
 
 const SectionDetails = ({ selectedScreenName, selectedSection }) => {
-  const [configurations, setConfigurations] = useState([
-    {
-      startDate: null,
-      endDate: null,
-      image: null,
-      visualizationTime: { hours: 0, minutes: 0, seconds: 0 },
-      docId: null,
-    },
-  ]);
-  const [configCount, setConfigCount] = useState(1);
+  const [configurations, setConfigurations] = useState([]);
+  const [editingIndex, setEditingIndex] = useState(-1);
 
   useEffect(() => {
-    cargarConfiguraciones(
-      selectedScreenName,
-      selectedSection,
-      setConfigurations
-    );
+    const loadConfigurations = async () => {
+      const loadedConfigs = await cargarConfiguraciones(
+        selectedScreenName,
+        selectedSection
+      );
+      setConfigurations(
+        loadedConfigs.map((config) => ({
+          ...config,
+          startDate: config.startDate ? new Date(config.startDate) : null,
+          endDate: config.endDate ? new Date(config.endDate) : null,
+        }))
+      );
+    };
+    loadConfigurations();
   }, [selectedScreenName, selectedSection]);
 
   const handleStartDateChange = (index, date) => {
@@ -162,6 +212,7 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
   const handleImageChange = (index, e) => {
     if (e.target.files && e.target.files[0]) {
       const newConfigurations = [...configurations];
+      newConfigurations[index].imageFile = e.target.files[0];
       newConfigurations[index].image = URL.createObjectURL(e.target.files[0]);
       setConfigurations(newConfigurations);
     }
@@ -170,38 +221,118 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
   const handleTimeChange = (index, e) => {
     const { name, value } = e.target;
     const newConfigurations = [...configurations];
-    newConfigurations[index].visualizationTime[name] = value;
+    newConfigurations[index].visualizationTime[name] = parseInt(value, 10);
     setConfigurations(newConfigurations);
   };
 
-  const handleSave = (index) => {
+  const handleSave = async (index) => {
     const user = auth.currentUser;
     if (user) {
       const config = configurations[index];
+
+      if (
+        !config.startDate ||
+        !config.endDate ||
+        (!config.image && !config.imageFile)
+      ) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, asegúrese de establecer la fecha de inicio, la fecha final y subir una imagen antes de guardar los cambios.",
+        });
+        return;
+      }
+
       const lugar = ["a", "b", "c"][index];
 
-      guardarConfiguracionAvanzada(
+      const saveResult = await guardarConfiguracionAvanzada(
         {
           selectedScreenName: selectedScreenName.label,
           selectedSection: selectedSection.label,
           ...config,
         },
         lugar,
-        config.docId
+        config.docId,
+        config.imageFile
       );
 
-      if (index === configurations.length - 1 && configurations.length < 3) {
-        setConfigCount(configCount + 1);
-        setConfigurations([
-          ...configurations,
-          {
-            startDate: null,
-            endDate: null,
-            image: null,
-            visualizationTime: { hours: 0, minutes: 0, seconds: 0 },
-            docId: null,
-          },
-        ]);
+      if (saveResult) {
+        await Swal.fire({
+          icon: "success",
+          title: "Configuración avanzada guardada con éxito",
+          showConfirmButton: false,
+          timer: 2000,
+        });
+
+        // Update the configuration with the new docId if it's a new configuration
+        const updatedConfigurations = [...configurations];
+        if (typeof saveResult === "string") {
+          updatedConfigurations[index] = {
+            ...config,
+            docId: saveResult,
+            imageFile: null, // Clear the imageFile after successful upload
+          };
+        } else {
+          updatedConfigurations[index] = {
+            ...config,
+            imageFile: null, // Clear the imageFile after successful upload
+          };
+        }
+        setConfigurations(updatedConfigurations);
+
+        setEditingIndex(-1);
+
+        if (index === configurations.length - 1 && configurations.length < 3) {
+          setConfigurations([
+            ...updatedConfigurations,
+            {
+              startDate: null,
+              endDate: null,
+              image: null,
+              imageFile: null,
+              visualizationTime: { hours: 0, minutes: 0, seconds: 10 },
+              docId: null,
+            },
+          ]);
+        }
+      }
+    } else {
+      console.error("Usuario no autenticado");
+    }
+  };
+
+  const handleEdit = (index) => {
+    setEditingIndex(index);
+  };
+
+  const handleDelete = async (index) => {
+    const user = auth.currentUser;
+    if (user) {
+      const config = configurations[index];
+      if (config.docId) {
+        try {
+          const docRef = doc(db, "TemplateServiciosAvanzado", config.docId);
+          await deleteDoc(docRef);
+
+          const newConfigurations = configurations.filter(
+            (_, i) => i !== index
+          );
+          setConfigurations(newConfigurations);
+
+          Swal.fire({
+            icon: "success",
+            title: "Configuración eliminada con éxito",
+            showConfirmButton: false,
+            timer: 2000,
+          });
+        } catch (error) {
+          console.error("Error al eliminar la configuración:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error al eliminar la configuración",
+            text: error.message,
+          });
+        }
       }
     } else {
       console.error("Usuario no autenticado");
@@ -221,8 +352,9 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
               <DatePicker
                 selected={config.startDate}
                 onChange={(date) => handleStartDateChange(index, date)}
-                dateFormat="dd/MM/yyyy"
+                dateFormat="yyyy-MM-dd"
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                disabled={config.docId && editingIndex !== index}
               />
             </div>
 
@@ -231,8 +363,9 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
               <DatePicker
                 selected={config.endDate}
                 onChange={(date) => handleEndDateChange(index, date)}
-                dateFormat="dd/MM/yyyy"
+                dateFormat="yyyy-MM-dd"
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                disabled={config.docId && editingIndex !== index}
               />
             </div>
 
@@ -243,6 +376,7 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
                 accept="image/*"
                 onChange={(e) => handleImageChange(index, e)}
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                disabled={config.docId && editingIndex !== index}
               />
               {config.image && (
                 <img
@@ -262,16 +396,18 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
                 name="hours"
                 value={config.visualizationTime.hours}
                 onChange={(e) => handleTimeChange(index, e)}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md mb-2"
                 placeholder="Horas"
+                disabled={config.docId && editingIndex !== index}
               />
               <input
                 type="number"
                 name="minutes"
                 value={config.visualizationTime.minutes}
                 onChange={(e) => handleTimeChange(index, e)}
-                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
+                className="w-full px-4 py-2 bg-gray-700 text-white rounded-md mb-2"
                 placeholder="Minutos"
+                disabled={config.docId && editingIndex !== index}
               />
               <input
                 type="number"
@@ -280,18 +416,35 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
                 onChange={(e) => handleTimeChange(index, e)}
                 className="w-full px-4 py-2 bg-gray-700 text-white rounded-md"
                 placeholder="Segundos"
+                disabled={config.docId && editingIndex !== index}
               />
             </div>
           </div>
-          <button
-            onClick={() => handleSave(index)}
-            className="mt-4 px-6 py-2 bg-pink-500 text-white rounded-md"
-            disabled={index < configCount - 1}
-          >
-            {configCount > 3 && index === 2
-              ? "Configuración Completa"
-              : "Guardar Configuración Avanzada"}
-          </button>
+          <div className="flex justify-end mt-4">
+            {!config.docId || editingIndex === index ? (
+              <button
+                onClick={() => handleSave(index)}
+                className="mx-2 px-4 py-2 bg-green-500 text-white rounded-md"
+              >
+                Guardar Cambios
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => handleEdit(index)}
+                  className="mx-2 px-4 py-2 bg-blue-500 text-white rounded-md"
+                >
+                  Editar
+                </button>
+                <button
+                  onClick={() => handleDelete(index)}
+                  className="mx-2 px-4 py-2 bg-red-500 text-white rounded-md"
+                >
+                  Eliminar
+                </button>
+              </>
+            )}
+          </div>
         </div>
       ))}
     </div>
