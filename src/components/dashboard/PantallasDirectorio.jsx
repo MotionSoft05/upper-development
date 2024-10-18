@@ -131,6 +131,10 @@ function PantallasDirectorio() {
       value: "Iguala de la Independencia",
       label: "Iguala de la Independencia",
     },
+    {
+      value: "Querétaro",
+      label: "Querétaro",
+    },
 
     // Ciudades de Estados Unidos
     { value: "Austin", label: "Austin" },
@@ -1029,7 +1033,7 @@ function PantallasDirectorio() {
                     className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
                     value={(nombrePantallasDirectorio[index] || "").slice(
                       0,
-                      16
+                      30
                     )}
                     onChange={(e) => {
                       const updatedNombres = [...nombrePantallasDirectorio];

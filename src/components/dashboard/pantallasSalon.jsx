@@ -811,7 +811,7 @@ function PantallasSalon() {
                       value={nombrePantallas[index] || ""}
                       onChange={(e) => {
                         const enteredValue = e.target.value;
-                        const truncatedValue = enteredValue.slice(0, 16); // Limit to 25 characters
+                        const truncatedValue = enteredValue.slice(0, 30);
                         const updatedNombres = [...nombrePantallas];
                         updatedNombres[index] = truncatedValue;
                         setNombrePantallas(updatedNombres);
