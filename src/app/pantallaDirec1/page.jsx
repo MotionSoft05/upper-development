@@ -622,103 +622,102 @@ function PantallaDirec1() {
 
     return (
       <>
-        <section>
-          <div className="flex items-center justify-between ">
-            {/* Logo en la esquina superior izquierda */}
-            <div className=" ">
-              {templateActual.logo && (
-                <>
-                  <div className="ml-5" style={{ height: "100%" }}>
-                    <img
-                      src={templateActual.logo}
-                      alt="Logo"
-                      className="rounded-lg object-contain w-full h-full  "
-                      style={{
-                        width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                        height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
-            {/* ---- Titulo Eventos del dia y Fecha---- */}
-            <div
-              className="flex flex-col text-color items-center"
-              style={{
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              <p className="text-base text-center  mb-2">
-                {obtenerFecha()}-{currentHour}
-              </p>
-              <h1 className="text-2xl font-bold">
-                {/* Eventos del día */}
-                {t("pantallaDirec.todaysEvents")}
-              </h1>
-            </div>
-
-            {/* ---- Clima e Icono ---- */}
-            <div
-              className="flex text-color flex-col"
-              style={{
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {isLoading ? (
-                <p>
-                  {/* Cargando datos del clima... */}
-                  {t("pantallaDirec.loadingWeatherData")}
+        <div
+          className="flex flex-col h-screen"
+          style={{
+            transform: templateData[0]?.setPortrait
+              ? "rotate(90deg)"
+              : "rotate(0deg)  ",
+            maxWidth: templateData[0]?.setPortrait ? "100vh" : "", // Establecer el ancho máximo para ajustarse a la pantalla
+            height: templateData[0]?.setPortrait ? "100vh" : "", // Ajustar la altura según la orientación
+            width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
+            marginLeft: templateData[0]?.setPortrait ? "auto" : "",
+            marginRight: templateData[0]?.setPortrait ? "0px" : "",
+          }}
+        >
+          <section>
+            <div className="flex items-center justify-between ">
+              {/* Logo en la esquina superior izquierda */}
+              <div className=" ">
+                {templateActual.logo && (
+                  <>
+                    <div className="ml-5" style={{ height: "100%" }}>
+                      <img
+                        src={templateActual.logo}
+                        alt="Logo"
+                        className="rounded-lg object-contain w-full h-full  "
+                        style={{
+                          width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                          height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                        }}
+                      />
+                    </div>
+                  </>
+                )}
+              </div>
+              {/* ---- Titulo Eventos del dia y Fecha---- */}
+              <div
+                className="flex flex-col text-color items-center"
+                style={{
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                <p className="text-base text-center  mb-2">
+                  {obtenerFecha()}-{currentHour}
                 </p>
-              ) : weatherData &&
-                weatherData.current &&
-                weatherData.current.temp_c ? (
-                <div className="flex items-center  justify-center mr-4">
-                  <img
-                    src={weatherData.current.condition.icon}
-                    alt="Clima"
-                    className="w-16"
-                  />
-                  <p className="text-2xl font-bold ml-2 mr-6">
-                    {weatherData.current.temp_c} °C
-                  </p>
-                </div>
-              ) : (
-                //si no da el Clima muestra un mensaje de Bienvenida
-                <h2 className="text-4xl mr-16">
-                  {/* Bienvenido */}
-                  {t("pantallaDirec.welcomeTitle")}
-                </h2>
-              )}
-            </div>
-          </div>
-        </section>
+                <h1 className="text-2xl font-bold">
+                  {/* Eventos del día */}
+                  {t("pantallaDirec.todaysEvents")}
+                </h1>
+              </div>
 
-        <section className="relative inset-0    bg-white">
-          <div className="slider-container">
-            <div ref={sliderRef} className="fader " style={{ height: "88vh" }}>
-              {isVideo ? (
-                // Si es un video, muestra un elemento de video
-                <video
-                  src={currentAd.videoUrl}
-                  alt={`Video ${currentMediaIndex}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                />
-              ) : (
-                // Si no es un video, muestra una imagen
-                <img
-                  src={currentAd.imageUrl}
-                  alt={`Image ${currentMediaIndex}`}
-                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
-                />
-              )}
+              {/* ---- Clima e Icono ---- */}
+              <div
+                className="flex text-color flex-col"
+                style={{
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                {isLoading ? (
+                  <p>
+                    {/* Cargando datos del clima... */}
+                    {t("pantallaDirec.loadingWeatherData")}
+                  </p>
+                ) : weatherData &&
+                  weatherData.current &&
+                  weatherData.current.temp_c ? (
+                  <div className="flex items-center  justify-center mr-4">
+                    <img
+                      src={weatherData.current.condition.icon}
+                      alt="Clima"
+                      className="w-16"
+                    />
+                    <p className="text-2xl font-bold ml-2 mr-6">
+                      {weatherData.current.temp_c} °C
+                    </p>
+                  </div>
+                ) : (
+                  //si no da el Clima muestra un mensaje de Bienvenida
+                  <h2 className="text-4xl mr-16">
+                    {/* Bienvenido */}
+                    {t("pantallaDirec.welcomeTitle")}
+                  </h2>
+                )}
+              </div>
             </div>
+          </section>
+
+          <div
+            ref={sliderRef}
+            className="flex justify-center align-middle overflow-hidden"
+          >
+            <img
+              src={currentAd.imageUrl}
+              alt={`Image ${currentMediaIndex}`}
+              className="w-full"
+            />
           </div>
-        </section>
+        </div>
       </>
     );
   }
@@ -729,7 +728,19 @@ function PantallaDirec1() {
   );
   if (eventoConPrimeraImagen) {
     return (
-      <div>
+      <div
+        className="flex flex-col h-screen"
+        style={{
+          transform: templateData[0]?.setPortrait
+            ? "rotate(90deg)"
+            : "rotate(0deg)  ",
+          maxWidth: templateData[0]?.setPortrait ? "100vh" : "", // Establecer el ancho máximo para ajustarse a la pantalla
+          height: templateData[0]?.setPortrait ? "100vh" : "", // Ajustar la altura según la orientación
+          width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
+          marginLeft: templateData[0]?.setPortrait ? "auto" : "",
+          marginRight: templateData[0]?.setPortrait ? "0px" : "",
+        }}
+      >
         <section>
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
@@ -801,12 +812,12 @@ function PantallaDirec1() {
             </div>
           </div>
         </section>
-        <div className=" z-50">
+
+        <div className=" flex justify-center align-middle overflow-hidden">
           <img
             src={eventoConPrimeraImagen.images[0]} // Mostrar la primera imagen del evento
             alt="Primera imagen del evento"
-            className="w-full h-full object-cover"
-            style={{ height: "89vh" }}
+            className="w-full "
           />
         </div>
       </div>

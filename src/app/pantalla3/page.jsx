@@ -442,7 +442,21 @@ function Pantalla3() {
   } = eventoActual;
   // h-screen PONE LA SCROLL BAR?!?!?!?!
   // console.log("🚀 ~ IDIOMA ~ templateData:", templateData[0].idioma)
-
+  if (eventoActual.primeraImagen && eventoActual.images.length > 0) {
+    return (
+      <div className="flex flex-col h-screen">
+        {/* Imagen de abajo */}
+        <div className=" flex justify-center align-middle overflow-hidden">
+          <img
+            src={eventoActual.images[0]} // Mostrar la primera imagen
+            alt="Primera imagen del evento"
+            className="w-full "
+          />
+        </div>
+        {/* -Imagen de abajo- */}
+      </div>
+    );
+  }
   return (
     <section className="flex flex-col p-4 h-screen flex-grow flex-shrink-0 overflow-hidden">
       {/* Línea superior: Logo, título y clima */}
