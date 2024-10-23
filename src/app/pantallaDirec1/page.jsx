@@ -729,7 +729,7 @@ function PantallaDirec1() {
   if (eventoConPrimeraImagen) {
     return (
       <div
-        className="flex flex-col h-screen"
+        className=" flex-col h-screen "
         style={{
           transform: templateData[0]?.setPortrait
             ? "rotate(90deg)"
@@ -739,6 +739,7 @@ function PantallaDirec1() {
           width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
           marginLeft: templateData[0]?.setPortrait ? "auto" : "",
           marginRight: templateData[0]?.setPortrait ? "0px" : "",
+          display: templateData[0]?.setPortrait ? "" : "flex",
         }}
       >
         <section>
