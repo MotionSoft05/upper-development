@@ -623,7 +623,7 @@ function PantallaDirec1() {
     return (
       <>
         <div
-          className="flex flex-col h-screen"
+          className=" flex-col h-screen"
           style={{
             transform: templateData[0]?.setPortrait
               ? "rotate(90deg)"
@@ -633,6 +633,7 @@ function PantallaDirec1() {
             width: templateData[0]?.setPortrait ? "100%" : "", // Asegurar que el ancho se ajuste correctamente
             marginLeft: templateData[0]?.setPortrait ? "auto" : "",
             marginRight: templateData[0]?.setPortrait ? "0px" : "",
+            display: templateData[0]?.setPortrait ? "" : "flex",
           }}
         >
           <section>
@@ -1305,20 +1306,9 @@ function PantallaDirec1() {
                                       {evento ? (
                                         // Si hay evento, mostrar los detalles
                                         <>
-                                          <div
-                                            style={{
-                                              position: "relative",
-                                              overflow: "hidden",
-                                              width: "7vw", // Ajusta el ancho del contenedor según sea necesario
-                                              height: "7vw", // Ajusta el alto del contenedor según sea necesario
-                                            }}
-                                          >
+                                          <div className="my-auto flex justify-center items-center relative overflow-hidden w-[6vw] h-[6vw]">
                                             <img
-                                              style={{
-                                                width: "7vw",
-                                                height: "7vw",
-                                                objectFit: "cover",
-                                              }}
+                                              className="object-cover"
                                               src={evento.images[0]}
                                               alt={evento.nombreEvento}
                                             />
