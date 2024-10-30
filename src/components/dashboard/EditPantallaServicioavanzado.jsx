@@ -186,14 +186,29 @@ const SectionDetails = ({ selectedScreenName, selectedSection }) => {
         selectedScreenName,
         selectedSection
       );
-      setConfigurations(
-        loadedConfigs.map((config) => ({
-          ...config,
-          startDate: config.startDate ? new Date(config.startDate) : null,
-          endDate: config.endDate ? new Date(config.endDate) : null,
-        }))
-      );
+
+      // Mapea y formatea las fechas de inicio y finalización
+      const formattedConfigs = loadedConfigs.map((config) => ({
+        ...config,
+        startDate: config.startDate ? new Date(config.startDate) : null,
+        endDate: config.endDate ? new Date(config.endDate) : null,
+      }));
+
+      // Si el número de configuraciones es menor a 3, agrega una vacía
+      if (formattedConfigs.length < 3) {
+        formattedConfigs.push({
+          startDate: null,
+          endDate: null,
+          image: null,
+          imageFile: null,
+          visualizationTime: { hours: 0, minutes: 0, seconds: 10 },
+          docId: null,
+        });
+      }
+
+      setConfigurations(formattedConfigs);
     };
+
     loadConfigurations();
   }, [selectedScreenName, selectedSection]);
 
