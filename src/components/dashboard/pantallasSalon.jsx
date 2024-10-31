@@ -59,6 +59,9 @@ function PantallasSalon() {
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [configuracionTemplate, setConfiguracionTemplate] = useState(null);
+  const [selectedTemplate, setSelectedTemplate] = useState(1); // Default to Template 1
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("es");
   const [nombreEmpresa, setNombreEmpresa] = useState(null);
 
@@ -339,6 +342,23 @@ function PantallasSalon() {
     }
   };
 
+  const templates = [
+    {
+      id: 1,
+      name: "Template 1",
+      previewUrl:
+        "https://upload.wikimedia.org/wikipedia/commons/5/55/Flag_of_Argentina_%2816-9%29.png",
+      description: "Diseño clásico con información clara y ordenada",
+    },
+    {
+      id: 2,
+      name: "Template 2",
+      previewUrl:
+        "https://wallpapers.com/images/featured/mexico-6g2c0dcx89ayis8l.jpg",
+      description: "Diseño moderno con elementos dinámicos",
+    },
+  ];
+
   const guardarInformacionPersonalizacion = async () => {
     try {
       const authUser = firebase.auth().currentUser;
@@ -425,6 +445,7 @@ function PantallasSalon() {
       }
 
       const personalizacionTemplate = {
+        template: selectedTemplate,
         fontColor: fontColor,
         templateColor: templateColor,
         fontStyle: selectedFontStyle.value,
@@ -494,6 +515,7 @@ function PantallasSalon() {
       if (!templateSalonesSnapshot.empty) {
         const templateSalonesDocRef = templateSalonesSnapshot.docs[0].ref;
         await updateDoc(templateSalonesDocRef, {
+          template: selectedTemplate,
           fontColor: fontColor,
           templateColor: templateColor,
           fontStyle: selectedFontStyle.value,
@@ -505,6 +527,7 @@ function PantallasSalon() {
       } else {
         // Si no hay documento existente para esta empresa, crea uno nuevo
         await addDoc(templateSalonesRef, {
+          template: selectedTemplate,
           empresa: empresaToUpdate,
           fontColor: fontColor,
           templateColor: templateColor,
@@ -571,8 +594,9 @@ function PantallasSalon() {
     }
   };
 
-  const handlePreviewClick = () => {
-    setPreviewVisible(true);
+  const handlePreviewClick = (imageUrl) => {
+    setPreviewImage(imageUrl);
+    setIsModalOpen(true);
   };
 
   const handleClosePreview = () => {
@@ -668,23 +692,78 @@ function PantallasSalon() {
               </div>
             </div>
           )}
+
           <h1 className="text-3x3 font-bold text-white capitalize mb-4">
             {/* Personalización del Template */}
             {t("screenSalon.templateCustomization")}
           </h1>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                {/* Logo */}
-                {t("screenSalon.logo")}
+              <label className="text-white dark:text-gray-200 block mb-2">
+                Seleccionar Template
               </label>
-              <div className="flex items-center">
-                <input
-                  onChange={handleImageChange}
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="file"
-                />
+              <div className="flex gap-4">
+                {templates.map((template) => (
+                  <div key={template.id} className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 mb-2">
+                      <input
+                        type="radio"
+                        id={`template-${template.id}`}
+                        name="template"
+                        value={template.id}
+                        checked={selectedTemplate === template.id}
+                        onChange={() => setSelectedTemplate(template.id)}
+                        className="w-4 h-4 text-blue-600"
+                      />
+                      <label
+                        htmlFor={`template-${template.id}`}
+                        className="text-white cursor-pointer"
+                      >
+                        {template.name}
+                      </label>
+                    </div>
+                    <div
+                      className="relative cursor-pointer group"
+                      onClick={() => handlePreviewClick(template.previewUrl)}
+                    >
+                      <img
+                        src={template.previewUrl}
+                        alt={template.name}
+                        className="w-32 h-24 object-cover rounded-lg border-2 border-gray-600 transition-all duration-200 group-hover:border-blue-500"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200">
+                        <span className="text-white text-sm">Ver preview</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
+
+              {/* Template Preview Modal */}
+              {isModalOpen && (
+                <div open={isModalOpen} onOpenChange={setIsModalOpen}>
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50">
+                    <div className="bg-white rounded-lg p-4 max-w-4xl w-full">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">
+                          Preview del Template
+                        </h3>
+                        <button
+                          onClick={() => setIsModalOpen(false)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                      <img
+                        src={previewImage}
+                        alt="Template preview"
+                        className="w-full h-auto rounded-lg"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-1">
@@ -700,63 +779,26 @@ function PantallasSalon() {
             </div>
             <div className="mb-4">
               <label className="text-white dark:text-gray-200 block mb-0.5">
+                {/* Logo */}
+                {t("screenSalon.logo")}
+              </label>
+              <div className="flex items-center">
+                <input
+                  onChange={handleImageChange}
+                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                  type="file"
+                />
+              </div>
+            </div>
+
+            <div className="mb-4">
+              <label className="text-white dark:text-gray-200 block mb-0.5">
                 {/* Logo Actual */}
                 {t("screenSalon.currentLogo")}
               </label>
               {selectedLogo && (
                 <img src={selectedLogo} alt="Logo Actual" className="w-48" />
               )}
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Idiomas */}
-                {t("screenSalon.languages")}
-              </label>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="spanish"
-                    value="es"
-                    checked={selectedLanguage === "es"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="spanish" className="ml-2 mr-4 text-white">
-                    {/* Español */}
-                    {t("screenSalon.idspanish")}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="english"
-                    value="en"
-                    checked={selectedLanguage === "en"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="english" className="ml-2 mr-4 text-white">
-                    {/* Inglés */}
-                    {t("screenSalon.idenglish")}
-                  </label>
-                </div>
-                <div className="flex items-center">
-                  <input
-                    type="radio"
-                    id="both"
-                    value="es-en"
-                    checked={selectedLanguage === "es-en"}
-                    onChange={handleLanguageChange}
-                    className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                  />
-                  <label htmlFor="both" className="ml-2 text-white">
-                    {/* Español/Inglés */}
-                    {t("screenSalon.idspanish/english")}
-                  </label>
-                </div>
-              </div>
             </div>
 
             <div className="mb-4">
@@ -797,42 +839,6 @@ function PantallasSalon() {
             </div>
 
             <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Nombres de pantallas */}
-                {t("screenSalon.screenNames")}
-              </label>
-              <div className="flex flex-col">
-                {Array.from({ length: ps }, (_, index) => (
-                  <div className="flex items-center mb-2" key={index}>
-                    <input
-                      type="text"
-                      placeholder={`Pantalla ${index + 1}`}
-                      className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                      value={nombrePantallas[index] || ""}
-                      onChange={(e) => {
-                        const enteredValue = e.target.value;
-                        const truncatedValue = enteredValue.slice(0, 30);
-                        const updatedNombres = [...nombrePantallas];
-                        updatedNombres[index] = truncatedValue;
-                        setNombrePantallas(updatedNombres);
-                      }}
-                    />
-                    <Link
-                      // href={`/pantalla${index + 1}.html`}
-                      href={`/pantalla${index + 1}${isProduction}?emp=${
-                        nombreEmpresa?.empresa
-                      }`}
-                      target="_blank"
-                      className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
-                    >
-                      URL
-                    </Link>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div className="mb-4">
               <label className="text-white dark:text-gray-200">
                 {/* Color de la plantilla */}
                 {t("screenSalon.templateColor")}
@@ -864,6 +870,91 @@ function PantallasSalon() {
                   className="w-8 h-8 rounded-full ml-4"
                   style={{ backgroundColor: templateColor }}
                 ></div>
+              </div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-white dark:text-gray-200 block mb-1">
+              {/* Nombres de pantallas */}
+              {t("screenSalon.screenNames")}
+            </label>
+            <div className="flex flex-col">
+              {Array.from({ length: ps }, (_, index) => (
+                <div className="flex items-center mb-2" key={index}>
+                  <input
+                    type="text"
+                    placeholder={`Pantalla ${index + 1}`}
+                    className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
+                    value={nombrePantallas[index] || ""}
+                    onChange={(e) => {
+                      const enteredValue = e.target.value;
+                      const truncatedValue = enteredValue.slice(0, 30);
+                      const updatedNombres = [...nombrePantallas];
+                      updatedNombres[index] = truncatedValue;
+                      setNombrePantallas(updatedNombres);
+                    }}
+                  />
+                  <Link
+                    // href={`/pantalla${index + 1}.html`}
+                    href={`/pantalla${index + 1}${isProduction}?emp=${
+                      nombreEmpresa?.empresa
+                    }`}
+                    target="_blank"
+                    className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
+                  >
+                    URL
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="text-white dark:text-gray-200 block mb-1">
+              {/* Idiomas */}
+              {t("screenSalon.languages")}
+            </label>
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="spanish"
+                  value="es"
+                  checked={selectedLanguage === "es"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="spanish" className="ml-2 mr-4 text-white">
+                  {/* Español */}
+                  {t("screenSalon.idspanish")}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="english"
+                  value="en"
+                  checked={selectedLanguage === "en"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="english" className="ml-2 mr-4 text-white">
+                  {/* Inglés */}
+                  {t("screenSalon.idenglish")}
+                </label>
+              </div>
+              <div className="flex items-center">
+                <input
+                  type="radio"
+                  id="both"
+                  value="es-en"
+                  checked={selectedLanguage === "es-en"}
+                  onChange={handleLanguageChange}
+                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
+                />
+                <label htmlFor="both" className="ml-2 text-white">
+                  {/* Español/Inglés */}
+                  {t("screenSalon.idspanish/english")}
+                </label>
               </div>
             </div>
           </div>
