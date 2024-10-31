@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import {
   getFirestore,
@@ -36,6 +37,18 @@ function PantallaServicio() {
   const [weatherData, setWeatherData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [eventosPorSeccion, setEventosPorSeccion] = useState({
+    Seccion1: [],
+    Seccion2: [],
+    Seccion3: [],
+  });
+  console.log("🚀 ~ PantallaServicio ~ eventosPorSeccion:", eventosPorSeccion);
+  const [seccion1, setSeccion1] = useState(null);
+  console.log("🚀 ~ PantallaServicio ~ seccion1:", seccion1);
+  const [seccion2, setSeccion2] = useState(null);
+  console.log("🚀 ~ PantallaServicio ~ seccion2:", seccion2);
+  const [seccion3, setSeccion3] = useState(null);
+  console.log("🚀 ~ PantallaServicio ~ seccion3:", seccion3);
   //* Función para obtener la hora actual
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
@@ -68,7 +81,6 @@ function PantallaServicio() {
   }, []);
   // *----------------- //Datos Firebase ---------------------------
   //* ----------------- Eventos ---------------------------
-
   useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user.uid);
@@ -77,21 +89,15 @@ function PantallaServicio() {
           const docSnap = await getDoc(userRef);
           if (docSnap.exists()) {
             const userData = docSnap.data();
-            let userCompany = "";
-            const nombrePantallasUsuario = userData.nombrePantallas || {};
-            const pantallasNumeradas = {};
+            let userCompany = userData.empresa || empresaNombre;
+            const nombrePantallasServicios = Object.values(
+              userData.NombrePantallasServicios || {}
+            );
 
-            Object.keys(nombrePantallasUsuario).forEach((key, index) => {
-              pantallasNumeradas[nombrePantallasUsuario[key]] = index + 1;
-            });
-            if (userData.empresa === empresaNombre) {
-              userCompany = userData.empresa;
-            } else {
-              userCompany = empresaNombre;
-            }
-            console.log("🚀 ~ obtenerUsuario ~ userCompany:", userCompany);
-
-            const eventosRef = collection(firestore, "TemplateServiciosVista");
+            const eventosRef = collection(
+              firestore,
+              "TemplateServiciosAvanzado"
+            );
             const eventosQuery = query(
               eventosRef,
               where("empresa", "==", userCompany)
@@ -100,137 +106,120 @@ function PantallaServicio() {
 
             const eventosData = [];
             console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
-
-            let dispositivoCoincidente = null;
-
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
-              const nombreDePantalla = evento.nombreDePantalla;
-              console.log(
-                "🚀 ~ querySnapshot.forEach ~ evento:",
-                evento.events
-              );
-              // Verificar si el nombreDePantalla del evento está en NombrePantallasServicios del usuario
-              const nombrePantallasServicios = Object.values(
-                userData.NombrePantallasServicios || {}
-              );
-              console.log(
-                "🚀 ~ querySnapshot.forEach ~ nombrePantallasServicios:",
-                nombrePantallasServicios
-              );
-              if (nombrePantallasServicios.includes(nombreDePantalla)) {
-                dispositivoCoincidente = evento;
-                console.log(
-                  "Dispositivo coincidente encontrado:",
-                  dispositivoCoincidente
-                );
-                evento.events.forEach((event) => {
-                  eventosData.push(event);
+              const selectedScreenName = evento.selectedScreenName;
+
+              if (nombrePantallasServicios.includes(selectedScreenName)) {
+                eventosData.push({
+                  id: evento.id,
+                  empresa: evento.empresa,
+                  endDate: evento.endDate,
+                  image: evento.image,
+                  lugar: evento.lugar,
+                  selectedScreenName: evento.selectedScreenName,
+                  selectedSection: evento.selectedSection,
+                  startDate: evento.startDate,
+                  userEmail: evento.userEmail,
+                  userId: evento.userId,
+                  visualizationTime: {
+                    hours: evento.visualizationTime?.hours || 0,
+                    minutes: evento.visualizationTime?.minutes || 0,
+                    seconds: evento.visualizationTime?.seconds || 0,
+                  },
                 });
               }
             });
 
-            // Filtrar por fecha y hora los eventos filtrados por pantalla
-            const eventosEnCursoEffect = eventosData.filter((evento) => {
-              // Obtener fecha actual (solo día)
-              const fechaActual = new Date();
-              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+            const fechaActual = new Date();
 
-              // Obtener fechas de inicio y finalización del evento (solo día)
-              const fechaInicioEvento = new Date(evento.fechaInicial);
-              fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1); // Sumar un día
-              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
-
-              const fechaFinalEvento = new Date(evento.fechaFinal);
-              fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
-              fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
-
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ fechaInicioEvento:",
-                fechaInicioEvento
-              );
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ fechaFinalEvento:",
-                fechaFinalEvento
-              );
-
-              const fechaActualEnRango =
-                fechaActual >= fechaInicioEvento &&
-                fechaActual <= fechaFinalEvento;
-              console.log(
-                "🚀 ~ eventosEnCursoEffect ~ fechaActualEnRango:",
-                fechaActualEnRango
-              );
-
-              return fechaActualEnRango;
-            });
-            console.log(
-              "🚀 ~ eventosEnCursoEffect ~ eventosEnCursoEffect:",
-              eventosEnCursoEffect
-            );
-            //  Sección template
-            const templateRef = collection(firestore, "TemplateServicios");
-            const templateQuery = query(
-              templateRef,
-              where("empresa", "==", userCompany)
-            );
-            const templateSnapshot = await getDocs(templateQuery);
-            console.log(
-              "🚀 ~ obtenerUsuario ~ templateSnapshot:",
-              templateSnapshot
-            );
-
-            if (!templateSnapshot.empty) {
-              const templateData = [];
-              console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
-              templateSnapshot.forEach((doc) => {
-                const template = { id: doc.id, ...doc.data() };
-
-                setSelectedCity({
-                  value: template.ciudad,
-                  label: template.ciudad,
-                });
-                templateData.push(template);
+            const filtrarEventosPorFecha = (eventos) => {
+              return eventos.filter((evento) => {
+                const inicio = new Date(evento.startDate);
+                const fin = new Date(evento.endDate);
+                return fechaActual >= inicio && fechaActual <= fin;
               });
+            };
 
-              setTemplateData(templateData);
-            } else {
-              console.log(
-                // "No se encontró información en TemplateDirectorios para este usuario."
-                t("pantalla.error.templateDirectoryNotFound")
-              );
-            }
+            const ordenarEventosPorLugar = (eventos) => {
+              const orden = { A: 1, B: 2, C: 3 };
+              return eventos.sort((a, b) => orden[a.lugar] - orden[b.lugar]);
+            };
 
-            //  Sección template
+            const eventosSeccion1 = ordenarEventosPorLugar(
+              filtrarEventosPorFecha(
+                eventosData.filter(
+                  (evento) => evento.selectedSection === "Sección 1"
+                )
+              )
+            );
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosSeccion1:",
+              eventosSeccion1
+            );
+            const eventosSeccion2 = ordenarEventosPorLugar(
+              filtrarEventosPorFecha(
+                eventosData.filter(
+                  (evento) => evento.selectedSection === "Sección 2"
+                )
+              )
+            );
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosSeccion2:",
+              eventosSeccion2
+            );
+            const eventosSeccion3 = ordenarEventosPorLugar(
+              filtrarEventosPorFecha(
+                eventosData.filter(
+                  (evento) => evento.selectedSection === "Sección 3"
+                )
+              )
+            );
+            console.log(
+              "🚀 ~ obtenerUsuario ~ eventosSeccion3:",
+              eventosSeccion3
+            );
+            setEventosPorSeccion({
+              Seccion1: eventosSeccion1,
+              Seccion2: eventosSeccion2,
+              Seccion3: eventosSeccion3,
+            });
 
-            console.log("eventosEnCursoEffect.", eventosEnCursoEffect);
-            setEventosEnCurso(eventosEnCursoEffect);
+            // Limpiar intervalos previos antes de establecer nuevos
+            Object.values(intervalRefs.current).forEach(clearInterval);
 
-            // console.log(
-            //   "🚀 ~ obtenerUsuario ~ eventosEnCursoEffect:",
-            //   eventosEnCursoEffect
-            // );
-            // Aquí puedes hacer algo con los eventos filtrados por fecha y hora
-            // setEventData(eventosEnCurso);
-          } else {
-            // console.log("No se encontraron datos para este usuario.");
-            console.log(t("pantalla.error.noDataFound"));
+            const mostrarEvento = (eventos, setSeccionEstado, seccionKey) => {
+              if (eventos.length === 0) return;
+              let index = 0;
+              setSeccionEstado(eventos[index]);
+
+              intervalRefs.current[seccionKey] = setInterval(() => {
+                index = (index + 1) % eventos.length;
+                setSeccionEstado(eventos[index]);
+              }, eventos[index].visualizationTime.seconds * 1000);
+            };
+
+            if (eventosSeccion1.length)
+              mostrarEvento(eventosSeccion1, setSeccion1, "Seccion1");
+            if (eventosSeccion2.length)
+              mostrarEvento(eventosSeccion2, setSeccion2, "Seccion2");
+            if (eventosSeccion3.length)
+              mostrarEvento(eventosSeccion3, setSeccion3, "Seccion3");
           }
         } catch (error) {
-          // console.error("Error al obtener datos del usuario:", error);
-          console.error("pantalla.error.userDataFetchError", error);
+          console.error("Error al obtener eventos:", error);
         }
       };
 
       obtenerUsuario();
 
-      const interval = setInterval(() => {
-        obtenerUsuario(); // Llamar a la función cada 5 segundos
-      }, 100000);
-
-      return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
+      // Cleanup al desmontarse el componente
+      return () => {
+        Object.values(intervalRefs.current).forEach(clearInterval);
+      };
     }
-  }, [user, firestore]);
+  }, [user, firestore, empresaNombre]);
+
   // *----------------- //Eventos ---------------------------
   // *----------------- Timer de los eventos ---------------------------
 
@@ -319,33 +308,45 @@ function PantallaServicio() {
     }
   }, [selectedCity]);
   //* ----------------- Clima ---------------------------
+
   const eventoActual = eventosEnCurso[eventoActualIndex] || {};
   return (
     <div className="min-h-screen bg-red-100 grid grid-rows-6 gap-1">
       {/* SECCION 1, 2, 3 */}
       <div className="grid grid-cols-3 gap-1 mb-1 h-full row-span-5">
-        {/* Seccion superior izquierda */}
+        {/* Sección superior izquierda */}
         <div className="grid grid-rows-2 gap-1">
           <div className="bg-cyan-200 border-2 border-slate-300 p-1">
-            <img src={eventoActual.img1} alt="Imagen 1" />
+            {/* Renderizar eventos de Seccion1 */}
+            {eventosPorSeccion.Seccion1.map((evento) => (
+              <div key={evento.id}>
+                <img src={evento.image} alt={evento.selectedScreenName} />
+              </div>
+            ))}
           </div>
+
           <div className="bg-cyan-200 border-2 border-slate-300 p-1">
-            <img src={eventoActual.img2} alt="Imagen 2" />
+            {/* Renderizar eventos de Seccion2 */}
+            {eventosPorSeccion.Seccion2.map((evento) => (
+              <div key={evento.id}>
+                <img src={evento.image} alt={evento.selectedScreenName} />
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* Seccion superior derecha */}
+        {/* Sección superior derecha */}
         <div className="bg-green-100 col-span-2 border-2 border-slate-300 p-1">
-          {eventoActual.imgovideo3 &&
-          eventoActual.imgovideo3.endsWith(".mp4") ? (
-            <video src={eventoActual.imgovideo3} controls alt=" video" />
-          ) : (
-            <img src={eventoActual.imgovideo3} alt="Imagen" />
-          )}
+          {/* Renderizar eventos de Seccion3 */}
+          {eventosPorSeccion.Seccion3.map((evento) => (
+            <div key={evento.id}>
+              <img src={evento.image} alt={evento.selectedScreenName} />
+            </div>
+          ))}
         </div>
       </div>
 
-      {/* SECCION FECHA, RSS, CLIMA */}
+      {/* SECCION FECHA, RSS, CLIMA Ignorar esta parte */}
       <div className="grid grid-cols-3 gap-1 h-full flex-grow row-span-1">
         <div className="bg-orange-200 border-2 border-slate-300 p-1">
           {" "}

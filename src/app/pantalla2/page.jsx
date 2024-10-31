@@ -437,6 +437,7 @@ function Pantalla2() {
     nombreEvento,
     images,
     horaInicialReal,
+    horaFinalReal,
     tipoEvento,
     description,
   } = eventoActual;
@@ -458,170 +459,337 @@ function Pantalla2() {
     );
   }
   return (
-    <section className="flex flex-col p-4 h-screen flex-grow flex-shrink-0 overflow-hidden">
-      {/* Línea superior: Logo, título y clima */}
-      <div className="flex justify-between items-center mb-4">
-        {templateActual.logo && (
-          <>
-            <div style={{ height: "100%" }}>
-              <img
-                src={templateActual.logo}
-                alt="Logo"
-                className=" object-cover"
-                style={{
-                  width: windowSize.width / 6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                  height: windowSize.height / 6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
-                }}
-              />
-            </div>
-          </>
-        )}
-        <h1
-          className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl   text-color `}
-          style={{ fontFamily: templateActual.fontStyle }}
-        >
-          {dispositivoCoincidenteLAL}
-        </h1>
-      </div>
-
-      {/* Línea inferior */}
-      <div className="flex flex-col flex-grow">
-        {/* Nombre del evento */}
-        <div className="mb-4">
-          {/* Linea arriba */}
-          <div
-            className={`text-white  py-3 uppercase  sm:text-xs md:text-3xl lg:text-5xl xl:text-7xl  font-bold px-20 rounded-t-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            <h2>{nombreEvento}</h2>
+    <>
+      {templateActual.template === 1 ? (
+        <section className="flex flex-col p-4  h-screen flex-grow flex-shrink-0 overflow-hidden">
+          {/* Línea superior: Logo, título y clima */}
+          <div className="flex justify-between items-center mb-4">
+            {templateActual.logo && (
+              <>
+                <div style={{ height: "100%" }}>
+                  <img
+                    src={templateActual.logo}
+                    alt="Logo"
+                    className=" object-cover"
+                    style={{
+                      width: windowSize.width / 6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                    }}
+                  />
+                </div>
+              </>
+            )}
+            <h1
+              className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl   text-color `}
+              style={{ fontFamily: templateActual.fontStyle }}
+            >
+              {dispositivoCoincidenteLAL}
+            </h1>
           </div>
-        </div>
 
-        <div className="flex-grow mb-4">
-          {/* contenido principal */}
-          <div className="bg-gradient-to-b from-gray-100 via-white to-gray-100 text-gray-50 h-full flex flex-col">
-            <div className="grid grid-cols-3 gap-x-4 text-black flex-grow">
-              <div className="col-span-1 mr-4 my-auto flex justify-center items-center">
-                <Swiper
-                  ref={swiperRef}
-                  spaceBetween={30}
-                  effect="fade"
-                  autoplay={{
-                    delay: 2500,
-                    disableOnInteraction: false,
-                  }}
-                  loop
-                  modules={[Autoplay, Pagination, EffectFade]}
-                  className="mySwiper"
-                  style={{ width: "100%", height: "100%" }}
-                >
-                  {images.map((image, index) => (
-                    <SwiperSlide key={index + 1}>
-                      <img
-                        src={image}
-                        alt={index + 1}
-                        className="object-cover"
+          {/* Línea inferior */}
+          <div className="flex flex-col flex-grow">
+            {/* Nombre del evento */}
+            <div className="mb-4">
+              {/* Linea arriba */}
+              <div
+                className={`text-white  py-3 uppercase  sm:text-xs md:text-3xl lg:text-5xl xl:text-7xl  font-bold px-20 rounded-t-xl`}
+                style={{
+                  backgroundColor: templateActual.templateColor,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                <h2>{nombreEvento}</h2>
+              </div>
+            </div>
+
+            <div className="flex-grow mb-4">
+              {/* contenido principal */}
+              <div className="bg-gradient-to-b from-gray-100 via-white to-gray-100 text-gray-50 h-full flex flex-col">
+                <div className="grid grid-cols-3 gap-x-4 text-black flex-grow">
+                  <div className="col-span-1 mr-4 my-auto flex justify-center items-center">
+                    <Swiper
+                      ref={swiperRef}
+                      spaceBetween={30}
+                      effect="fade"
+                      autoplay={{
+                        delay: 2500,
+                        disableOnInteraction: false,
+                      }}
+                      loop
+                      modules={[Autoplay, Pagination, EffectFade]}
+                      className="mySwiper"
+                      style={{ width: "100%", height: "100%" }}
+                    >
+                      {images.map((image, index) => (
+                        <SwiperSlide key={index + 1}>
+                          <img
+                            src={image}
+                            alt={index + 1}
+                            className="object-cover"
+                            style={{
+                              maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
+                            }}
+                          />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                    {images.length === 0 && (
+                      <p
                         style={{
-                          maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
+                          color: templateActual.fontColor,
+                          fontFamily: templateActual.fontStyle,
                         }}
-                      />
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-                {images.length === 0 && (
+                      >
+                        No hay imágenes disponibles
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="col-span-2 space-y-8 my-4">
+                    <div>
+                      <p
+                        className="text-3xl md:text-4xl text-color font-bold"
+                        style={{ fontFamily: templateActual.fontStyle }}
+                      >
+                        {/* Sesión: */}
+                        {t("pantalla.session")}
+                      </p>
+                      <p
+                        className="text-3xl md:text-4xl text-color font-bold"
+                        style={{ fontFamily: templateActual.fontStyle }}
+                      >
+                        {horaInicialReal}
+                        <span className="text-2x1"> hrs.</span>
+                      </p>
+                    </div>
+                    <div>
+                      <h1
+                        className="text-3xl md:text-4xl text-color font-bold"
+                        style={{ fontFamily: templateActual.fontStyle }}
+                      >
+                        {tipoEvento}
+                      </h1>
+                      <div className="text-center flex px-0 mt-6">
+                        <p
+                          className="text-3xl text-color md:text-4xl"
+                          style={{ fontFamily: templateActual.fontStyle }}
+                        >
+                          {description}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Fecha */}
+            <div className="mt-auto">
+              {/* Linea abajo */}
+              <div
+                id="Abajo"
+                className={` text-3xl md:text-4xl md:py-4 py-2 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
+                style={{
+                  backgroundColor: templateActual.templateColor,
+                  color: templateActual.fontColor,
+                  fontFamily: templateActual.fontStyle,
+                }}
+              >
+                <p
+                  className="font-bold uppercase"
+                  style={{
+                    color: templateActual.fontColor,
+                    fontFamily: templateActual.fontStyle,
+                  }}
+                >
+                  {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
+                  <GetLanguageDate idioma={templateData[0].idioma} />
+                </p>
+                <div className="flex items-center justify-center mb-1">
+                  <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
                   <p
+                    className=" uppercase"
                     style={{
                       color: templateActual.fontColor,
                       fontFamily: templateActual.fontStyle,
                     }}
                   >
-                    No hay imágenes disponibles
-                  </p>
-                )}
-              </div>
-
-              <div className="col-span-2 space-y-8 my-4">
-                <div>
-                  <p
-                    className="text-3xl md:text-4xl text-color font-bold"
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    {/* Sesión: */}
-                    {t("pantalla.session")}
-                  </p>
-                  <p
-                    className="text-3xl md:text-4xl text-color font-bold"
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    {horaInicialReal}
-                    <span className="text-2x1"> hrs.</span>
-                  </p>
+                    {currentHour}
+                  </p>{" "}
+                  {/* Mostrar la hora actual */}
                 </div>
-                <div>
-                  <h1
-                    className="text-3xl md:text-4xl text-color font-bold"
-                    style={{ fontFamily: templateActual.fontStyle }}
-                  >
-                    {tipoEvento}
-                  </h1>
-                  <div className="text-center flex px-0 mt-6">
-                    <p
-                      className="text-3xl text-color md:text-4xl"
-                      style={{ fontFamily: templateActual.fontStyle }}
+              </div>
+            </div>
+          </div>
+        </section>
+      ) : (
+        <section className="flex flex-col p-4  h-screen flex-grow flex-shrink-0 overflow-hidden">
+          {/* Línea superior: Logo, título y clima */}
+          <div className="flex justify-between items-center mb-4">
+            {templateActual.logo && (
+              <>
+                <div style={{ height: "100%" }}>
+                  <img
+                    src={templateActual.logo}
+                    alt="Logo"
+                    className=" object-cover"
+                    style={{
+                      width: windowSize.width / 6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                    }}
+                  />
+                </div>
+              </>
+            )}
+            <h1
+              className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl   text-color `}
+              style={{ fontFamily: templateActual.fontStyle }}
+            >
+              {dispositivoCoincidenteLAL}
+            </h1>
+          </div>
+
+          {/* Línea inferior */}
+          <div className="flex flex-col flex-grow">
+            {/* Nombre del evento */}
+
+            <div className="flex-grow mb-4">
+              {/* contenido principal */}
+              <div
+                className="bg-gradient-to-b bg-black h-full flex flex-col"
+                style={{
+                  backgroundColor: templateActual.templateColor,
+                }}
+              >
+                <div className="grid grid-cols-3 gap-x-4 text-black flex-grow">
+                  <div className="col-span-1 mr-4 my-auto flex justify-center items-center">
+                    <Swiper
+                      ref={swiperRef}
+                      spaceBetween={30}
+                      effect="fade"
+                      autoplay={{
+                        delay: 2500,
+                        disableOnInteraction: false,
+                      }}
+                      loop
+                      modules={[Autoplay, Pagination, EffectFade]}
+                      className="mySwiper"
+                      style={{ width: "100%", height: "100%" }}
                     >
-                      {description}
-                    </p>
+                      {images.map((image, index) => (
+                        <SwiperSlide key={index + 1}>
+                          <img
+                            src={image}
+                            alt={index + 1}
+                            className="object-cover"
+                            style={{
+                              maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
+                            }}
+                          />
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                    {images.length === 0 && (
+                      <p
+                        style={{
+                          color: templateActual.fontColor,
+                          fontFamily: templateActual.fontStyle,
+                        }}
+                      >
+                        No hay imágenes disponibles
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="col-span-2 space-y-8 my-4">
+                    <div
+                      className={`text-3xl md:text-6xl text-color font-bold`}
+                      style={{
+                        color: templateActual.fontColor,
+                        fontFamily: templateActual.fontStyle,
+                      }}
+                    >
+                      <h2>{nombreEvento}</h2>
+                    </div>
+
+                    <div>
+                      <h1
+                        className="text-3xl md:text-5xl text-color font-bold"
+                        style={{
+                          fontFamily: templateActual.fontStyle,
+                          color: templateActual.fontColor,
+                        }}
+                      >
+                        {tipoEvento}
+                      </h1>
+                      <div>
+                        <p
+                          className="text-3xl md:text-5xl text-color font-bold mt-5"
+                          style={{
+                            fontFamily: templateActual.fontStyle,
+                            color: templateActual.fontColor,
+                          }}
+                        >
+                          {horaInicialReal} - {horaFinalReal}
+                          <span className="text-2x1"> .</span>
+                        </p>
+                      </div>
+                      <div className="text-center flex px-0 mt-6 justify-center">
+                        <p
+                          className="text-4xl text-color md:text-4xl"
+                          style={{
+                            fontFamily: templateActual.fontStyle,
+                            color: templateActual.fontColor,
+                          }}
+                        >
+                          {description}
+                        </p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Fecha */}
-        <div className="mt-auto">
-          {/* Linea abajo */}
-          <div
-            id="Abajo"
-            className={` text-3xl md:text-4xl md:py-4 py-2 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
-            style={{
-              backgroundColor: templateActual.templateColor,
-              color: templateActual.fontColor,
-              fontFamily: templateActual.fontStyle,
-            }}
-          >
-            <p
-              className="font-bold uppercase"
-              style={{
-                color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
-              }}
-            >
-              {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
-              <GetLanguageDate idioma={templateData[0].idioma} />
-            </p>
-            <div className="flex items-center justify-center mb-1">
-              <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
-              <p
-                className=" uppercase"
+            {/* Fecha */}
+            <div className="mt-auto">
+              {/* Linea abajo */}
+              <div
+                id="Abajo"
+                className={` text-black text-3xl md:text-4xl md:py-4 py-2 font-semibold mt-1 text-center justify-between flex px-20 rounded-b-xl`}
                 style={{
-                  color: templateActual.fontColor,
                   fontFamily: templateActual.fontStyle,
                 }}
               >
-                {currentHour}
-              </p>{" "}
-              {/* Mostrar la hora actual */}
+                <p
+                  className="font-bold uppercase"
+                  style={{
+                    fontFamily: templateActual.fontStyle,
+                  }}
+                >
+                  {/* FECHA Y HORA EN IDIOMA DEL TEMPLATE */}
+                  <GetLanguageDate idioma={templateData[0].idioma} />
+                </p>
+                <div className="flex items-center justify-center mb-1">
+                  <img src="/img/reloj.png" className="p-1 h-8 mt-1" />
+                  <p
+                    className=" uppercase"
+                    style={{
+                      fontFamily: templateActual.fontStyle,
+                    }}
+                  >
+                    {currentHour}
+                  </p>{" "}
+                  {/* Mostrar la hora actual */}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
-    </section>
+        </section>
+      )}
+    </>
   );
 }
-
 export default Pantalla2;
