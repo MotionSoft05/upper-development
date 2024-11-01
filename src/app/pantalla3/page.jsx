@@ -625,7 +625,7 @@ function Pantalla3() {
           </div>
         </section>
       ) : (
-        <section className="flex flex-col p-4  h-screen flex-grow flex-shrink-0 overflow-hidden">
+        <section className="flex flex-col py-4  h-screen flex-grow flex-shrink-0 overflow-hidden">
           {/* Línea superior: Logo, título y clima */}
           <div className="flex justify-between items-center mb-4">
             {templateActual.logo && (
@@ -664,7 +664,7 @@ function Pantalla3() {
                 }}
               >
                 <div className="grid grid-cols-3 gap-x-4 text-black flex-grow">
-                  <div className="col-span-1 mr-4 my-auto flex justify-center items-center">
+                  <div className="col-span-1 mr-4 my-auto flex justify-center items-center ">
                     <Swiper
                       ref={swiperRef}
                       spaceBetween={30}
@@ -683,7 +683,7 @@ function Pantalla3() {
                           <img
                             src={image}
                             alt={index + 1}
-                            className="object-cover"
+                            className="object-cover  rounded-2xl"
                             style={{
                               maxHeight: "80vh", // Opcional, para limitar la altura si es necesario
                             }}
@@ -733,7 +733,6 @@ function Pantalla3() {
                           }}
                         >
                           {horaInicialReal} - {horaFinalReal}
-                          <span className="text-2x1"> .</span>
                         </p>
                       </div>
                       <div className="text-center flex px-0 mt-6 justify-center">
@@ -792,4 +791,5 @@ function Pantalla3() {
     </>
   );
 }
+
 export default Pantalla3;
