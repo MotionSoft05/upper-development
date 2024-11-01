@@ -246,6 +246,7 @@ function PantallasSalon() {
                 templateSalonesSnapshot.docs[0].data();
 
               // Establecer datos de personalización en el estado
+              setSelectedTemplate(templateSalonesDocData.template || 1);
               setFontColor(templateSalonesDocData.fontColor || "#000000");
               setTemplateColor(
                 templateSalonesDocData.templateColor || "#D1D5DB"
@@ -280,6 +281,7 @@ function PantallasSalon() {
                 templateSalonesSnapshot.docs[0].data();
 
               // Establecer datos de personalización en el estado
+              setSelectedTemplate(templateSalonesDocData.template || 1);
               setFontColor(templateSalonesDocData.fontColor || "#000000");
               setTemplateColor(
                 templateSalonesDocData.templateColor || "#D1D5DB"
