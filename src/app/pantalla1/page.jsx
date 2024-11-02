@@ -554,7 +554,10 @@ function Pantalla1() {
                         style={{ fontFamily: templateActual.fontStyle }}
                       >
                         {/* Sesión: */}
-                        {t("pantalla.session")}
+                        {templateActual.idioma === "en" && "Session"}
+                        {templateActual.idioma === "es" && "Sesión"}
+                        {templateActual.idioma === "es-en" &&
+                          "Sesión / Session"}
                       </p>
                       <p
                         className="text-3xl md:text-4xl text-color font-bold"
@@ -644,7 +647,7 @@ function Pantalla1() {
               </>
             )}
             <h1
-              className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl   text-color `}
+              className={`font-bold uppercase sm:text-xs md:text-2xl lg:text-4xl xl:text-6xl  mr-2 text-color `}
               style={{ fontFamily: templateActual.fontStyle }}
             >
               {dispositivoCoincidenteLAL}
@@ -763,7 +766,7 @@ function Pantalla1() {
                 }}
               >
                 <p
-                  className="font-bold uppercase"
+                  className="font-bold uppercase text-color"
                   style={{
                     fontFamily: templateActual.fontStyle,
                   }}

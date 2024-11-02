@@ -527,29 +527,73 @@ function PantallaDirec1() {
   const pantalla = "directorio";
 
   const obtenerFecha = () => {
-    const diasSemana = t("pantallaDirec.weekdays", { returnObjects: true });
+    const diasSemana = {
+      es: [
+        "domingo",
+        "lunes",
+        "martes",
+        "miércoles",
+        "jueves",
+        "viernes",
+        "sábado",
+      ],
+      en: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ],
+    };
 
-    const meses = [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
-    ];
+    const meses = {
+      es: [
+        "enero",
+        "febrero",
+        "marzo",
+        "abril",
+        "mayo",
+        "junio",
+        "julio",
+        "agosto",
+        "septiembre",
+        "octubre",
+        "noviembre",
+        "diciembre",
+      ],
+      en: [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ],
+    };
 
     const now = new Date();
-    const diaSemana = diasSemana[now.getDay()];
+    const diaSemanaEs = diasSemana["es"][now.getDay()];
     const dia = now.getDate();
-    const mes = meses[now.getMonth()];
+    const mesEs = meses["es"][now.getMonth()];
 
-    return `${diaSemana} ${dia}/${mes} `;
+    const diaSemanaEn = diasSemana["en"][now.getDay()];
+    const mesEn = meses["en"][now.getMonth()];
+
+    if (templateActual.idioma === "es") {
+      return `${diaSemanaEs} ${dia} ${mesEs}`;
+    } else if (templateActual.idioma === "en") {
+      return `${diaSemanaEn} ${dia} ${mesEn}`;
+    } else if (templateActual.idioma === "es-en") {
+      return `${diaSemanaEs} ${dia} ${mesEs} / ${diaSemanaEn} ${dia} ${mesEn}`;
+    }
   };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -668,7 +712,10 @@ function PantallaDirec1() {
                 </p>
                 <h1 className="text-2xl font-bold">
                   {/* Eventos del día */}
-                  {t("pantallaDirec.todaysEvents")}
+                  {templateActual.idioma === "en" && "Today's Events"}
+                  {templateActual.idioma === "es" && "Eventos del día"}
+                  {templateActual.idioma === "es-en" &&
+                    "Eventos del día / Today's Events"}
                 </h1>
               </div>
 
@@ -682,7 +729,12 @@ function PantallaDirec1() {
                 {isLoading ? (
                   <p>
                     {/* Cargando datos del clima... */}
-                    {t("pantallaDirec.loadingWeatherData")}
+                    {templateActual.idioma === "en" &&
+                      "Loading weather data..."}
+                    {templateActual.idioma === "es" &&
+                      "Cargando datos del clima..."}
+                    {templateActual.idioma === "es-en" &&
+                      "Cargando datos del clima... / Loading weather data..."}
                   </p>
                 ) : weatherData &&
                   weatherData.current &&
@@ -701,7 +753,10 @@ function PantallaDirec1() {
                   //si no da el Clima muestra un mensaje de Bienvenida
                   <h2 className="text-4xl mr-16">
                     {/* Bienvenido */}
-                    {t("pantallaDirec.welcomeTitle")}
+                    {templateActual.idioma === "en" && "Welcome"}
+                    {templateActual.idioma === "es" && "Bienvenido"}
+                    {templateActual.idioma === "es-en" &&
+                      "Bienvenido / Welcome"}
                   </h2>
                 )}
               </div>
@@ -775,7 +830,10 @@ function PantallaDirec1() {
               </p>
               <h1 className="text-2xl font-bold">
                 {/* Eventos del día */}
-                {t("pantallaDirec.todaysEvents")}
+                {templateActual.idioma === "en" && "Today's Events"}
+                {templateActual.idioma === "es" && "Eventos del día"}
+                {templateActual.idioma === "es-en" &&
+                  "Eventos del día / Today's Events"}
               </h1>
             </div>
 
@@ -789,7 +847,11 @@ function PantallaDirec1() {
               {isLoading ? (
                 <p>
                   {/* Cargando datos del clima... */}
-                  {t("pantallaDirec.loadingWeatherData")}
+                  {templateActual.idioma === "en" && "Loading weather data..."}
+                  {templateActual.idioma === "es" &&
+                    "Cargando datos del clima..."}
+                  {templateActual.idioma === "es-en" &&
+                    "Cargando datos del clima... / Loading weather data..."}
                 </p>
               ) : weatherData &&
                 weatherData.current &&
@@ -808,7 +870,9 @@ function PantallaDirec1() {
                 //si no da el Clima muestra un mensaje de Bienvenida
                 <h2 className="text-4xl mr-16">
                   {/* Bienvenido */}
-                  {t("pantallaDirec.welcomeTitle")}
+                  {templateActual.idioma === "en" && "Welcome"}
+                  {templateActual.idioma === "es" && "Bienvenido"}
+                  {templateActual.idioma === "es-en" && "Bienvenido / Welcome"}
                 </h2>
               )}
             </div>
@@ -880,8 +944,10 @@ function PantallaDirec1() {
                 {obtenerFecha()}-{currentHour}
               </p>
               <h1 className="text-2xl font-bold">
-                {/* Eventos del día */}
-                {t("pantallaDirec.todaysEvents")}
+                {templateActual.idioma === "en" && "Today's Events"}
+                {templateActual.idioma === "es" && "Eventos del día"}
+                {templateActual.idioma === "es-en" &&
+                  "Eventos del día / Today's Events"}
               </h1>
             </div>
 
@@ -895,7 +961,11 @@ function PantallaDirec1() {
               {isLoading ? (
                 <p>
                   {/* Cargando datos del clima... */}
-                  {t("pantallaDirec.loadingWeatherData")}
+                  {templateActual.idioma === "en" && "Loading weather data..."}
+                  {templateActual.idioma === "es" &&
+                    "Cargando datos del clima..."}
+                  {templateActual.idioma === "es-en" &&
+                    "Cargando datos del clima... / Loading weather data..."}
                 </p>
               ) : weatherData &&
                 weatherData.current &&
@@ -914,7 +984,9 @@ function PantallaDirec1() {
                 //si no da el Clima muestra un mensaje de Bienvenida
                 <h2 className="text-4xl mr-16">
                   {/* Bienvenido */}
-                  {t("pantallaDirec.welcomeTitle")}
+                  {templateActual.idioma === "en" && "Welcome"}
+                  {templateActual.idioma === "es" && "Bienvenido"}
+                  {templateActual.idioma === "es-en" && "Bienvenido / Welcome"}
                 </h2>
               )}
             </div>
@@ -935,7 +1007,9 @@ function PantallaDirec1() {
                   {/* Título */}
                   <h2 className=" text-xl text-center">
                     {/* EVENTOS */}
-                    {t("pantallaDirec.eventsTitle")}
+                    {templateActual.idioma === "en" && "EVENTS"}
+                    {templateActual.idioma === "es" && "EVENTOS"}
+                    {templateActual.idioma === "es-en" && "EVENTOS / EVENTS"}
                   </h2>
                 </div>
                 {/* contenido principal */}
@@ -1116,13 +1190,15 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* Título */}
-                  <h2z
+                  <h2
                     className="text-color text-xl text-center align-bottom "
                     style={{ color: templateActual.fontColor }}
                   >
                     {/* NOTICIAS */}
-                    {t("pantallaDirec.newsTitle")}
-                  </h2z>
+                    {templateActual.idioma === "en" && "NEWS"}
+                    {templateActual.idioma === "es" && "NOTICIAS"}
+                    {templateActual.idioma === "es-en" && "NOTICIAS / NEWS"}
+                  </h2>
                 </div>
               </div>
               <div className="col-span-1 md:col-span-1 flex items-center justify-center  mx-3">
@@ -1159,7 +1235,9 @@ function PantallaDirec1() {
                 {/* Título */}
                 <h2 className=" text-xl text-center">
                   {/* EVENTOS */}
-                  {t("pantallaDirec.eventsTitle")}
+                  {templateActual.idioma === "en" && "EVENTS"}
+                  {templateActual.idioma === "es" && "EVENTOS"}
+                  {templateActual.idioma === "es-en" && "EVENTOS / EVENTS"}
                 </h2>
               </div>
               {/* contenido principal */}
@@ -1374,7 +1452,9 @@ function PantallaDirec1() {
                   }}
                 >
                   {/* NOTICIAS */}
-                  {t("pantallaDirec.newsTitle")}
+                  {templateActual.idioma === "en" && "NEWS"}
+                  {templateActual.idioma === "es" && "NOTICIAS"}
+                  {templateActual.idioma === "es-en" && "NOTICIAS / NEWS"}
                 </h2>
               </div>
             </div>
@@ -1402,7 +1482,11 @@ function PantallaDirec1() {
               <div className="flex flex-col items-center mx-2 ">
                 <p className="mb-2 text-center">
                   {/* Eventos en tu dispositivo */}
-                  {t("pantallaDirec.deviceEventsDescription")}
+                  {templateActual.idioma === "en" && "Events on your device"}
+                  {templateActual.idioma === "es" &&
+                    "Eventos en tu dispositivo"}
+                  {templateActual.idioma === "es-en" &&
+                    "Eventos en tu dispositivo / Events on your device"}
                 </p>
                 {qrCodeUrl && (
                   <a
