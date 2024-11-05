@@ -25,7 +25,8 @@ import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig"; // Credenciales .env
-
+import img1 from "@/../public/img/img1.jpg";
+import img2 from "@/../public/img/img2.jpg";
 //TODO verificar que haga falta inicializar y getFirestore, getStorage que se deban llamar vacios o con app
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -348,15 +349,13 @@ function PantallasSalon() {
     {
       id: 1,
       name: "Template 1",
-      previewUrl:
-        "https://upload.wikimedia.org/wikipedia/commons/5/55/Flag_of_Argentina_%2816-9%29.png",
+      previewUrl: "/img/img1.jpg",
       description: "Diseño clásico con información clara y ordenada",
     },
     {
       id: 2,
       name: "Template 2",
-      previewUrl:
-        "https://wallpapers.com/images/featured/mexico-6g2c0dcx89ayis8l.jpg",
+      previewUrl: "/img/img2.jpg",
       description: "Diseño moderno con elementos dinámicos",
     },
   ];
@@ -731,7 +730,7 @@ function PantallasSalon() {
                       <img
                         src={template.previewUrl}
                         alt={template.name}
-                        className="w-32 h-24 object-cover rounded-lg border-2 border-gray-600 transition-all duration-200 group-hover:border-blue-500"
+                        className="w-32 h-24 object-fill rounded-lg border-2 border-gray-600 transition-all duration-200 group-hover:border-blue-500"
                       />
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 rounded-lg transition-opacity duration-200">
                         <span className="text-white text-sm">Ver preview</span>
