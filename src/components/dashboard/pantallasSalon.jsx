@@ -25,8 +25,7 @@ import { useKeenSlider } from "keen-slider/react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig"; // Credenciales .env
-import img1 from "@/../public/img/img1.jpg";
-import img2 from "@/../public/img/img2.jpg";
+
 //TODO verificar que haga falta inicializar y getFirestore, getStorage que se deban llamar vacios o con app
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
