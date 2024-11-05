@@ -348,7 +348,7 @@ function PantallasSalon() {
     {
       id: 1,
       name: "Template 1",
-      previewUrl: "/img/img2.jpg",
+      previewUrl: "/img/ImagenFix1.jpg",
       description: "Diseño clásico con información clara y ordenada",
     },
     {
