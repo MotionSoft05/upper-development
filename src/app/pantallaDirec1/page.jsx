@@ -745,7 +745,7 @@ function PantallaDirec1() {
                       alt="Clima"
                       className="w-16"
                     />
-                    <p className="text-2xl font-bold ml-2 mr-6">
+                    <p className="text-base font-bold ml-2 mr-6">
                       {weatherData.current.temp_c} °C
                     </p>
                   </div>
@@ -862,7 +862,7 @@ function PantallaDirec1() {
                     alt="Clima"
                     className="w-16"
                   />
-                  <p className="text-2xl font-bold ml-2 mr-6">
+                  <p className="text-base font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -976,7 +976,7 @@ function PantallaDirec1() {
                     alt="Clima"
                     className="w-16"
                   />
-                  <p className="text-2xl font-bold ml-2 mr-6">
+                  <p className="text-base font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -997,7 +997,7 @@ function PantallaDirec1() {
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
+                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-8`}
                   style={{
                     background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
@@ -1182,7 +1182,7 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
+                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-8 flex justify-center items-end`}
                   style={{
                     background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
 
@@ -1224,7 +1224,7 @@ function PantallaDirec1() {
             <div className="">
               {/* Linea arriba */}{" "}
               <div
-                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
+                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-8`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -1424,7 +1424,7 @@ function PantallaDirec1() {
               </div>
               {/* Linea abajo */}
               <div
-                className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
+                className={`text-white uppercase font-bold px-20 rounded-b-xl h-8 flex justify-center items-end`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
