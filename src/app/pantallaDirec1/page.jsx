@@ -1054,7 +1054,7 @@ function PantallaDirec1() {
                   weatherData.current.temp_c ? (
                   <div className="grid grid-cols-2 items-center ">
                     <img src={weatherData.current.condition.icon} alt="Clima" />
-                    <p className="text-2xl font-bold ">
+                    <p className="text-2xl font-bold -ml-4 w-24">
                       {weatherData.current.temp_c} °C
                     </p>
                     <div className="flex justify-center col-span-2">
