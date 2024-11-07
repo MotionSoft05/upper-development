@@ -582,8 +582,9 @@ function PantallaDirec1() {
     const diaSemana = diasSemana[idioma][now.getDay()];
     const dia = now.getDate();
     const mes = meses[idioma][now.getMonth()];
+    const year = now.getFullYear(); // Obtener el año actual
 
-    return `${diaSemana} ${dia} ${mes}`;
+    return `${diaSemana} ${dia} ${mes} ${year}`;
   };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -946,16 +947,14 @@ function PantallaDirec1() {
                     Today&apos;s Events
                   </h1>
 
-                  <h1
-                    className={` text-center mb-2 block ${
+                  <div
+                    className={` text-center mb-2  ${
                       templateActual.idioma === "es-en" ? "block" : "hidden"
                     }`}
                   >
-                    <span className="text-2xl font-bold">Eventos del día</span>{" "}
-                    <span className="text-xl font-bold">
-                      Today&apos;s Events
-                    </span>
-                  </h1>
+                    <p className="text-2xl font-bold">Eventos del día</p>
+                    <p className="text-xl font-bold">Today&apos;s Events</p>
+                  </div>
                   <p
                     className={`text-base text-center mb-2 ${
                       templateActual.idioma === "es" ? "block" : "hidden"
@@ -1053,15 +1052,14 @@ function PantallaDirec1() {
                 ) : weatherData &&
                   weatherData.current &&
                   weatherData.current.temp_c ? (
-                  <div className="flex items-center">
-                    <img
-                      src={weatherData.current.condition.icon}
-                      alt="Clima"
-                      className="w-16"
-                    />
-                    <p className="text-2xl font-bold w-36">
+                  <div className="grid grid-cols-2 items-center ">
+                    <img src={weatherData.current.condition.icon} alt="Clima" />
+                    <p className="text-2xl font-bold ">
                       {weatherData.current.temp_c} °C
                     </p>
+                    <div className="flex justify-center col-span-2">
+                      <p className="text-2xl font-bold ">{currentHour}</p>
+                    </div>
                   </div>
                 ) : (
                   //si no da el Clima muestra un mensaje de Bienvenida
@@ -1073,9 +1071,6 @@ function PantallaDirec1() {
                       "Bienvenido / Welcome"}
                   </h2>
                 )}
-              </div>
-              <div className="flex justify-center">
-                <p className="text-2xl font-bold ">{currentHour}</p>
               </div>
             </div>
           </div>
