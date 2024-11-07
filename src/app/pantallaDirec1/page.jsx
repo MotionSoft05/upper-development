@@ -525,17 +525,16 @@ function PantallaDirec1() {
   // ----------------- RSS ---------------------------
 
   const pantalla = "directorio";
-
-  const obtenerFecha = () => {
+  const obtenerFecha = (idioma) => {
     const diasSemana = {
       es: [
-        "domingo",
-        "lunes",
-        "martes",
-        "miércoles",
-        "jueves",
-        "viernes",
-        "sábado",
+        "Domingo",
+        "Lunes",
+        "Martes",
+        "Miércoles",
+        "Jueves",
+        "Viernes",
+        "Sábado",
       ],
       en: [
         "Sunday",
@@ -550,18 +549,18 @@ function PantallaDirec1() {
 
     const meses = {
       es: [
-        "enero",
-        "febrero",
-        "marzo",
-        "abril",
-        "mayo",
-        "junio",
-        "julio",
-        "agosto",
-        "septiembre",
-        "octubre",
-        "noviembre",
-        "diciembre",
+        "Enero",
+        "Febrero",
+        "Marzo",
+        "Abril",
+        "Mayo",
+        "Junio",
+        "Julio",
+        "Agosto",
+        "Septiembre",
+        "Octubre",
+        "Noviembre",
+        "Diciembre",
       ],
       en: [
         "January",
@@ -580,20 +579,11 @@ function PantallaDirec1() {
     };
 
     const now = new Date();
-    const diaSemanaEs = diasSemana["es"][now.getDay()];
+    const diaSemana = diasSemana[idioma][now.getDay()];
     const dia = now.getDate();
-    const mesEs = meses["es"][now.getMonth()];
+    const mes = meses[idioma][now.getMonth()];
 
-    const diaSemanaEn = diasSemana["en"][now.getDay()];
-    const mesEn = meses["en"][now.getMonth()];
-
-    if (templateActual.idioma === "es") {
-      return `${diaSemanaEs} ${dia} ${mesEs}`;
-    } else if (templateActual.idioma === "en") {
-      return `${diaSemanaEn} ${dia} ${mesEn}`;
-    } else if (templateActual.idioma === "es-en") {
-      return `${diaSemanaEs} ${dia} ${mesEs} / ${diaSemanaEn} ${dia} ${mesEn}`;
-    }
+    return `${diaSemana} ${dia} ${mes}`;
   };
 
   const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
@@ -938,55 +928,100 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              <p className="text-base text-center  mb-2">
-                {obtenerFecha()}-{currentHour}
+              <p
+                className={`text-base text-center mb-2 ${
+                  templateActual.idioma === "es" ? "block" : "hidden"
+                }`}
+              >
+                {obtenerFecha("es")}
               </p>
-              <h1 className="text-2xl font-bold">
-                {templateActual.idioma === "en" && "Today's Events"}
-                {templateActual.idioma === "es" && "Eventos del día"}
-                {templateActual.idioma === "es-en" &&
-                  "Eventos del día / Today's Events"}
+              <p
+                className={`text-base text-center mb-2 ${
+                  templateActual.idioma === "en" ? "block" : "hidden"
+                }`}
+              >
+                {obtenerFecha("en")}
+              </p>
+              <p
+                className={`text-base text-center mb-2 ${
+                  templateActual.idioma === "es-en" ? "block" : "hidden"
+                }`}
+              >
+                <p className="text-xl ">{obtenerFecha("es")}</p>
+                <p> {obtenerFecha("en")}</p>
+              </p>
+
+              <h1
+                className={`text-2xl font-bold  text-center mb-2 block ${
+                  templateActual.idioma === "es" ? "block" : "hidden"
+                }`}
+              >
+                Eventos del día
+              </h1>
+
+              <h1
+                className={`text-2xl font-bold text-center mb-2 block ${
+                  templateActual.idioma === "en" ? "block" : "hidden"
+                }`}
+              >
+                Today&apos;s Events
+              </h1>
+
+              <h1
+                className={` text-center mb-2 block ${
+                  templateActual.idioma === "es-en" ? "block" : "hidden"
+                }`}
+              >
+                <span className="text-2xl font-bold">Eventos del día</span>{" "}
+                <span className="text-xl font-bold">Today&apos;s Events</span>
               </h1>
             </div>
 
             {/* ---- Clima e Icono ---- */}
             <div
-              className="flex text-color "
+              className="flex-col text-color "
               style={{
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              {isLoading ? (
-                <p>
-                  {/* Cargando datos del clima... */}
-                  {templateActual.idioma === "en" && "Loading weather data..."}
-                  {templateActual.idioma === "es" &&
-                    "Cargando datos del clima..."}
-                  {templateActual.idioma === "es-en" &&
-                    "Cargando datos del clima... / Loading weather data..."}
-                </p>
-              ) : weatherData &&
-                weatherData.current &&
-                weatherData.current.temp_c ? (
-                <div className="flex items-center">
-                  <img
-                    src={weatherData.current.condition.icon}
-                    alt="Clima"
-                    className="w-16"
-                  />
-                  <p className="text-2xl font-bold w-36">
-                    {weatherData.current.temp_c} °C
+              <div>
+                {isLoading ? (
+                  <p>
+                    {/* Cargando datos del clima... */}
+                    {templateActual.idioma === "en" &&
+                      "Loading weather data..."}
+                    {templateActual.idioma === "es" &&
+                      "Cargando datos del clima..."}
+                    {templateActual.idioma === "es-en" &&
+                      "Cargando datos del clima... / Loading weather data..."}
                   </p>
-                </div>
-              ) : (
-                //si no da el Clima muestra un mensaje de Bienvenida
-                <h2 className="text-4xl mr-16">
-                  {/* Bienvenido */}
-                  {templateActual.idioma === "en" && "Welcome"}
-                  {templateActual.idioma === "es" && "Bienvenido"}
-                  {templateActual.idioma === "es-en" && "Bienvenido / Welcome"}
-                </h2>
-              )}
+                ) : weatherData &&
+                  weatherData.current &&
+                  weatherData.current.temp_c ? (
+                  <div className="flex items-center">
+                    <img
+                      src={weatherData.current.condition.icon}
+                      alt="Clima"
+                      className="w-16"
+                    />
+                    <p className="text-2xl font-bold w-36">
+                      {weatherData.current.temp_c} °C
+                    </p>
+                  </div>
+                ) : (
+                  //si no da el Clima muestra un mensaje de Bienvenida
+                  <h2 className="text-4xl mr-16">
+                    {/* Bienvenido */}
+                    {templateActual.idioma === "en" && "Welcome"}
+                    {templateActual.idioma === "es" && "Bienvenido"}
+                    {templateActual.idioma === "es-en" &&
+                      "Bienvenido / Welcome"}
+                  </h2>
+                )}
+              </div>
+              <div className="flex justify-center">
+                <p className="text-2xl font-bold ">{currentHour}</p>
+              </div>
             </div>
           </div>
           {/* Contenedor de eventos */}
