@@ -745,7 +745,7 @@ function PantallaDirec1() {
                       alt="Clima"
                       className="w-16"
                     />
-                    <p className="text-base font-bold ml-2 mr-6">
+                    <p className="text-2xl font-bold ml-2 mr-6">
                       {weatherData.current.temp_c} °C
                     </p>
                   </div>
@@ -862,7 +862,7 @@ function PantallaDirec1() {
                     alt="Clima"
                     className="w-16"
                   />
-                  <p className="text-base font-bold ml-2 mr-6">
+                  <p className="text-2xl font-bold ml-2 mr-6">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -916,23 +916,21 @@ function PantallaDirec1() {
           {/* Header */}
           <div className="flex items-center justify-between ">
             {/* Logo en la esquina superior izquierda */}
-            <div className=" ">
-              {templateActual.logo && (
-                <>
-                  <div className="ml-5" style={{ height: "100%" }}>
-                    <img
-                      src={templateActual.logo}
-                      alt="Logo"
-                      className="rounded-lg object-contain w-full h-full  "
-                      style={{
-                        width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                        height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </div>
+            {templateActual.logo && (
+              <>
+                <div className="ml-5" style={{ height: "100%" }}>
+                  <img
+                    src={templateActual.logo}
+                    alt="Logo"
+                    className="rounded-lg object-contain w-full h-full  "
+                    style={{
+                      width: windowSize.width / 8.6, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 8.6, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                    }}
+                  />
+                </div>
+              </>
+            )}
             {/* ---- Titulo Eventos del dia y Fecha---- */}
             <div
               className="flex flex-col text-color items-center"
@@ -953,7 +951,7 @@ function PantallaDirec1() {
 
             {/* ---- Clima e Icono ---- */}
             <div
-              className="flex text-color flex-col"
+              className="flex text-color "
               style={{
                 fontFamily: templateActual.fontStyle,
               }}
@@ -970,13 +968,13 @@ function PantallaDirec1() {
               ) : weatherData &&
                 weatherData.current &&
                 weatherData.current.temp_c ? (
-                <div className="flex items-center justify-center mr-4">
+                <div className="flex items-center">
                   <img
                     src={weatherData.current.condition.icon}
                     alt="Clima"
                     className="w-16"
                   />
-                  <p className="text-base font-bold ml-2 mr-6">
+                  <p className="text-2xl font-bold w-36">
                     {weatherData.current.temp_c} °C
                   </p>
                 </div>
@@ -994,10 +992,11 @@ function PantallaDirec1() {
           {/* Contenedor de eventos */}
           {!templateData[0]?.setPortrait ? (
             <div className="grid grid-cols-4 bg-white">
+              {/* normal */}
               <div className="col-span-3 md:col-span-3  mx-3">
                 {/* Linea arriba */}{" "}
                 <div
-                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-8`}
+                  className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
                   style={{
                     background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
                     color: templateActual.fontColor,
@@ -1182,7 +1181,7 @@ function PantallaDirec1() {
                 </div>
                 {/* Linea abajo */}
                 <div
-                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-8 flex justify-center items-end`}
+                  className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
                   style={{
                     background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`, // Ajusta el punto de inicio del degradado
 
@@ -1222,9 +1221,10 @@ function PantallaDirec1() {
             </div>
           ) : (
             <div className="">
+              {/* 90 grados */}
               {/* Linea arriba */}{" "}
               <div
-                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-8`}
+                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -1424,7 +1424,7 @@ function PantallaDirec1() {
               </div>
               {/* Linea abajo */}
               <div
-                className={`text-white uppercase font-bold px-20 rounded-b-xl h-8 flex justify-center items-end`}
+                className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
