@@ -1017,16 +1017,14 @@ function PantallaDirec1() {
                   >
                     Today&apos;s Events
                   </h1>
-                  <h1
-                    className={` text-center mb-2 block ${
+                  <div
+                    className={` text-center mb-2  ${
                       templateActual.idioma === "es-en" ? "block" : "hidden"
                     }`}
                   >
-                    <span className="text-2xl font-bold">Eventos del día</span>{" "}
-                    <span className="text-xl font-bold">
-                      Today&apos;s Events
-                    </span>
-                  </h1>
+                    <p className="text-2xl font-bold">Eventos del día</p>
+                    <p className="text-xl font-bold">Today&apos;s Events</p>
+                  </div>
                 </>
               )}
             </div>
