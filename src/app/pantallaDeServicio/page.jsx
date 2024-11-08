@@ -43,12 +43,18 @@ function PantallaServicio() {
     Seccion3: [],
   });
   console.log("🚀 ~ PantallaServicio ~ eventosPorSeccion:", eventosPorSeccion);
-  const [seccion1, setSeccion1] = useState(null);
-  console.log("🚀 ~ PantallaServicio ~ seccion1:", seccion1);
-  const [seccion2, setSeccion2] = useState(null);
-  console.log("🚀 ~ PantallaServicio ~ seccion2:", seccion2);
-  const [seccion3, setSeccion3] = useState(null);
-  console.log("🚀 ~ PantallaServicio ~ seccion3:", seccion3);
+
+  const [currentIndexes, setCurrentIndexes] = useState({
+    Seccion1: 0,
+    Seccion2: 0,
+    Seccion3: 0,
+  });
+  // const [seccion1, setSeccion1] = useState(null);
+  // console.log("🚀 ~ PantallaServicio ~ seccion1:", seccion1);
+  // const [seccion2, setSeccion2] = useState(null);
+  // console.log("🚀 ~ PantallaServicio ~ seccion2:", seccion2);
+  // const [seccion3, setSeccion3] = useState(null);
+  // console.log("🚀 ~ PantallaServicio ~ seccion3:", seccion3);
   //* Función para obtener la hora actual
   function obtenerHoraActual() {
     setCurrentHour(obtenerHora()); // Actualizar el estado con la hora actual
@@ -84,6 +90,8 @@ function PantallaServicio() {
   useEffect(() => {
     if (user && firestore) {
       const userRef = doc(firestore, "usuarios", user.uid);
+
+      // Lógica para obtener el usuario
       const obtenerUsuario = async () => {
         try {
           const docSnap = await getDoc(userRef);
@@ -105,7 +113,6 @@ function PantallaServicio() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
-            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const selectedScreenName = evento.selectedScreenName;
@@ -133,6 +140,7 @@ function PantallaServicio() {
 
             const fechaActual = new Date();
 
+            // Filtrar eventos por fecha
             const filtrarEventosPorFecha = (eventos) => {
               return eventos.filter((evento) => {
                 const inicio = new Date(evento.startDate);
@@ -141,21 +149,19 @@ function PantallaServicio() {
               });
             };
 
+            // Ordenar eventos por lugar
             const ordenarEventosPorLugar = (eventos) => {
               const orden = { A: 1, B: 2, C: 3 };
               return eventos.sort((a, b) => orden[a.lugar] - orden[b.lugar]);
             };
 
+            // Dividir eventos por secciones
             const eventosSeccion1 = ordenarEventosPorLugar(
               filtrarEventosPorFecha(
                 eventosData.filter(
                   (evento) => evento.selectedSection === "Sección 1"
                 )
               )
-            );
-            console.log(
-              "🚀 ~ obtenerUsuario ~ eventosSeccion1:",
-              eventosSeccion1
             );
             const eventosSeccion2 = ordenarEventosPorLugar(
               filtrarEventosPorFecha(
@@ -164,10 +170,6 @@ function PantallaServicio() {
                 )
               )
             );
-            console.log(
-              "🚀 ~ obtenerUsuario ~ eventosSeccion2:",
-              eventosSeccion2
-            );
             const eventosSeccion3 = ordenarEventosPorLugar(
               filtrarEventosPorFecha(
                 eventosData.filter(
@@ -175,10 +177,7 @@ function PantallaServicio() {
                 )
               )
             );
-            console.log(
-              "🚀 ~ obtenerUsuario ~ eventosSeccion3:",
-              eventosSeccion3
-            );
+
             setEventosPorSeccion({
               Seccion1: eventosSeccion1,
               Seccion2: eventosSeccion2,
@@ -188,37 +187,41 @@ function PantallaServicio() {
             // Limpiar intervalos previos antes de establecer nuevos
             Object.values(intervalRefs.current).forEach(clearInterval);
 
+            // Mostrar evento según la sección
             const mostrarEvento = (eventos, setSeccionEstado, seccionKey) => {
               if (eventos.length === 0) return;
               let index = 0;
               setSeccionEstado(eventos[index]);
 
               intervalRefs.current[seccionKey] = setInterval(() => {
-                index = (index + 1) % eventos.length;
+                index = (index + 1) % eventos.length; // Ciclo de eventos
                 setSeccionEstado(eventos[index]);
-              }, eventos[index].visualizationTime.seconds * 1000);
+              }, 1000 * 60); // 1 minuto
             };
 
-            if (eventosSeccion1.length)
-              mostrarEvento(eventosSeccion1, setSeccion1, "Seccion1");
-            if (eventosSeccion2.length)
-              mostrarEvento(eventosSeccion2, setSeccion2, "Seccion2");
-            if (eventosSeccion3.length)
-              mostrarEvento(eventosSeccion3, setSeccion3, "Seccion3");
+            mostrarEvento(eventosSeccion1, setSeccion1, "Seccion1");
+            mostrarEvento(eventosSeccion2, setSeccion2, "Seccion2");
+            mostrarEvento(eventosSeccion3, setSeccion3, "Seccion3");
+          } else {
+            console.log("pantallaDirec.noDataFound");
           }
         } catch (error) {
-          console.error("Error al obtener eventos:", error);
+          console.error("pantallaDirec.userDataFetchError", error);
         }
       };
 
       obtenerUsuario();
 
-      // Cleanup al desmontarse el componente
+      // Intervalo para actualizar los datos cada minuto
+      const interval = setInterval(() => {
+        obtenerUsuario(); // Llamar a la función cada 1 minuto
+      }, 60000);
+
       return () => {
-        Object.values(intervalRefs.current).forEach(clearInterval);
+        clearInterval(interval); // Limpiar el intervalo al desmontar el componente
       };
     }
-  }, [user, firestore, empresaNombre]);
+  }, [user, firestore]);
 
   // *----------------- //Eventos ---------------------------
   // *----------------- Timer de los eventos ---------------------------
@@ -309,6 +312,50 @@ function PantallaServicio() {
   }, [selectedCity]);
   //* ----------------- Clima ---------------------------
 
+  useEffect(() => {
+    // Función para manejar el cambio de imagen en una sección específica
+    const startTimers = (seccion) => {
+      const eventos = eventosPorSeccion[seccion];
+      if (!eventos || eventos.length === 0) return;
+
+      // Obtener la imagen actual según el índice
+      const currentIndex = currentIndexes[seccion];
+      const currentEvent = eventos[currentIndex];
+      const { visualizationTime } = currentEvent;
+
+      // Calcular el tiempo en milisegundos
+      const delay =
+        (visualizationTime.hours * 3600 +
+          visualizationTime.minutes * 60 +
+          visualizationTime.seconds) *
+        1000;
+
+      // Crear un temporizador para cambiar a la siguiente imagen
+      const timer = setTimeout(() => {
+        setCurrentIndexes((prevIndexes) => ({
+          ...prevIndexes,
+          [seccion]: (prevIndexes[seccion] + 1) % eventos.length,
+        }));
+      }, delay);
+
+      return timer;
+    };
+
+    // Iniciar temporizadores para cada sección
+    const timers = {
+      Seccion1: startTimers("Seccion1"),
+      Seccion2: startTimers("Seccion2"),
+      Seccion3: startTimers("Seccion3"),
+    };
+
+    // Limpiar los temporizadores cuando el componente se desmonte o cuando los índices cambien
+    return () => {
+      clearTimeout(timers.Seccion1);
+      clearTimeout(timers.Seccion2);
+      clearTimeout(timers.Seccion3);
+    };
+  }, [currentIndexes, eventosPorSeccion]);
+
   const eventoActual = eventosEnCurso[eventoActualIndex] || {};
   return (
     <div className="min-h-screen bg-red-100 grid grid-rows-6 gap-1">
@@ -318,31 +365,37 @@ function PantallaServicio() {
         <div className="grid grid-rows-2 gap-1">
           <div className="bg-cyan-200 border-2 border-slate-300 p-1">
             {/* Renderizar eventos de Seccion1 */}
-            {eventosPorSeccion.Seccion1.map((evento) => (
-              <div key={evento.id}>
-                <img src={evento.image} alt={evento.selectedScreenName} />
-              </div>
-            ))}
+            <h2>Sección 1</h2>
+            {eventosPorSeccion.Seccion1.length > 0 && (
+              <img
+                src={eventosPorSeccion.Seccion1[currentIndexes.Seccion1].image}
+                alt="Sección 1"
+              />
+            )}
           </div>
 
           <div className="bg-cyan-200 border-2 border-slate-300 p-1">
             {/* Renderizar eventos de Seccion2 */}
-            {eventosPorSeccion.Seccion2.map((evento) => (
-              <div key={evento.id}>
-                <img src={evento.image} alt={evento.selectedScreenName} />
-              </div>
-            ))}
+            <h2>Sección 2</h2>
+            {eventosPorSeccion.Seccion2.length > 0 && (
+              <img
+                src={eventosPorSeccion.Seccion2[currentIndexes.Seccion2].image}
+                alt="Sección 2"
+              />
+            )}
           </div>
         </div>
 
         {/* Sección superior derecha */}
         <div className="bg-green-100 col-span-2 border-2 border-slate-300 p-1">
           {/* Renderizar eventos de Seccion3 */}
-          {eventosPorSeccion.Seccion3.map((evento) => (
-            <div key={evento.id}>
-              <img src={evento.image} alt={evento.selectedScreenName} />
-            </div>
-          ))}
+          <h2>Sección 3</h2>
+          {eventosPorSeccion.Seccion3.length > 0 && (
+            <img
+              src={eventosPorSeccion.Seccion3[currentIndexes.Seccion3].image}
+              alt="Sección 3"
+            />
+          )}
         </div>
       </div>
 

@@ -1163,29 +1163,6 @@ function PantallaDirec1() {
                 </>
               ) : (
                 <>
-                  {" "}
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("es")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("en")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-xl ">{obtenerFecha("es")}</p>
-                    <p> {obtenerFecha("en")}</p>
-                  </p>
                   <h1
                     className={`text-2xl font-bold  text-center mb-2 block ${
                       templateActual.idioma === "es" ? "block" : "hidden"
@@ -1208,6 +1185,28 @@ function PantallaDirec1() {
                     <p className="text-2xl font-bold">Eventos del día</p>
                     <p className="text-xl font-bold">Today&apos;s Events</p>
                   </div>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "es" ? "block" : "hidden"
+                    }`}
+                  >
+                    {obtenerFecha("es")}
+                  </p>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "en" ? "block" : "hidden"
+                    }`}
+                  >
+                    {obtenerFecha("en")}
+                  </p>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "es-en" ? "block" : "hidden"
+                    }`}
+                  >
+                    <p className="text-xl ">{obtenerFecha("es")}</p>
+                    <p> {obtenerFecha("en")}</p>
+                  </p>
                 </>
               )}
             </div>
@@ -1476,7 +1475,7 @@ function PantallaDirec1() {
                   <img
                     style={{
                       width: windowSize.width / 4, // Dividir por 5 o cualquier otro factor para ajustar el tamaño
-                      height: windowSize.height / 1.41, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
+                      height: windowSize.height / 1.48, // Dividir por 10 o cualquier otro factor para ajustar el tamaño
                       borderRadius: "10px", // Redondear las esquinas objectFit: "cover",
                     }}
                     src={templateData[0].publicidad}

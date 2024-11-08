@@ -195,7 +195,7 @@ function Sidebar(props) {
             </div>
             {/* Pantalla de Servicio  */}
             {/* Comentar para que no se vea */}
-            {/* <div className="my-px">
+            <div className="my-px">
               <button
                 className={efectSelect(props.showPantallaServicio)}
                 onClick={() => changePanel("setShowPantallaServicio")}
@@ -206,7 +206,7 @@ function Sidebar(props) {
 
                 <span className="ml-3">{t("sidebar.servicescreen")}</span>
               </button>
-            </div> */}
+            </div>
             {/* Publicidad */}
             <div className="my-px">
               <button
