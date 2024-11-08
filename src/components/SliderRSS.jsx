@@ -55,7 +55,7 @@ export default function SliderRSS() {
   const placeholders = new Array(8).fill(null);
 
   return (
-    <div ref={sliderRef} className="keen-slider h-28 ml-2">
+    <div ref={sliderRef} className="keen-slider h-24 ml-2">
       {placeholders.map((_, index) => (
         <div key={index} className="keen-slider__slide number-slide1">
           <h1 className="text-lg">{rssItems[index]?.title || "Cargando..."}</h1>
