@@ -1735,11 +1735,10 @@ function PantallaDirec1() {
               <div className="flex flex-col items-center mx-2 ">
                 <p className="mb-2 text-center">
                   {/* Eventos en tu dispositivo */}
-                  {templateActual.idioma === "en" && "Events on your device"}
-                  {templateActual.idioma === "es" &&
-                    "Eventos en tu dispositivo"}
+                  {templateActual.idioma === "en" && "Events QR"}
+                  {templateActual.idioma === "es" && "QR de Eventos"}
                   {templateActual.idioma === "es-en" &&
-                    "Eventos en tu dispositivo / Events on your device"}
+                    "QR de Eventos / Events QR"}
                 </p>
                 {qrCodeUrl && (
                   <a
