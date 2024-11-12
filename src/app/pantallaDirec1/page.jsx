@@ -1309,7 +1309,7 @@ function PantallaDirec1() {
                                     key={innerIndex}
                                     className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                     style={{
-                                      height: evento ? "auto" : "92px",
+                                      height: evento ? "auto" : "127px",
                                       borderColor: templateActual.templateColor,
                                     }} // Establecer la altura dependiendo de si hay evento o no
                                   >
@@ -1317,7 +1317,7 @@ function PantallaDirec1() {
                                     {evento ? (
                                       // Si hay evento, mostrar los detalles
                                       <>
-                                        <div className="my-auto flex justify-center items-center relative overflow-hidden w-[7vw] h-[7vw]">
+                                        <div className="my-auto flex justify-center items-center relative overflow-hidden w-[6.7vw] h-[6.7vw]">
                                           <img
                                             style={{
                                               objectFit: "cover",
@@ -1389,7 +1389,7 @@ function PantallaDirec1() {
                                   key={innerIndex}
                                   className="flex items-center space-x-4 space-y-1 border-b pr-8"
                                   style={{
-                                    height: evento ? "auto" : "92px",
+                                    height: evento ? "auto" : "127",
                                     borderColor: templateActual.templateColor,
                                   }} // Establecer la altura dependiendo de si hay evento o no
                                 >
@@ -1397,7 +1397,7 @@ function PantallaDirec1() {
                                   {evento ? (
                                     // Si hay evento, mostrar los detalles
                                     <>
-                                      <div className="my-auto flex justify-center items-center relative overflow-hidden w-[6vw] h-[6vw]">
+                                      <div className="my-auto flex justify-center items-center relative overflow-hidden w-[6.7vw] h-[6.7vw]">
                                         <img
                                           className="object-cover"
                                           src={evento.images[0]}
@@ -1732,8 +1732,8 @@ function PantallaDirec1() {
               ))} */}
               </div>
               {/* --- QR image --- */}
-              <div className="flex flex-col items-center mx-2 ">
-                <p className="mb-2 text-center">
+              <div className="flex flex-col items-center mx-2  mb-7">
+                <p className=" text-center">
                   {/* Eventos en tu dispositivo */}
                   {templateActual.idioma === "en" && "Events QR"}
                   {templateActual.idioma === "es" && "QR de Eventos"}
