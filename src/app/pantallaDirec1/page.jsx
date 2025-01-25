@@ -698,104 +698,54 @@ function PantallaDirec1() {
                   fontFamily: templateActual.fontStyle,
                 }}
               >
-                {templateData[0]?.setPortrait ? (
-                  <>
-                    <h1
-                      className={`text-2xl font-bold  text-center mb-2 block ${
-                        templateActual.idioma === "es" ? "block" : "hidden"
-                      }`}
-                    >
-                      Eventos del día
-                    </h1>
+                <>
+                  <h1
+                    className={`text-2xl font-bold  text-center mb-2 block ${
+                      templateActual.idioma === "es" ? "block" : "hidden"
+                    }`}
+                  >
+                    Eventos del día
+                  </h1>
 
-                    <h1
-                      className={`text-2xl font-bold text-center mb-2 block ${
-                        templateActual.idioma === "en" ? "block" : "hidden"
-                      }`}
-                    >
-                      Today&apos;s Events
-                    </h1>
+                  <h1
+                    className={`text-2xl font-bold text-center mb-2 block ${
+                      templateActual.idioma === "en" ? "block" : "hidden"
+                    }`}
+                  >
+                    Today&apos;s Events
+                  </h1>
 
-                    <div
-                      className={` text-center mb-2  ${
-                        templateActual.idioma === "es-en" ? "block" : "hidden"
-                      }`}
-                    >
-                      <p className="text-2xl font-bold">Eventos del día</p>
-                      <p className="text-xl font-bold">Today&apos;s Events</p>
-                    </div>
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "es" ? "block" : "hidden"
-                      }`}
-                    >
-                      {obtenerFecha("es")}
-                    </p>
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "en" ? "block" : "hidden"
-                      }`}
-                    >
-                      {obtenerFecha("en")}
-                    </p>
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "es-en" ? "block" : "hidden"
-                      }`}
-                    >
-                      <p className="text-xl ">{obtenerFecha("es")}</p>
-                      <p> {obtenerFecha("en")}</p>
-                    </p>
-                  </>
-                ) : (
-                  <>
-                    {" "}
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "es" ? "block" : "hidden"
-                      }`}
-                    >
-                      {obtenerFecha("es")}
-                    </p>
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "en" ? "block" : "hidden"
-                      }`}
-                    >
-                      {obtenerFecha("en")}
-                    </p>
-                    <p
-                      className={`text-base text-center mb-2 ${
-                        templateActual.idioma === "es-en" ? "block" : "hidden"
-                      }`}
-                    >
-                      <p className="text-xl ">{obtenerFecha("es")}</p>
-                      <p> {obtenerFecha("en")}</p>
-                    </p>
-                    <h1
-                      className={`text-2xl font-bold  text-center mb-2 block ${
-                        templateActual.idioma === "es" ? "block" : "hidden"
-                      }`}
-                    >
-                      Eventos del día
-                    </h1>
-                    <h1
-                      className={`text-2xl font-bold text-center mb-2 block ${
-                        templateActual.idioma === "en" ? "block" : "hidden"
-                      }`}
-                    >
-                      Today&apos;s Events
-                    </h1>
-                    <div
-                      className={` text-center mb-2  ${
-                        templateActual.idioma === "es-en" ? "block" : "hidden"
-                      }`}
-                    >
-                      <p className="text-2xl font-bold">Eventos del día</p>
-                      <p className="text-xl font-bold">Today&apos;s Events</p>
-                    </div>
-                  </>
-                )}
+                  <div
+                    className={` text-center mb-2  ${
+                      templateActual.idioma === "es-en" ? "block" : "hidden"
+                    }`}
+                  >
+                    <p className="text-2xl font-bold">Eventos del día</p>
+                    <p className="text-xl font-bold">Today&apos;s Events</p>
+                  </div>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "es" ? "block" : "hidden"
+                    }`}
+                  >
+                    {obtenerFecha("es")}
+                  </p>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "en" ? "block" : "hidden"
+                    }`}
+                  >
+                    {obtenerFecha("en")}
+                  </p>
+                  <p
+                    className={`text-base text-center mb-2 ${
+                      templateActual.idioma === "es-en" ? "block" : "hidden"
+                    }`}
+                  >
+                    <p className="text-xl ">{obtenerFecha("es")}</p>
+                    <p> {obtenerFecha("en")}</p>
+                  </p>
+                </>
               </div>
 
               {/* ---- Clima e Icono ---- */}
@@ -908,104 +858,54 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              {templateData[0]?.setPortrait ? (
-                <>
-                  <h1
-                    className={`text-2xl font-bold  text-center mb-2 block ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    Eventos del día
-                  </h1>
+              <>
+                <h1
+                  className={`text-2xl font-bold  text-center mb-2 block ${
+                    templateActual.idioma === "es" ? "block" : "hidden"
+                  }`}
+                >
+                  Eventos del día
+                </h1>
 
-                  <h1
-                    className={`text-2xl font-bold text-center mb-2 block ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    Today&apos;s Events
-                  </h1>
+                <h1
+                  className={`text-2xl font-bold text-center mb-2 block ${
+                    templateActual.idioma === "en" ? "block" : "hidden"
+                  }`}
+                >
+                  Today&apos;s Events
+                </h1>
 
-                  <div
-                    className={` text-center mb-2  ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-2xl font-bold">Eventos del día</p>
-                    <p className="text-xl font-bold">Today&apos;s Events</p>
-                  </div>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("es")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("en")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-xl ">{obtenerFecha("es")}</p>
-                    <p> {obtenerFecha("en")}</p>
-                  </p>
-                </>
-              ) : (
-                <>
-                  {" "}
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("es")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("en")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-xl ">{obtenerFecha("es")}</p>
-                    <p> {obtenerFecha("en")}</p>
-                  </p>
-                  <h1
-                    className={`text-2xl font-bold  text-center mb-2 block ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    Eventos del día
-                  </h1>
-                  <h1
-                    className={`text-2xl font-bold text-center mb-2 block ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    Today&apos;s Events
-                  </h1>
-                  <div
-                    className={` text-center mb-2  ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-2xl font-bold">Eventos del día</p>
-                    <p className="text-xl font-bold">Today&apos;s Events</p>
-                  </div>
-                </>
-              )}
+                <div
+                  className={` text-center mb-2  ${
+                    templateActual.idioma === "es-en" ? "block" : "hidden"
+                  }`}
+                >
+                  <p className="text-2xl font-bold">Eventos del día</p>
+                  <p className="text-xl font-bold">Today&apos;s Events</p>
+                </div>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "es" ? "block" : "hidden"
+                  }`}
+                >
+                  {obtenerFecha("es")}
+                </p>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "en" ? "block" : "hidden"
+                  }`}
+                >
+                  {obtenerFecha("en")}
+                </p>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "es-en" ? "block" : "hidden"
+                  }`}
+                >
+                  <p className="text-xl ">{obtenerFecha("es")}</p>
+                  <p> {obtenerFecha("en")}</p>
+                </p>
+              </>
             </div>
 
             {/* ---- Clima e Icono ---- */}
@@ -1112,103 +1012,54 @@ function PantallaDirec1() {
                 fontFamily: templateActual.fontStyle,
               }}
             >
-              {templateData[0]?.setPortrait ? (
-                <>
-                  <h1
-                    className={`text-2xl font-bold  text-center mb-2 block ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    Eventos del día
-                  </h1>
+              <>
+                <h1
+                  className={`text-2xl font-bold  text-center mb-2 block ${
+                    templateActual.idioma === "es" ? "block" : "hidden"
+                  }`}
+                >
+                  Eventos del día
+                </h1>
 
-                  <h1
-                    className={`text-2xl font-bold text-center mb-2 block ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    Today&apos;s Events
-                  </h1>
+                <h1
+                  className={`text-2xl font-bold text-center mb-2 block ${
+                    templateActual.idioma === "en" ? "block" : "hidden"
+                  }`}
+                >
+                  Today&apos;s Events
+                </h1>
 
-                  <div
-                    className={` text-center mb-2  ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-2xl font-bold">Eventos del día</p>
-                    <p className="text-xl font-bold">Today&apos;s Events</p>
-                  </div>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("es")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("en")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-xl ">{obtenerFecha("es")}</p>
-                    <p> {obtenerFecha("en")}</p>
-                  </p>
-                </>
-              ) : (
-                <>
-                  <h1
-                    className={`text-2xl font-bold  text-center mb-2 block ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    Eventos del día
-                  </h1>
-                  <h1
-                    className={`text-2xl font-bold text-center mb-2 block ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    Today&apos;s Events
-                  </h1>
-                  <div
-                    className={` text-center mb-2  ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-2xl font-bold">Eventos del día</p>
-                    <p className="text-xl font-bold">Today&apos;s Events</p>
-                  </div>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("es")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "en" ? "block" : "hidden"
-                    }`}
-                  >
-                    {obtenerFecha("en")}
-                  </p>
-                  <p
-                    className={`text-base text-center mb-2 ${
-                      templateActual.idioma === "es-en" ? "block" : "hidden"
-                    }`}
-                  >
-                    <p className="text-xl ">{obtenerFecha("es")}</p>
-                    <p> {obtenerFecha("en")}</p>
-                  </p>
-                </>
-              )}
+                <div
+                  className={` text-center mb-2  ${
+                    templateActual.idioma === "es-en" ? "block" : "hidden"
+                  }`}
+                >
+                  <p className="text-2xl font-bold">Eventos del día</p>
+                  <p className="text-xl font-bold">Today&apos;s Events</p>
+                </div>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "es" ? "block" : "hidden"
+                  }`}
+                >
+                  {obtenerFecha("es")}
+                </p>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "en" ? "block" : "hidden"
+                  }`}
+                >
+                  {obtenerFecha("en")}
+                </p>
+                <p
+                  className={`text-base text-center mb-2 ${
+                    templateActual.idioma === "es-en" ? "block" : "hidden"
+                  }`}
+                >
+                  <p className="text-xl ">{obtenerFecha("es")}</p>
+                  <p> {obtenerFecha("en")}</p>
+                </p>
+              </>
             </div>
 
             {/* ---- Clima e Icono ---- */}
