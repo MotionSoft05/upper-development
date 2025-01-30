@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSync } from "@fortawesome/free-solid-svg-icons";
+import { faSync, faCheck } from "@fortawesome/free-solid-svg-icons";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
@@ -28,6 +28,7 @@ function PublicidadDirec() {
     null,
   ]);
   const [isUploading, setIsUploading] = useState(false);
+  const [screenTypes, setScreenTypes] = useState([]);
   const [tiemposSalon, setTiemposSalon] = useState([
     { horas: 0, minutos: 0, segundos: 10 },
   ]);
@@ -42,6 +43,7 @@ function PublicidadDirec() {
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
   const [empresaUsuario, setEmpresaUsuario] = useState(null);
+  const [tiposPantalla, setTiposPantalla] = useState([]);
   const [empresas, setEmpresas] = useState([]); // Estado para almacenar las empresas disponibles
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null); // Estado para la empresa seleccionada
   const [publicidadesDirectorio, setPublicidadesDirectorio] = useState([]);
@@ -220,12 +222,12 @@ function PublicidadDirec() {
 
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
+      const tipoPantalla = tiposPantalla[index] || []; // Obtener el tipo de pantalla actual
 
       const isEditingExistingPublicidad = index < publicidadesIds.length;
       const hasNewMedia = nuevaImagen && nuevaImagen.name !== undefined;
 
       if (!isEditingExistingPublicidad && !hasNewMedia) {
-        // "No se ha seleccionado un nuevo archivo de media"
         console.warn(t("advertisement.salon.noNewMediaSelected"));
         return;
       }
@@ -238,14 +240,12 @@ function PublicidadDirec() {
         segundos <= 59;
 
       if (!hasValidData) {
-        // "Completa por lo menos uno de los tres campos"
         console.alert(t("advertisement.salon.completeAtLeastOneField"));
         return;
       }
 
       const userUid = user.uid;
       const publicidadId = publicidadesIds[index];
-
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
       let mediaUrl = previewImages[index].url;
 
@@ -269,28 +269,28 @@ function PublicidadDirec() {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           },
           (error) => {
-            // "Error durante la carga de la media:"
             console.error(t("advertisement.salon.errorLoadingMedia"), error);
           },
           async () => {
             mediaUrl = await mediaRef.getDownloadURL();
 
-            // Limpiar el campo opuesto si cambias de imagen a video o viceversa
             if (isVideo) {
               await publicidadRef.update({
-                imageUrl: null, // Limpiar el campo de imagen
+                imageUrl: null,
                 videoUrl: mediaUrl,
                 horas,
                 minutos,
                 segundos,
+                tipoPantalla, // Añadir el tipo de pantalla aquí
               });
             } else {
               await publicidadRef.update({
                 imageUrl: mediaUrl,
-                videoUrl: null, // Limpiar el campo de video
+                videoUrl: null,
                 horas,
                 minutos,
                 segundos,
+                tipoPantalla, // Añadir el tipo de pantalla aquí
               });
             }
 
@@ -303,13 +303,13 @@ function PublicidadDirec() {
           horas,
           minutos,
           segundos,
+          tipoPantalla, // Añadir el tipo de pantalla aquí
         });
 
         setEditIndex(null);
         setIsUploading(false);
       }
     } catch (error) {
-      // "Error al guardar cambios:"
       console.error(t("advertisement.salon.errorSavingChanges"), error);
       setIsUploading(false);
     } finally {
@@ -415,6 +415,7 @@ function PublicidadDirec() {
               segundos,
               tipo: "directorio",
               empresa: empresa, // Usar la empresa seleccionada o la del usuario logueado
+              tipoPantalla: tiposPantalla[index] || [],
               fechaDeSubida,
             });
 
@@ -457,6 +458,14 @@ function PublicidadDirec() {
       setIsUploading(false);
       setIsLoading(false);
     }
+  };
+
+  const handleTipoPantallaChange = (index, tipos) => {
+    setTiposPantalla((prevTipos) => {
+      const nuevosTipos = [...prevTipos];
+      nuevosTipos[index] = tipos;
+      return nuevosTipos;
+    });
   };
 
   const handleEliminarPublicidad = async (publicidadId, index) => {
@@ -520,6 +529,61 @@ function PublicidadDirec() {
               {/* Directorio de Eventos {index + 1} */}
               {`${t("advertisement.salon.title2")}  ${index + 1}`}
             </h3>
+            {/* Selección de Tipo de Pantalla */}
+            <div className="mb-6">
+              <label className="block text-gray-700 font-medium mb-2">
+                Tipo de Pantalla
+              </label>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  onClick={() => handleTipoPantallaChange(index, ["vertical"])}
+                  className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+                    tiposPantalla[index]?.includes("vertical")
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  disabled={
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                  }
+                >
+                  Pantalla Vertical
+                </button>
+                <button
+                  onClick={() =>
+                    handleTipoPantallaChange(index, ["horizontal"])
+                  }
+                  className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+                    tiposPantalla[index]?.includes("horizontal")
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  disabled={
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                  }
+                >
+                  Pantalla Horizontal
+                </button>
+                <button
+                  onClick={() =>
+                    handleTipoPantallaChange(index, ["vertical", "horizontal"])
+                  }
+                  className={`px-4 py-2 rounded-md transition-colors duration-200 ${
+                    tiposPantalla[index]?.length === 2
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                  disabled={
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                  }
+                >
+                  Ambas Pantallas
+                </button>
+              </div>
+            </div>
+
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
                 {/* Seleccionar Imagen o Video */}
