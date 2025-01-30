@@ -377,9 +377,9 @@ function PantallaDirec1() {
             );
 
             const templateSnapshot = await getDocs(templateQuery);
-
+            const templateData = [];
+            console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
             if (!templateSnapshot.empty) {
-              const templateData = [];
               templateSnapshot.forEach((doc) => {
                 const template = { id: doc.id, ...doc.data() };
                 templateData.push(template);
@@ -399,15 +399,8 @@ function PantallaDirec1() {
             //  Sección template
             //  Sección publicidad
             if (eventosOrdenados.length === 0) {
-              console.log("🚀 ~ Entro a publicidad:");
               const pantalla = "directorio";
-              console.log("🚀 ~ obtenerUsuario ~ pantalla:", pantalla);
               const publicidadesRef = collection(firestore, "Publicidad");
-              console.log(
-                "🚀 ~ obtenerUsuario ~ publicidadesRef:",
-                publicidadesRef
-              );
-
               const publicidadesQuery = query(
                 publicidadesRef,
                 where("empresa", "==", userCompany)
@@ -416,25 +409,47 @@ function PantallaDirec1() {
 
               if (!publicidadesSnapshot.empty) {
                 const publicidades = [];
-                console.log(
-                  "🚀 ~ obtenerUsuario ~ publicidades:",
-                  publicidades
-                );
+
+                // Verificar si templateData tiene datos y obtener setPortrait
+                console.log("Estado actual de templateData:", templateData);
+
+                if (!templateData || templateData.length === 0) {
+                  console.log("templateData está vacío");
+                  return;
+                }
+
+                const isPortrait = templateData[0].setPortrait;
+                console.log("Estado de setPortrait:", isPortrait);
+
                 publicidadesSnapshot.forEach((doc) => {
                   const publicidad = { id: doc.id, ...doc.data() };
-                  // Comparar el tipo de la publicidad con la pantalla deseada
 
                   if (publicidad.tipo === pantalla) {
-                    publicidades.push(publicidad);
+                    const tipoPantallaArray = publicidad.tipoPantalla || [];
+
+                    const tieneAmbasOrientaciones =
+                      tipoPantallaArray.includes("vertical") &&
+                      tipoPantallaArray.includes("horizontal");
+
+                    const orientacionCoincide = isPortrait
+                      ? tipoPantallaArray.includes("vertical")
+                      : tipoPantallaArray.includes("horizontal");
+
+                    if (tieneAmbasOrientaciones || orientacionCoincide) {
+                      publicidades.push(publicidad);
+                    }
                   }
                 });
 
+                console.log(
+                  "Orientación actual:",
+                  isPortrait ? "vertical" : "horizontal"
+                );
+                console.log("Publicidades filtradas:", publicidades);
+
                 setPublicidadesUsuario(publicidades);
               } else {
-                console.log(
-                  // "No se encontró información en TemplateDirectorios para este usuario."
-                  t("pantalla.error.publicidadesDirectoryNotFound")
-                );
+                console.log(t("pantalla.error.publicidadesDirectoryNotFound"));
               }
             }
 
@@ -458,6 +473,7 @@ function PantallaDirec1() {
       return () => clearInterval(interval); // Limpiar el intervalo al desmontar el componente
     }
   }, [user, firestore]);
+
   useEffect(() => {
     if (selectedCity) {
       setIsLoading(true);
