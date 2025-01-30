@@ -380,6 +380,7 @@ function PantallaDirec1() {
             const templateData = [];
             console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
             if (!templateSnapshot.empty) {
+              const templateData = [];
               templateSnapshot.forEach((doc) => {
                 const template = { id: doc.id, ...doc.data() };
                 templateData.push(template);
