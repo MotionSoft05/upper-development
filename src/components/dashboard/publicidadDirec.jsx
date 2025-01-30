@@ -149,6 +149,13 @@ function PublicidadDirec() {
 
         const nuevasVistasPrevias = nuevasImagenes.map(() => null);
 
+        setTiposPantalla([
+          ...publicidadesData.map(
+            (publicidad) => publicidad.tipoPantalla || []
+          ),
+          ...Array(cantidadNuevasPublicidades).fill([]),
+        ]);
+
         setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
         setImagenesSalon([
           ...publicidadesData.map(() => null),
@@ -505,18 +512,25 @@ function PublicidadDirec() {
     const isNewImageSelected =
       imagenesSalon[index] && imagenesSalon[index].name !== undefined;
     const { horas, minutos, segundos } = tiemposSalon[index];
+    const hasTipoPantalla = tiposPantalla[index]?.length > 0;
     const isAdditionalField = index >= publicidadesIds.length;
+
+    // Validación para campos adicionales
     if (isAdditionalField) {
       return (
         isNewImageSelected &&
         (horas > 0 || minutos > 0 || segundos > 0) &&
-        previewImages[index] !== null
+        previewImages[index] !== null &&
+        hasTipoPantalla
       );
     }
+
+    // Validación para campos existentes
     return (
       hasImage &&
       (horas > 0 || minutos > 0 || segundos > 0) &&
-      previewImages[index] !== null
+      previewImages[index] !== null &&
+      hasTipoPantalla
     );
   };
 
