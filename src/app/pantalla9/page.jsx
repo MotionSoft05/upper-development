@@ -164,9 +164,20 @@ function Pantalla9() {
               fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1); // Sumar un día
               fechaFinalEvento.setHours(23, 59, 59, 0); // Establecer hora, minutos, segundos y milisegundos a cero
 
+              // Verificar si las horas son "00:00" para establecer el rango completo
+              const horaInicialEvento =
+                evento.horaInicialSalon === "00:00" &&
+                evento.horaFinalSalon === "00:00"
+                  ? "00:00"
+                  : evento.horaInicialSalon;
+              const horaFinalEvento =
+                evento.horaInicialSalon === "00:00" &&
+                evento.horaFinalSalon === "00:00"
+                  ? "23:59"
+                  : evento.horaFinalSalon;
+
               const horaActual = obtenerHora();
-              const horaInicialEvento = evento.horaInicialSalon;
-              const horaFinalEvento = evento.horaFinalSalon;
+
               const fechaActualEnRango =
                 fechaActual >= fechaInicioEvento &&
                 fechaActual <= fechaFinalEvento;
@@ -181,6 +192,7 @@ function Pantalla9() {
                 fechaActualEnRango && horaActualEnRango && empresaCoincidente
               );
             });
+
             //  Sección template
             const templateRef = collection(db, "TemplateSalones");
             const templateQuery = query(

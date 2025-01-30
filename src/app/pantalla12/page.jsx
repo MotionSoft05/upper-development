@@ -34,7 +34,7 @@ const obtenerHora = () => {
   return `${hours}:${minutes}`;
 };
 
-function Pantalla6() {
+function Pantalla12() {
   const { t, ready } = useTranslation();
   const pathname = usePathname();
 
@@ -46,7 +46,7 @@ function Pantalla6() {
   const [dispositivoCoincidenteLAL, setDispositivoCoincidente] = useState(null);
   const [templateData, setTemplateData] = useState([]);
   const [selectedCity, setSelectedCity] = useState(null);
-  const numeroPantallaActual = "6";
+  const numeroPantallaActual = "12";
 
   const swiperRef = useRef(null);
 
@@ -116,13 +116,17 @@ function Pantalla6() {
             const querySnapshot = await getDocs(eventosQuery);
 
             const eventosData = [];
-
+            // console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
             let dispositivoCoincidente = null;
 
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               const devicesEvento = evento.devices || [];
-
+              console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
+              console.log(
+                "🚀 ~ querySnapshot.forEach ~ devicesEvento:",
+                devicesEvento
+              );
               const pantallasAsignadas = devicesEvento.reduce(
                 (pantallas, device) => {
                   if (Object.keys(pantallasNumeradas).includes(device)) {
@@ -133,14 +137,24 @@ function Pantalla6() {
                 },
                 []
               );
-
+              console.log(
+                "🚀 ~ querySnapshot.forEach ~ pantallasAsignadas:",
+                pantallasAsignadas
+              );
               if (pantallasAsignadas.length > 0) {
-                const posicionActual = parseInt(numeroPantallaActual, 10);
+                const posicionActual = parseInt(numeroPantallaActual);
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ posicionActual:",
+                  posicionActual
+                );
 
                 const dispositivosCoincidentes = pantallasAsignadas.filter(
                   (pantalla) => pantalla.posicion === posicionActual
                 );
-
+                console.log(
+                  "🚀 ~ querySnapshot.forEach ~ dispositivosCoincidentes:",
+                  dispositivosCoincidentes
+                );
                 if (dispositivosCoincidentes.length > 0) {
                   dispositivoCoincidente = dispositivosCoincidentes[0].device;
 
@@ -636,4 +650,4 @@ function Pantalla6() {
   );
 }
 
-export default Pantalla6;
+export default Pantalla12;
