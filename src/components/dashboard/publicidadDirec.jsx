@@ -125,6 +125,11 @@ function PublicidadDirec() {
 
         publicidadesData.sort((a, b) => a.fechaDeSubida - b.fechaDeSubida);
 
+        const nuevosTiposPantalla = publicidadesData.map(
+          (publicidad) => publicidad.tipoPantalla || []
+        );
+        setTiposPantalla([...nuevosTiposPantalla, []]);
+
         const cantidadPublicidades = publicidadesData.length;
         const cantidadNuevasPublicidades = 1;
         const nuevasImagenes = Array.from(
@@ -505,18 +510,22 @@ function PublicidadDirec() {
     const isNewImageSelected =
       imagenesSalon[index] && imagenesSalon[index].name !== undefined;
     const { horas, minutos, segundos } = tiemposSalon[index];
+    const hasTipoPantalla = tiposPantalla[index]?.length > 0; // Validación de tipo de pantalla
     const isAdditionalField = index >= publicidadesIds.length;
+
     if (isAdditionalField) {
       return (
         isNewImageSelected &&
         (horas > 0 || minutos > 0 || segundos > 0) &&
-        previewImages[index] !== null
+        previewImages[index] !== null &&
+        hasTipoPantalla // Añadir validación de tipo de pantalla
       );
     }
     return (
       hasImage &&
       (horas > 0 || minutos > 0 || segundos > 0) &&
-      previewImages[index] !== null
+      previewImages[index] !== null &&
+      hasTipoPantalla // Añadir validación de tipo de pantalla
     );
   };
 
