@@ -303,14 +303,26 @@ function PantallaDirec1() {
                 "🚀 ~ eventosOrdenados ~ fechaFinalEvento:",
                 fechaFinalEvento
               );
+
               const horaActual = obtenerHora();
               console.log("🚀 ~ eventosOrdenados ~ horaActual:", horaActual);
-              const horaInicialEvento = evento.horaInicialSalon;
+
+              // Verificar si las horas son "00:00" para establecer el rango completo
+              const horaInicialEvento =
+                evento.horaInicialSalon === "00:00" &&
+                evento.horaFinalSalon === "00:00"
+                  ? "00:00"
+                  : evento.horaInicialSalon;
+              const horaFinalEvento =
+                evento.horaInicialSalon === "00:00" &&
+                evento.horaFinalSalon === "00:00"
+                  ? "23:59"
+                  : evento.horaFinalSalon;
+
               console.log(
                 "🚀 ~ eventosOrdenados ~ horaInicialEvento:",
                 horaInicialEvento
               );
-              const horaFinalEvento = evento.horaFinalSalon;
               console.log(
                 "🚀 ~ eventosOrdenados ~ horaFinalEvento:",
                 horaFinalEvento
@@ -323,11 +335,15 @@ function PantallaDirec1() {
                 "🚀 ~ eventosOrdenados ~ fechaActualEnRango:",
                 fechaActualEnRango
               );
-              const horaActualEnRango = horaActual <= horaFinalEvento;
+
+              const horaActualEnRango =
+                horaActual >= horaInicialEvento &&
+                horaActual <= horaFinalEvento;
               console.log(
                 "🚀 ~ eventosOrdenados ~ horaActualEnRango:",
                 horaActualEnRango
               );
+
               // Filtrar eventos por empresa
               const empresaCoincidente = evento.empresa === userCompany;
               console.log(
