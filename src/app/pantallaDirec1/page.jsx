@@ -239,6 +239,7 @@ function PantallaDirec1() {
             console.log("🚀 ~ obtenerUsuario ~ userCompany:", userCompany);
             const nombrePantallasUsuario =
               userData.nombrePantallasDirectorio || {};
+
             const pantallasNumeradas = {};
 
             Object.keys(nombrePantallasUsuario).forEach((key, index) => {
@@ -246,14 +247,15 @@ function PantallaDirec1() {
             });
 
             const eventosRef = collection(firestore, "eventos");
+
             const eventosQuery = query(
               eventosRef,
               where("empresa", "==", userCompany)
             );
-            const querySnapshot = await getDocs(eventosQuery);
 
+            const querySnapshot = await getDocs(eventosQuery);
             const eventosData = [];
-            console.log("🚀 ~ obtenerUsuario ~ eventosData:", eventosData);
+
             querySnapshot.forEach((doc) => {
               const evento = { id: doc.id, ...doc.data() };
               console.log("🚀 ~ querySnapshot.forEach ~ evento:", evento);
@@ -270,12 +272,16 @@ function PantallaDirec1() {
                 eventosData.push(evento);
               }
             });
-
             const eventosOrdenados = eventosData.filter((evento) => {
-              console.log("🚀 ~ eventosOrdenados ~ evento:", evento);
+              console.log("🚀 ~ evento:", evento);
+              console.log(
+                "🚀 ~ nombrePantallasUsuario:",
+                userData.nombrePantallasDirectorio
+              );
+
               // Obtener fecha actual (solo día)
               const fechaActual = new Date();
-              fechaActual.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              fechaActual.setHours(0, 0, 0, 0);
               console.log(
                 "🚀 ~ eventosOrdenados ~ fechaActual (sin hora):",
                 fechaActual
@@ -283,10 +289,8 @@ function PantallaDirec1() {
 
               // Obtener fechas de inicio y finalización del evento (solo día)
               const fechaInicioEvento = new Date(evento.fechaInicio);
-
-              // Ajustar fecha de inicio al día correcto sumando 24 horas (un día completo)
               fechaInicioEvento.setDate(fechaInicioEvento.getDate() + 1);
-              fechaInicioEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              fechaInicioEvento.setHours(0, 0, 0, 0);
 
               console.log(
                 "🚀 ~ eventosOrdenados ~ fechaInicioEvento:",
@@ -294,10 +298,8 @@ function PantallaDirec1() {
               );
 
               const fechaFinalEvento = new Date(evento.fechaFinal);
-
-              // Ajustar fecha de finalización al día correcto sumando 24 horas (un día completo)
               fechaFinalEvento.setDate(fechaFinalEvento.getDate() + 1);
-              fechaFinalEvento.setHours(0, 0, 0, 0); // Establecer hora, minutos, segundos y milisegundos a cero
+              fechaFinalEvento.setHours(0, 0, 0, 0);
 
               console.log(
                 "🚀 ~ eventosOrdenados ~ fechaFinalEvento:",
@@ -357,6 +359,18 @@ function PantallaDirec1() {
                 "🚀 ~ eventosOrdenados ~ mostrarPorFecha:",
                 mostrarPorFecha
               );
+
+              // Filtrar dispositivos que coincidan con nombrePantallasDirectorio
+              if (evento.devices && Array.isArray(evento.devices)) {
+                evento.devices = evento.devices.filter((device) => {
+                  // Convertir objeto nombrePantallasDirectorio a array de valores
+                  const pantallasArray = Object.values(
+                    userData.nombrePantallasDirectorio
+                  );
+                  // Verificar si el dispositivo NO está en el array de pantallas
+                  return !pantallasArray.includes(device);
+                });
+              }
 
               return (
                 (fechaActualEnRango &&
