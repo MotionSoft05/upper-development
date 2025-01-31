@@ -1352,7 +1352,7 @@ function PantallaDirec1() {
               {/* 90 grados */}
               {/* Linea arriba */}{" "}
               <div
-                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-6`}
+                className={` text-black  uppercase  font-bold px-20 rounded-t-xl h-8`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
@@ -1415,6 +1415,7 @@ function PantallaDirec1() {
                                           height: evento ? "111px" : "110px",
                                           borderColor:
                                             templateActual.templateColor,
+                                          fontFamily: templateActual.fontStyle,
                                         }} // Establecer la altura dependiendo de si hay evento o no
                                       >
                                         {/* ---- Evento ---- */}
@@ -1446,7 +1447,7 @@ function PantallaDirec1() {
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className=" text-right text-base ">
+                                                <p className=" text-right text-lg ">
                                                   {evento.horaInicialReal +
                                                     " a "}
                                                   {evento.horaFinalReal}
@@ -1494,6 +1495,7 @@ function PantallaDirec1() {
                                         height: evento ? "134px" : "134px",
                                         borderColor:
                                           templateActual.templateColor,
+                                        fontFamily: templateActual.fontStyle,
                                       }} // Establecer la altura dependiendo de si hay evento o no
                                     >
                                       {/* ---- Evento ---- */}
@@ -1517,7 +1519,7 @@ function PantallaDirec1() {
                                               <p className="col-span-3 text-base">
                                                 {evento.tipoEvento}
                                               </p>
-                                              <p className=" text-smbase">
+                                              <p className=" text-base">
                                                 {evento.devices[0]}
                                               </p>
                                               {/* Columna 2: Lugar (en el centro) */}
@@ -1526,7 +1528,7 @@ function PantallaDirec1() {
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className=" text-right text-base ">
+                                              <p className=" text-right text-lg ">
                                                 {evento.horaInicialReal + " a "}
                                                 {evento.horaFinalReal}
                                                 {"HRS"}
@@ -1552,7 +1554,7 @@ function PantallaDirec1() {
               </div>
               {/* Linea abajo */}
               <div
-                className={`text-white uppercase font-bold px-20 rounded-b-xl h-6 flex justify-center items-end`}
+                className={`text-white uppercase font-bold px-20 rounded-b-xl h-8 flex justify-center items-end`}
                 style={{
                   // backgroundColor: templateActual.templateColor,
                   background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
