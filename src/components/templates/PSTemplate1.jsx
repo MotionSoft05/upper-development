@@ -1,4 +1,4 @@
-import GetLanguageDate from "../GetLanguageDate";
+import GetLanguageDate from "@/components/getLanguageDate";
 import EventImageSlider from "@/components/sliders/EventImageSlider";
 
 export const PSTemplate1 = ({ event, templates, currentHour, t }) => {

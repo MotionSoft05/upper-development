@@ -15,9 +15,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import LogIn from "@/app/login/page";
-import { Swiper, SwiperSlide } from "swiper/react";
-import GetLanguageDate from "./GetLanguageDate";
-import { Autoplay, Pagination, EffectFade } from "swiper/modules";
+
 import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/TemplateManager";
