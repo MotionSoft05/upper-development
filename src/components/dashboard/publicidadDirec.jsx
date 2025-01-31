@@ -579,7 +579,8 @@ function PublicidadDirec() {
                 >
                   Pantalla Horizontal
                 </button>
-                <button
+                {/* AMBAS PANTALLAS DESACTIVADO POR ULISES */}
+                {/* <button
                   onClick={() =>
                     handleTipoPantallaChange(index, ["vertical", "horizontal"])
                   }
@@ -594,7 +595,7 @@ function PublicidadDirec() {
                   }
                 >
                   Ambas Pantallas
-                </button>
+                </button> */}
               </div>
             </div>
 

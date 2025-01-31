@@ -896,7 +896,7 @@ function PantallasSalon() {
                   />
                   <Link
                     // href={`/pantalla${index + 1}.html`}
-                    href={`/pantalla${index + 1}${isProduction}?emp=${
+                    href={`/pantalla/${index + 1}${isProduction}/?emp=${
                       nombreEmpresa?.empresa
                     }`}
                     target="_blank"

@@ -1,17 +1,14 @@
-/**
- * @type {import('next').NextConfig}
- */
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
-
-  // Optional: Change links `/me` -> `/me/` and emit `/me.html` -> `/me/index.html`
-  // trailingSlash: true,
-
-  // Optional: Prevent automatic `/me` -> `/me/`, instead preserve `href`
-  // skipTrailingSlashRedirect: true,
-
-  // Optional: Change the output directory `out` -> `dist`
-  // distDir: 'dist',
+  images: {
+    unoptimized: true,
+  },
+  trailingSlash: true,
+  // Asegurarnos que las rutas dinámicas se generen correctamente
+  generateBuildId: async () => {
+    return "build-" + Date.now();
+  },
 };
-module.exports = { trailingSlash: true };
+
 module.exports = nextConfig;
