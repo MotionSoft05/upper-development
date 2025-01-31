@@ -56,6 +56,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     templates: null,
     matchingDevice: null,
   });
+
   const [currentHour, setCurrentHour] = useState(getHour());
 
   const currentEvent = useMemo(() => screenData.events[0], [screenData.events]);
@@ -66,41 +67,92 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     debounce(() => setCurrentHour(getHour()), 1000),
     []
   );
+  const convertTimeToMinutes = (timeString) => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const getHourInMinutes = () => {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  };
 
   const filterCurrentEvents = useCallback((events, company) => {
     const now = new Date();
-    return events.filter(
-      ({
+    const currentMinutes = getHourInMinutes();
+
+    console.log("Starting filter process with:", {
+      currentTime: new Date().toLocaleTimeString(),
+      currentMinutes,
+      totalEvents: events.length,
+      companyFilter: company,
+    });
+
+    return events.filter((event) => {
+      const {
         fechaInicio,
         fechaFinal,
-        horaInicialSalon,
-        horaFinalSalon,
+        horaInicialReal, // Usando hora real en lugar de hora de salón
+        horaFinalReal, // Usando hora real en lugar de hora de salón
         empresa,
-      }) => {
-        const startDate = new Date(fechaInicio);
-        const endDate = new Date(fechaFinal);
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 0);
+        nombreEvento,
+        id,
+      } = event;
 
-        const startHour =
-          horaInicialSalon === DEFAULT_HOUR && horaFinalSalon === DEFAULT_HOUR
-            ? DEFAULT_HOUR
-            : horaInicialSalon;
-        const endHour =
-          horaInicialSalon === DEFAULT_HOUR && horaFinalSalon === DEFAULT_HOUR
-            ? "23:59"
-            : horaFinalSalon;
-        const currentHour = getHour();
+      // Validar las fechas
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFinal);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
 
-        return (
-          now >= startDate &&
-          now <= endDate &&
-          currentHour >= startHour &&
-          currentHour <= endHour &&
-          empresa === company
-        );
+      const isWithinDateRange = now >= startDate && now <= endDate;
+
+      // Manejar las horas reales del evento
+      let startMinutes, endMinutes;
+
+      if (horaInicialReal === DEFAULT_HOUR && horaFinalReal === DEFAULT_HOUR) {
+        startMinutes = 0; // 00:00
+        endMinutes = 24 * 60 - 1; // 23:59
+      } else {
+        startMinutes = convertTimeToMinutes(horaInicialReal);
+        endMinutes = convertTimeToMinutes(horaFinalReal);
       }
-    );
+
+      const isWithinTimeRange =
+        currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+      const matchesCompany = empresa === company;
+
+      // Log detallado para cada evento
+      console.log("Event check:", {
+        id,
+        nombreEvento,
+        empresa,
+        dates: {
+          start: fechaInicio,
+          end: fechaFinal,
+          now: now.toISOString().split("T")[0],
+          isWithinDateRange,
+        },
+        times: {
+          realStart: horaInicialReal,
+          realEnd: horaFinalReal,
+          displayStart: event.horaInicialSalon, // Solo para referencia en los logs
+          displayEnd: event.horaFinalSalon, // Solo para referencia en los logs
+          startMinutes,
+          endMinutes,
+          currentMinutes,
+          isWithinTimeRange,
+        },
+        company: {
+          eventCompany: empresa,
+          filterCompany: company,
+          matchesCompany,
+        },
+        willPass: isWithinDateRange && isWithinTimeRange && matchesCompany,
+      });
+
+      return isWithinDateRange && isWithinTimeRange && matchesCompany;
+    });
   }, []);
 
   const findMatchingDevice = useCallback(
@@ -142,6 +194,8 @@ const BaseScreen = ({ screenNumber, empresa }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log("🚀 ~ unsubscribe ~ user:", user);
+
       setUser(user);
       if (!user) setIsLoading(false);
     });
@@ -159,17 +213,28 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       setError(null);
 
       try {
+        // Add debugging for user document fetch
         const userDoc = await retryOperation(() =>
           getDoc(doc(db, "usuarios", user.uid))
         );
 
-        if (!userDoc.exists() || !mounted) return;
+        console.log("User document exists:", userDoc.exists());
+
+        if (!userDoc.exists() || !mounted) {
+          console.error("User document doesn't exist or component unmounted");
+          return;
+        }
 
         const userData = userDoc.data();
-        const userCompany = userData.empresa;
-        const screenNames = userData.nombrePantallas || {};
+        console.log("User data:", userData);
 
-        // Subscribe to templates updates
+        const userCompany = userData.empresa;
+        console.log("User company:", userCompany);
+
+        const screenNames = userData.nombrePantallas || {};
+        console.log("Screen names:", screenNames);
+
+        // Subscribe to templates updates with debugging
         const templatesRef = query(
           collection(db, "TemplateSalones"),
           where("empresa", "==", userCompany)
@@ -184,6 +249,8 @@ const BaseScreen = ({ screenNumber, empresa }) => {
               ...doc.data(),
             }))[0];
 
+            console.log("Templates loaded:", templates);
+
             setScreenData((prev) => ({
               ...prev,
               templates,
@@ -195,7 +262,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
           }
         );
 
-        // Subscribe to events updates
+        // Subscribe to events updates with debugging
         const eventsRef = query(
           collection(db, "eventos"),
           where("empresa", "==", userCompany)
@@ -211,6 +278,8 @@ const BaseScreen = ({ screenNumber, empresa }) => {
               ...doc.data(),
             }));
 
+            console.log("Raw events loaded:", events);
+
             const eventsWithMatching = events.map((event) => {
               const matchingDevice = findMatchingDevice(
                 event,
@@ -220,14 +289,20 @@ const BaseScreen = ({ screenNumber, empresa }) => {
               return { ...event, matchingDevice };
             });
 
+            console.log("Events with matching devices:", eventsWithMatching);
+
             const filteredEvents = eventsWithMatching
               .filter((event) => event.matchingDevice)
               .filter(
                 (event) => filterCurrentEvents([event], userCompany).length > 0
               );
 
+            console.log("Filtered events:", filteredEvents);
+
             const ads =
               filteredEvents.length === 0 ? await loadAds(userCompany) : [];
+
+            console.log("Loaded ads:", ads);
 
             setScreenData((prev) => ({
               ...prev,
@@ -333,11 +408,11 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   return (
     <TemplateManager
       templateId={templates.template}
-      event={currentEvent}
+      event={currentEvent || {}} // Provide default empty object
       templates={templates}
       currentHour={currentHour}
       t={t}
-      matchingDevice={screenData.matchingDevice}
+      matchingDevice={screenData.matchingDevice || null} // Provide default null
     />
   );
 };

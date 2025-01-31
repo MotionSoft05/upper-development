@@ -2,6 +2,8 @@ import GetLanguageDate from "@/components/getLanguageDate";
 import EventImageSlider from "@/components/sliders/EventImageSlider";
 
 export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
+  console.log("🚀 ~ PSTemplate1 ~ templates:", templates);
+  console.log("🚀 ~ PSTemplate1 ~ event:", event);
   return (
     <section
       className="fixed inset-0 flex flex-col p-4 bg-white"
