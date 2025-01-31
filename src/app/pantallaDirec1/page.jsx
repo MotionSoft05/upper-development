@@ -377,8 +377,7 @@ function PantallaDirec1() {
             );
 
             const templateSnapshot = await getDocs(templateQuery);
-            const templateData = [];
-            console.log("🚀 ~ obtenerUsuario ~ templateData:", templateData);
+
             if (!templateSnapshot.empty) {
               const templateData = [];
               templateSnapshot.forEach((doc) => {
@@ -410,35 +409,15 @@ function PantallaDirec1() {
 
               if (!publicidadesSnapshot.empty) {
                 const publicidades = [];
-
-                // Verificar si templateData tiene datos y obtener setPortrait
-                console.log("Estado actual de templateData:", templateData);
-
-                if (!templateData || templateData.length === 0) {
-                  console.log("templateData está vacío");
-                  return;
-                }
-
-                const isPortrait = templateData[0].setPortrait;
-                console.log("Estado de setPortrait:", isPortrait);
-
+                console.log(
+                  "🚀 ~ obtenerUsuario ~ publicidades:",
+                  publicidades
+                );
                 publicidadesSnapshot.forEach((doc) => {
                   const publicidad = { id: doc.id, ...doc.data() };
 
                   if (publicidad.tipo === pantalla) {
-                    const tipoPantallaArray = publicidad.tipoPantalla || [];
-
-                    const tieneAmbasOrientaciones =
-                      tipoPantallaArray.includes("vertical") &&
-                      tipoPantallaArray.includes("horizontal");
-
-                    const orientacionCoincide = isPortrait
-                      ? tipoPantallaArray.includes("vertical")
-                      : tipoPantallaArray.includes("horizontal");
-
-                    if (tieneAmbasOrientaciones || orientacionCoincide) {
-                      publicidades.push(publicidad);
-                    }
+                    publicidades.push(publicidad);
                   }
                 });
 
@@ -1382,7 +1361,7 @@ function PantallaDirec1() {
                 }}
               >
                 {/* Título */}
-                <h2 className=" text-xl text-center">
+                <h2 className=" text-2xl text-center">
                   {/* EVENTOS */}
                   {templateActual.idioma === "en" && "EVENTS"}
                   {templateActual.idioma === "es" && "EVENTOS"}
@@ -1450,24 +1429,24 @@ function PantallaDirec1() {
                                               />
                                             </div>
                                             <div className="w-full ">
-                                              <h3 className="font-bold mb-4 text-lg">
+                                              <h3 className="font-bold mb-4 text-xl">
                                                 {evento.nombreEvento}
                                               </h3>
                                               <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
                                                 {/* Columna 1: Nombre (a la izquierda) */}
-                                                <p className="col-span-3 text-sm">
+                                                <p className="col-span-3 text-base">
                                                   {evento.tipoEvento}
                                                 </p>
-                                                <p className=" text-sm">
+                                                <p className=" text-base">
                                                   {evento.devices[0]}
                                                 </p>
                                                 {/* Columna 2: Lugar (en el centro) */}
-                                                <p className="text-center text-sm ">
+                                                <p className="text-center text-base ">
                                                   {evento.lugar}
                                                 </p>
 
                                                 {/* Columna 3: Rango de horas (a la derecha) */}
-                                                <p className=" text-right text-sm ">
+                                                <p className=" text-right text-base ">
                                                   {evento.horaInicialReal +
                                                     " a "}
                                                   {evento.horaFinalReal}
@@ -1530,24 +1509,24 @@ function PantallaDirec1() {
                                           </div>
 
                                           <div className="w-full ">
-                                            <h3 className="font-bold mb-4 text-lg">
+                                            <h3 className="font-bold mb-4 text-xl">
                                               {evento.nombreEvento}
                                             </h3>
                                             <div className="grid grid-cols-3 gap-1 font-bold text-2xl ">
                                               {/* Columna 1: Nombre (a la izquierda) */}
-                                              <p className="col-span-3 text-sm">
+                                              <p className="col-span-3 text-base">
                                                 {evento.tipoEvento}
                                               </p>
-                                              <p className=" text-sm">
+                                              <p className=" text-smbase">
                                                 {evento.devices[0]}
                                               </p>
                                               {/* Columna 2: Lugar (en el centro) */}
-                                              <p className="text-center text-sm ">
+                                              <p className="text-center text-base ">
                                                 {evento.lugar}
                                               </p>
 
                                               {/* Columna 3: Rango de horas (a la derecha) */}
-                                              <p className=" text-right text-sm ">
+                                              <p className=" text-right text-base ">
                                                 {evento.horaInicialReal + " a "}
                                                 {evento.horaFinalReal}
                                                 {"HRS"}
@@ -1583,7 +1562,7 @@ function PantallaDirec1() {
               >
                 {/* Título */}
                 <h2
-                  className="text-color text-xl text-center align-bottom"
+                  className="text-color text-2xl text-center align-bottom"
                   style={{
                     color: templateActual.fontColor,
                   }}
