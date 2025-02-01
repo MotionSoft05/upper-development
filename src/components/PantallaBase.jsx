@@ -15,7 +15,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import LogIn from "@/app/login/page";
-
+import AdvertisementSlider from "@/components/sliderPublicidadPS";
 import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/TemplateManager";
@@ -403,6 +403,11 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         <div className="text-xl">No template data available</div>
       </div>
     );
+  }
+
+  // Si no hay eventos pero hay anuncios, mostrar el slider de anuncios
+  if (!currentEvent && screenData.ads.length > 0) {
+    return <AdvertisementSlider advertisements={screenData.ads} />;
   }
 
   return (
