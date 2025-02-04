@@ -28,11 +28,11 @@ const AdvertisementSlider = ({ advertisements }) => {
         (currentAd.segundos || 0)
     );
 
-    console.log(
-      `Ad ${currentIndex + 1}/${
-        advertisements.length
-      } will display for ${totalSeconds} seconds`
-    );
+    // console.log(
+    //   `Ad ${currentIndex + 1}/${
+    //     advertisements.length
+    //   } will display for ${totalSeconds} seconds`
+    // );
 
     const timer = setTimeout(moveToNextAd, totalSeconds * 1000);
     return () => clearTimeout(timer);

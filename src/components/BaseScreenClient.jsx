@@ -1,7 +1,7 @@
 // src/components/BaseScreenClient.jsx
 "use client";
 import { useSearchParams } from "next/navigation";
-import BaseScreen from "@/components/PantallaBase";
+import BaseScreen from "@/components/PantallaBaseSalon";
 
 export default function BaseScreenClient({ id }) {
   const searchParams = useSearchParams();
