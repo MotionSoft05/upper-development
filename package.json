@@ -32,8 +32,6 @@
     "firebase-admin": "^12.0.0",
     "html2canvas": "^1.4.1",
     "keen-slider": "^6.8.6",
-    "lodash": "^4.17.21",
-    "lodash.debounce": "^4.0.8",
     "moment": "^2.30.1",
     "next": "^13.4.19",
     "postcss": "8.4.28",

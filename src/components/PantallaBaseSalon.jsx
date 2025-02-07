@@ -92,8 +92,8 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       const {
         fechaInicio,
         fechaFinal,
-        horaInicialReal,
-        horaFinalReal,
+        horaInicialSalon,
+        horaFinalSalon,
         empresa,
         nombreEvento,
         id,
@@ -108,12 +108,15 @@ const BaseScreen = ({ screenNumber, empresa }) => {
 
       let startMinutes, endMinutes;
 
-      if (horaInicialReal === DEFAULT_HOUR && horaFinalReal === DEFAULT_HOUR) {
+      if (
+        horaInicialSalon === DEFAULT_HOUR &&
+        horaFinalSalon === DEFAULT_HOUR
+      ) {
         startMinutes = 0;
         endMinutes = 24 * 60 - 1;
       } else {
-        startMinutes = convertTimeToMinutes(horaInicialReal);
-        endMinutes = convertTimeToMinutes(horaFinalReal);
+        startMinutes = convertTimeToMinutes(horaInicialSalon);
+        endMinutes = convertTimeToMinutes(horaFinalSalon);
       }
 
       const isWithinTimeRange =
@@ -336,8 +339,8 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       });
 
       const filteredEvents = prev.events.filter((event) => {
-        const startMinutes = convertTimeToMinutes(event.horaInicialReal);
-        const endMinutes = convertTimeToMinutes(event.horaFinalReal);
+        const startMinutes = convertTimeToMinutes(event.horaInicialSalon);
+        const endMinutes = convertTimeToMinutes(event.horaFinalSalon);
         const isValid = nowMinutes >= startMinutes && nowMinutes <= endMinutes;
 
         console.log(`🔎 Evento: ${event.nombreEvento}`, {

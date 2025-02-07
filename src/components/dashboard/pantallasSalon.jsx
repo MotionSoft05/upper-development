@@ -164,11 +164,22 @@ function PantallasSalon() {
     const fetchUserData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
+        console.log(
+          "🚀 ~ pantallasSalon.jsx:167 ~ fetchUserData ~ authUser:",
+          authUser
+        );
 
         if (authUser) {
           const usuariosRef = collection(db, "usuarios");
+          console.log(
+            "🚀 ~ pantallasSalon.jsx:174 ~ fetchUserData ~ usuariosRef:",
+            usuariosRef
+          );
           let usuariosQuery;
-
+          console.log(
+            "🚀 ~ pantallasSalon.jsx:239 ~ fetchUserData ~ usuariosQuery:",
+            usuariosQuery
+          );
           // Cambio aquí: Si hay una empresa seleccionada, buscar usuarios con esa empresa
           if (empresaSeleccionada) {
             usuariosQuery = query(
@@ -184,21 +195,38 @@ function PantallasSalon() {
           }
 
           const usuariosSnapshot = await getDocs(usuariosQuery);
+          console.log(
+            "🚀 ~ pantallasSalon.jsx:191 ~ fetchUserData ~ usuariosSnapshot:",
+            usuariosSnapshot
+          );
 
           if (!usuariosSnapshot.empty) {
             const user = usuariosSnapshot.docs[0].data();
+            console.log(
+              "🚀 ~ pantallasSalon.jsx:198 ~ fetchUserData ~ user:",
+              user
+            );
             const numberOfScreens = user.ps || 0;
-
+            console.log(
+              "🚀 ~ pantallasSalon.jsx:217 ~ fetchUserData ~ numberOfScreens:",
+              numberOfScreens
+            );
             // Cambio aquí: Usar los nombres de pantallas de la colección
             const nombresPantallasColeccion = user.nombrePantallas || [];
-
+            console.log(
+              "🚀 ~ pantallasSalon.jsx:217 ~ fetchUserData ~ nombresPantallasColeccion:",
+              nombresPantallasColeccion
+            );
             // Asegurarnos de que tengamos suficientes nombres para el número de pantallas
             const namesArray = Array.from(
               { length: numberOfScreens },
               (_, index) =>
                 nombresPantallasColeccion[index] || `Pantalla ${index + 1}`
             );
-
+            console.log(
+              "🚀 ~ pantallasSalon.jsx:206 ~ fetchUserData ~ namesArray:",
+              namesArray
+            );
             setNombreEmpresa(user);
             setNombrePantallas(namesArray);
             setPs(numberOfScreens);
@@ -222,6 +250,10 @@ function PantallasSalon() {
           const usuariosQuery = query(
             usuariosRef,
             where("email", "==", authUser.email)
+          );
+          console.log(
+            "🚀 ~ pantallasSalon.jsx:246 ~ cargarDatosPersonalizacion ~ authUser:",
+            authUser
           );
           const usuariosSnapshot = await getDocs(usuariosQuery);
 
