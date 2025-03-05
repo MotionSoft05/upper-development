@@ -1,3 +1,4 @@
+// PantallaBaseSalon
 "use client";
 import {
   collection,
