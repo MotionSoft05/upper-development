@@ -287,7 +287,19 @@
     "selectedDevices": "Selected Devices",
     "saveChanges": "Save Changes",
     "close": "Close",
-    "viewEdit": "View/Edit"
+    "viewEdit": "View/Edit",
+    "search": "Search...",
+    "viewAll": "View All",
+    "selectCompany": "Select company...",
+    "showing": "Showing",
+    "events": "events",
+    "noMatchingEvents": "No events match your search",
+    "noActiveEvents": "No active events",
+    "noFinishedEvents": "No finished events",
+    "noScreens": "No screens",
+    "confirmDelete": "Confirm deletion",
+    "deleteWarning": "Are you sure you want to delete this event? This action cannot be undone.",
+    "cancel": "Cancel"
   },
   "screenSalon": {
     "licenseError": "No active licenses. Screens cannot be customized.",

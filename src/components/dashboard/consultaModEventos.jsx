@@ -13,11 +13,15 @@ import {
   deleteObject,
 } from "firebase/storage";
 
-// if (!firebase.apps.length) {
-//   firebase.initializeApp(firebaseConfig);
-// }
-// const storage = firebase.storage();
-
+import {
+  CalendarIcon,
+  ClockIcon,
+  BookmarkIcon,
+  TrashIcon,
+  PencilSquareIcon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from "@heroicons/react/20/solid";
 function ConsultaModEvento() {
   const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
@@ -41,6 +45,15 @@ function ConsultaModEvento() {
   const [cambiosPendientes, setCambiosPendientes] = useState(false);
   const [empresas, setEmpresas] = useState([]); // Estado para almacenar las opciones del filtro de empresas
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
+
+  // Estados nuevos para las funcionalidades mejoradas
+  const [searchTerm, setSearchTerm] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [sortConfig, setSortConfig] = useState({
+    key: null,
+    direction: "ascending",
+  });
+  const [showTooltip, setShowTooltip] = useState(null);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -73,7 +86,6 @@ function ConsultaModEvento() {
     setEmpresaSeleccionada(selectedOption);
   };
 
-  // Filtrar eventos según la empresa seleccionada
   // Filtrar eventos según la empresa seleccionada
   const eventosFiltradosPorEmpresa = eventos.filter((evento) => {
     if (empresaSeleccionada === null || empresaSeleccionada.value === null) {
@@ -244,32 +256,36 @@ function ConsultaModEvento() {
 
   const eliminarEvento = async (id) => {
     try {
-      const confirmacion = window.confirm(
-        "¿Estás seguro que quieres eliminar este evento?"
-      );
+      // Fetch the event data
+      const evento = await firebase
+        .firestore()
+        .collection("eventos")
+        .doc(id)
+        .get();
 
-      if (confirmacion) {
-        // Fetch the event data
-        const evento = await firebase
-          .firestore()
-          .collection("eventos")
-          .doc(id)
-          .get();
+      // Check if the event has images
+      const imagenesEvento = evento.data().images || [];
 
-        // Check if the event has images
-        const imagenesEvento = evento.data().images || [];
+      // Delete the event
+      await firebase.firestore().collection("eventos").doc(id).delete();
 
-        // Delete the event
-        await firebase.firestore().collection("eventos").doc(id).delete();
+      // Delete the associated images
+      if (imagenesEvento.length > 0) {
+        imagenesEvento.forEach(async (imagen) => {
+          const imagenRef = ref(
+            storage,
+            decodeURIComponent(imagen.split("/o/")[1].split("?alt=media")[0])
+          );
 
-        // Delete the associated images
-        if (imagenesEvento.length > 0) {
-          imagenesEvento.forEach(async (imagen) => {
-            const imagenRef = storage.refFromURL(imagen);
-            await imagenRef.delete();
-          });
-        }
+          try {
+            await deleteObject(imagenRef);
+          } catch (error) {
+            console.warn(`Error al eliminar imagen: ${error.message}`);
+          }
+        });
       }
+
+      setConfirmDelete(null);
     } catch (error) {
       console.error("Error al eliminar el evento:", error);
     }
@@ -311,10 +327,10 @@ function ConsultaModEvento() {
 
               try {
                 // Verificar si la imagen existe antes de intentar eliminarla
-                await imagenRef.getMetadata();
+                //await imagenRef.getMetadata();
 
                 // Si la imagen existe, entonces eliminarla
-                await imagenRef.delete();
+                await deleteObject(imagenRef);
               } catch (error) {
                 // Manejar el error si la imagen no existe
                 console.warn(`La imagen no existe: ${imagen}`);
@@ -396,55 +412,198 @@ function ConsultaModEvento() {
     }
   };
 
+  // Nueva funcionalidad: búsqueda, ordenamiento y confirmación de eliminación
+  const filteredEvents = eventosFiltradosPorEmpresa.filter((evento) => {
+    // First filter by active/finished status
+    if (filtro === "activos") {
+      if (evento.status !== true) return false;
+    } else if (filtro === "finalizados") {
+      if (evento.status !== false) return false;
+    }
+
+    // Then filter by search term
+    if (!searchTerm) return true;
+
+    const searchableFields = [
+      evento.nombreEvento,
+      evento.tipoEvento,
+      evento.lugar,
+      ...(evento.devices || []),
+    ];
+
+    return searchableFields.some(
+      (field) =>
+        field &&
+        field.toString().toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  });
+
+  // Sorting functionality
+  const sortedEvents = React.useMemo(() => {
+    let sortableItems = [...filteredEvents];
+    if (sortConfig.key) {
+      sortableItems.sort((a, b) => {
+        if (sortConfig.key === "usuario") {
+          const usuarioA = usuarios.find((usuario) => usuario.id === a.userId);
+          const usuarioB = usuarios.find((usuario) => usuario.id === b.userId);
+          const valA = usuarioA?.nombre || "";
+          const valB = usuarioB?.nombre || "";
+
+          if (valA < valB) {
+            return sortConfig.direction === "ascending" ? -1 : 1;
+          }
+          if (valA > valB) {
+            return sortConfig.direction === "ascending" ? 1 : -1;
+          }
+          return 0;
+        } else {
+          let valA = a[sortConfig.key] || "";
+          let valB = b[sortConfig.key] || "";
+
+          if (
+            sortConfig.key === "fechaInicio" ||
+            sortConfig.key === "fechaFinal"
+          ) {
+            valA = new Date(valA);
+            valB = new Date(valB);
+          }
+
+          if (valA < valB) {
+            return sortConfig.direction === "ascending" ? -1 : 1;
+          }
+          if (valA > valB) {
+            return sortConfig.direction === "ascending" ? 1 : -1;
+          }
+          return 0;
+        }
+      });
+    } else {
+      // Default sort by user first, then by end date
+      sortableItems.sort((a, b) => {
+        const usuarioA = usuarios.find((usuario) => usuario.id === a.userId);
+        const usuarioB = usuarios.find((usuario) => usuario.id === b.userId);
+        const ordenPorUsuario =
+          usuarioA?.nombre?.localeCompare(usuarioB?.nombre) || 0;
+
+        if (ordenPorUsuario === 0) {
+          const fechaHoraFinalA = new Date(
+            `${a.fechaFinal}T${a.horaFinalSalon}`
+          );
+          const fechaHoraFinalB = new Date(
+            `${b.fechaFinal}T${b.horaFinalSalon}`
+          );
+          return fechaHoraFinalA - fechaHoraFinalB;
+        }
+
+        return ordenPorUsuario;
+      });
+    }
+    return sortableItems;
+  }, [filteredEvents, sortConfig, usuarios]);
+
+  const requestSort = (key) => {
+    let direction = "ascending";
+    if (sortConfig.key === key && sortConfig.direction === "ascending") {
+      direction = "descending";
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const getSortIndicator = (key) => {
+    if (sortConfig.key !== key) return null;
+    return sortConfig.direction === "ascending" ? " ↑" : " ↓";
+  };
+
+  const handleDeleteClick = (eventoId) => {
+    setConfirmDelete(eventoId);
+  };
+
+  const confirmDeleteAction = () => {
+    if (confirmDelete) {
+      eliminarEvento(confirmDelete);
+    }
+  };
+
+  const cancelDeleteAction = () => {
+    setConfirmDelete(null);
+  };
+
   return (
-    <section className="pl-14 md:px-20">
-      <div>
-        <div className="p-5">
-          <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-            {/* Consulta de Eventos */}
+    <section className="pl-4 md:pl-10 pr-4 md:pr-10 py-6 max-w-full overflow-hidden">
+      <div className="bg-white rounded-lg shadow-lg p-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-extrabold text-gray-800 mb-4 md:mb-0">
             {t("consultaModEventos.title")}
           </h1>
-        </div>
-        {/* Agregar React Select para filtrar por empresa */}
-        {user && // Verificar si user no es null antes de acceder a sus propiedades
-          (user.email === "uppermex10@gmail.com" ||
-            user.email === "ulises.jacobo@hotmail.com" ||
-            user.email === "contacto@upperds.mx") && (
-            <div className="mb-4">
-              <Select
-                options={[
-                  { value: null, label: "VER TODOS" }, // Opción "Ver Todos"
-                  ...empresas, // Otras opciones de empresas
-                ]}
-                onChange={handleEmpresaChange}
-                value={empresaSeleccionada}
-                placeholder={"Seleccionar empresa..."}
-              />
-            </div>
-          )}
 
-        <div className="mb-4">
-          <button
-            onClick={() => setFiltro("activos")}
-            className={`${
-              filtro === "activos" ? "bg-blue-500" : "bg-gray-300"
-            } text-white px-4 py-2 rounded mr-2`}
-          >
-            {/* Eventos Activos */}
-            {t("consultaModEventos.activeEvents")}
-          </button>
-          <button
-            onClick={() => setFiltro("finalizados")}
-            className={`${
-              filtro === "finalizados" ? "bg-red-500" : "bg-gray-300"
-            } text-white px-4 py-2 rounded`}
-          >
-            {/* Eventos Finalizados */}
-            {t("consultaModEventos.finishedEvents")}
-          </button>
+          {/* Admin company selector */}
+          {user &&
+            (user.email === "uppermex10@gmail.com" ||
+              user.email === "ulises.jacobo@hotmail.com" ||
+              user.email === "contacto@upperds.mx") && (
+              <div className="w-full md:w-64 mb-4 md:mb-0 md:ml-4">
+                <Select
+                  options={[
+                    { value: null, label: t("consultaModEventos.viewAll") },
+                    ...empresas,
+                  ]}
+                  onChange={handleEmpresaChange}
+                  value={empresaSeleccionada}
+                  placeholder={t("consultaModEventos.selectCompany")}
+                  className="text-sm"
+                />
+              </div>
+            )}
         </div>
-        <div className=" ">
-          <table className=" ">
+
+        {/* Search and filter controls */}
+        <div className="flex flex-col md:flex-row items-start md:items-center mb-6 space-y-4 md:space-y-0">
+          <div className="relative w-full md:w-64 mr-0 md:mr-4">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <MagnifyingGlassIcon className="text-gray-400" />
+            </div>
+            <input
+              type="text"
+              className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              placeholder={t("consultaModEventos.search")}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setFiltro("activos")}
+              className={`px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+                filtro === "activos"
+                  ? "bg-blue-600 text-white shadow-md hover:bg-blue-700 focus:ring-blue-500"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500"
+              }`}
+            >
+              {t("consultaModEventos.activeEvents")}
+            </button>
+            <button
+              onClick={() => setFiltro("finalizados")}
+              className={`px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200 ${
+                filtro === "finalizados"
+                  ? "bg-red-600 text-white shadow-md hover:bg-red-700 focus:ring-red-500"
+                  : "bg-gray-200 text-gray-700 hover:bg-gray-300 focus:ring-gray-500"
+              }`}
+            >
+              {t("consultaModEventos.finishedEvents")}
+            </button>
+          </div>
+        </div>
+
+        {/* Results count */}
+        <div className="text-sm text-gray-600 mb-4">
+          {t("consultaModEventos.showing")} {sortedEvents.length}{" "}
+          {t("consultaModEventos.events")}
+        </div>
+
+        {/* Table container with horizontal scroll for mobile */}
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
             <thead className="bg-gray-50">
               <tr>
                 {(usuarioLogeado === "uppermex10@gmail.com" ||
@@ -452,116 +611,107 @@ function ConsultaModEvento() {
                   usuarioLogeado === "contacto@upperds.mx") && (
                   <th
                     scope="col"
-                    className="px-0.5 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => requestSort("usuario")}
                   >
-                    {/* USUARIO */}
                     {t("consultaModEventos.user")}
+                    {getSortIndicator("usuario")}
                   </th>
                 )}
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  N
+                  #
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort("nombreEvento")}
                 >
-                  {/* NOMBRE */}
                   {t("consultaModEventos.name")}
+                  {getSortIndicator("nombreEvento")}
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort("tipoEvento")}
                 >
-                  {/* TIPO */}
                   {t("consultaModEventos.type")}
+                  {getSortIndicator("tipoEvento")}
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  {/* NOMBRE DE SALON */}
                   {t("consultaModEventos.roomName")}
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  onClick={() => requestSort("fechaInicio")}
                 >
-                  {/* FECHA/S */}
                   {t("consultaModEventos.dates")}
+                  {getSortIndicator("fechaInicio")}
                 </th>
                 <th
                   scope="col"
-                  className="px-2 py-1 md:px-3 md:py-3 text-left text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  {/* HORA SALON */}
                   {t("consultaModEventos.roomTime")}
                 </th>
-
                 <th
                   scope="col"
-                  className="px-0.5 py-1 md:px-3 md:py-3 text-center text-xs font-medium text-gray-500 "
+                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
                 >
-                  {/* ACCIONES */}
                   {t("consultaModEventos.actions")}
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
-              {eventosFiltradosPorEmpresa
-                .filter((evento) => {
-                  if (filtro === "activos") {
-                    return evento.status === true;
-                  } else if (filtro === "finalizados") {
-                    return evento.status === false;
-                  }
-                  return true;
-                })
-                .slice()
-                .sort((a, b) => {
-                  const usuarioA = usuarios.find(
-                    (usuario) => usuario.id === a.userId
-                  );
-                  const usuarioB = usuarios.find(
-                    (usuario) => usuario.id === b.userId
-                  );
-                  const ordenPorUsuario = usuarioA?.nombre.localeCompare(
-                    usuarioB?.nombre
-                  );
-
-                  if (ordenPorUsuario === 0) {
-                    // Si los usuarios son iguales, ordena por fecha y hora final del salón
-                    const fechaHoraFinalA = new Date(
-                      `${a.fechaFinal}T${a.horaFinalSalon}`
-                    );
-                    const fechaHoraFinalB = new Date(
-                      `${b.fechaFinal}T${b.horaFinalSalon}`
-                    );
-                    return fechaHoraFinalA - fechaHoraFinalB;
-                  }
-
-                  return ordenPorUsuario;
-                })
-                .map((evento, index) => {
+            <tbody className="bg-white divide-y divide-gray-200">
+              {sortedEvents.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={
+                      usuarioLogeado === "uppermex10@gmail.com" ||
+                      usuarioLogeado === "ulises.jacobo@hotmail.com" ||
+                      usuarioLogeado === "contacto@upperds.mx"
+                        ? 8
+                        : 7
+                    }
+                    className="px-4 py-8 text-center text-sm text-gray-500"
+                  >
+                    {searchTerm
+                      ? t("consultaModEventos.noMatchingEvents")
+                      : filtro === "activos"
+                      ? t("consultaModEventos.noActiveEvents")
+                      : t("consultaModEventos.noFinishedEvents")}
+                  </td>
+                </tr>
+              ) : (
+                sortedEvents.map((evento, index) => {
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
                   );
 
                   return (
-                    <tr key={evento.id} className="text-xs md:text-base">
+                    <tr
+                      key={evento.id}
+                      className="hover:bg-gray-50 transition-colors duration-150"
+                    >
                       {(usuarioLogeado === "uppermex10@gmail.com" ||
                         usuarioLogeado === "ulises.jacobo@hotmail.com" ||
                         usuarioLogeado === "contacto@upperds.mx") && (
-                        <td className="md:px-2 md:py-4 ">
-                          {usuario ? `${usuario.empresa}` : "N/A"}
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                          {usuario ? usuario.empresa : "N/A"}
                         </td>
                       )}
-                      {/* Contador */}
-                      <td className="md:px-2 md:py-4 ">{index + 1}</td>
-                      {/* Nombre */}
-                      <td className="md:px-2 md:py-4 ">
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {index + 1}
+                      </td>
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -569,23 +719,40 @@ function ConsultaModEvento() {
                             onChange={(e) =>
                               handleFieldEdit("nombreEvento", e.target.value)
                             }
-                            className="w-full px-2 py-1 border rounded-lg text-center"
+                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                           />
                         ) : (
-                          <span>
-                            {eventoEditado?.id === evento.id
-                              ? eventoEditado.nombreEvento.length > 15
-                                ? eventoEditado.nombreEvento.substring(0, 15) +
-                                  "..."
-                                : eventoEditado.nombreEvento
-                              : evento.nombreEvento.length > 15
-                              ? evento.nombreEvento.substring(0, 15) + "..."
-                              : evento.nombreEvento}
-                          </span>
+                          <div
+                            className="relative"
+                            onMouseEnter={() =>
+                              evento.nombreEvento.length > 15 &&
+                              setShowTooltip(`nombre-${evento.id}`)
+                            }
+                            onMouseLeave={() => setShowTooltip(null)}
+                          >
+                            <span>
+                              {eventoEditado?.id === evento.id
+                                ? eventoEditado.nombreEvento.length > 15
+                                  ? eventoEditado.nombreEvento.substring(
+                                      0,
+                                      15
+                                    ) + "..."
+                                  : eventoEditado.nombreEvento
+                                : evento.nombreEvento.length > 15
+                                ? evento.nombreEvento.substring(0, 15) + "..."
+                                : evento.nombreEvento}
+                            </span>
+                            {showTooltip === `nombre-${evento.id}` &&
+                              evento.nombreEvento.length > 15 && (
+                                <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                                  {evento.nombreEvento}
+                                </div>
+                              )}
+                          </div>
                         )}
                       </td>
-                      {/* Tipo  */}
-                      <td className="md:px-2 md:py-4 ">
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -593,25 +760,40 @@ function ConsultaModEvento() {
                             onChange={(e) =>
                               handleFieldEdit("tipoEvento", e.target.value)
                             }
-                            className="w-full px-2 py-1 border rounded-lg text-center"
+                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                           />
                         ) : (
-                          <span>
-                            {eventoEditado?.id === evento.id
-                              ? eventoEditado.tipoEvento &&
-                                eventoEditado.tipoEvento.length > 15
-                                ? eventoEditado.tipoEvento.substring(0, 15) +
-                                  "..."
-                                : eventoEditado.tipoEvento || ""
-                              : evento.tipoEvento &&
-                                evento.tipoEvento.length > 15
-                              ? evento.tipoEvento.substring(0, 15) + "..."
-                              : evento.tipoEvento || ""}
-                          </span>
+                          <div
+                            className="relative"
+                            onMouseEnter={() =>
+                              evento.tipoEvento?.length > 15 &&
+                              setShowTooltip(`tipo-${evento.id}`)
+                            }
+                            onMouseLeave={() => setShowTooltip(null)}
+                          >
+                            <span>
+                              {eventoEditado?.id === evento.id
+                                ? eventoEditado.tipoEvento &&
+                                  eventoEditado.tipoEvento.length > 15
+                                  ? eventoEditado.tipoEvento.substring(0, 15) +
+                                    "..."
+                                  : eventoEditado.tipoEvento || ""
+                                : evento.tipoEvento &&
+                                  evento.tipoEvento.length > 15
+                                ? evento.tipoEvento.substring(0, 15) + "..."
+                                : evento.tipoEvento || ""}
+                            </span>
+                            {showTooltip === `tipo-${evento.id}` &&
+                              evento.tipoEvento?.length > 15 && (
+                                <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                                  {evento.tipoEvento}
+                                </div>
+                              )}
+                          </div>
                         )}
                       </td>
-                      {/* Nombre de salon   */}
-                      <td className="md:px-2 md:py-4 ">
+
+                      <td className="px-4 py-4 whitespace-normal max-w-xs text-sm text-gray-900">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
                             type="text"
@@ -619,496 +801,651 @@ function ConsultaModEvento() {
                             onChange={(e) =>
                               handleFieldEdit("devices", e.target.value)
                             }
-                            className="w-full px-2 py-1 border rounded-lg text-center"
+                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
                           />
                         ) : eventoEditado?.id === evento.id ? (
                           eventoEditado.devices
                         ) : (
-                          // Devices names o "Sin pantallas" si no hay ninguna disponible
-                          <>
+                          <div className="max-h-20 overflow-y-auto">
                             {evento.devices.length === 0 ? (
-                              "sin Pantallas"
+                              <span className="text-red-500 italic">
+                                {t("consultaModEventos.noScreens")}
+                              </span>
                             ) : (
-                              <>
-                                {" "}
-                                {evento.devices.map((device, key) => {
-                                  return <div key={key}>{`* ${device}`}</div>;
-                                })}{" "}
-                              </>
+                              <div className="space-y-1">
+                                {evento.devices.map((device, key) => (
+                                  <div
+                                    key={key}
+                                    className="text-sm text-gray-700 bg-gray-100 rounded px-2 py-1 inline-block mr-1 mb-1"
+                                  >
+                                    {device}
+                                  </div>
+                                ))}
+                              </div>
                             )}
-                          </>
+                          </div>
                         )}
                       </td>
-                      {/* Fecha */}
-                      <td className="md:px-2 md:py-4 ">
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {modoEdicion &&
                         evento.id === eventoEditado?.id &&
                         edicionFechas ? (
-                          <div>
-                            <input
-                              type="date"
-                              value={eventoEditado.fechaInicio || ""}
-                              onChange={(e) =>
-                                handleFieldEdit("fechaInicio", e.target.value)
-                              }
-                              className="w-full px-2 py-1 border rounded-lg text-center"
-                            />
-                            <br />
-                            <input
-                              type="date"
-                              value={eventoEditado.fechaFinal || ""}
-                              onChange={(e) =>
-                                handleFieldEdit("fechaFinal", e.target.value)
-                              }
-                              className="w-full px-2 py-1 border rounded-lg text-center"
-                            />
-                          </div>
-                        ) : evento.id === eventoEditado?.id ? (
-                          evento.fechaInicio === eventoEditado.fechaFinal ? (
-                            eventoEditado.fechaInicio
-                          ) : (
-                            <>
-                              {eventoEditado.fechaInicio}
-                              <br />
-                              {eventoEditado.fechaFinal}
-                            </>
-                          )
-                        ) : evento.fechaInicio === evento.fechaFinal ? (
-                          evento.fechaInicio
-                        ) : (
-                          <>
-                            {evento.fechaInicio}
-                            <br />
-                            {evento.fechaFinal}
-                          </>
-                        )}
-                      </td>
-                      {/* Hora salon     */}
-                      <td className="md:px-2 md:py-4">
-                        {modoEdicion && evento.id === eventoEditado?.id ? (
-                          <input
-                            type="time"
-                            value={eventoEditado.horaInicialSalon || ""}
-                            onChange={(e) =>
-                              handleFieldEdit(
-                                "horaInicialSalon",
-                                e.target.value
-                              )
-                            }
-                            className="w-full px-2 py-1 border rounded-lg"
-                          />
-                        ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.horaInicialSalon
-                        ) : (
-                          evento.horaInicialSalon
-                        )}
-                        <br />
-                        {modoEdicion && evento.id === eventoEditado?.id ? (
-                          <input
-                            type="time"
-                            value={eventoEditado.horaFinalSalon || ""}
-                            onChange={(e) =>
-                              handleFieldEdit("horaFinalSalon", e.target.value)
-                            }
-                            className="w-full px-2 py-1 border rounded-lg"
-                          />
-                        ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.horaFinalSalon
-                        ) : (
-                          evento.horaFinalSalon
-                        )}
-                      </td>
-
-                      {/* Editar */}
-                      <td className="md:px-2 md:py-4">
-                        {modalAbierto && (
-                          <div className="fixed inset-0 flex items-center justify-center z-50">
-                            <div className="fixed inset-0 z-40 bg-black opacity-25"></div>
-                            <div className="bg-white p-1 md:p-4 rounded shadow-lg z-50 w-full max-w-screen-md overflow-y-auto">
-                              <h2 className="text-xl font-bold mb-4">
-                                {/* Editar Evento */}
-                                {t("consultaModEventos.editEvent")}
-                              </h2>
-                              <div className="grid grid-cols-2 space-x-3">
-                                <div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      {/* Nombre del Evento */}
-                                      {t("consultaModEventos.eventName")}
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={eventoEditado?.nombreEvento || ""}
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "nombreEvento",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      {/* Tipo del Evento */}
-                                      {t("consultaModEventos.eventType")}
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={eventoEditado?.tipoEvento || ""}
-                                      onChange={(e) =>
-                                        handleFieldEdit(
-                                          "tipoEvento",
-                                          e.target.value
-                                        )
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      {/* Lugar del Evento */}
-                                      {t("consultaModEventos.eventLocation")}
-                                    </label>
-                                    <input
-                                      type="text"
-                                      value={eventoEditado?.lugar || ""}
-                                      onChange={(e) =>
-                                        handleFieldEdit("lugar", e.target.value)
-                                      }
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                    />
-                                  </div>
-                                  <div className="mb-2">
-                                    {t("consultaModEventos.eventDescription")} (
-                                    {255 -
-                                      (eventoEditado.description || "").length}
-                                    )
-                                    <textarea
-                                      value={eventoEditado?.description || ""}
-                                      onChange={(e) => {
-                                        handleFieldEdit(
-                                          "description",
-                                          e.target.value
-                                        );
-                                        setDescription(e.target.value); // Agrega esta línea
-                                      }}
-                                      className="w-full px-2 py-1 border rounded-lg text-center"
-                                      rows={4}
-                                      maxLength={255}
-                                    />
-                                  </div>
-                                </div>
-
-                                <div>
-                                  <div className="mb-2 flex space-x-3">
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Fecha de Inicio */}
-                                        {t("consultaModEventos.startDate")}
-                                      </label>
-                                      <input
-                                        type="date"
-                                        value={eventoEditado?.fechaInicio || ""}
-                                        onChange={(e) =>
-                                          handleFieldEdit(
-                                            "fechaInicio",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Fecha de Finalización */}
-                                        {t("consultaModEventos.endDate")}
-                                      </label>
-                                      <input
-                                        type="date"
-                                        value={eventoEditado?.fechaFinal || ""}
-                                        onChange={(e) =>
-                                          handleFieldEdit(
-                                            "fechaFinal",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                  </div>
-                                  <p className="md:text-sm">
-                                    {/* Horario en que se tiene programado el evento */}
-                                    {t("consultaModEventos.eventSchedule")}
-                                  </p>
-                                  {/* Horas Real */}
-                                  <div className="mb-2 flex space-x-3">
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Hora Inicial Real */}
-                                        {t("consultaModEventos.realStartTime")}
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={horaInicialReal}
-                                        onChange={(e) =>
-                                          setHoraInicialReal(e.target.value)
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Hora Final Real */}
-                                        {t("consultaModEventos.realEndTime")}
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={horaFinalReal}
-                                        onChange={(e) =>
-                                          setHoraFinalReal(e.target.value)
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                  </div>
-                                  {/* Horas Salon */}{" "}
-                                  <p className="md:text-sm">
-                                    {/* Horario en que se mostrara... */}
-                                    {t("consultaModEventos.screenSchedule")}
-                                  </p>
-                                  <div className="mb-2 flex space-x-3">
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Hora Inicial Salon */}
-                                        {t("consultaModEventos.roomStartTime")}
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={
-                                          eventoEditado?.horaInicialSalon || ""
-                                        }
-                                        onChange={(e) =>
-                                          handleFieldEdit(
-                                            "horaInicialSalon",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                    <div className="w-1/2">
-                                      <label className="block text-sm font-medium text-gray-700">
-                                        {/* Hora Final Salon */}
-                                        {t("consultaModEventos.roomEndTime")}
-                                      </label>
-                                      <input
-                                        type="time"
-                                        value={
-                                          eventoEditado?.horaFinalSalon || ""
-                                        }
-                                        onChange={(e) =>
-                                          handleFieldEdit(
-                                            "horaFinalSalon",
-                                            e.target.value
-                                          )
-                                        }
-                                        className="w-full px-2 py-1 border rounded-lg text-center"
-                                      />
-                                    </div>
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="block text-sm font-medium text-gray-700">
-                                      {/* Imágenes del Evento (Máximo 3) */}
-                                      {t("consultaModEventos.eventImages")}
-                                    </label>
-                                    <div className="flex items-center">
-                                      {imagenesEvento.map((imagen, index) => (
-                                        <div key={index} className="mr-2">
-                                          <img
-                                            src={imagen}
-                                            alt={`Imagen ${index + 1}`}
-                                            className="w-16 h-16 object-cover rounded-lg"
-                                          />
-                                          <button
-                                            onClick={() =>
-                                              eliminarImagen(index)
-                                            }
-                                            className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg mt-2"
-                                          >
-                                            {/* Eliminar */}
-                                            {t("consultaModEventos.delete")}
-                                          </button>
-                                        </div>
-                                      ))}
-                                    </div>
-                                    {imagenesEvento.length < 3 && (
-                                      <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleImagenChange}
-                                        className="mt-2"
-                                      />
-                                    )}
-                                  </div>
-                                  <div className="mb-2">
-                                    <label className="flex items-center text-sm font-medium text-gray-700">
-                                      <input
-                                        type="checkbox"
-                                        checked={
-                                          eventoEditado?.primeraImagen || false
-                                        }
-                                        onChange={(e) =>
-                                          handleFieldEdit(
-                                            "primeraImagen",
-                                            e.target.checked
-                                          )
-                                        }
-                                        className="mr-2"
-                                      />
-                                      Activar Pantalla Completa (1280 x 720 px)
-                                    </label>
-                                  </div>
-                                </div>
-                              </div>
-
-                              <div className="mb-2">
-                                <label className="block text-sm font-medium text-gray-700">
-                                  {/* Dispositivos Seleccionados */}
-                                  {t("consultaModEventos.selectedDevices")}
-                                </label>
-                                <div className="flex flex-wrap justify-start items-start">
-                                  {pantallas
-                                    .filter(
-                                      (usuario) =>
-                                        eventoEditado?.userId === usuario.id
-                                    )
-                                    .map((usuario) => {
-                                      const nombrePantallas =
-                                        Array.isArray(
-                                          usuario.nombrePantallas
-                                        ) && usuario.nombrePantallas.length
-                                          ? usuario.nombrePantallas
-                                          : typeof usuario.nombrePantallas ===
-                                            "object"
-                                          ? Object.values(
-                                              usuario.nombrePantallas
-                                            )
-                                          : ["N/A"];
-
-                                      const nombrePantallasDirectorio =
-                                        Array.isArray(
-                                          usuario.nombrePantallasDirectorio
-                                        ) &&
-                                        usuario.nombrePantallasDirectorio.length
-                                          ? usuario.nombrePantallasDirectorio
-                                          : typeof usuario.nombrePantallasDirectorio ===
-                                            "object"
-                                          ? Object.values(
-                                              usuario.nombrePantallasDirectorio
-                                            )
-                                          : ["N/A"];
-
-                                      return (
-                                        <>
-                                          {nombrePantallas.map((pantalla) => (
-                                            <div
-                                              key={`pantalla-${pantalla}`}
-                                              className="flex items-center mb-2 mr-4"
-                                            >
-                                              <input
-                                                type="checkbox"
-                                                id={`checkbox-${pantalla}`}
-                                                value={pantalla}
-                                                checked={eventoEditado?.devices.includes(
-                                                  pantalla
-                                                )}
-                                                onChange={() =>
-                                                  handleCheckboxChange(pantalla)
-                                                }
-                                                className="mr-2"
-                                              />
-                                              <label
-                                                htmlFor={`checkbox-${pantalla}`}
-                                              >
-                                                {pantalla}
-                                              </label>
-                                            </div>
-                                          ))}
-                                          {nombrePantallasDirectorio.map(
-                                            (pantallaDir) => (
-                                              <div
-                                                key={`pantallaDir-${pantallaDir}`}
-                                                className="flex items-center mb-2 mr-4"
-                                              >
-                                                <input
-                                                  type="checkbox"
-                                                  id={`checkbox-${pantallaDir}`}
-                                                  value={pantallaDir}
-                                                  checked={eventoEditado?.devices.includes(
-                                                    pantallaDir
-                                                  )}
-                                                  onChange={() =>
-                                                    handleCheckboxChange(
-                                                      pantallaDir
-                                                    )
-                                                  }
-                                                  className="mr-2"
-                                                />
-                                                <label
-                                                  htmlFor={`checkbox-${pantallaDir}`}
-                                                >
-                                                  {pantallaDir}
-                                                </label>
-                                              </div>
-                                            )
-                                          )}
-                                        </>
-                                      );
-                                    })}
-                                </div>
-                              </div>
-
-                              <div className="flex justify-end">
-                                <button
-                                  onClick={guardarCambios}
-                                  className="text-white bg-green-500 hover:bg-green-600 px-4 py-2 rounded-lg mr-2"
-                                >
-                                  {/* Guardar Cambios */}
-                                  {t("consultaModEventos.saveChanges")}
-                                </button>
-                                <button
-                                  onClick={cerrarModal}
-                                  className="text-white bg-red-500 hover:bg-red-600 px-4 py-2 rounded-lg"
-                                >
-                                  {/* Cerrar */}
-                                  {t("consultaModEventos.close")}
-                                </button>
-                              </div>
+                          <div className="space-y-2">
+                            <div className="flex items-center">
+                              <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                              <input
+                                type="date"
+                                value={eventoEditado.fechaInicio || ""}
+                                onChange={(e) =>
+                                  handleFieldEdit("fechaInicio", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                            </div>
+                            <div className="flex items-center">
+                              <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                              <input
+                                type="date"
+                                value={eventoEditado.fechaFinal || ""}
+                                onChange={(e) =>
+                                  handleFieldEdit("fechaFinal", e.target.value)
+                                }
+                                className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                              />
                             </div>
                           </div>
+                        ) : (
+                          <div>
+                            {evento.fechaInicio === evento.fechaFinal ? (
+                              <div className="flex items-center">
+                                <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                <span>{evento.fechaInicio}</span>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center">
+                                  <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                  <span>{evento.fechaInicio}</span>
+                                </div>
+                                <div className="flex items-center mt-1">
+                                  <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                  <span>{evento.fechaFinal}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
                         )}
-                        <button
-                          onClick={() => abrirModalEdicion(evento)}
-                          className="text-white bg-green-500 hover:bg-green-600 px-2 py-1 rounded-lg "
-                        >
-                          {/* Ver más/Editar */}
-                          {t("consultaModEventos.viewEdit")}
-                        </button>
-                        <button
-                          onClick={() => eliminarEvento(evento.id)}
-                          className="text-white bg-red-500 hover:bg-red-600 px-2 py-1 rounded-lg"
-                        >
-                          {/* Eliminar */}
-                          {t("consultaModEventos.delete")}
-                        </button>
+                      </td>
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                        <div>
+                          {modoEdicion && evento.id === eventoEditado?.id ? (
+                            <div className="space-y-2">
+                              <div className="flex items-center">
+                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <input
+                                  type="time"
+                                  value={eventoEditado.horaInicialSalon || ""}
+                                  onChange={(e) =>
+                                    handleFieldEdit(
+                                      "horaInicialSalon",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+                              <div className="flex items-center">
+                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <input
+                                  type="time"
+                                  value={eventoEditado.horaFinalSalon || ""}
+                                  onChange={(e) =>
+                                    handleFieldEdit(
+                                      "horaFinalSalon",
+                                      e.target.value
+                                    )
+                                  }
+                                  className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                />
+                              </div>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="flex items-center">
+                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <span>{evento.horaInicialSalon}</span>
+                              </div>
+                              <div className="flex items-center mt-1">
+                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <span>{evento.horaFinalSalon}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </td>
+
+                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                        <div className="flex flex-wrap justify-center gap-2">
+                          <button
+                            onClick={() => abrirModalEdicion(evento)}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                            title={t("consultaModEventos.viewEdit")}
+                          >
+                            <PencilSquareIcon className="mr-1" />
+                            <span className="hidden sm:inline">
+                              {t("consultaModEventos.viewEdit")}
+                            </span>
+                          </button>
+
+                          <button
+                            onClick={() => handleDeleteClick(evento.id)}
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            title={t("consultaModEventos.delete")}
+                          >
+                            <TrashIcon className="mr-1" />
+                            <span className="hidden sm:inline">
+                              {t("consultaModEventos.delete")}
+                            </span>
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   );
-                })}
+                })
+              )}
             </tbody>
           </table>
         </div>
+
+        {/* Edit Event Modal */}
+        {modalAbierto && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+
+              <span
+                className="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mt-3 text-center sm:mt-0 sm:text-left w-full">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-6 flex items-center">
+                        <PencilSquareIcon className="mr-2 h-5" />{" "}
+                        {t("consultaModEventos.editEvent")}
+                      </h3>
+
+                      <div className="bg-gray-50 p-4 rounded-lg mb-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                          {/* Left column */}
+                          <div>
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t("consultaModEventos.eventName")}
+                              </label>
+                              <input
+                                type="text"
+                                value={eventoEditado?.nombreEvento || ""}
+                                onChange={(e) =>
+                                  handleFieldEdit(
+                                    "nombreEvento",
+                                    e.target.value
+                                  )
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t("consultaModEventos.eventType")}
+                              </label>
+                              <input
+                                type="text"
+                                value={eventoEditado?.tipoEvento || ""}
+                                onChange={(e) =>
+                                  handleFieldEdit("tipoEvento", e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t("consultaModEventos.eventLocation")}
+                              </label>
+                              <input
+                                type="text"
+                                value={eventoEditado?.lugar || ""}
+                                onChange={(e) =>
+                                  handleFieldEdit("lugar", e.target.value)
+                                }
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                              />
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                {t("consultaModEventos.eventDescription")} (
+                                {255 -
+                                  (eventoEditado?.description || "").length}
+                                )
+                              </label>
+                              <textarea
+                                value={eventoEditado?.description || ""}
+                                onChange={(e) => {
+                                  handleFieldEdit(
+                                    "description",
+                                    e.target.value
+                                  );
+                                  setDescription(e.target.value);
+                                }}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                rows={4}
+                                maxLength={255}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Right column */}
+                          <div>
+                            <div className="mb-4 grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  {t("consultaModEventos.startDate")}
+                                </label>
+                                <div className="relative">
+                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <CalendarIcon className="text-gray-400" />
+                                  </div>
+                                  <input
+                                    type="date"
+                                    value={eventoEditado?.fechaInicio || ""}
+                                    onChange={(e) =>
+                                      handleFieldEdit(
+                                        "fechaInicio",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                  />
+                                </div>
+                              </div>
+
+                              <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                  {t("consultaModEventos.endDate")}
+                                </label>
+                                <div className="relative">
+                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <CalendarIcon className="text-gray-400" />
+                                  </div>
+                                  <input
+                                    type="date"
+                                    value={eventoEditado?.fechaFinal || ""}
+                                    onChange={(e) =>
+                                      handleFieldEdit(
+                                        "fechaFinal",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                  />
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium text-gray-700 mb-2 border-b pb-1">
+                                {t("consultaModEventos.eventSchedule")}
+                              </h4>
+
+                              <div className="grid grid-cols-2 gap-4 mb-2">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    {t("consultaModEventos.realStartTime")}
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <ClockIcon className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type="time"
+                                      value={horaInicialReal}
+                                      onChange={(e) =>
+                                        setHoraInicialReal(e.target.value)
+                                      }
+                                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    {t("consultaModEventos.realEndTime")}
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <ClockIcon className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type="time"
+                                      value={horaFinalReal}
+                                      onChange={(e) =>
+                                        setHoraFinalReal(e.target.value)
+                                      }
+                                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mb-4">
+                              <h4 className="text-sm font-medium text-gray-700 mb-2 border-b pb-1">
+                                {t("consultaModEventos.screenSchedule")}
+                              </h4>
+
+                              <div className="grid grid-cols-2 gap-4 mb-2">
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    {t("consultaModEventos.roomStartTime")}
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <ClockIcon className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type="time"
+                                      value={
+                                        eventoEditado?.horaInicialSalon || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleFieldEdit(
+                                          "horaInicialSalon",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                  </div>
+                                </div>
+
+                                <div>
+                                  <label className="block text-xs font-medium text-gray-500 mb-1">
+                                    {t("consultaModEventos.roomEndTime")}
+                                  </label>
+                                  <div className="relative">
+                                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                      <ClockIcon className="text-gray-400" />
+                                    </div>
+                                    <input
+                                      type="time"
+                                      value={
+                                        eventoEditado?.horaFinalSalon || ""
+                                      }
+                                      onChange={(e) =>
+                                        handleFieldEdit(
+                                          "horaFinalSalon",
+                                          e.target.value
+                                        )
+                                      }
+                                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="block text-sm font-medium text-gray-700 mb-2">
+                                {t("consultaModEventos.eventImages")}
+                              </label>
+
+                              <div className="flex flex-wrap gap-3 mt-2">
+                                {imagenesEvento.map((imagen, index) => (
+                                  <div key={index} className="relative group">
+                                    <img
+                                      src={imagen}
+                                      alt={`Imagen ${index + 1}`}
+                                      className="h-24 w-24 object-cover rounded-lg border border-gray-300"
+                                    />
+                                    <button
+                                      onClick={() => eliminarImagen(index)}
+                                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                                      title={t("consultaModEventos.delete")}
+                                    >
+                                      <TrashIcon size={12} />
+                                    </button>
+                                  </div>
+                                ))}
+
+                                {imagenesEvento.length < 3 && (
+                                  <label className="h-24 w-24 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <span className="text-gray-500">+</span>
+                                    <input
+                                      type="file"
+                                      accept="image/*"
+                                      onChange={handleImagenChange}
+                                      className="hidden"
+                                    />
+                                  </label>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="mb-4">
+                              <label className="flex items-center text-sm text-gray-700">
+                                <input
+                                  type="checkbox"
+                                  checked={
+                                    eventoEditado?.primeraImagen || false
+                                  }
+                                  onChange={(e) =>
+                                    handleFieldEdit(
+                                      "primeraImagen",
+                                      e.target.checked
+                                    )
+                                  }
+                                  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                />
+                                <span className="ml-2">
+                                  Activar Pantalla Completa (1280 x 720 px)
+                                </span>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Devices selection section */}
+                      <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                        <h4 className="text-sm font-medium text-gray-700 mb-3 border-b pb-1">
+                          {t("consultaModEventos.selectedDevices")}
+                        </h4>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                          {pantallas
+                            .filter(
+                              (usuario) => eventoEditado?.userId === usuario.id
+                            )
+                            .map((usuario) => {
+                              const nombrePantallas =
+                                Array.isArray(usuario.nombrePantallas) &&
+                                usuario.nombrePantallas.length
+                                  ? usuario.nombrePantallas
+                                  : typeof usuario.nombrePantallas === "object"
+                                  ? Object.values(usuario.nombrePantallas)
+                                  : ["N/A"];
+
+                              const nombrePantallasDirectorio =
+                                Array.isArray(
+                                  usuario.nombrePantallasDirectorio
+                                ) && usuario.nombrePantallasDirectorio.length
+                                  ? usuario.nombrePantallasDirectorio
+                                  : typeof usuario.nombrePantallasDirectorio ===
+                                    "object"
+                                  ? Object.values(
+                                      usuario.nombrePantallasDirectorio
+                                    )
+                                  : ["N/A"];
+
+                              return (
+                                <>
+                                  {nombrePantallas.map((pantalla) => (
+                                    <div
+                                      key={`pantalla-${pantalla}`}
+                                      className="flex items-center bg-white p-2 rounded-md border border-gray-200"
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        id={`checkbox-${pantalla}`}
+                                        value={pantalla}
+                                        checked={eventoEditado?.devices.includes(
+                                          pantalla
+                                        )}
+                                        onChange={() =>
+                                          handleCheckboxChange(pantalla)
+                                        }
+                                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                      />
+                                      <label
+                                        htmlFor={`checkbox-${pantalla}`}
+                                        className="ml-2 block text-sm text-gray-900 truncate"
+                                        title={pantalla}
+                                      >
+                                        {pantalla}
+                                      </label>
+                                    </div>
+                                  ))}
+
+                                  {nombrePantallasDirectorio.map(
+                                    (pantallaDir) => (
+                                      <div
+                                        key={`pantallaDir-${pantallaDir}`}
+                                        className="flex items-center bg-white p-2 rounded-md border border-gray-200"
+                                      >
+                                        <input
+                                          type="checkbox"
+                                          id={`checkbox-${pantallaDir}`}
+                                          value={pantallaDir}
+                                          checked={eventoEditado?.devices.includes(
+                                            pantallaDir
+                                          )}
+                                          onChange={() =>
+                                            handleCheckboxChange(pantallaDir)
+                                          }
+                                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                                        />
+                                        <label
+                                          htmlFor={`checkbox-${pantallaDir}`}
+                                          className="ml-2 block text-sm text-gray-900 truncate"
+                                          title={pantallaDir}
+                                        >
+                                          {pantallaDir}
+                                        </label>
+                                      </div>
+                                    )
+                                  )}
+                                </>
+                              );
+                            })}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    onClick={guardarCambios}
+                    className="w-full inline-flex justify-center items-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    <BookmarkIcon className="mr-2 h-5" />
+                    {t("consultaModEventos.saveChanges")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={cerrarModal}
+                    className="mt-3 w-full inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                  >
+                    <XMarkIcon className="mr-2" />
+                    {t("consultaModEventos.close")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Dialog */}
+        {confirmDelete && (
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+              >
+                <div className="absolute inset-0 bg-gray-500 opacity-75"></div>
+              </div>
+
+              <span
+                className="hidden sm:inline-block sm:align-middle sm:h-screen"
+                aria-hidden="true"
+              >
+                &#8203;
+              </span>
+
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                  <div className="sm:flex sm:items-start">
+                    <div className="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                      <TrashIcon className="h-6 w-6 text-red-600" />
+                    </div>
+                    <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                      <h3 className="text-lg leading-6 font-medium text-gray-900">
+                        {t("consultaModEventos.confirmDelete")}
+                      </h3>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-500">
+                          {t("consultaModEventos.deleteWarning")}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                  <button
+                    type="button"
+                    className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={confirmDeleteAction}
+                  >
+                    {t("consultaModEventos.delete")}
+                  </button>
+                  <button
+                    type="button"
+                    className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+                    onClick={cancelDeleteAction}
+                  >
+                    {t("consultaModEventos.cancel")}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
