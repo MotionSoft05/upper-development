@@ -492,7 +492,16 @@
     "successMessage": "Los datos se enviaron correctamente.",
     "uploadImagesTitle": "Subir Imágenes:",
     "selectDevicesTitle": "Seleccionar Dispositivos:",
-    "showTitle": "Se muestra en:"
+    "showTitle": "Se muestra en:",
+    "basicInfo": "Información Básica",
+    "eventNamePlaceholder": "Ej: Conferencia anual, Reunión directiva...",
+    "eventTypePlaceholder": "Ej: Conferencia, Taller, Reunión...",
+    "locationPlaceholder": "Ej: Salón Magnolia, Sala de juntas...",
+    "descriptionPlaceholder": "Descripción breve del evento...",
+    "image": "Imagen",
+    "activateFullScreen": "Activar Pantalla Completa (1280 × 720px)",
+    "noDevicesSelected": "No hay dispositivos seleccionados",
+    "createEvent": "Crear Evento"
   },
   "admin": {
     "messages": {

@@ -494,7 +494,16 @@
     "successMessage": "Data sent successfully.",
     "uploadImagesTitle": "Upload Images:",
     "selectDevicesTitle": "Select Devices:",
-    "showTitle": "Displayed on:"
+    "showTitle": "Displayed on:",
+    "basicInfo": "Basic Information",
+    "eventNamePlaceholder": "E.g.: Annual Conference, Board Meeting...",
+    "eventTypePlaceholder": "E.g.: Conference, Workshop, Meeting...",
+    "locationPlaceholder": "E.g.: Magnolia Room, Boardroom...",
+    "descriptionPlaceholder": "Brief description of the event...",
+    "image": "Image",
+    "activateFullScreen": "Activate Full Screen (1280 × 720px)",
+    "noDevicesSelected": "No devices selected",
+    "createEvent": "Create Event"
   },
   "admin": {
     "messages": {
