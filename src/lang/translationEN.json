@@ -408,6 +408,8 @@
     "description2": "The recommended size is that of your screen. Maximum of 10 advertisements per section.",
     "eventRoom": "Event Room",
     "eventDirectory": "Event Directory",
+    "infoTitle": "Important information",
+    "infoText": "The images or videos you add will be displayed when there are no scheduled events on the screens. You can add up to 10 items per screen type.",
     "salon": {
       "userNull": "The user object is null.",
       "userNullUidProperty": "Warning! The user object is null or does not have the uid property.",
@@ -423,7 +425,9 @@
       "title": "Event Hall",
       "title2": "Event Directory",
       "selectMedia": "Select Image",
+      "browse": "Browse",
       "displayTime": "Display Time:",
+      "displayTimeHelper": "Define how long this content will be shown",
       "edit": "Edit",
       "delete": "Delete",
       "cancel": "Cancel",
@@ -431,7 +435,19 @@
       "saveAdvertisement": "Save Advertisement",
       "horas": "hours",
       "minutos": "minutes",
-      "segundos": "seconds"
+      "segundos": "seconds",
+      "timeWarning": "You must set a valid display time",
+      "screenType": "Screen Type",
+      "verticalScreen": "Vertical Screen",
+      "horizontalScreen": "Horizontal Screen",
+      "screenTypeWarning": "You must select a screen type",
+      "helpText": "Images will be displayed when there are no scheduled events. The recommended time per image is between 10 and 15 seconds.",
+      "directoryHelpText": "Images will be displayed when there are no scheduled events on directory screens.",
+      "dimensionRecommendation": "Dimension recommendations:",
+      "verticalDimension": "Vertical Screen: 520px x 1040px",
+      "horizontalDimension": "Horizontal Screen: 440px x 660px",
+      "selectCompany": "Select company",
+      "select": "Select..."
     }
   },
   "licencia": {

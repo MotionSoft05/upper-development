@@ -407,6 +407,8 @@
     "description2": "El tamaño recomendado es el de tu pantalla. Como máximo 10 publicidades por sección.",
     "eventRoom": "Salón de Eventos",
     "eventDirectory": "Directorio de Eventos",
+    "infoTitle": "Información importante",
+    "infoText": "Las imágenes o videos que agregue se mostrarán cuando no haya eventos programados en las pantallas. Puede agregar hasta 10 elementos por tipo de pantalla.",
     "salon": {
       "userNull": "El objeto user es nulo.",
       "userNullUidProperty": "¡Advertencia! El objeto user es nulo o no tiene la propiedad uid.",
@@ -422,7 +424,9 @@
       "title": "Salón de Eventos",
       "title2": "Directorio de Eventos",
       "selectMedia": "Seleccionar Imagen",
+      "browse": "Explorar",
       "displayTime": "Tiempo de visualización:",
+      "displayTimeHelper": "Defina por cuánto tiempo se mostrará este contenido",
       "edit": "Editar",
       "delete": "Eliminar",
       "cancel": "Cancelar",
@@ -430,7 +434,19 @@
       "saveAdvertisement": "Guardar Publicidad",
       "horas": "horas",
       "minutos": "minutos",
-      "segundos": "segundos"
+      "segundos": "segundos",
+      "timeWarning": "Debe establecer un tiempo de visualización válido",
+      "screenType": "Tipo de Pantalla",
+      "verticalScreen": "Pantalla Vertical",
+      "horizontalScreen": "Pantalla Horizontal",
+      "screenTypeWarning": "Debe seleccionar un tipo de pantalla",
+      "helpText": "Las imágenes se mostrarán cuando no haya eventos programados. El tiempo recomendado por imagen es entre 10 y 15 segundos.",
+      "directoryHelpText": "Las imágenes se mostrarán cuando no haya eventos programados en las pantallas de directorio.",
+      "dimensionRecommendation": "Recomendaciones de dimensiones:",
+      "verticalDimension": "Pantalla Vertical: 520px x 1040px",
+      "horizontalDimension": "Pantalla Horizontal: 440px x 660px",
+      "selectCompany": "Seleccionar empresa",
+      "select": "Seleccionar..."
     }
   },
   "licencia": {
