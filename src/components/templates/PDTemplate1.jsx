@@ -163,7 +163,7 @@ const PDTemplate1 = ({
     <div
       className="flex items-center space-x-4 border-b pr-8"
       style={{
-        height: event ? "auto" : "92px",
+        height: event ? "130px" : "129px",
         borderColor: templateActual.templateColor || "#e5e7eb",
       }}
     >
@@ -176,7 +176,7 @@ const PDTemplate1 = ({
               }}
               src={event.images && event.images[0]}
               alt={event.nombreEvento}
-              className="w-full h-full"
+              className=""
             />
           </div>
 
@@ -212,20 +212,20 @@ const PDTemplate1 = ({
     <div
       className="flex items-center space-x-4 space-y-5 border-b pr-16"
       style={{
-        height: event ? "111px" : "110px",
+        height: event ? "123px" : "122px",
         borderColor: templateActual.templateColor || "#e5e7eb",
       }}
     >
       {event ? (
         <>
-          <div className="my-auto flex justify-center items-center relative overflow-hidden w-[8vw] h-[8vw]">
+          <div className="my-auto flex justify-center items-center relative overflow-hidden w-[7vw] h-[7vw]">
             <img
               style={{
-                objectFit: "cover",
+                objectFit: "object-cover",
               }}
               src={event.images && event.images[0]}
               alt={event.nombreEvento}
-              className="w-full h-full"
+              className=""
             />
           </div>
 
@@ -287,10 +287,10 @@ const PDTemplate1 = ({
         }}
       >
         {/* Header Section - 10vh */}
-        <div className="flex items-center justify-between p-4 h-[10vh]">
+        <div className="flex items-center justify-between h-[12vh]">
           {/* Logo */}
           {templateActual.logo && (
-            <div className="h-full aspect-square">
+            <div className="h-full aspect-square ml-4">
               <img
                 src={templateActual.logo}
                 alt="Logo"
@@ -301,7 +301,7 @@ const PDTemplate1 = ({
 
           {/* Title and Date */}
           <div
-            className="flex flex-col items-center"
+            className="flex flex-col items-center "
             style={{ fontFamily: templateActual.fontStyle }}
           >
             {templateActual.idioma === "es" && (
@@ -380,7 +380,7 @@ const PDTemplate1 = ({
         </div>
 
         {/* Main Content - 80vh */}
-        <div className="h-[80vh]">
+        <div className="h-[76vh]">
           {!template.setPortrait ? (
             // LANDSCAPE MODE
             <div className="grid grid-cols-4 h-full">
@@ -596,11 +596,11 @@ const PDTemplate1 = ({
         </div>
 
         {/* Footer - 10vh */}
-        <div className="h-[10vh] bg-white">
+        <div className="h-[12vh] bg-white">
           <div className="flex justify-between items-center h-full px-4">
             {/* RSS Feed */}
             <div className="w-9/12">
-              <div className="flex items-center h-[6vh] font-black bg-gradient-to-r from-gray-300 to-white w-full rounded-md">
+              <div className="flex items-center h-[11vh] font-black bg-gradient-to-r from-gray-300 to-white w-full rounded-md">
                 <SliderRSS />
               </div>
             </div>
@@ -634,16 +634,24 @@ const PDTemplate1 = ({
         {/* Portrait mode advertisement - positioned at the bottom */}
         {template.setPortrait && templateActual.publicidad && (
           <div
-            className=" bottom-0 left-0 right-0 h-[20vh]"
+            className="bottom-0 left-0 right-0 flex items-center justify-center mx-3"
             style={{ zIndex: 10 }}
           >
-            <div style={{ width: "100%", height: "100%" }}>
+            <div
+              style={{
+                position: "relative",
+                overflow: "hidden",
+                width: "100%",
+                height: "22vw",
+                borderRadius: "10px",
+              }}
+            >
               <img
                 src={templateActual.publicidad}
                 alt="Advertisement"
                 style={{
                   width: "100%",
-                  height: "100%",
+                  height: "27vw",
                   objectFit: "cover",
                 }}
               />
