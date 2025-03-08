@@ -245,6 +245,7 @@
   "userAdmin": {
     "welcome": "Bienvenido",
     "selectCompany": "Seleccionar Empresa",
+    "selectCompanyPlaceholder": "Seleccione una empresa",
     "eventInfo": "Información de eventos",
     "todayEvents": "Eventos Hoy",
     "weekEvents": "Eventos Semana",
@@ -255,7 +256,13 @@
     "directoryScreen": "Pantalla Directorio",
     "roomAdvertisement": "Publicidad Salón",
     "directoryAdvertisement": "Publicidad Directorio",
-    "servicescreen": "Pantalla Servicio"
+    "servicescreen": "Pantalla Servicio",
+    "dashboardDescription": "Consulta el resumen de tus pantallas y eventos activos",
+    "totalSubscriptions": "Total Suscripciones",
+    "totalAds": "Total Publicidad",
+    "totalEvents": "Total Eventos",
+    "noSubscriptions": "No hay suscripciones activas",
+    "noEvents": "No hay eventos registrados"
   },
   "consultaModEventos": {
     "title": "Consulta de Eventos",

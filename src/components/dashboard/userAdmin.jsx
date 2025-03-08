@@ -10,12 +10,16 @@ import {
 } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { useTranslation } from "react-i18next";
-import Select from "react-select";
 import db from "@/firebase/firestore";
 import auth from "@/firebase/auth";
+import { Chart, ArcElement, Tooltip, Legend } from "chart.js";
+import { Doughnut } from "react-chartjs-2";
+
+// Registrar los elementos necesarios para Chart.js
+Chart.register(ArcElement, Tooltip, Legend);
 
 function UserAdmin() {
-  const { t } = useTranslation(); // Traducciones i18N
+  const { t } = useTranslation();
 
   const [cantidadPd, setCantidadPd] = useState(0);
   const [cantidadPs, setCantidadPs] = useState(0);
@@ -23,20 +27,98 @@ function UserAdmin() {
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
-  const [cantidadPublicidad, setCantidadPublicidad] = useState(0);
   const [cantidadPublicidadSalon, setCantidadPublicidadSalon] = useState(0);
   const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
     useState(0);
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [eventosHoy, setEventosHoy] = useState(0);
+  const [eventosSemana, setEventosSemana] = useState(0);
+  const [eventosFinalizados, setEventosFinalizados] = useState(0);
 
   const total =
     parseInt(cantidadPd) + parseInt(cantidadPs) + parseInt(cantidadPservice);
 
-  useEffect(() => {
+  // Datos para el gráfico de suscripciones
+  const subscriptionChartData = {
+    labels: [
+      t("userAdmin.roomScreen"),
+      t("userAdmin.directoryScreen"),
+      t("userAdmin.servicescreen"),
+    ],
+    datasets: [
+      {
+        data: [cantidadPs, cantidadPd, cantidadPservice],
+        backgroundColor: [
+          "rgba(54, 162, 235, 0.6)",
+          "rgba(75, 192, 192, 0.6)",
+          "rgba(153, 102, 255, 0.6)",
+        ],
+        borderColor: [
+          "rgba(54, 162, 235, 1)",
+          "rgba(75, 192, 192, 1)",
+          "rgba(153, 102, 255, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
 
+  // Datos para el gráfico de eventos
+  const eventsChartData = {
+    labels: [
+      t("userAdmin.todayEvents"),
+      t("userAdmin.weekEvents"),
+      t("userAdmin.finishedEvents"),
+    ],
+    datasets: [
+      {
+        data: [eventosHoy, eventosSemana, eventosFinalizados],
+        backgroundColor: [
+          "rgba(255, 99, 132, 0.6)",
+          "rgba(255, 159, 64, 0.6)",
+          "rgba(201, 203, 207, 0.6)",
+        ],
+        borderColor: [
+          "rgba(255, 99, 132, 1)",
+          "rgba(255, 159, 64, 1)",
+          "rgba(201, 203, 207, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: "bottom",
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+        },
+      },
+      tooltip: {
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        padding: 10,
+        titleFont: {
+          size: 14,
+        },
+        bodyFont: {
+          size: 14,
+        },
+      },
+    },
+    cutout: "70%",
+  };
+
+  useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setLoading(true);
         try {
           const userRef = doc(db, "usuarios", user.uid);
           const docSnap = await getDoc(userRef);
@@ -56,8 +138,7 @@ function UserAdmin() {
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
 
-            console.log("Inicio del bloque de inicialización de publicidad");
-
+            // Publicidad de salón
             const publicidadSalonQuery = query(
               collection(db, "Publicidad"),
               where("empresa", "==", userData.empresa),
@@ -66,9 +147,8 @@ function UserAdmin() {
             const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
             const cantidadSalon = publicidadSalonSnapshot.docs.length;
             setCantidadPublicidadSalon(cantidadSalon);
-            console.log("Cantidad de publicidad de salón:", cantidadSalon);
 
-            // Bloque de inicialización de publicidad de directorio
+            // Publicidad de directorio
             const publicidadDirectorioQuery = query(
               collection(db, "Publicidad"),
               where("empresa", "==", userData.empresa),
@@ -79,64 +159,60 @@ function UserAdmin() {
             );
             const cantidadDirectorio = publicidadDirectorioSnapshot.docs.length;
             setCantidadPublicidadDirectorio(cantidadDirectorio);
-            console.log(
-              "Cantidad de publicidad de directorio:",
-              cantidadDirectorio
-            );
 
-            setCantidadPublicidad(cantidadPublicidad);
-          } else {
-            console.log("No se encontraron datos para este usuario.");
-          }
-        } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
-        }
-        try {
-          const userRef = doc(db, "usuarios", user.uid);
-          const docSnap = await getDoc(userRef);
-
-          if (docSnap.exists()) {
-            const userData = docSnap.data();
-            console.log("userData", userData);
-            setUserInfo(userData);
-
+            // Eventos
             const eventsQuery = query(
               collection(db, "eventos"),
-              where("empresa", "==", userData.empresa) // Modifica aquí para usar el campo "empresa"
+              where("empresa", "==", userData.empresa)
             );
             const eventsSnapshot = await getDocs(eventsQuery);
             const userEventsData = eventsSnapshot.docs.map((doc) => doc.data());
+            setUserEvents(userEventsData);
 
             const fechaActual = new Date();
-            const eventosEnCurso = userEventsData.filter((evento) => {
-              const fechaInicial = new Date(evento.fechaInicial);
-              const fechaFinal = new Date(evento.fechaFinal);
-              return fechaActual >= fechaInicial && fechaActual <= fechaFinal;
-            });
-            const eventosFinalizados = userEventsData.filter((evento) => {
-              const fechaFinal = new Date(evento.fechaFinal);
-              return fechaFinal < fechaActual;
-            });
 
-            const eventosFuturos = userEventsData.filter((evento) => {
-              const fechaInicial = new Date(evento.fechaInicial);
-              const fechaFinal = new Date(evento.fechaFinal);
-              return fechaActual <= fechaFinal && fechaInicial > fechaActual;
-            });
+            // Eventos hoy
+            const hoy = userEventsData.filter((evento) => {
+              const fechaInicial = new Date(evento.fechaInicio + "T00:00:00");
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              return (
+                evento.status &&
+                fechaActual >= fechaInicial &&
+                fechaActual <= fechaFinal
+              );
+            }).length;
+            setEventosHoy(hoy);
 
-            console.log("eventosFinalizados", eventosFinalizados);
-            console.log("eventosEnCurso", eventosEnCurso);
-            console.log("eventosFuturos", eventosFuturos);
-            setUserEvents(userEventsData);
-          } else {
-            console.log("No se encontraron datos para este usuario.");
+            // Eventos semana
+            const semana = userEventsData.filter((evento) => {
+              const fechaInicial = new Date(evento.fechaInicio + "T00:00:00");
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              const finSemana = new Date(fechaActual);
+              finSemana.setDate(fechaActual.getDate() + 6);
+              return (
+                evento.status &&
+                fechaActual <= fechaFinal &&
+                finSemana >= fechaInicial
+              );
+            }).length;
+            setEventosSemana(semana);
+
+            // Eventos finalizados
+            const finalizados = userEventsData.filter((evento) => {
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              return !evento.status && fechaFinal < fechaActual;
+            }).length;
+            setEventosFinalizados(finalizados);
           }
         } catch (error) {
           console.error("Error al obtener datos del usuario:", error);
+        } finally {
+          setLoading(false);
         }
       } else {
         setUserInfo(null);
         setUserEvents([]);
+        setLoading(false);
       }
     });
 
@@ -145,340 +221,350 @@ function UserAdmin() {
 
   useEffect(() => {
     const obtenerEmpresas = async () => {
-      const firebaseConfig = {
-        /* Configuración de Firebase */
-      };
-      const db = getFirestore();
-      const usuariosRef = collection(db, "usuarios");
-      const usuariosSnapshot = await getDocs(usuariosRef);
-      const empresas = usuariosSnapshot.docs.map((doc) => doc.data().empresa);
-      const empresasFiltradas = [...new Set(empresas)];
-      setEmpresas(empresasFiltradas);
+      try {
+        const usuariosRef = collection(db, "usuarios");
+        const usuariosSnapshot = await getDocs(usuariosRef);
+        const empresasData = usuariosSnapshot.docs.map(
+          (doc) => doc.data().empresa
+        );
+        const empresasFiltradas = [...new Set(empresasData)].filter(Boolean);
+        setEmpresas(empresasFiltradas);
+      } catch (error) {
+        console.error("Error al obtener empresas:", error);
+      }
     };
 
     obtenerEmpresas();
   }, []);
 
   useEffect(() => {
-    const obtenerEventos = async () => {
-      if (empresaSeleccionada) {
-        const firebaseConfig = {
-          /* Configuración de Firebase */
-        };
-        const db = getFirestore();
-        const eventosRef = collection(db, "eventos");
-        const eventosQuery = query(
-          eventosRef,
-          where("empresa", "==", empresaSeleccionada)
-        );
-        const eventosSnapshot = await getDocs(eventosQuery);
-        const eventos = eventosSnapshot.docs.map((doc) => doc.data());
-        setUserEvents(eventos);
-      }
-    };
-
-    obtenerEventos();
-  }, [empresaSeleccionada]);
-
-  useEffect(() => {
     const obtenerDatosEmpresa = async () => {
       if (empresaSeleccionada) {
-        const firebaseConfig = {
-          /* Configuración de Firebase */
-        };
-        const db = getFirestore();
+        setLoading(true);
+        try {
+          // Obtener datos de la empresa seleccionada
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosQuery = query(
+            usuariosRef,
+            where("empresa", "==", empresaSeleccionada)
+          );
+          const usuariosSnapshot = await getDocs(usuariosQuery);
 
-        // Obtener datos de la empresa seleccionada
-        const usuariosRef = collection(db, "usuarios");
-        const usuariosQuery = query(
-          usuariosRef,
-          where("empresa", "==", empresaSeleccionada)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-        const datosEmpresa = usuariosSnapshot.docs[0].data();
+          if (usuariosSnapshot.docs.length > 0) {
+            const datosEmpresa = usuariosSnapshot.docs[0].data();
 
-        setCantidadPd(datosEmpresa.pd || 0);
-        setCantidadPs(datosEmpresa.ps || 0);
-        setCantidadPservice(datosEmpresa.pservice || 0);
+            setCantidadPd(datosEmpresa.pd || 0);
+            setCantidadPs(datosEmpresa.ps || 0);
+            setCantidadPservice(datosEmpresa.pservice || 0);
 
-        // Obtener cantidad de publicidades de salón
-        const publicidadSalonQuery = query(
-          collection(db, "Publicidad"),
-          where("empresa", "==", empresaSeleccionada),
-          where("tipo", "==", "salon")
-        );
-        const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
-        setCantidadPublicidadSalon(publicidadSalonSnapshot.docs.length);
+            // Obtener cantidad de publicidades de salón
+            const publicidadSalonQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", empresaSeleccionada),
+              where("tipo", "==", "salon")
+            );
+            const publicidadSalonSnapshot = await getDocs(publicidadSalonQuery);
+            setCantidadPublicidadSalon(publicidadSalonSnapshot.docs.length);
 
-        // Obtener cantidad de publicidades de directorio
-        const publicidadDirectorioQuery = query(
-          collection(db, "Publicidad"),
-          where("empresa", "==", empresaSeleccionada),
-          where("tipo", "==", "directorio")
-        );
-        const publicidadDirectorioSnapshot = await getDocs(
-          publicidadDirectorioQuery
-        );
-        setCantidadPublicidadDirectorio(
-          publicidadDirectorioSnapshot.docs.length
-        );
+            // Obtener cantidad de publicidades de directorio
+            const publicidadDirectorioQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", empresaSeleccionada),
+              where("tipo", "==", "directorio")
+            );
+            const publicidadDirectorioSnapshot = await getDocs(
+              publicidadDirectorioQuery
+            );
+            setCantidadPublicidadDirectorio(
+              publicidadDirectorioSnapshot.docs.length
+            );
+
+            // Obtener eventos
+            const eventosRef = collection(db, "eventos");
+            const eventosQuery = query(
+              eventosRef,
+              where("empresa", "==", empresaSeleccionada)
+            );
+            const eventosSnapshot = await getDocs(eventosQuery);
+            const eventos = eventosSnapshot.docs.map((doc) => doc.data());
+            setUserEvents(eventos);
+
+            const fechaActual = new Date();
+
+            // Eventos hoy
+            const hoy = eventos.filter((evento) => {
+              const fechaInicial = new Date(evento.fechaInicio + "T00:00:00");
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              return (
+                evento.status &&
+                fechaActual >= fechaInicial &&
+                fechaActual <= fechaFinal
+              );
+            }).length;
+            setEventosHoy(hoy);
+
+            // Eventos semana
+            const semana = eventos.filter((evento) => {
+              const fechaInicial = new Date(evento.fechaInicio + "T00:00:00");
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              const finSemana = new Date(fechaActual);
+              finSemana.setDate(fechaActual.getDate() + 6);
+              return (
+                evento.status &&
+                fechaActual <= fechaFinal &&
+                finSemana >= fechaInicial
+              );
+            }).length;
+            setEventosSemana(semana);
+
+            // Eventos finalizados
+            const finalizados = eventos.filter((evento) => {
+              const fechaFinal = new Date(evento.fechaFinal + "T23:59:59");
+              return !evento.status && fechaFinal < fechaActual;
+            }).length;
+            setEventosFinalizados(finalizados);
+          }
+        } catch (error) {
+          console.error("Error al obtener datos de empresa:", error);
+        } finally {
+          setLoading(false);
+        }
       }
     };
 
-    obtenerDatosEmpresa();
+    if (empresaSeleccionada) {
+      obtenerDatosEmpresa();
+    }
   }, [empresaSeleccionada]);
 
   const handleChangeEmpresa = (e) => {
     setEmpresaSeleccionada(e.target.value);
   };
 
-  return (
-    <section className="pl-10 md:px-32">
-      <h1 className="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6x2">
-        {/* Bienvenido */}
-        {t("userAdmin.welcome")}
-        <span className="text-blue-600 "> {nombreUsuario}</span>
-      </h1>
-      <div className=" mb-6 ">
-        <div className="h-full py-8 px-6 space-y-6 rounded-xl border border-gray-200 bg-white">
-          <div className="px-6 pt-6 2xl:container">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              {/* Selector de empresas */}
-              {userInfo && userInfo.permisos === 10 && (
-                <div className="md:col-span-2 lg:col-span-1">
-                  <select
-                    className="block w-full bg-white border border-gray-300 rounded-md shadow-sm focus:ring-cyan-500 focus:border-cyan-500 sm:text-sm"
-                    onChange={handleChangeEmpresa}
-                    value={empresaSeleccionada}
-                  >
-                    <option value="">{t("userAdmin.selectCompany")}</option>
-                    {empresas.map((empresa, index) => (
-                      <option key={index} value={empresa}>
-                        {empresa}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="px-6 pt-6 2xl:container">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-2">
-              <div className="md:col-span-2 lg:col-span-1">
-                <div className="h-full py-8 px-6 space-y-6 rounded-xl border border-gray-200 bg-white">
-                  <table className="table-auto w-full">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 text-left border-b-2 w-full">
-                          <h2 className="text-ml font-bold ">
-                            {/* Información de eventos */}
-                            {t("userAdmin.eventInfo")}
-                          </h2>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            {/* Eventos Hoy */}
-                            <h2>{t("userAdmin.todayEvents")}</h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>
-                              {
-                                userEvents.filter((evento) => {
-                                  const fechaInicial = new Date(
-                                    evento.fechaInicio + "T00:00:00"
-                                  );
-                                  const fechaFinal = new Date(
-                                    evento.fechaFinal + "T23:59:59"
-                                  );
-                                  const fechaActual = new Date();
-                                  return (
-                                    evento.status &&
-                                    fechaActual >= fechaInicial &&
-                                    fechaActual <= fechaFinal
-                                  );
-                                }).length
-                              }
-                            </span>
-                          </p>
-                        </td>
-                      </tr>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Eventos Semana */}
-                              {t("userAdmin.weekEvents")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>
-                              {
-                                userEvents.filter((evento) => {
-                                  const fechaInicial = new Date(
-                                    evento.fechaInicio + "T00:00:00"
-                                  );
-                                  const fechaFinal = new Date(
-                                    evento.fechaFinal + "T23:59:59"
-                                  );
-                                  const fechaActual = new Date();
-                                  const finSemana = new Date(fechaActual);
-                                  finSemana.setDate(fechaActual.getDate() + 6);
-                                  return (
-                                    evento.status &&
-                                    fechaActual <= fechaFinal &&
-                                    finSemana >= fechaInicial
-                                  );
-                                }).length
-                              }
-                            </span>
-                          </p>
-                        </td>
-                      </tr>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Eventos finalizados */}
-                              {t("userAdmin.finishedEvents")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>
-                              {
-                                userEvents.filter((evento) => {
-                                  const fechaFinal = new Date(
-                                    evento.fechaFinal + "T23:59:59"
-                                  );
-                                  const fechaActual = new Date();
-                                  return (
-                                    !evento.status && fechaFinal < fechaActual
-                                  );
-                                }).length
-                              }
-                            </span>
-                          </p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <div className="md:col-span-2 lg:col-span-1">
-                <div className="h-full py-8 px-6 space-y-6 rounded-xl border border-gray-200 bg-white">
-                  <table className="table-auto w-full">
-                    <thead>
-                      <tr>
-                        <th className="px-4 py-2 text-left border-b-2 w-full">
-                          <h2 className="text-ml font-bold ">
-                            {/* Plan de suscripción */}
-                            {t("userAdmin.subscriptionPlan")}
-                          </h2>
-                          <p className="text-ml font-bold text-gray-600">
-                            {t("userAdmin.currentSubscriptions")}
-                            <span className="ml-2 text-cyan-500 w-1/2">
-                              {total}
-                            </span>
-                          </p>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Pantalla salon */}
-                              {t("userAdmin.roomScreen")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>{cantidadPs}</span>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Pantalla directorio */}
-                              {t("userAdmin.directoryScreen")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>{cantidadPd}</span>
-                          </p>
-                        </td>
-                      </tr>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Pantalla directorio */}
-                              {t("userAdmin.servicescreen")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-cyan-500 w-1/2">
-                          <p>
-                            <span>{cantidadPservice}</span>
-                          </p>
-                        </td>
-                      </tr>
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Publicidad Salón */}
-                              {t("userAdmin.roomAdvertisement")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-black w-1/2">
-                          <p>
-                            <span>{cantidadPublicidadSalon}</span>
-                          </p>
-                        </td>
-                      </tr>
-
-                      <tr className="border-b w-full">
-                        <td className="px-4 py-2 text-left align-top w-1/2">
-                          <div>
-                            <h2>
-                              {/* Publicidad Directorio */}
-                              {t("userAdmin.directoryAdvertisement")}
-                            </h2>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2 text-right text-black w-1/2">
-                          <p>
-                            <span>{cantidadPublicidadDirectorio}</span>
-                          </p>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+  // Card components
+  const StatCard = ({ title, value, icon, bgColor }) => (
+    <div
+      className={`${bgColor} shadow-lg rounded-lg p-4 flex items-center justify-between transition-transform duration-300 hover:scale-105`}
+    >
+      <div>
+        <h3 className="text-lg font-medium text-white">{title}</h3>
+        <p className="text-3xl font-bold text-white">{value}</p>
       </div>
+      <div className="text-white text-opacity-80 text-4xl">{icon}</div>
+    </div>
+  );
+
+  return (
+    <section className="px-6 md:px-8 lg:px-12 py-8">
+      {loading ? (
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+        </div>
+      ) : (
+        <>
+          <div className="mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 flex items-center gap-3">
+              <span>{t("userAdmin.welcome")}</span>
+              <span className="text-blue-600">{nombreUsuario}</span>
+            </h1>
+            <p className="text-gray-600 mt-2">
+              {t("userAdmin.dashboardDescription")}
+            </p>
+          </div>
+
+          {userInfo && userInfo.permisos === 10 && (
+            <div className="mb-6 bg-white rounded-lg shadow-md p-4">
+              <label
+                htmlFor="empresa-select"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                {t("userAdmin.selectCompany")}
+              </label>
+              <select
+                id="empresa-select"
+                className="block w-full bg-white border border-gray-300 rounded-md py-2 px-3 shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                onChange={handleChangeEmpresa}
+                value={empresaSeleccionada}
+              >
+                <option value="">
+                  {t("userAdmin.selectCompanyPlaceholder")}
+                </option>
+                {empresas.map((empresa, index) => (
+                  <option key={index} value={empresa}>
+                    {empresa}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {/* Estadísticas generales */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <StatCard
+              title={t("userAdmin.totalSubscriptions")}
+              value={total}
+              icon={<i className="fas fa-tv">📺</i>}
+              bgColor="bg-gradient-to-r from-blue-500 to-blue-600"
+            />
+            <StatCard
+              title={t("userAdmin.todayEvents")}
+              value={eventosHoy}
+              icon={<i className="fas fa-calendar-day">📅</i>}
+              bgColor="bg-gradient-to-r from-emerald-500 to-emerald-600"
+            />
+            <StatCard
+              title={t("userAdmin.weekEvents")}
+              value={eventosSemana}
+              icon={<i className="fas fa-calendar-week">🗓️</i>}
+              bgColor="bg-gradient-to-r from-amber-500 to-amber-600"
+            />
+            <StatCard
+              title={t("userAdmin.totalAds")}
+              value={cantidadPublicidadSalon + cantidadPublicidadDirectorio}
+              icon={<i className="fas fa-ad">🎯</i>}
+              bgColor="bg-gradient-to-r from-purple-500 to-purple-600"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Panel de Suscripciones */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 pb-2 border-b">
+                {t("userAdmin.subscriptionPlan")}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-64">
+                  {total > 0 ? (
+                    <Doughnut
+                      data={subscriptionChartData}
+                      options={chartOptions}
+                    />
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-500">
+                        {t("userAdmin.noSubscriptions")}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.roomScreen")}:
+                    </span>
+                    <span className="text-lg text-blue-600 font-bold">
+                      {cantidadPs}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.directoryScreen")}:
+                    </span>
+                    <span className="text-lg text-blue-600 font-bold">
+                      {cantidadPd}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.servicescreen")}:
+                    </span>
+                    <span className="text-lg text-blue-600 font-bold">
+                      {cantidadPservice}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.roomAdvertisement")}:
+                    </span>
+                    <span className="text-gray-700 font-bold">
+                      {cantidadPublicidadSalon}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.directoryAdvertisement")}:
+                    </span>
+                    <span className="text-gray-700 font-bold">
+                      {cantidadPublicidadDirectorio}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Panel de Eventos */}
+            <div className="bg-white rounded-lg shadow-md p-6">
+              <h2 className="text-xl font-bold text-gray-800 mb-6 pb-2 border-b">
+                {t("userAdmin.eventInfo")}
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="h-64">
+                  {eventosHoy > 0 ||
+                  eventosSemana > 0 ||
+                  eventosFinalizados > 0 ? (
+                    <Doughnut data={eventsChartData} options={chartOptions} />
+                  ) : (
+                    <div className="h-full flex items-center justify-center">
+                      <p className="text-gray-500">{t("userAdmin.noEvents")}</p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-4">
+                  <div className="p-4 bg-pink-50 rounded-lg border border-pink-100">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">
+                        {t("userAdmin.todayEvents")}:
+                      </span>
+                      <span className="text-lg text-pink-600 font-bold">
+                        {eventosHoy}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-orange-50 rounded-lg border border-orange-100">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">
+                        {t("userAdmin.weekEvents")}:
+                      </span>
+                      <span className="text-lg text-orange-600 font-bold">
+                        {eventosSemana}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-gray-50 rounded-lg border border-gray-200">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">
+                        {t("userAdmin.finishedEvents")}:
+                      </span>
+                      <span className="text-lg text-gray-600 font-bold">
+                        {eventosFinalizados}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">
+                        {t("userAdmin.totalEvents")}:
+                      </span>
+                      <span className="text-lg text-blue-600 font-bold">
+                        {userEvents.length}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 }
+
 export default UserAdmin;

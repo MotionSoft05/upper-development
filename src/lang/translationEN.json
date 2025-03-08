@@ -245,6 +245,7 @@
   "userAdmin": {
     "welcome": "Welcome",
     "selectCompany": "Select Company",
+    "selectCompanyPlaceholder": "Select a company",
     "eventInfo": "Event Information",
     "todayEvents": "Today's Events",
     "weekEvents": "Weekly Events",
@@ -255,7 +256,13 @@
     "directoryScreen": "Directory Screen",
     "roomAdvertisement": "Room Advertisement",
     "directoryAdvertisement": "Directory Advertisement",
-    "servicescreen": "Service Screen"
+    "servicescreen": "Service Screen",
+    "dashboardDescription": "Check the summary of your screens and active events",
+    "totalSubscriptions": "Total Subscriptions",
+    "totalAds": "Total Ads",
+    "totalEvents": "Total Events",
+    "noSubscriptions": "No active subscriptions",
+    "noEvents": "No registered events"
   },
   "consultaModEventos": {
     "title": "Event Query",
