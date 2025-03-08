@@ -322,6 +322,7 @@
     "customizationSaveError": "Error saving customization information and logo URL:",
     "screenPleaseselectalanguage": "Please select a language.",
     "title": "ROOM SCREEN SETTINGS",
+    "description": "Configure display options for your room screens",
     "templateCustomization": "Template Customization",
     "logo": "Logo",
     "textStyle": "Text Style",
@@ -335,10 +336,22 @@
     "languages": "Languages",
     "idspanish": "Spanish",
     "idenglish": "English",
-    "idspanish/english": "Spanish/English"
+    "idspanish/english": "Spanish/English",
+    "generalSettings": "General Settings",
+    "appearance": "Appearance",
+    "uploadLogo": "Upload logo",
+    "preview": "Preview",
+    "previewText": "Example Screen Title",
+    "reset": "Reset",
+    "resetConfirm": "Are you sure you want to reset all values?",
+    "saveSuccess": "Changes saved successfully!",
+    "close": "Close",
+    "selectTemplate": "Select Template",
+    "templatePreview": "Template Preview"
   },
   "screensDirectory": {
     "title": "DIRECTORY SCREENS SETTINGS",
+    "description": "Configure the display options for your directory screens",
     "templateCustomization": "Template Customization",
     "logo": "Logo",
     "advertisement": "Advertisement",
@@ -352,7 +365,12 @@
     "selectCity": "Select City",
     "templateColor": "Template Color",
     "screenNames": "Screen Names",
-    "save": "Save"
+    "save": "Save",
+    "generalSettings": "General Settings",
+    "appearance": "Appearance",
+    "uploadLogo": "Upload logo",
+    "uploadAdvertisement": "Upload advertisement",
+    "reset": "Reset"
   },
   "screenService": {
     "generalcustomization": "General Customization",

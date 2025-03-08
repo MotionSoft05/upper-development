@@ -163,11 +163,11 @@ function PantallasDirectorio() {
   cityOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   const [selectedCity, setSelectedCity] = useState(null);
-
+  const [activeTab, setActiveTab] = useState("general"); // Para controlar las pestañas
   const [empresaOptions, setEmpresaOptions] = useState([]);
   const [selectedEmpresa, setSelectedEmpresa] = useState(null);
   const [empresaQr, setEmpresaQR] = useState(null);
-
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const authorizedEmails = [
     "uppermex10@gmail.com",
     "ulises.jacobo@hotmail.com",
@@ -767,322 +767,566 @@ function PantallasDirectorio() {
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
   };
-
+  // Función para guardar con feedback
+  const handleSaveWithFeedback = () => {
+    guardarInformacionPersonalizacion(selectedLogo);
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 3000);
+  };
   return (
-    <section className="pl-16 md:px-8 py-2">
-      <div>
-        <div className="p-5 text-center">
-          <h2 className="text-4xl font-extrabold text-gray-900">
-            {/* AJUSTES DE PANTALLAS DIRECTORIO */}
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50 min-h-screen">
+      {/* Cabecera con título y descripción */}
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
             {t("screensDirectory.title")}
-          </h2>
+          </h1>
+          <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
+            {t("screensDirectory.description")}
+          </p>
         </div>
 
-        {/* Sección de personalización */}
-        <section className="max-w-4xl p-6 mx-auto rounded-md shadow-md bg-gray-800 mt-6 pl-10 md:px-32">
-          {/* Select de Empresa */}
-          <div className="mx-auto flex justify-center">
-            {usuarioAutorizado && (
-              <div className="mb-4 flex ">
-                <label
-                  htmlFor="empresa"
-                  className=" block text-base my-auto mr-4  text-center font-medium text-white mb-2"
-                >
-                  Empresa:
-                </label>
-                <div className="relative ">
-                  <Select
-                    id="empresa"
-                    value={selectedEmpresa}
-                    onChange={handleEmpresaChange}
-                    options={empresaOptions}
-                    placeholder="Seleccionar Empresa"
-                    isClearable
-                    styles={customStyles}
-                    className="block w-auto  bg-white border border-gray-300 text-sm sm:text-base rounded-md shadow-sm appearance-none focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 "
-                  />
+        {/* Selector de empresa para usuarios autorizados */}
+        {usuarioAutorizado && (
+          <div className="max-w-3xl mx-auto mb-6 bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+              <label
+                htmlFor="empresa"
+                className="text-gray-700 font-medium mb-2 sm:mb-0"
+              >
+                Empresa:
+              </label>
+              <div className="w-full sm:w-2/3">
+                <Select
+                  id="empresa"
+                  value={selectedEmpresa}
+                  onChange={handleEmpresaChange}
+                  options={empresaOptions}
+                  placeholder="Seleccionar Empresa"
+                  isClearable
+                  styles={customStyles}
+                  className="w-full"
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Contenido principal */}
+        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+          {/* Pestañas de navegación */}
+          <div className="flex border-b border-gray-200">
+            <button
+              onClick={() => setActiveTab("general")}
+              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+                activeTab === "general"
+                  ? "text-blue-600 border-b-2 border-blue-500"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Configuración General
+            </button>
+            <button
+              onClick={() => setActiveTab("screens")}
+              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+                activeTab === "screens"
+                  ? "text-blue-600 border-b-2 border-blue-500"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Pantallas
+            </button>
+            <button
+              onClick={() => setActiveTab("appearance")}
+              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+                activeTab === "appearance"
+                  ? "text-blue-600 border-b-2 border-blue-500"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Apariencia
+            </button>
+          </div>
+
+          {/* Contenido de las pestañas */}
+          <div className="p-6">
+            {/* Pestaña de Configuración General */}
+            {activeTab === "general" && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  {t("screensDirectory.generalSettings")}
+                </h2>
+
+                {/* Logo y Publicidad */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Logo */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t("screensDirectory.logo")}
+                    </label>
+                    <div className="mt-1 flex items-center space-x-4">
+                      <div className="flex-1">
+                        <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-1 text-center">
+                            <svg
+                              className="mx-auto h-12 w-12 text-gray-400"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 48 48"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <div className="flex text-sm text-gray-600">
+                              <span>{t("screensDirectory.uploadLogo")}</span>
+                              <input
+                                id="file-upload-logo"
+                                name="file-upload-logo"
+                                type="file"
+                                className="sr-only"
+                                onChange={handleImageChange}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF hasta 2MB
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                      {selectedLogo && (
+                        <div className="flex-shrink-0">
+                          <img
+                            src={selectedLogo}
+                            alt="Logo Actual"
+                            className="h-24 w-auto object-contain border rounded p-1"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Publicidad */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t("screensDirectory.advertisement")}
+                    </label>
+                    <div className="mt-1 flex items-center space-x-4">
+                      <div className="flex-1">
+                        <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-1 text-center">
+                            <svg
+                              className="mx-auto h-12 w-12 text-gray-400"
+                              stroke="currentColor"
+                              fill="none"
+                              viewBox="0 0 48 48"
+                              aria-hidden="true"
+                            >
+                              <path
+                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                            <div className="flex text-sm text-gray-600">
+                              <span>
+                                {t("screensDirectory.uploadAdvertisement")}
+                              </span>
+                              <input
+                                id="file-upload-pub"
+                                name="file-upload-pub"
+                                type="file"
+                                className="sr-only"
+                                onChange={handlePublicidadChange}
+                              />
+                            </div>
+                            <p className="text-xs text-gray-500">
+                              {t("screensDirectory.sizeInfo")}
+                            </p>
+                          </div>
+                        </label>
+                      </div>
+                      {selectedPublicidad && (
+                        <div className="flex-shrink-0">
+                          <img
+                            src={selectedPublicidad}
+                            alt="Publicidad Actual"
+                            className="h-24 w-auto object-contain border rounded p-1"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ciudad e Idioma */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                  {/* Selector de Ciudad */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t("screensDirectory.selectCity")}
+                    </label>
+                    <Select
+                      options={cityOptions}
+                      value={selectedCity}
+                      onChange={handleCityChange}
+                      placeholder="Seleccione una ciudad"
+                      className="w-full"
+                      isSearchable
+                      isClearable={false}
+                      required
+                    />
+                  </div>
+
+                  {/* Selector de Idioma */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      {t("screenSalon.languages")}
+                    </label>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id="spanish"
+                          value="es"
+                          checked={selectedLanguage === "es"}
+                          onChange={handleLanguageChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label
+                          htmlFor="spanish"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
+                          {t("screenSalon.idspanish")}
+                        </label>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id="english"
+                          value="en"
+                          checked={selectedLanguage === "en"}
+                          onChange={handleLanguageChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label
+                          htmlFor="english"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
+                          {t("screenSalon.idenglish")}
+                        </label>
+                      </div>
+
+                      <div className="flex items-center">
+                        <input
+                          type="radio"
+                          id="both"
+                          value="es-en"
+                          checked={selectedLanguage === "es-en"}
+                          onChange={handleLanguageChange}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <label
+                          htmlFor="both"
+                          className="ml-2 block text-sm text-gray-700"
+                        >
+                          {t("screenSalon.idspanish/english")}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             )}
-          </div>
 
-          <h1 className="text-3x3 font-bold text-white capitalize mb-4">
-            {/* templateCustomization */}
-            {t("screensDirectory.templateCustomization")}
-          </h1>
-          <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div className="flex flex-col">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Logo */}
-                {t("screensDirectory.logo")}
-              </label>
-              <div className="flex items-center">
-                <input
-                  onChange={handleImageChange}
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="file"
-                />
+            {/* Pestaña de Pantallas */}
+            {activeTab === "screens" && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  {t("screensDirectory.screenNames")}
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Array.from({ length: pd }, (_, index) => (
+                    <div className="flex flex-col space-y-2" key={index}>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="text"
+                          placeholder={`Pantalla ${index + 1}`}
+                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          value={(nombrePantallasDirectorio[index] || "").slice(
+                            0,
+                            30
+                          )}
+                          onChange={(e) => {
+                            const updatedNombres = [
+                              ...nombrePantallasDirectorio,
+                            ];
+                            updatedNombres[index] = e.target.value;
+                            setNombrePantallasDirectorio(updatedNombres);
+                          }}
+                        />
+                        <Link
+                          href={`/pantallaDirec${
+                            index + 1
+                          }${isProduction}?emp=${empresaQr}`}
+                          target="_blank"
+                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          URL
+                        </Link>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                          <input
+                            type="checkbox"
+                            name={`toggle-${index}`}
+                            id={`toggle-${index}`}
+                            checked={setPortrait}
+                            onChange={() => setSetPortrait((prev) => !prev)}
+                            className="checked:bg-blue-500 outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                          />
+                          <label
+                            htmlFor={`toggle-${index}`}
+                            className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
+                              setPortrait ? "bg-blue-500" : ""
+                            }`}
+                          ></label>
+                        </div>
+                        <span className="text-sm text-gray-700">
+                          {setPortrait
+                            ? "Pantalla Vertical: activado"
+                            : "Pantalla Vertical: desactivado"}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
-            <div className="flex flex-col">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Publicidad */}
-                {t("screensDirectory.advertisement")}
-              </label>
-              <div className="flex items-center">
-                <input
-                  onChange={handlePublicidadChange}
-                  className="w-full py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                  type="file"
-                />
-              </div>
-              <p className="text-white dark:text-gray-200 block text-sm">
-                {/* Desktop: (440px x 660x max) portrait: (520px x 1040px max) */}
-                {t("screensDirectory.sizeInfo")}
-              </p>
-            </div>
+            {/* Pestaña de Apariencia */}
+            {activeTab === "appearance" && (
+              <div className="space-y-6">
+                <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
+                  {t("screensDirectory.appearance")}
+                </h2>
 
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                {/* Logo actual */}
-                {t("screensDirectory.currentLogo")}
-              </label>
-              {selectedLogo && (
-                <img src={selectedLogo} alt="Logo Actual" className="w-48" />
-              )}
-            </div>
-            <div>
-              <label className="text-white dark:text-gray-200 block mb-0.5">
-                {/* Publicidad actual */}
-                {t("screensDirectory.currentAdvertisement")}
-              </label>
-              {selectedPublicidad && (
-                <img
-                  src={selectedPublicidad}
-                  alt="Publicidad Actual"
-                  className="w-48"
-                />
-              )}
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                {/* Estilo de texto */}
-                {t("screensDirectory.textStyle")}
-              </label>
-              <Select
-                options={fontStyleOptions}
-                value={selectedFontStyle}
-                onChange={handleFontStyleChange}
-                placeholder="Seleccionar estilo de texto"
-              />
-            </div>
-
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                {/* Color de letra */}
-                {t("screensDirectory.fontColor")}
-              </label>
-              <div className="flex items-center">
-                <button
-                  onClick={handleFontColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  {/* Seleccionar Color */}
-                  {t("screensDirectory.selectColor")}
-                </button>
-                {showFontColorPicker && (
-                  <div className="absolute z-10">
-                    <ChromePicker
-                      color={fontColor}
-                      onChange={handleColorChange}
+                {/* Estilo de Texto */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t("screensDirectory.textStyle")}
+                    </label>
+                    <Select
+                      options={fontStyleOptions}
+                      value={selectedFontStyle}
+                      onChange={handleFontStyleChange}
+                      placeholder="Seleccionar estilo de texto"
+                      className="w-full"
                     />
-                    <button
-                      onClick={handleFontColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                    <div
+                      className="mt-2 p-3 border rounded-md"
+                      style={{
+                        fontFamily: selectedFontStyle?.value || "Arial",
+                      }}
                     >
-                      {/* Listo */}
-                      {t("screensDirectory.confirm")}
-                    </button>
+                      <p>Vista previa del texto</p>
+                    </div>
                   </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full ml-4"
-                  style={{ backgroundColor: fontColor }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          {/* Sección para URL del clima y eventos del calendario */}
-          <div className="grid grid-cols-1 gap-6 mt-4 sm:grid-cols-2">
-            <div className="mb-4 flex flex-col">
-              <label className="text-white dark:text-gray-200">
-                {/* Seleccionar Ciudad */}
-                {t("screensDirectory.selectCity")}
-              </label>
-              <Select
-                options={cityOptions}
-                value={selectedCity}
-                onChange={handleCityChange}
-                placeholder="Seleccione una ciudad"
-                className="w-full"
-                isSearchable
-                isClearable={false}
-                required // Asegura que la ciudad sea obligatoria
-              />
-            </div>
 
-            <div className="mb-4">
-              <label className="text-white dark:text-gray-200">
-                {/* Color de la plantilla */}
-                {t("screensDirectory.templateColor")}
-              </label>
-              <div className="flex items-center">
-                <button
-                  onClick={handleTemplateColorChange}
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
-                >
-                  {/* Seleccionar Color */}
-                  {t("screensDirectory.selectColor")}
-                </button>
-                {showColorPicker && (
-                  <div className="absolute z-10">
-                    <ChromePicker
-                      color={templateColor}
-                      onChange={handleColorChange}
-                    />
+                  {/* Color de Texto */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      {t("screensDirectory.fontColor")}
+                    </label>
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={handleFontColorChange}
+                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        {t("screensDirectory.selectColor")}
+                      </button>
+                      <div
+                        className="w-8 h-8 rounded-full border border-gray-300"
+                        style={{ backgroundColor: fontColor }}
+                      ></div>
+                      <div className="text-sm" style={{ color: fontColor }}>
+                        {fontColor}
+                      </div>
+                    </div>
+                    {showFontColorPicker && (
+                      <div className="absolute z-10 mt-2">
+                        <div className="mb-2">
+                          <ChromePicker
+                            color={fontColor}
+                            onChange={handleColorChange}
+                          />
+                        </div>
+                        <button
+                          onClick={handleFontColorChange}
+                          className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                        >
+                          {t("screensDirectory.confirm")}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Color de Plantilla */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t("screensDirectory.templateColor")}
+                  </label>
+                  <div className="flex items-center space-x-3">
                     <button
                       onClick={handleTemplateColorChange}
-                      className="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-md"
+                      className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                      {/* Listo */}
-                      {t("screensDirectory.confirm")}
+                      {t("screensDirectory.selectColor")}
                     </button>
+                    <div
+                      className="w-8 h-8 rounded-full border border-gray-300"
+                      style={{ backgroundColor: templateColor }}
+                    ></div>
+                    <div className="text-sm">{templateColor}</div>
                   </div>
-                )}
-                <div
-                  className="w-8 h-8 rounded-full ml-4"
-                  style={{ backgroundColor: templateColor }}
-                ></div>
-              </div>
-            </div>
-          </div>
-          <div className="mb-4">
-            <label className="text-white dark:text-gray-200 block mb-1">
-              {/* Idiomas */}
-              {t("screenSalon.languages")}
-            </label>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="spanish"
-                  value="es"
-                  checked={selectedLanguage === "es"}
-                  onChange={handleLanguageChange}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                />
-                <label htmlFor="spanish" className="ml-2 mr-4 text-white">
-                  {/* Español */}
-                  {t("screenSalon.idspanish")}
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="english"
-                  value="en"
-                  checked={selectedLanguage === "en"}
-                  onChange={handleLanguageChange}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                />
-                <label htmlFor="english" className="ml-2 mr-4 text-white">
-                  {/* Inglés */}
-                  {t("screenSalon.idenglish")}
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="both"
-                  value="es-en"
-                  checked={selectedLanguage === "es-en"}
-                  onChange={handleLanguageChange}
-                  className="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300"
-                />
-                <label htmlFor="both" className="ml-2 text-white">
-                  {/* Español/Inglés */}
-                  {t("screenSalon.idspanish/english")}
-                </label>
-              </div>
-            </div>
-          </div>
-          <div className="mb-4 flex flex-wrap">
-            {/* Nombres de pantallas */}
-            <div className="flex flex-col mr-4">
-              <label className="text-white dark:text-gray-200 block mb-1">
-                {/* Nombres de pantallas */}
-                {t("screensDirectory.screenNames")}
-              </label>
-              {Array.from({ length: pd }, (_, index) => (
-                <div className="flex items-center mb-2" key={index}>
-                  <input
-                    type="text"
-                    placeholder={`Pantalla ${index + 1}`}
-                    className="w-36 py-2 px-3 border rounded-lg bg-gray-700 text-white"
-                    value={(nombrePantallasDirectorio[index] || "").slice(
-                      0,
-                      30
-                    )}
-                    onChange={(e) => {
-                      const updatedNombres = [...nombrePantallasDirectorio];
-                      updatedNombres[index] = e.target.value;
-                      setNombrePantallasDirectorio(updatedNombres);
+                  {showColorPicker && (
+                    <div className="absolute z-10 mt-2">
+                      <div className="mb-2">
+                        <ChromePicker
+                          color={templateColor}
+                          onChange={handleColorChange}
+                        />
+                      </div>
+                      <button
+                        onClick={handleTemplateColorChange}
+                        className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        {t("screensDirectory.confirm")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Vista previa */}
+                <div className="mt-4 p-4 border rounded-md">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">
+                    Vista previa
+                  </h3>
+                  <div
+                    className="p-4 rounded-md"
+                    style={{
+                      backgroundColor: templateColor,
+                      fontFamily: selectedFontStyle?.value || "Arial",
+                      color: fontColor,
                     }}
+                  >
+                    <div className="flex items-center justify-between">
+                      {selectedLogo && (
+                        <img
+                          src={selectedLogo}
+                          alt="Logo Preview"
+                          className="h-10 w-auto"
+                        />
+                      )}
+                      <div className="text-lg font-bold">
+                        Ejemplo de Título en Pantalla
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Botones de acción */}
+            <div className="mt-8 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  // Reiniciar a valores por defecto
+                  if (
+                    window.confirm(
+                      "¿Está seguro que desea restablecer todos los valores?"
+                    )
+                  ) {
+                    setTemplateColor("#D1D5DB");
+                    setFontColor("#000000");
+                    setSelectedFontStyle(fontStyleOptions[0]);
+                  }
+                }}
+                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                {t("screensDirectory.reset")}
+              </button>
+              <button
+                onClick={handleSaveWithFeedback}
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                {t("screensDirectory.save")}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mensaje de éxito */}
+        {showSuccessMessage && (
+          <div className="fixed bottom-4 right-4 bg-green-50 p-4 rounded-md shadow-lg border-l-4 border-green-500 max-w-md transition-all duration-500 ease-in-out">
+            <div className="flex">
+              <div className="flex-shrink-0">
+                <svg
+                  className="h-5 w-5 text-green-400"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clipRule="evenodd"
                   />
-                  <Link
-                    // href={`/pantallaDirec${index + 1}.html`}
-                    // TODO cambiar UPPER por el usuario logeado
-                    href={`/pantallaDirec${
-                      index + 1
-                    }${isProduction}?emp=${empresaQr}`}
-                    target="_blank"
-                    className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
-                  >
-                    URL
-                  </Link>
+                </svg>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-green-800">
+                  ¡Cambios guardados correctamente!
+                </p>
+              </div>
+              <div className="ml-auto pl-3">
+                <div className="-mx-1.5 -my-1.5">
                   <button
-                    onClick={() => {
-                      setSetPortrait((prevState) => !prevState);
-                    }}
-                    className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-full ml-2"
+                    onClick={() => setShowSuccessMessage(false)}
+                    className="inline-flex rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
-                    {setPortrait
-                      ? "Pantalla Vertical: activado"
-                      : "Pantalla Vertical: desactivado"}
+                    <span className="sr-only">Cerrar</span>
+                    <svg
+                      className="h-5 w-5"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
                   </button>
                 </div>
-              ))}
+              </div>
             </div>
-
-            {/* Publicidad */}
           </div>
-
-          <div className="flex justify-end mt-6">
-            <button
-              onClick={() => {
-                guardarInformacionPersonalizacion(selectedLogo);
-              }}
-              className="mx-5 px-6 py-2 leading-5 text-white transition-colors duration-200 transform bg-pink-500 rounded-md hover:bg-pink-700 focus:outline-none focus:bg-gray-600"
-            >
-              {/* Guardar */}
-              {t("screensDirectory.save")}
-            </button>
-          </div>
-        </section>
+        )}
       </div>
-    </section>
+    </div>
   );
 }
 

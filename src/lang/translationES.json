@@ -322,6 +322,7 @@
     "customizationSaveError": "Error al guardar la información de personalización y URL del logo:",
     "screenPleaseselectalanguage": "Por favor, selecciona un idioma.",
     "title": "AJUSTES DE PANTALLAS SALÓN",
+    "description": "Configure las opciones de visualización para sus pantallas de salón",
     "templateCustomization": "Personalización del Template",
     "logo": "Logo",
     "textStyle": "Estilo de texto",
@@ -335,10 +336,22 @@
     "languages": "Idiomas",
     "idspanish": "Español",
     "idenglish": "Inglés",
-    "idspanish/english": "Español/Inglés"
+    "idspanish/english": "Español/Inglés",
+    "generalSettings": "Configuración General",
+    "appearance": "Apariencia",
+    "uploadLogo": "Subir logo",
+    "preview": "Vista previa",
+    "previewText": "Ejemplo de Título en Pantalla",
+    "reset": "Restablecer",
+    "resetConfirm": "¿Está seguro que desea restablecer todos los valores?",
+    "saveSuccess": "¡Cambios guardados correctamente!",
+    "close": "Cerrar",
+    "selectTemplate": "Seleccionar Template",
+    "templatePreview": "Vista previa del Template"
   },
   "screensDirectory": {
     "title": "AJUSTES DE PANTALLAS DIRECTORIO",
+    "description": "Configure las opciones de visualización para sus pantallas de directorio",
     "templateCustomization": "Personalización del Template",
     "logo": "Logo",
     "advertisement": "Publicidad",
@@ -352,7 +365,12 @@
     "selectCity": "Seleccionar Ciudad",
     "templateColor": "Color de la plantilla",
     "screenNames": "Nombres de pantallas",
-    "save": "Guardar"
+    "save": "Guardar",
+    "generalSettings": "Configuración General",
+    "appearance": "Apariencia",
+    "uploadLogo": "Subir logo",
+    "uploadAdvertisement": "Subir publicidad",
+    "reset": "Restablecer"
   },
   "screenService": {
     "generalcustomization": "Personalización general",
