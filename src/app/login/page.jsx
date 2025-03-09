@@ -1,29 +1,24 @@
-/* eslint-disable @next/next/no-img-element */
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useState, Fragment } from "react";
 import Link from "next/link";
 import emailjs from "emailjs-com";
-import { initializeApp } from "firebase/app";
 import { Dialog, Transition } from "@headlessui/react";
 import { useTranslation } from "react-i18next";
-import auth, { loginUser, logoutUser } from "@/firebase/auth";
+import auth, { loginUser } from "@/firebase/auth";
 import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore";
 import { sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
 
-
 // Esta función enviará un correo electrónico utilizando Email.js
 const sendEmail = async (userID) => {
-  // Cambiar user.uid a userID
   try {
     // Configura tus credenciales de Email.js
-    const serviceID = "service_qjv3qpt"; // Reemplaza con tu Service ID
-    const templateID = "template_pa584we"; // Reemplaza con tu Template ID
-    const userIDEmailJS = "MEzsSEWILjBamER7b"; // Reemplaza con tu User ID de Email.js
+    const serviceID = "service_qjv3qpt";
+    const templateID = "template_pa584we";
+    const userIDEmailJS = "MEzsSEWILjBamER7b";
 
     // Obtiene una referencia al documento del usuario en Firestore
     const db = getFirestore();
-    const userDocRef = doc(db, "usuarios", userID); // Usar userID aquí
+    const userDocRef = doc(db, "usuarios", userID);
 
     // Obtiene los datos del usuario de Firestore
     const userDocSnapshot = await getDoc(userDocRef);
@@ -43,79 +38,83 @@ const sendEmail = async (userID) => {
   }
 };
 
-function LogIn({ url }) {
+function LogIn() {
   const { t } = useTranslation();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
 
-  const [error, setError] = useState(null);
-  const [isForgotPasswordModalOpen, setIsForgotPasswordModalOpen] = useState(false);
+  // Estados principales
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+
+  // Estados de UI
   const [showPassword, setShowPassword] = useState(false);
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
-  const [isResendingVerificationEmail, setIsResendingVerificationEmail] = useState(false);
-  let [isOpen, setIsOpen] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState("");
-  const [successMessage, setSuccessMessage] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
+  const [showResetEmailSentModal, setShowResetEmailSentModal] = useState(false);
+  const [isResendingVerificationEmail, setIsResendingVerificationEmail] =
+    useState(false);
 
-  const isFormValid = email && password;
+  // Estados de mensajes
+  const [error, setError] = useState(null);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [recoveryEmail, setRecoveryEmail] = useState("");
+
+  // Validaciones
+  const isFormValid = formData.email && formData.password;
+
+  // Manejadores
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setIsFormSubmitted(true);
 
-    if (isFormValid) {
-      try {
-        const userCredential = await loginUser(email, password);
-        const user = userCredential.user;
+    if (!isFormValid) return;
 
-        if (user && user.emailVerified) {
-          setEmail("");
-          setPassword("");
-          setError(null);
-          // Obtener una referencia al documento del usuario en Firestore
-          const db = getFirestore();
-          const userDocRef = doc(db, "usuarios", user.uid);
+    setIsLoading(true);
+    setError(null);
 
-          // Obtener el valor actual del campo "sesion"
-          const userDocSnapshot = await getDoc(userDocRef);
-          const sesionActual = userDocSnapshot.data().sesion || 0;
+    try {
+      const userCredential = await loginUser(formData.email, formData.password);
+      const user = userCredential.user;
 
-          // Incrementar el valor del campo "sesion" en 1
-          await updateDoc(userDocRef, {
-            sesion: sesionActual + 1,
-          });
+      if (user && user.emailVerified) {
+        // Login exitoso
+        // Obtener una referencia al documento del usuario en Firestore
+        const db = getFirestore();
+        const userDocRef = doc(db, "usuarios", user.uid);
 
-          // Verificar si la sesión pasó a estar en 1 y enviar el correo electrónico
-          if (sesionActual + 1 === 1) {
-            await sendEmail(user.uid);
-          }
+        // Obtener el valor actual del campo "sesion"
+        const userDocSnapshot = await getDoc(userDocRef);
+        const sesionActual = userDocSnapshot.data().sesion || 0;
 
-          window.location.href = "/";
-        } else {
-          // "Verifica tu correo antes de iniciar sesión. Si no lo encuentras, revisa el correo no deseado."
-          setError(t("login.verifyEmail"));
-          const resendVerificationOption = (
-            <button
-              className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
-              onClick={handleResendVerificationEmail}
-            >
-              {/* ¿No has recibido el correo de verificación? Haz clic aquí para
-              reenviar. */}
-              {t("login.resendVerificationEmail")}
-            </button>
-          );
-          //
-          setError((prevError) => (
-            <>
-              {prevError}
-              {resendVerificationOption}
-            </>
-          ));
+        // Incrementar el valor del campo "sesion" en 1
+        await updateDoc(userDocRef, {
+          sesion: sesionActual + 1,
+        });
+
+        // Verificar si la sesión pasó a estar en 1 y enviar el correo electrónico
+        if (sesionActual + 1 === 1) {
+          await sendEmail(user.uid);
         }
-      } catch (error) {
-        // ("Credenciales incorrectas. Por favor, inténtalo de nuevo.")
-        setError(t("login.incorrectCredentials"));
+
+        // Redireccionar al usuario
+        window.location.href = "/";
+      } else {
+        // El email no está verificado
+        setError(t("login.verifyEmail"));
       }
+    } catch (error) {
+      console.error("Error de inicio de sesión:", error);
+      setError(t("login.incorrectCredentials"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -124,246 +123,445 @@ function LogIn({ url }) {
       setIsResendingVerificationEmail(true);
       const user = auth.currentUser;
       await sendEmailVerification(user);
-      setSuccessMessage(t("login.verificationEmailResent")); // "Correo de verificación reenviado exitosamente"
-      setIsResendingVerificationEmail(false);
+      setSuccessMessage(t("login.verificationEmailResent"));
     } catch (error) {
+      console.error("Error al reenviar email de verificación:", error);
+      setError(t("login.resendVerificationError"));
+    } finally {
       setIsResendingVerificationEmail(false);
     }
   };
-
-  function closeModal() {
-    setIsOpen(false);
-    setIsForgotPasswordModalOpen(false);
-  }
 
   const handleForgotPassword = async () => {
-    setIsOpen(true);
+    if (!recoveryEmail) return;
 
     try {
+      setIsLoading(true);
       await sendPasswordResetEmail(auth, recoveryEmail);
+      setShowForgotPasswordModal(false);
+      setShowResetEmailSentModal(true);
     } catch (error) {
-      // "Error al enviar el correo electrónico de restablecimiento de contraseña:",
-      console.error(t("login.resetPasswordEmailError"), error.message );
+      console.error(t("login.resetPasswordEmailError"), error.message);
+      setError(t("login.resetPasswordEmailError"));
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleShowPasswordClick = (e) => {
-    e.preventDefault();
+  const handleShowPasswordClick = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleFormKeyDown = (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleLogin(e);
-    }
-  };
-
   return (
-    <section className="">
-      <div className="mt-20">
-        <div className="g-6 flex h-full flex-wrap items-center justify-center lg:justify-between">
-          <div className="mb-12 md:mb-0 md:w-full lg:w-6/12 xl:w-6/12">
+    <section className="bg-gray-50 min-h-screen py-12">
+      <div className="container mx-auto px-4">
+        <div className="flex flex-col-reverse lg:flex-row items-center justify-center gap-8">
+          {/* Parte izquierda - Ilustración */}
+          <div className="lg:w-1/2 hidden md:block">
             <img
               src="https://tecdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-              className="w-full"
-              alt="Sample image"
+              className="w-full max-w-lg mx-auto"
+              alt="Login illustration"
             />
           </div>
-          <div className="mb-4 md:mb-0 md:w-full lg:w-5/12 xl:w-5/12 md:ml-auto md:mr-auto lg:ml-0 lg:mr-0">
-            <form onSubmit={handleLogin} onKeyDown={handleFormKeyDown}>
-              <h2 className="mb-6 text-2xl font-semibold text-gray-900">
-                {/* Inicio de Sesión */}
+
+          {/* Parte derecha - Formulario */}
+          <div className="w-full lg:w-5/12 p-6 bg-white rounded-xl shadow-2xl">
+            <div className="mb-6 text-center">
+              {/* <Link href="/" className="inline-block mb-6">
+                <img className="h-12" src="/img/logo.png" alt="Logo" />
+              </Link> */}
+              <h2 className="text-3xl font-bold text-gray-800">
                 {t("login.loginTitle")}
               </h2>
-              {error && <div className="text-red-500 mb-4">{error}</div>}
-              {successMessage && (
-                <p className="text-green-500 mb-4">{successMessage}</p>
-              )}
-              <div className="mb-6 relative border border-gray-300 shadow-md w-full md:w-1/2">
-                <input
-                  type="text"
-                  className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
-                    isFormSubmitted && !email ? "" : ""
-                  }`}
-                  id="exampleFormControlInput2"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="mb-6 relative border border-gray-300 shadow-md w-full md:w-1/2">
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className={`peer block min-h-[auto] w-full rounded border-0 bg-transparent px-3 py-[0.32rem] leading-[2.15] outline-none transition-all duration-200 ease-linear focus:placeholder:opacity-100 data-[te-input-state-active]:placeholder:opacity-100 motion-reduce:transition-none ${
-                    isFormSubmitted && !password ? "" : ""
-                  }`}
-                  id="exampleFormControlInput22"
-                  placeholder={t("login.password")} //"Contraseña"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  className="absolute top-1/2 right-3 transform -translate-y-1/2 focus:outline-none"
-                  onClick={handleShowPasswordClick}
-                >
-                  {showPassword ? (
-                    <img
-                      src="/img/ojo.png"
-                      alt="Hide password"
-                      className="w-7 h-7"
-                    />
-                  ) : (
-                    <img
-                      src="/img/ojosno.png"
-                      alt="Show password"
-                      className="w-7 h-7"
-                    />
-                  )}
-                </button>
-              </div>
+              <p className="text-gray-600 mt-2">{t("login.welcomeBack")}</p>
+            </div>
 
-              <div className="text-center lg:text-left">
-                <button
-                  type="submit"
-                  disabled={!isFormValid}
-                  className={`inline-block rounded bg-gray-400 text-white px-7 pb-2.5 pt-3 text-sm font-medium uppercase leading-normal shadow-[0_4px_9px_-4px_#3b71ca] transition duration-150 ease-in-out ${
-                    isFormValid
-                      ? "bg-green-300 hover:bg-primary hover:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:bg-primary-600 focus:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)] focus:outline-none focus:ring-0 active:bg-primary-700 active:shadow-[0_8px_9px_-4px_rgba(59,113,202,0.3),0_4px_18px_0_rgba(59,113,202,0.2)]"
-                      : "cursor-not-allowed bg-gray-400 text-gray-200"
-                  }`}
-                >
-                  {/* Iniciar Sesión */}
-                  {t("login.loginTitle")}
-                </button>
+            {error && (
+              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+                <p className="font-medium">{error}</p>
+                {error === t("login.verifyEmail") && (
+                  <button
+                    className="text-sm mt-2 text-red-600 hover:text-red-800 underline focus:outline-none"
+                    onClick={handleResendVerificationEmail}
+                    disabled={isResendingVerificationEmail}
+                  >
+                    {isResendingVerificationEmail
+                      ? t("login.resendingVerificationEmail")
+                      : t("login.resendVerificationEmail")}
+                  </button>
+                )}
+              </div>
+            )}
 
-                <div className="mt-3 text-sm font-light text-gray-500">
-                  {/* ¿No tienes una cuenta? */}
-                  {t("login.noAccountMessage")}
-                  <strong>
-                    <Link href="/register">
-                      {/* Registrate aquí */}
-                      {t("login.registerLink")}
-                    </Link>
-                  </strong>
+            {successMessage && (
+              <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded">
+                <p>{successMessage}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleLogin} className="space-y-6">
+              {/* Email input */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  {t("login.email")}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type="email"
+                    id="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
+                    placeholder={t("login.emailPlaceholder")}
+                    required
+                  />
                 </div>
-                <button
-                  onClick={() => setIsForgotPasswordModalOpen(true)}
-                  className="text-sm font-light text-gray-500 hover:underline focus:outline-none"
+              </div>
+
+              {/* Password input */}
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  {/* ¿Olvidaste tu contraseña? */}
+                  {t("login.password")}
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    id="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
+                    placeholder={t("login.passwordPlaceholder")}
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={handleShowPasswordClick}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
+                    {showPassword ? (
+                      <img
+                        src="/img/ojo.png"
+                        alt="Hide password"
+                        className="w-6 h-6"
+                      />
+                    ) : (
+                      <img
+                        src="/img/ojosno.png"
+                        alt="Show password"
+                        className="w-6 h-6"
+                      />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {/* Forgot password link */}
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowForgotPasswordModal(true)}
+                  className="text-sm text-cyan-600 hover:text-cyan-800 focus:outline-none"
+                >
                   {t("login.forgotPasswordLink")}
                 </button>
-                {isForgotPasswordModalOpen && (
-                  <div className="fixed inset-0 flex items-center justify-center">
-                    <div
-                      className="absolute inset-0 bg-gray-800 opacity-75"
-                      onClick={() => setIsForgotPasswordModalOpen(false)}
-                    ></div>
-                    <div className="bg-white p-8 rounded-md shadow-lg z-10">
-                      <h2 className="text-2xl font-semibold mb-4">
-                        {/* Recuperar Contraseña */}
-                        {t("login.forgotPasswordTitle")}
-                      </h2>
-                      <p className="text-gray-600 mb-6">
-                        {/* Ingresa tu correo electrónico para restablecer tu
-                        contraseña. */}
-                        {t("login.forgotPasswordDescription")}
-                      </p>
-                      <input
-                        type="email"
-                        className="w-full p-2 border rounded mb-4"
-                        placeholder="Email"
-                        value={recoveryEmail}
-                        onChange={(e) => setRecoveryEmail(e.target.value)}
-                      />
-                      <button
-                        onClick={handleForgotPassword}
-                        className={`w-full text-gray-600 mt-4 hover:underline focus:outline-none ${
-                          recoveryEmail ? "" : "cursor-not-allowed opacity-50"
-                        }`}
-                        disabled={!recoveryEmail}
-                      >
-                        {/* Enviar Correo de Recuperación */}
-                        {t("login.sendRecoveryEmailButton")}
-                      </button>
+              </div>
 
-                      <Transition appear show={isOpen} as={Fragment}>
-                        <Dialog
-                          as="div"
-                          className="relative z-10"
-                          onClose={closeModal}
-                        >
-                          <Transition.Child
-                            as={Fragment}
-                            enter="ease-out duration-300"
-                            enterFrom="opacity-0"
-                            enterTo="opacity-100"
-                            leave="ease-in duration-200"
-                            leaveFrom="opacity-100"
-                            leaveTo="opacity-0"
-                          >
-                            <div className="fixed inset-0 bg-black bg-opacity-25" />
-                          </Transition.Child>
-
-                          <div className="fixed inset-0 overflow-y-auto">
-                            <div className="flex min-h-full items-center justify-center p-4 text-center">
-                              <Transition.Child
-                                as={Fragment}
-                                enter="ease-out duration-300"
-                                enterFrom="opacity-0 scale-95"
-                                enterTo="opacity-100 scale-100"
-                                leave="ease-in duration-200"
-                                leaveFrom="opacity-100 scale-100"
-                                leaveTo="opacity-0 scale-95"
-                              >
-                                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                                  <Dialog.Title
-                                    as="h3"
-                                    className="text-lg font-medium leading-6 text-gray-900"
-                                  >
-                                    {/* ¡Correo de recuperación enviado! */}
-                                    {t("login.recoveryEmailSent")}
-                                  </Dialog.Title>
-                                  <div className="mt-2">
-                                    <p className="text-sm text-gray-500">
-                                      {/* Te enviamos un correo con instrucciones
-                                      para actualizar ... */}
-                                      {t("login.recoveryEmailInstructions")}
-                                    </p>
-                                  </div>
-
-                                  <div className="mt-4">
-                                    <button
-                                      type="button"
-                                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                                      onClick={closeModal}
-                                    >
-                                      {/* Listo! */}
-                                      {t("login.confirmationButton")}
-                                    </button>
-                                  </div>
-                                </Dialog.Panel>
-                              </Transition.Child>
-                            </div>
-                          </div>
-                        </Dialog>
-                      </Transition>
-                      <button
-                        onClick={() => setIsForgotPasswordModalOpen(false)}
-                        className="w-full text-gray-600 mt-4 hover:underline focus:outline-none"
-                      >
-                        {/* Cancelar */}
-                        {t("login.cancelButton")}
-                      </button>
-                    </div>
+              {/* Submit button */}
+              <button
+                type="submit"
+                disabled={!isFormValid || isLoading}
+                className={`w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-base font-medium text-white focus:outline-none transition-colors duration-200 ${
+                  isFormValid && !isLoading
+                    ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                {isLoading ? (
+                  <div className="flex items-center">
+                    <svg
+                      className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    {t("login.loggingIn")}
                   </div>
+                ) : (
+                  t("login.loginButton")
                 )}
+              </button>
+
+              {/* Register link */}
+              <div className="text-center mt-6">
+                <p className="text-sm text-gray-600">
+                  {t("login.noAccountMessage")}
+                  <Link
+                    href="/register"
+                    className="ml-1 font-medium text-cyan-600 hover:text-cyan-800"
+                  >
+                    {t("login.registerLink")}
+                  </Link>
+                </p>
               </div>
             </form>
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      <Transition appear show={showForgotPasswordModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setShowForgotPasswordModal(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900"
+                  >
+                    {t("login.forgotPasswordTitle")}
+                  </Dialog.Title>
+                  <div className="mt-2">
+                    <p className="text-sm text-gray-500">
+                      {t("login.forgotPasswordDescription")}
+                    </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 text-gray-400"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                          />
+                        </svg>
+                      </div>
+                      <input
+                        type="email"
+                        className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-cyan-500 focus:border-cyan-500"
+                        placeholder="tu@email.com"
+                        value={recoveryEmail}
+                        onChange={(e) => setRecoveryEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-6 flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500 border border-gray-300 rounded-md"
+                      onClick={() => setShowForgotPasswordModal(false)}
+                    >
+                      {t("login.cancelButton")}
+                    </button>
+                    <button
+                      type="button"
+                      className={`px-4 py-2 text-sm font-medium text-white rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500 ${
+                        recoveryEmail && !isLoading
+                          ? "bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600"
+                          : "bg-gray-300 cursor-not-allowed"
+                      }`}
+                      onClick={handleForgotPassword}
+                      disabled={!recoveryEmail || isLoading}
+                    >
+                      {isLoading ? (
+                        <div className="flex items-center">
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          {t("login.sending")}
+                        </div>
+                      ) : (
+                        t("login.sendRecoveryEmailButton")
+                      )}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
+
+      {/* Reset Email Sent Modal */}
+      <Transition appear show={showResetEmailSentModal} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-10"
+          onClose={() => setShowResetEmailSentModal(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm" />
+          </Transition.Child>
+
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <Transition.Child
+                as={Fragment}
+                enter="ease-out duration-300"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
+                leave="ease-in duration-200"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
+              >
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="text-center mb-4">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-12 w-12 mx-auto text-green-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </div>
+
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900 text-center"
+                  >
+                    {t("login.recoveryEmailSent")}
+                  </Dialog.Title>
+
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-500 text-center">
+                      {t("login.recoveryEmailInstructions")}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 flex justify-center">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-white bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 rounded-md focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-cyan-500"
+                      onClick={() => setShowResetEmailSentModal(false)}
+                    >
+                      {t("login.confirmationButton")}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </section>
   );
 }

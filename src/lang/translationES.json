@@ -38,7 +38,16 @@
       "passwordsMatchError": "Las contraseñas no coinciden",
       "passwordsMatch": "Las contraseñas coinciden",
       "emailAlreadyExistsError": "El correo electrónico ya está en uso",
-      "registrationError": "Error al registrar el usuario:"
+      "registrationError": "Error al registrar el usuario:",
+      "confirmPasswordRequired": "La confirmación de contraseña es obligatoria",
+      "emailInUse": "El correo electrónico ya está en uso"
+    },
+    "passwordStrength": {
+      "minChars": "8+ caracteres",
+      "uppercase": "Mayúscula",
+      "lowercase": "Minúscula",
+      "number": "Número",
+      "specialChar": "Caracter especial"
     },
     "submitButton": "Crear cuenta",
     "termsAndConditions": "Estoy de acuerdo con los",
@@ -69,7 +78,13 @@
     "recoveryEmailSent": "¡Correo de recuperación enviado!",
     "recoveryEmailInstructions": "Te enviamos un correo con instrucciones para actualizar tu contraseña. Revisa también tu carpeta de correo no deseado por si acaso.",
     "confirmationButton": "Listo!",
-    "cancelButton": "Cancelar"
+    "cancelButton": "Cancelar",
+    "email": "Correo electrónico",
+    "welcomeBack": "Bienvenido de nuevo",
+    "loggingIn": "Iniciando sesión...",
+    "resendingVerificationEmail": "Reenviando correo...",
+    "resendVerificationError": "Error al reenviar el correo de verificación",
+    "sending": "Enviando..."
   },
   "homeSliderData": {
     "sliderTitle1": "Impulsa tu Marca con Experiencias Personalizadas",

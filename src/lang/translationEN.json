@@ -38,7 +38,16 @@
       "passwordsMatchError": "Passwords do not match",
       "passwordsMatch": "Passwords match",
       "emailAlreadyExistsError": "Email is already in use",
-      "registrationError": "Error registering user:"
+      "registrationError": "Error registering user:",
+      "confirmPasswordRequired": "Password confirmation is required",
+      "emailInUse": "Email is already in use"
+    },
+    "passwordStrength": {
+      "minChars": "8+ characters",
+      "uppercase": "Uppercase",
+      "lowercase": "Lowercase",
+      "number": "Number",
+      "specialChar": "Special character"
     },
     "submitButton": "Create Account",
     "termsAndConditions": "I agree to the",
@@ -69,7 +78,13 @@
     "recoveryEmailSent": "Recovery email sent!",
     "recoveryEmailInstructions": "We've sent you an email with instructions to update your password. Also, check your spam folder just in case.",
     "confirmationButton": "Got it!",
-    "cancelButton": "Cancel"
+    "cancelButton": "Cancel",
+    "email": "Email",
+    "welcomeBack": "Welcome back",
+    "loggingIn": "Logging in...",
+    "resendingVerificationEmail": "Resending email...",
+    "resendVerificationError": "Error resending verification email",
+    "sending": "Sending..."
   },
   "homeSliderData": {
     "sliderTitle1": "Boost Your Brand with Personalized Experiences",
