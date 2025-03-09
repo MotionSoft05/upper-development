@@ -507,13 +507,13 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
               user.email === "ulises.jacobo@hotmail.com" ||
               user.email === "contacto@upperds.mx") && (
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-base font-medium text-gray-700 mb-1">
                   {t("altaEventos.selectCompany")}
                 </label>
                 <select
                   value={selectedUser || ""}
                   onChange={handleUserSelect}
-                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-sm"
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
                 >
                   <option value="" disabled>
                     {t("altaEventos.selectCompany")}
@@ -535,62 +535,62 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
           {/* Campos de información */}
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 {t("altaEventos.eventName")}
               </label>
               <input
                 type="text"
                 name="floating_name"
                 id="floating_name"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-sm"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
                 placeholder={t("altaEventos.eventNamePlaceholder")}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 {t("altaEventos.eventType")}
               </label>
               <input
                 type="text"
                 name="floating_event"
                 id="floating_event"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-sm"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
                 placeholder={t("altaEventos.eventTypePlaceholder")}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 {t("altaEventos.location")}
               </label>
               <input
                 type="text"
                 name="floating_floor"
                 id="floating_floor"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-sm"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
                 placeholder={t("altaEventos.locationPlaceholder")}
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-base font-medium text-gray-700 mb-1">
                 {t("altaEventos.description")}
               </label>
               <textarea
                 name="description"
                 id="description"
-                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-sm"
+                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
                 placeholder={t("altaEventos.descriptionPlaceholder")}
                 rows="3"
                 maxLength="255"
                 value={description}
                 onChange={handleDescriptionChange}
               />
-              <p className="text-xs text-gray-500 mt-1">{`${charCount}/255 ${t(
+              <p className="text-sm text-gray-500 mt-1">{`${charCount}/255 ${t(
                 "altaEventos.characters"
               )}`}</p>
             </div>
@@ -600,7 +600,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
           <div className="mt-4">
             <div className="flex items-center mb-2">
               <CalendarIcon className="h-4 w-4 text-blue-500 mr-1" />
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-base font-medium text-gray-700">
                 {t("altaEventos.selectDate")}
               </h3>
             </div>
@@ -608,7 +608,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
               useRange={false}
               value={value}
               onChange={handleValueChange}
-              inputClassName="w-full py-2 bg-gray-50 border border-gray-300 text-gray-900 rounded text-sm"
+              inputClassName="w-full py-2 bg-gray-50 border border-gray-300 text-gray-900 rounded text-base"
             />
           </div>
         </div>
@@ -619,28 +619,28 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
           <div>
             <div className="flex items-center mb-2">
               <ClockIcon className="h-4 w-4 text-blue-500 mr-1" />
-              <h3 className="text-sm font-medium text-gray-700">
+              <h3 className="text-base font-medium text-gray-700">
                 {t("altaEventos.selectHours")}
               </h3>
             </div>
 
             {/* Horario real del evento */}
             <div className="bg-gray-50 p-3 rounded border border-gray-200 mb-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
                 {t("altaEventos.realInitialTime")}
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-sm text-gray-600 mb-1">
                     {t("altaEventos.realInitialHour")}
                   </label>
                   <div className="flex space-x-1">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.hours")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="hourSelectorInicio"
                       >
                         {Array.from({ length: 24 }, (_, i) => (
@@ -651,11 +651,11 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.minutes")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="minuteSelectorInicio"
                       >
                         {Array.from({ length: 60 }, (_, i) => (
@@ -669,16 +669,16 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-sm text-gray-600 mb-1">
                     {t("altaEventos.realFinalHour")}
                   </label>
                   <div className="flex space-x-1">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.hours")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="hourSelectorFinal"
                       >
                         {Array.from({ length: 24 }, (_, i) => (
@@ -689,11 +689,11 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.minutes")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="minuteSelectorFinal"
                       >
                         {Array.from({ length: 60 }, (_, i) => (
@@ -710,21 +710,21 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
 
             {/* Horario en que se mostrará en pantallas */}
             <div className="bg-gray-50 p-3 rounded border border-gray-200 mb-4">
-              <h4 className="text-xs font-medium text-gray-700 mb-2">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">
                 {t("altaEventos.realFinalTime")}
               </h4>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-sm text-gray-600 mb-1">
                     {t("altaEventos.loungeInitialHour")}
                   </label>
                   <div className="flex space-x-1">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.hours")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="hourSelectorInicioSalon"
                       >
                         {Array.from({ length: 24 }, (_, i) => (
@@ -735,11 +735,11 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.minutes")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="minuteSelectorInicioSalon"
                       >
                         {Array.from({ length: 60 }, (_, i) => (
@@ -753,16 +753,16 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                 </div>
 
                 <div>
-                  <label className="block text-xs text-gray-600 mb-1">
+                  <label className="block text-sm text-gray-600 mb-1">
                     {t("altaEventos.loungeFinalHour")}
                   </label>
                   <div className="flex space-x-1">
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.hours")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="hourSelectorFinalSalon"
                       >
                         {Array.from({ length: 24 }, (_, i) => (
@@ -773,11 +773,11 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       </select>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">
+                      <p className="text-sm text-gray-500 mb-1">
                         {t("altaEventos.minutes")}
                       </p>
                       <select
-                        className="border border-gray-300 text-gray-700 rounded p-1 text-xs w-14"
+                        className="border border-gray-300 text-gray-700 rounded p-1 text-sm w-14"
                         id="minuteSelectorFinalSalon"
                       >
                         {Array.from({ length: 60 }, (_, i) => (
@@ -795,7 +795,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
 
           {/* Dispositivos */}
           <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">
+            <h3 className="text-base font-medium text-gray-700 mb-2">
               {t("altaEventos.selectDevicesTitle")}
             </h3>
 
@@ -810,7 +810,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       ? nombrePantallas.map((nombrePantalla, index) => (
                           <label
                             key={index}
-                            className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                            className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                           >
                             <input
                               type="checkbox"
@@ -826,7 +826,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={index}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -848,7 +848,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={`dir-${index}`}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -867,7 +867,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={`dir-${index}`}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -890,7 +890,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       ? selectedUserPantallas.map((nombrePantalla, index) => (
                           <label
                             key={index}
-                            className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                            className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                           >
                             <input
                               type="checkbox"
@@ -906,7 +906,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={index}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -927,7 +927,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={`dir-${index}`}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -946,7 +946,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                           (nombrePantalla, index) => (
                             <label
                               key={`dir-${index}`}
-                              className="flex items-center text-xs hover:bg-gray-100 p-1 rounded"
+                              className="flex items-center text-sm hover:bg-gray-100 p-1 rounded"
                             >
                               <input
                                 type="checkbox"
@@ -968,12 +968,12 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
 
             {/* Dispositivos seleccionados */}
             <div className="mt-3">
-              <h4 className="text-xs font-medium text-gray-700 mb-1">
+              <h4 className="text-sm font-medium text-gray-700 mb-1">
                 {t("altaEventos.showTitle")}
               </h4>
               <div className="bg-gray-50 p-2 border border-gray-200 rounded max-h-24 overflow-y-auto">
                 {selectedDevices.length > 0 ? (
-                  <ul className="text-xs">
+                  <ul className="text-sm">
                     {selectedDevices.map((device, index) => (
                       <li key={index} className="flex items-center py-0.5">
                         <span className="w-1.5 h-1.5 bg-blue-500 rounded-full mr-1.5 flex-shrink-0"></span>
@@ -982,7 +982,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                     ))}
                   </ul>
                 ) : (
-                  <p className="text-xs text-gray-500 italic">
+                  <p className="text-sm text-gray-500 italic">
                     {t("altaEventos.noDevicesSelected")}
                   </p>
                 )}
@@ -1010,12 +1010,12 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                       />
                       <button
                         onClick={() => deleteImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center text-xs shadow-sm"
+                        className="absolute top-1 right-1 bg-red-500 text-white font-bold w-5 h-5 rounded-full flex items-center justify-center text-sm shadow-sm"
                       >
                         ×
                       </button>
                     </div>
-                    <p className="text-xs text-center mt-1 text-gray-500">
+                    <p className="text-sm text-center mt-1 text-gray-500">
                       {t("altaEventos.image")} {index + 1}
                     </p>
                   </div>
@@ -1026,7 +1026,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                   >
                     <div className="flex flex-col items-center justify-center">
                       <span className="text-2xl text-blue-500">+</span>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-sm text-gray-500 mt-1">
                         {t("altaEventos.image")} {index + 1}
                       </p>
                     </div>
@@ -1052,7 +1052,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
                 checked={primeraImagen}
                 onChange={(e) => setPrimeraImagen(e.target.checked)}
               />
-              <span className="ml-2 text-xs text-gray-700">
+              <span className="ml-2 text-sm text-gray-700">
                 {t("altaEventos.activateFullScreen")}
               </span>
             </label>
@@ -1067,7 +1067,7 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
               {t("altaEventos.sendButton")}
             </button>
             {alertaEnviada && (
-              <div className="mt-3 p-2 bg-green-100 text-green-800 rounded-md text-sm text-center">
+              <div className="mt-3 p-2 bg-green-100 text-green-800 rounded-md text-base text-center">
                 {t("altaEventos.successMessage")}
               </div>
             )}
