@@ -72,7 +72,7 @@ function DashBoard() {
   }, []);
 
   const [sidebarClasses, setSidebarClasses] = useState(
-    "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 "
+    "sidebar w-64 md:shadow transform  md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 "
   );
 
   const toggleSidebar = () => {
@@ -81,7 +81,7 @@ function DashBoard() {
       // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
       return prevClasses.includes("-translate-x-full")
         ? "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 z-50"
-        : "sidebar w-64 md:shadow transform -translate-x-full md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
+        : "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
     });
   };
 
@@ -125,13 +125,12 @@ function DashBoard() {
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />} {/* Usuarios y Licencias */}
-
+              userEmail === "contacto@upperds.mx") && <Admin />}{" "}
+          {/* Usuarios y Licencias */}
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
-          
           {/* GESTION DE USUARIOS */}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && (
@@ -141,13 +140,11 @@ function DashBoard() {
             />
           )}
           {showConsultaEvento && <ConsultaModEvento />}
-
           {/* CONFIGURACION DE PANTALLAS */}
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
           {showPublicidad && <Publicidad />}
-          
           {/* INFORMACION DE USUARIO */}
           {showlicencia && <Licencia />}
           {showGuia && <Guia userData={userData} />}
