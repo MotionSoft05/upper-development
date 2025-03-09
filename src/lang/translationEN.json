@@ -528,7 +528,23 @@
     "emailPlaceholder": "Email",
     "messagePlaceholder": "Your message",
     "sendButton": "Send",
-    "successMessage": "Message sent successfully! We'll get back to you soon."
+    "successMessage": "Message sent successfully! We'll get back to you soon.",
+
+    "nameLabel": "Name",
+    "emailLabel": "Email",
+    "messageLabel": "Message",
+    "sendingButton": "Sending...",
+    "bannerTitle": "We're here to help you",
+    "bannerSubtitle": "Our support team is ready to address your questions",
+    "infoTitle": "How we can help you",
+    "formTitle": "Complete the form",
+    "tipTitle": "Helpful tip",
+    "tipContent": "Provide as much detail as possible so we can resolve your issue more quickly.",
+    "categoryLabel": "Category",
+    "categoryGeneral": "General",
+    "categoryTechnical": "Technical Support",
+    "categoryBilling": "Billing",
+    "categoryFeature": "Feature Request"
   },
   "altaEventos": {
     "noActiveLicenses": "Currently, there are no active licenses, so it's not possible to continue with the event registration.",

@@ -528,7 +528,23 @@
     "emailPlaceholder": "Correo electrónico",
     "messagePlaceholder": "Su mensaje",
     "sendButton": "Enviar",
-    "successMessage": "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto."
+    "successMessage": "¡Mensaje enviado con éxito! Nos pondremos en contacto contigo pronto.",
+
+    "nameLabel": "Nombre",
+    "emailLabel": "Correo electrónico",
+    "messageLabel": "Mensaje",
+    "sendingButton": "Enviando...",
+    "bannerTitle": "Estamos aquí para ayudarte",
+    "bannerSubtitle": "Nuestro equipo de soporte está listo para resolver tus dudas",
+    "infoTitle": "Cómo podemos ayudarte",
+    "formTitle": "Completa el formulario",
+    "tipTitle": "Consejo útil",
+    "tipContent": "Proporciona la mayor cantidad de detalles posible para que podamos resolver tu problema más rápidamente.",
+    "categoryLabel": "Categoría",
+    "categoryGeneral": "General",
+    "categoryTechnical": "Soporte Técnico",
+    "categoryBilling": "Facturación",
+    "categoryFeature": "Sugerencia de Funcionalidad"
   },
   "altaEventos": {
     "noActiveLicenses": "En este momento no cuenta con licencias activas, no es posible continuar con el alta de eventos",
