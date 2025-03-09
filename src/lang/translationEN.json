@@ -222,7 +222,24 @@
   "footer": {
     "title": "The content of this site is protected by copyright and is owned by Upper Digital Signage.",
     "privacyPolicy": "Privacy Policy",
-    "termsOfService": "Terms of Service"
+    "termsOfService": "Terms of Service",
+    "copyright": "All rights reserved.",
+    "sections": {
+      "solutions": "Solutions",
+      "support": "Support",
+      "company": "Company"
+    },
+    "links": {
+      "digitalSignage": "Digital Signage",
+      "interactiveScreens": "Interactive Screens",
+      "contentManagement": "Content Management",
+      "documentation": "Documentation",
+      "contact": "Contact",
+      "faq": "FAQ",
+      "about": "About Us",
+      "blog": "Blog",
+      "partners": "Partners"
+    }
   },
   "sidebar": {
     "title": "SCREEN MANAGEMENT",

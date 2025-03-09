@@ -7,7 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { getAuth, signOut, onAuthStateChanged } from "firebase/auth";
 import { initializeApp } from "firebase/app";
-import { usePathname } from "next/navigation"; // Captura la url
+import { usePathname } from "next/navigation";
 import {
   getDocs,
   onSnapshot,
@@ -17,56 +17,39 @@ import {
   getFirestore,
 } from "firebase/firestore";
 import LanguageSwitcher from "./LanguageSwitcher";
-
-import { useTranslation } from "react-i18next"; // Traducciones
+import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
+
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app); // Asegúrate de agregar esta línea para obtener la instancia de Firestore
+const db = getFirestore(app);
 const usuariosCollection = collection(db, "usuarios");
 
-{
-  /*
-const Loader = () => (
-  <div className="h-screen bg-white">
-    <div className="flex justify-center items-center h-full">
-      <img
-        className="h-16 w-16"
-        src="https://icons8.com/preloaders/preloaders/1488/Iphone-spinner-2.gif"
-        alt="Loading spinner"
-      />
-    
-    </div>
-  </div>
-);
-    */
-}
-
 function Navigation() {
-  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
-  const { t } = useTranslation(); // i18n
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION;
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [userName, setUserName] = useState(null);
-  //const [loading, setLoading] = useState(true);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const pathname = usePathname(); // Obtiene la ruta actual (pathname) para renderizar parte del NavBar
+  const pathname = usePathname();
 
-  //* --- FUNCIONES ---
+  // Check if we're on the homepage
+  const isHomePage =
+    pathname === "/" || pathname === "/upper.mx" || pathname === "/upperds.mx";
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user && user.emailVerified) {
-        // console.log("Usuario autenticado:", user);
         setUser(user);
 
-        // Obtener el nombre del usuario desde la propiedad displayName
+        // Get user's first name from displayName
         const displayName = user.displayName;
-
-        // Dividir la cadena del nombre y apellido y tomar la primera parte (nombre)
         const nombreUsuario = displayName ? displayName.split(" ")[0] : "";
-
         setUserName(nombreUsuario);
 
+        // Get user data from Firestore
         const q = query(usuariosCollection, where("email", "==", user.email));
 
         try {
@@ -76,7 +59,7 @@ function Navigation() {
             setUserName(usuario.nombre);
           }
 
-          // Manejar cambios en los datos del usuario
+          // Listen for user data changes
           const unsubscribeUsuario = onSnapshot(q, (snapshot) => {
             if (snapshot.docs.length > 0) {
               const usuario = snapshot.docs[0].data();
@@ -84,24 +67,20 @@ function Navigation() {
             }
           });
 
-          //setLoading(false);
-
           return () => unsubscribeUsuario();
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
-          //setLoading(false);
+          console.error("Error fetching user data:", error);
         }
       } else {
         setUser(null);
         setUserName(null);
-        //setLoading(false); // Marcar la carga como completa en caso de que no haya usuario autenticado
       }
     });
 
     return () => unsubscribe();
-  }, []); //? Podria ir [pathname] para actualizar en cada url?
+  }, []);
 
-  // No muestra Navigation en algunas URL determinadas
+  // Hide navigation on specific routes
   const hideNavigation = () => {
     const hideRoutes = [
       "/paginasAleatorias",
@@ -109,10 +88,8 @@ function Navigation() {
       "/pantallaDirec1",
     ];
 
-    // Elimina el .html del pathname si está presente
+    // Remove .html extension if present
     const sanitizedPathname = pathname.replace(".html", "");
-
-    console.log("Sanitized Pathname: ", sanitizedPathname);
 
     return (
       hideRoutes.includes(sanitizedPathname) ||
@@ -122,299 +99,246 @@ function Navigation() {
 
   const handleLogout = async () => {
     try {
-      //setLoading(true);
       await signOut(auth);
       setUser(null);
       setUserName(null);
-      //setLoading(false);
       window.location.href = "/";
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
-      //setLoading(false); // Marcar la carga como completa en caso de error
+      console.error("Error during logout:", error);
     }
   };
 
-  const navigateToDashboard = async () => {
-    //setLoading(true); // Iniciar la pantalla de carga al dirigirse al dashboard
-    // Puedes agregar cualquier lógica adicional aquí antes de redirigir al dashboard
+  const navigateToDashboard = () => {
     window.location.href = `/dashboard${isProduction}`;
   };
-  //* --- FUNCIONES ---
 
   if (hideNavigation()) {
     return null;
   }
 
+  // Navbar menu items for homepage
+  const menuItems = [
+    { id: "products", label: t("navbar.products"), href: "#" },
+    { id: "solutions", label: t("navbar.solutions"), href: "#soluciones" },
+    { id: "resources", label: t("navbar.resources"), href: "#recursos" },
+    { id: "pricing", label: t("navbar.pricing"), href: "#precios" },
+    { id: "faq", label: "FAQ", href: "#preguntas" },
+  ];
+
   return (
-    <nav className="bg-white">
-      <div className="max-w-9xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className="bg-white shadow-md sticky top-0 z-50">
+      <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="hidden md:block flex-shrink-0 items-center">
+          {/* Logo - visible on all screens */}
+          <div className="flex-shrink-0 flex items-center">
             <Link href="/">
               <img
                 src="/img/logov2.png"
-                className="h-16 md:h-24 py-3"
-                alt="Logo"
+                className="h-12 md:h-16"
+                alt="Upper Logo"
               />
             </Link>
           </div>
-          {/* menu y register Desktop */}
-          <div className="hidden md:block">
-            <div className="ml-auto flex items-baseline space-x-4">
-              {/* Se renderiza menu solo en el inicio de la pagina */}
-              {(pathname === "/" || pathname === "/upper.mx") && (
-                <ul className="flex font-bold rounded-lg flex-row space-x-8">
-                  <li>
-                    <a
-                      href="#"
-                      className="hover:text-custom md:p-0"
-                      aria-current="page"
-                    >
-                      {t("navbar.products")}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#soluciones" className="hover:text-custom md:p-0">
-                      {t("navbar.solutions")}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#recursos" className="hover:text-custom md:p-0">
-                      {t("navbar.resources")}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#precios" className="hover:text-custom md:p-0">
-                      {t("navbar.pricing")}
-                    </a>
-                  </li>
-                  <li>
-                    <a href="#preguntas" className="hover:text-custom md:p-0">
-                      FAQ
-                    </a>
-                  </li>
-                </ul>
-              )}
 
-              <div className="px-3">
-                <div className="ml-auto flex items-baseline space-x-4 ">
-                  {user && (
-                    <div className="flex items-center space-x-2">
-                      <span className="text-3x2 font-bold text-black">
-                        {t("navbar.greeting")} {userName}!
-                      </span>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex md:items-center md:justify-end md:flex-1">
+            {/* Menu items - only on homepage */}
+            {isHomePage && (
+              <div className="flex space-x-6 mr-8">
+                {menuItems.map((item) => (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    className="text-gray-700 hover:text-custom font-medium transition duration-150 ease-in-out"
+                  >
+                    {item.label}
+                  </a>
+                ))}
+              </div>
+            )}
 
-                      {user.emailVerified && (
-                        <>
-                          <Link
-                            // href="/dashboard.html"
-                            href={`/dashboard${isProduction}`}
-                          >
-                            <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                              Dashboard
-                            </button>
-                          </Link>
-                          <button
-                            onClick={async () => {
-                              await handleLogout();
-                              window.location.href = "/";
-                            }}
-                            className="text-white bg-red-500 hover:bg-red-600 font-medium rounded-lg text-sm px-4 py-2"
-                          >
-                            {t("navbar.logout")}
-                          </button>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  {!user && (
-                    <div className="flex items-center space-x-2">
-                      <Link href={`/register${isProduction}`}>
-                        <button className="text-white bg-green-300 hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                          {/* Registrarse */}
-                          {t("navbar.register")}
-                        </button>
-                      </Link>
-                      {/* <Link href="/login.html"> */}
-                      <Link href={`/login${isProduction}`}>
-                        <button className="text-white bg-custom hover:bg-teal-300 font-medium rounded-lg text-sm px-4 py-2">
-                          {/* Iniciar sesión */}
-                          {t("navbar.login")}
-                        </button>
-                      </Link>
-                    </div>
-                  )}
+            {/* Right side - user actions */}
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <div className="flex items-center space-x-3">
+                  <span className="text-gray-800 font-medium">
+                    ¡Hola, <span className="font-bold">{userName}</span>!
+                  </span>
+                  <Link href={`/dashboard${isProduction}`}>
+                    <button className="bg-teal-400 hover:bg-teal-500 text-white font-medium rounded-lg px-5 py-2 text-sm transition duration-150 ease-in-out">
+                      Dashboard
+                    </button>
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="bg-red-500 hover:bg-red-600 text-white font-medium rounded-lg px-5 py-2 text-sm transition duration-150 ease-in-out"
+                  >
+                    Cerrar sesión
+                  </button>
                   <LanguageSwitcher />
                 </div>
+              ) : (
+                <div className="flex items-center space-x-3">
+                  <Link href={`/register${isProduction}`}>
+                    <button className="bg-teal-400 hover:bg-teal-500 text-white font-medium rounded-lg px-5 py-2 text-sm transition duration-150 ease-in-out">
+                      {t("navbar.register")}
+                    </button>
+                  </Link>
+                  <Link href={`/login${isProduction}`}>
+                    <button className="bg-custom hover:bg-teal-500 text-white font-medium rounded-lg px-5 py-2 text-sm transition duration-150 ease-in-out">
+                      {t("navbar.login")}
+                    </button>
+                  </Link>
+                  <LanguageSwitcher />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile Navigation */}
+          <div className="flex md:hidden items-center space-x-2">
+            {/* Menu button - only on homepage */}
+            {isHomePage && (
+              <Menu as="div" className="relative">
+                <Menu.Button
+                  className="p-2 rounded-md hover:bg-gray-100 focus:outline-none"
+                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                >
+                  <Bars3Icon
+                    className="h-6 w-6 text-gray-700"
+                    aria-hidden="true"
+                  />
+                </Menu.Button>
+                <Transition
+                  as={Fragment}
+                  enter="transition ease-out duration-200"
+                  enterFrom="opacity-0 translate-y-1"
+                  enterTo="opacity-100 translate-y-0"
+                  leave="transition ease-in duration-150"
+                  leaveFrom="opacity-100 translate-y-0"
+                  leaveTo="opacity-0 translate-y-1"
+                >
+                  <Menu.Items className="absolute left-0 mt-2 w-48 origin-top-left bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="py-1">
+                      {menuItems.map((item) => (
+                        <Menu.Item key={item.id}>
+                          {({ active }) => (
+                            <a
+                              href={item.href}
+                              className={`${
+                                active
+                                  ? "bg-gray-100 text-gray-900"
+                                  : "text-gray-700"
+                              } block px-4 py-2 text-sm`}
+                            >
+                              {item.label}
+                            </a>
+                          )}
+                        </Menu.Item>
+                      ))}
+                    </div>
+                  </Menu.Items>
+                </Transition>
+              </Menu>
+            )}
+
+            {/* User menu */}
+            <Menu as="div" className="relative">
+              <div className="flex items-center">
+                {user && (
+                  <span className="text-gray-800 font-medium mr-2">
+                    ¡Hola, <span className="font-bold">{userName}</span>!
+                  </span>
+                )}
+                <Menu.Button className="p-2 rounded-md hover:bg-gray-100 focus:outline-none">
+                  <UserCircleIcon
+                    className="h-6 w-6 text-gray-700"
+                    aria-hidden="true"
+                  />
+                </Menu.Button>
               </div>
-            </div>
-          </div>
-          <div className=" lg:hidden md:hidden top-16 w-56 text-right z-10">
-            <div className="ml-auto flex items-center space-x-1">
-              {/* Se renderiza menu hamburgesa solo en el inicio de la pagina */}
-              {(pathname === "/" || pathname === "/upperds.mx") && (
-                <Menu as="div" className=" ">
-                  <div>
-                    <Menu.Button className="p-2">
-                      <Bars3Icon
-                        className="h-6 text-black"
-                        aria-hidden="true"
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute left-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div>
-                        <Menu.Item>
-                          <a
-                            href="#"
-                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                          >
-                            {t("navbar.products")}
-                          </a>
-                        </Menu.Item>
-                        <Menu.Item>
+              <Transition
+                as={Fragment}
+                enter="transition ease-out duration-200"
+                enterFrom="opacity-0 translate-y-1"
+                enterTo="opacity-100 translate-y-0"
+                leave="transition ease-in duration-150"
+                leaveFrom="opacity-100 translate-y-0"
+                leaveTo="opacity-0 translate-y-1"
+              >
+                <Menu.Items className="absolute right-0 mt-2 w-48 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  {user ? (
+                    <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
                           <Link
-                            href="/#soluciones"
-                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
+                            href={`/dashboard${isProduction}`}
+                            className={`${
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700"
+                            } block px-4 py-2 text-sm`}
+                            onClick={navigateToDashboard}
                           >
-                            {t("navbar.solutions")}
+                            Dashboard
                           </Link>
-                        </Menu.Item>
-                      </div>
-                      <div>
-                        <Menu.Item>
-                          <Link
-                            href="/#recursos"
-                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                          >
-                            {t("navbar.resources")}
-                          </Link>
-                        </Menu.Item>
-                        <Menu.Item>
-                          <Link
-                            href="/#precios"
-                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                          >
-                            {t("navbar.pricing")}
-                          </Link>
-                        </Menu.Item>
-                        <Menu.Item>
-                          <Link
-                            href="/#preguntas"
-                            className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                          >
-                            FAQ
-                          </Link>
-                        </Menu.Item>
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              )}
-            </div>
-          </div>
-          {/* Logo Mobile */}
-          <div className="  md:hidden flex-shrink-0  items-center ">
-            <Link href="/">
-              <img
-                src="/img/logov2.png"
-                className="h-16 md:h-24 py-3 "
-                alt="Logo"
-              />
-            </Link>
-          </div>
-          {/* login, dashboard y register Mobile */}
-          <div className=" flex justify-between items-center lg:hidden md:hidden top-16 w-56 text-right z-10">
-            <div className="ml-4">
-              <LanguageSwitcher />
-            </div>
-            <div className="">
-              {(pathname === "/" || pathname === "/upperds.mx") && (
-                <Menu as="div" className=" ">
-                  <div>
-                    <Menu.Button className="p-2">
-                      <UserCircleIcon
-                        className="h-6 text-black"
-                        aria-hidden="true"
-                      />
-                    </Menu.Button>
-                  </div>
-                  <Transition
-                    as={Fragment}
-                    enter="transition ease-out duration-100"
-                    enterFrom="transform opacity-0 scale-95"
-                    enterTo="transform opacity-100 scale-100"
-                    leave="transition ease-in duration-75"
-                    leaveFrom="transform opacity-100 scale-100"
-                    leaveTo="transform opacity-0 scale-95"
-                  >
-                    <Menu.Items className="absolute right-0 mt-2 w-56 origin-top-right divide-y divide-gray-100 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div>
-                        {user && (
-                          <>
-                            <Menu.Item>
-                              {/* <Link href="/dashboard.html"> */}
-                              <Link href={`/dashboard${isProduction}`}>
-                                <button
-                                  onClick={navigateToDashboard}
-                                  className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                                >
-                                  Dashboard
-                                </button>
-                              </Link>
-                            </Menu.Item>
-                            <Menu.Item>
-                              <button
-                                onClick={async () => {
-                                  await handleLogout();
-                                  window.location.href = "/";
-                                }}
-                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                              >
-                                {t("navbar.logout")}
-                              </button>
-                            </Menu.Item>
-                          </>
                         )}
-                        {!user && (
-                          <>
-                            <Menu.Item>
-                              <Link
-                                // href="/register.html"
-                                href={`/register${isProduction}`}
-                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                              >
-                                {/* Registrarse */}
-                                {t("navbar.register")}
-                              </Link>
-                            </Menu.Item>
-                            <Menu.Item>
-                              <Link
-                                // href="/login.html"
-                                href={`/login${isProduction}`}
-                                className="group flex w-full items-center rounded-md px-2 py-1 text-sm"
-                              >
-                                {/* Iniciar sesión */}
-                                {t("navbar.login")}
-                              </Link>
-                            </Menu.Item>
-                          </>
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <button
+                            onClick={handleLogout}
+                            className={`${
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700"
+                            } block w-full text-left px-4 py-2 text-sm`}
+                          >
+                            Cerrar sesión
+                          </button>
                         )}
-                      </div>
-                    </Menu.Items>
-                  </Transition>
-                </Menu>
-              )}
-            </div>
+                      </Menu.Item>
+                    </div>
+                  ) : (
+                    <div className="py-1">
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href={`/register${isProduction}`}
+                            className={`${
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700"
+                            } block px-4 py-2 text-sm`}
+                          >
+                            {t("navbar.register")}
+                          </Link>
+                        )}
+                      </Menu.Item>
+                      <Menu.Item>
+                        {({ active }) => (
+                          <Link
+                            href={`/login${isProduction}`}
+                            className={`${
+                              active
+                                ? "bg-gray-100 text-gray-900"
+                                : "text-gray-700"
+                            } block px-4 py-2 text-sm`}
+                          >
+                            {t("navbar.login")}
+                          </Link>
+                        )}
+                      </Menu.Item>
+                    </div>
+                  )}
+                  <div className="py-1 border-t border-gray-100">
+                    <div className="px-4 py-2">
+                      <LanguageSwitcher />
+                    </div>
+                  </div>
+                </Menu.Items>
+              </Transition>
+            </Menu>
           </div>
         </div>
       </div>

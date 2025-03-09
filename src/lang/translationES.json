@@ -219,11 +219,30 @@
     "title": "Contáctanos",
     "content": "Ponte en contacto con nosotros para discutir cómo podemos ayudarte con tus necesidades comerciales."
   },
+
   "footer": {
     "title": "El contenido de este sitio está protegido por copyright y es propiedad de Upper Digital Signage.",
     "privacyPolicy": "Política de privacidad",
-    "termsOfService": "Términos de servicio"
+    "termsOfService": "Términos de servicio",
+    "copyright": "Todos los derechos reservados.",
+    "sections": {
+      "solutions": "Soluciones",
+      "support": "Soporte",
+      "company": "Empresa"
+    },
+    "links": {
+      "digitalSignage": "Señalización Digital",
+      "interactiveScreens": "Pantallas Interactivas",
+      "contentManagement": "Gestión de Contenido",
+      "documentation": "Documentación",
+      "contact": "Contacto",
+      "faq": "Preguntas Frecuentes",
+      "about": "Acerca de Nosotros",
+      "blog": "Blog",
+      "partners": "Socios"
+    }
   },
+
   "sidebar": {
     "title": "GESTIÓN DE PANTALLAS",
     "admin": "Usuarios y licencias",
