@@ -49,11 +49,11 @@ function Sidebar(props) {
   const isActive = (show) => show === true;
 
   return (
-    <div className="sidebar-content bg-gradient-to-b  rounded-r-lg ">
+    <div className="sidebar-content rounded-r-lg ">
       {/* Logo en la parte superior */}
-      <div className="py-4 px-6 flex justify-center">
+      {/* <div className="py-4 px-6 flex justify-center">
         <img src="/img/logov2.png" alt="Upper Logo" className="h-10" />
-      </div>
+      </div> */}
 
       <ul className="flex flex-col w-full px-2">
         {/* ADMINISTRADOR permiso solo para SUPERADMIN */}
