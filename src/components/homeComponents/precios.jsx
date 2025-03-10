@@ -28,7 +28,7 @@ function Precios() {
       title: "precios.standard.title",
       description: "precios.standard.description",
       price: {
-        mensual: "$ 200",
+        mensual: "$ 150",
         anual: "$ 1,440", // 12 × $150 = $1,800 but with 20% annual discount = $1,440
       },
       features: [
@@ -67,7 +67,7 @@ function Precios() {
 
         {/* Billing Period Toggle */}
         <div className="flex justify-center mb-10">
-          <div className="bg-white rounded-full p-1 inline-flex shadow-md">
+          {/* <div className="bg-white rounded-full p-1 inline-flex shadow-md">
             <button
               onClick={togglePricingPeriod}
               className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
@@ -93,7 +93,7 @@ function Precios() {
                 </span>
               )}
             </button>
-          </div>
+          </div> */}
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">

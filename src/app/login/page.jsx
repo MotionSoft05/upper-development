@@ -105,7 +105,7 @@ function LogIn() {
         }
 
         // Redireccionar al usuario
-        window.location.href = "/";
+        window.location.href = "/dashboard/";
       } else {
         // El email no está verificado
         setError(t("login.verifyEmail"));

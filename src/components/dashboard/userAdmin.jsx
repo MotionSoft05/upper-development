@@ -36,6 +36,15 @@ function UserAdmin() {
   const [eventosHoy, setEventosHoy] = useState(0);
   const [eventosSemana, setEventosSemana] = useState(0);
   const [eventosFinalizados, setEventosFinalizados] = useState(0);
+  const [empresaData, setEmpresaData] = useState({
+    nombre: "",
+    email: "",
+    telefono: "",
+    direccion: "",
+    fechaRegistro: "",
+    fechaVencimiento: "",
+    tipoPlan: "",
+  });
 
   const total =
     parseInt(cantidadPd) + parseInt(cantidadPs) + parseInt(cantidadPservice);
@@ -137,6 +146,17 @@ function UserAdmin() {
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
+
+            // Datos de la empresa
+            setEmpresaData({
+              nombre: userData.empresa || "",
+              email: userData.email || "",
+              telefono: userData.telefono || "",
+              direccion: userData.direccion || "",
+              fechaRegistro: userData.inicio || "",
+              fechaVencimiento: userData.final || "",
+              tipoPlan: userData.tipoPlan || "",
+            });
 
             // Publicidad de salón
             const publicidadSalonQuery = query(
@@ -257,6 +277,17 @@ function UserAdmin() {
             setCantidadPs(datosEmpresa.ps || 0);
             setCantidadPservice(datosEmpresa.pservice || 0);
 
+            // Actualizar datos de empresa
+            setEmpresaData({
+              nombre: datosEmpresa.empresa || "",
+              email: datosEmpresa.email || "",
+              telefono: datosEmpresa.telefono || "",
+              direccion: datosEmpresa.direccion || "",
+              fechaRegistro: datosEmpresa.inicio || "",
+              fechaVencimiento: datosEmpresa.final || "",
+              tipoPlan: datosEmpresa.tipoPlan || "",
+            });
+
             // Obtener cantidad de publicidades de salón
             const publicidadSalonQuery = query(
               collection(db, "Publicidad"),
@@ -354,6 +385,39 @@ function UserAdmin() {
     </div>
   );
 
+  // Componente de campo de información para la sección de empresa
+  const InfoField = ({ label, value, icon }) => (
+    <div className="flex items-center p-3 border-b border-gray-100 last:border-b-0">
+      <div className="text-gray-500 mr-3">{icon}</div>
+      <div className="flex-grow">
+        <p className="text-sm text-gray-500">{label}</p>
+        <p className="font-medium">{value || "-"}</p>
+      </div>
+    </div>
+  );
+
+  // Calcula el estado de la suscripción y el tiempo restante
+  const calcularEstadoSuscripcion = () => {
+    if (!empresaData.fechaVencimiento)
+      return { estado: "inactive", diasRestantes: 0 };
+
+    const fechaActual = new Date();
+    const fechaVencimiento = new Date(empresaData.fechaVencimiento);
+    const diferenciaTiempo = fechaVencimiento.getTime() - fechaActual.getTime();
+    const diasRestantes = Math.ceil(diferenciaTiempo / (1000 * 3600 * 24));
+
+    let estado = "active";
+    if (diasRestantes < 0) {
+      estado = "expired";
+    } else if (diasRestantes <= 7) {
+      estado = "warning";
+    }
+
+    return { estado, diasRestantes };
+  };
+
+  const { estado, diasRestantes } = calcularEstadoSuscripcion();
+
   return (
     <section className="px-6 md:px-8 lg:px-12 py-8">
       {loading ? (
@@ -424,6 +488,139 @@ function UserAdmin() {
               icon={<i className="fas fa-ad">🎯</i>}
               bgColor="bg-gradient-to-r from-purple-500 to-purple-600"
             />
+          </div>
+
+          {/* Datos de la empresa */}
+          <div className="mb-8 bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 py-4 px-6">
+              <h2 className="text-xl font-bold text-white flex items-center">
+                <span className="mr-2">🏢</span>
+                {t("userAdmin.companyInfo")}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x">
+              {/* Información general */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                  {t("userAdmin.generalInfo")}
+                </h3>
+                <div className="space-y-1">
+                  <InfoField
+                    label={t("userAdmin.companyName")}
+                    value={empresaData.nombre}
+                    icon="🏢"
+                  />
+                  <InfoField
+                    label={t("userAdmin.email")}
+                    value={empresaData.email}
+                    icon="📧"
+                  />
+                  <InfoField
+                    label={t("userAdmin.phone")}
+                    value={empresaData.telefono}
+                    icon="📱"
+                  />
+                  <InfoField
+                    label={t("userAdmin.address")}
+                    value={empresaData.direccion}
+                    icon="📍"
+                  />
+                </div>
+              </div>
+
+              {/* Información de suscripción */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                  {t("userAdmin.subscriptionInfo")}
+                </h3>
+                <div className="space-y-1">
+                  <InfoField
+                    label={t("userAdmin.plan")}
+                    value={empresaData.tipoPlan}
+                    icon="⭐"
+                  />
+                  <InfoField
+                    label={t("userAdmin.startDate")}
+                    value={empresaData.fechaRegistro}
+                    icon="📆"
+                  />
+                  <InfoField
+                    label={t("userAdmin.expirationDate")}
+                    value={empresaData.fechaVencimiento}
+                    icon="⏱️"
+                  />
+                </div>
+              </div>
+
+              {/* Estado de la suscripción */}
+              <div className="p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-700 border-b pb-2">
+                  {t("userAdmin.subscriptionStatus")}
+                </h3>
+
+                <div className="flex items-center justify-between mb-4">
+                  <span className="text-gray-700">
+                    {t("userAdmin.status")}:
+                  </span>
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-semibold ${
+                      estado === "active"
+                        ? "bg-green-100 text-green-800"
+                        : estado === "warning"
+                        ? "bg-yellow-100 text-yellow-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {estado === "active"
+                      ? t("userAdmin.active")
+                      : estado === "warning"
+                      ? t("userAdmin.aboutToExpire")
+                      : t("userAdmin.expired")}
+                  </span>
+                </div>
+
+                <div className="mb-4">
+                  <p className="text-sm text-gray-600 mb-1">
+                    {t("userAdmin.timeRemaining")}:
+                  </p>
+                  <div className="flex items-center">
+                    <div className="flex-grow bg-gray-200 h-2 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full ${
+                          estado === "active"
+                            ? "bg-green-500"
+                            : estado === "warning"
+                            ? "bg-yellow-500"
+                            : "bg-red-500"
+                        }`}
+                        style={{
+                          width: `${Math.max(
+                            0,
+                            Math.min(100, (diasRestantes / 30) * 100)
+                          )}%`,
+                        }}
+                      ></div>
+                    </div>
+                    <span className="ml-3 text-sm font-semibold">
+                      {diasRestantes > 0
+                        ? `${diasRestantes} ${t("userAdmin.days")}`
+                        : t("userAdmin.expired")}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 rounded-lg p-4 mt-6">
+                  <p className="text-sm text-blue-800">
+                    {estado === "active"
+                      ? t("userAdmin.activeMessage")
+                      : estado === "warning"
+                      ? t("userAdmin.warningMessage")
+                      : t("userAdmin.expiredMessage")}
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
