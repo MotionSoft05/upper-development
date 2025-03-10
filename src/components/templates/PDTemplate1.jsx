@@ -275,7 +275,7 @@ const PDTemplate1 = ({
   };
 
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
+    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed z-20 bg-white">
       <div
         style={{
           transform: template.setPortrait ? "rotate(90deg)" : "rotate(0deg)",

@@ -25,7 +25,7 @@ export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
 
   return (
     <section
-      className="fixed inset-0 flex flex-col p-4 bg-white"
+      className="fixed inset-0 flex flex-col p-4 z-20 bg-white"
       style={{
         color: templates.fontColor,
         fontFamily: templates.fontStyle,

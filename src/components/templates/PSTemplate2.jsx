@@ -5,7 +5,7 @@ import EventImageSlider from "@/components/sliders/EventImageSlider";
 export const PSTemplate2 = ({ event, templates, currentHour, t }) => {
   return (
     <section
-      className="fixed inset-0 flex flex-col py-4 bg-white"
+      className="fixed inset-0 flex flex-col py-4 z-20 bg-white"
       style={{
         color: templates.fontColor,
         fontFamily: templates.fontStyle,
