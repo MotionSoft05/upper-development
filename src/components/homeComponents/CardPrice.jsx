@@ -1,51 +1,99 @@
-import { useState } from "react";
 import Link from "next/link";
-
-const CardPrice = ({ title, description, mensualPrice, mensualTitle, anualPrice, anualTitle, featureList, btnTitle }) => {
+import { useTranslation } from "react-i18next";
+const CardPrice = ({
+  title,
+  description,
+  price,
+  periodText,
+  currentPeriod,
+  featureList,
+  btnTitle,
+  highlighted = false,
+}) => {
+  const { t } = useTranslation();
   return (
-    <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-    <h3 className="mb-4 text-2xl font-semibold text-custom">
-      {title}
-    </h3>
-    <p className="font-light sm:text-lg text-gray-400">
-      {description}
-    </p>
     <div
-      id="precios1"
-      className="flex flex-col justify-center items-center my-8 mt-4"
+      className={`flex flex-col h-full overflow-hidden rounded-2xl ${
+        highlighted
+          ? "border-2 border-blue-500 shadow-xl transform md:-translate-y-4 scale-105"
+          : "border border-gray-200 shadow-lg"
+      }`}
     >
-      <h4 className="mb-2">{mensualTitle}</h4>
-      {/* <h4 className="mb-2">{t("precios.monthly")}</h4> */}
-      <div className="mb-2 text-4xl font-extrabold">
-        {/* Precio Mensual*/}
-        {mensualPrice}
-        {/* {t("precios.free.monthly")} */}
-        {/* {t(precios.gratis.mensual)} */}
+      {/* Card Header */}
+      <div
+        className={`p-8 ${
+          highlighted ? "bg-blue-600 text-white" : "bg-white text-gray-900"
+        }`}
+      >
+        {highlighted && (
+          <span className="inline-block px-3 py-1 text-xs font-semibold bg-blue-200 text-blue-800 rounded-full mb-4">
+            {t("precios.mostPopular")}
+          </span>
+        )}
+        <h3
+          className={`text-2xl font-bold mb-2 ${
+            highlighted ? "text-white" : "text-gray-900"
+          }`}
+        >
+          {title}
+        </h3>
+        <p
+          className={`font-light ${
+            highlighted ? "text-blue-100" : "text-gray-600"
+          }`}
+        >
+          {description}
+        </p>
       </div>
-      <h4 className="mb-2mt-4">{anualTitle}</h4>
-      <div className="text-4xl font-extrabold">
-        {/* Precio Anual*/}
-        {anualPrice}
-        {/* {t("precios.free.yearly")} */}
-        {/* {t(precios.gratis.anual)} */}
+
+      {/* Price */}
+      <div className="px-8 py-6 bg-gray-50 border-t border-b border-gray-200">
+        <div className="flex items-end">
+          <span className="text-4xl font-extrabold text-gray-900">{price}</span>
+          {price !== t("precios.professional.contact") && (
+            <span className="text-gray-500 ml-2">{periodText}</span>
+          )}
+        </div>
+      </div>
+
+      {/* Features */}
+      <div className="flex-grow p-8 bg-white">
+        <ul className="space-y-4">
+          {featureList.map((feature, index) => (
+            <li key={index} className="flex items-start">
+              <svg
+                className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="ml-3 text-gray-700">{feature}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {/* Button */}
+      <div className="p-8 bg-white border-t border-gray-200">
+        <Link href="/register">
+          <button
+            className={`w-full py-3 px-4 rounded-lg font-semibold transition-colors ${
+              highlighted
+                ? "bg-blue-600 text-white hover:bg-blue-700"
+                : "bg-gray-800 text-white hover:bg-gray-900"
+            }`}
+          >
+            {btnTitle}
+          </button>
+        </Link>
       </div>
     </div>
+  );
+};
 
-    <ul role="list" className="mb-8 space-y-4 text-left">
-        {featureList.map((feature, index) => (
-          <li key={index} className="flex items-center space-x-3">
-            <img src="/img/tick.svg" alt="Tick icon" />
-            <span>{feature}</span>
-          </li>
-        ))}
-      </ul>
-    <Link href="/register">
-      <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-        {btnTitle}
-      </button>
-    </Link>
-  </div>
-  )
-}
-
-export default CardPrice
+export default CardPrice;

@@ -1,121 +1,122 @@
-import Link from "next/link";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import CardPrice from "./CardPrice";
 
 function Precios() {
   const { t } = useTranslation();
-  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState("mensual");
+  const [pricingPeriod, setPricingPeriod] = useState("mensual");
 
-  //! Función para alternar entre precios mensuales y anuales
-  const alternarPrecios = () => {
-    setMostrarPreciosAnuales(!mostrarPreciosAnuales);
+  // Toggle between monthly and annual pricing
+  const togglePricingPeriod = () => {
+    setPricingPeriod(pricingPeriod === "mensual" ? "anual" : "mensual");
   };
 
-  // Función para obtener el texto del período (mensual o anual)
-  const obtenerTextoPeriodo = () => {
-    mostrarPreciosAnuales === "mensual"
-      ? setMostrarPreciosAnuales("anual")
-      : setMostrarPreciosAnuales("mensual");
-  };
-
-  // Función para obtener el precio según el período
-  // const obtenerPrecio = (categoria) => {
-  //   // Define los precios según la categoría y el período
-  //   const precios = {
-  //     gratis: {
-  //       mensual: "$0",
-  //       anual: "$0",
-  //     },
-  //     estandar: {
-  //       mensual: "$99",
-  //       anual: "$1200",
-  //     },
-  //     profesional: {
-  //       mensual: "$120",
-  //       anual: "$1400", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
-  //     },
-  //   };
-
-  //   // Obtén el precio según la categoría y el período
-  //   return precios[categoria][obtenerTextoPeriodo()];
-  // };
-
-  // Define los precios según la categoría y el período
-  //? Posteriormente se podria borrar este objeto y usar el de traducciones
-  const precios = {
-    gratis: {
-      mensual: "precios.free.monthly",
-      anual: "precios.free.yearly",
+  // Define pricing data
+  const pricingData = [
+    {
+      id: "free",
+      title: "precios.free.title",
+      description: "precios.free.description",
+      price: {
+        mensual: "$ 0",
+        anual: "$ 0",
+      },
+      features: ["precios.free.features.item1", "precios.free.features.item2"],
     },
-    estandar: {
-      mensual: "precios.standard.monthly",
-      anual: "precios.standard.yearly",
+    {
+      id: "standard",
+      title: "precios.standard.title",
+      description: "precios.standard.description",
+      price: {
+        mensual: "$ 200",
+        anual: "$ 1,440", // 12 × $150 = $1,800 but with 20% annual discount = $1,440
+      },
+      features: [
+        "precios.standard.features.item1",
+        "precios.standard.features.item2",
+      ],
+      highlighted: true,
     },
-    profesional: {
-      mensual: "precios.professional.monthly",
-      anual: "precios.professional.yearly",
+    {
+      id: "professional",
+      title: "precios.professional.title",
+      description: "precios.professional.description",
+      price: {
+        mensual: t("precios.professional.contact"),
+        anual: t("precios.professional.contact"),
+      },
+      features: [
+        "precios.professional.features.item1",
+        "precios.professional.features.item2",
+      ],
     },
-  };
+  ];
 
   return (
-    <section id="precios">
-      <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
-        <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-          <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom ">
+    <section id="precios" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4 max-w-screen-xl">
+        <div className="mx-auto max-w-screen-md text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
             {t("precios.title1")}
           </h2>
-          <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
+          <div className="w-20 h-1 bg-blue-600 mx-auto mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             {t("precios.description1")}
           </p>
         </div>
-        <div className="text-center"></div>
-        <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-          {/* Card Gratis */}
-          <CardPrice
-            title={t("precios.free.title")}
-            description={t("precios.free.description")}
-            mensualTitle={t("precios.monthly")}
-            mensualPrice={"$ 0"}
-            // anualTitle={t("precios.yearly")}
-            // anualPrice={"$ 0"}
-            featureList={[
-              t("precios.free.features.item1"),
-              t("precios.free.features.item2"),
-            ]}
-            btnTitle={t("precios.btnStart")}
-          />
-          {/* Card Estandar */}
-          <CardPrice
-            title={t("precios.standard.title")}
-            description={t("precios.standard.description")}
-            mensualTitle={t("precios.monthly")}
-            mensualPrice={"$ 150"}
-            // anualTitle={t("precios.yearly")}
-            // anualPrice={"$ 1200"}
-            featureList={[
-              t("precios.standard.features.item1"),
-              t("precios.standard.features.item2"),
-            ]}
-            btnTitle={t("precios.btnStart")}
-          />
-          {/* Card Profesional */}
-          <CardPrice
-            title={t("precios.professional.title")}
-            description={t("precios.professional.description")}
-            mensualTitle={t("precios.monthly")}
-            mensualPrice={t("precios.professional.contact")}
-            // anualTitle={t("precios.yearly")}
-            // anualPrice={"$ 1400"}
-            featureList={[
-              t("precios.professional.features.item1"),
-              t("precios.professional.features.item2"),
-            ]}
-            btnTitle={t("precios.btnStart")}
-          />
+
+        {/* Billing Period Toggle */}
+        <div className="flex justify-center mb-10">
+          <div className="bg-white rounded-full p-1 inline-flex shadow-md">
+            <button
+              onClick={togglePricingPeriod}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                pricingPeriod === "mensual"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              {t("precios.monthly")}
+            </button>
+            <button
+              onClick={togglePricingPeriod}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                pricingPeriod === "anual"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              {t("precios.yearly")}
+              {pricingPeriod === "anual" && (
+                <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                  20% {t("precios.discount")}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
-        <p className="mb-5 font-light  text-gray-400 text-center">
+        <div className="grid md:grid-cols-3 gap-8">
+          {pricingData.map((plan) => (
+            <CardPrice
+              key={plan.id}
+              title={t(plan.title)}
+              description={t(plan.description)}
+              currentPeriod={pricingPeriod}
+              price={plan.price[pricingPeriod]}
+              periodText={t(
+                pricingPeriod === "mensual"
+                  ? "precios.perMonth"
+                  : "precios.perYear"
+              )}
+              featureList={plan.features.map((feature) => t(feature))}
+              btnTitle={t("precios.btnStart")}
+              highlighted={plan.highlighted}
+            />
+          ))}
+        </div>
+
+        <p className="text-center text-gray-500 mt-12">
           {t("precios.pricesNote")}
         </p>
       </div>

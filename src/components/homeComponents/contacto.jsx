@@ -1,40 +1,37 @@
-import { useTranslation } from 'react-i18next';
-import { useState, Fragment } from "react";
+import { useTranslation } from "react-i18next";
+import { useState, Fragment, useRef } from "react";
 import { Dialog, Transition } from "@headlessui/react";
 import emailjs from "emailjs-com";
 
 function Contacto() {
-  const {t} = useTranslation(); // Traduccion de i18n
-  
-  let [isOpen, setIsOpen] = useState(false);
+  const { t } = useTranslation();
+  const formRef = useRef(null);
+
+  // Form states
+  const [formData, setFormData] = useState({
+    email: "",
+    phoneNumber: "",
+    subject: "",
+    message: "",
+  });
+
+  // UI states
+  const [isOpen, setIsOpen] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  function handlePhoneChange(event) {
-    const inputPhoneNumber = event.target.value;
-    const validatedPhoneNumber = inputPhoneNumber.replace(/[^\d]/g, ""); // Reemplaza cualquier cosa que no sea un dígito con una cadena vacía
+  function handleInputChange(e) {
+    const { id, value } = e.target;
+    setFormData({
+      ...formData,
+      [id]: value,
+    });
 
-    setPhoneNumber(validatedPhoneNumber);
+    // Clear error when user starts typing again
+    if (error) setError("");
   }
-
-  function closeModal() {
-    setIsOpen(false);
-    setEmail("");
-    setPhoneNumber("");
-    setSubject("");
-    setMessage("");
-  }
-
-  function openModal() {
-    setIsOpen(true);
-  }
-
-  const [email, setEmail] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
 
   function handlePhoneChange(event) {
     const inputPhoneNumber = event.target.value;
@@ -42,210 +39,427 @@ function Contacto() {
       .replace(/[^\d+()-]/g, "")
       .substring(0, 16);
 
-    setPhoneNumber(validatedPhoneNumber);
+    setFormData({
+      ...formData,
+      phoneNumber: validatedPhoneNumber,
+    });
+
+    if (error) setError("");
+  }
+
+  function resetForm() {
+    setFormData({
+      email: "",
+      phoneNumber: "",
+      subject: "",
+      message: "",
+    });
+    setIsOpen(false);
   }
 
   function sendEmail() {
-    // Validar el correo electrónico
-    if (!email || !phoneNumber || !subject || !message) {
-      setError(
-        t("contacto.validationMessage")
-      );
+    // Validate form
+    if (
+      !formData.email ||
+      !formData.phoneNumber ||
+      !formData.subject ||
+      !formData.message
+    ) {
+      setError(t("contacto.validationMessage"));
       return;
     }
 
-    // Validar el correo electrónico solo si está presente
-    if (email && !emailRegex.test(email)) {
+    if (formData.email && !emailRegex.test(formData.email)) {
       setError(t("contacto.validEmailError"));
       return;
     }
 
-    // Validar el número de teléfono solo si está presente
-    if (phoneNumber && !/^[+\d()-]+$/.test(phoneNumber)) {
+    if (formData.phoneNumber && !/^[+\d()-]+$/.test(formData.phoneNumber)) {
       setError(t("contacto.validationNumber"));
       return;
     }
 
+    // Send email
+    setIsSubmitting(true);
+
     const templateParams = {
       to_name: "Destinatario",
       from_name: "Remitente",
-      email: email,
-      telefono: phoneNumber,
-      asunto: subject,
-      mensaje: message,
+      email: formData.email,
+      telefono: formData.phoneNumber,
+      asunto: formData.subject,
+      mensaje: formData.message,
     };
 
     const serviceId = "service_y3wemni";
     const templateId = "template_jas85ew";
     const userId = "IVTJPKKd0ooe1am6U";
 
-    emailjs.send(serviceId, templateId, templateParams, userId).then(
-      (response) => {
-        console.log("Correo electrónico enviado:", response);
-        setSuccess(true);
+    emailjs
+      .send(serviceId, templateId, templateParams, userId)
+      .then((response) => {
+        console.log("Email sent successfully:", response);
+        setIsOpen(true);
         setError("");
-        openModal();
-      },
-      (error) => {
-        console.error("Error al enviar el correo electrónico:", error);
-        setError(
-          "Hubo un error al enviar el mensaje. Por favor, inténtalo de nuevo más tarde."
-        );
-      }
-    );
+      })
+      .catch((error) => {
+        console.error("Error sending email:", error);
+        setError(t("contacto.errorMessage"));
+      })
+      .finally(() => {
+        setIsSubmitting(false);
+      });
   }
 
   return (
-    <section id="contacto">
-      <div className="pt-24  px-4 mx-auto max-w-screen-md">
-        <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-center text-custom ">
-          {/* Contáctenos */}
-          {t("contacto.title")}
-        </h2>
-        <p className="mb-8 lg:mb-16 font-light text-center   md:text-xl">
-          {t("contacto.description")}
-        </p>
-        <form action="#" className="space-y-8">
-          <div>
-            <label
-              htmlFor="email"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              {/* Correo electrónico ​ */}
-              {t("contacto.email")}
-            </label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-500 focus:border-primary-500 block w-full p-2.5  "
-              placeholder={t("contacto.emailPlaceholder")}
-              required
-            />
+    <section id="contacto" className="py-20 bg-white">
+      <div className="container mx-auto px-4 max-w-6xl">
+        <div className="flex flex-col md:flex-row items-center gap-12">
+          {/* Left Column - Info */}
+          <div className="w-full md:w-2/5 space-y-8">
+            <div className="text-left">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                {t("contacto.title")}
+              </h2>
+              <div className="w-20 h-1 bg-blue-600 mb-6"></div>
+              <p className="text-lg text-gray-600 mb-8">
+                {t("contacto.description")}
+              </p>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-blue-100 p-3 rounded-full mr-4">
+                  <svg
+                    className="w-6 h-6 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">Email</h3>
+                  <p className="text-gray-600">info@upperds.mx</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-blue-100 p-3 rounded-full mr-4">
+                  <svg
+                    className="w-6 h-6 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {t("contacto.phone")}
+                  </h3>
+                  <p className="text-gray-600">+52 (55) 1234 5678</p>
+                </div>
+              </div>
+
+              <div className="flex items-start">
+                <div className="flex-shrink-0 bg-blue-100 p-3 rounded-full mr-4">
+                  <svg
+                    className="w-6 h-6 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                    />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                    />
+                  </svg>
+                </div>
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {t("contacto.location")}
+                  </h3>
+                  <p className="text-gray-600">Ciudad de México, México</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <label
-              htmlFor="subject"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              {/* Teléfono */}
-              {t("contacto.phone")}
-            </label>
-            <input
-              type="text"
-              id="Tema"
-              value={phoneNumber} // Asignar el estado del número de teléfono al valor del input
-              onChange={handlePhoneChange} //! PUEDE QUE ESTO NO ANDE
-              className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
-              placeholder="(55) 1234-5678"
-              required
-            />
+
+          {/* Right Column - Form */}
+          <div className="w-full md:w-3/5 bg-white rounded-lg shadow-xl p-8">
+            <form ref={formRef} className="space-y-6">
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  {t("contacto.email")} <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={t("contacto.emailPlaceholder")}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="phoneNumber"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  {t("contacto.phone")} <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="phoneNumber"
+                    type="text"
+                    value={formData.phoneNumber}
+                    onChange={handlePhoneChange}
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="(55) 1234-5678"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="subject"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  {t("contacto.subject")}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg
+                      className="h-5 w-5 text-gray-400"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
+                      />
+                    </svg>
+                  </div>
+                  <input
+                    id="subject"
+                    type="text"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className="pl-10 w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                    placeholder={t("contacto.subjectPlaceholder")}
+                    required
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label
+                  htmlFor="message"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
+                  {t("contacto.message")}{" "}
+                  <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="message"
+                  rows="5"
+                  value={formData.message}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
+                  placeholder={t("contacto.messagePlaceholder")}
+                  required
+                ></textarea>
+              </div>
+
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-lg">
+                  {error}
+                </div>
+              )}
+
+              <div>
+                <button
+                  type="button"
+                  onClick={sendEmail}
+                  disabled={isSubmitting}
+                  className="w-full py-3 px-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors duration-300 flex items-center justify-center"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      {t("contacto.sending")}
+                    </>
+                  ) : (
+                    t("contacto.sendMessage")
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
-          <div>
-            <label
-              htmlFor="subject"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              {/* Asunto */}
-              {t("contacto.subject")}
-            </label>
-            <input
-              type="text"
-              id="Tema"
-              value={subject}
-              onChange={(e) => setSubject(e.target.value)}
-              className="block p-3 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 shadow-sm focus:ring-primary-500 focus:border-primary-500 "
-              placeholder={t("contacto.subjectPlaceholder")}
-              required
-            />
-          </div>
-          <div className="sm:col-span-2">
-            <label
-              htmlFor="message"
-              className="block mb-2 text-sm font-medium text-gray-900 "
-            >
-              {/* Mensaje */}
-              {t("contacto.message")}
-            </label>
-            <textarea
-              id="message"
-              rows="6"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              className="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg shadow-sm border border-gray-300 focus:ring-primary-500 focus:border-primary-500 "
-              placeholder={t("contacto.messagePlaceholder")}
-            ></textarea>
-          </div>
-          <button
-            type="button"
-            onClick={sendEmail}
-            className="py-3 px-5 text-sm font-medium text-center text-white rounded-lg bg-primary-700 sm:w-fit hover:bg-primary-800 focus:ring-4 focus:outline-none focus:ring-primary-300 bg-Second"
+        </div>
+      </div>
+
+      {/* Success Modal */}
+      <Transition appear show={isOpen} as={Fragment}>
+        <Dialog
+          as="div"
+          className="relative z-50"
+          onClose={() => setIsOpen(false)}
+        >
+          <Transition.Child
+            as={Fragment}
+            enter="ease-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="ease-in duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            {/* Enviar mensaje */}
-            {t("contacto.sendMessage")}
-          </button>
+            <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+          </Transition.Child>
 
-          {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-
-          <Transition appear show={isOpen} as={Fragment}>
-            <Dialog as="div" className="relative z-10" onClose={closeModal}>
+          <div className="fixed inset-0 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
               <Transition.Child
                 as={Fragment}
                 enter="ease-out duration-300"
-                enterFrom="opacity-0"
-                enterTo="opacity-100"
+                enterFrom="opacity-0 scale-95"
+                enterTo="opacity-100 scale-100"
                 leave="ease-in duration-200"
-                leaveFrom="opacity-100"
-                leaveTo="opacity-0"
+                leaveFrom="opacity-100 scale-100"
+                leaveTo="opacity-0 scale-95"
               >
-                <div className="fixed inset-0 bg-black bg-opacity-25" />
-              </Transition.Child>
-
-              <div className="fixed inset-0 overflow-y-auto">
-                <div className="flex min-h-full items-center justify-center p-4 text-center">
-                  <Transition.Child
-                    as={Fragment}
-                    enter="ease-out duration-300"
-                    enterFrom="opacity-0 scale-95"
-                    enterTo="opacity-100 scale-100"
-                    leave="ease-in duration-200"
-                    leaveFrom="opacity-100 scale-100"
-                    leaveTo="opacity-0 scale-95"
-                  >
-                    <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
-                      <Dialog.Title
-                        as="h3"
-                        className="text-lg font-medium leading-6 text-gray-900"
+                <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                  <div className="text-center mb-4">
+                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                      <svg
+                        className="h-6 w-6 text-green-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                       >
-                        {/* Su pregunta a sido enviada */}
-                        {t("contacto.successMessage")}
-                      </Dialog.Title>
-                      <div className="mt-2">
-                        <p className="text-sm text-gray-500">
-                          {t("contacto.successMessageNote")}
-                        </p>
-                      </div>
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                  </div>
 
-                      <div className="mt-4">
-                        <button
-                          type="button"
-                          className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
-                          onClick={closeModal}
-                        >
-                          {/* Gracias! */}
-                          {t("contacto.thankYou")}
-                        </button>
-                      </div>
-                    </Dialog.Panel>
-                  </Transition.Child>
-                </div>
-              </div>
-            </Dialog>
-          </Transition>
-        </form>
-      </div>
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium leading-6 text-gray-900 text-center"
+                  >
+                    {t("contacto.successMessage")}
+                  </Dialog.Title>
+
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-500 text-center">
+                      {t("contacto.successMessageNote")}
+                    </p>
+                  </div>
+
+                  <div className="mt-6 text-center">
+                    <button
+                      type="button"
+                      className="inline-flex justify-center rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      onClick={resetForm}
+                    >
+                      {t("contacto.thankYou")}
+                    </button>
+                  </div>
+                </Dialog.Panel>
+              </Transition.Child>
+            </div>
+          </div>
+        </Dialog>
+      </Transition>
     </section>
   );
 }
+
 export default Contacto;

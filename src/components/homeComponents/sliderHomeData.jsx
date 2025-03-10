@@ -36,7 +36,7 @@ export const SliderHomeData = ({ slider, index, t }) => {
           </video>
         )}
         {/* OVERLAY */}
-        <div className="absolute inset-0 hero2-gradient"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-black/40"></div>
       </div>
       <div className="container h-full sm:py-40 py-28 relative z-10 text-white flex items-center">
         <div className="max-w-[850px]">
@@ -44,7 +44,7 @@ export const SliderHomeData = ({ slider, index, t }) => {
           <div className="flex flex-col gap-6 ">
             <p className="px-5 py-2 border-solid border-3 border-primary rounded-full w-fit md:text-2xl text-xl"></p>
 
-            <h1 className="lg:text-6xl text-4xl font-bold lg:leading-[70px] flex gap-3">
+            <h1 className="lg:text-6xl text-4xl font-bold lg:leading-[70px]  flex gap-3">
               {t(`homeSliderData.sliderTitle${index + 1}`)}
             </h1>
             <p className="lg:text-lg mb-6">

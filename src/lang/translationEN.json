@@ -201,6 +201,10 @@
         "item2": "Register to be contacted and define service scope."
       }
     },
+    "perMonth": "per month",
+    "perYear": "per year",
+    "discount": "discount",
+    "mostPopular": "Most popular",
     "title1": "Boost Your Business Success with Upper DS",
     "description1": "Find the digital signage plan that gives you the most benefits​",
     "btnStart": "Start Now",
@@ -224,7 +228,8 @@
     "thankYou": "Thank you!",
     "validationMessage": "Please fill out all required fields",
     "validEmailError": "Please enter a valid email address.",
-    "validationNumber": "Please enter only numbers in the phone field."
+    "validationNumber": "Please enter only numbers in the phone field.",
+    "location": "Location"
   },
   "aboutUs": {
     "title": "About Us",

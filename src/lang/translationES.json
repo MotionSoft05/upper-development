@@ -201,11 +201,15 @@
         "item2": "Registrase para ser contactados y definir alcance de servicios"
       }
     },
+    "perMonth": "por mes",
+    "perYear": "por año",
+    "discount": "descuento",
+    "mostPopular": "Más popular",
     "title1": "Impulsa el éxito de tu negocio con Upper DS",
     "description1": "Encuentre el plan de señalización digital que te de mayores beneficios​",
     "btnStart": "Comienza ya",
-    "monthly": "Monthly",
-    "yearly": "Yearly",
+    "monthly": "Mensual",
+    "yearly": "Anual",
     "pricesNote": "*Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos"
   },
   "contacto": {
@@ -224,7 +228,8 @@
     "thankYou": "Gracias!",
     "validationMessage": "Por favor, complete todos los campos requeridos",
     "validEmailError": "Por favor, ingresa un correo electrónico válido.",
-    "validationNumber": "Por favor, ingresa solo números en el campo de teléfono."
+    "validationNumber": "Por favor, ingresa solo números en el campo de teléfono.",
+    "location": "Localización"
   },
   "aboutUs": {
     "title": "Sobre nosotros",
