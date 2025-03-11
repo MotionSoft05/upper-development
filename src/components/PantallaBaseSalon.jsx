@@ -21,7 +21,6 @@ import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PSTemplateManager";
 
-const REFRESH_INTERVAL = 60000;
 const DEFAULT_HOUR = "00:00";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
@@ -31,6 +30,14 @@ const getHour = () =>
     hour: "2-digit",
     minute: "2-digit",
   });
+
+// Calculate milliseconds until next minute starts
+const calculateTimeUntilNextMinute = () => {
+  const now = new Date();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
+  return (60 - seconds) * 1000 - milliseconds;
+};
 
 const retryOperation = async (operation, retries = MAX_RETRIES) => {
   for (let i = 0; i < retries; i++) {
@@ -49,7 +56,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   const { t } = useTranslation();
   const pathname = usePathname();
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true); // Only for initial load
   const [error, setError] = useState(null);
   const [screenData, setScreenData] = useState({
     events: [],
@@ -68,15 +75,18 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     debounce(() => setCurrentHour(getHour()), 1000),
     []
   );
-  const convertTimeToMinutes = (timeString) => {
+
+  // Convert time string to minutes - extracted to stabilize references
+  const convertTimeToMinutes = useCallback((timeString) => {
     const [hours, minutes] = timeString.split(":").map(Number);
     return hours * 60 + minutes;
-  };
+  }, []);
 
-  const getHourInMinutes = () => {
+  // Get current hour in minutes - extracted to stabilize references
+  const getHourInMinutes = useCallback(() => {
     const now = new Date();
     return now.getHours() * 60 + now.getMinutes();
-  };
+  }, []);
 
   const filterCurrentEvents = useCallback((events, company) => {
     const now = new Date();
@@ -120,8 +130,9 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         endMinutes = convertTimeToMinutes(horaFinalSalon);
       }
 
+      // Note: We use < for end time comparison to make events end exactly at end time
       const isWithinTimeRange =
-        currentMinutes >= startMinutes && currentMinutes <= endMinutes;
+        currentMinutes >= startMinutes && currentMinutes < endMinutes;
       const matchesCompany = empresa === company;
 
       return isWithinDateRange && isWithinTimeRange && matchesCompany;
@@ -165,36 +176,116 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     }
   }, []);
 
+  // Check for active events based on current time (memory-based filtering)
+  const checkCurrentEvents = useCallback(() => {
+    const now = new Date();
+    const nowMinutes = getHourInMinutes();
+
+    // Safe guard to prevent errors when events haven't loaded yet
+    if (!screenData.allEvents || screenData.allEvents.length === 0) {
+      console.log("⚠️ No hay eventos disponibles para filtrar");
+      return;
+    }
+
+    console.log("⌛ Revisando eventos activos en memoria...", {
+      currentTime: now.toLocaleTimeString(),
+      nowMinutes,
+      totalEvents: screenData.allEvents.length,
+    });
+
+    // Filter the existing events in memory based on current time
+    const allCurrentEvents = screenData.allEvents.filter((event) => {
+      const { fechaInicio, fechaFinal, horaInicialSalon, horaFinalSalon } =
+        event;
+
+      // Check date range
+      const startDate = new Date(fechaInicio);
+      const endDate = new Date(fechaFinal);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
+      const isWithinDateRange = now >= startDate && now <= endDate;
+
+      // Check time range
+      let startMinutes, endMinutes;
+      if (
+        horaInicialSalon === DEFAULT_HOUR &&
+        horaFinalSalon === DEFAULT_HOUR
+      ) {
+        startMinutes = 0;
+        endMinutes = 24 * 60 - 1;
+      } else {
+        startMinutes = convertTimeToMinutes(horaInicialSalon);
+        endMinutes = convertTimeToMinutes(horaFinalSalon);
+      }
+
+      const isWithinTimeRange =
+        nowMinutes >= startMinutes && nowMinutes < endMinutes;
+
+      console.log(`🔎 Evento: ${event.nombreEvento}`, {
+        startMinutes,
+        endMinutes,
+        nowMinutes,
+        isWithinDateRange,
+        isWithinTimeRange,
+        shouldShow: isWithinDateRange && isWithinTimeRange,
+      });
+
+      return isWithinDateRange && isWithinTimeRange;
+    });
+
+    if (allCurrentEvents.length === 0) {
+      console.log("📢 No hay eventos activos, mostrando publicidad");
+    } else {
+      console.log(`🎭 Mostrando evento: ${allCurrentEvents[0].nombreEvento}`);
+    }
+
+    // Update the screen data with the filtered events
+    setScreenData((prev) => ({
+      ...prev,
+      events: allCurrentEvents,
+      matchingDevice: allCurrentEvents[0]?.matchingDevice || null,
+    }));
+  }, [screenData.allEvents]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       console.log("🚀 ~ unsubscribe ~ user:", user);
 
       setUser(user);
-      if (!user) setIsLoading(false);
+      if (!user) setInitialLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
   useEffect(() => {
     if (!user || !db) return;
-    let mounted = true;
+
+    // Use ref to track if we're mounted to prevent memory leaks
+    const isMounted = { current: true };
+
     let eventsUnsubscribe = () => {};
     let templatesUnsubscribe = () => {};
     let adsUnsubscribe = () => {};
 
     const setupSubscriptions = async () => {
-      setIsLoading(true);
-      setError(null);
+      if (isMounted.current) setInitialLoading(true);
+      if (isMounted.current) setError(null);
 
       try {
         const userDoc = await retryOperation(() =>
           getDoc(doc(db, "usuarios", user.uid))
         );
 
-        if (!userDoc.exists() || !mounted) {
-          console.error("User document doesn't exist or component unmounted");
+        if (!userDoc.exists()) {
+          console.error("User document doesn't exist");
+          if (isMounted.current) {
+            setError("User document doesn't exist");
+            setInitialLoading(false);
+          }
           return;
         }
+
+        if (!isMounted.current) return;
 
         const userData = userDoc.data();
         const userCompany = userData.empresa;
@@ -205,14 +296,16 @@ const BaseScreen = ({ screenNumber, empresa }) => {
           screenNames[screenNumber - 1] || `Pantalla ${screenNumber}`;
 
         // Luego en los setScreenData iniciales, añade esta información
-        setScreenData((prev) => ({
-          ...prev,
-          deviceName: currentScreenName,
-          usuario: {
-            ...userData,
-            nombrePantallas: screenNames,
-          },
-        }));
+        if (isMounted.current) {
+          setScreenData((prev) => ({
+            ...prev,
+            deviceName: currentScreenName,
+            usuario: {
+              ...userData,
+              nombrePantallas: screenNames,
+            },
+          }));
+        }
 
         // 📢 Suscripción a Publicidad
         const adsRef = query(
@@ -224,7 +317,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         adsUnsubscribe = onSnapshot(
           adsRef,
           (adsSnapshot) => {
-            if (!mounted) return;
+            if (!isMounted.current) return;
             const ads = adsSnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
@@ -235,7 +328,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
             }));
           },
           (error) => {
-            setError(error.message);
+            if (isMounted.current) setError(error.message);
           }
         );
 
@@ -248,7 +341,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         templatesUnsubscribe = onSnapshot(
           templatesRef,
           (templatesSnapshot) => {
-            if (!mounted) return;
+            if (!isMounted.current) return;
             const templates = templatesSnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
@@ -260,7 +353,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
             }));
           },
           (error) => {
-            setError(error.message);
+            if (isMounted.current) setError(error.message);
           }
         );
 
@@ -273,7 +366,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         eventsUnsubscribe = onSnapshot(
           eventsRef,
           async (snapshot) => {
-            if (!mounted) return;
+            if (!isMounted.current) return;
 
             const events = snapshot.docs.map((doc) => ({
               id: doc.id,
@@ -289,29 +382,79 @@ const BaseScreen = ({ screenNumber, empresa }) => {
               return { ...event, matchingDevice };
             });
 
-            const filteredEvents = eventsWithMatching
-              .filter((event) => event.matchingDevice)
-              .filter(
-                (event) => filterCurrentEvents([event], userCompany).length > 0
-              );
+            // Store ALL matching events in screenData,
+            // then filter for current time in the render or checkCurrentEvents
+            const matchingEvents = eventsWithMatching.filter(
+              (event) => event.matchingDevice
+            );
 
-            console.log("🔄 Eventos filtrados:", filteredEvents);
+            console.log(
+              "🔄 Eventos con pantalla correspondiente:",
+              matchingEvents.length
+            );
 
-            setScreenData((prev) => ({
-              ...prev,
-              events: filteredEvents,
-              matchingDevice: filteredEvents[0]?.matchingDevice || null,
-            }));
+            // Filter for current time immediately
+            const now = new Date();
+            const nowMinutes = getHourInMinutes();
+
+            const currentlyActiveEvents = matchingEvents.filter((event) => {
+              const {
+                fechaInicio,
+                fechaFinal,
+                horaInicialSalon,
+                horaFinalSalon,
+              } = event;
+
+              // Check date range
+              const startDate = new Date(fechaInicio);
+              const endDate = new Date(fechaFinal);
+              startDate.setHours(0, 0, 0, 0);
+              endDate.setHours(23, 59, 59, 999);
+              const isWithinDateRange = now >= startDate && now <= endDate;
+
+              // Check time range
+              let startMinutes, endMinutes;
+              if (
+                horaInicialSalon === DEFAULT_HOUR &&
+                horaFinalSalon === DEFAULT_HOUR
+              ) {
+                startMinutes = 0;
+                endMinutes = 24 * 60 - 1;
+              } else {
+                startMinutes = convertTimeToMinutes(horaInicialSalon);
+                endMinutes = convertTimeToMinutes(horaFinalSalon);
+              }
+
+              const isWithinTimeRange =
+                nowMinutes >= startMinutes && nowMinutes < endMinutes;
+              return isWithinDateRange && isWithinTimeRange;
+            });
+
+            if (isMounted.current) {
+              setScreenData((prev) => ({
+                ...prev,
+                // Store all matching events in allEvents
+                allEvents: matchingEvents,
+                // Store currently active events in events
+                events: currentlyActiveEvents,
+                matchingDevice:
+                  currentlyActiveEvents[0]?.matchingDevice || null,
+              }));
+
+              setInitialLoading(false);
+            }
           },
           (error) => {
-            setError(error.message);
+            if (isMounted.current) {
+              setError(error.message);
+              setInitialLoading(false);
+            }
           }
         );
       } catch (error) {
-        setError(error.message);
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
+        if (isMounted.current) {
+          setError(error.message);
+          setInitialLoading(false);
         }
       }
     };
@@ -319,7 +462,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     setupSubscriptions();
 
     return () => {
-      mounted = false;
+      isMounted.current = false;
       eventsUnsubscribe();
       templatesUnsubscribe();
       adsUnsubscribe();
@@ -328,63 +471,62 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     user,
     db,
     screenNumber,
-    filterCurrentEvents,
     findMatchingDevice,
-    currentHour,
-  ]); // 🟢 Agregamos `currentHour`
+    getHourInMinutes,
+    convertTimeToMinutes,
+  ]); // Removed currentHour dependency
 
-  // Update hour and recheck events periodically
+  // Schedule updates at the start of each minute
   useEffect(() => {
-    const interval = setInterval(() => {
-      const newHour = getHour();
-      console.log(`⏰ Interval ejecutado - Hora actualizada: ${newHour}`);
-      setCurrentHour(newHour);
-    }, 60000); // Cada minuto
+    // useRef to track if we're mounted
+    const isMounted = { current: true };
 
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    setScreenData((prev) => {
-      const nowMinutes = getHourInMinutes();
-
-      console.log("⌛ Revisando eventos activos...", {
-        nowMinutes,
-        totalEvents: prev.events.length,
-      });
-
-      const filteredEvents = prev.events.filter((event) => {
-        const startMinutes = convertTimeToMinutes(event.horaInicialSalon);
-        const endMinutes = convertTimeToMinutes(event.horaFinalSalon);
-        const isValid = nowMinutes >= startMinutes && nowMinutes <= endMinutes;
-
-        console.log(`🔎 Evento: ${event.nombreEvento}`, {
-          startMinutes,
-          endMinutes,
-          isValid,
-        });
-
-        return isValid;
-      });
-
-      if (filteredEvents.length === 0) {
-        console.log("📢 No hay eventos activos, mostrando publicidad");
-      } else {
-        console.log(`🎭 Mostrando evento: ${filteredEvents[0].nombreEvento}`);
+    const runCheck = () => {
+      if (isMounted.current && screenData.allEvents?.length > 0) {
+        checkCurrentEvents();
       }
+    };
 
-      return {
-        ...prev,
-        events: [...filteredEvents], // Se fuerza un nuevo objeto para actualizar el estado
-      };
-    });
-  }, [currentHour]); // Se ejecuta cada vez que cambia la hora actual
+    // Wait a bit after mounting before doing the first check
+    const initialTimerId = setTimeout(runCheck, 1000);
+
+    const scheduleNextMinute = () => {
+      const timeUntilNextMinute = calculateTimeUntilNextMinute();
+      console.log(
+        `⏱️ Next update in ${Math.round(timeUntilNextMinute / 1000)} seconds`
+      );
+
+      const timerId = setTimeout(() => {
+        if (!isMounted.current) return;
+
+        const newHour = getHour();
+        console.log(`⏰ Minute-exact update - Updated hour: ${newHour}`);
+        setCurrentHour(newHour);
+
+        // Fetch fresh event data from the database
+        runCheck();
+
+        // Schedule the next update
+        scheduleNextMinute();
+      }, timeUntilNextMinute);
+
+      return timerId;
+    };
+
+    const timerId = scheduleNextMinute();
+
+    return () => {
+      isMounted.current = false;
+      clearTimeout(initialTimerId);
+      clearTimeout(timerId);
+    };
+  }, [screenData.allEvents]);
 
   if (!user) {
     return <LogIn url={pathname} />;
   }
 
-  if (isLoading) {
+  if (initialLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
@@ -416,7 +558,6 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     );
   }
 
-  // Y finalmente, modifica la parte donde renderizas el AdvertisementSlider así:
   if (!currentEvent) {
     return screenData.ads.length > 0 ? (
       <AdvertisementSlider

@@ -17,31 +17,52 @@ const EventImageSlider = ({ images, templateStyle }) => {
   }
 
   return (
-    <Swiper
-      ref={swiperRef}
-      spaceBetween={30}
-      effect="fade"
-      autoplay={{
-        delay: 2500,
-        disableOnInteraction: false,
-      }}
-      loop
-      modules={[Autoplay, Pagination, EffectFade]}
-      className="w-full h-full"
-    >
-      {images.map((image, index) => (
-        <SwiperSlide key={index}>
-          <img
-            src={image}
-            alt={`Slide ${index + 1}`}
-            className="object-cover rounded-2xl"
+    <div className="w-full h-full" style={{ backgroundColor: "transparent" }}>
+      <Swiper
+        ref={swiperRef}
+        spaceBetween={0}
+        effect="fade"
+        fadeEffect={{
+          crossFade: true,
+        }}
+        autoplay={{
+          delay: 2500,
+          disableOnInteraction: false,
+        }}
+        loop
+        modules={[Autoplay, Pagination, EffectFade]}
+        className="w-full h-full"
+      >
+        {images.map((image, index) => (
+          <SwiperSlide
+            key={index}
+            className="flex items-center justify-center"
             style={{
-              maxHeight: "80vh",
+              width: "100%",
+              height: "100%",
+              backgroundColor: "transparent",
             }}
-          />
-        </SwiperSlide>
-      ))}
-    </Swiper>
+          >
+            <div
+              className="relative w-full h-full flex items-center justify-center"
+              style={{
+                backgroundColor: "transparent",
+              }}
+            >
+              <img
+                src={image}
+                alt={`Slide ${index + 1}`}
+                className="object-contain w-full h-full"
+                style={{
+                  display: "block",
+                  aspectRatio: "auto",
+                }}
+              />
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
+    </div>
   );
 };
 

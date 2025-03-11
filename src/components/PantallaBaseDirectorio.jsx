@@ -11,27 +11,46 @@ import {
 import { onAuthStateChanged } from "firebase/auth";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { usePathname, useRouter } from "next/navigation";
 import LogIn from "@/app/login/page";
 import AdvertisementSlider from "@/components/sliderPublicidadPD";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PDTemplateManager";
-import {
-  formatDate,
-  getCurrentTime,
-  isWithinTimeRange,
-} from "@/utils/dateUtils";
+import { formatDate, getCurrentTime } from "@/utils/dateUtils";
 
 import { fetchWeatherData } from "@/utils/weatherUtils";
 
 import QRCode from "qrcode.react";
 
-const REFRESH_INTERVAL = 60000;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 const COUNTDOWN_DURATION = 60;
+
+// Calculate milliseconds until next minute starts
+const calculateTimeUntilNextMinute = () => {
+  const now = new Date();
+  const seconds = now.getSeconds();
+  const milliseconds = now.getMilliseconds();
+  return (60 - seconds) * 1000 - milliseconds;
+};
+
+// Función modificada para que los eventos terminen exactamente a la hora indicada
+const isWithinTimeRange = (currentTime, startTime, endTime) => {
+  // Convert times to minutes for easier comparison
+  const convertTimeToMinutes = (timeString) => {
+    const [hours, minutes] = timeString.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const currentMinutes = convertTimeToMinutes(currentTime);
+  const startMinutes = convertTimeToMinutes(startTime);
+  const endMinutes = convertTimeToMinutes(endTime);
+
+  // Use < instead of <= for end time to make events end exactly at the specified time
+  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+};
 
 const retryOperation = async (operation, retries = MAX_RETRIES) => {
   for (let i = 0; i < retries; i++) {
@@ -52,11 +71,13 @@ export default function BaseDirectorioClient({ id }) {
   const pathname = usePathname();
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPortrait, setIsPortrait] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
+  const isMounted = useRef(true);
+  const allEventsRef = useRef([]);
 
   const [screenData, setScreenData] = useState({
     events: [],
@@ -169,100 +190,75 @@ export default function BaseDirectorioClient({ id }) {
     [screenNumber]
   );
 
-  const filterCurrentEvents = useCallback(
-    (events, company, screenNames, currentScreenNumber) => {
-      console.log("--- INICIO FILTRADO EVENTOS ---");
-      console.log("Parámetros recibidos:", {
-        company,
-        screenNames,
-        currentScreenNumber,
-        currentTime: getCurrentTime(),
-      });
+  // Función para verificar eventos basado en el tiempo actual (filtrado en memoria)
+  const checkCurrentEvents = useCallback(() => {
+    if (!allEventsRef.current || allEventsRef.current.length === 0) {
+      console.log("⚠️ No hay eventos disponibles para filtrar");
+      return;
+    }
 
-      // Validación de screenNames
-      if (!screenNames || Object.keys(screenNames).length === 0) {
-        console.error("screenNames no está definido o está vacío");
-        return [];
-      }
+    const currentTime = getCurrentTime();
+    const userScreenNames = screenData.usuario?.nombrePantallas;
+    const userCompany = screenData.usuario?.empresa;
 
+    if (!userScreenNames || !userCompany) {
+      console.log("⚠️ Faltan datos de usuario necesarios para filtrar eventos");
+      return;
+    }
+
+    console.log("⌛ Revisando eventos activos en memoria...", {
+      currentTime,
+      totalEvents: allEventsRef.current.length,
+    });
+
+    const filteredEvents = allEventsRef.current.filter((event) => {
+      console.log("\nRevisando evento:", event.nombreEvento);
+
+      // Date validation
       const now = new Date();
-      const currentTime = getCurrentTime();
-      console.log("Fecha y hora actual:", now.toISOString());
+      const startDate = new Date(event.fechaInicio);
+      const endDate = new Date(event.fechaFinal);
+      startDate.setHours(0, 0, 0, 0);
+      endDate.setHours(23, 59, 59, 999);
 
-      // Crear el objeto que mapea nombres de pantallas a números
-      const pantallasNumeradas = Object.entries(screenNames).reduce(
-        (acc, [key, value]) => {
-          acc[value] = parseInt(key) + 1;
-          return acc;
-        },
-        {}
+      const isWithinDateRange = now >= startDate && now <= endDate;
+
+      // Time validation with modified function to end exactly at end time
+      const isWithinTime = isWithinTimeRange(
+        currentTime,
+        event.horaInicialSalon || "00:00",
+        event.horaFinalSalon || "23:59"
       );
 
-      console.log("Mapeo de pantallas:", pantallasNumeradas);
+      // Device validation
+      const hasValidDevice = event.devices?.some(
+        (device) => userScreenNames[screenNumber - 1] === device
+      );
 
-      return events.filter((event) => {
-        console.log("\nProcesando evento:", event.id);
-        console.log("Datos del evento:", {
-          nombre: event.nombreEvento,
-          empresa: event.empresa,
-          devices: event.devices,
-          fechaInicio: event.fechaInicio,
-          fechaFinal: event.fechaFinal,
-          horaInicial: event.horaInicialSalon,
-          horaFinal: event.horaFinalSalon,
-        });
+      // Company validation
+      const isValidCompany = event.empresa === userCompany;
 
-        // Date validation
-        const startDate = new Date(event.fechaInicio);
-        const endDate = new Date(event.fechaFinal);
-        startDate.setHours(0, 0, 0, 0);
-        endDate.setHours(23, 59, 59, 999);
+      const result =
+        isWithinDateRange && isWithinTime && hasValidDevice && isValidCompany;
 
-        const isWithinDateRange = now >= startDate && now <= endDate;
-        console.log("¿Dentro de rango fechas?", isWithinDateRange, {
-          start: startDate.toISOString(),
-          end: endDate.toISOString(),
-        });
-
-        // Time validation
-        const isWithinTime = isWithinTimeRange(
-          currentTime,
-          event.horaInicialSalon || "00:00",
-          event.horaFinalSalon || "23:59"
-        );
-        console.log("¿Dentro de rango horario?", isWithinTime, {
-          current: currentTime,
-          start: event.horaInicialSalon,
-          end: event.horaFinalSalon,
-        });
-
-        // Company validation
-        const isValidCompany = event.empresa === company;
-        console.log("¿Empresa coincide?", isValidCompany, {
-          eventCompany: event.empresa,
-          userCompany: company,
-        });
-
-        // Device validation - Optimizada
-        const hasValidDevice = event.devices?.some(
-          (device) => screenNames[currentScreenNumber - 1] === device
-        );
-
-        console.log("¿Tiene dispositivo válido?", hasValidDevice, {
-          devices: event.devices,
-          screenNames,
-          currentScreenNumber,
-        });
-
-        const result =
-          isWithinDateRange && isWithinTime && isValidCompany && hasValidDevice;
-        console.log("¿Evento válido?", result);
-
-        return result;
+      console.log(`Evento: ${event.nombreEvento}`, {
+        fechaOk: isWithinDateRange,
+        horaOk: isWithinTime,
+        deviceOk: hasValidDevice,
+        companyOk: isValidCompany,
+        mostrar: result,
       });
-    },
-    []
-  );
+
+      return result;
+    });
+
+    console.log("Eventos filtrados:", filteredEvents.length);
+
+    setScreenData((prev) => ({
+      ...prev,
+      events: filteredEvents,
+    }));
+  }, [screenData.usuario, screenNumber]);
 
   const loadAds = useCallback(
     async (userCompany) => {
@@ -288,7 +284,7 @@ export default function BaseDirectorioClient({ id }) {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
-      if (!user) setIsLoading(false);
+      if (!user) setInitialLoading(false);
     });
     return () => unsubscribe();
   }, []);
@@ -325,14 +321,56 @@ export default function BaseDirectorioClient({ id }) {
     }
   }, [templates, getScreenOrientation]);
 
+  // Configurar actualizaciones al inicio de cada minuto
+  useEffect(() => {
+    // Ejecutamos verificación inicial si tenemos datos
+    if (allEventsRef.current.length > 0) {
+      checkCurrentEvents();
+    }
+
+    const scheduleNextMinute = () => {
+      const timeUntilNextMinute = calculateTimeUntilNextMinute();
+      console.log(
+        `⏱️ Próxima actualización en ${Math.round(
+          timeUntilNextMinute / 1000
+        )} segundos`
+      );
+
+      const timerId = setTimeout(() => {
+        if (!isMounted.current) return;
+
+        const newTime = getCurrentTime();
+        console.log(`⏰ Actualización al inicio de minuto - Hora: ${newTime}`);
+
+        // Actualizar la hora y verificar eventos
+        setScreenData((prev) => ({
+          ...prev,
+          currentTime: newTime,
+        }));
+
+        checkCurrentEvents();
+
+        // Programar la siguiente actualización
+        scheduleNextMinute();
+      }, timeUntilNextMinute);
+
+      return timerId;
+    };
+
+    const timerId = scheduleNextMinute();
+
+    return () => {
+      clearTimeout(timerId);
+    };
+  }, [checkCurrentEvents]);
+
   useEffect(() => {
     if (!user || !db) return;
-
-    let mounted = true;
+    isMounted.current = true;
     let unsubscribers = [];
 
     const setupSubscriptions = async () => {
-      setIsLoading(true);
+      setInitialLoading(true);
       setError(null);
 
       try {
@@ -340,7 +378,14 @@ export default function BaseDirectorioClient({ id }) {
           getDoc(doc(db, "usuarios", user.uid))
         );
 
-        if (!userDoc.exists() || !mounted) return;
+        if (!userDoc.exists()) {
+          console.error("Usuario no existe");
+          setError("Usuario no existe");
+          setInitialLoading(false);
+          return;
+        }
+
+        if (!isMounted.current) return;
 
         const userData = userDoc.data();
         console.log("\n=== DATOS DEL USUARIO ===");
@@ -349,6 +394,7 @@ export default function BaseDirectorioClient({ id }) {
           nombrePantallasDirectorio: userData.nombrePantallasDirectorio,
           pantallas: userData.pantallas,
         });
+
         const userCompany = userData.empresa;
         const screenNames = userData.nombrePantallasDirectorio || {};
 
@@ -366,14 +412,14 @@ export default function BaseDirectorioClient({ id }) {
           },
         }));
 
-        // Events subscription
+        // Events subscription - Almacenamos todos los eventos que coinciden con la empresa
         const eventsRef = query(
           collection(db, "eventos"),
           where("empresa", "==", userCompany)
         );
 
         const eventsUnsubscribe = onSnapshot(eventsRef, (snapshot) => {
-          if (!mounted) return;
+          if (!isMounted.current) return;
 
           const events = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -382,23 +428,12 @@ export default function BaseDirectorioClient({ id }) {
 
           console.log("\n=== EVENTOS RECIBIDOS DE FIRESTORE ===");
           console.log("Total eventos:", events.length);
-          console.log("Eventos crudos:", events);
 
-          const filteredEvents = filterCurrentEvents(
-            events,
-            userCompany,
-            screenNames,
-            screenNumber
-          );
+          // Almacenamos todos los eventos en la ref para filtrado en memoria
+          allEventsRef.current = events;
 
-          console.log("\n=== EVENTOS FILTRADOS ===");
-          console.log("Eventos que pasaron el filtro:", filteredEvents.length);
-          console.log("Detalle eventos filtrados:", filteredEvents);
-
-          setScreenData((prev) => ({
-            ...prev,
-            events: filteredEvents,
-          }));
+          // Filtramos para el momento actual
+          checkCurrentEvents();
         });
 
         unsubscribers.push(eventsUnsubscribe);
@@ -410,7 +445,7 @@ export default function BaseDirectorioClient({ id }) {
         );
 
         const templatesUnsubscribe = onSnapshot(templatesRef, (snapshot) => {
-          if (!mounted) return;
+          if (!isMounted.current) return;
 
           const templates = snapshot.docs.map((doc) => ({
             id: doc.id,
@@ -433,11 +468,13 @@ export default function BaseDirectorioClient({ id }) {
             if (templates.ciudad) {
               fetchWeatherData(templates.ciudad)
                 .then((weatherData) => {
-                  setScreenData((prev) => ({
-                    ...prev,
-                    templates,
-                    weatherData,
-                  }));
+                  if (isMounted.current) {
+                    setScreenData((prev) => ({
+                      ...prev,
+                      templates,
+                      weatherData,
+                    }));
+                  }
                 })
                 .catch((error) => {
                   console.error(t("errors.weather"), error);
@@ -455,19 +492,17 @@ export default function BaseDirectorioClient({ id }) {
 
         // Load initial ads
         const ads = await loadAds(userCompany);
-        if (mounted) {
+        if (isMounted.current) {
           setScreenData((prev) => ({
             ...prev,
             ads,
           }));
+          setInitialLoading(false);
         }
       } catch (error) {
-        if (mounted) {
+        if (isMounted.current) {
           setError(t("errors.general", { error: error.message }));
-        }
-      } finally {
-        if (mounted) {
-          setIsLoading(false);
+          setInitialLoading(false);
         }
       }
     };
@@ -475,33 +510,17 @@ export default function BaseDirectorioClient({ id }) {
     setupSubscriptions();
 
     return () => {
-      mounted = false;
+      isMounted.current = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [
-    user,
-    db,
-    screenNumber,
-    filterCurrentEvents,
-    loadAds,
-    t,
-    getScreenOrientation,
-  ]);
-
-  useEffect(() => {
-    const interval = setInterval(debouncedSetCurrentTime, 1000);
-    return () => {
-      clearInterval(interval);
-      debouncedSetCurrentTime.cancel();
-    };
-  }, [debouncedSetCurrentTime]);
+  }, [user, db, screenNumber, loadAds, t, getScreenOrientation]);
 
   // Rendering states
   if (!user) {
     return <LogIn url={pathname} />;
   }
 
-  if (isLoading) {
+  if (initialLoading) {
     return (
       <div className="flex justify-center items-center h-screen">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
