@@ -16,7 +16,7 @@ import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { usePathname } from "next/navigation";
 import LogIn from "@/app/login/page";
-import AdvertisementSlider from "@/components/sliderPublicidadPS";
+import AdvertisementSlider from "@/components/sliderPublicidadPD";
 import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PDTemplateManager";
@@ -275,6 +275,19 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
         const userCompany = empresa || userData.empresa;
         const screenNames = userData.nombrePantallasDirectorio || {};
 
+        // Obtener el nombre de la pantalla actual basado en el número de pantalla
+        const currentScreenName =
+          screenNames[screenNumber - 1] || `Pantalla ${screenNumber}`;
+
+        // Añadir esta información al estado
+        setScreenData((prev) => ({
+          ...prev,
+          deviceName: currentScreenName,
+          usuario: {
+            ...userData,
+            nombrePantallas: screenNames,
+          },
+        }));
         // Events subscription
         const eventsRef = query(
           collection(db, "eventos"),
@@ -446,11 +459,12 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
   ) : (
     <AdvertisementSlider
       advertisements={screenData.ads}
-      template={templates}
-      weatherData={weatherData}
+      templates={screenData.templates || {}}
+      event={{
+        matchingDevice: screenData.deviceName || `Pantalla ${screenNumber}`,
+      }}
       currentTime={screenData.currentTime}
-      isPortrait={isPortrait}
-      qrCodeUrl={qrCodeUrl} // Also pass it to the AdvertisementSlider
+      weatherData={weatherData}
     />
   );
 };

@@ -200,6 +200,20 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         const userCompany = userData.empresa;
         const screenNames = userData.nombrePantallas || {};
 
+        // Obtener el nombre de la pantalla actual basado en el número de pantalla
+        const currentScreenName =
+          screenNames[screenNumber - 1] || `Pantalla ${screenNumber}`;
+
+        // Luego en los setScreenData iniciales, añade esta información
+        setScreenData((prev) => ({
+          ...prev,
+          deviceName: currentScreenName,
+          usuario: {
+            ...userData,
+            nombrePantallas: screenNames,
+          },
+        }));
+
         // 📢 Suscripción a Publicidad
         const adsRef = query(
           collection(db, "Publicidad"),
@@ -402,10 +416,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     );
   }
 
-  // Modificada la lógica de renderización
+  // Y finalmente, modifica la parte donde renderizas el AdvertisementSlider así:
   if (!currentEvent) {
     return screenData.ads.length > 0 ? (
-      <AdvertisementSlider advertisements={screenData.ads} />
+      <AdvertisementSlider
+        advertisements={screenData.ads}
+        templates={screenData.templates || {}}
+        event={{
+          matchingDevice: screenData.deviceName || `Pantalla ${screenNumber}`,
+        }}
+        currentHour={currentHour}
+      />
     ) : null;
   }
 
