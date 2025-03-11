@@ -28,7 +28,9 @@ export default function LayoutWrapper({ children }) {
     const patternMatch =
       sanitizedPathname.match(/\/pantalla[1-9]|10/) || // Pantallas numeradas del 1-10
       sanitizedPathname.match(/\/pantallaDirec[1-9]|10/) || // Pantallas Directorio numeradas
+      sanitizedPathname.match(/\/pantallaDirec\/[1-9]|10/) || // Pantallas Directorio con formato /pantallaDirec/1/
       sanitizedPathname.includes("/pantalla/") || // Cualquier subruteo de /pantalla/
+      sanitizedPathname.includes("/pantallaDirec/") || // Cualquier subruteo de /pantallaDirec/
       sanitizedPathname.includes("/paginasAleatorias"); // Incluye parámetros de query
 
     return exactMatch || patternMatch;
