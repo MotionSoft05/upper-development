@@ -21,9 +21,66 @@ import {
   PencilSquareIcon,
   MagnifyingGlassIcon,
   XMarkIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
 } from "@heroicons/react/20/solid";
+
 function ConsultaModEvento() {
-  const { t } = useTranslation();
+  // Mock translation function if i18n is not set up
+  const {
+    t = (key) => {
+      const translations = {
+        "consultaModEventos.title": "Event Query",
+        "consultaModEventos.viewAll": "View All",
+        "consultaModEventos.selectCompany": "Select Company",
+        "consultaModEventos.search": "Search events...",
+        "consultaModEventos.activeEvents": "Active Events",
+        "consultaModEventos.finishedEvents": "Finished Events",
+        "consultaModEventos.showing": "Showing",
+        "consultaModEventos.of": "of",
+        "consultaModEventos.events": "events",
+        "consultaModEventos.rowsPerPage": "Rows per page:",
+        "consultaModEventos.user": "User",
+        "consultaModEventos.name": "Name",
+        "consultaModEventos.type": "Type",
+        "consultaModEventos.roomName": "Room Name",
+        "consultaModEventos.dates": "Dates",
+        "consultaModEventos.roomTime": "Room Time",
+        "consultaModEventos.actions": "Actions",
+        "consultaModEventos.noMatchingEvents": "No matching events found",
+        "consultaModEventos.noActiveEvents": "No active events found",
+        "consultaModEventos.noFinishedEvents": "No finished events found",
+        "consultaModEventos.noScreens": "No screens assigned",
+        "consultaModEventos.viewEdit": "View/Edit",
+        "consultaModEventos.delete": "Delete",
+        "consultaModEventos.editEvent": "Edit Event",
+        "consultaModEventos.eventName": "Event Name",
+        "consultaModEventos.eventType": "Event Type",
+        "consultaModEventos.eventLocation": "Event Location",
+        "consultaModEventos.eventDescription": "Event Description",
+        "consultaModEventos.startDate": "Start Date",
+        "consultaModEventos.endDate": "End Date",
+        "consultaModEventos.eventSchedule": "Event Schedule",
+        "consultaModEventos.realStartTime": "Real Start Time",
+        "consultaModEventos.realEndTime": "Real End Time",
+        "consultaModEventos.screenSchedule": "Screen Schedule",
+        "consultaModEventos.roomStartTime": "Room Start Time",
+        "consultaModEventos.roomEndTime": "Room End Time",
+        "consultaModEventos.eventImages": "Event Images",
+        "consultaModEventos.selectedDevices": "Selected Devices",
+        "consultaModEventos.saveChanges": "Save Changes",
+        "consultaModEventos.close": "Close",
+        "consultaModEventos.confirmDelete": "Confirm Delete",
+        "consultaModEventos.deleteWarning":
+          "Are you sure you want to delete this event? This action cannot be undone.",
+        "consultaModEventos.cancel": "Cancel",
+        "consultaModEventos.page": "Page",
+        "consultaModEventos.previous": "Previous",
+        "consultaModEventos.next": "Next",
+      };
+      return translations[key] || key;
+    },
+  } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
   const [user, setUser] = useState(null);
   const [eventos, setEventos] = useState([]);
@@ -43,7 +100,7 @@ function ConsultaModEvento() {
     []
   );
   const [cambiosPendientes, setCambiosPendientes] = useState(false);
-  const [empresas, setEmpresas] = useState([]); // Estado para almacenar las opciones del filtro de empresas
+  const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
 
   // Estados nuevos para las funcionalidades mejoradas
@@ -54,6 +111,11 @@ function ConsultaModEvento() {
     direction: "ascending",
   });
   const [showTooltip, setShowTooltip] = useState(null);
+
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [eventsPerPage, setEventsPerPage] = useState(5);
+  const [totalPages, setTotalPages] = useState(1);
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -84,6 +146,7 @@ function ConsultaModEvento() {
 
   const handleEmpresaChange = (selectedOption) => {
     setEmpresaSeleccionada(selectedOption);
+    setCurrentPage(1); // Reset to first page when filtering
   };
 
   // Filtrar eventos según la empresa seleccionada
@@ -501,6 +564,37 @@ function ConsultaModEvento() {
     return sortableItems;
   }, [filteredEvents, sortConfig, usuarios]);
 
+  // Calculate pagination
+  useEffect(() => {
+    setTotalPages(Math.max(1, Math.ceil(sortedEvents.length / eventsPerPage)));
+    // If current page is greater than total pages, reset to page 1
+    if (currentPage > Math.ceil(sortedEvents.length / eventsPerPage)) {
+      setCurrentPage(1);
+    }
+  }, [sortedEvents, eventsPerPage, currentPage]);
+
+  // Get current events for the page
+  const indexOfLastEvent = currentPage * eventsPerPage;
+  const indexOfFirstEvent = indexOfLastEvent - eventsPerPage;
+  const currentEvents = sortedEvents.slice(indexOfFirstEvent, indexOfLastEvent);
+
+  // Change page
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  // Previous page
+  const previousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  // Next page
+  const nextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   const requestSort = (key) => {
     let direction = "ascending";
     if (sortConfig.key === key && sortConfig.direction === "ascending") {
@@ -526,6 +620,11 @@ function ConsultaModEvento() {
 
   const cancelDeleteAction = () => {
     setConfirmDelete(null);
+  };
+
+  const handleRowsPerPageChange = (e) => {
+    setEventsPerPage(Number(e.target.value));
+    setCurrentPage(1); // Reset to first page when changing items per page
   };
 
   return (
@@ -689,7 +788,7 @@ function ConsultaModEvento() {
                   </td>
                 </tr>
               ) : (
-                sortedEvents.map((evento, index) => {
+                currentEvents.map((evento, index) => {
                   const usuario = usuarios.find(
                     (usuario) => usuario.id === evento.userId
                   );
@@ -708,9 +807,8 @@ function ConsultaModEvento() {
                       )}
 
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {index + 1}
+                        {indexOfFirstEvent + index + 1}
                       </td>
-
                       <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                         {modoEdicion && evento.id === eventoEditado?.id ? (
                           <input
@@ -958,6 +1056,99 @@ function ConsultaModEvento() {
             </tbody>
           </table>
         </div>
+
+        {/* Pagination */}
+        {sortedEvents.length > 0 && (
+          <div className="mt-5 flex flex-col sm:flex-row items-center justify-between">
+            <div className="flex items-center space-x-2 mb-3 sm:mb-0">
+              <button
+                onClick={previousPage}
+                disabled={currentPage === 1}
+                className={`flex items-center justify-center p-2 rounded-md ${
+                  currentPage === 1
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                }`}
+              >
+                <ChevronLeftIcon className="h-5 w-5" />
+              </button>
+
+              <div className="flex space-x-1">
+                {/* First page button */}
+                {currentPage > 2 && (
+                  <button
+                    onClick={() => paginate(1)}
+                    className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    1
+                  </button>
+                )}
+
+                {/* Ellipsis for skipped pages */}
+                {currentPage > 3 && (
+                  <span className="px-3 py-1 text-gray-500">...</span>
+                )}
+
+                {/* Previous page number if not first page */}
+                {currentPage > 1 && (
+                  <button
+                    onClick={() => paginate(currentPage - 1)}
+                    className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    {currentPage - 1}
+                  </button>
+                )}
+
+                {/* Current page */}
+                <button className="px-3 py-1 rounded-md bg-blue-600 text-white">
+                  {currentPage}
+                </button>
+
+                {/* Next page number if not last page */}
+                {currentPage < totalPages && (
+                  <button
+                    onClick={() => paginate(currentPage + 1)}
+                    className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    {currentPage + 1}
+                  </button>
+                )}
+
+                {/* Ellipsis for skipped pages */}
+                {currentPage < totalPages - 2 && (
+                  <span className="px-3 py-1 text-gray-500">...</span>
+                )}
+
+                {/* Last page button */}
+                {currentPage < totalPages - 1 && totalPages > 1 && (
+                  <button
+                    onClick={() => paginate(totalPages)}
+                    className="px-3 py-1 rounded-md bg-white border border-gray-300 text-gray-700 hover:bg-gray-50"
+                  >
+                    {totalPages}
+                  </button>
+                )}
+              </div>
+
+              <button
+                onClick={nextPage}
+                disabled={currentPage === totalPages}
+                className={`flex items-center justify-center p-2 rounded-md ${
+                  currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-300"
+                }`}
+              >
+                <ChevronRightIcon className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="text-sm text-gray-600">
+              {t("consultaModEventos.page")} {currentPage}{" "}
+              {t("consultaModEventos.of")} {totalPages}
+            </div>
+          </div>
+        )}
 
         {/* Edit Event Modal */}
         {modalAbierto && (

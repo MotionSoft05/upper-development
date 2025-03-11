@@ -58,7 +58,8 @@ function Admin() {
   const [activeTab, setActiveTab] = useState("usuarios");
   const [sortDirection, setSortDirection] = useState("asc");
   const [sortColumn, setSortColumn] = useState("nombre");
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(5);
   // Función para mostrar un mensaje y ocultarlo después de 3 segundos
   const mostrarMensaje = (mensaje, estilo) => {
     setMensaje(mensaje);
@@ -391,7 +392,11 @@ function Admin() {
     setModoEdicion(true);
     setUsuarioEditado(usuario);
   };
-
+  // Añade este useEffect después de los otros useEffect en tu componente
+  useEffect(() => {
+    // Resetear a la página 1 cuando cambien los criterios de búsqueda o filtrado
+    setCurrentPage(1);
+  }, [searchTerm, filtroSeleccionado]);
   // Cambio a la función handleGuardarCambios para permitir más pantallas directorio
   const handleGuardarCambios = async () => {
     try {
@@ -595,6 +600,7 @@ function Admin() {
     return <p>No tienes permiso para acceder a esta página.</p>;
   }
 
+  // Modificar la función aplicarFiltro para incluir la paginación
   const aplicarFiltro = () => {
     let usuariosFiltrados = [...usuarios];
 
@@ -746,6 +752,68 @@ function Admin() {
     }
   };
 
+  // Función para paginar los usuarios
+  const getPaginatedUsers = (users) => {
+    const indexOfLastUser = currentPage * usersPerPage;
+    const indexOfFirstUser = indexOfLastUser - usersPerPage;
+    return users.slice(indexOfFirstUser, indexOfLastUser);
+  };
+
+  // Componente de paginación
+  const Pagination = ({ totalUsers }) => {
+    const pageNumbers = [];
+
+    for (let i = 1; i <= Math.ceil(totalUsers / usersPerPage); i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex justify-center mt-4 mb-6">
+        <nav className="flex items-center">
+          <button
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+            className="px-3 py-2 mx-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+          >
+            {t("admin.buttons.previous")}
+          </button>
+
+          <div className="flex space-x-1 mx-2">
+            {pageNumbers.map((number) => (
+              <button
+                key={number}
+                onClick={() => setCurrentPage(number)}
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                  currentPage === number
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 hover:bg-gray-200"
+                }`}
+              >
+                {number}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() =>
+              setCurrentPage((prev) =>
+                Math.min(
+                  prev + 1,
+                  Math.ceil(aplicarFiltro().length / usersPerPage)
+                )
+              )
+            }
+            disabled={
+              currentPage === Math.ceil(aplicarFiltro().length / usersPerPage)
+            }
+            className="px-3 py-2 mx-1 rounded border bg-gray-100 hover:bg-gray-200 disabled:opacity-50"
+          >
+            {t("admin.buttons.next")}
+          </button>
+        </nav>
+      </div>
+    );
+  };
   const uniqueEmpresas = [
     ...new Set(usuarios.map((usuario) => usuario.empresa)),
   ];
@@ -881,6 +949,7 @@ function Admin() {
               <table className="w-full table-auto text-sm">
                 <thead>
                   <tr className="text-xs text-white uppercase bg-blue-600">
+                    <th className="px-4 py-3 text-center">#</th>
                     {renderColumnHeader("nombre", t("admin.nameAndSurname"))}
                     {renderColumnHeader("email", t("admin.email"))}
                     {renderColumnHeader("empresa", t("admin.company"))}
@@ -902,7 +971,7 @@ function Admin() {
                   </tr>
                 </thead>
                 <tbody>
-                  {aplicarFiltro().map((usuario, index) => (
+                  {getPaginatedUsers(aplicarFiltro()).map((usuario, index) => (
                     <tr
                       key={usuario.id}
                       className={`${
@@ -913,6 +982,10 @@ function Admin() {
                           : "bg-gray-50"
                       } border-b hover:bg-gray-100 transition-colors duration-150`}
                     >
+                      {/* Columna de numeración */}
+                      <td className="px-4 py-3 text-center font-medium text-gray-700">
+                        {(currentPage - 1) * usersPerPage + index + 1}
+                      </td>
                       {/* Nombre y Apellido */}
                       <td className="px-4 py-3">
                         {modoEdicion && usuarioEditado.id === usuario.id ? (
@@ -1219,6 +1292,9 @@ function Admin() {
               </table>
             </div>
 
+            {aplicarFiltro().length > 0 && (
+              <Pagination totalUsers={aplicarFiltro().length} />
+            )}
             {aplicarFiltro().length === 0 && (
               <div className="text-center py-8 text-gray-500">
                 <FontAwesomeIcon icon={faFilter} className="text-4xl mb-2" />
