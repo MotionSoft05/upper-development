@@ -9,7 +9,7 @@ import Licencia from "@/components/dashboard/licencia";
 import PantallasSalon from "@/components/dashboard/pantallasSalon";
 import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
-import Admin from "@/components/dashboard/admin";
+import Admin from "@/components/dashboard/admin/admin";
 import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";

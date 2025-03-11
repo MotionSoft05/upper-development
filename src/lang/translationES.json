@@ -636,7 +636,7 @@
       "errorFetchingFiscalData": "Error al obtener los datos fiscales de Firebase:",
       "allFieldsRequired": "Todos los campos deben estar completos",
       "errorSavingFiscalChanges": "Error al guardar los cambios en datos fiscales:",
-      "errorSavingChanges": "Error al guardar los cambios:",
+      "errorSavingChanges": "Error al guardar los cambios",
       "successSaveMessage": "Guardado con éxito",
       "confirmDeleteFiscalData": "¿Estás seguro de que deseas eliminar estos datos fiscales?",
       "successDeleteMessage": "Eliminado con éxito",
@@ -648,22 +648,32 @@
       "errorSavingFirebaseChanges": "Error al guardar los cambios en Firebase:",
       "errorDeletingTransactionFirebase": "Error al eliminar la transacción de Firebase:",
       "confirmDeleteUser": "¿Estás seguro de que deseas eliminar este usuario?",
-      "successDeleteUserMessage": "Usuario con ID {{usuarioId}} eliminado correctamente.",
+      "successDeleteUserMessage": "Usuario eliminado correctamente.",
       "errorDeleteUserBackend": "Error al eliminar usuario del backend:",
       "errorDeletingFirestoreUser": "Error al eliminar el usuario de Firestore o al hacer la solicitud al backend:",
       "errorFetchingFirebaseUsers": "Error al obtener los usuarios de Firebase:",
       "noPermissionMessage": "No tienes permiso para acceder a esta página.",
-      "successEnableUserMessage": "Usuario con ID {{usuarioId}} habilitado correctamente.",
+      "successEnableUserMessage": "Usuario habilitado correctamente.",
+      "errorEnableUserMessage": "Error al habilitar el usuario",
       "errorEnableUserBackend": "Error al habilitar usuario en el backend:",
-      "errorEnableUser": "Error al habilitar usuario",
-      "errorDisableUser": "Error al deshabilitar usuario",
-      "successDisableUserMessage": "Usuario con ID {{usuarioId}} deshabilitado correctamente.",
+      "errorEnableUser": "Error al habilitar el usuario:",
+      "errorDisableUser": "Error al deshabilitar el usuario:",
+      "errorDisableUserMessage": "Error al deshabilitar el usuario",
+      "successDisableUserMessage": "Usuario deshabilitado correctamente.",
       "errorDisableUserBackend": "Error al deshabilitar usuario en el backend:",
-      "noValidFieldsUpdate": "No hay campos válidos para actualizar."
+      "noValidFieldsUpdate": "No hay campos válidos para actualizar.",
+      "noUsersFound": "No se encontraron usuarios con los filtros seleccionados."
     },
     "titles": {
+      "pageTitle": "Administración de Usuarios",
       "userDetails": "Datos de Usuarios",
+      "userManagement": "Gestión de Usuarios",
       "transactions": "Transacciones",
+      "licenses": "Licencias",
+      "fiscalData": "Datos Fiscales"
+    },
+    "tabs": {
+      "users": "Usuarios",
       "licenses": "Licencias"
     },
     "buttons": {
@@ -674,8 +684,15 @@
       "saveChanges": "Guardar Cambios",
       "edit": "Editar",
       "delete": "Eliminar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "enable": "Habilitar",
+      "disable": "Deshabilitar"
     },
+    "status": {
+      "active": "Activo",
+      "inactive": "Inactivo"
+    },
+    "search": "Buscar usuario...",
     "nameAndSurname": "Nombre y Apellido",
     "email": "Email",
     "company": "Empresa",
@@ -686,10 +703,12 @@
     "actions": "Acciones",
     "date": "Fecha",
     "amount": "Monto",
-    "postalCode": "Código Postal:",
-    "companyName": "Razón Social:",
-    "fiscalRegime": "Régimen Fiscal:",
-    "cdfiUsage": "Uso CDFI:",
+    "status": "Estado",
+    "postalCode": "Código Postal",
+    "companyName": "Razón Social",
+    "fiscalRegime": "Régimen Fiscal",
+    "cdfiUsage": "Uso CDFI",
+    "rfc": "RFC",
     "selectCompany": "Seleccione Empresa"
   },
   "pantalla": {
