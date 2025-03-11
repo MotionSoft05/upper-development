@@ -52,6 +52,7 @@
     "react-select": "^5.8.0",
     "react-tailwindcss-datepicker": "^1.6.6",
     "react-textra": "^0.2.0",
+    "react-tooltip": "^5.28.0",
     "sweetalert2": "^11.10.8",
     "swiper": "^11.0.6",
     "tailwind-merge": "^1.14.0",
