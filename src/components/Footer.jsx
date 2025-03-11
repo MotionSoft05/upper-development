@@ -1,32 +1,10 @@
 "use client";
 import { useTranslation } from "react-i18next";
-import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { FaLinkedin, FaTwitter, FaFacebook, FaInstagram } from "react-icons/fa";
 
 function Footer() {
   const { t } = useTranslation();
-  const pathname = usePathname();
-
-  // No muestra el Footer en algunas URL determinadas
-  const hideFooter = () => {
-    const hideRoutes = [
-      "/paginasAleatorias",
-      "/pantallaDeServicio",
-      "/pantallaDirec1",
-    ];
-    // Elimina el .html del pathname si está presente
-    const sanitizedPathname = pathname.replace(".html", "");
-
-    return (
-      hideRoutes.includes(sanitizedPathname) ||
-      sanitizedPathname.match(/\/pantalla[1-9]|10/)
-    );
-  };
-
-  if (hideFooter()) {
-    return null;
-  }
 
   // Enlaces para las columnas del footer
   const footerLinks = {

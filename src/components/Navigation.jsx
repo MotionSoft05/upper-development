@@ -80,23 +80,6 @@ function Navigation() {
     return () => unsubscribe();
   }, []);
 
-  // Hide navigation on specific routes
-  const hideNavigation = () => {
-    const hideRoutes = [
-      "/paginasAleatorias",
-      "/pantallaDeServicio",
-      "/pantallaDirec1",
-    ];
-
-    // Remove .html extension if present
-    const sanitizedPathname = pathname.replace(".html", "");
-
-    return (
-      hideRoutes.includes(sanitizedPathname) ||
-      sanitizedPathname.match(/\/pantalla[1-9]|10/)
-    );
-  };
-
   const handleLogout = async () => {
     try {
       await signOut(auth);
@@ -111,10 +94,6 @@ function Navigation() {
   const navigateToDashboard = () => {
     window.location.href = `/dashboard${isProduction}`;
   };
-
-  if (hideNavigation()) {
-    return null;
-  }
 
   // Navbar menu items for homepage
   const menuItems = [
