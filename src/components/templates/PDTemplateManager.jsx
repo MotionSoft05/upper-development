@@ -1,6 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
-import PDTemplate1 from "./PDTemplate1";
+import PDTemplate1Vertical from "./PDTemplate1Vertical";
+import PDTemplate1Horizontal from "./PDTemplate1Horizontal";
 
 const PDTemplateManager = ({
   templateId,
@@ -10,21 +11,41 @@ const PDTemplateManager = ({
   currentTime,
   isPortrait,
   t,
-  qrCodeUrl, // Add qrCodeUrl prop
+  qrCodeUrl,
+  screenNumber,
 }) => {
-  // Por ahora solo tenemos Template1, pero aquí podrías agregar más templates
-  // basándote en templateId
-  return (
-    <PDTemplate1
-      events={events}
-      template={template}
-      weatherData={weatherData}
-      currentTime={currentTime}
-      isPortrait={isPortrait}
-      t={t}
-      qrCodeUrl={qrCodeUrl} // Pass qrCodeUrl to PDTemplate1
-    />
-  );
+  // Seleccionar la versión del template basado en la orientación
+  const renderTemplate = () => {
+    // Podemos expandir este switch en el futuro para manejar más templates
+    switch (templateId) {
+      case "template1":
+      default:
+        // Seleccionar vertical u horizontal basado en isPortrait
+        return isPortrait ? (
+          <PDTemplate1Vertical
+            events={events}
+            template={template}
+            weatherData={weatherData}
+            currentTime={currentTime}
+            t={t}
+            qrCodeUrl={qrCodeUrl}
+            screenNumber={screenNumber}
+          />
+        ) : (
+          <PDTemplate1Horizontal
+            events={events}
+            template={template}
+            weatherData={weatherData}
+            currentTime={currentTime}
+            t={t}
+            qrCodeUrl={qrCodeUrl}
+            screenNumber={screenNumber}
+          />
+        );
+    }
+  };
+
+  return renderTemplate();
 };
 
 PDTemplateManager.propTypes = {
@@ -35,7 +56,8 @@ PDTemplateManager.propTypes = {
   currentTime: PropTypes.string.isRequired,
   isPortrait: PropTypes.bool.isRequired,
   t: PropTypes.func.isRequired,
-  qrCodeUrl: PropTypes.string, // Add to propTypes
+  qrCodeUrl: PropTypes.string,
+  screenNumber: PropTypes.number,
 };
 
 export default PDTemplateManager;

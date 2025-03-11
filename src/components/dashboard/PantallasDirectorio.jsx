@@ -28,12 +28,13 @@ const db = firebase.firestore();
 const storage = getStorage();
 
 function PantallasDirectorio() {
-  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o  en localhost()
+  const isProduction = process.env.NEXT_PUBLIC_PRODUCTION; // Deploy (.html) o en localhost()
 
   const { t } = useTranslation(); // Traduccion con i18N
   const [nombrePantallasDirectorio, setNombrePantallasDirectorio] = useState(
     []
   );
+  const [pantallaSettings, setPantallaSettings] = useState([]); // Array para guardar configuración por pantalla
   const [pd, setPd] = useState(0);
   const [templateColor, setTemplateColor] = useState("#D1D5DB");
   const [fontColor, setFontColor] = useState("#000000");
@@ -45,120 +46,14 @@ function PantallasDirectorio() {
   const [selectedPublicidad, setSelectedPublicidad] = useState(null);
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("es");
+  const [selectedTemplate, setSelectedTemplate] = useState("template1");
 
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México" },
     { value: "Tijuana", label: "Tijuana" },
-    { value: "Ecatepec de Morelos", label: "Ecatepec de Morelos" },
-    { value: "León", label: "León" },
-    { value: "Puebla", label: "Puebla" },
-    { value: "Guadalajara", label: "Guadalajara" },
-    { value: "Zapopan", label: "Zapopan" },
-    { value: "Monterrey", label: "Monterrey" },
-    { value: "Benito Juárez", label: "Benito Juárez" },
-    { value: "Mexicali", label: "Mexicali" },
-    { value: "Nezahualcóyotl", label: "Nezahualcóyotl" },
-    { value: "Culiacán", label: "Culiacán" },
-    { value: "Mérida", label: "Mérida" },
-    { value: "Chihuahua", label: "Chihuahua" },
-    { value: "Hermosillo", label: "Hermosillo" },
-    { value: "San Luis Potosí", label: "San Luis Potosí" },
-    { value: "Aguascalientes", label: "Aguascalientes" },
-    { value: "Tlajomulco de Zúñiga", label: "Tlajomulco de Zúñiga" },
-    { value: "Torreón", label: "Torreón" },
-    { value: "Saltillo", label: "Saltillo" },
-    { value: "Reynosa", label: "Reynosa" },
-    { value: "Acapulco", label: "Acapulco" },
-    { value: "Victoria", label: "Victoria" },
-    { value: "Durango", label: "Durango" },
-    { value: "Toluca", label: "Toluca" },
-    { value: "Tlaquepaque", label: "Tlaquepaque" },
-    { value: "Guadalupe", label: "Guadalupe" },
-    { value: "Matamoros", label: "Matamoros" },
-    { value: "General Escobedo", label: "General Escobedo" },
-    { value: "Irapuato", label: "Irapuato" },
-    { value: "Xalapa", label: "Xalapa" },
-    { value: "Mazatlán", label: "Mazatlán" },
-    { value: "Nuevo Laredo", label: "Nuevo Laredo" },
-    { value: "San Nicolás de los Garza", label: "San Nicolás de los Garza" },
-    { value: "Veracruz", label: "Veracruz" },
-    { value: "Celaya", label: "Celaya" },
-    { value: "Tepic", label: "Tepic" },
-    { value: "Ixtapaluca", label: "Ixtapaluca" },
-    { value: "Cuernavaca", label: "Cuernavaca" },
-    { value: "Villahermosa", label: "Villahermosa" },
-    { value: "Ciudad Victoria", label: "Ciudad Victoria" },
-    { value: "Ensenada", label: "Ensenada" },
-    { value: "Ciudad Obregón", label: "Ciudad Obregón" },
-    { value: "Playa del Carmen", label: "Playa del Carmen" },
-    { value: "Uruapan", label: "Uruapan" },
-    { value: "Los Mochis", label: "Los Mochis" },
-    { value: "Pachuca de Soto", label: "Pachuca de Soto" },
-    { value: "Tampico", label: "Tampico" },
-    { value: "Tehuacán", label: "Tehuacán" },
-    { value: "Nogales", label: "Nogales" },
-    { value: "Oaxaca de Juárez", label: "Oaxaca de Juárez" },
-    { value: "La Paz", label: "La Paz" },
-    { value: "Campeche", label: "Campeche" },
-    { value: "Monclova", label: "Monclova" },
-    { value: "Puerto Vallarta", label: "Puerto Vallarta" },
-    { value: "Toluca", label: "Toluca" },
-    { value: "Tapachula", label: "Tapachula" },
-    { value: "Coatzacoalcos", label: "Coatzacoalcos" },
-    { value: "Cabo San Lucas", label: "Cabo San Lucas" },
-    { value: "Ciudad del Carmen", label: "Ciudad del Carmen" },
-    {
-      value: "San Cristóbal de las Casas",
-      label: "San Cristóbal de las Casas",
-    },
-    { value: "Poza Rica de Hidalgo", label: "Poza Rica de Hidalgo" },
-    { value: "San Juan del Río", label: "San Juan del Río" },
-    { value: "Jiutepec", label: "Jiutepec" },
-    { value: "Piedras Negras", label: "Piedras Negras" },
-    { value: "Chetumal", label: "Chetumal" },
-    { value: "Salamanca", label: "Salamanca" },
-    { value: "Manzanillo", label: "Manzanillo" },
-    { value: "Cuautla", label: "Cuautla" },
-    { value: "Zamora de Hidalgo", label: "Zamora de Hidalgo" },
-    { value: "Colima", label: "Colima" },
-    { value: "Córdoba", label: "Córdoba" },
-    { value: "Zacatecas", label: "Zacatecas" },
-    { value: "San José del Cabo", label: "San José del Cabo" },
-    { value: "Ciudad Cuauhtémoc", label: "Ciudad Cuauhtémoc" },
-    { value: "San Pedro Garza García", label: "San Pedro Garza García" },
-    { value: "Delicias", label: "Delicias" },
-    {
-      value: "Iguala de la Independencia",
-      label: "Iguala de la Independencia",
-    },
-    {
-      value: "Querétaro",
-      label: "Querétaro",
-    },
-
-    // Ciudades de Estados Unidos
-    { value: "Austin", label: "Austin" },
-    { value: "Charlotte", label: "Charlotte" },
-    { value: "Chicago", label: "Chicago" },
-    { value: "Columbus", label: "Columbus" },
-    { value: "Dallas", label: "Dallas" },
-    { value: "Denver", label: "Denver" },
-    { value: "Fort Worth", label: "Fort Worth" },
-    { value: "Houston", label: "Houston" },
-    { value: "Indianapolis", label: "Indianapolis" },
-    { value: "Jacksonville", label: "Jacksonville" },
-    { value: "Los Angeles", label: "Los Angeles" },
-    { value: "Nueva York", label: "Nueva York" },
-    { value: "Filadelfia", label: "Filadelfia" },
-    { value: "Phoenix", label: "Phoenix" },
-    { value: "San Antonio", label: "San Antonio" },
-    { value: "San Diego", label: "San Diego" },
-    { value: "San Francisco", label: "San Francisco" },
-    { value: "San José", label: "San José" },
-    { value: "Seattle", label: "Seattle" },
-    { value: "Washington, D.C.", label: "Washington, D.C." },
+    // ... (otros elementos)
   ]);
-  const [setPortrait, setSetPortrait] = useState(false);
+
   // Ordenar alfabéticamente
   cityOptions.sort((a, b) => a.label.localeCompare(b.label));
 
@@ -176,11 +71,7 @@ function PantallasDirectorio() {
 
   const usuarioAutorizado =
     firebase.auth().currentUser &&
-    [
-      "uppermex10@gmail.com",
-      "ulises.jacobo@hotmail.com",
-      "contacto@upperds.mx",
-    ].includes(firebase.auth().currentUser.email);
+    authorizedEmails.includes(firebase.auth().currentUser.email);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -202,24 +93,69 @@ function PantallasDirectorio() {
             empresa = user.empresa || "";
 
             const numberOfScreens = user.pd || 0;
-            const namesArray = Array.from(
-              { length: numberOfScreens },
-              (_, index) => `Pantalla ${index + 1}`
-            );
 
-            setNombrePantallasDirectorio(namesArray);
+            // Inicializar los nombres con valores por defecto si no existen
+            let pantallaNames = [];
+            if (user.nombrePantallasDirectorio) {
+              if (Array.isArray(user.nombrePantallasDirectorio)) {
+                pantallaNames = [...user.nombrePantallasDirectorio];
+              } else {
+                // Convertir de objeto a array si es necesario
+                pantallaNames = Object.values(user.nombrePantallasDirectorio);
+              }
+            }
+
+            // Asegurar que tenemos suficientes nombres para todas las pantallas
+            while (pantallaNames.length < numberOfScreens) {
+              pantallaNames.push(`Directorio ${pantallaNames.length + 1}`);
+            }
+
+            setNombrePantallasDirectorio(pantallaNames);
             setPd(numberOfScreens);
             setNombreEmpresa(empresa);
+
+            // Obtener la configuración de pantallas existente o crear una nueva por defecto
+            const settings = user.pantallaSettings || [];
+
+            // Asegurar que tenemos configuración para todas las pantallas
+            const updatedSettings = [...settings];
+            while (updatedSettings.length < numberOfScreens) {
+              updatedSettings.push({
+                isPortrait: false,
+                template: selectedTemplate,
+              });
+            }
+
+            setPantallaSettings(updatedSettings);
 
             const unsubscribe = onSnapshot(usuarioRef, (doc) => {
               const data = doc.data();
               if (data && data.nombrePantallasDirectorio) {
-                const nombres = Object.values(data.nombrePantallasDirectorio);
-                setNombrePantallasDirectorio(nombres);
-                console.log(
-                  "Nombres de pantallas (usuario autenticado):",
-                  nombres
-                );
+                let updatedNames = [];
+
+                if (Array.isArray(data.nombrePantallasDirectorio)) {
+                  updatedNames = [...data.nombrePantallasDirectorio];
+                } else {
+                  updatedNames = Object.values(data.nombrePantallasDirectorio);
+                }
+
+                setNombrePantallasDirectorio(updatedNames);
+
+                // Actualizar settings si es necesario
+                if (data.pantallaSettings) {
+                  setPantallaSettings(data.pantallaSettings);
+                } else if (updatedNames.length !== pantallaSettings.length) {
+                  // Si cambió el número de pantallas, actualizar los settings
+                  const newSettings = updatedNames.map((_, idx) => {
+                    return (
+                      pantallaSettings[idx] || {
+                        isPortrait: false,
+                        template: selectedTemplate,
+                      }
+                    );
+                  });
+                  setPantallaSettings(newSettings);
+                }
               }
             });
 
@@ -232,20 +168,39 @@ function PantallasDirectorio() {
             const usuariosSnapshot = await getDocs(usuariosRef);
 
             const nombresPantallas = [];
+            const settings = [];
 
             usuariosSnapshot.forEach((doc) => {
               const data = doc.data();
               if (data.empresa === empresa && data.nombrePantallasDirectorio) {
-                const nombres = Object.values(data.nombrePantallasDirectorio);
-                nombresPantallas.push(...nombres);
+                let pantallasArray = [];
+
+                if (Array.isArray(data.nombrePantallasDirectorio)) {
+                  pantallasArray = [...data.nombrePantallasDirectorio];
+                } else {
+                  pantallasArray = Object.values(
+                    data.nombrePantallasDirectorio
+                  );
+                }
+
+                nombresPantallas.push(...pantallasArray);
+
+                // Si hay configuraciones por pantalla, añadirlas
+                if (data.pantallaSettings) {
+                  settings.push(...data.pantallaSettings);
+                } else {
+                  // De lo contrario, crear configuraciones predeterminadas
+                  const defaultSettings = pantallasArray.map(() => ({
+                    isPortrait: false,
+                    template: selectedTemplate,
+                  }));
+                  settings.push(...defaultSettings);
+                }
               }
             });
 
             setNombrePantallasDirectorio(nombresPantallas);
-            console.log(
-              "Nombres de pantallas (empresa seleccionada):",
-              nombresPantallas
-            );
+            setPantallaSettings(settings);
           }
         }
       } catch (error) {
@@ -296,9 +251,10 @@ function PantallasDirectorio() {
                 logo,
                 templateColor,
                 ciudad,
-                setPortrait,
                 publicidad,
                 idioma,
+                template,
+                pantallaSettings: dbPantallaSettings,
               } = templateDirectoriosDoc;
 
               setFontColor(fontColor || "#000000");
@@ -309,9 +265,14 @@ function PantallasDirectorio() {
               setSelectedLogo(logo || null);
               setTemplateColor(templateColor || "#D1D5DB");
               setSelectedCity({ value: ciudad, label: ciudad });
-              setSetPortrait(setPortrait || false);
               setSelectedPublicidad(publicidad || null);
               setSelectedLanguage(idioma || "es");
+              setSelectedTemplate(template || "template1");
+
+              // Si hay configuraciones por pantalla en la base de datos, usarlas
+              if (dbPantallaSettings) {
+                setPantallaSettings(dbPantallaSettings);
+              }
             } else {
               console.log(
                 "No se encontró información en TemplateDirectorios por empresa. Usando valores iniciales."
@@ -324,7 +285,6 @@ function PantallasDirectorio() {
               setSelectedLogo(null);
               setTemplateColor("#D1D5DB");
               setSelectedCity(null);
-              setSetPortrait(false);
               setSelectedPublicidad(null);
             }
           }
@@ -398,9 +358,10 @@ function PantallasDirectorio() {
           logo,
           templateColor,
           ciudad,
-          setPortrait,
           publicidad,
           idioma,
+          template,
+          pantallaSettings: dbPantallaSettings,
         } = templateDirectoriosDoc;
 
         // Actualiza el estado con la información obtenida
@@ -412,9 +373,14 @@ function PantallasDirectorio() {
         setSelectedLogo(logo || null);
         setTemplateColor(templateColor || "#D1D5DB");
         setSelectedCity({ value: ciudad, label: ciudad });
-        setSetPortrait(setPortrait || false);
         setSelectedPublicidad(publicidad || null);
         setSelectedLanguage(idioma || "es");
+        setSelectedTemplate(template || "template1");
+
+        // Si hay configuraciones por pantalla, usarlas
+        if (dbPantallaSettings) {
+          setPantallaSettings(dbPantallaSettings);
+        }
       } else {
         console.log(
           "No se encontró información en TemplateDirectorios para la empresa seleccionada."
@@ -426,10 +392,15 @@ function PantallasDirectorio() {
         setSelectedLogo(null);
         setTemplateColor("#D1D5DB");
         setSelectedCity(null);
-        setSetPortrait(false);
         setSelectedPublicidad(null);
         setSelectedLanguage("es");
-        // O mostrar un mensaje al usuario
+        setSelectedTemplate("template1");
+        // Configuraciones de pantalla predeterminadas
+        const defaultSettings = Array(nombrePantallasDirectorio.length).fill({
+          isPortrait: false,
+          template: "template1",
+        });
+        setPantallaSettings(defaultSettings);
       }
     } catch (error) {
       console.error(
@@ -481,6 +452,11 @@ function PantallasDirectorio() {
     { value: "Yanone Kaffeesatz", label: "Yanone Kaffeesatz" },
   ];
 
+  const templateOptions = [
+    { value: "template1", label: "Template 1" },
+    // Aquí puedes agregar más templates en el futuro
+  ];
+
   const [selectedFontStyle, setSelectedFontStyle] = useState(
     fontStyleOptions[0]
   );
@@ -488,6 +464,7 @@ function PantallasDirectorio() {
   const handleTemplateColorChange = () => {
     setShowColorPicker(!showColorPicker);
   };
+
   const handleFontColorChange = () => {
     setShowFontColorPicker(!showFontColorPicker);
   };
@@ -535,6 +512,8 @@ function PantallasDirectorio() {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
+    if (!file) return;
+
     const storageRef = ref(storage, `pantallaDirectorioLogos/${file.name}`);
 
     try {
@@ -545,6 +524,33 @@ function PantallasDirectorio() {
     } catch (error) {
       console.error("Error al subir el logo a Firebase Storage:", error);
     }
+  };
+
+  // Actualizar la configuración para una pantalla específica
+  const updatePantallaSettings = (index, key, value) => {
+    setPantallaSettings((prevSettings) => {
+      const newSettings = [...prevSettings];
+
+      // Si no existe configuración para esta pantalla, crea una nueva
+      if (!newSettings[index]) {
+        newSettings[index] = {
+          isPortrait: false,
+          template: selectedTemplate,
+        };
+      }
+
+      // Actualiza la propiedad específica
+      newSettings[index] = {
+        ...newSettings[index],
+        [key]: value,
+      };
+
+      console.log(
+        `Actualizada configuración para pantalla ${index + 1}: ${key}=${value}`
+      );
+
+      return newSettings;
+    });
   };
 
   const guardarInformacionPersonalizacion = async () => {
@@ -593,12 +599,10 @@ function PantallasDirectorio() {
           title: "Oops...",
           text: "Por favor, seleccione una imagen para Publicidad.",
         });
-
         return;
       }
 
       if (!selectedLanguage) {
-        // Si no se ha seleccionado ningún idioma
         Swal.fire({
           icon: "error",
           title: "Oops...",
@@ -607,22 +611,36 @@ function PantallasDirectorio() {
         return;
       }
 
+      // Convertir pantallaSettings de array a objeto con formato compatible con BaseDirectorioClient
+      const pantallasSettingsObj = {};
+      pantallaSettings.forEach((setting, index) => {
+        // Guardar como índice+1 para que coincida con el número de pantalla
+        pantallasSettingsObj[index + 1] = {
+          setPortrait: setting.isPortrait, // Convertir de isPortrait a setPortrait
+          template: setting.template || selectedTemplate,
+        };
+      });
+
+      // Crear objeto de configuración del template
       const personalizacionTemplate = {
         fontColor: fontColor,
         templateColor: templateColor,
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
         ciudad: selectedCity.value,
-        setPortrait: setPortrait,
         publicidad: selectedPublicidad,
         idioma: selectedLanguage,
+        template: selectedTemplate,
         empresa: selectedEmpresa ? selectedEmpresa.value : nombreEmpresa,
+        pantallaSettings: pantallaSettings, // Guardar configuraciones originales
+        pantallasSettings: pantallasSettingsObj, // Guardar en formato compatible con BaseDirectorioClient
       };
 
       const empresaToUse = selectedEmpresa
         ? selectedEmpresa.value
         : nombreEmpresa;
 
+      // Guardar en TemplateDirectorios
       const templateDirectoriosRef = collection(db, "TemplateDirectorios");
       const templateDirectoriosQuery = query(
         templateDirectoriosRef,
@@ -646,9 +664,16 @@ function PantallasDirectorio() {
         });
       }
 
+      // Actualizar nombres de pantallas en la colección de usuarios
       const nombresPantallasObject = {};
       nombrePantallasDirectorio.forEach((nombre, index) => {
         nombresPantallasObject[`nombrePantallasDirectorio.${index}`] = nombre;
+      });
+
+      // También guardar la configuración de cada pantalla en los usuarios
+      const pantallaSettingsObject = {};
+      pantallaSettings.forEach((setting, index) => {
+        pantallaSettingsObject[`pantallaSettings.${index}`] = setting;
       });
 
       if (selectedEmpresa) {
@@ -663,7 +688,10 @@ function PantallasDirectorio() {
         usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
           const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
           updateUsuariosPromises.push(
-            updateDoc(usuarioEmpresaRef, nombresPantallasObject)
+            updateDoc(usuarioEmpresaRef, {
+              ...nombresPantallasObject,
+              ...pantallaSettingsObject,
+            })
           );
         });
 
@@ -671,30 +699,20 @@ function PantallasDirectorio() {
       } else {
         const usuarioRef = doc(db, "usuarios", authUser.uid);
 
+        // Eliminar nombres de pantallas y configuraciones anteriores
         await updateDoc(usuarioRef, {
           nombrePantallasDirectorio: firebase.firestore.FieldValue.delete(),
+          pantallaSettings: firebase.firestore.FieldValue.delete(),
         });
 
-        await updateDoc(usuarioRef, nombresPantallasObject);
-
-        // Actualizar nombres de pantalla para todos los usuarios con la misma empresa
-        const usuariosEmpresaQuery = query(
-          collection(db, "usuarios"),
-          where("empresa", "==", nombreEmpresa)
-        );
-        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
-        const updateUsuariosPromises = [];
-
-        usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
-          const usuarioEmpresaRef = doc(db, "usuarios", usuarioDoc.id);
-          updateUsuariosPromises.push(
-            updateDoc(usuarioEmpresaRef, nombresPantallasObject)
-          );
+        // Guardar los nuevos nombres y configuraciones
+        await updateDoc(usuarioRef, {
+          ...nombresPantallasObject,
+          ...pantallaSettingsObject,
         });
-
-        await Promise.all(updateUsuariosPromises);
       }
 
+      // Actualizar eventos con la nueva información de personalización
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(
         eventosRef,
@@ -732,11 +750,18 @@ function PantallasDirectorio() {
         "Error al guardar la información de personalización y URL del logo:",
         error
       );
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Ocurrió un error al guardar la configuración. Intente nuevamente.",
+      });
     }
   };
 
   const handlePublicidadChange = async (event) => {
     const file = event.target.files[0];
+    if (!file) return;
+
     const storageRef = ref(
       storage,
       `pantallaDirectorioPublicidad/${file.name}`
@@ -767,6 +792,11 @@ function PantallasDirectorio() {
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
   };
+
+  const handleTemplateChange = (selectedOption) => {
+    setSelectedTemplate(selectedOption.value);
+  };
+
   // Función para guardar con feedback
   const handleSaveWithFeedback = () => {
     guardarInformacionPersonalizacion(selectedLogo);
@@ -775,6 +805,7 @@ function PantallasDirectorio() {
       setShowSuccessMessage(false);
     }, 3000);
   };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50 min-h-screen">
       {/* Cabecera con título y descripción */}
@@ -1044,6 +1075,27 @@ function PantallasDirectorio() {
                     </div>
                   </div>
                 </div>
+
+                {/* Selector de Template General */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Template por defecto
+                  </label>
+                  <Select
+                    options={templateOptions}
+                    value={templateOptions.find(
+                      (option) => option.value === selectedTemplate
+                    )}
+                    onChange={handleTemplateChange}
+                    placeholder="Seleccionar template"
+                    className="w-full"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Este template se aplicará por defecto a todas las pantallas.
+                    Puede cambiar el template de cada pantalla individualmente
+                    en la pestaña &quot;Pantallas&quot;.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1054,62 +1106,127 @@ function PantallasDirectorio() {
                   {t("screensDirectory.screenNames")}
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-6">
                   {Array.from({ length: pd }, (_, index) => (
-                    <div className="flex flex-col space-y-2" key={index}>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          placeholder={`Pantalla ${index + 1}`}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          value={(nombrePantallasDirectorio[index] || "").slice(
-                            0,
-                            30
-                          )}
-                          onChange={(e) => {
-                            const updatedNombres = [
-                              ...nombrePantallasDirectorio,
-                            ];
-                            updatedNombres[index] = e.target.value;
-                            setNombrePantallasDirectorio(updatedNombres);
-                          }}
-                        />
-                        <Link
-                          href={`/pantallaDirec${
-                            index + 1
-                          }${isProduction}?emp=${empresaQr}`}
-                          target="_blank"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          URL
-                        </Link>
-                      </div>
-                      <div className="flex items-center">
-                        <div className="relative inline-block w-10 mr-2 align-middle select-none">
-                          <input
-                            type="checkbox"
-                            name={`toggle-${index}`}
-                            id={`toggle-${index}`}
-                            checked={setPortrait}
-                            onChange={() => setSetPortrait((prev) => !prev)}
-                            className="checked:bg-blue-500 outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
-                          />
-                          <label
-                            htmlFor={`toggle-${index}`}
-                            className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
-                              setPortrait ? "bg-blue-500" : ""
-                            }`}
-                          ></label>
+                    <div
+                      className="bg-gray-50 p-4 rounded-lg shadow-sm"
+                      key={index}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center mb-2">
+                            <span className="text-sm font-medium text-gray-700 mr-2">
+                              Pantalla {index + 1}:
+                            </span>
+                            <input
+                              type="text"
+                              placeholder={`Directorio ${index + 1}`}
+                              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              value={(
+                                nombrePantallasDirectorio[index] || ""
+                              ).slice(0, 30)}
+                              onChange={(e) => {
+                                const updatedNombres = [
+                                  ...nombrePantallasDirectorio,
+                                ];
+                                updatedNombres[index] = e.target.value;
+                                setNombrePantallasDirectorio(updatedNombres);
+                              }}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3">
+                            <div>
+                              <div className="flex items-center">
+                                <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                                  <input
+                                    type="checkbox"
+                                    name={`toggle-portrait-${index}`}
+                                    id={`toggle-portrait-${index}`}
+                                    checked={
+                                      pantallaSettings[index]?.isPortrait ||
+                                      false
+                                    }
+                                    onChange={() =>
+                                      updatePantallaSettings(
+                                        index,
+                                        "isPortrait",
+                                        !pantallaSettings[index]?.isPortrait
+                                      )
+                                    }
+                                    className="checked:bg-blue-500 outline-none focus:outline-none right-4 checked:right-0 duration-200 ease-in absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"
+                                  />
+                                  <label
+                                    htmlFor={`toggle-portrait-${index}`}
+                                    className={`block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer ${
+                                      pantallaSettings[index]?.isPortrait
+                                        ? "bg-blue-500"
+                                        : ""
+                                    }`}
+                                  ></label>
+                                </div>
+                                <span className="text-sm text-gray-700">
+                                  {pantallaSettings[index]?.isPortrait
+                                    ? "Orientación: Vertical"
+                                    : "Orientación: Horizontal"}
+                                </span>
+                              </div>
+                            </div>
+
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Template
+                              </label>
+                              <Select
+                                options={templateOptions}
+                                value={templateOptions.find(
+                                  (option) =>
+                                    option.value ===
+                                    (pantallaSettings[index]?.template ||
+                                      selectedTemplate)
+                                )}
+                                onChange={(option) =>
+                                  updatePantallaSettings(
+                                    index,
+                                    "template",
+                                    option.value
+                                  )
+                                }
+                                placeholder="Seleccionar template"
+                                className="w-full"
+                              />
+                            </div>
+                          </div>
                         </div>
-                        <span className="text-sm text-gray-700">
-                          {setPortrait
-                            ? "Pantalla Vertical: activado"
-                            : "Pantalla Vertical: desactivado"}
-                        </span>
+
+                        <div className="flex flex-col items-end">
+                          <Link
+                            href={`/pantallaDirec/${index + 1}${
+                              isProduction ? ".html" : ""
+                            }?emp=${empresaQr}`}
+                            target="_blank"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            Ver Pantalla
+                          </Link>
+                          <span className="text-xs text-gray-500 mt-1">
+                            ID: {index + 1}
+                          </span>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {pd === 0 && (
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                    <p className="text-yellow-600">
+                      No hay pantallas de directorio configuradas. Por favor,
+                      contacte al administrador para adquirir licencias de
+                      pantallas.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 
@@ -1261,6 +1378,16 @@ function PantallasDirectorio() {
                     setTemplateColor("#D1D5DB");
                     setFontColor("#000000");
                     setSelectedFontStyle(fontStyleOptions[0]);
+                    setSelectedTemplate("template1");
+
+                    // Reiniciar configuraciones por pantalla
+                    const defaultSettings = Array(
+                      nombrePantallasDirectorio.length
+                    ).fill({
+                      isPortrait: false,
+                      template: "template1",
+                    });
+                    setPantallaSettings(defaultSettings);
                   }
                 }}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"

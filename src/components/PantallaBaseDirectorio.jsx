@@ -1,4 +1,3 @@
-// components/PantallaBaseDirectorio.jsx
 "use client";
 import {
   collection,
@@ -14,19 +13,18 @@ import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import LogIn from "@/app/login/page";
 import AdvertisementSlider from "@/components/sliderPublicidadPD";
-import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PDTemplateManager";
 import {
   formatDate,
   getCurrentTime,
   isWithinTimeRange,
-} from "@/utils/dateUtils"; // <-- Mayúscula en "Utils"
+} from "@/utils/dateUtils";
 
-import { fetchWeatherData } from "@/utils/weatherUtils"; // <-- Separado en otro archivo
+import { fetchWeatherData } from "@/utils/weatherUtils";
 
 import QRCode from "qrcode.react";
 
@@ -48,17 +46,15 @@ const retryOperation = async (operation, retries = MAX_RETRIES) => {
   }
 };
 
-const DirectoryScreen = ({ screenNumber, empresa }) => {
+export default function BaseDirectorioClient({ id }) {
+  const screenNumber = parseInt(id, 10);
   const { t } = useTranslation();
   const pathname = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPortrait, setIsPortrait] = useState(false);
-  console.log(
-    "🚀 ~ PantallaBaseDirectorio.jsx:58 ~ DirectoryScreen ~ isPortrait:",
-    isPortrait
-  );
   const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
 
@@ -88,9 +84,90 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
     []
   );
 
+  // Respaldo de detección de orientación
   const checkOrientation = useCallback(() => {
-    setIsPortrait(window.innerHeight > window.innerWidth);
+    const defaultOrientation = window.innerHeight > window.innerWidth;
+    setIsPortrait(defaultOrientation);
   }, []);
+
+  // Obtiene la configuración de orientación para esta pantalla específica
+  const getScreenOrientation = useCallback(
+    (templateData) => {
+      // Verificar si hay configuración por pantalla
+      if (templateData && typeof templateData === "object") {
+        console.log(
+          "Buscando configuración de orientación para pantalla:",
+          screenNumber
+        );
+
+        // Opción 1: Buscar en screenSettings si existe
+        if (
+          templateData.screenSettings &&
+          templateData.screenSettings[screenNumber] &&
+          typeof templateData.screenSettings[screenNumber].setPortrait !==
+            "undefined"
+        ) {
+          const orientation =
+            !!templateData.screenSettings[screenNumber].setPortrait;
+          console.log(
+            `Encontrada orientación específica para pantalla ${screenNumber}:`,
+            orientation
+          );
+          return orientation;
+        }
+
+        // Opción 2: Buscar en pantallasSettings si existe (formato alternativo)
+        if (
+          templateData.pantallasSettings &&
+          templateData.pantallasSettings[screenNumber] &&
+          typeof templateData.pantallasSettings[screenNumber].setPortrait !==
+            "undefined"
+        ) {
+          const orientation =
+            !!templateData.pantallasSettings[screenNumber].setPortrait;
+          console.log(
+            `Encontrada orientación específica para pantalla ${screenNumber}:`,
+            orientation
+          );
+          return orientation;
+        }
+
+        // Opción 3: Buscar en pantallaDirectorioSettings si existe (otro formato posible)
+        if (
+          templateData.pantallaDirectorioSettings &&
+          templateData.pantallaDirectorioSettings[screenNumber] &&
+          typeof templateData.pantallaDirectorioSettings[screenNumber]
+            .setPortrait !== "undefined"
+        ) {
+          const orientation =
+            !!templateData.pantallaDirectorioSettings[screenNumber].setPortrait;
+          console.log(
+            `Encontrada orientación específica para pantalla ${screenNumber}:`,
+            orientation
+          );
+          return orientation;
+        }
+
+        // Opción 4: Usar la configuración global como respaldo
+        if (typeof templateData.setPortrait !== "undefined") {
+          console.log(
+            "Usando configuración de orientación global:",
+            templateData.setPortrait
+          );
+          return !!templateData.setPortrait;
+        }
+      }
+
+      // Si no hay configuración, usar detección automática
+      const defaultOrientation = window.innerHeight > window.innerWidth;
+      console.log(
+        "No se encontró configuración de orientación, usando detección automática:",
+        defaultOrientation
+      );
+      return defaultOrientation;
+    },
+    [screenNumber]
+  );
 
   const filterCurrentEvents = useCallback(
     (events, company, screenNames, currentScreenNumber) => {
@@ -186,6 +263,7 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
     },
     []
   );
+
   const loadAds = useCallback(
     async (userCompany) => {
       try {
@@ -222,18 +300,9 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
     }
   }, [user]);
 
+  // Efecto para detección de orientación como respaldo
   useEffect(() => {
-    const handleResize = debounce(() => {
-      checkOrientation();
-    }, 300);
-
-    window.addEventListener("resize", handleResize);
     checkOrientation();
-
-    return () => {
-      window.removeEventListener("resize", handleResize);
-      handleResize.cancel();
-    };
   }, [checkOrientation]);
 
   useEffect(() => {
@@ -247,6 +316,14 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
       return () => clearInterval(timer);
     }
   }, [screenData, user]);
+
+  // Actualizar orientación cuando cambian los templates
+  useEffect(() => {
+    if (templates) {
+      const orientation = getScreenOrientation(templates);
+      setIsPortrait(orientation);
+    }
+  }, [templates, getScreenOrientation]);
 
   useEffect(() => {
     if (!user || !db) return;
@@ -272,7 +349,7 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
           nombrePantallasDirectorio: userData.nombrePantallasDirectorio,
           pantallas: userData.pantallas,
         });
-        const userCompany = empresa || userData.empresa;
+        const userCompany = userData.empresa;
         const screenNames = userData.nombrePantallasDirectorio || {};
 
         // Obtener el nombre de la pantalla actual basado en el número de pantalla
@@ -288,6 +365,7 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
             nombrePantallas: screenNames,
           },
         }));
+
         // Events subscription
         const eventsRef = query(
           collection(db, "eventos"),
@@ -339,18 +417,37 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
             ...doc.data(),
           }))[0];
 
-          if (templates?.ciudad) {
-            fetchWeatherData(templates.ciudad)
-              .then((weatherData) => {
-                setScreenData((prev) => ({
-                  ...prev,
-                  templates,
-                  weatherData,
-                }));
-              })
-              .catch((error) => {
-                console.error(t("errors.weather"), error);
-              });
+          if (templates) {
+            // Obtener orientación específica para esta pantalla
+            const screenOrientation = getScreenOrientation(templates);
+            setIsPortrait(screenOrientation);
+
+            console.log("Template obtenido:", templates);
+            console.log(
+              "Orientación para pantalla",
+              screenNumber,
+              ":",
+              screenOrientation
+            );
+
+            if (templates.ciudad) {
+              fetchWeatherData(templates.ciudad)
+                .then((weatherData) => {
+                  setScreenData((prev) => ({
+                    ...prev,
+                    templates,
+                    weatherData,
+                  }));
+                })
+                .catch((error) => {
+                  console.error(t("errors.weather"), error);
+                });
+            } else {
+              setScreenData((prev) => ({
+                ...prev,
+                templates,
+              }));
+            }
           }
         });
 
@@ -381,7 +478,15 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
       mounted = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [user, db, screenNumber, filterCurrentEvents, loadAds, t, empresa]);
+  }, [
+    user,
+    db,
+    screenNumber,
+    filterCurrentEvents,
+    loadAds,
+    t,
+    getScreenOrientation,
+  ]);
 
   useEffect(() => {
     const interval = setInterval(debouncedSetCurrentTime, 1000);
@@ -430,21 +535,21 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
 
   if (screenData.events.length === 0 && screenData.ads.length === 0) {
     return (
-      <div className="flex justify-center items-center h-screen">
-        <p>
-          {t("errors.noContent", { countdown })}
-          {qrCodeUrl && (
-            <QRCode value={qrCodeUrl} size={128} className="mt-4" />
-          )}
-        </p>
+      <div className="flex justify-center items-center h-screen flex-col">
+        <p className="text-xl mb-4">{t("errors.noContent", { countdown })}</p>
+        {qrCodeUrl && <QRCode value={qrCodeUrl} size={128} className="mt-4" />}
       </div>
     );
   }
+
   console.log(
-    "🚀 ~ PantallaBaseDirectorio.jsx:446 ~ DirectoryScreen ~ weatherData:",
-    weatherData
+    "Renderizando pantalla",
+    screenNumber,
+    "con orientación:",
+    isPortrait ? "Vertical" : "Horizontal"
   );
-  // Update the return statement at the end of the component
+
+  // Render appropriate content
   return screenData.events.length > 0 ? (
     <TemplateManager
       templateId={templates.template}
@@ -454,7 +559,8 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
       currentTime={screenData.currentTime}
       isPortrait={isPortrait}
       t={t}
-      qrCodeUrl={qrCodeUrl} // Pass the QR code URL
+      qrCodeUrl={qrCodeUrl}
+      screenNumber={screenNumber}
     />
   ) : (
     <AdvertisementSlider
@@ -467,11 +573,4 @@ const DirectoryScreen = ({ screenNumber, empresa }) => {
       weatherData={weatherData}
     />
   );
-};
-
-DirectoryScreen.propTypes = {
-  screenNumber: PropTypes.number.isRequired,
-  empresa: PropTypes.string,
-};
-
-export default DirectoryScreen;
+}
