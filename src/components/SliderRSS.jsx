@@ -1,132 +1,158 @@
 import React, { useEffect, useState } from "react";
-import { useKeenSlider } from "keen-slider/react";
-import "keen-slider/keen-slider.min.css";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
 
-const animation = { duration: 30000, easing: (t) => t };
-
-export default function SliderRSS() {
+export default function VerticalNewsSwiper() {
   const [rssItems, setRssItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const [sliderRef] = useKeenSlider({
-    loop: true,
-    renderMode: "performance",
-    drag: false,
-    created(s) {
-      s.moveToIdx(5, true, animation);
-    },
-    updated(s) {
-      s.moveToIdx(s.track.details.abs + 5, true, animation);
-    },
-    animationEnded(s) {
-      s.moveToIdx(s.track.details.abs + 5, true, animation);
-    },
-    vertical: true,
-    slides: {
-      perView: 2,
-      spacing: 8,
-    },
-  });
+  // Función mejorada para limpiar y formatear el texto
+  const cleanText = (text) => {
+    if (!text) return "";
 
+    // Decodificar entidades HTML
+    let decodedText = decodeHTMLEntities(text);
+
+    // Eliminar etiquetas HTML
+    decodedText = decodedText.replace(/<\/?[^>]+(>|$)/g, " ");
+
+    // Formatear fechas numéricas (12032025 → 12/03/2025)
+    decodedText = formatDateInText(decodedText);
+
+    // Limpiar caracteres especiales pero preservar acentos españoles
+    return decodedText.replace(/[^\w\s.,;:'"¿?¡!áéíóúÁÉÍÓÚñÑüÜ/-]/g, "");
+  };
+
+  // Decodificar entidades HTML
+  const decodeHTMLEntities = (text) => {
+    if (!text) return "";
+    const textArea = document.createElement("textarea");
+    textArea.innerHTML = text;
+    return textArea.value;
+  };
+
+  // Formatear fechas en el texto (busca secuencias como 12032025 y las convierte a 12/03/2025)
+  const formatDateInText = (text) => {
+    // Busca patrones de fecha numérica de 8 dígitos (DDMMYYYY)
+    return text.replace(
+      /\b(\d{2})(\d{2})(\d{4})\b/g,
+      function (match, day, month, year) {
+        return `${day}/${month}/${year}`;
+      }
+    );
+  };
+
+  // Procesar el título para mejorar su presentación
+  const processTitle = (title) => {
+    // Eliminar prefijos comunes como "🔴" o emojis
+    let processed = title.replace(/^[🔴⚠️📢📣]\s+/, "");
+
+    // Formatear fechas numéricas
+    processed = formatDateInText(processed);
+
+    // Formatear "En Vivo" para mayor consistencia
+    processed = processed.replace(/\(En Vivo\)$/i, "(En vivo)");
+
+    return processed;
+  };
+
+  // Obtener los datos RSS
   useEffect(() => {
     setLoading(true);
 
-    // Using fetch instead of axios
     fetch("https://upperds.onrender.com/fetch-rss")
       .then((response) => {
         if (!response.ok) {
-          throw new Error("Network response was not ok");
+          throw new Error("Error al cargar noticias");
         }
         return response.json();
       })
       .then((data) => {
-        const items = data.items.map((item) => ({
-          title: removeSymbols(decodeEntities(item.title)),
-          link: item.link,
-          description: removeSymbols(decodeEntities(item.description)),
-          pubDate: item.pubDate
-            ? new Date(item.pubDate).toLocaleDateString()
-            : null,
-        }));
-        setRssItems(items);
+        if (data && data.items && Array.isArray(data.items)) {
+          const processedItems = data.items.map((item) => ({
+            title: processTitle(cleanText(item.title)),
+            link: item.link,
+            description: cleanText(item.description),
+            pubDate: item.pubDate
+              ? new Date(item.pubDate).toLocaleDateString("es-MX", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })
+              : null,
+          }));
+          setRssItems(processedItems);
+        } else {
+          throw new Error("Formato de datos inválido");
+        }
         setLoading(false);
       })
       .catch((error) => {
-        console.error("Error fetching or parsing RSS feed:", error);
+        console.error("Error fetching RSS:", error);
         setError("No se pudieron cargar las noticias");
         setLoading(false);
       });
   }, []);
 
-  const removeSymbols = (text) => {
-    if (!text) return "";
-    const regex = /[^\w\s.,'"áéíóúÁÉÍÓÚñÑ:-]/g;
-    return text.replace(regex, "");
-  };
+  // Si no hay datos, mostrar un estado de carga o error
+  if (loading) {
+    return (
+      <div className="bg-gray-800 text-white rounded-t-md">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-20">
+          <div className="w-5 h-5 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mr-2"></div>
+          <span className="text-base">Cargando noticias...</span>
+        </div>
+      </div>
+    );
+  }
 
-  const decodeEntities = (encodedString) => {
-    if (!encodedString) return "";
-    const textArea = document.createElement("textarea");
-    textArea.innerHTML = encodedString;
-    return textArea.value;
-  };
+  if (error) {
+    return (
+      <div className="bg-gray-800 text-white rounded-t-md">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-20 text-red-500 text-base">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
-  const truncateText = (text, maxLength = 80) => {
-    if (!text) return "";
-    return text;
-  };
-
-  // Ensure we have at least 8 items in the slider, duplicate if needed
-  const displayItems =
-    rssItems.length > 0
-      ? [...rssItems, ...rssItems].slice(0, 10)
-      : new Array(8).fill(null);
+  if (rssItems.length === 0) {
+    return (
+      <div className="bg-gray-800 text-white rounded-t-md">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-20 text-base">
+          No hay noticias disponibles
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full">
-      <div className="bg-gradient-to-r from-gray-200 to-white rounded-lg shadow-md overflow-hidden">
-        {loading ? (
-          <div className="h-10 flex items-center justify-center">
-            <div className="w-6 h-6 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin"></div>
-            <p className="ml-2 text-gray-600">Cargando noticias...</p>
-          </div>
-        ) : error ? (
-          <div className="h-28 flex items-center justify-center text-red-500">
-            {error}
-          </div>
-        ) : (
-          <div ref={sliderRef} className="keen-slider h-28 px-3 py-2">
-            {displayItems.map((item, index) => (
-              <div
-                key={index}
-                className="keen-slider__slide px-2 py-1 border-b border-gray-200 last:border-0"
-              >
-                {item ? (
-                  <div className="flex flex-col">
-                    <h3 className="text-lg font-bold text-gray-800 truncate">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 line-clamp-2">
-                      {truncateText(item.description)}
-                    </p>
-                    {item.pubDate && (
-                      <span className="text-xs text-gray-500 mt-1">
-                        {item.pubDate}
-                      </span>
-                    )}
-                  </div>
-                ) : (
-                  <div className="animate-pulse flex flex-col">
-                    <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-full mb-1"></div>
-                    <div className="h-3 bg-gray-200 rounded w-2/3"></div>
-                  </div>
-                )}
+    <div className="bg-gray-800 text-white rounded-t-md">
+      <div className="bg-white text-gray-900">
+        <Swiper
+          direction="vertical" // Cambiado a vertical
+          slidesPerView={1}
+          spaceBetween={0}
+          loop={true}
+          speed={1000}
+          autoplay={{
+            delay: 10000, // 10 segundos para dar tiempo a leer el contenido completo
+            disableOnInteraction: false,
+          }}
+          modules={[Autoplay]}
+          className="w-full h-36" // Definida altura fija
+        >
+          {rssItems.map((item, index) => (
+            <SwiperSlide key={index}>
+              <div className="p-2 overflow-y-auto h-full">
+                <h3 className="font-bold text-base mb-1">{item.title}</h3>
+                <p className="text-sm text-gray-800">{item.description}</p>
               </div>
-            ))}
-          </div>
-        )}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );

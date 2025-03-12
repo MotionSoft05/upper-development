@@ -14,12 +14,27 @@ const PDTemplate1Horizontal = ({
   t,
   screenNumber,
 }) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const [windowSize, setWindowSize] = useState({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
 
-  const [isLoading, setIsLoading] = useState(true);
+  // Monitor window size for responsive adjustments
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Initial call
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Set loading to false when weather data is fetched or times out
   useEffect(() => {
@@ -35,63 +50,6 @@ const PDTemplate1Horizontal = ({
     return () => clearTimeout(timer);
   }, [weatherData]);
 
-  // Update window size on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setWindowSize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
-    };
-
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
-  // Setup for date formatting
-  const [currentDate, setCurrentDate] = useState(new Date());
-
-  // Número máximo de eventos a mostrar por página en vista horizontal
-  const eventsPerPage = 5;
-
-  // Determinar cuando mostrar el slider
-  const shouldUseSlider = events.length > eventsPerPage;
-
-  // Format current date in correct language format
-  const formatDate = () => {
-    const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
-    ];
-
-    const meses = [
-      "ENERO",
-      "FEBRERO",
-      "MARZO",
-      "ABRIL",
-      "MAYO",
-      "JUNIO",
-      "JULIO",
-      "AGOSTO",
-      "SEPTIEMBRE",
-      "OCTUBRE",
-      "NOVIEMBRE",
-      "DICIEMBRE",
-    ];
-
-    const day = currentDate.getDay();
-    const date = currentDate.getDate();
-    const month = currentDate.getMonth();
-    const year = currentDate.getFullYear();
-
-    return `${diasSemana[day]} ${date} DE ${meses[month]} ${year}`;
-  };
-
   // Update date every minute
   useEffect(() => {
     const timer = setInterval(() => {
@@ -100,6 +58,33 @@ const PDTemplate1Horizontal = ({
 
     return () => clearInterval(timer);
   }, []);
+
+  // Fixed number of events per page - always 4
+  const eventsPerPage = 4;
+
+  // Dividir eventos en grupos para el slider
+  const chunkEvents = (arr, size) => {
+    const chunks = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(arr.slice(i, i + size));
+    }
+    return chunks;
+  };
+
+  const eventChunks = chunkEvents(events, eventsPerPage);
+  const shouldUseSlider = events.length > eventsPerPage;
+
+  // Get template settings with defaults
+  const templateActual = {
+    templateColor: "#E2E8F0",
+    fontColor: "#000000",
+    fontStyle: "sans-serif",
+    ...template,
+  };
+
+  // Get the screen name from template if available
+  const screenName =
+    template?.nombrePantallas?.[screenNumber - 1] || `Pantalla ${screenNumber}`;
 
   // Configuración del slider con autoplay
   const [sliderRef] = useKeenSlider(
@@ -113,9 +98,6 @@ const PDTemplate1Horizontal = ({
       dragSpeed: 0.5,
       defaultAnimation: {
         duration: 2000,
-      },
-      slideChanged(slider) {
-        console.log("Slide changed to:", slider.track.details.abs);
       },
     },
     [
@@ -155,311 +137,290 @@ const PDTemplate1Horizontal = ({
     ]
   );
 
-  // Dividir eventos en grupos para el slider
-  const chunkEvents = (arr, size) => {
-    const chunks = [];
-    for (let i = 0; i < arr.length; i += size) {
-      chunks.push(arr.slice(i, i + size));
-    }
-    return chunks;
-  };
-
-  const eventChunks = chunkEvents(events, eventsPerPage);
-
-  // Get template settings with defaults
-  const templateActual = {
-    templateColor: "#00BFFF",
-    fontColor: "#FFFFFF",
-    fontStyle: "Arial, sans-serif",
-    ...template,
-  };
-  // Get the screen name from template if available
-  const screenName =
-    template?.nombrePantallas?.[screenNumber - 1] || `Pantalla ${screenNumber}`;
-
-  // Event display component for horizontal mode
-  const EventCard = ({ event, index }) => (
-    <div
-      className="flex items-center space-x-4 border-b pr-8"
-      style={{
-        height: event ? "auto" : "110px",
-        borderColor: templateActual.templateColor || "#e5e7eb",
-      }}
-    >
-      {event ? (
-        <>
-          <div
-            style={{
-              position: "relative",
-              overflow: "hidden",
-              width: "20vw",
-              height: "20vw",
-              maxWidth: "100px",
-              maxHeight: "100px",
-            }}
-          >
-            <img
-              className="object-contain my-2 shadow-xl"
-              src={event.images && event.images[0]}
-              alt={event.nombreEvento}
-              style={{
-                width: "5vw",
-                height: "5vw",
-                objectFit: "cover",
-              }}
-            />
-          </div>
-
-          <div className="w-full">
-            <h3 className="font-bold mb-4 text-base lg:text-3xl">
-              {event.nombreEvento}
-            </h3>
-            <div className="grid grid-cols-3 gap-1 font-bold text-xs">
-              {/* Columna 1: Tipo de evento (span completo) */}
-              <p className="col-span-3">{event.tipoEvento}</p>
-
-              {/* Mostramos el nombre de la pantalla específica a la que está asignado el evento */}
-              <p className="text-base">
-                {(event.devices &&
-                  event.devices.find(
-                    (d) =>
-                      template?.nombrePantallas &&
-                      Object.values(template.nombrePantallas).includes(d)
-                  )) ||
-                  screenName}
-              </p>
-              {/* Columna 1: Dispositivo (a la izquierda) */}
-              <p className="">{event.devices && event.devices[0]}</p>
-
-              {/* Columna 2: Lugar (en el centro) */}
-              <p className="text-center">{event.lugar}</p>
-
-              {/* Columna 3: Rango de horas (a la derecha) */}
-              <p className="text-right">
-                {event.horaInicialSalon} a {event.horaFinalSalon}HRS
-              </p>
-            </div>
-          </div>
-        </>
-      ) : (
-        // Si no hay evento, mostrar el espacio vacío
-        <p></p>
-      )}
-    </div>
-  );
-
-  const obtenerFecha = () => {
+  const formatCompleteDate = () => {
     const diasSemana = [
-      "DOMINGO",
-      "LUNES",
-      "MARTES",
-      "MIÉRCOLES",
-      "JUEVES",
-      "VIERNES",
-      "SÁBADO",
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
     ];
 
     const meses = [
-      "1",
-      "2",
-      "3",
-      "4",
-      "5",
-      "6",
-      "7",
-      "8",
-      "9",
-      "10",
-      "11",
-      "12",
+      "Enero",
+      "Febrero",
+      "Marzo",
+      "Abril",
+      "Mayo",
+      "Junio",
+      "Julio",
+      "Agosto",
+      "Septiembre",
+      "Octubre",
+      "Noviembre",
+      "Diciembre",
     ];
 
     const now = new Date();
     const diaSemana = diasSemana[now.getDay()];
     const dia = now.getDate();
     const mes = meses[now.getMonth()];
+    const year = now.getFullYear();
 
-    return `${diaSemana} ${dia}/${mes} `;
+    return `${diaSemana} ${dia} ${mes} ${year}`;
   };
 
   return (
-    <section className="relative inset-0 w-full min-h-screen md:fixed sm:fixed min-[120px]:fixed bg-white">
-      <div className="bg-white text-black flex flex-col justify-center">
-        <div
-          id="Content"
-          className="flex-grow flex flex-col justify-center mx-2 my-2"
-        >
-          {/* Header */}
-          <div className="flex flex-col items-center justify-center md:flex-row md:justify-between">
-            {/* Logo en la esquina superior izquierda */}
-            <div className="">
-              {templateActual.logo && (
-                <>
-                  <div
-                    className="max-w-[150px] lg:max-w-[250px]"
-                    style={{
-                      marginBottom: "20px",
-                    }}
-                  >
-                    <img
-                      src={templateActual.logo}
-                      alt="Logo"
-                      className="rounded-lg object-contain w-full h-full"
-                    />
-                  </div>
-                </>
-              )}
+    <div
+      className="flex flex-col h-screen bg-white overflow-hidden"
+      style={{ fontFamily: templateActual.fontStyle }}
+    >
+      {/* Header Section */}
+      <header className="px-8 py-4 flex justify-between items-center">
+        {/* Logo */}
+        <div className="flex-shrink-0 w-32 h-12">
+          {templateActual.logo ? (
+            <img
+              src={templateActual.logo}
+              alt="Logo"
+              className="h-full w-auto object-contain"
+            />
+          ) : (
+            <div className="h-full w-full bg-gray-100 flex items-center justify-center rounded">
+              <span className="text-gray-400">Logo</span>
             </div>
-            {/* Titulo, fecha y hora central */}
-            <div className="flex flex-col text-color items-center md:ml-4">
-              <p className="text-xs lg:text-2xl text-center mb-2">
-                {obtenerFecha()} Hr: {currentTime}
-              </p>
-              <h1 className="text-2xl lg:text-4xl font-bold">
-                Eventos del día
-              </h1>
-            </div>
+          )}
+        </div>
 
-            {/* Clima e Icono */}
-            <div className="flex flex-col md:flex-row text-color items-center md:ml-4">
-              {isLoading ? (
-                <p>Cargando datos del clima...</p>
-              ) : weatherData &&
-                weatherData.current &&
-                weatherData.current.temp_c ? (
-                <div className="flex items-center justify-center md:mr-4">
+        {/* Title and Date */}
+        <div className="flex flex-col items-center">
+          <h1 className="text-2xl font-bold text-center text-gray-800">
+            Eventos del día
+          </h1>
+          <p className="text-sm text-gray-600">{formatCompleteDate()}</p>
+        </div>
+
+        {/* Weather and Time */}
+        <div className="flex flex-col items-end">
+          {isLoading ? (
+            <div className="animate-pulse flex space-x-2">
+              <div className="rounded-full bg-gray-200 h-5 w-5"></div>
+              <div className="rounded bg-gray-200 h-5 w-12"></div>
+            </div>
+          ) : weatherData ? (
+            <>
+              <div className="flex items-center">
+                {weatherData.icon && (
                   <img
-                    src={weatherData.current.condition.icon}
-                    alt="Clima"
-                    className="w-12"
+                    src={weatherData.icon}
+                    alt="Weather"
+                    className="h-6 w-6 mr-1"
                   />
-                  <p className="text-2xl font-bold ml-2 mr-6">
-                    {weatherData.current.temp_c} °C
-                  </p>
-                </div>
-              ) : (
-                <h2 className="text-2xl mr-16">Bienvenido</h2>
-              )}
-            </div>
-          </div>
+                )}
+                <span className="text-lg font-medium text-blue-600">
+                  {weatherData.temp_c
+                    ? `${weatherData.temp_c.toFixed(1)} °C`
+                    : "Sin datos"}
+                </span>
+              </div>
+              <div className="text-lg font-semibold text-gray-800">
+                {currentTime}
+              </div>
+            </>
+          ) : (
+            <span className="text-lg text-gray-500">Sin datos</span>
+          )}
+        </div>
+      </header>
 
-          <div className="">
-            {/* Linea arriba */}
+      {/* Main Content Area - Restructured */}
+      <div className="flex flex-col flex-grow overflow-hidden">
+        {/* Upper Section: Events and Advertising side by side */}
+        <div className="flex flex-grow">
+          {/* Events Column - 75% */}
+          <div className="w-3/4 ml-2 flex flex-col">
+            {/* Events Header */}
             <div
-              className="text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-t-xl h-16"
+              className="py-2 px-4 text-center rounded-t-lg"
               style={{
-                background: `linear-gradient(to bottom, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
+                backgroundColor: templateActual.templateColor,
                 color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
               }}
             >
-              {/* Título */}
-              <h2
-                className="text-white text-4xl text-center"
-                style={{
-                  color: templateActual.fontColor,
-                }}
-              >
-                EVENTOS
-              </h2>
+              <h2 className="text-2xl font-bold uppercase">EVENTOS</h2>
             </div>
 
-            {/* Contenido principal */}
-            <div className="bg-gradient-to-t from-white to-gray-200 text-gray-50">
-              <div className="text-black">
-                {/* Estructura de dos columnas: lista de eventos y publicidad */}
-                <div className="flex flex-col md:flex-row">
-                  {/* Columna de eventos - ocupa 3/4 del ancho */}
-                  <div className="w-full md:w-3/4 space-y-5 pl-2 flex-grow">
-                    {/* Slots predeterminados */}
-                    {shouldUseSlider ? (
-                      <div ref={sliderRef} className="keen-slider">
-                        {eventChunks.map((slideEventos, index) => (
-                          <div key={index} className="keen-slider__slide my-2">
-                            {Array.from({ length: eventsPerPage }).map(
-                              (_, innerIndex) => {
-                                const evento = slideEventos[innerIndex];
-                                return (
-                                  <EventCard
-                                    key={`slider-event-${index}-${innerIndex}`}
-                                    event={evento}
-                                    index={innerIndex}
-                                  />
-                                );
-                              }
-                            )}
-                          </div>
+            {/* Events Content */}
+            <div className="flex-grow overflow-auto bg-gray-50 flex flex-col">
+              {shouldUseSlider ? (
+                <div ref={sliderRef} className="keen-slider h-full">
+                  {eventChunks.map((chunk, index) => (
+                    <div
+                      key={index}
+                      className="keen-slider__slide overflow-hidden h-full"
+                    >
+                      <div className="flex flex-col h-full">
+                        {chunk.map((event, eventIndex) => (
+                          <EventRow
+                            key={`event-${index}-${eventIndex}`}
+                            event={event}
+                            screenName={screenName}
+                            total={chunk.length}
+                          />
+                        ))}
+                        {/* Fill remaining slots with empty rows */}
+                        {Array.from({
+                          length: eventsPerPage - chunk.length,
+                        }).map((_, i) => (
+                          <div
+                            key={`empty-${index}-${i}`}
+                            className="flex-grow border-b border-gray-200"
+                            style={{ height: `${100 / eventsPerPage}%` }}
+                          ></div>
                         ))}
                       </div>
-                    ) : (
-                      // Vista estática sin slider
-                      <div>
-                        {events.length > 0 ? (
-                          Array.from({ length: eventsPerPage }).map(
-                            (_, index) => {
-                              const evento =
-                                index < events.length ? events[index] : null;
-                              return (
-                                <EventCard
-                                  key={`static-event-${index}`}
-                                  event={evento}
-                                  index={index}
-                                />
-                              );
-                            }
-                          )
-                        ) : (
-                          <div className="p-4 text-center text-gray-500">
-                            No hay eventos para mostrar
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Columna de publicidad - ocupa 1/4 del ancho */}
-                  <div className="w-full md:w-1/4 flex items-center justify-center">
-                    {templateActual.publicidad && (
-                      <div className="h-full w-full">
-                        <img
-                          src={templateActual.publicidad}
-                          alt="Publicidad"
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
-                  </div>
+                    </div>
+                  ))}
                 </div>
-              </div>
+              ) : (
+                <div className="h-full flex flex-col">
+                  {events.map((event, index) => (
+                    <EventRow
+                      key={`event-${index}`}
+                      event={event}
+                      screenName={screenName}
+                      total={events.length}
+                    />
+                  ))}
+                  {/* Fill remaining slots with empty rows */}
+                  {Array.from({
+                    length: Math.max(0, eventsPerPage - events.length),
+                  }).map((_, i) => (
+                    <div
+                      key={`empty-${i}`}
+                      className="flex-grow border-b border-gray-200"
+                      style={{ height: `${100 / eventsPerPage}%` }}
+                    ></div>
+                  ))}
+                </div>
+              )}
             </div>
-
-            {/* Linea abajo */}
+            {/* News Header */}
             <div
-              className="text-white py-1 uppercase text-5xl md:text-7xl font-bold px-20 rounded-b-xl h-16 flex justify-center items-end"
+              className="py-1 px-4 text-center rounded-b-lg"
               style={{
-                background: `linear-gradient(to top, ${templateActual.templateColor} 70%, #e3e3e3d9)`,
+                backgroundColor: templateActual.templateColor,
                 color: templateActual.fontColor,
-                fontFamily: templateActual.fontStyle,
               }}
             >
-              {/* Footer */}
-              <h2 className="text-white"></h2>
+              <h2 className="text-lg font-bold uppercase">NOTICIAS</h2>
             </div>
           </div>
 
-          {/* Footer with RSS and QR */}
-          <div className="mt-4 flex justify-between items-center">
-            <div className="w-3/4">
+          {/* Advertising Column - 25% */}
+          <div className="w-1/4 flex items-center justify-center  bg-white">
+            {templateActual.publicidad ? (
+              <img
+                src={templateActual.publicidad}
+                alt="Publicidad"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <span className="text-gray-400">Espacio publicitario</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Lower Section: News and QR side by side */}
+        <div className="flex h-32 py-2  ">
+          {/* News Column - 75% */}
+          <div className="w-3/4 flex ml-2 flex-col">
+            {/* RSS Feed */}
+            <div className="flex-grow bg-white">
               <SliderRSS />
             </div>
-            <div className="w-1/4 flex flex-col items-center">
-              <p className="text-center">QR de Eventos</p>
-              {qrCodeUrl && <QRCode value={qrCodeUrl} size={70} />}
-            </div>
+          </div>
+
+          {/* QR Code Column - 25% */}
+          <div className="w-1/4 flex flex-col items-center justify-center   h-full">
+            {qrCodeUrl ? (
+              <div className="flex flex-col items-center justify-center h-full">
+                <span className="text-xs text-gray-600 mb-1">
+                  QR de Eventos
+                </span>
+                <QRCode value={qrCodeUrl} size={60} />
+                <span className="text-xs text-gray-600 mt-1">
+                  Escanea para más información
+                </span>
+              </div>
+            ) : (
+              <span className="text-gray-500 text-xs">QR no disponible</span>
+            )}
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  );
+};
+
+// Event display component that matches the design in the screenshots
+const EventRow = ({ event, screenName, total }) => {
+  if (!event) return null;
+
+  // Calculate height percentage based on number of events
+  const heightPercentage = 100 / 4; // Always show 4 events
+
+  return (
+    <div
+      className="flex items-center border-b border-gray-200 px-6 hover:bg-gray-100"
+      style={{ height: `${heightPercentage}%` }}
+    >
+      {/* Image container with fixed dimensions */}
+      <div className="flex-shrink-0 h-12 w-12 relative mr-4">
+        {event.images && event.images.length > 0 ? (
+          <img
+            src={event.images[0]}
+            alt={event.nombreEvento}
+            className="h-full w-full object-cover"
+          />
+        ) : (
+          <div className="h-full w-full bg-gray-200 flex items-center justify-center">
+            <span className="text-gray-400 text-xs">Sin imagen</span>
+          </div>
+        )}
+      </div>
+
+      {/* Event details - Using prefix // and / as in the screenshot */}
+      <div className="flex-grow">
+        {/* Event title with prefix // */}
+        <h3 className="font-bold text-lg">{event.nombreEvento}</h3>
+
+        {/* Event type with prefix / */}
+        <div className="flex items-center">
+          <p className="text-sm">/{event.tipoEvento}</p>
+        </div>
+
+        {/* Screen name or location if available */}
+        {event.devices && event.devices[0] && (
+          <div className="text-sm">{event.devices[0]}</div>
+        )}
+      </div>
+
+      {/* Right side info: location and time */}
+      <div className="flex flex-col items-end">
+        {/* Location with prefix / */}
+        <p className="text-sm text-right">{event.lugar}</p>
+
+        {/* Time range */}
+        <p className="text-sm font-medium">
+          {event.horaInicialSalon} a {event.horaFinalSalon}HRS
+        </p>
+      </div>
+    </div>
   );
 };
 
