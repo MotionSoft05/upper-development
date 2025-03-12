@@ -36,17 +36,31 @@ export default function LayoutWrapper({ children }) {
     return exactMatch || patternMatch;
   };
 
+  // Si estamos en la página de dashboard
+  const isDashboard = pathname.includes("/dashboard");
+
   // Si la ruta debe excluir el layout, solo renderiza el contenido sin header/footer
   if (shouldHideLayout()) {
     return children;
   }
 
-  // De lo contrario, renderiza el layout completo
+  // Si es la página del dashboard, aplicamos una estructura especial
+  if (isDashboard) {
+    return (
+      <div className="flex flex-col min-h-screen">
+        <Navigation />
+        <div className="flex-grow">{children}</div>
+        <Footer />
+      </div>
+    );
+  }
+
+  // De lo contrario, renderiza el layout completo estándar
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       <Navigation />
-      {children}
+      <div className="flex-grow">{children}</div>
       <Footer />
-    </>
+    </div>
   );
 }

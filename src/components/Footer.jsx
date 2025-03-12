@@ -2,9 +2,14 @@
 import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { FaLinkedin, FaTwitter, FaFacebook, FaInstagram } from "react-icons/fa";
+import { usePathname } from "next/navigation";
 
 function Footer() {
   const { t } = useTranslation();
+  const pathname = usePathname();
+
+  // Verificar si estamos en el dashboard para aplicar estilos específicos
+  const isDashboard = pathname.includes("/dashboard");
 
   // Enlaces para las columnas del footer
   const footerLinks = {
@@ -25,8 +30,42 @@ function Footer() {
     ],
   };
 
+  // Si estamos en la página del dashboard, mostrar un footer más simple
+  if (isDashboard) {
+    return (
+      <footer
+        className={`bg-white border-t border-gray-200 mt-auto w-full relative z-10 
+    
+        }`}
+      >
+        <div className="w-full p-4 md:p-6">
+          <div
+            className={`flex flex-col md:flex-row justify-between items-center ml-32${
+              isDashboard ? "md:pl-64" : ""
+            }`}
+          >
+            <div className={`flex items-center mb-4 md:mb-0$`}></div>
+            <div>
+              <img
+                src="/img/logov2.png"
+                className="h-8 mr-3"
+                alt="Upper Logo"
+              />
+              <span className="text-sm text-gray-500">
+                © 2024 Upper™. {t("footer.copyright")}
+              </span>
+            </div>
+            <div></div>
+            <div className="text-sm text-gray-500">Versión: 1.0.0</div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  // Footer completo para otras páginas
   return (
-    <footer className="bg-white border-t border-gray-200">
+    <footer className="bg-white border-t border-gray-200 relative z-10">
       <div className="mx-auto w-full max-w-screen-xl p-6 py-6 lg:py-8">
         <div className="md:flex md:justify-between">
           {/* Logo and company info */}

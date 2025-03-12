@@ -46,6 +46,9 @@ function DashBoard() {
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
 
+  // Estado para controlar la visibilidad del sidebar en dispositivos móviles
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
@@ -71,23 +74,18 @@ function DashBoard() {
     return () => unsubscribe();
   }, []);
 
-  const [sidebarClasses, setSidebarClasses] = useState(
-    "sidebar w-64 md:shadow transform  md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 "
-  );
-
   const toggleSidebar = () => {
-    // Cambia las clases del sidebar al hacer clic en el botón para ocultar o mostrar la barra
-    setSidebarClasses((prevClasses) => {
-      // Si el sidebar tiene las primeras clases, cambia a las segundas y viceversa
-      return prevClasses.includes("-translate-x-full")
-        ? "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 z-50"
-        : "sidebar w-64 md:shadow transform md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 ";
-    });
+    setSidebarVisible(!sidebarVisible);
   };
+
+  // Determinamos las clases del sidebar basado en el estado de visibilidad
+  const sidebarClasses = `sidebar w-64 md:shadow transform ${
+    sidebarVisible ? "translate-x-0" : "-translate-x-full"
+  } md:translate-x-0 transition-transform duration-150 ease-in bg-blue-500 fixed z-50 h-full overflow-y-auto`;
 
   return (
     // <!-- component -->
-    <div className="flex flex-row min-h-screen ">
+    <div className="flex flex-row min-h-screen">
       <aside className={sidebarClasses}>
         <Sidebar
           userEmail={userEmail}
@@ -119,8 +117,8 @@ function DashBoard() {
           toggleSidebar={toggleSidebar}
         />
       </aside>
-      <main className="main flex flex-col flex-grow -ml-64 md:ml-0 transition-all duration-150 ease-in">
-        <div className="">
+      <main className="flex-1 flex flex-col md:ml-64 transition-all duration-150 ease-in min-h-screen overflow-x-auto">
+        <div className="px-4 py-6 mb-20">
           {/* ADMINISTRACIÓN */}
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
@@ -151,13 +149,27 @@ function DashBoard() {
           {showSoporte && <Soporte />}
         </div>
       </main>
-      {/* boton para abrir el sidebar en Mobile */}
+
+      {/* Botón mejorado para abrir el sidebar en mobile */}
       <button
-        className="fixed bottom-4 right-4 bg-blue-500 text-white py-2 px-4 rounded-3xl shadow md:hidden"
+        className="fixed bottom-5 right-5 flex items-center justify-center bg-white/90 backdrop-blur-sm text-blue-500 p-3 rounded-full shadow-lg border border-blue-200 hover:bg-blue-50 transition-all duration-300 md:hidden z-50 group"
         onClick={toggleSidebar}
+        aria-label="Abrir menú"
       >
-        <img src="/img/sidebar.svg" alt="Logo" className="w-8" />
+        <div className="flex flex-col items-center">
+          <div className="w-6 h-0.5 bg-blue-500 mb-1.5"></div>
+          <div className="w-6 h-0.5 bg-blue-500 mb-1.5"></div>
+          <div className="w-6 h-0.5 bg-blue-500"></div>
+        </div>
       </button>
+
+      {/* Overlay para cerrar el sidebar al hacer clic fuera */}
+      {sidebarVisible && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          onClick={toggleSidebar}
+        ></div>
+      )}
     </div>
   );
 }
