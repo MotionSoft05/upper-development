@@ -387,7 +387,7 @@ const PDTemplate1Horizontal = ({
                 <img
                   src={publicidad}
                   alt="Publicidad"
-                  className=" object-contain rounded-lg shadow-sm"
+                  className="w-full h-full object-contain rounded-lg shadow-sm"
                   style={{ borderRadius: "0.5rem" }}
                 />
               </div>
