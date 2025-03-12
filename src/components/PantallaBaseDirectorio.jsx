@@ -590,6 +590,7 @@ export default function BaseDirectorioClient({ id }) {
       }}
       currentTime={screenData.currentTime}
       weatherData={weatherData}
+      isPortrait={isPortrait} // Añadir esta línea
     />
   );
 }

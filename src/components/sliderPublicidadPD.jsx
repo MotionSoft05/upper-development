@@ -1,5 +1,5 @@
 // src/components/sliderPublicidadPD.jsx
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import "keen-slider/keen-slider.min.css";
 
 const AdvertisementSlider = ({
@@ -8,12 +8,54 @@ const AdvertisementSlider = ({
   event,
   currentHour,
   weatherData,
-  idioma,
+  isPortrait = false,
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
   const transitioningRef = useRef(false);
+
+  // Filtrar anuncios por orientación de manera estricta
+  const filteredAds = useMemo(() => {
+    if (!advertisements || advertisements.length === 0) return [];
+
+    const expectedValue = isPortrait ? "vertical" : "horizontal";
+
+    // Imprimir los valores exactos para depuración
+    if (advertisements.length > 0 && advertisements[0].tipoPantalla) {
+      console.log(
+        "Caracteres en tipoPantalla:",
+        JSON.stringify(advertisements[0].tipoPantalla)
+      );
+      console.log(
+        "Caracteres en expectedValue:",
+        JSON.stringify(expectedValue)
+      );
+    }
+
+    // Filtrado más tolerante
+    const orientationFiltered = advertisements.filter((ad) => {
+      // Asegúrate que existe el campo y usa trim() para eliminar espacios
+      if (!ad.tipoPantalla) return false;
+
+      // Comparación normalizada
+      const adValue = ad.tipoPantalla.toString().toLowerCase().trim();
+      const matches = adValue === expectedValue;
+
+      console.log(
+        `Anuncio - tipoPantalla: '${adValue}', esperado: '${expectedValue}', coincide: ${matches}`
+      );
+      return matches;
+    });
+
+    console.log(`Filtrado de anuncios:`, {
+      total: advertisements.length,
+      filtrados: orientationFiltered.length,
+    });
+
+    return orientationFiltered;
+  }, [advertisements, isPortrait]);
+  // El resto del componente permanece igual...
 
   // Format date based on language
   const formatDate = (lang) => {
@@ -40,17 +82,13 @@ const AdvertisementSlider = ({
 
   // Get current advertisement
   const getCurrentAd = () => {
-    if (!advertisements || advertisements.length === 0) return null;
-    return advertisements[currentIndex];
+    if (!filteredAds || filteredAds.length === 0) return null;
+    return filteredAds[currentIndex];
   };
 
   // Handle transition to next ad
   const moveToNextAd = () => {
-    if (
-      !advertisements ||
-      advertisements.length <= 1 ||
-      transitioningRef.current
-    )
+    if (!filteredAds || filteredAds.length <= 1 || transitioningRef.current)
       return;
 
     transitioningRef.current = true;
@@ -60,7 +98,7 @@ const AdvertisementSlider = ({
 
     // After fade out completes, change ad and fade in
     setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredAds.length);
 
       // Small delay before starting fade in
       setTimeout(() => {
@@ -70,9 +108,14 @@ const AdvertisementSlider = ({
     }, 500); // Wait for fade out to complete
   };
 
+  // Reset index when filtered ads change
+  useEffect(() => {
+    setCurrentIndex(0);
+  }, [filteredAds.length]);
+
   // Set up timer for ad rotation
   useEffect(() => {
-    if (!advertisements || advertisements.length === 0) return;
+    if (!filteredAds || filteredAds.length === 0) return;
 
     const currentAd = getCurrentAd();
     if (!currentAd) return;
@@ -99,10 +142,17 @@ const AdvertisementSlider = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, advertisements]);
+  }, [currentIndex, filteredAds]);
 
-  if (!advertisements || advertisements.length === 0) {
-    return null;
+  if (!filteredAds || filteredAds.length === 0) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-gray-100">
+        <p className="text-2xl text-gray-500">
+          No hay publicidades disponibles para la orientación{" "}
+          {isPortrait ? "vertical" : "horizontal"}
+        </p>
+      </div>
+    );
   }
 
   const currentAd = getCurrentAd();
@@ -110,6 +160,7 @@ const AdvertisementSlider = ({
 
   const templateActual = templates || {};
   const isLoading = !weatherData;
+  const idioma = templateActual.idioma || "es";
 
   return (
     <div className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20 flex flex-col">
@@ -131,32 +182,32 @@ const AdvertisementSlider = ({
           className="flex flex-col items-center"
           style={{ fontFamily: templateActual.fontStyle }}
         >
-          {templateActual.idioma === "es" && (
+          {idioma === "es" && (
             <h1 className="text-2xl font-bold text-center">Eventos del día</h1>
           )}
 
-          {templateActual.idioma === "en" && (
+          {idioma === "en" && (
             <h1 className="text-2xl font-bold text-center">
               Today&rsquo;s Events
             </h1>
           )}
 
-          {templateActual.idioma === "es-en" && (
+          {idioma === "es-en" && (
             <>
               <p className="text-2xl font-bold">Eventos del día</p>
               <p className="text-xl font-bold">Today&rsquo;s Events</p>
             </>
           )}
 
-          {templateActual.idioma === "es" && (
+          {idioma === "es" && (
             <p className="text-base text-center">{formatDate("es")}</p>
           )}
 
-          {templateActual.idioma === "en" && (
+          {idioma === "en" && (
             <p className="text-base text-center">{formatDate("en")}</p>
           )}
 
-          {templateActual.idioma === "es-en" && (
+          {idioma === "es-en" && (
             <>
               <p className="text-base">{formatDate("es")}</p>
               <p className="text-base">{formatDate("en")}</p>
@@ -172,10 +223,9 @@ const AdvertisementSlider = ({
           <div>
             {isLoading ? (
               <p>
-                {templateActual.idioma === "en" && "Loading weather data..."}
-                {templateActual.idioma === "es" &&
-                  "Cargando datos del clima..."}
-                {templateActual.idioma === "es-en" &&
+                {idioma === "en" && "Loading weather data..."}
+                {idioma === "es" && "Cargando datos del clima..."}
+                {idioma === "es-en" &&
                   "Cargando datos del clima... / Loading weather data..."}
               </p>
             ) : weatherData?.current?.temp_c || weatherData?.temp_c ? (
@@ -193,9 +243,9 @@ const AdvertisementSlider = ({
               </div>
             ) : (
               <h2 className="text-4xl mr-16">
-                {templateActual.idioma === "en" && "Welcome"}
-                {templateActual.idioma === "es" && "Bienvenido"}
-                {templateActual.idioma === "es-en" && "Bienvenido / Welcome"}
+                {idioma === "en" && "Welcome"}
+                {idioma === "es" && "Bienvenido"}
+                {idioma === "es-en" && "Bienvenido / Welcome"}
               </h2>
             )}
           </div>
@@ -203,7 +253,9 @@ const AdvertisementSlider = ({
       </div>
 
       {/* Advertisement Content - Fills remaining space */}
-      <div className="flex-1 relative">
+      <div
+        className={`flex-1 relative ${isPortrait ? "portrait" : "landscape"}`}
+      >
         <div
           className="absolute inset-0 w-full h-full transition-opacity duration-1000"
           style={{ opacity }}
@@ -211,17 +263,22 @@ const AdvertisementSlider = ({
           {currentAd.videoUrl ? (
             <video
               key={`video-${currentIndex}`}
-              className="w-full h-full object-cover"
+              className={`${
+                isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
+              }`}
               autoPlay
               muted
               playsInline
+              loop
               src={currentAd.videoUrl}
               onEnded={moveToNextAd}
             />
           ) : (
             <img
               key={`image-${currentIndex}`}
-              className="w-full h-full object-cover"
+              className={`${
+                isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
+              }`}
               src={currentAd.imageUrl}
               alt="Advertisement"
             />
