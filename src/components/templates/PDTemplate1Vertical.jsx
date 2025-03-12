@@ -67,6 +67,7 @@ const PDTemplate1Vertical = ({
   qrCodeUrl,
   t,
   screenNumber,
+  publicidad, // Añadir esta nueva prop
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -510,12 +511,12 @@ const PDTemplate1Vertical = ({
         <div className="w-full flex justify-center">
           {" "}
           <div
-            className="h-64 mb-2 w-[30rem]  bg-white rounded-lg overflow-hidden"
+            className="h-64 mb-2 w-[45rem]  bg-white rounded-lg overflow-hidden"
             style={{ flexShrink: 0 }}
           >
-            {templateActual.publicidad ? (
+            {publicidad ? (
               <img
-                src={templateActual.publicidad}
+                src={publicidad}
                 alt="Publicidad"
                 className=" object-contain "
               />

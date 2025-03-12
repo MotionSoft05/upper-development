@@ -13,6 +13,7 @@ const PDTemplate1Horizontal = ({
   qrCodeUrl,
   t,
   screenNumber,
+  publicidad, // Añadir esta nueva prop
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -381,11 +382,11 @@ const PDTemplate1Horizontal = ({
 
           {/* Advertising Column - 25% */}
           <div className="w-1/4 flex items-center justify-center bg-white rounded-lg overflow-hidden">
-            {templateActual.publicidad ? (
+            {publicidad ? (
               <img
-                src={templateActual.publicidad}
+                src={publicidad}
                 alt="Publicidad"
-                className="w-full h-full object-contain rounded-lg"
+                className="  object-contain rounded-lg"
               />
             ) : (
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">

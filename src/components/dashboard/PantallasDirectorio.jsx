@@ -63,6 +63,10 @@ function PantallasDirectorio() {
   const [selectedEmpresa, setSelectedEmpresa] = useState(null);
   const [empresaQr, setEmpresaQR] = useState(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [selectedPublicidadLandscape, setSelectedPublicidadLandscape] =
+    useState(null);
+  const [selectedPublicidadPortrait, setSelectedPublicidadPortrait] =
+    useState(null);
   const authorizedEmails = [
     "uppermex10@gmail.com",
     "ulises.jacobo@hotmail.com",
@@ -251,7 +255,8 @@ function PantallasDirectorio() {
                 logo,
                 templateColor,
                 ciudad,
-                publicidad,
+                publicidadLandscape,
+                publicidadPortrait,
                 idioma,
                 template,
                 pantallaSettings: dbPantallaSettings,
@@ -265,7 +270,8 @@ function PantallasDirectorio() {
               setSelectedLogo(logo || null);
               setTemplateColor(templateColor || "#D1D5DB");
               setSelectedCity({ value: ciudad, label: ciudad });
-              setSelectedPublicidad(publicidad || null);
+              setSelectedPublicidadLandscape(publicidadLandscape || null);
+              setSelectedPublicidadPortrait(publicidadPortrait || null);
               setSelectedLanguage(idioma || "es");
               setSelectedTemplate(template || "template1");
 
@@ -373,7 +379,8 @@ function PantallasDirectorio() {
         setSelectedLogo(logo || null);
         setTemplateColor(templateColor || "#D1D5DB");
         setSelectedCity({ value: ciudad, label: ciudad });
-        setSelectedPublicidad(publicidad || null);
+        setSelectedPublicidadLandscape(publicidadLandscape || null);
+        setSelectedPublicidadPortrait(publicidadPortrait || null);
         setSelectedLanguage(idioma || "es");
         setSelectedTemplate(template || "template1");
 
@@ -593,11 +600,11 @@ function PantallasDirectorio() {
         return;
       }
 
-      if (!selectedPublicidad) {
+      if (!selectedPublicidadLandscape || !selectedPublicidadPortrait) {
         Swal.fire({
           icon: "error",
           title: "Oops...",
-          text: "Por favor, seleccione una imagen para Publicidad.",
+          text: "Por favor, seleccione imágenes para publicidad en ambas orientaciones.",
         });
         return;
       }
@@ -628,7 +635,8 @@ function PantallasDirectorio() {
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
         ciudad: selectedCity.value,
-        publicidad: selectedPublicidad,
+        publicidadLandscape: selectedPublicidadLandscape,
+        publicidadPortrait: selectedPublicidadPortrait,
         idioma: selectedLanguage,
         template: selectedTemplate,
         empresa: selectedEmpresa ? selectedEmpresa.value : nombreEmpresa,
@@ -757,29 +765,47 @@ function PantallasDirectorio() {
       });
     }
   };
-
-  const handlePublicidadChange = async (event) => {
+  const handlePublicidadLandscapeChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
 
     const storageRef = ref(
       storage,
-      `pantallaDirectorioPublicidad/${file.name}`
+      `pantallaDirectorioPublicidad/landscape_${file.name}`
     );
 
     try {
       await uploadBytes(storageRef, file);
       const publicidadUrl = await getDownloadURL(storageRef);
-
-      setSelectedPublicidad(publicidadUrl);
+      setSelectedPublicidadLandscape(publicidadUrl);
     } catch (error) {
       console.error(
-        "Error al subir la imagen de publicidad a Firebase Storage:",
+        "Error al subir la imagen de publicidad horizontal a Firebase Storage:",
         error
       );
     }
   };
 
+  const handlePublicidadPortraitChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const storageRef = ref(
+      storage,
+      `pantallaDirectorioPublicidad/portrait_${file.name}`
+    );
+
+    try {
+      await uploadBytes(storageRef, file);
+      const publicidadUrl = await getDownloadURL(storageRef);
+      setSelectedPublicidadPortrait(publicidadUrl);
+    } catch (error) {
+      console.error(
+        "Error al subir la imagen de publicidad vertical a Firebase Storage:",
+        error
+      );
+    }
+  };
   // Estilos personalizados de React Select
   const customStyles = {
     control: (provided) => ({
@@ -891,7 +917,7 @@ function PantallasDirectorio() {
                 </h2>
 
                 {/* Logo y Publicidad */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 gap-6">
                   {/* Logo */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -942,57 +968,117 @@ function PantallasDirectorio() {
                       )}
                     </div>
                   </div>
+                </div>
 
-                  {/* Publicidad */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("screensDirectory.advertisement")}
-                    </label>
-                    <div className="mt-1 flex items-center space-x-4">
-                      <div className="flex-1">
-                        <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
-                          <div className="space-y-1 text-center">
-                            <svg
-                              className="mx-auto h-12 w-12 text-gray-400"
-                              stroke="currentColor"
-                              fill="none"
-                              viewBox="0 0 48 48"
-                              aria-hidden="true"
-                            >
-                              <path
-                                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                            <div className="flex text-sm text-gray-600">
-                              <span>
-                                {t("screensDirectory.uploadAdvertisement")}
-                              </span>
-                              <input
-                                id="file-upload-pub"
-                                name="file-upload-pub"
-                                type="file"
-                                className="sr-only"
-                                onChange={handlePublicidadChange}
-                              />
+                {/* Publicidades - horizontal y vertical */}
+                <div className="mt-6">
+                  <h3 className="text-lg font-medium text-gray-900">
+                    {t("screensDirectory.advertisement")}
+                  </h3>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                    {/* Publicidad Horizontal */}
+                    <div className=" p-4 rounded-lg">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Publicidad Horizontal (16:9)
+                      </label>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Recomendado para pantallas en orientación horizontal.
+                        Proporción 16:9 (ej. 1920x1080px).
+                      </p>
+                      <div className="mt-1 flex items-center space-x-4">
+                        <div className="flex-1">
+                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
+                            <div className="space-y-1 text-center">
+                              <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 48 48"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              <div className="flex text-sm text-gray-600">
+                                <span>Subir publicidad horizontal</span>
+                                <input
+                                  id="file-upload-landscape"
+                                  name="file-upload-landscape"
+                                  type="file"
+                                  className="sr-only"
+                                  onChange={handlePublicidadLandscapeChange}
+                                />
+                              </div>
                             </div>
-                            <p className="text-xs text-gray-500">
-                              {t("screensDirectory.sizeInfo")}
-                            </p>
-                          </div>
-                        </label>
-                      </div>
-                      {selectedPublicidad && (
-                        <div className="flex-shrink-0">
-                          <img
-                            src={selectedPublicidad}
-                            alt="Publicidad Actual"
-                            className="h-24 w-auto object-contain border rounded p-1"
-                          />
+                          </label>
                         </div>
-                      )}
+                        {selectedPublicidadLandscape && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={selectedPublicidadLandscape}
+                              alt="Publicidad Horizontal"
+                              className="h-24 w-auto object-contain border rounded p-1"
+                            />
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Publicidad Vertical */}
+                    <div className=" p-4 rounded-lg">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">
+                        Publicidad Vertical (9:16)
+                      </label>
+                      <p className="text-xs text-gray-500 mb-3">
+                        Recomendado para pantallas en orientación vertical.
+                        Proporción 9:16 (ej. 1080x1920px).
+                      </p>
+                      <div className="mt-1 flex items-center space-x-4">
+                        <div className="flex-1">
+                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
+                            <div className="space-y-1 text-center">
+                              <svg
+                                className="mx-auto h-12 w-12 text-gray-400"
+                                stroke="currentColor"
+                                fill="none"
+                                viewBox="0 0 48 48"
+                                aria-hidden="true"
+                              >
+                                <path
+                                  d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              </svg>
+                              <div className="flex text-sm text-gray-600">
+                                <span>Subir publicidad vertical</span>
+                                <input
+                                  id="file-upload-portrait"
+                                  name="file-upload-portrait"
+                                  type="file"
+                                  className="sr-only"
+                                  onChange={handlePublicidadPortraitChange}
+                                />
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                        {selectedPublicidadPortrait && (
+                          <div className="flex-shrink-0">
+                            <img
+                              src={selectedPublicidadPortrait}
+                              alt="Publicidad Vertical"
+                              className="h-24 w-auto object-contain border rounded p-1"
+                            />
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

@@ -532,14 +532,23 @@ export default function BaseDirectorioClient({ id }) {
               ":",
               screenOrientation
             );
-
+            // Asegurarnos de que las publicidades estén bien definidas en el template
+            // Añadir propiedades de respaldo si alguna publicidad no está definida
+            const enrichedTemplates = {
+              ...templates,
+              // Asegurar que publicidadLandscape y publicidadPortrait existan
+              publicidadLandscape:
+                templates.publicidadLandscape || templates.publicidad || null,
+              publicidadPortrait:
+                templates.publicidadPortrait || templates.publicidad || null,
+            };
             if (templates.ciudad) {
               fetchWeatherData(templates.ciudad)
                 .then((weatherData) => {
                   if (isMounted.current) {
                     setScreenData((prev) => ({
                       ...prev,
-                      templates,
+                      templates: enrichedTemplates,
                       weatherData,
                     }));
                   }
@@ -550,7 +559,7 @@ export default function BaseDirectorioClient({ id }) {
             } else {
               setScreenData((prev) => ({
                 ...prev,
-                templates,
+                templates: enrichedTemplates,
               }));
             }
           }
@@ -676,6 +685,11 @@ export default function BaseDirectorioClient({ id }) {
       t={t}
       qrCodeUrl={qrCodeUrl}
       screenNumber={screenNumber}
+      publicidad={
+        isPortrait
+          ? templates.publicidadPortrait
+          : templates.publicidadLandscape
+      }
     />
   ) : (
     <AdvertisementSlider

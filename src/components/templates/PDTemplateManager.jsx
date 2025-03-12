@@ -14,6 +14,11 @@ const PDTemplateManager = ({
   qrCodeUrl,
   screenNumber,
 }) => {
+  // Determinar qué publicidad usar según la orientación
+  const publicidad = isPortrait
+    ? template?.publicidadLandscape || template?.publicidad
+    : template?.publicidadPortrait || template?.publicidad;
+  console.log("🚀 ~ PDTemplateManager.jsx:19 ~ publicidad:", publicidad);
   // Seleccionar la versión del template basado en la orientación
   const renderTemplate = () => {
     // Podemos expandir este switch en el futuro para manejar más templates
@@ -30,6 +35,7 @@ const PDTemplateManager = ({
             t={t}
             qrCodeUrl={qrCodeUrl}
             screenNumber={screenNumber}
+            publicidad={publicidad}
           />
         ) : (
           <PDTemplate1Horizontal
@@ -40,6 +46,7 @@ const PDTemplateManager = ({
             t={t}
             qrCodeUrl={qrCodeUrl}
             screenNumber={screenNumber}
+            publicidad={publicidad}
           />
         );
     }
