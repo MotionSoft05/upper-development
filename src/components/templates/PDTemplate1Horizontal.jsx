@@ -399,7 +399,7 @@ const PDTemplate1Horizontal = ({
         </div>
 
         {/* Lower Section: News and QR side by side */}
-        <div className="flex h-32 py-2  ">
+        <div className="flex h-32 py-1  ">
           {/* News Column - 75% */}
           <div className="w-3/4 flex ml-2 flex-col">
             {/* RSS Feed */}
