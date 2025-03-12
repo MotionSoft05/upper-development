@@ -1077,7 +1077,7 @@ function PantallasDirectorio() {
                 </div>
 
                 {/* Selector de Template General */}
-                <div className="mt-4">
+                {/* <div className="mt-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Template por defecto
                   </label>
@@ -1095,7 +1095,7 @@ function PantallasDirectorio() {
                     Puede cambiar el template de cada pantalla individualmente
                     en la pestaña &quot;Pantallas&quot;.
                   </p>
-                </div>
+                </div> */}
               </div>
             )}
 
@@ -1173,7 +1173,7 @@ function PantallasDirectorio() {
                               </div>
                             </div>
 
-                            <div>
+                            {/* <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Template
                               </label>
@@ -1195,7 +1195,7 @@ function PantallasDirectorio() {
                                 placeholder="Seleccionar template"
                                 className="w-full"
                               />
-                            </div>
+                            </div> */}
                           </div>
                         </div>
 
