@@ -1,8 +1,29 @@
 // src/components/templates/PSTemplate2.jsx
 import GetLanguageDate from "@/components/getLanguageDate";
 import EventImageSlider from "@/components/sliders/EventImageSlider";
+const FullScreenImage = ({ image }) => (
+  <div className="fixed inset-0 z-50 bg-black">
+    <img
+      src={image}
+      alt="Full screen event"
+      fill
+      className="object-contain"
+      priority
+    />
+  </div>
+);
 
 export const PSTemplate2 = ({ event, templates, currentHour, t }) => {
+  const [showFullScreen, setShowFullScreen] = useState(false);
+
+  useEffect(() => {
+    setShowFullScreen(event.primeraImagen && event.images?.length > 0);
+  }, [event.primeraImagen, event.images]);
+
+  if (showFullScreen && event.images?.[0]) {
+    return <FullScreenImage image={event.images[0]} />;
+  }
+
   return (
     <section
       className="fixed inset-0 flex flex-col py-4 z-20 bg-white"

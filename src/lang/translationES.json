@@ -686,7 +686,9 @@
       "delete": "Eliminar",
       "cancel": "Cancelar",
       "enable": "Habilitar",
-      "disable": "Deshabilitar"
+      "disable": "Deshabilitar",
+      "next": "Siguiente",
+      "previous": "Anterior"
     },
     "status": {
       "active": "Activo",

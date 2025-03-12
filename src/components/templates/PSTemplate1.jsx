@@ -7,7 +7,9 @@ const FullScreenImage = ({ image }) => (
     <img
       src={image}
       alt="Full screen event"
-      className="w-full h-full object-contain"
+      fill
+      className="object-contain"
+      priority
     />
   </div>
 );

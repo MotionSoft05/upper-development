@@ -273,15 +273,26 @@ const AdvertisementSlider = ({
               src={currentAd.videoUrl}
               onEnded={moveToNextAd}
             />
-          ) : (
+          ) : // Para modo landscape (isPortrait es falso)
+          isPortrait ? (
             <img
               key={`image-${currentIndex}`}
-              className={`${
-                isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
-              }`}
+              className="h-full mx-auto"
               src={currentAd.imageUrl}
               alt="Advertisement"
             />
+          ) : (
+            // Usando Next.js Image para mejor rendimiento en modo landscape
+            <div className="relative w-full h-full">
+              <img
+                key={`image-${currentIndex}`}
+                src={currentAd.imageUrl}
+                alt="Advertisement"
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
           )}
         </div>
       </div>
