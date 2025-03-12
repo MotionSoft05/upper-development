@@ -409,9 +409,9 @@ const PDTemplate1Horizontal = ({
           </div>
 
           {/* QR Code Column - 25% */}
-          <div className="w-1/4 flex flex-col items-center justify-center   h-full">
+          <div className="w-1/4 flex flex-col items-center ">
             {qrCodeUrl ? (
-              <div className="flex flex-col items-center justify-center h-full">
+              <div className="flex flex-col items-center justify-center ">
                 <span className="text-xs text-gray-600 mb-1">
                   {templateActual.idioma === "en" && "Events QR"}
                   {templateActual.idioma === "es" && "QR de Eventos"}
