@@ -931,7 +931,7 @@ function PantallasSalon() {
                                 const enteredValue = e.target.value;
                                 const truncatedValue = enteredValue.slice(
                                   0,
-                                  30
+                                  50
                                 );
                                 const updatedNombres = [...nombrePantallas];
                                 updatedNombres[index] = truncatedValue;
