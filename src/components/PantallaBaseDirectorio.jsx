@@ -27,6 +27,7 @@ import QRCode from "qrcode.react";
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 1000;
 const COUNTDOWN_DURATION = 60;
+const DEFAULT_HOUR = "00:00";
 
 // Calculate milliseconds until next minute starts
 const calculateTimeUntilNextMinute = () => {
@@ -36,20 +37,16 @@ const calculateTimeUntilNextMinute = () => {
   return (60 - seconds) * 1000 - milliseconds;
 };
 
-// Función modificada para que los eventos terminen exactamente a la hora indicada
-const isWithinTimeRange = (currentTime, startTime, endTime) => {
-  // Convert times to minutes for easier comparison
-  const convertTimeToMinutes = (timeString) => {
-    const [hours, minutes] = timeString.split(":").map(Number);
-    return hours * 60 + minutes;
-  };
+// Function to convert time string to minutes
+const convertTimeToMinutes = (timeString) => {
+  const [hours, minutes] = timeString.split(":").map(Number);
+  return hours * 60 + minutes;
+};
 
-  const currentMinutes = convertTimeToMinutes(currentTime);
-  const startMinutes = convertTimeToMinutes(startTime);
-  const endMinutes = convertTimeToMinutes(endTime);
-
-  // Use < instead of <= for end time to make events end exactly at the specified time
-  return currentMinutes >= startMinutes && currentMinutes < endMinutes;
+// Get current time in minutes
+const getCurrentTimeInMinutes = () => {
+  const now = new Date();
+  return now.getHours() * 60 + now.getMinutes();
 };
 
 const retryOperation = async (operation, retries = MAX_RETRIES) => {
@@ -197,7 +194,8 @@ export default function BaseDirectorioClient({ id }) {
       return;
     }
 
-    const currentTime = getCurrentTime();
+    const now = new Date();
+    const nowMinutes = getCurrentTimeInMinutes();
     const userScreenNames = screenData.usuario?.nombrePantallas;
     const userCompany = screenData.usuario?.empresa;
 
@@ -207,7 +205,8 @@ export default function BaseDirectorioClient({ id }) {
     }
 
     console.log("⌛ Revisando eventos activos en memoria...", {
-      currentTime,
+      currentTime: new Date().toLocaleTimeString(),
+      nowMinutes,
       totalEvents: allEventsRef.current.length,
     });
 
@@ -215,7 +214,6 @@ export default function BaseDirectorioClient({ id }) {
       console.log("\nRevisando evento:", event.nombreEvento);
 
       // Date validation
-      const now = new Date();
       const startDate = new Date(event.fechaInicio);
       const endDate = new Date(event.fechaFinal);
       startDate.setHours(0, 0, 0, 0);
@@ -223,12 +221,22 @@ export default function BaseDirectorioClient({ id }) {
 
       const isWithinDateRange = now >= startDate && now <= endDate;
 
-      // Time validation with modified function to end exactly at end time
-      const isWithinTime = isWithinTimeRange(
-        currentTime,
-        event.horaInicialSalon || "00:00",
-        event.horaFinalSalon || "23:59"
-      );
+      // Time validation
+      let startMinutes, endMinutes;
+      if (
+        event.horaInicialSalon === DEFAULT_HOUR &&
+        event.horaFinalSalon === DEFAULT_HOUR
+      ) {
+        startMinutes = 0;
+        endMinutes = 24 * 60 - 1;
+      } else {
+        startMinutes = convertTimeToMinutes(event.horaInicialSalon || "00:00");
+        endMinutes = convertTimeToMinutes(event.horaFinalSalon || "23:59");
+      }
+
+      // Use < for end time to make events end exactly at end time
+      const isWithinTimeRange =
+        nowMinutes >= startMinutes && nowMinutes < endMinutes;
 
       // Device validation
       const hasValidDevice = event.devices?.some(
@@ -239,14 +247,20 @@ export default function BaseDirectorioClient({ id }) {
       const isValidCompany = event.empresa === userCompany;
 
       const result =
-        isWithinDateRange && isWithinTime && hasValidDevice && isValidCompany;
+        isWithinDateRange &&
+        isWithinTimeRange &&
+        hasValidDevice &&
+        isValidCompany;
 
       console.log(`Evento: ${event.nombreEvento}`, {
         fechaOk: isWithinDateRange,
-        horaOk: isWithinTime,
+        horaOk: isWithinTimeRange,
         deviceOk: hasValidDevice,
         companyOk: isValidCompany,
         mostrar: result,
+        startMin: startMinutes,
+        endMin: endMinutes,
+        nowMin: nowMinutes,
       });
 
       return result;
@@ -432,8 +446,62 @@ export default function BaseDirectorioClient({ id }) {
           // Almacenamos todos los eventos en la ref para filtrado en memoria
           allEventsRef.current = events;
 
-          // Filtramos para el momento actual
-          checkCurrentEvents();
+          // Filtramos inmediatamente para el momento actual
+          // Este es el cambio principal que asegura que tengamos eventos filtrados al inicio
+          const now = new Date();
+          const nowMinutes = getCurrentTimeInMinutes();
+          const screenNames = userData.nombrePantallasDirectorio || {};
+
+          const filteredEvents = events.filter((event) => {
+            // Date validation
+            const startDate = new Date(event.fechaInicio);
+            const endDate = new Date(event.fechaFinal);
+            startDate.setHours(0, 0, 0, 0);
+            endDate.setHours(23, 59, 59, 999);
+            const isWithinDateRange = now >= startDate && now <= endDate;
+
+            // Time validation
+            let startMinutes, endMinutes;
+            if (
+              event.horaInicialSalon === DEFAULT_HOUR &&
+              event.horaFinalSalon === DEFAULT_HOUR
+            ) {
+              startMinutes = 0;
+              endMinutes = 24 * 60 - 1;
+            } else {
+              startMinutes = convertTimeToMinutes(
+                event.horaInicialSalon || "00:00"
+              );
+              endMinutes = convertTimeToMinutes(
+                event.horaFinalSalon || "23:59"
+              );
+            }
+
+            const isWithinTimeRange =
+              nowMinutes >= startMinutes && nowMinutes < endMinutes;
+
+            // Device validation
+            const hasValidDevice = event.devices?.some(
+              (device) => screenNames[screenNumber - 1] === device
+            );
+
+            // Company validation
+            const isValidCompany = event.empresa === userCompany;
+
+            return (
+              isWithinDateRange &&
+              isWithinTimeRange &&
+              hasValidDevice &&
+              isValidCompany
+            );
+          });
+
+          console.log("Eventos iniciales filtrados:", filteredEvents.length);
+
+          setScreenData((prev) => ({
+            ...prev,
+            events: filteredEvents,
+          }));
         });
 
         unsubscribers.push(eventsUnsubscribe);
@@ -492,9 +560,9 @@ export default function BaseDirectorioClient({ id }) {
 
         // Ads subscription - Reemplazando la carga única por una suscripción
         const adsRef = query(
-          collection(db, "Publicidad"), // Asegúrate de que esta es la colección correcta
+          collection(db, "Publicidad"),
           where("empresa", "==", userCompany),
-          where("tipo", "==", "directorio") // Ajusta esto según el tipo necesario
+          where("tipo", "==", "directorio")
         );
 
         const adsUnsubscribe = onSnapshot(
@@ -541,7 +609,8 @@ export default function BaseDirectorioClient({ id }) {
       isMounted.current = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [user, db, screenNumber, t, getScreenOrientation]); // Eliminé 'loadAds' ya que ya no lo usamos
+  }, [user, db, screenNumber, t, getScreenOrientation]);
+
   // Rendering states
   if (!user) {
     return <LogIn url={pathname} />;
@@ -617,7 +686,7 @@ export default function BaseDirectorioClient({ id }) {
       }}
       currentTime={screenData.currentTime}
       weatherData={weatherData}
-      isPortrait={isPortrait} // Añadir esta línea
+      isPortrait={isPortrait}
     />
   );
 }
