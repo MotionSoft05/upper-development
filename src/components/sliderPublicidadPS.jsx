@@ -98,7 +98,6 @@ const AdvertisementSlider = ({
         <h1
           className="font-bold uppercase text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-color"
           style={{
-            color: templates?.fontColor,
             fontFamily: templates?.fontStyle,
           }}
         >
