@@ -225,8 +225,15 @@ const PDTemplate1Horizontal = ({
                     : "Sin datos"}
                 </span>
               </div>
-              <div className="text-lg font-semibold text-gray-800">
-                {currentTime}
+              <div className="flex items-center">
+                <img
+                  src="/img/reloj.png"
+                  className="p-1 h-8 mt-1"
+                  alt="Clock"
+                />
+                <div className="text-lg font-semibold text-gray-800">
+                  {currentTime}
+                </div>
               </div>
             </>
           ) : (
