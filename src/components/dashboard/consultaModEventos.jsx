@@ -1142,11 +1142,6 @@ function ConsultaModEvento() {
                 <ChevronRightIcon className="h-5 w-5" />
               </button>
             </div>
-
-            <div className="text-sm text-gray-600">
-              {t("consultaModEventos.page")} {currentPage}{" "}
-              {t("consultaModEventos.of")} {totalPages}
-            </div>
           </div>
         )}
 
