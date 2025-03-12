@@ -171,7 +171,20 @@ const PDTemplate1Horizontal = ({
 
     return `${diaSemana} ${dia} ${mes} ${year}`;
   };
-
+  // Format current date in Spanish and English
+  const formatDate = (language) => {
+    const options = {
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    };
+    if (language === "es") {
+      return currentDate.toLocaleDateString("es-ES", options);
+    } else {
+      return currentDate.toLocaleDateString("en-US", options);
+    }
+  };
   return (
     <div
       className="flex flex-col h-screen bg-white overflow-hidden"
@@ -180,12 +193,12 @@ const PDTemplate1Horizontal = ({
       {/* Header Section */}
       <header className="px-8 py-4 flex justify-between items-center">
         {/* Logo */}
-        <div className="flex-shrink-0 w-32 h-12">
+        <div className="flex-shrink-0 w-44 h-20">
           {templateActual.logo ? (
             <img
               src={templateActual.logo}
               alt="Logo"
-              className="h-full w-auto object-contain"
+              className="h-full w-auto object-contain "
             />
           ) : (
             <div className="h-full w-full bg-gray-100 flex items-center justify-center rounded">
@@ -195,11 +208,41 @@ const PDTemplate1Horizontal = ({
         </div>
 
         {/* Title and Date */}
-        <div className="flex flex-col items-center">
-          <h1 className="text-2xl font-bold text-center text-gray-800">
-            Eventos del día
-          </h1>
-          <p className="text-sm text-gray-600">{formatCompleteDate()}</p>
+        <div
+          className="flex flex-col items-center "
+          style={{ fontFamily: templateActual.fontStyle }}
+        >
+          {templateActual.idioma === "es" && (
+            <h1 className="text-2xl font-bold text-center">Eventos del día</h1>
+          )}
+
+          {templateActual.idioma === "en" && (
+            <h1 className="text-2xl font-bold text-center">
+              Today&rsquo;s Events
+            </h1>
+          )}
+
+          {templateActual.idioma === "es-en" && (
+            <>
+              <p className="text-2xl font-bold">Eventos del día</p>
+              <p className="text-2xl font-bold">Today&rsquo;s Events</p>
+            </>
+          )}
+
+          {templateActual.idioma === "es" && (
+            <p className="text-xs text-center">{formatDate("es")}</p>
+          )}
+
+          {templateActual.idioma === "en" && (
+            <p className="text-xs text-center">{formatDate("en")}</p>
+          )}
+
+          {templateActual.idioma === "es-en" && (
+            <>
+              <p className="text-xs">{formatDate("es")}</p>
+              <p className="text-xs">{formatDate("en")}</p>
+            </>
+          )}
         </div>
 
         {/* Weather and Time */}
@@ -245,9 +288,9 @@ const PDTemplate1Horizontal = ({
       {/* Main Content Area - Restructured */}
       <div className="flex flex-col flex-grow overflow-hidden">
         {/* Upper Section: Events and Advertising side by side */}
-        <div className="flex flex-grow">
+        <div className="flex flex-grow mx-2">
           {/* Events Column - 75% */}
-          <div className="w-3/4 ml-2 flex flex-col">
+          <div className="w-3/4  flex flex-col">
             {/* Events Header */}
             <div
               className="py-2 px-4 text-center rounded-t-lg"
@@ -256,7 +299,12 @@ const PDTemplate1Horizontal = ({
                 color: templateActual.fontColor,
               }}
             >
-              <h2 className="text-2xl font-bold uppercase">EVENTOS</h2>
+              <h2 className="text-2xl font-bold uppercase">
+                {" "}
+                {templateActual.idioma === "en" && "EVENTS"}
+                {templateActual.idioma === "es" && "EVENTOS"}
+                {templateActual.idioma === "es-en" && "EVENTOS / EVENTS"}
+              </h2>
             </div>
 
             {/* Events Content */}
@@ -322,17 +370,22 @@ const PDTemplate1Horizontal = ({
                 color: templateActual.fontColor,
               }}
             >
-              <h2 className="text-lg font-bold uppercase">NOTICIAS</h2>
+              <h2 className="text-2xl font-bold uppercase">
+                {" "}
+                {templateActual.idioma === "en" && "NEWS"}
+                {templateActual.idioma === "es" && "NOTICIAS"}
+                {templateActual.idioma === "es-en" && "NOTICIAS / NEWS"}
+              </h2>
             </div>
           </div>
 
           {/* Advertising Column - 25% */}
-          <div className="w-1/4 flex items-center justify-center  bg-white">
+          <div className="w-1/4 flex items-center justify-center bg-white rounded-lg overflow-hidden">
             {templateActual.publicidad ? (
               <img
                 src={templateActual.publicidad}
                 alt="Publicidad"
-                className="w-full h-full object-contain"
+                className="w-full h-full object-contain rounded-lg"
               />
             ) : (
               <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -357,12 +410,12 @@ const PDTemplate1Horizontal = ({
             {qrCodeUrl ? (
               <div className="flex flex-col items-center justify-center h-full">
                 <span className="text-xs text-gray-600 mb-1">
-                  QR de Eventos
+                  {templateActual.idioma === "en" && "Events QR"}
+                  {templateActual.idioma === "es" && "QR de Eventos"}
+                  {templateActual.idioma === "es-en" &&
+                    "QR de Eventos / Events QR"}
                 </span>
                 <QRCode value={qrCodeUrl} size={60} />
-                <span className="text-xs text-gray-600 mt-1">
-                  Escanea para más información
-                </span>
               </div>
             ) : (
               <span className="text-gray-500 text-xs">QR no disponible</span>
@@ -387,12 +440,12 @@ const EventRow = ({ event, screenName, total }) => {
       style={{ height: `${heightPercentage}%` }}
     >
       {/* Image container with fixed dimensions */}
-      <div className="flex-shrink-0 h-16 w-16 relative mr-4">
+      <div className="flex-shrink-0 h-24 w-24 relative mr-4">
         {event.images && event.images.length > 0 ? (
           <img
             src={event.images[0]}
             alt={event.nombreEvento}
-            className="h-full w-full object-cover"
+            className="h-full w-full object-cover rounded-lg"
           />
         ) : (
           <div className="h-full w-full bg-gray-200 flex items-center justify-center">
@@ -404,26 +457,26 @@ const EventRow = ({ event, screenName, total }) => {
       {/* Event details - Using prefix // and / as in the screenshot */}
       <div className="flex-grow">
         {/* Event title with prefix // */}
-        <h3 className="font-bold text-lg">{event.nombreEvento}</h3>
+        <h3 className="font-bold text-2xl">{event.nombreEvento}</h3>
 
         {/* Event type with prefix / */}
         <div className="flex items-center">
-          <p className="text-sm">{event.tipoEvento}</p>
+          <p className="text-xl">{event.tipoEvento}</p>
         </div>
 
         {/* Screen name or location if available */}
         {event.devices && event.devices[0] && (
-          <div className="text-sm">{event.devices[0]}</div>
+          <div className="text-xl">{event.devices[0]}</div>
         )}
       </div>
 
       {/* Right side info: location and time */}
       <div className="flex flex-col items-end">
         {/* Location with prefix / */}
-        <p className="text-sm text-right">{event.lugar}</p>
+        <p className="text-xl text-right">{event.lugar}</p>
 
         {/* Time range */}
-        <p className="text-sm font-medium">
+        <p className="text-xl font-medium">
           {event.horaInicialSalon} a {event.horaFinalSalon}HRS
         </p>
       </div>
