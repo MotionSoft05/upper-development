@@ -291,7 +291,7 @@ const PDTemplate1Horizontal = ({
         {/* Upper Section: Events and Advertising side by side */}
         <div className="flex flex-grow mx-2">
           {/* Events Column - 75% */}
-          <div className="w-3/4  flex flex-col">
+          <div className="w-3/4 mr-2  flex flex-col">
             {/* Events Header */}
             <div
               className="py-2 px-4 text-center rounded-t-lg"
@@ -381,15 +381,18 @@ const PDTemplate1Horizontal = ({
           </div>
 
           {/* Advertising Column - 25% */}
-          <div className="w-1/4 flex items-center justify-center bg-white rounded-lg overflow-hidden">
+          <div className="w-1/4 flex items-center justify-center p-2">
             {publicidad ? (
-              <img
-                src={publicidad}
-                alt="Publicidad"
-                className="  object-contain rounded-lg"
-              />
+              <div className="w-full h-full p-2 overflow-hidden">
+                <img
+                  src={publicidad}
+                  alt="Publicidad"
+                  className=" object-contain rounded-lg shadow-sm"
+                  style={{ borderRadius: "0.5rem" }}
+                />
+              </div>
             ) : (
-              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
                 <span className="text-gray-400">Espacio publicitario</span>
               </div>
             )}

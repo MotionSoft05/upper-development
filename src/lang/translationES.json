@@ -429,7 +429,13 @@
     "appearance": "Apariencia",
     "uploadLogo": "Subir logo",
     "uploadAdvertisement": "Subir publicidad",
-    "reset": "Restablecer"
+    "reset": "Restablecer",
+    "horizontalAdvertisement": "Publicidad Horizontal (16:9)",
+    "horizontalAdvertisementDescription": "Recomendado para pantallas en orientación horizontal. Proporción 16:9 (ej. 1920x1080px).",
+    "verticalAdvertisement": "Publicidad Vertical (9:16)",
+    "verticalAdvertisementDescription": "Recomendado para pantallas en orientación vertical. Proporción 9:16 (ej. 1080x1920px).",
+    "uploadHorizontalAdvertisement": "Subir publicidad horizontal",
+    "uploadVerticalAdvertisement": "Subir publicidad vertical"
   },
   "screenService": {
     "generalcustomization": "Personalización general",

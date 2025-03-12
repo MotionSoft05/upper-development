@@ -427,7 +427,13 @@
     "appearance": "Appearance",
     "uploadLogo": "Upload logo",
     "uploadAdvertisement": "Upload advertisement",
-    "reset": "Reset"
+    "reset": "Reset",
+    "horizontalAdvertisement": "Horizontal Advertisement (16:9)",
+    "horizontalAdvertisementDescription": "Recommended for screens in horizontal orientation. Aspect ratio 16:9 (e.g. 1920x1080px).",
+    "verticalAdvertisement": "Vertical Advertisement (9:16)",
+    "verticalAdvertisementDescription": "Recommended for screens in vertical orientation. Aspect ratio 9:16 (e.g. 1080x1920px).",
+    "uploadHorizontalAdvertisement": "Upload horizontal advertisement",
+    "uploadVerticalAdvertisement": "Upload vertical advertisement"
   },
   "screenService": {
     "generalcustomization": "General Customization",

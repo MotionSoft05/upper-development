@@ -511,7 +511,7 @@ const PDTemplate1Vertical = ({
         <div className="w-full flex justify-center">
           {" "}
           <div
-            className="h-64 mb-2 w-[45rem]  bg-white rounded-lg overflow-hidden"
+            className="h-64 mb-2 w-[35rem]  bg-white rounded-lg overflow-hidden"
             style={{ flexShrink: 0 }}
           >
             {publicidad ? (

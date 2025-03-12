@@ -971,6 +971,7 @@ function PantallasDirectorio() {
                 </div>
 
                 {/* Publicidades - horizontal y vertical */}
+
                 <div className="mt-6">
                   <h3 className="text-lg font-medium text-gray-900">
                     {t("screensDirectory.advertisement")}
@@ -980,11 +981,12 @@ function PantallasDirectorio() {
                     {/* Publicidad Horizontal */}
                     <div className=" p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Publicidad Horizontal (16:9)
+                        {t("screensDirectory.horizontalAdvertisement")}
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
-                        Recomendado para pantallas en orientación vertical.
-                        Proporción 16:9 (ej. 1920x1080px).
+                        {t(
+                          "screensDirectory.horizontalAdvertisementDescription"
+                        )}
                       </p>
                       <div className="mt-1 flex items-center space-x-4">
                         <div className="flex-1">
@@ -1005,7 +1007,11 @@ function PantallasDirectorio() {
                                 />
                               </svg>
                               <div className="flex text-sm text-gray-600">
-                                <span>Subir publicidad horizontal</span>
+                                <span>
+                                  {t(
+                                    "screensDirectory.uploadHorizontalAdvertisement"
+                                  )}
+                                </span>
                                 <input
                                   id="file-upload-landscape"
                                   name="file-upload-landscape"
@@ -1021,7 +1027,9 @@ function PantallasDirectorio() {
                           <div className="flex-shrink-0">
                             <img
                               src={selectedPublicidadLandscape}
-                              alt="Publicidad Horizontal"
+                              alt={t(
+                                "screensDirectory.horizontalAdvertisement"
+                              )}
                               className="h-24 w-auto object-contain border rounded p-1"
                             />
                           </div>
@@ -1032,11 +1040,10 @@ function PantallasDirectorio() {
                     {/* Publicidad Vertical */}
                     <div className=" p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Publicidad Vertical (9:16)
+                        {t("screensDirectory.verticalAdvertisement")}
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
-                        Recomendado para pantallas en orientación horizontal.
-                        Proporción 9:16 (ej. 1080x1920px).
+                        {t("screensDirectory.verticalAdvertisementDescription")}
                       </p>
                       <div className="mt-1 flex items-center space-x-4">
                         <div className="flex-1">
@@ -1057,7 +1064,11 @@ function PantallasDirectorio() {
                                 />
                               </svg>
                               <div className="flex text-sm text-gray-600">
-                                <span>Subir publicidad vertical</span>
+                                <span>
+                                  {t(
+                                    "screensDirectory.uploadVerticalAdvertisement"
+                                  )}
+                                </span>
                                 <input
                                   id="file-upload-portrait"
                                   name="file-upload-portrait"
@@ -1073,7 +1084,7 @@ function PantallasDirectorio() {
                           <div className="flex-shrink-0">
                             <img
                               src={selectedPublicidadPortrait}
-                              alt="Publicidad Vertical"
+                              alt={t("screensDirectory.verticalAdvertisement")}
                               className="h-24 w-auto object-contain border rounded p-1"
                             />
                           </div>
