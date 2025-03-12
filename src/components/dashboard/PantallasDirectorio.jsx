@@ -983,7 +983,7 @@ function PantallasDirectorio() {
                         Publicidad Horizontal (16:9)
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
-                        Recomendado para pantallas en orientación horizontal.
+                        Recomendado para pantallas en orientación vertical.
                         Proporción 16:9 (ej. 1920x1080px).
                       </p>
                       <div className="mt-1 flex items-center space-x-4">
@@ -1035,7 +1035,7 @@ function PantallasDirectorio() {
                         Publicidad Vertical (9:16)
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
-                        Recomendado para pantallas en orientación vertical.
+                        Recomendado para pantallas en orientación horizontal.
                         Proporción 9:16 (ej. 1080x1920px).
                       </p>
                       <div className="mt-1 flex items-center space-x-4">
