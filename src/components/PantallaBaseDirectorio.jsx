@@ -490,15 +490,43 @@ export default function BaseDirectorioClient({ id }) {
 
         unsubscribers.push(templatesUnsubscribe);
 
-        // Load initial ads
-        const ads = await loadAds(userCompany);
-        if (isMounted.current) {
-          setScreenData((prev) => ({
-            ...prev,
-            ads,
-          }));
-          setInitialLoading(false);
-        }
+        // Ads subscription - Reemplazando la carga única por una suscripción
+        const adsRef = query(
+          collection(db, "Publicidad"), // Asegúrate de que esta es la colección correcta
+          where("empresa", "==", userCompany),
+          where("tipo", "==", "directorio") // Ajusta esto según el tipo necesario
+        );
+
+        const adsUnsubscribe = onSnapshot(
+          adsRef,
+          (snapshot) => {
+            if (!isMounted.current) return;
+
+            const ads = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+
+            console.log("\n=== PUBLICIDADES RECIBIDAS DE FIRESTORE ===");
+            console.log("Total publicidades:", ads.length);
+
+            setScreenData((prev) => ({
+              ...prev,
+              ads,
+            }));
+
+            // Solo marcamos como cargado después de obtener todos los datos iniciales
+            setInitialLoading(false);
+          },
+          (error) => {
+            if (isMounted.current) {
+              console.error("Error en la suscripción de publicidades:", error);
+              setError(t("errors.ads", { error: error.message }));
+            }
+          }
+        );
+
+        unsubscribers.push(adsUnsubscribe);
       } catch (error) {
         if (isMounted.current) {
           setError(t("errors.general", { error: error.message }));
@@ -513,8 +541,7 @@ export default function BaseDirectorioClient({ id }) {
       isMounted.current = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [user, db, screenNumber, loadAds, t, getScreenOrientation]);
-
+  }, [user, db, screenNumber, t, getScreenOrientation]); // Eliminé 'loadAds' ya que ya no lo usamos
   // Rendering states
   if (!user) {
     return <LogIn url={pathname} />;
