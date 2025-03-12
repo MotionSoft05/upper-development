@@ -163,7 +163,10 @@ const AdvertisementSlider = ({
   const idioma = templateActual.idioma || "es";
 
   return (
-    <div className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20 flex flex-col">
+    <div
+      className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20 flex flex-col"
+      style={{ fontFamily: templateActual.fontStyle }}
+    >
       {/* Header Section - 12vh */}
       <div className="flex items-center justify-between h-[12vh]">
         {/* Logo */}
@@ -254,7 +257,7 @@ const AdvertisementSlider = ({
                   alt="Clock"
                 />
                 <div
-                  className="text-lg font-semibold"
+                  className="text-xl font-semibold mt-0.5"
                   style={{
                     color: templateActual.fontColor || "rgb(31, 41, 55)",
                   }}

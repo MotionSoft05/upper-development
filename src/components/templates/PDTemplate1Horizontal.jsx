@@ -231,7 +231,7 @@ const PDTemplate1Horizontal = ({
                   className="p-1 h-8 mt-1"
                   alt="Clock"
                 />
-                <div className="text-lg font-semibold text-gray-800">
+                <div className="text-xl font-semibold text-gray-800 mt-0.5">
                   {currentTime}
                 </div>
               </div>
@@ -387,7 +387,7 @@ const EventRow = ({ event, screenName, total }) => {
       style={{ height: `${heightPercentage}%` }}
     >
       {/* Image container with fixed dimensions */}
-      <div className="flex-shrink-0 h-12 w-12 relative mr-4">
+      <div className="flex-shrink-0 h-16 w-16 relative mr-4">
         {event.images && event.images.length > 0 ? (
           <img
             src={event.images[0]}
@@ -408,7 +408,7 @@ const EventRow = ({ event, screenName, total }) => {
 
         {/* Event type with prefix / */}
         <div className="flex items-center">
-          <p className="text-sm">/{event.tipoEvento}</p>
+          <p className="text-sm">{event.tipoEvento}</p>
         </div>
 
         {/* Screen name or location if available */}
