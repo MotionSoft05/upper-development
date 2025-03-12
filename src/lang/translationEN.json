@@ -274,7 +274,7 @@
     "servicescreen": "Service screen",
     "advertisement": "Salon advertising",
     "moreInformation": "Customer information",
-    "myData": "My data",
+    "myData": "Billing information",
     "userGuides": "User guides",
     "supportContact": "Support contact",
     "logout": "Logout"
@@ -519,7 +519,7 @@
       "fiscalDataError": "Error sending fiscal data:",
       "fiscalDataReceived": "Fiscal Data received:"
     },
-    "myData": "My Data",
+    "myTitle": "Billing information",
     "account": "My Account",
     "billingData": "Billing Data",
     "fiscalData": "Fiscal Data",

@@ -276,7 +276,7 @@
     "servicescreen": "Pantalla servicios",
     "advertisement": "Publicidad salones",
     "moreInformation": "INFORMACIÓN CLIENTES",
-    "myData": "Mis datos",
+    "myData": "Datos facturación",
     "userGuides": "Guías de usuario",
     "supportContact": "Contacto soporte",
     "logout": "Salir"
@@ -520,7 +520,7 @@
       "fiscalDataError": "Error al enviar datos fiscales:",
       "fiscalDataReceived": "Datos Fiscales recibidos:"
     },
-    "myData": "Mis datos",
+    "myTitle": "Datos de facturación",
     "account": "Mi cuenta",
     "billingData": "Datos de facturación",
     "fiscalData": "Datos Fiscales",
