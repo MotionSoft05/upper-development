@@ -1,6 +1,8 @@
 // src/components/templates/PSTemplate2.jsx
 import GetLanguageDate from "@/components/getLanguageDate";
 import EventImageSlider from "@/components/sliders/EventImageSlider";
+import { useState, useEffect } from "react";
+
 const FullScreenImage = ({ image }) => (
   <div className="fixed inset-0 z-50 bg-black">
     <img
