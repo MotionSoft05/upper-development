@@ -214,19 +214,19 @@ const PDTemplate1Horizontal = ({
           style={{ fontFamily: templateActual.fontStyle }}
         >
           {templateActual.idioma === "es" && (
-            <h1 className="text-2xl font-bold text-center">Eventos del día</h1>
+            <h1 className="text-xl font-bold text-center">Eventos del día</h1>
           )}
 
           {templateActual.idioma === "en" && (
-            <h1 className="text-2xl font-bold text-center">
+            <h1 className="text-xl font-bold text-center">
               Today&rsquo;s Events
             </h1>
           )}
 
           {templateActual.idioma === "es-en" && (
             <>
-              <p className="text-2xl font-bold">Eventos del día</p>
-              <p className="text-2xl font-bold">Today&rsquo;s Events</p>
+              <p className="text-xl font-bold">Eventos del día</p>
+              <p className="text-xl font-bold">Today&rsquo;s Events</p>
             </>
           )}
 
@@ -381,14 +381,13 @@ const PDTemplate1Horizontal = ({
           </div>
 
           {/* Advertising Column - 25% */}
-          <div className="w-1/4 flex items-center justify-center p-2">
+          <div className="w-1/4 flex items-center justify-center ">
             {publicidad ? (
-              <div className="w-full h-full p-2 overflow-hidden">
+              <div className="p-2 overflow-hidden">
                 <img
                   src={publicidad}
                   alt="Publicidad"
-                  className="w-full h-full object-contain rounded-lg shadow-sm"
-                  style={{ borderRadius: "0.5rem" }}
+                  className=" object-contain rounded-lg shadow-sm"
                 />
               </div>
             ) : (
