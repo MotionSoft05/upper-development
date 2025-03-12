@@ -907,39 +907,62 @@ function PantallasSalon() {
             {activeTab === "screens" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  {t("screenSalon.screenNames")}
+                  Nombres de pantallas
                 </h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-4">
                   {Array.from({ length: ps }, (_, index) => (
-                    <div className="flex flex-col space-y-2" key={index}>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="text"
-                          placeholder={`Pantalla ${index + 1}`}
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                          value={nombrePantallas[index] || ""}
-                          onChange={(e) => {
-                            const enteredValue = e.target.value;
-                            const truncatedValue = enteredValue.slice(0, 30);
-                            const updatedNombres = [...nombrePantallas];
-                            updatedNombres[index] = truncatedValue;
-                            setNombrePantallas(updatedNombres);
-                          }}
-                        />
-                        <Link
-                          href={`/pantalla/${index + 1}${isProduction}/?emp=${
-                            nombreEmpresa?.empresa
-                          }`}
-                          target="_blank"
-                          className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          URL
-                        </Link>
+                    <div
+                      className="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200"
+                      key={index}
+                    >
+                      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div className="flex-1">
+                          <div className="flex items-center mb-2">
+                            <span className="text-sm font-medium text-gray-700 mr-2 w-32">
+                              Pantalla Salon {index + 1}:
+                            </span>
+                            <input
+                              type="text"
+                              placeholder={`Pantalla ${index + 1}`}
+                              className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                              value={nombrePantallas[index] || ""}
+                              onChange={(e) => {
+                                const enteredValue = e.target.value;
+                                const truncatedValue = enteredValue.slice(
+                                  0,
+                                  30
+                                );
+                                const updatedNombres = [...nombrePantallas];
+                                updatedNombres[index] = truncatedValue;
+                                setNombrePantallas(updatedNombres);
+                              }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Link
+                            href={`/pantalla${index + 1}.html`}
+                            target="_blank"
+                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                          >
+                            URL
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
+
+                {ps === 0 && (
+                  <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-100">
+                    <p className="text-yellow-600">
+                      No hay pantallas de salón configuradas. Por favor,
+                      contacte al administrador para adquirir licencias de
+                      pantallas.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

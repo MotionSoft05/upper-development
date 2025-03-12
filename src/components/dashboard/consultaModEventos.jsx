@@ -24,6 +24,110 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
+// Add this new component for mobile card view
+const MobileEventCard = ({
+  evento,
+  usuario,
+  handleDeleteClick,
+  abrirModalEdicion,
+}) => {
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-white rounded-lg shadow-md p-4 mb-3">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="font-medium text-gray-900 truncate max-w-[70%]">
+          {evento.nombreEvento}
+        </h3>
+        <span
+          className={`text-xs font-medium px-2 py-1 rounded-full ${
+            evento.status
+              ? "bg-green-100 text-green-800"
+              : "bg-red-100 text-red-800"
+          }`}
+        >
+          {evento.status ? t("Active") : t("Inactive")}
+        </span>
+      </div>
+
+      <div className="space-y-1 text-sm text-gray-600 mb-3">
+        <div className="flex items-start">
+          <span className="w-24 flex-shrink-0 text-gray-500">
+            {t("consultaModEventos.type")}:
+          </span>
+          <span className="truncate">{evento.tipoEvento || "-"}</span>
+        </div>
+
+        <div className="flex items-start">
+          <span className="w-24 flex-shrink-0 text-gray-500">
+            {t("consultaModEventos.dates")}:
+          </span>
+          <span>
+            {evento.fechaInicio === evento.fechaFinal
+              ? evento.fechaInicio
+              : `${evento.fechaInicio} - ${evento.fechaFinal}`}
+          </span>
+        </div>
+
+        <div className="flex items-start">
+          <span className="w-24 flex-shrink-0 text-gray-500">
+            {t("consultaModEventos.roomTime")}:
+          </span>
+          <span>
+            {evento.horaInicialSalon} - {evento.horaFinalSalon}
+          </span>
+        </div>
+
+        <div className="flex items-start">
+          <span className="w-24 flex-shrink-0 text-gray-500">
+            {t("consultaModEventos.roomName")}:
+          </span>
+          <div className="flex-1">
+            {evento.devices && evento.devices.length > 0 ? (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {evento.devices.slice(0, 2).map((device, index) => (
+                  <span
+                    key={index}
+                    className="inline-block px-2 py-1 text-xs bg-gray-100 rounded"
+                  >
+                    {device}
+                  </span>
+                ))}
+                {evento.devices.length > 2 && (
+                  <span className="inline-block px-2 py-1 text-xs bg-gray-100 rounded">
+                    +{evento.devices.length - 2}
+                  </span>
+                )}
+              </div>
+            ) : (
+              <span className="text-red-500 italic text-xs">
+                {t("consultaModEventos.noScreens")}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-2 border-t border-gray-100">
+        <button
+          onClick={() => abrirModalEdicion(evento)}
+          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+        >
+          <PencilSquareIcon className="h-4 w-4 mr-1" />
+          {t("consultaModEventos.viewEdit")}
+        </button>
+
+        <button
+          onClick={() => handleDeleteClick(evento.id)}
+          className="inline-flex items-center px-3 py-1.5 text-xs font-medium rounded shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+        >
+          <TrashIcon className="h-4 w-4 mr-1" />
+          {t("consultaModEventos.delete")}
+        </button>
+      </div>
+    </div>
+  );
+};
 
 function ConsultaModEvento() {
   // Mock translation function if i18n is not set up
@@ -102,7 +206,7 @@ function ConsultaModEvento() {
   const [cambiosPendientes, setCambiosPendientes] = useState(false);
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
-
+  const [activeTab, setActiveTab] = useState("details");
   // Estados nuevos para las funcionalidades mejoradas
   const [searchTerm, setSearchTerm] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -701,293 +805,249 @@ function ConsultaModEvento() {
         </div>
 
         {/* Table container with horizontal scroll for mobile */}
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
-            <thead className="bg-gray-50">
-              <tr>
-                {(usuarioLogeado === "uppermex10@gmail.com" ||
-                  usuarioLogeado === "ulises.jacobo@hotmail.com" ||
-                  usuarioLogeado === "contacto@upperds.mx") && (
+
+        {/* Responsive table or card view */}
+        <div className="w-full">
+          {/* Desktop view - only visible on md and above */}
+          <div className="hidden md:block overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg">
+              <thead className="bg-gray-50">
+                <tr>
+                  {(usuarioLogeado === "uppermex10@gmail.com" ||
+                    usuarioLogeado === "ulises.jacobo@hotmail.com" ||
+                    usuarioLogeado === "contacto@upperds.mx") && (
+                    <th
+                      scope="col"
+                      className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                      onClick={() => requestSort("usuario")}
+                    >
+                      {t("consultaModEventos.user")}
+                      {getSortIndicator("usuario")}
+                    </th>
+                  )}
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    #
+                  </th>
                   <th
                     scope="col"
                     className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                    onClick={() => requestSort("usuario")}
+                    onClick={() => requestSort("nombreEvento")}
                   >
-                    {t("consultaModEventos.user")}
-                    {getSortIndicator("usuario")}
+                    {t("consultaModEventos.name")}
+                    {getSortIndicator("nombreEvento")}
                   </th>
-                )}
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  #
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort("nombreEvento")}
-                >
-                  {t("consultaModEventos.name")}
-                  {getSortIndicator("nombreEvento")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort("tipoEvento")}
-                >
-                  {t("consultaModEventos.type")}
-                  {getSortIndicator("tipoEvento")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t("consultaModEventos.roomName")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => requestSort("fechaInicio")}
-                >
-                  {t("consultaModEventos.dates")}
-                  {getSortIndicator("fechaInicio")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t("consultaModEventos.roomTime")}
-                </th>
-                <th
-                  scope="col"
-                  className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
-                >
-                  {t("consultaModEventos.actions")}
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {sortedEvents.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan={
-                      usuarioLogeado === "uppermex10@gmail.com" ||
-                      usuarioLogeado === "ulises.jacobo@hotmail.com" ||
-                      usuarioLogeado === "contacto@upperds.mx"
-                        ? 8
-                        : 7
-                    }
-                    className="px-4 py-8 text-center text-sm text-gray-500"
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => requestSort("tipoEvento")}
                   >
-                    {searchTerm
-                      ? t("consultaModEventos.noMatchingEvents")
-                      : filtro === "activos"
-                      ? t("consultaModEventos.noActiveEvents")
-                      : t("consultaModEventos.noFinishedEvents")}
-                  </td>
+                    {t("consultaModEventos.type")}
+                    {getSortIndicator("tipoEvento")}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {t("consultaModEventos.roomName")}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                    onClick={() => requestSort("fechaInicio")}
+                  >
+                    {t("consultaModEventos.dates")}
+                    {getSortIndicator("fechaInicio")}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {t("consultaModEventos.roomTime")}
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
+                  >
+                    {t("consultaModEventos.actions")}
+                  </th>
                 </tr>
-              ) : (
-                currentEvents.map((evento, index) => {
-                  const usuario = usuarios.find(
-                    (usuario) => usuario.id === evento.userId
-                  );
-
-                  return (
-                    <tr
-                      key={evento.id}
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
-                      {(usuarioLogeado === "uppermex10@gmail.com" ||
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {sortedEvents.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={
+                        usuarioLogeado === "uppermex10@gmail.com" ||
                         usuarioLogeado === "ulises.jacobo@hotmail.com" ||
-                        usuarioLogeado === "contacto@upperds.mx") && (
-                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                          {usuario ? usuario.empresa : "N/A"}
+                        usuarioLogeado === "contacto@upperds.mx"
+                          ? 8
+                          : 7
+                      }
+                      className="px-4 py-8 text-center text-sm text-gray-500"
+                    >
+                      {searchTerm
+                        ? t("consultaModEventos.noMatchingEvents")
+                        : filtro === "activos"
+                        ? t("consultaModEventos.noActiveEvents")
+                        : t("consultaModEventos.noFinishedEvents")}
+                    </td>
+                  </tr>
+                ) : (
+                  currentEvents.map((evento, index) => {
+                    const usuario = usuarios.find(
+                      (usuario) => usuario.id === evento.userId
+                    );
+
+                    return (
+                      <tr
+                        key={evento.id}
+                        className="hover:bg-gray-50 transition-colors duration-150"
+                      >
+                        {(usuarioLogeado === "uppermex10@gmail.com" ||
+                          usuarioLogeado === "ulises.jacobo@hotmail.com" ||
+                          usuarioLogeado === "contacto@upperds.mx") && (
+                          <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                            {usuario ? usuario.empresa : "N/A"}
+                          </td>
+                        )}
+
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {indexOfFirstEvent + index + 1}
                         </td>
-                      )}
-
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {indexOfFirstEvent + index + 1}
-                      </td>
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {modoEdicion && evento.id === eventoEditado?.id ? (
-                          <input
-                            type="text"
-                            value={eventoEditado.nombreEvento}
-                            onChange={(e) =>
-                              handleFieldEdit("nombreEvento", e.target.value)
-                            }
-                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          />
-                        ) : (
-                          <div
-                            className="relative"
-                            onMouseEnter={() =>
-                              evento.nombreEvento.length > 15 &&
-                              setShowTooltip(`nombre-${evento.id}`)
-                            }
-                            onMouseLeave={() => setShowTooltip(null)}
-                          >
-                            <span>
-                              {eventoEditado?.id === evento.id
-                                ? eventoEditado.nombreEvento.length > 15
-                                  ? eventoEditado.nombreEvento.substring(
-                                      0,
-                                      15
-                                    ) + "..."
-                                  : eventoEditado.nombreEvento
-                                : evento.nombreEvento.length > 15
-                                ? evento.nombreEvento.substring(0, 15) + "..."
-                                : evento.nombreEvento}
-                            </span>
-                            {showTooltip === `nombre-${evento.id}` &&
-                              evento.nombreEvento.length > 15 && (
-                                <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
-                                  {evento.nombreEvento}
-                                </div>
-                              )}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {modoEdicion && evento.id === eventoEditado?.id ? (
-                          <input
-                            type="text"
-                            value={eventoEditado.tipoEvento || ""}
-                            onChange={(e) =>
-                              handleFieldEdit("tipoEvento", e.target.value)
-                            }
-                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          />
-                        ) : (
-                          <div
-                            className="relative"
-                            onMouseEnter={() =>
-                              evento.tipoEvento?.length > 15 &&
-                              setShowTooltip(`tipo-${evento.id}`)
-                            }
-                            onMouseLeave={() => setShowTooltip(null)}
-                          >
-                            <span>
-                              {eventoEditado?.id === evento.id
-                                ? eventoEditado.tipoEvento &&
-                                  eventoEditado.tipoEvento.length > 15
-                                  ? eventoEditado.tipoEvento.substring(0, 15) +
-                                    "..."
-                                  : eventoEditado.tipoEvento || ""
-                                : evento.tipoEvento &&
-                                  evento.tipoEvento.length > 15
-                                ? evento.tipoEvento.substring(0, 15) + "..."
-                                : evento.tipoEvento || ""}
-                            </span>
-                            {showTooltip === `tipo-${evento.id}` &&
-                              evento.tipoEvento?.length > 15 && (
-                                <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
-                                  {evento.tipoEvento}
-                                </div>
-                              )}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-4 whitespace-normal max-w-xs text-sm text-gray-900">
-                        {modoEdicion && evento.id === eventoEditado?.id ? (
-                          <input
-                            type="text"
-                            value={eventoEditado.devices || ""}
-                            onChange={(e) =>
-                              handleFieldEdit("devices", e.target.value)
-                            }
-                            className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                          />
-                        ) : eventoEditado?.id === evento.id ? (
-                          eventoEditado.devices
-                        ) : (
-                          <div className="max-h-20 overflow-y-auto">
-                            {evento.devices.length === 0 ? (
-                              <span className="text-red-500 italic">
-                                {t("consultaModEventos.noScreens")}
-                              </span>
-                            ) : (
-                              <div className="space-y-1">
-                                {evento.devices.map((device, key) => (
-                                  <div
-                                    key={key}
-                                    className="text-sm text-gray-700 bg-gray-100 rounded px-2 py-1 inline-block mr-1 mb-1"
-                                  >
-                                    {device}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {modoEdicion &&
-                        evento.id === eventoEditado?.id &&
-                        edicionFechas ? (
-                          <div className="space-y-2">
-                            <div className="flex items-center">
-                              <CalendarIcon className="text-gray-400 mr-2 h-5" />
-                              <input
-                                type="date"
-                                value={eventoEditado.fechaInicio || ""}
-                                onChange={(e) =>
-                                  handleFieldEdit("fechaInicio", e.target.value)
-                                }
-                                className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                              />
-                            </div>
-                            <div className="flex items-center">
-                              <CalendarIcon className="text-gray-400 mr-2 h-5" />
-                              <input
-                                type="date"
-                                value={eventoEditado.fechaFinal || ""}
-                                onChange={(e) =>
-                                  handleFieldEdit("fechaFinal", e.target.value)
-                                }
-                                className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div>
-                            {evento.fechaInicio === evento.fechaFinal ? (
-                              <div className="flex items-center">
-                                <CalendarIcon className="text-gray-400 mr-2 h-5" />
-                                <span>{evento.fechaInicio}</span>
-                              </div>
-                            ) : (
-                              <>
-                                <div className="flex items-center">
-                                  <CalendarIcon className="text-gray-400 mr-2 h-5" />
-                                  <span>{evento.fechaInicio}</span>
-                                </div>
-                                <div className="flex items-center mt-1">
-                                  <CalendarIcon className="text-gray-400 mr-2 h-5" />
-                                  <span>{evento.fechaFinal}</span>
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        )}
-                      </td>
-
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
                           {modoEdicion && evento.id === eventoEditado?.id ? (
+                            <input
+                              type="text"
+                              value={eventoEditado.nombreEvento}
+                              onChange={(e) =>
+                                handleFieldEdit("nombreEvento", e.target.value)
+                              }
+                              className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                          ) : (
+                            <div
+                              className="relative"
+                              onMouseEnter={() =>
+                                evento.nombreEvento.length > 15 &&
+                                setShowTooltip(`nombre-${evento.id}`)
+                              }
+                              onMouseLeave={() => setShowTooltip(null)}
+                            >
+                              <span>
+                                {eventoEditado?.id === evento.id
+                                  ? eventoEditado.nombreEvento.length > 15
+                                    ? eventoEditado.nombreEvento.substring(
+                                        0,
+                                        15
+                                      ) + "..."
+                                    : eventoEditado.nombreEvento
+                                  : evento.nombreEvento.length > 15
+                                  ? evento.nombreEvento.substring(0, 15) + "..."
+                                  : evento.nombreEvento}
+                              </span>
+                              {showTooltip === `nombre-${evento.id}` &&
+                                evento.nombreEvento.length > 15 && (
+                                  <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                                    {evento.nombreEvento}
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {modoEdicion && evento.id === eventoEditado?.id ? (
+                            <input
+                              type="text"
+                              value={eventoEditado.tipoEvento || ""}
+                              onChange={(e) =>
+                                handleFieldEdit("tipoEvento", e.target.value)
+                              }
+                              className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                          ) : (
+                            <div
+                              className="relative"
+                              onMouseEnter={() =>
+                                evento.tipoEvento?.length > 15 &&
+                                setShowTooltip(`tipo-${evento.id}`)
+                              }
+                              onMouseLeave={() => setShowTooltip(null)}
+                            >
+                              <span>
+                                {eventoEditado?.id === evento.id
+                                  ? eventoEditado.tipoEvento &&
+                                    eventoEditado.tipoEvento.length > 15
+                                    ? eventoEditado.tipoEvento.substring(
+                                        0,
+                                        15
+                                      ) + "..."
+                                    : eventoEditado.tipoEvento || ""
+                                  : evento.tipoEvento &&
+                                    evento.tipoEvento.length > 15
+                                  ? evento.tipoEvento.substring(0, 15) + "..."
+                                  : evento.tipoEvento || ""}
+                              </span>
+                              {showTooltip === `tipo-${evento.id}` &&
+                                evento.tipoEvento?.length > 15 && (
+                                  <div className="absolute z-10 p-2 bg-gray-800 text-white text-xs rounded shadow-lg">
+                                    {evento.tipoEvento}
+                                  </div>
+                                )}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-normal max-w-xs text-sm text-gray-900">
+                          {modoEdicion && evento.id === eventoEditado?.id ? (
+                            <input
+                              type="text"
+                              value={eventoEditado.devices || ""}
+                              onChange={(e) =>
+                                handleFieldEdit("devices", e.target.value)
+                              }
+                              className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                            />
+                          ) : eventoEditado?.id === evento.id ? (
+                            eventoEditado.devices
+                          ) : (
+                            <div className="max-h-20 overflow-y-auto">
+                              {evento.devices.length === 0 ? (
+                                <span className="text-red-500 italic">
+                                  {t("consultaModEventos.noScreens")}
+                                </span>
+                              ) : (
+                                <div className="space-y-1">
+                                  {evento.devices.map((device, key) => (
+                                    <div
+                                      key={key}
+                                      className="text-sm text-gray-700 bg-gray-100 rounded px-2 py-1 inline-block mr-1 mb-1"
+                                    >
+                                      {device}
+                                    </div>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </td>
+
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {modoEdicion &&
+                          evento.id === eventoEditado?.id &&
+                          edicionFechas ? (
                             <div className="space-y-2">
                               <div className="flex items-center">
-                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <CalendarIcon className="text-gray-400 mr-2 h-5" />
                                 <input
-                                  type="time"
-                                  value={eventoEditado.horaInicialSalon || ""}
+                                  type="date"
+                                  value={eventoEditado.fechaInicio || ""}
                                   onChange={(e) =>
                                     handleFieldEdit(
-                                      "horaInicialSalon",
+                                      "fechaInicio",
                                       e.target.value
                                     )
                                   }
@@ -995,13 +1055,13 @@ function ConsultaModEvento() {
                                 />
                               </div>
                               <div className="flex items-center">
-                                <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                <CalendarIcon className="text-gray-400 mr-2 h-5" />
                                 <input
-                                  type="time"
-                                  value={eventoEditado.horaFinalSalon || ""}
+                                  type="date"
+                                  value={eventoEditado.fechaFinal || ""}
                                   onChange={(e) =>
                                     handleFieldEdit(
-                                      "horaFinalSalon",
+                                      "fechaFinal",
                                       e.target.value
                                     )
                                   }
@@ -1010,51 +1070,139 @@ function ConsultaModEvento() {
                               </div>
                             </div>
                           ) : (
-                            <>
-                              <div className="flex items-center">
-                                <ClockIcon className="text-gray-400 mr-2 h-5" />
-                                <span>{evento.horaInicialSalon}</span>
-                              </div>
-                              <div className="flex items-center mt-1">
-                                <ClockIcon className="text-gray-400 mr-2 h-5" />
-                                <span>{evento.horaFinalSalon}</span>
-                              </div>
-                            </>
+                            <div>
+                              {evento.fechaInicio === evento.fechaFinal ? (
+                                <div className="flex items-center">
+                                  <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                  <span>{evento.fechaInicio}</span>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex items-center">
+                                    <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                    <span>{evento.fechaInicio}</span>
+                                  </div>
+                                  <div className="flex items-center mt-1">
+                                    <CalendarIcon className="text-gray-400 mr-2 h-5" />
+                                    <span>{evento.fechaFinal}</span>
+                                  </div>
+                                </>
+                              )}
+                            </div>
                           )}
-                        </div>
-                      </td>
+                        </td>
 
-                      <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
-                        <div className="flex flex-wrap justify-center gap-2">
-                          <button
-                            onClick={() => abrirModalEdicion(evento)}
-                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                            title={t("consultaModEventos.viewEdit")}
-                          >
-                            <PencilSquareIcon className="mr-1" />
-                            <span className="hidden sm:inline">
-                              {t("consultaModEventos.viewEdit")}
-                            </span>
-                          </button>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900">
+                          <div>
+                            {modoEdicion && evento.id === eventoEditado?.id ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center">
+                                  <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                  <input
+                                    type="time"
+                                    value={eventoEditado.horaInicialSalon || ""}
+                                    onChange={(e) =>
+                                      handleFieldEdit(
+                                        "horaInicialSalon",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                  />
+                                </div>
+                                <div className="flex items-center">
+                                  <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                  <input
+                                    type="time"
+                                    value={eventoEditado.horaFinalSalon || ""}
+                                    onChange={(e) =>
+                                      handleFieldEdit(
+                                        "horaFinalSalon",
+                                        e.target.value
+                                      )
+                                    }
+                                    className="w-full px-2 py-1 border rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                                  />
+                                </div>
+                              </div>
+                            ) : (
+                              <>
+                                <div className="flex items-center">
+                                  <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                  <span>{evento.horaInicialSalon}</span>
+                                </div>
+                                <div className="flex items-center mt-1">
+                                  <ClockIcon className="text-gray-400 mr-2 h-5" />
+                                  <span>{evento.horaFinalSalon}</span>
+                                </div>
+                              </>
+                            )}
+                          </div>
+                        </td>
 
-                          <button
-                            onClick={() => handleDeleteClick(evento.id)}
-                            className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                            title={t("consultaModEventos.delete")}
-                          >
-                            <TrashIcon className="mr-1" />
-                            <span className="hidden sm:inline">
-                              {t("consultaModEventos.delete")}
-                            </span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
+                        <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-900 text-center">
+                          <div className="flex flex-wrap justify-center gap-2">
+                            <button
+                              onClick={() => abrirModalEdicion(evento)}
+                              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                              title={t("consultaModEventos.viewEdit")}
+                            >
+                              <PencilSquareIcon className="mr-1 h-5 w-5" />
+                              <span className="hidden sm:inline">
+                                {t("consultaModEventos.viewEdit")}
+                              </span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteClick(evento.id)}
+                              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              title={t("consultaModEventos.delete")}
+                            >
+                              <TrashIcon className="mr-1 h-5 w-5" />
+                              <span className="hidden sm:inline">
+                                {t("consultaModEventos.delete")}
+                              </span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile view - only visible on small screens */}
+          <div className="md:hidden">
+            {sortedEvents.length === 0 ? (
+              <div className="bg-white p-6 text-center text-gray-500 rounded-lg shadow-sm border border-gray-200">
+                {searchTerm
+                  ? t("consultaModEventos.noMatchingEvents")
+                  : filtro === "activos"
+                  ? t("consultaModEventos.noActiveEvents")
+                  : t("consultaModEventos.noFinishedEvents")}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {currentEvents.map((evento, index) => {
+                  const usuario = usuarios.find(
+                    (usuario) => usuario.id === evento.userId
                   );
-                })
-              )}
-            </tbody>
-          </table>
+
+                  return (
+                    <MobileEventCard
+                      key={evento.id}
+                      evento={evento}
+                      usuario={usuario}
+                      handleDeleteClick={handleDeleteClick}
+                      abrirModalEdicion={abrirModalEdicion}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Pagination */}
@@ -1567,7 +1715,6 @@ function ConsultaModEvento() {
                     onClick={cerrarModal}
                     className="mt-3 w-full inline-flex justify-center items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
                   >
-                    <XMarkIcon className="mr-2" />
                     {t("consultaModEventos.close")}
                   </button>
                 </div>
