@@ -907,7 +907,7 @@ function PantallasSalon() {
             {activeTab === "screens" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Nombres de pantallas
+                  {t("screenSalon.screenNames")}
                 </h2>
 
                 <div className="space-y-4">
@@ -942,9 +942,11 @@ function PantallasSalon() {
                         </div>
                         <div>
                           <Link
-                            href={`/pantalla${index + 1}.html`}
+                            href={`/pantalla/${index + 1}${isProduction}/?emp=${
+                              nombreEmpresa?.empresa
+                            }`}
                             target="_blank"
-                            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
                             URL
                           </Link>

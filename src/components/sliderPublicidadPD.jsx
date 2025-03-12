@@ -6,7 +6,7 @@ const AdvertisementSlider = ({
   advertisements,
   templates,
   event,
-  currentHour,
+  currentTime,
   weatherData,
   isPortrait = false,
 }) => {
@@ -216,39 +216,56 @@ const AdvertisementSlider = ({
         </div>
 
         {/* Weather and Time */}
-        <div
-          className="flex-col text-color mr-4"
-          style={{ fontFamily: templateActual.fontStyle }}
-        >
-          <div>
-            {isLoading ? (
-              <p>
-                {idioma === "en" && "Loading weather data..."}
-                {idioma === "es" && "Cargando datos del clima..."}
-                {idioma === "es-en" &&
-                  "Cargando datos del clima... / Loading weather data..."}
-              </p>
-            ) : weatherData?.current?.temp_c || weatherData?.temp_c ? (
-              <div className="grid grid-cols-2 items-center">
+        <div className="flex flex-col items-end mr-4">
+          {isLoading ? (
+            <div className="animate-pulse flex space-x-2">
+              <div className="rounded-full bg-gray-200 h-5 w-5"></div>
+              <div className="rounded bg-gray-200 h-5 w-12"></div>
+            </div>
+          ) : weatherData ? (
+            <>
+              <div className="flex items-center">
+                {(weatherData.current?.condition?.icon || weatherData.icon) && (
+                  <img
+                    src={
+                      weatherData.current?.condition?.icon || weatherData.icon
+                    }
+                    alt="Weather"
+                    className="h-6 w-6 mr-1"
+                  />
+                )}
+                <span
+                  className="text-lg font-medium"
+                  style={{
+                    color: templateActual.fontColor || "rgb(37, 99, 235)",
+                  }}
+                >
+                  {weatherData.current?.temp_c || weatherData.temp_c
+                    ? `${(
+                        weatherData.current?.temp_c || weatherData.temp_c
+                      ).toFixed(1)} °C`
+                    : "Sin datos"}
+                </span>
+              </div>
+              <div className="flex items-center">
                 <img
-                  src={weatherData.current?.condition?.icon || weatherData.icon}
-                  alt="Clima"
+                  src="/img/reloj.png"
+                  className="p-1 h-8 mt-1"
+                  alt="Clock"
                 />
-                <p className="text-2xl font-bold -ml-4 w-24">
-                  {weatherData.current?.temp_c || weatherData.temp_c} °C
-                </p>
-                <div className="flex justify-center col-span-2">
-                  <p className="text-2xl font-bold">{currentHour}</p>
+                <div
+                  className="text-lg font-semibold"
+                  style={{
+                    color: templateActual.fontColor || "rgb(31, 41, 55)",
+                  }}
+                >
+                  {currentTime}
                 </div>
               </div>
-            ) : (
-              <h2 className="text-4xl mr-16">
-                {idioma === "en" && "Welcome"}
-                {idioma === "es" && "Bienvenido"}
-                {idioma === "es-en" && "Bienvenido / Welcome"}
-              </h2>
-            )}
-          </div>
+            </>
+          ) : (
+            <span className="text-lg text-gray-500">Sin datos</span>
+          )}
         </div>
       </div>
 
