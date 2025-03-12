@@ -192,7 +192,7 @@ const PDTemplate1Horizontal = ({
       style={{ fontFamily: templateActual.fontStyle }}
     >
       {/* Header Section */}
-      <header className="px-8 py-4 flex justify-between items-center">
+      <header className="px-8  flex justify-between items-center">
         {/* Logo */}
         <div className="flex-shrink-0 w-44 h-20">
           {templateActual.logo ? (
