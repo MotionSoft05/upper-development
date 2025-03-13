@@ -14,6 +14,56 @@ const AdvertisementSlider = ({
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
   const transitioningRef = useRef(false);
+  const [windowSize, setWindowSize] = useState({
+    width: typeof window !== "undefined" ? window.innerWidth : 0,
+    height: typeof window !== "undefined" ? window.innerHeight : 0,
+  });
+
+  // Monitor window size for responsive adjustments
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowSize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("resize", handleResize);
+      handleResize(); // Initial call
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("resize", handleResize);
+      }
+    };
+  }, []);
+
+  // Prevent scrolling when component is mounted
+  useEffect(() => {
+    if (isPortrait) {
+      // Prevent scrolling on the body
+      document.body.style.overflow = "hidden";
+      document.body.style.margin = "0";
+      document.body.style.padding = "0";
+      document.body.style.height = "100%";
+
+      // Apply specific styles to html element too
+      document.documentElement.style.overflow = "hidden";
+      document.documentElement.style.height = "100%";
+
+      return () => {
+        // Restore default styles when component unmounts
+        document.body.style.overflow = "";
+        document.body.style.margin = "";
+        document.body.style.padding = "";
+        document.body.style.height = "";
+        document.documentElement.style.overflow = "";
+        document.documentElement.style.height = "";
+      };
+    }
+  }, [isPortrait]);
 
   // Filtrar anuncios por orientación de manera estricta
   const filteredAds = useMemo(() => {
@@ -55,7 +105,6 @@ const AdvertisementSlider = ({
 
     return orientationFiltered;
   }, [advertisements, isPortrait]);
-  // El resto del componente permanece igual...
 
   // Format date based on language
   const formatDate = (lang) => {
@@ -162,154 +211,198 @@ const AdvertisementSlider = ({
   const isLoading = !weatherData;
   const idioma = templateActual.idioma || "es";
 
-  return (
-    <div
-      className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20 flex flex-col"
-      style={{ fontFamily: templateActual.fontStyle }}
-    >
-      {/* Header Section - 12vh */}
-      <div className="flex items-center justify-between h-[14vh]">
-        {/* Logo */}
-        {templateActual.logo && (
-          <div className="h-full aspect-square ml-4">
-            <img
-              src={templateActual.logo}
-              alt="Logo"
-              className="rounded-lg object-contain h-full"
-            />
-          </div>
+  // Render header content (used in both orientations)
+  const renderHeaderContent = () => (
+    <>
+      {/* Logo */}
+      {templateActual.logo && (
+        <div className="h-full aspect-square ml-4">
+          <img
+            src={templateActual.logo}
+            alt="Logo"
+            className="rounded-lg object-contain h-full"
+          />
+        </div>
+      )}
+
+      {/* Title and Date */}
+      <div
+        className="flex flex-col items-center text-color"
+        style={{ fontFamily: templateActual.fontStyle }}
+      >
+        {idioma === "es" && (
+          <h1 className="text-xl font-bold text-center text-color">
+            Eventos del día
+          </h1>
         )}
 
-        {/* Title and Date */}
-        <div
-          className="flex flex-col items-center text-color"
-          style={{ fontFamily: templateActual.fontStyle }}
-        >
-          {idioma === "es" && (
-            <h1 className="text-xl font-bold text-center text-color">
-              Eventos del día
-            </h1>
-          )}
+        {idioma === "en" && (
+          <h1 className="text-xl font-bold text-center text-color">
+            Today&rsquo;s Events
+          </h1>
+        )}
 
-          {idioma === "en" && (
-            <h1 className="text-xl font-bold text-center text-color">
-              Today&rsquo;s Events
-            </h1>
-          )}
+        {idioma === "es-en" && (
+          <>
+            <p className="text-xl font-bold text-color">Eventos del día</p>
+            <p className="text-xl font-bold text-color">Today&rsquo;s Events</p>
+          </>
+        )}
 
-          {idioma === "es-en" && (
-            <>
-              <p className="text-xl font-bold text-color">Eventos del día</p>
-              <p className="text-xl font-bold text-color">
-                Today&rsquo;s Events
-              </p>
-            </>
-          )}
+        {idioma === "es" && (
+          <p className="text-xs text-center text-color">{formatDate("es")}</p>
+        )}
 
-          {idioma === "es" && (
-            <p className="text-xs text-center text-color">{formatDate("es")}</p>
-          )}
+        {idioma === "en" && (
+          <p className="text-xs text-center text-color">{formatDate("en")}</p>
+        )}
 
-          {idioma === "en" && (
-            <p className="text-xs text-center text-color">{formatDate("en")}</p>
-          )}
+        {idioma === "es-en" && (
+          <>
+            <p className="text-xs text-color">{formatDate("es")}</p>
+            <p className="text-xs text-color">{formatDate("en")}</p>
+          </>
+        )}
+      </div>
 
-          {idioma === "es-en" && (
-            <>
-              <p className="text-xs text-color">{formatDate("es")}</p>
-              <p className="text-xs text-color">{formatDate("en")}</p>
-            </>
-          )}
-        </div>
-
-        {/* Weather and Time */}
-        <div className="flex flex-col items-end mr-4">
-          {isLoading ? (
-            <div className="animate-pulse flex space-x-2">
-              <div className="rounded-full bg-gray-200 h-5 w-5"></div>
-              <div className="rounded bg-gray-200 h-5 w-12"></div>
-            </div>
-          ) : weatherData ? (
-            <>
-              <div className="flex items-center">
-                {(weatherData.current?.condition?.icon || weatherData.icon) && (
-                  <img
-                    src={
-                      weatherData.current?.condition?.icon || weatherData.icon
-                    }
-                    alt="Weather"
-                    className="h-6 w-6 mr-1"
-                  />
-                )}
-                <span className="text-lg font-medium text-color">
-                  {weatherData.current?.temp_c || weatherData.temp_c
-                    ? `${(
-                        weatherData.current?.temp_c || weatherData.temp_c
-                      ).toFixed(1)} °C`
-                    : "Sin datos"}
-                </span>
-              </div>
-              <div className="flex items-center">
+      {/* Weather and Time */}
+      <div className="flex flex-col items-end mr-4">
+        {isLoading ? (
+          <div className="animate-pulse flex space-x-2">
+            <div className="rounded-full bg-gray-200 h-5 w-5"></div>
+            <div className="rounded bg-gray-200 h-5 w-12"></div>
+          </div>
+        ) : weatherData ? (
+          <>
+            <div className="flex items-center">
+              {(weatherData.current?.condition?.icon || weatherData.icon) && (
                 <img
-                  src="/img/reloj.png"
-                  className="p-1 h-8 mt-1"
-                  alt="Clock"
+                  src={weatherData.current?.condition?.icon || weatherData.icon}
+                  alt="Weather"
+                  className="h-6 w-6 mr-1"
                 />
-                <div className="text-xl font-semibold mt-0.5 text-color">
-                  {currentTime}
-                </div>
-              </div>
-            </>
-          ) : (
-            <span className="text-lg text-gray-500">Sin datos</span>
-          )}
-        </div>
-      </div>
-
-      {/* Advertisement Content - Fills remaining space */}
-      <div
-        className={`flex-1 relative ${isPortrait ? "portrait" : "landscape"}`}
-      >
-        <div
-          className="absolute inset-0 w-full h-full transition-opacity duration-1000"
-          style={{ opacity }}
-        >
-          {currentAd.videoUrl ? (
-            <video
-              key={`video-${currentIndex}`}
-              className={`${
-                isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
-              }`}
-              autoPlay
-              muted
-              playsInline
-              loop
-              src={currentAd.videoUrl}
-              onEnded={moveToNextAd}
-            />
-          ) : // Para modo landscape (isPortrait es falso)
-          isPortrait ? (
-            <img
-              key={`image-${currentIndex}`}
-              className="h-full mx-auto"
-              src={currentAd.imageUrl}
-              alt="Advertisement"
-            />
-          ) : (
-            // Usando Next.js Image para mejor rendimiento en modo landscape
-            <div className="relative w-full h-full">
-              <img
-                key={`image-${currentIndex}`}
-                src={currentAd.imageUrl}
-                alt="Advertisement"
-                fill
-                className="object-cover"
-                priority
-              />
+              )}
+              <span className="text-lg font-medium text-color">
+                {weatherData.current?.temp_c || weatherData.temp_c
+                  ? `${(
+                      weatherData.current?.temp_c || weatherData.temp_c
+                    ).toFixed(1)} °C`
+                  : "Sin datos"}
+              </span>
             </div>
-          )}
-        </div>
+            <div className="flex items-center">
+              <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
+              <div className="text-xl font-semibold mt-0.5 text-color">
+                {currentTime}
+              </div>
+            </div>
+          </>
+        ) : (
+          <span className="text-lg text-gray-500">Sin datos</span>
+        )}
       </div>
+    </>
+  );
+
+  // Render advertisement content (used in both orientations)
+  const renderAdvertisementContent = () => (
+    <div
+      className="absolute inset-0 w-full h-full transition-opacity duration-1000"
+      style={{
+        opacity,
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        overflow: "hidden",
+      }}
+    >
+      {currentAd.videoUrl ? (
+        <video
+          key={`video-${currentIndex}`}
+          className={`${
+            isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
+          }`}
+          autoPlay
+          muted
+          playsInline
+          loop
+          src={currentAd.videoUrl}
+          onEnded={moveToNextAd}
+          style={{ maxWidth: "100%", maxHeight: "100%" }}
+        />
+      ) : // Para modo landscape (isPortrait es falso)
+      isPortrait ? (
+        <img
+          key={`image-${currentIndex}`}
+          className="h-full mx-auto"
+          src={currentAd.imageUrl}
+          alt="Advertisement"
+          style={{ maxHeight: "100%" }}
+        />
+      ) : (
+        // Imagen en modo horizontal (landscape) - Asegurando que ocupe el espacio
+        <img
+          key={`image-${currentIndex}`}
+          src={currentAd.imageUrl}
+          alt="Advertisement"
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            display: "block", // Importante para eliminar espacio adicional
+          }}
+        />
+      )}
+    </div>
+  );
+
+  return (
+    <div
+      className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20"
+      style={{ fontFamily: templateActual.fontStyle }}
+    >
+      {isPortrait ? (
+        // Portrait mode with rotation
+        <div
+          style={{
+            position: "absolute",
+            width: windowSize.height,
+            height: windowSize.width,
+            top: (windowSize.height - windowSize.width) / 2,
+            left: (windowSize.width - windowSize.height) / 2,
+            transform: "rotate(90deg)",
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: "white",
+          }}
+        >
+          {/* Header Section - rotated for portrait */}
+          <div className="flex items-center justify-between h-[14vh]">
+            {renderHeaderContent()}
+          </div>
+
+          {/* Advertisement Content - rotated for portrait */}
+          <div className="flex-1 relative portrait">
+            {renderAdvertisementContent()}
+          </div>
+        </div>
+      ) : (
+        // Original landscape layout
+        <div className="flex flex-col h-full w-full">
+          {/* Header Section */}
+          <div className="flex items-center justify-between h-[14vh]">
+            {renderHeaderContent()}
+          </div>
+
+          {/* Advertisement Content - Explícitamente ocupando el espacio restante */}
+          <div
+            className="flex-1 relative overflow-hidden"
+            style={{ height: "calc(100% - 14vh)" }}
+          >
+            {renderAdvertisementContent()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
