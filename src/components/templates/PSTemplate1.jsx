@@ -2,18 +2,6 @@ import GetLanguageDate from "@/components/getLanguageDate";
 import EventImageSlider from "@/components/sliders/EventImageSlider";
 import { useState, useEffect } from "react";
 
-const FullScreenImage = ({ image }) => (
-  <div className="fixed inset-0 z-50 bg-black">
-    <img
-      src={image}
-      alt="Full screen event"
-      fill
-      className="object-contain"
-      priority
-    />
-  </div>
-);
-
 export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
   const [showFullScreen, setShowFullScreen] = useState(false);
 
@@ -21,10 +9,46 @@ export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
     setShowFullScreen(event.primeraImagen && event.images?.length > 0);
   }, [event.primeraImagen, event.images]);
 
+  // Renderizar el header (encabezado) para mantener consistencia
+  const renderHeader = () => (
+    <header className="flex justify-between items-center h-[10vh] mb-2">
+      {templates.logo && (
+        <div className="h-full aspect-video flex items-center">
+          <img
+            src={templates.logo}
+            alt="Logo"
+            className="object-contain h-full"
+          />
+        </div>
+      )}
+      <h1 className="font-bold uppercase text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-color">
+        {event.matchingDevice}
+      </h1>
+    </header>
+  );
+
+  // Si estamos en modo pantalla completa, solo mostramos el header y la imagen
   if (showFullScreen && event.images?.[0]) {
-    return <FullScreenImage image={event.images[0]} />;
+    return (
+      <div className="fixed inset-0 flex flex-col bg-white">
+        <div className="w-[100vw] p-4">
+          {/* Solo mostramos el header */}
+          {renderHeader()}
+        </div>
+
+        {/* Imagen a pantalla completa que ocupa todo el espacio restante */}
+        <div className="flex-1 bg-black flex items-center justify-center relative">
+          <img
+            src={event.images[0]}
+            alt="Full screen event"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      </div>
+    );
   }
 
+  // Vista normal cuando no estamos en pantalla completa
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white">
       <section
@@ -35,20 +59,7 @@ export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
         }}
       >
         {/* Header - 10vh */}
-        <header className="flex justify-between items-center h-[10vh] mb-2">
-          {templates.logo && (
-            <div className="h-full aspect-video flex items-center">
-              <img
-                src={templates.logo}
-                alt="Logo"
-                className="object-contain h-full"
-              />
-            </div>
-          )}
-          <h1 className="font-bold uppercase text-2xl md:text-3xl lg:text-4xl xl:text-5xl text-color">
-            {event.matchingDevice}
-          </h1>
-        </header>
+        {renderHeader()}
 
         {/* Main Content - 80vh */}
         <main className="flex-1 flex flex-col min-h-0">
@@ -69,7 +80,12 @@ export const PSTemplate1 = ({ event, templates, currentHour, t }) => {
             <div className="h-full grid grid-cols-3 gap-x-4">
               {/* Image Slider */}
               <div className="col-span-1 flex items-center justify-center p-4">
-                <EventImageSlider images={event.images} />
+                <EventImageSlider
+                  images={event.images}
+                  onImageClick={(image) => {
+                    setShowFullScreen(true);
+                  }}
+                />
               </div>
 
               {/* Event Details */}

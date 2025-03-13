@@ -64,6 +64,10 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     templates: null,
     matchingDevice: null,
   });
+  console.log(
+    "🚀 ~ PantallaBaseSalon.jsx:67 ~ BaseScreen ~ screenData:",
+    screenData
+  );
 
   const [currentHour, setCurrentHour] = useState(getHour());
 
@@ -110,12 +114,13 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         id,
       } = event;
 
-      const startDate = new Date(fechaInicio);
-      const endDate = new Date(fechaFinal);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
+      // Usar una comparación de strings de fecha en lugar de objetos Date
+      const today = new Date();
+      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
 
-      const isWithinDateRange = now >= startDate && now <= endDate;
+      // Compare strings directamente - mucho más seguro
+      const isWithinDateRange =
+        formattedToday >= fechaInicio && formattedToday <= fechaFinal;
 
       let startMinutes, endMinutes;
 
@@ -198,12 +203,13 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       const { fechaInicio, fechaFinal, horaInicialSalon, horaFinalSalon } =
         event;
 
-      // Check date range
-      const startDate = new Date(fechaInicio);
-      const endDate = new Date(fechaFinal);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
-      const isWithinDateRange = now >= startDate && now <= endDate;
+      // Usar una comparación de strings de fecha en lugar de objetos Date
+      const today = new Date();
+      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+
+      // Compare strings directamente - mucho más seguro
+      const isWithinDateRange =
+        formattedToday >= fechaInicio && formattedToday <= fechaFinal;
 
       // Check time range
       let startMinutes, endMinutes;
@@ -236,7 +242,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     if (allCurrentEvents.length === 0) {
       console.log("📢 No hay eventos activos, mostrando publicidad");
     } else {
-      console.log(`🎭 Mostrando evento: ${allCurrentEvents[0].nombreEvento}`);
+      console.log(`🎭 Mostrando evento: ${allCurrentEvents}`);
     }
 
     // Update the screen data with the filtered events
@@ -405,12 +411,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
                 horaFinalSalon,
               } = event;
 
-              // Check date range
-              const startDate = new Date(fechaInicio);
-              const endDate = new Date(fechaFinal);
-              startDate.setHours(0, 0, 0, 0);
-              endDate.setHours(23, 59, 59, 999);
-              const isWithinDateRange = now >= startDate && now <= endDate;
+              // Usar una comparación de strings de fecha en lugar de objetos Date
+              const today = new Date();
+              const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+              console.log(
+                "🚀 ~ PantallaBaseSalon.jsx:417 ~ currentlyActiveEvents ~ formattedToday:",
+                formattedToday
+              );
+
+              // Compare strings directamente - mucho más seguro
+              const isWithinDateRange =
+                formattedToday >= fechaInicio && formattedToday <= fechaFinal;
 
               // Check time range
               let startMinutes, endMinutes;

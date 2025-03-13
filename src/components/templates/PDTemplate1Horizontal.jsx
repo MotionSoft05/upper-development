@@ -13,7 +13,8 @@ const PDTemplate1Horizontal = ({
   qrCodeUrl,
   t,
   screenNumber,
-  publicidad, // Añadir esta nueva prop
+  publicidad,
+  nombrePantallasDirectorio = [],
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -21,6 +22,9 @@ const PDTemplate1Horizontal = ({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
+  // State for full screen image functionality
+  const [showFullScreen, setShowFullScreen] = useState(false);
+  const [fullScreenImage, setFullScreenImage] = useState(null);
 
   // Monitor window size for responsive adjustments
   useEffect(() => {
@@ -59,6 +63,20 @@ const PDTemplate1Horizontal = ({
 
     return () => clearInterval(timer);
   }, []);
+
+  // Check for primeraImagen flag in events
+  useEffect(() => {
+    const eventWithPrimeraImagen = events.find(
+      (event) => event.primeraImagen && event.images?.length > 0
+    );
+
+    if (eventWithPrimeraImagen) {
+      setFullScreenImage(eventWithPrimeraImagen.images[0]);
+      setShowFullScreen(true);
+    } else {
+      setShowFullScreen(false);
+    }
+  }, [events]);
 
   // Fixed number of events per page - always 4
   const eventsPerPage = 4;
@@ -186,105 +204,130 @@ const PDTemplate1Horizontal = ({
       return currentDate.toLocaleDateString("en-US", options);
     }
   };
+
+  // Renderizar el header (encabezado)
+  const renderHeader = () => (
+    <header className="px-8 flex justify-between items-center">
+      {/* Logo */}
+      <div className="flex-shrink-0 w-44 h-20">
+        {templateActual.logo ? (
+          <img
+            src={templateActual.logo}
+            alt="Logo"
+            className="h-full w-auto object-contain "
+          />
+        ) : (
+          <div className="h-full w-full bg-gray-100 flex items-center justify-center rounded">
+            <span className="text-gray-400">Logo</span>
+          </div>
+        )}
+      </div>
+
+      {/* Title and Date */}
+      <div
+        className="flex flex-col items-center "
+        style={{ fontFamily: templateActual.fontStyle }}
+      >
+        {templateActual.idioma === "es" && (
+          <h1 className="text-xl font-bold text-center">Eventos del día</h1>
+        )}
+
+        {templateActual.idioma === "en" && (
+          <h1 className="text-xl font-bold text-center">
+            Today&rsquo;s Events
+          </h1>
+        )}
+
+        {templateActual.idioma === "es-en" && (
+          <>
+            <p className="text-xl font-bold">Eventos del día</p>
+            <p className="text-xl font-bold">Today&rsquo;s Events</p>
+          </>
+        )}
+
+        {templateActual.idioma === "es" && (
+          <p className="text-xs text-center">{formatDate("es")}</p>
+        )}
+
+        {templateActual.idioma === "en" && (
+          <p className="text-xs text-center">{formatDate("en")}</p>
+        )}
+
+        {templateActual.idioma === "es-en" && (
+          <>
+            <p className="text-xs">{formatDate("es")}</p>
+            <p className="text-xs">{formatDate("en")}</p>
+          </>
+        )}
+      </div>
+
+      {/* Weather and Time */}
+      <div className="flex flex-col items-end">
+        {isLoading ? (
+          <div className="animate-pulse flex space-x-2">
+            <div className="rounded-full bg-gray-200 h-5 w-5"></div>
+            <div className="rounded bg-gray-200 h-5 w-12"></div>
+          </div>
+        ) : weatherData ? (
+          <>
+            <div className="flex items-center">
+              {weatherData.icon && (
+                <img
+                  src={weatherData.icon}
+                  alt="Weather"
+                  className="h-6 w-6 mr-1"
+                />
+              )}
+              <span className="text-lg font-medium text-color">
+                {weatherData.temp_c
+                  ? `${weatherData.temp_c.toFixed(1)} °C`
+                  : "Sin datos"}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
+              <div className="text-xl font-semibold text-gray-800 mt-0.5">
+                {currentTime}
+              </div>
+            </div>
+          </>
+        ) : (
+          <span className="text-lg text-gray-500">Sin datos</span>
+        )}
+      </div>
+    </header>
+  );
+
+  // Si se debe mostrar una imagen a pantalla completa
+  if (showFullScreen && fullScreenImage) {
+    return (
+      <div
+        className="flex flex-col h-screen bg-white overflow-hidden"
+        style={{ fontFamily: templateActual.fontStyle }}
+      >
+        {/* Header sigue siendo visible */}
+        {renderHeader()}
+
+        {/* Imagen a pantalla completa */}
+        <div className="flex-grow flex items-center justify-center bg-black relative">
+          <img
+            src={fullScreenImage}
+            alt="Evento a pantalla completa"
+            className="max-h-full max-w-full object-contain"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Vista normal
   return (
     <div
       className="flex flex-col h-screen bg-white overflow-hidden"
       style={{ fontFamily: templateActual.fontStyle }}
     >
       {/* Header Section */}
-      <header className="px-8  flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex-shrink-0 w-44 h-20">
-          {templateActual.logo ? (
-            <img
-              src={templateActual.logo}
-              alt="Logo"
-              className="h-full w-auto object-contain "
-            />
-          ) : (
-            <div className="h-full w-full bg-gray-100 flex items-center justify-center rounded">
-              <span className="text-gray-400">Logo</span>
-            </div>
-          )}
-        </div>
-
-        {/* Title and Date */}
-        <div
-          className="flex flex-col items-center "
-          style={{ fontFamily: templateActual.fontStyle }}
-        >
-          {templateActual.idioma === "es" && (
-            <h1 className="text-xl font-bold text-center">Eventos del día</h1>
-          )}
-
-          {templateActual.idioma === "en" && (
-            <h1 className="text-xl font-bold text-center">
-              Today&rsquo;s Events
-            </h1>
-          )}
-
-          {templateActual.idioma === "es-en" && (
-            <>
-              <p className="text-xl font-bold">Eventos del día</p>
-              <p className="text-xl font-bold">Today&rsquo;s Events</p>
-            </>
-          )}
-
-          {templateActual.idioma === "es" && (
-            <p className="text-xs text-center">{formatDate("es")}</p>
-          )}
-
-          {templateActual.idioma === "en" && (
-            <p className="text-xs text-center">{formatDate("en")}</p>
-          )}
-
-          {templateActual.idioma === "es-en" && (
-            <>
-              <p className="text-xs">{formatDate("es")}</p>
-              <p className="text-xs">{formatDate("en")}</p>
-            </>
-          )}
-        </div>
-
-        {/* Weather and Time */}
-        <div className="flex flex-col items-end">
-          {isLoading ? (
-            <div className="animate-pulse flex space-x-2">
-              <div className="rounded-full bg-gray-200 h-5 w-5"></div>
-              <div className="rounded bg-gray-200 h-5 w-12"></div>
-            </div>
-          ) : weatherData ? (
-            <>
-              <div className="flex items-center">
-                {weatherData.icon && (
-                  <img
-                    src={weatherData.icon}
-                    alt="Weather"
-                    className="h-6 w-6 mr-1"
-                  />
-                )}
-                <span className="text-lg font-medium text-blue-600">
-                  {weatherData.temp_c
-                    ? `${weatherData.temp_c.toFixed(1)} °C`
-                    : "Sin datos"}
-                </span>
-              </div>
-              <div className="flex items-center">
-                <img
-                  src="/img/reloj.png"
-                  className="p-1 h-8 mt-1"
-                  alt="Clock"
-                />
-                <div className="text-xl font-semibold text-gray-800 mt-0.5">
-                  {currentTime}
-                </div>
-              </div>
-            </>
-          ) : (
-            <span className="text-lg text-gray-500">Sin datos</span>
-          )}
-        </div>
-      </header>
+      {renderHeader()}
 
       {/* Main Content Area - Restructured */}
       <div className="flex flex-col flex-grow overflow-hidden">
@@ -324,6 +367,13 @@ const PDTemplate1Horizontal = ({
                             event={event}
                             screenName={screenName}
                             total={chunk.length}
+                            nombrePantallasDirectorio={
+                              nombrePantallasDirectorio
+                            }
+                            onImageClick={(image) => {
+                              setFullScreenImage(image);
+                              setShowFullScreen(true);
+                            }}
                           />
                         ))}
                         {/* Fill remaining slots with empty rows */}
@@ -348,6 +398,11 @@ const PDTemplate1Horizontal = ({
                       event={event}
                       screenName={screenName}
                       total={events.length}
+                      nombrePantallasDirectorio={nombrePantallasDirectorio}
+                      onImageClick={(image) => {
+                        setFullScreenImage(image);
+                        setShowFullScreen(true);
+                      }}
                     />
                   ))}
                   {/* Fill remaining slots with empty rows */}
@@ -431,12 +486,24 @@ const PDTemplate1Horizontal = ({
 };
 
 // Event display component that matches the design in the screenshots
-const EventRow = ({ event, screenName, total }) => {
+const EventRow = ({
+  event,
+  screenName,
+  total,
+  nombrePantallasDirectorio = [],
+  onImageClick,
+}) => {
   if (!event) return null;
 
   // Calculate height percentage based on number of events
   const heightPercentage = 100 / 4; // Always show 4 events
 
+  // Filtrar los devices para mostrar solo los que NO están en nombrePantallasDirectorio
+  const filteredDevices = event.devices
+    ? event.devices.filter(
+        (device) => !nombrePantallasDirectorio.includes(device)
+      )
+    : [];
   return (
     <div
       className="flex items-center border-b border-gray-200 px-6 hover:bg-gray-100"
@@ -448,7 +515,8 @@ const EventRow = ({ event, screenName, total }) => {
           <img
             src={event.images[0]}
             alt={event.nombreEvento}
-            className="h-full w-full object-cover rounded-lg"
+            className="h-full w-full object-cover rounded-lg cursor-pointer"
+            onClick={() => onImageClick && onImageClick(event.images[0])}
           />
         ) : (
           <div className="h-full w-full bg-gray-200 flex items-center justify-center">
@@ -467,9 +535,9 @@ const EventRow = ({ event, screenName, total }) => {
           <p className="text-xl">{event.tipoEvento}</p>
         </div>
 
-        {/* Screen name or location if available */}
-        {event.devices && event.devices[0] && (
-          <div className="text-xl">{event.devices[0]}</div>
+        {/* Modificamos esta parte para usar los devices filtrados */}
+        {filteredDevices.length > 0 && (
+          <div className="text-xl">{filteredDevices[0]}</div>
         )}
       </div>
 
@@ -495,6 +563,16 @@ PDTemplate1Horizontal.propTypes = {
   qrCodeUrl: PropTypes.string,
   t: PropTypes.func,
   screenNumber: PropTypes.number,
+  nombrePantallasDirectorio: PropTypes.array,
+  publicidad: PropTypes.string,
+};
+
+EventRow.propTypes = {
+  event: PropTypes.object.isRequired,
+  screenName: PropTypes.string,
+  total: PropTypes.number,
+  nombrePantallasDirectorio: PropTypes.array,
+  onImageClick: PropTypes.func,
 };
 
 export default PDTemplate1Horizontal;

@@ -168,7 +168,7 @@ const AdvertisementSlider = ({
       style={{ fontFamily: templateActual.fontStyle }}
     >
       {/* Header Section - 12vh */}
-      <div className="flex items-center justify-between h-[12vh]">
+      <div className="flex items-center justify-between h-[14vh]">
         {/* Logo */}
         {templateActual.logo && (
           <div className="h-full aspect-square ml-4">
@@ -182,38 +182,42 @@ const AdvertisementSlider = ({
 
         {/* Title and Date */}
         <div
-          className="flex flex-col items-center"
+          className="flex flex-col items-center text-color"
           style={{ fontFamily: templateActual.fontStyle }}
         >
           {idioma === "es" && (
-            <h1 className="text-2xl font-bold text-center">Eventos del día</h1>
+            <h1 className="text-xl font-bold text-center text-color">
+              Eventos del día
+            </h1>
           )}
 
           {idioma === "en" && (
-            <h1 className="text-2xl font-bold text-center">
+            <h1 className="text-xl font-bold text-center text-color">
               Today&rsquo;s Events
             </h1>
           )}
 
           {idioma === "es-en" && (
             <>
-              <p className="text-2xl font-bold">Eventos del día</p>
-              <p className="text-xl font-bold">Today&rsquo;s Events</p>
+              <p className="text-xl font-bold text-color">Eventos del día</p>
+              <p className="text-xl font-bold text-color">
+                Today&rsquo;s Events
+              </p>
             </>
           )}
 
           {idioma === "es" && (
-            <p className="text-base text-center">{formatDate("es")}</p>
+            <p className="text-xs text-center text-color">{formatDate("es")}</p>
           )}
 
           {idioma === "en" && (
-            <p className="text-base text-center">{formatDate("en")}</p>
+            <p className="text-xs text-center text-color">{formatDate("en")}</p>
           )}
 
           {idioma === "es-en" && (
             <>
-              <p className="text-base">{formatDate("es")}</p>
-              <p className="text-base">{formatDate("en")}</p>
+              <p className="text-xs text-color">{formatDate("es")}</p>
+              <p className="text-xs text-color">{formatDate("en")}</p>
             </>
           )}
         </div>
@@ -237,12 +241,7 @@ const AdvertisementSlider = ({
                     className="h-6 w-6 mr-1"
                   />
                 )}
-                <span
-                  className="text-lg font-medium"
-                  style={{
-                    color: templateActual.fontColor || "rgb(37, 99, 235)",
-                  }}
-                >
+                <span className="text-lg font-medium text-color">
                   {weatherData.current?.temp_c || weatherData.temp_c
                     ? `${(
                         weatherData.current?.temp_c || weatherData.temp_c
@@ -256,12 +255,7 @@ const AdvertisementSlider = ({
                   className="p-1 h-8 mt-1"
                   alt="Clock"
                 />
-                <div
-                  className="text-xl font-semibold mt-0.5"
-                  style={{
-                    color: templateActual.fontColor || "rgb(31, 41, 55)",
-                  }}
-                >
+                <div className="text-xl font-semibold mt-0.5 text-color">
                   {currentTime}
                 </div>
               </div>

@@ -13,6 +13,7 @@ const PDTemplateManager = ({
   t,
   qrCodeUrl,
   screenNumber,
+  nombrePantallasDirectorio,
 }) => {
   // Determinar qué publicidad usar según la orientación
   const publicidad = isPortrait
@@ -36,6 +37,7 @@ const PDTemplateManager = ({
             qrCodeUrl={qrCodeUrl}
             screenNumber={screenNumber}
             publicidad={publicidad}
+            nombrePantallasDirectorio={nombrePantallasDirectorio}
           />
         ) : (
           <PDTemplate1Horizontal
@@ -47,6 +49,7 @@ const PDTemplateManager = ({
             qrCodeUrl={qrCodeUrl}
             screenNumber={screenNumber}
             publicidad={publicidad}
+            nombrePantallasDirectorio={nombrePantallasDirectorio}
           />
         );
     }

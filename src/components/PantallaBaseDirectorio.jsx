@@ -83,6 +83,10 @@ export default function BaseDirectorioClient({ id }) {
     weatherData: null,
     currentTime: getCurrentTime(),
   });
+  console.log(
+    "🚀 ~ PantallaBaseDirectorio.jsx:86 ~ BaseDirectorioClient ~ screenData:",
+    screenData
+  );
 
   // Memoized values
   const currentEvent = useMemo(() => screenData.events[0], [screenData.events]);
@@ -213,28 +217,33 @@ export default function BaseDirectorioClient({ id }) {
     const filteredEvents = allEventsRef.current.filter((event) => {
       console.log("\nRevisando evento:", event.nombreEvento);
 
-      // Date validation
-      const startDate = new Date(event.fechaInicio);
-      const endDate = new Date(event.fechaFinal);
-      startDate.setHours(0, 0, 0, 0);
-      endDate.setHours(23, 59, 59, 999);
+      // Usar una comparación de strings de fecha en lugar de objetos Date
+      const today = new Date();
+      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
 
-      const isWithinDateRange = now >= startDate && now <= endDate;
+      // Comparar strings directamente - mucho más seguro
+      const isWithinDateRange =
+        formattedToday >= event.fechaInicio &&
+        formattedToday <= event.fechaFinal;
 
       // Time validation
       let startMinutes, endMinutes;
       if (
-        event.horaInicialSalon === DEFAULT_HOUR &&
-        event.horaFinalSalon === DEFAULT_HOUR
+        (event.horaInicialSalon === DEFAULT_HOUR &&
+          event.horaFinalSalon === DEFAULT_HOUR) ||
+        (!event.horaInicialSalon && !event.horaFinalSalon)
       ) {
+        // Evento de todo el día - abarca el día completo (0:00 a 23:59)
         startMinutes = 0;
-        endMinutes = 24 * 60 - 1;
+        endMinutes = 24 * 60 - 1; // 23:59
+        console.log(`Evento de todo el día detectado: ${event.nombreEvento}`);
       } else {
+        // Evento con horas específicas
         startMinutes = convertTimeToMinutes(event.horaInicialSalon || "00:00");
         endMinutes = convertTimeToMinutes(event.horaFinalSalon || "23:59");
       }
 
-      // Use < for end time to make events end exactly at end time
+      // Verificar si la hora actual está dentro del rango
       const isWithinTimeRange =
         nowMinutes >= startMinutes && nowMinutes < endMinutes;
 
@@ -454,21 +463,29 @@ export default function BaseDirectorioClient({ id }) {
 
           const filteredEvents = events.filter((event) => {
             // Date validation
-            const startDate = new Date(event.fechaInicio);
-            const endDate = new Date(event.fechaFinal);
-            startDate.setHours(0, 0, 0, 0);
-            endDate.setHours(23, 59, 59, 999);
-            const isWithinDateRange = now >= startDate && now <= endDate;
+            // Usar una comparación de strings de fecha en lugar de objetos Date
+            const today = new Date();
+            const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
 
+            // Comparar strings directamente - mucho más seguro
+            const isWithinDateRange =
+              formattedToday >= event.fechaInicio &&
+              formattedToday <= event.fechaFinal;
             // Time validation
             let startMinutes, endMinutes;
             if (
-              event.horaInicialSalon === DEFAULT_HOUR &&
-              event.horaFinalSalon === DEFAULT_HOUR
+              (event.horaInicialSalon === DEFAULT_HOUR &&
+                event.horaFinalSalon === DEFAULT_HOUR) ||
+              (!event.horaInicialSalon && !event.horaFinalSalon)
             ) {
+              // Evento de todo el día - abarca el día completo (0:00 a 23:59)
               startMinutes = 0;
-              endMinutes = 24 * 60 - 1;
+              endMinutes = 24 * 60 - 1; // 23:59
+              console.log(
+                `Evento de todo el día detectado: ${event.nombreEvento}`
+              );
             } else {
+              // Evento con horas específicas
               startMinutes = convertTimeToMinutes(
                 event.horaInicialSalon || "00:00"
               );
@@ -477,6 +494,7 @@ export default function BaseDirectorioClient({ id }) {
               );
             }
 
+            // Verificar si la hora actual está dentro del rango
             const isWithinTimeRange =
               nowMinutes >= startMinutes && nowMinutes < endMinutes;
 
@@ -690,6 +708,9 @@ export default function BaseDirectorioClient({ id }) {
           ? templates.publicidadPortrait
           : templates.publicidadLandscape
       }
+      nombrePantallasDirectorio={Object.values(
+        screenData.usuario?.nombrePantallasDirectorio || {}
+      )}
     />
   ) : (
     <AdvertisementSlider
