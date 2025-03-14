@@ -243,10 +243,8 @@ export default function BaseDirectorioClient({ id }) {
         endMinutes = convertTimeToMinutes(event.horaFinalSalon || "23:59");
       }
 
-      // Verificar si la hora actual está dentro del rango
-      const isWithinTimeRange =
-        nowMinutes >= startMinutes && nowMinutes < endMinutes;
-
+      // We only check if the event has NOT ended yet
+      const hasNotEnded = nowMinutes < endMinutes;
       // Device validation
       const hasValidDevice = event.devices?.some(
         (device) => userScreenNames[screenNumber - 1] === device
@@ -257,13 +255,13 @@ export default function BaseDirectorioClient({ id }) {
 
       const result =
         isWithinDateRange &&
-        isWithinTimeRange &&
+        hasNotEnded && // Cambio de isWithinTimeRange a hasNotEnded
         hasValidDevice &&
         isValidCompany;
 
       console.log(`Evento: ${event.nombreEvento}`, {
         fechaOk: isWithinDateRange,
-        horaOk: isWithinTimeRange,
+        noTerminado: hasNotEnded, // Cambio en el nombre del log
         deviceOk: hasValidDevice,
         companyOk: isValidCompany,
         mostrar: result,
@@ -465,6 +463,10 @@ export default function BaseDirectorioClient({ id }) {
             // Date validation
             // Usar una comparación de strings de fecha en lugar de objetos Date
             const today = new Date();
+            console.log(
+              "🚀 ~ PantallaBaseDirectorio.jsx:466 ~ filteredEvents ~ today:",
+              today
+            );
             const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
 
             // Comparar strings directamente - mucho más seguro
@@ -494,10 +496,8 @@ export default function BaseDirectorioClient({ id }) {
               );
             }
 
-            // Verificar si la hora actual está dentro del rango
-            const isWithinTimeRange =
-              nowMinutes >= startMinutes && nowMinutes < endMinutes;
-
+            // We only check if the event has NOT ended yet
+            const hasNotEnded = nowMinutes < endMinutes;
             // Device validation
             const hasValidDevice = event.devices?.some(
               (device) => screenNames[screenNumber - 1] === device
@@ -508,7 +508,7 @@ export default function BaseDirectorioClient({ id }) {
 
             return (
               isWithinDateRange &&
-              isWithinTimeRange &&
+              hasNotEnded && // Cambio de isWithinTimeRange a hasNotEnded
               hasValidDevice &&
               isValidCompany
             );
