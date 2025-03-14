@@ -710,9 +710,53 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
 
             {/* Horario en que se mostrará en pantallas */}
             <div className="bg-gray-50 p-3 rounded border border-gray-200 mb-4">
-              <h4 className="text-sm font-medium text-gray-700 mb-2">
-                {t("altaEventos.realFinalTime")}
-              </h4>
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="text-sm font-medium text-gray-700">
+                  {t("altaEventos.realFinalTime")}
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => {
+                    // Copiar el valor del selector de hora inicial
+                    const hourInicio =
+                      document.getElementById("hourSelectorInicio").value;
+                    const minuteInicio = document.getElementById(
+                      "minuteSelectorInicio"
+                    ).value;
+                    const hourFinal =
+                      document.getElementById("hourSelectorFinal").value;
+                    const minuteFinal = document.getElementById(
+                      "minuteSelectorFinal"
+                    ).value;
+
+                    // Establecer los valores en los selectores de salón
+                    document.getElementById("hourSelectorInicioSalon").value =
+                      hourInicio;
+                    document.getElementById("minuteSelectorInicioSalon").value =
+                      minuteInicio;
+                    document.getElementById("hourSelectorFinalSalon").value =
+                      hourFinal;
+                    document.getElementById("minuteSelectorFinalSalon").value =
+                      minuteFinal;
+                  }}
+                  className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium py-1 px-2 rounded flex items-center"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-7 w-7 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
+                    />
+                  </svg>
+                </button>
+              </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm text-gray-600 mb-1">
@@ -792,7 +836,6 @@ function AltaEventos({ setShowAltaEvento, setShowUserAdmin }) {
               </div>
             </div>
           </div>
-
           {/* Dispositivos */}
           <div>
             <h3 className="text-base font-medium text-gray-700 mb-2">

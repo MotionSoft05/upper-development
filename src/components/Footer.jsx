@@ -90,33 +90,6 @@ function Footer() {
                 <FaLinkedin className="w-5 h-5" />
                 <span className="sr-only">LinkedIn</span>
               </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-500 hover:text-blue-500"
-              >
-                <FaTwitter className="w-5 h-5" />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-500 hover:text-blue-800"
-              >
-                <FaFacebook className="w-5 h-5" />
-                <span className="sr-only">Facebook</span>
-              </a>
-              <a
-                href="#"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-500 hover:text-pink-600"
-              >
-                <FaInstagram className="w-5 h-5" />
-                <span className="sr-only">Instagram</span>
-              </a>
             </div>
           </div>
 
@@ -128,34 +101,6 @@ function Footer() {
               </h2>
               <ul className="text-gray-600">
                 {footerLinks.solutions.map((link, index) => (
-                  <li className="mb-2" key={index}>
-                    <a href={link.href} className="hover:text-teal-500">
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="mb-4 text-sm font-semibold text-gray-900 uppercase">
-                {t("footer.sections.support")}
-              </h2>
-              <ul className="text-gray-600">
-                {footerLinks.support.map((link, index) => (
-                  <li className="mb-2" key={index}>
-                    <a href={link.href} className="hover:text-teal-500">
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div>
-              <h2 className="mb-4 text-sm font-semibold text-gray-900 uppercase">
-                {t("footer.sections.company")}
-              </h2>
-              <ul className="text-gray-600">
-                {footerLinks.company.map((link, index) => (
                   <li className="mb-2" key={index}>
                     <a href={link.href} className="hover:text-teal-500">
                       {link.name}
@@ -179,7 +124,7 @@ function Footer() {
             .{t("footer.copyright")}
           </span>
           <div className="flex mt-4 sm:mt-0">
-            <span className="text-sm text-gray-500">Versión: 1.0.0</span>
+            <span className="text-sm text-gray-500">Versión: 2.0.1</span>
           </div>
         </div>
       </div>
