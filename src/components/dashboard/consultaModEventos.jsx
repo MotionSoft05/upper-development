@@ -24,6 +24,8 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
 } from "@heroicons/react/20/solid";
+import Datepicker from "react-tailwindcss-datepicker";
+import moment from "moment";
 // Add this new component for mobile card view
 const MobileEventCard = ({
   evento,
@@ -131,60 +133,7 @@ const MobileEventCard = ({
 
 function ConsultaModEvento() {
   // Mock translation function if i18n is not set up
-  const {
-    t = (key) => {
-      const translations = {
-        "consultaModEventos.title": "Event Query",
-        "consultaModEventos.viewAll": "View All",
-        "consultaModEventos.selectCompany": "Select Company",
-        "consultaModEventos.search": "Search events...",
-        "consultaModEventos.activeEvents": "Active Events",
-        "consultaModEventos.finishedEvents": "Finished Events",
-        "consultaModEventos.showing": "Showing",
-        "consultaModEventos.of": "of",
-        "consultaModEventos.events": "events",
-        "consultaModEventos.rowsPerPage": "Rows per page:",
-        "consultaModEventos.user": "User",
-        "consultaModEventos.name": "Name",
-        "consultaModEventos.type": "Type",
-        "consultaModEventos.roomName": "Room Name",
-        "consultaModEventos.dates": "Dates",
-        "consultaModEventos.roomTime": "Room Time",
-        "consultaModEventos.actions": "Actions",
-        "consultaModEventos.noMatchingEvents": "No matching events found",
-        "consultaModEventos.noActiveEvents": "No active events found",
-        "consultaModEventos.noFinishedEvents": "No finished events found",
-        "consultaModEventos.noScreens": "No screens assigned",
-        "consultaModEventos.viewEdit": "View/Edit",
-        "consultaModEventos.delete": "Delete",
-        "consultaModEventos.editEvent": "Edit Event",
-        "consultaModEventos.eventName": "Event Name",
-        "consultaModEventos.eventType": "Event Type",
-        "consultaModEventos.eventLocation": "Event Location",
-        "consultaModEventos.eventDescription": "Event Description",
-        "consultaModEventos.startDate": "Start Date",
-        "consultaModEventos.endDate": "End Date",
-        "consultaModEventos.eventSchedule": "Event Schedule",
-        "consultaModEventos.realStartTime": "Real Start Time",
-        "consultaModEventos.realEndTime": "Real End Time",
-        "consultaModEventos.screenSchedule": "Screen Schedule",
-        "consultaModEventos.roomStartTime": "Room Start Time",
-        "consultaModEventos.roomEndTime": "Room End Time",
-        "consultaModEventos.eventImages": "Event Images",
-        "consultaModEventos.selectedDevices": "Selected Devices",
-        "consultaModEventos.saveChanges": "Save Changes",
-        "consultaModEventos.close": "Close",
-        "consultaModEventos.confirmDelete": "Confirm Delete",
-        "consultaModEventos.deleteWarning":
-          "Are you sure you want to delete this event? This action cannot be undone.",
-        "consultaModEventos.cancel": "Cancel",
-        "consultaModEventos.page": "Page",
-        "consultaModEventos.previous": "Previous",
-        "consultaModEventos.next": "Next",
-      };
-      return translations[key] || key;
-    },
-  } = useTranslation();
+  const { t } = useTranslation();
   const [usuarios, setUsuarios] = useState([]);
   const [user, setUser] = useState(null);
   const [eventos, setEventos] = useState([]);
@@ -220,6 +169,30 @@ function ConsultaModEvento() {
   const [currentPage, setCurrentPage] = useState(1);
   const [eventsPerPage, setEventsPerPage] = useState(5);
   const [totalPages, setTotalPages] = useState(1);
+
+  const [dateRange, setDateRange] = useState({
+    startDate: null,
+    endDate: null,
+  });
+
+  // Función para manejar cambios de fecha
+  const handleDateRangeChange = (newValue) => {
+    setDateRange(newValue);
+
+    // Actualizar los valores en eventoEditado
+    if (newValue.startDate) {
+      handleFieldEdit(
+        "fechaInicio",
+        moment(newValue.startDate).format("YYYY-MM-DD")
+      );
+    }
+    if (newValue.endDate) {
+      handleFieldEdit(
+        "fechaFinal",
+        moment(newValue.endDate).format("YYYY-MM-DD")
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchEmpresas = async () => {
@@ -465,6 +438,12 @@ function ConsultaModEvento() {
     setModalAbierto(true);
     setEdicionFechas(false);
     setImagenesEvento(evento.images || []);
+
+    // Inicializar el rango de fechas
+    setDateRange({
+      startDate: evento.fechaInicio || null,
+      endDate: evento.fechaFinal || null,
+    });
   };
 
   const cerrarModal = () => {
@@ -1394,50 +1373,23 @@ function ConsultaModEvento() {
 
                           {/* Right column */}
                           <div>
-                            <div className="mb-4 grid grid-cols-2 gap-4">
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  {t("consultaModEventos.startDate")}
-                                </label>
-                                <div className="relative">
-                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <CalendarIcon className="text-gray-400" />
-                                  </div>
-                                  <input
-                                    type="date"
-                                    value={eventoEditado?.fechaInicio || ""}
-                                    onChange={(e) =>
-                                      handleFieldEdit(
-                                        "fechaInicio",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                  />
-                                </div>
+                            <div className="mb-4">
+                              <div className="flex items-center mb-2">
+                                <CalendarIcon className="h-4 w-4 text-blue-500 mr-1" />
+                                <h4 className="text-sm font-medium text-gray-700">
+                                  {t("consultaModEventos.selectDate")}
+                                </h4>
                               </div>
-
-                              <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                  {t("consultaModEventos.endDate")}
-                                </label>
-                                <div className="relative">
-                                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <CalendarIcon className="text-gray-400" />
-                                  </div>
-                                  <input
-                                    type="date"
-                                    value={eventoEditado?.fechaFinal || ""}
-                                    onChange={(e) =>
-                                      handleFieldEdit(
-                                        "fechaFinal",
-                                        e.target.value
-                                      )
-                                    }
-                                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
-                                  />
-                                </div>
-                              </div>
+                              <Datepicker
+                                useRange={true}
+                                value={{
+                                  startDate: eventoEditado?.fechaInicio || null,
+                                  endDate: eventoEditado?.fechaFinal || null,
+                                }}
+                                onChange={handleDateRangeChange}
+                                inputClassName="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+                                displayFormat="YYYY-MM-DD"
+                              />
                             </div>
 
                             <div className="mb-4">
