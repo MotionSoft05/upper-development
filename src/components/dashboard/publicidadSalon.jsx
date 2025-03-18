@@ -1,21 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faSync } from "@fortawesome/free-solid-svg-icons";
+
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
 import "firebase/compat/firestore";
+import { useTranslation } from "react-i18next";
+import { firebaseConfig } from "@/firebase/firebaseConfig"; // .env
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-  authDomain: "upper-b0be3.firebaseapp.com",
-  projectId: "upper-b0be3",
-  storageBucket: "upper-b0be3.appspot.com",
-  messagingSenderId: "295362615418",
-  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-  measurementId: "G-2E66K5XY81",
-};
-
+import {
+  ClockIcon,
+  BookmarkIcon,
+  TrashIcon,
+  PencilSquareIcon,
+  XMarkIcon,
+  PhotoIcon,
+  PlusCircleIcon,
+  ArrowPathIcon,
+} from "@heroicons/react/20/solid";
+//TODO verificar que haga falta inicializar y getFirestore, getStorage que se deban llamar vacios o con app
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -25,6 +27,7 @@ const storage = firebase.storage();
 const db = firebase.firestore();
 
 function PublicidadSalon() {
+  const { t } = useTranslation();
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [imagenesSalon, setImagenesSalon] = useState([null]);
@@ -35,41 +38,67 @@ function PublicidadSalon() {
   ]);
   const [isUploading, setIsUploading] = useState(false);
   const [tiemposSalon, setTiemposSalon] = useState([
-    { horas: 0, minutos: 0, segundos: 0 },
+    { horas: 0, minutos: 0, segundos: 10 },
   ]);
   const [successMessage, setSuccessMessage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [originalTiemposSalon, setOriginalTiemposSalon] = useState({
     horas: 0,
     minutos: 0,
-    segundos: 0,
+    segundos: 10,
   });
   const [originalImagen, setOriginalImagen] = useState(null);
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
+  const [empresaUsuario, setEmpresaUsuario] = useState(null);
+  const [empresas, setEmpresas] = useState([]); // Estado para almacenar las empresas disponibles
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null); // Estado para la empresa seleccionada
+  const [publicidadesSalon, setPublicidadesSalon] = useState([]);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
         setUser(user);
-        await obtenerPublicidades(user, "salon");
+        const usuarioDoc = await db.collection("usuarios").doc(user.uid).get();
+        const usuarioData = usuarioDoc.data();
+        const empresaUsuario = usuarioData.empresa;
+        await obtenerEmpresas(); // Obtener empresas disponibles
+        await obtenerPublicidades(empresaUsuario, "salon");
       } else {
-        console.warn("El objeto user es nulo.");
+        console.warn(t("advertisement.salon.userNull"));
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  const obtenerPublicidades = async (currentUser, tipo) => {
+  const obtenerEmpresas = async () => {
+    try {
+      const empresasSnapshot = await db.collection("usuarios").get();
+      const empresasData = empresasSnapshot.docs.map(
+        (doc) => doc.data().empresa
+      );
+      const empresasUnicas = Array.from(new Set(empresasData)); // Eliminar repeticiones
+      setEmpresas(empresasUnicas);
+    } catch (error) {
+      console.error("Error al obtener empresas:", error);
+    }
+  };
+
+  const handleEmpresaChange = async (event) => {
+    const empresaSeleccionada = event.target.value;
+    setEmpresaSeleccionada(empresaSeleccionada);
+    await obtenerPublicidades(empresaSeleccionada, "salon");
+  };
+
+  const obtenerPublicidades = async (empresa, tipo) => {
     try {
       setIsLoading(true);
 
-      if (currentUser && currentUser.uid) {
-        const userUid = currentUser.uid;
+      if (empresa) {
         const publicidadesSnapshot = await db
           .collection("Publicidad")
-          .where("userId", "==", userUid)
+          .where("empresa", "==", empresa)
           .where("tipo", "==", tipo)
           .get();
 
@@ -119,7 +148,7 @@ function PublicidadSalon() {
           () => ({
             horas: 0,
             minutos: 0,
-            segundos: 0,
+            segundos: 10,
           })
         );
 
@@ -134,7 +163,7 @@ function PublicidadSalon() {
           ...publicidadesData.map((publicidad) => ({
             horas: publicidad.horas || 0,
             minutos: publicidad.minutos || 0,
-            segundos: publicidad.segundos || 0,
+            segundos: publicidad.segundos || 10,
           })),
           ...nuevosTiempos,
         ]);
@@ -149,10 +178,15 @@ function PublicidadSalon() {
 
         setImagenesSalonOriginales(publicidadesData.map(() => null));
       } else {
-        console.warn("El objeto user es nulo o no tiene la propiedad uid.");
+        // El objeto user es nulo o no tiene la propiedad uid.
+        console.warn(t("advertisement.salon.userNullUidProperty"));
       }
     } catch (error) {
-      console.error("Error al obtener publicidades:", error);
+      // Error al obtener publicidades:
+      console.error(
+        t("advertisement.salon.errorFetchingAdvertisements"),
+        error
+      );
     } finally {
       setIsLoading(false);
     }
@@ -198,7 +232,8 @@ function PublicidadSalon() {
       const hasNewMedia = nuevaImagen && nuevaImagen.name !== undefined;
 
       if (!isEditingExistingPublicidad && !hasNewMedia) {
-        console.warn("No se ha seleccionado un nuevo archivo de media");
+        // "No se ha seleccionado un nuevo archivo de media"
+        console.warn(t("advertisement.salon.noNewMediaSelected"));
         return;
       }
 
@@ -210,7 +245,8 @@ function PublicidadSalon() {
         segundos <= 59;
 
       if (!hasValidData) {
-        window.alert("Completa por lo menos uno de los tres campos");
+        // "Completa por lo menos uno de los tres campos"
+        console.alert(t("advertisement.salon.completeAtLeastOneField"));
         return;
       }
 
@@ -240,7 +276,8 @@ function PublicidadSalon() {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           },
           (error) => {
-            console.error("Error durante la carga de la media:", error);
+            // "Error durante la carga de la media:"
+            console.error(t("advertisement.salon.errorLoadingMedia"), error);
           },
           async () => {
             mediaUrl = await mediaRef.getDownloadURL();
@@ -279,7 +316,8 @@ function PublicidadSalon() {
         setIsUploading(false);
       }
     } catch (error) {
-      console.error("Error al guardar cambios:", error);
+      // "Error al guardar cambios:"
+      console.error(t("advertisement.salon.errorSavingChanges"), error);
       setIsUploading(false);
     } finally {
       setIsLoading(false);
@@ -289,11 +327,14 @@ function PublicidadSalon() {
 
   const handleInputChange = (event, index, type) => {
     const { name, value } = event.target;
-    const newValue = parseInt(value) || 0;
+    let newValue = parseInt(value) || 0;
 
     if (name === "horas" || name === "minutos" || name === "segundos") {
       // Verificar que el valor esté dentro del rango permitido
       const max = name === "horas" ? 23 : 59;
+      if (name === "segundos") {
+        newValue = Math.max(newValue, 10);
+      }
       const validValue = Math.min(Math.max(newValue, 0), max);
 
       const newValues = [...type];
@@ -343,6 +384,16 @@ function PublicidadSalon() {
       let hasValidData = false;
       let newIds = [];
 
+      // Obtener los datos del usuario
+      const usuarioDoc = await db.collection("usuarios").doc(userUid).get();
+      const usuarioData = usuarioDoc.data();
+      const empresaUsuario = usuarioData.empresa;
+
+      // Obtener la empresa seleccionada
+      const empresa = empresaSeleccionada
+        ? empresaSeleccionada
+        : empresaUsuario;
+
       for (let index = 0; index < imagenesSalon.length; index++) {
         const imagen = imagenesSalon[index];
 
@@ -370,7 +421,7 @@ function PublicidadSalon() {
               minutos,
               segundos,
               tipo: "salon",
-              userId: userUid,
+              empresa: empresa, // Usar la empresa seleccionada o la del usuario logueado
               fechaDeSubida,
             });
 
@@ -384,7 +435,7 @@ function PublicidadSalon() {
 
             setTiemposSalon((prevTiempos) => [
               ...prevTiempos,
-              { horas: 0, minutos: 0, segundos: 0 },
+              { horas: 0, minutos: 0, segundos: 10 },
             ]);
 
             setPreviewImages((prevPreviews) => [...prevPreviews, null]);
@@ -395,17 +446,19 @@ function PublicidadSalon() {
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
       } else {
-        console.warn("No hay datos válidos para agregar");
+        // "No hay datos válidos para agregar"
+        console.warn(t("advertisement.salon.noValidDataToAdd"));
       }
 
       setImagenesSalon((prevImages) => [...prevImages, null]);
       setTiemposSalon((prevTiempos) => [
         ...prevTiempos,
-        { horas: 0, minutos: 0, segundos: 0 },
+        { horas: 0, minutos: 0, segundos: 10 },
       ]);
       setPreviewImages((prevPreviews) => [...prevPreviews, null]);
     } catch (error) {
-      console.error("Error al agregar publicidad:", error);
+      // "Error al agregar publicidad:"
+      console.error(t("advertisement.salon.errorAddAdvertising"), error);
     } finally {
       setCurrentAction(null);
       setIsUploading(false);
@@ -416,7 +469,8 @@ function PublicidadSalon() {
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
       const confirmacion = window.confirm(
-        "¿Estás seguro de que quieres eliminar esta publicidad?"
+        // "¿Estás seguro de que quieres eliminar esta publicidad?"
+        t("advertisement.salon.confirmDeleteAdvertisement")
       );
       setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
@@ -437,7 +491,8 @@ function PublicidadSalon() {
       setTiemposSalon(newTiemposSalon);
       setPublicidadesIds(newIds);
     } catch (error) {
-      console.error("Error al eliminar publicidad:", error);
+      // "Error al eliminar publicidad:"
+      console.error(t("advertisement.salon.errorDeleteAdvertising"), error);
     } finally {
       setIsLoading(false);
     }
@@ -469,14 +524,16 @@ function PublicidadSalon() {
         {imagenesSalon.slice(0, 10).map((imagen, index) => (
           <div key={index} className="mb-8">
             <h3 className="text-xl font-semibold text-gray-800">
-              Salón de Eventos {index + 1}
+              {/* Salón de Eventos */}
+              {`${t("advertisement.salon.title")}  ${index + 1}`}
             </h3>
             <div className="mt-4">
               <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
-                Seleccionar Imagen o Video
+                {/* Seleccionar Imagen o Video */}
+                {t("advertisement.salon.selectMedia")}
                 <input
                   type="file"
-                  accept="image/*,video/*"
+                  accept="image/*"
                   className="hidden"
                   id={`imagenSalon-${index}`}
                   onChange={(event) => handleImagenSelect(event, index)}
@@ -510,7 +567,10 @@ function PublicidadSalon() {
             )}
 
             <div className="mt-4">
-              <label className="text-gray-800">Tiempo de visualización:</label>
+              <label className="text-gray-800">
+                {/* Tiempo de visualización: */}
+                {t("advertisement.salon.displayTime")}
+              </label>
               <div className="flex mt-2">
                 {["horas", "minutos", "segundos"].map((unit) => (
                   <div key={unit} className="flex items-center">
@@ -530,7 +590,9 @@ function PublicidadSalon() {
                       }
                       pattern="\d*"
                     />
-                    <span className="text-gray-600 ml-1">{unit}</span>
+                    <span className="text-gray-600 ml-1">
+                      {t(`advertisement.salon.${unit}`)}
+                    </span>
                   </div>
                 ))}
               </div>
@@ -543,7 +605,8 @@ function PublicidadSalon() {
                       onClick={() => handleEditarPublicidad(index)}
                       className="text-yellow-500 p-2 px-4 bg-white border border-yellow-500 rounded-full cursor-pointer hover:bg-yellow-100 hover:text-yellow-700 mr-4"
                     >
-                      Editar
+                      {/* Editar */}
+                      {t("advertisement.salon.edit")}
                     </button>
                     <button
                       onClick={() =>
@@ -551,7 +614,8 @@ function PublicidadSalon() {
                       }
                       className="text-red-500 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
                     >
-                      Eliminar
+                      {/* Eliminar */}
+                      {t("advertisement.salon.delete")}
                     </button>
                   </>
                 )}
@@ -561,13 +625,15 @@ function PublicidadSalon() {
                       onClick={() => handleCancelarEdicion()}
                       className="text-gray-500 p-2 px-4 bg-white border border-gray-500 rounded-full cursor-pointer hover:bg-gray-100 hover:text-gray-700 mr-4"
                     >
-                      Cancelar
+                      {/* Cancelar */}
+                      {t("advertisement.salon.cancel")}
                     </button>
                     <button
                       onClick={() => handleGuardarCambios(index)}
                       className="text-green-500 p-2 px-4 bg-white border border-green-500 rounded-full cursor-pointer hover:bg-green-100 hover:text-green-700"
                     >
-                      Guardar Cambios
+                      {/* Guardar Cambios */}
+                      {t("advertisement.salon.saveChanges")}
                     </button>
                   </>
                 )}
@@ -580,46 +646,327 @@ function PublicidadSalon() {
   );
 
   return (
-    <section className="md:mt-3 ">
-      <div>
-        <section className="">
-          {successMessage && (
-            <div className="bg-green-500 text-white p-2 mb-4 rounded-md">
-              {successMessage}
-            </div>
-          )}
-          <div
-            className="mb-8"
-            style={{ cursor: isUploading ? "wait" : "auto" }}
-          >
-            {renderCamposImagenes()}
-            {imagenesSalon.length < 11 && (
-              <div className="mt-4">
-                <button
-                  onClick={handleAgregarPublicidad}
-                  disabled={
-                    isUploading || !isValidData(imagenesSalon.length - 1)
-                  }
-                  className={`px-4 py-2 text-white ${
-                    isValidData(imagenesSalon.length - 1)
-                      ? "bg-blue-500 hover:bg-blue-600"
-                      : "bg-gray-400 cursor-not-allowed"
-                  } rounded-md focus:outline-none`}
+    <div className="space-y-6">
+      {/* Selector de empresa para admin */}
+      {user &&
+        (user.email === "uppermex10@gmail.com" ||
+          user.email === "ulises.jacobo@hotmail.com" ||
+          user.email === "contacto@upperds.mx") && (
+          <div className="bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+              <label
+                htmlFor="empresa"
+                className="text-gray-700 font-medium mb-2 sm:mb-0"
+              >
+                {t("advertisement.salon.selectCompany") ||
+                  "Seleccionar empresa"}
+              </label>
+              <div className="w-full sm:w-2/3">
+                <select
+                  id="empresa"
+                  name="empresa"
+                  className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  onChange={handleEmpresaChange}
                 >
-                  {isUploading && currentAction === "Guardar Publicidad" ? (
-                    <FontAwesomeIcon icon={faSync} spin size="lg" />
-                  ) : currentAction === "Guardar Publicidad" ? (
-                    "Guardar Publicidad"
-                  ) : (
-                    "Guardar Cambios"
-                  )}
-                </button>
+                  <option value="" disabled selected>
+                    {t("advertisement.salon.select") || "Seleccionar..."}
+                  </option>
+                  {empresas.map((empresa, index) => (
+                    <option key={index} value={empresa}>
+                      {empresa}
+                    </option>
+                  ))}
+                </select>
               </div>
-            )}
+            </div>
           </div>
-        </section>
+        )}
+
+      {/* Mensaje de éxito */}
+      {successMessage && (
+        <div className="bg-green-50 p-4 rounded-md border-l-4 border-green-500">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg
+                className="h-5 w-5 text-green-400"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium text-green-800">
+                {successMessage}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de publicidades */}
+      <div className="space-y-8">
+        {imagenesSalon.slice(0, 10).map((imagen, index) => (
+          <div
+            key={index}
+            className={`bg-white p-5 rounded-lg shadow-sm border-l-4 ${
+              editIndex === index ? "border-yellow-500" : "border-transparent"
+            } transition-all duration-200`}
+          >
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                <PhotoIcon className="mr-2 h-5 text-blue-500" />
+                {`${t("advertisement.salon.title")} ${index + 1}`}
+              </h3>
+
+              {publicidadesIds[index] && (
+                <div className="flex space-x-2">
+                  {editIndex === null ? (
+                    <>
+                      <button
+                        onClick={() => handleEditarPublicidad(index)}
+                        className="flex items-center text-yellow-500 px-3 py-1 rounded-md border border-yellow-500 hover:bg-yellow-50"
+                      >
+                        <PencilSquareIcon className="mr-1 h-5" />
+                        {t("advertisement.salon.edit")}
+                      </button>
+                      <button
+                        onClick={() =>
+                          handleEliminarPublicidad(
+                            publicidadesIds[index],
+                            index
+                          )
+                        }
+                        className="flex items-center text-red-500 px-3 py-1 rounded-md border border-red-500 hover:bg-red-50"
+                      >
+                        <TrashIcon className="mr-1 h-5" />
+                        {t("advertisement.salon.delete")}
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {editIndex === index && (
+                        <>
+                          <button
+                            onClick={handleCancelarEdicion}
+                            className="flex items-center text-gray-500 px-3 py-1 rounded-md border border-gray-500 hover:bg-gray-50"
+                          >
+                            <XMarkIcon className="mr-1 h-5" />
+                            {t("advertisement.salon.cancel")}
+                          </button>
+                          <button
+                            onClick={() => handleGuardarCambios(index)}
+                            className="flex items-center text-green-500 px-3 py-1 rounded-md border border-green-500 hover:bg-green-50"
+                          >
+                            <BookmarkIcon className="mr-1 h-5" />
+                            {t("advertisement.salon.saveChanges")}
+                          </button>
+                        </>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Selector de imagen */}
+              <div>
+                <div className="mb-4">
+                  <label
+                    className={`
+                  flex justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none hover:border-blue-400 focus:outline-none
+                  ${
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                      ? "opacity-50 cursor-not-allowed"
+                      : "cursor-pointer"
+                  }
+                `}
+                  >
+                    <span className="flex items-center space-x-2 h-full">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="w-6 h-6 text-gray-600"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                      <span className="font-medium text-gray-600">
+                        {t("advertisement.salon.selectMedia")}
+                        <span className="text-blue-600 underline">
+                          {" "}
+                          {t("advertisement.salon.browse")}
+                        </span>
+                      </span>
+                    </span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      id={`imagenSalon-${index}`}
+                      onChange={(event) => handleImagenSelect(event, index)}
+                      disabled={
+                        (editIndex !== null && editIndex !== index) ||
+                        (editIndex === null && publicidadesIds[index])
+                      }
+                    />
+                  </label>
+                </div>
+
+                {/* Vista previa de la imagen */}
+                {previewImages[index] && (
+                  <div className="mt-4 flex justify-center">
+                    {previewImages[index].type === "image" ? (
+                      <img
+                        src={previewImages[index].url}
+                        alt={`Vista previa de la imagen ${index + 1}`}
+                        className="object-cover rounded-lg border border-gray-200 shadow-sm max-h-48"
+                      />
+                    ) : (
+                      <video
+                        src={previewImages[index].url}
+                        alt={`Vista previa del video ${index + 1}`}
+                        className="rounded-lg border border-gray-200 shadow-sm max-h-48"
+                        controls
+                        preload="metadata"
+                      />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Tiempo de visualización */}
+              <div>
+                <div className="mb-2">
+                  <label className="text-base font-medium text-gray-700 flex items-center">
+                    <ClockIcon className="mr-2 h-5 text-blue-500" />
+                    {t("advertisement.salon.displayTime")}
+                  </label>
+                  <p className="text-sm text-gray-500 mb-2">
+                    {t("advertisement.salon.displayTimeHelper") ||
+                      "Defina por cuánto tiempo se mostrará este contenido"}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-4 mt-2">
+                  {["horas", "minutos", "segundos"].map((unit) => (
+                    <div key={unit} className="flex flex-col">
+                      <label className="text-sm text-gray-600 mb-1">
+                        {t(`advertisement.salon.${unit}`)}
+                      </label>
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name={unit}
+                          min="0"
+                          max={unit === "horas" ? "23" : "59"}
+                          value={tiemposSalon[index][unit] || 0}
+                          onChange={(event) =>
+                            handleInputChange(event, index, tiemposSalon)
+                          }
+                          className={`
+                          w-full p-2 border rounded-md focus:ring-blue-500 focus:border-blue-500
+                          ${
+                            (editIndex !== null && editIndex !== index) ||
+                            (editIndex === null && publicidadesIds[index])
+                              ? "bg-gray-100 text-gray-500 cursor-not-allowed"
+                              : "bg-white text-gray-700"
+                          }
+                        `}
+                          disabled={
+                            (editIndex !== null && editIndex !== index) ||
+                            (editIndex === null && publicidadesIds[index])
+                          }
+                          pattern="\d*"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Información de advertencia */}
+                {!tiemposSalon[index].horas &&
+                  !tiemposSalon[index].minutos &&
+                  !tiemposSalon[index].segundos &&
+                  !(
+                    (editIndex !== null && editIndex !== index) ||
+                    (editIndex === null && publicidadesIds[index])
+                  ) && (
+                    <div className="mt-4 bg-yellow-50 p-2 rounded-md text-sm text-yellow-700 border-l-4 border-yellow-400">
+                      {t("advertisement.salon.timeWarning") ||
+                        "Debe establecer un tiempo de visualización válido"}
+                    </div>
+                  )}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+
+      {/* Botón para agregar nueva publicidad */}
+      {imagenesSalon.length < 11 && (
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={handleAgregarPublicidad}
+            disabled={isUploading || !isValidData(imagenesSalon.length - 1)}
+            className={`
+            flex items-center px-6 py-3 rounded-lg shadow-sm font-medium text-white
+            ${
+              isValidData(imagenesSalon.length - 1)
+                ? "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                : "bg-gray-400 cursor-not-allowed"
+            }
+          `}
+          >
+            {isUploading && currentAction === "Guardar Publicidad" ? (
+              <ArrowPathIcon spin className="mr-2 h-5" />
+            ) : (
+              <PlusCircleIcon className="mr-2 h-5" />
+            )}
+            {currentAction === "Guardar Publicidad"
+              ? t("advertisement.salon.saveAdvertisement")
+              : t("advertisement.salon.saveChanges")}
+          </button>
+        </div>
+      )}
+
+      {/* Información adicional */}
+      <div className="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 text-sm text-gray-600">
+        <div className="flex items-start">
+          <div className="flex-shrink-0">
+            <svg
+              className="h-5 w-5 text-gray-400"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+          <p className="ml-2">
+            {t("advertisement.salon.helpText") ||
+              "Las imágenes se mostrarán cuando no haya eventos programados. El tiempo recomendado por imagen es entre 10 y 15 segundos."}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 

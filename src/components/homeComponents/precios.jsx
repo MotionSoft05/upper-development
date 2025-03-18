@@ -1,162 +1,123 @@
-import Link from "next/link";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import CardPrice from "./CardPrice";
 
 function Precios() {
-  const [mostrarPreciosAnuales, setMostrarPreciosAnuales] = useState(false);
+  const { t } = useTranslation();
+  const [pricingPeriod, setPricingPeriod] = useState("mensual");
 
-  // Función para alternar entre precios mensuales y anuales
-  const alternarPrecios = () => {
-    setMostrarPreciosAnuales(!mostrarPreciosAnuales);
+  // Toggle between monthly and annual pricing
+  const togglePricingPeriod = () => {
+    setPricingPeriod(pricingPeriod === "mensual" ? "anual" : "mensual");
   };
 
-  // Función para obtener el texto del período (mensual o anual)
-  const obtenerTextoPeriodo = () => {
-    return mostrarPreciosAnuales ? "anual" : "mensual";
-  };
+  // Define pricing data
+  const pricingData = [
+    {
+      id: "free",
+      title: "precios.free.title",
+      description: "precios.free.description",
+      price: {
+        mensual: "$ 0",
+        anual: "$ 0",
+      },
+      features: ["precios.free.features.item1", "precios.free.features.item2"],
+    },
+    {
+      id: "standard",
+      title: "precios.standard.title",
+      description: "precios.standard.description",
+      price: {
+        mensual: "$ 150",
+        anual: "$ 1,440", // 12 × $150 = $1,800 but with 20% annual discount = $1,440
+      },
+      features: [
+        "precios.standard.features.item1",
+        "precios.standard.features.item2",
+      ],
+      highlighted: true,
+    },
+    {
+      id: "professional",
+      title: "precios.professional.title",
+      description: "precios.professional.description",
+      price: {
+        mensual: t("precios.professional.contact"),
+        anual: t("precios.professional.contact"),
+      },
+      features: [
+        "precios.professional.features.item1",
+        "precios.professional.features.item2",
+      ],
+    },
+  ];
 
-  // Función para obtener el precio según el período
-  const obtenerPrecio = (categoria) => {
-    // Define los precios según la categoría y el período
-    const precios = {
-      gratis: {
-        mensual: "$0",
-        anual: "$0",
-      },
-      estandar: {
-        mensual: "$99",
-        anual: "$1200",
-      },
-      profesional: {
-        mensual: "$Contacto",
-        anual: "$Contacto", // Puedes reemplazar "$Contacto" con el precio anual real si lo tienes
-      },
-    };
-
-    // Obtén el precio según la categoría y el período
-    return precios[categoria][obtenerTextoPeriodo()];
-  };
   return (
-    <section id="precios">
-      <div className="pt-24 px-4 mx-auto max-w-screen-xl ">
-        <div className="mx-auto max-w-screen-md text-center mb-8 lg:mb-12">
-          <h2 className="mb-4 text-lg md:text-4xl tracking-tight font-extrabold text-custom ">
-            Impulsa el éxito de tu negocio con Upper DS
+    <section id="precios" className="py-20 bg-gray-50">
+      <div className="container mx-auto px-4 max-w-screen-xl">
+        <div className="mx-auto max-w-screen-md text-center mb-16">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            {t("precios.title1")}
           </h2>
-          <p className="mb-5 font-light text-sm md:text-xl text-gray-400">
-            Encuentre el plan de señalización digital que te de mayores
-            beneficios​
+          <div className="w-20 h-1 bg-blue-600 mx-auto mb-6"></div>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            {t("precios.description1")}
           </p>
         </div>
-        <div className="text-center"></div>
-        <div className="space-y-8 md:grid md:grid-cols-3 sm:gap-6 xl:gap-10 lg:space-y-0">
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">Gratis</h3>
-            <p className="font-light sm:text-lg text-gray-400">
-              La mejor opción para comenzar tu siguiente proyecto de
-              digitalización
-            </p>
-            <div
-              id="precios1"
-              className="flex justify-center items-baseline my-8 mt-14"
-            >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("gratis")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Solicita una licencia de evaluación para una pantalla.
-                </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>La licencia de evaluación se activara por 21 días.</span>
-              </li>
-            </ul>
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center rounded-lg border shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">
-              Estándar
-            </h3>
-            <p className="font-light sm:text-lg text-gray-400 ">
-              Lo mejor para usuarios que buscan incorporar la señalización
-              digital como parte de su estrategia de negocio
-            </p>
-            <div
-              id="precios2"
-              className="flex justify-center items-baseline my-8"
-            >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("estandar")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Licencia para aquellos negocios que inician con Señalización
-                  Digital
-                </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>Costo mensual por pantalla.</span>
-              </li>
-            </ul>
 
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
-          <div className="flex flex-col p-6 mx-auto max-w-lg text-center  rounded-lg border  shadow border-gray-600 xl:p-8 bg-gray-800 text-white justify-between ">
-            <h3 className="mb-4 text-2xl font-semibold text-custom">
-              Profesional
-            </h3>
-            <p className="font-light sm:text-lg text-gray-400 ">
-              La mejor opción para organizaciones con requerimientos avanzados
-            </p>
-            <div
-              id="precios3"
-              className="flex justify-center items-baseline my-8 mt-14"
+        {/* Billing Period Toggle */}
+        <div className="flex justify-center mb-10">
+          {/* <div className="bg-white rounded-full p-1 inline-flex shadow-md">
+            <button
+              onClick={togglePricingPeriod}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                pricingPeriod === "mensual"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
             >
-              <span className="mr-2 text-5xl font-extrabold">
-                {obtenerPrecio("profesional")}
-              </span>
-            </div>
-            <ul role="list" className="mb-8 space-y-4 text-left">
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Licencia para aquellos negocios que requieren licencias y
-                  servicios de diseño personalizado
+              {t("precios.monthly")}
+            </button>
+            <button
+              onClick={togglePricingPeriod}
+              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
+                pricingPeriod === "anual"
+                  ? "bg-blue-600 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              {t("precios.yearly")}
+              {pricingPeriod === "anual" && (
+                <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded-full">
+                  20% {t("precios.discount")}
                 </span>
-              </li>
-              <li className="flex items-center space-x-3">
-                <img src="/img/tick.svg" />
-                <span>
-                  Registrase para ser contactados y definir alcance de servicios
-                </span>
-              </li>
-            </ul>
-            <Link href="/register">
-              <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded inline-block mt-auto">
-                Comienza ya
-              </button>
-            </Link>
-          </div>
+              )}
+            </button>
+          </div> */}
         </div>
 
-        <p className="mb-5 font-light  text-gray-400 text-center">
-          *Precios se expresados en pesos ​ mexicanos (MXN) antes de impuestos
+        <div className="grid md:grid-cols-3 gap-8">
+          {pricingData.map((plan) => (
+            <CardPrice
+              key={plan.id}
+              title={t(plan.title)}
+              description={t(plan.description)}
+              currentPeriod={pricingPeriod}
+              price={plan.price[pricingPeriod]}
+              periodText={t(
+                pricingPeriod === "mensual"
+                  ? "precios.perMonth"
+                  : "precios.perYear"
+              )}
+              featureList={plan.features.map((feature) => t(feature))}
+              btnTitle={t("precios.btnStart")}
+              highlighted={plan.highlighted}
+            />
+          ))}
+        </div>
+
+        <p className="text-center text-gray-500 mt-12">
+          {t("precios.pricesNote")}
         </p>
       </div>
     </section>

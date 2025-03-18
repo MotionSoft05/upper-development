@@ -1,26 +1,24 @@
 import React, { useState, useEffect } from "react";
-import { initializeApp } from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { getFirestore, doc, getDoc, setDoc } from "firebase/firestore";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyDpo0u-nVMA4LnbInj_qAkzcUfNtT8h29o",
-  authDomain: "upper-b0be3.firebaseapp.com",
-  projectId: "upper-b0be3",
-  storageBucket: "upper-b0be3.appspot.com",
-  messagingSenderId: "295362615418",
-  appId: "1:295362615418:web:c22cac2f406e4596c2c3c3",
-  measurementId: "G-2E66K5XY81",
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { onAuthStateChanged } from "firebase/auth";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  query,
+  collection,
+  where,
+  getDocs,
+} from "firebase/firestore";
+import { useTranslation } from "react-i18next";
+import auth from "@/firebase/auth";
+import db from "@/firebase/firestore";
 
 function Licencia() {
+  const { t } = useTranslation();
   const [currentUser, setCurrentUser] = useState(null);
-  const [selectedFilter, setSelectedFilter] = useState("datosNegocio");
+  const [fiscalData, setFiscalData] = useState([]);
+  const [successMessage, setSuccessMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -30,14 +28,22 @@ function Licencia() {
           const userDocSnap = await getDoc(userDocRef);
 
           if (userDocSnap.exists()) {
-            setCurrentUser(userDocSnap.data());
+            const userData = userDocSnap.data();
+            setCurrentUser(userData);
 
-            // Obtener datos fiscales si existen
-            const datosFiscalesDocRef = doc(db, "DatosFiscales", user.uid);
-            const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
-
-            if (datosFiscalesDocSnap.exists()) {
-              DatosFiscales(datosFiscalesDocSnap.data());
+            // Fetch all fiscal data for the company
+            const empresa = userData.empresa;
+            if (empresa) {
+              const q = query(
+                collection(db, "DatosFiscales"),
+                where("empresa", "==", empresa)
+              );
+              const querySnapshot = await getDocs(q);
+              const fetchedFiscalData = querySnapshot.docs.map((doc) => ({
+                id: doc.id,
+                ...doc.data(),
+              }));
+              setFiscalData(fetchedFiscalData);
             }
           } else {
             const userData = {
@@ -47,70 +53,83 @@ function Licencia() {
             setCurrentUser(userData);
           }
         } catch (error) {
-          console.error("Error al obtener datos del usuario:", error);
+          console.error(t("licencia.messages.userFetch"), error);
+          setErrorMessage(t("licencia.messages.userFetch"));
         }
       } else {
         setCurrentUser(null);
+        setFiscalData([]);
       }
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [t]);
+
+  // Function to show success message and clear it after 3 seconds
+  const showSuccessMessage = (message) => {
+    setSuccessMessage(message);
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  };
+
+  // Function to show error message and clear it after 3 seconds
+  const showErrorMessage = (message) => {
+    setErrorMessage(message);
+    setTimeout(() => {
+      setErrorMessage(null);
+    }, 3000);
+  };
 
   return (
-    <section className="px-5 md:px-32">
-      <div className="p-5">
-        <h1 className="mb-4 text-3xl font-extrabold leading-none tracking-tight text-gray-900 md:text-4xl">
-          Mis datos
+    <section className="px-5 md:px-32 py-6">
+      {/* Header Section */}
+      <div className="mb-6">
+        <h1 className="text-3xl font-extrabold text-gray-900 mb-2">
+          {t("licencia.myTitle")}
         </h1>
+        <p className="text-gray-600">{t("licencia.billingData")}</p>
       </div>
-      <div className="text-lg font-medium text-center text-gray-500 border-b border-gray-200 dark:text-gray-400 dark:border-gray-700">
-        <ul className="flex flex-wrap -mb-px">
-          <li className="mr-2">
-            <button
-              onClick={() => setSelectedFilter("datosNegocio")}
-              className={`${
-                selectedFilter === "datosNegocio"
-                  ? "border-b-2 border-blue-500"
-                  : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-              } inline-block p-4 rounded-t-lg`}
-            >
-              <span className="ml-3">Mi cuenta</span>
-            </button>
-          </li>
-          <li className="mr-2">
-            <button
-              onClick={() => setSelectedFilter("datosFiscales")}
-              className={`${
-                selectedFilter === "datosFiscales"
-                  ? "border-b-2 border-blue-500"
-                  : "hover:text-gray-600 hover:border-gray-300 dark:hover:text-gray-300"
-              } inline-block p-4 rounded-t-lg`}
-            >
-              <span className="ml-3">Datos de facturación</span>
-            </button>
-          </li>
-        </ul>
+
+      {/* Status Messages */}
+      {successMessage && (
+        <div
+          className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6"
+          role="alert"
+        >
+          <p className="font-bold">{t("licencia.fiscalDataSaved")}</p>
+          <p>{successMessage}</p>
+        </div>
+      )}
+
+      {errorMessage && (
+        <div
+          className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-6"
+          role="alert"
+        >
+          <p className="font-bold">{t("licencia.messages.fiscalDataError")}</p>
+          <p>{errorMessage}</p>
+        </div>
+      )}
+
+      {/* Main Content Card */}
+      <div className="bg-white rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <DatosFiscales
+            currentUser={currentUser}
+            showSuccessMessage={showSuccessMessage}
+            showErrorMessage={showErrorMessage}
+          />
+        </div>
       </div>
-      <main>
-        <main className="main ">
-          <div className="main-content flex flex-col flex-grow p-4">
-            {selectedFilter === "datosNegocio" && (
-              <DatosNegocio currentUser={currentUser} />
-            )}
-            {selectedFilter === "datosFiscales" && (
-              <DatosFiscales currentUser={currentUser} />
-            )}
-          </div>
-        </main>
-      </main>
     </section>
   );
 }
 
-function DatosFiscales({ currentUser }) {
-  const [guardadoExitoso, setGuardadoExitoso] = useState(false);
-  const [datosFiscales, setDatosFiscales] = useState({
+function DatosFiscales({ currentUser, showSuccessMessage, showErrorMessage }) {
+  const { t } = useTranslation();
+  const [loading, setLoading] = useState(false);
+  const [fiscalData, setFiscalData] = useState({
     rfc: "",
     razonSocial: "",
     codigoPostal: "",
@@ -122,315 +141,280 @@ function DatosFiscales({ currentUser }) {
   useEffect(() => {
     const fetchDatosFiscales = async () => {
       try {
-        const user = getAuth().currentUser;
+        setLoading(true);
+        if (currentUser && currentUser.empresa) {
+          const empresa = currentUser.empresa;
+          console.log("Nombre de empresa del usuario:", empresa);
 
-        if (user) {
-          const userId = user.uid;
-          const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
-          const datosFiscalesDocSnap = await getDoc(datosFiscalesDocRef);
+          const q = query(
+            collection(db, "DatosFiscales"),
+            where("empresa", "==", empresa)
+          );
+          const querySnapshot = await getDocs(q);
 
-          if (datosFiscalesDocSnap.exists()) {
-            const datosFiscalesData = datosFiscalesDocSnap.data();
-            setDatosFiscales(datosFiscalesData);
-            console.log("Datos Fiscales recibidos:", datosFiscalesData);
+          if (!querySnapshot.empty) {
+            const datosFiscalesData = querySnapshot.docs[0].data();
+            setFiscalData(datosFiscalesData);
+            console.log(
+              t("licencia.messages.fiscalDataReceived"),
+              datosFiscalesData
+            );
           } else {
-            console.log("No se encontraron datos fiscales para el usuario.");
+            console.log(t("licencia.messages.noFiscalData"));
           }
         }
       } catch (error) {
-        console.error("Error al obtener datos fiscales:", error);
+        console.error(t("licencia.messages.fiscalDataFetch"), error);
+        showErrorMessage(t("licencia.messages.fiscalDataFetch"));
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchDatosFiscales();
-  }, []);
+  }, [currentUser, t, showErrorMessage]);
+
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setFiscalData({ ...fiscalData, [id]: value });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
 
     const user = auth.currentUser;
 
     if (!user) {
-      console.error("No se ha obtenido el usuario actual.");
+      showErrorMessage(t("licencia.messages.currentUserFetch"));
+      setLoading(false);
       return;
     }
 
-    const userId = user.uid;
-
-    if (!userId) {
-      console.error("No se ha obtenido el UID del usuario actual.");
-      return;
-    }
-
-    const rfc = event.target.rfc.value;
-    const razonSocial = event.target.razonSocial.value;
-    const codigoPostal = event.target.codigoPostal.value;
-    const regimenFiscal = event.target.regimenFiscal.value;
-    const usoCdfi = event.target.usoCdfi.value;
-    const email = event.target.email.value;
-
-    if (
-      !rfc ||
-      !razonSocial ||
-      !codigoPostal ||
-      !regimenFiscal ||
-      !usoCdfi ||
-      !email
-    ) {
-      console.error("Por favor, completa todos los campos.");
-      return;
-    }
-
-    const datosFiscalesDocRef = doc(db, "DatosFiscales", userId);
-    const datosFiscalesData = {
-      userId,
-      rfc,
-      razonSocial,
-      codigoPostal,
-      regimenFiscal,
-      usoCdfi,
-      email,
+    const formData = {
+      rfc: event.target.rfc.value,
+      razonSocial: event.target.razonSocial.value,
+      codigoPostal: event.target.codigoPostal.value,
+      regimenFiscal: event.target.regimenFiscal.value,
+      usoCdfi: event.target.usoCdfi.value,
+      email: event.target.email.value,
+      empresa: currentUser?.empresa || fiscalData.empresa,
     };
 
+    // Validate all fields are filled
+    const requiredFields = Object.entries(formData).filter(
+      ([key]) => key !== "id"
+    );
+    const missingFields = requiredFields.filter(([_, value]) => !value);
+
+    if (missingFields.length > 0) {
+      showErrorMessage(t("licencia.messages.fieldsIncomplete"));
+      setLoading(false);
+      return;
+    }
+
     try {
-      await setDoc(datosFiscalesDocRef, datosFiscalesData);
-      setGuardadoExitoso(true);
-      console.log("Datos fiscales enviados correctamente.");
+      // Query to verify if a document with the company name already exists
+      const q = query(
+        collection(db, "DatosFiscales"),
+        where("empresa", "==", formData.empresa)
+      );
+      const querySnapshot = await getDocs(q);
+
+      let docRef;
+      if (!querySnapshot.empty) {
+        // If we find the company, we get the reference of the first document
+        const existingDoc = querySnapshot.docs[0];
+        docRef = doc(db, "DatosFiscales", existingDoc.id);
+      } else {
+        // If there are no documents for that company, we create a new document with a unique ID
+        docRef = doc(collection(db, "DatosFiscales"));
+      }
+
+      // Overwrite or create the document
+      await setDoc(docRef, formData);
+
+      showSuccessMessage(t("licencia.messages.fiscalDataSent"));
+      console.log(t("licencia.messages.fiscalDataSent"));
     } catch (error) {
-      console.error("Error al enviar datos fiscales:", error);
+      console.error(t("licencia.messages.fiscalDataError"), error);
+      showErrorMessage(t("licencia.messages.fiscalDataError"));
+    } finally {
+      setLoading(false);
     }
   };
+
+  if (loading && !fiscalData.rfc) {
+    return (
+      <div className="flex justify-center items-center h-40">
+        <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
   return (
-    <section className="px-8 py-12">
-      <h1>Datos Fiscales</h1>
-      {guardadoExitoso && (
-        <div className="text-green-500 font-bold mb-4">
-          ¡Datos fiscales guardados correctamente!
+    <div>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">
+        {t("licencia.fiscalData")}
+      </h2>
+      <p className="text-gray-600 mb-6">{t("licencia.billingData")}</p>
+
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* RFC Field */}
+          <div>
+            <label
+              htmlFor="rfc"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              RFC
+            </label>
+            <input
+              type="text"
+              id="rfc"
+              value={fiscalData.rfc || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="ABC 680524 P-76"
+              maxLength="20"
+            />
+          </div>
+
+          {/* Business Name Field */}
+          <div>
+            <label
+              htmlFor="razonSocial"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t("licencia.nameOrBusiness")}
+            </label>
+            <input
+              type="text"
+              id="razonSocial"
+              value={fiscalData.razonSocial || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Your Company Name"
+              maxLength="100"
+            />
+          </div>
+
+          {/* Postal Code Field */}
+          <div>
+            <label
+              htmlFor="codigoPostal"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t("licencia.postalCode")}
+            </label>
+            <input
+              type="text"
+              id="codigoPostal"
+              value={fiscalData.codigoPostal || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="01000"
+              maxLength="10"
+            />
+          </div>
+
+          {/* Tax Regime Field */}
+          <div>
+            <label
+              htmlFor="regimenFiscal"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t("licencia.taxRegime")}
+            </label>
+            <input
+              type="text"
+              id="regimenFiscal"
+              value={fiscalData.regimenFiscal || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Tax Regime"
+              maxLength="70"
+            />
+          </div>
+
+          {/* CFDI Usage Field */}
+          <div>
+            <label
+              htmlFor="usoCdfi"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t("licencia.cfdiUsage")}
+            </label>
+            <input
+              type="text"
+              id="usoCdfi"
+              value={fiscalData.usoCdfi || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="CFDI Usage"
+              maxLength="24"
+            />
+          </div>
+
+          {/* Email Field */}
+          <div>
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              {t("licencia.youEmail")}
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={fiscalData.email || ""}
+              onChange={handleInputChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+              placeholder="ejemplo@gmail.com"
+            />
+          </div>
         </div>
-      )}
-      <form onSubmit={handleSubmit}>
-        <div className="mb-6">
-          <label
-            htmlFor="rfc"
-            className="block mb-2 text-sm font-medium text-gray-900"
+
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            disabled={loading}
+            className="px-6 py-2 bg-blue-600 text-white font-medium rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
-            RFC
-          </label>
-          <input
-            type="text"
-            id="rfc"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="ABC 680524 P-76"
-            maxLength="20"
-            defaultValue={datosFiscales.rfc}
-            required
-          />
+            {loading ? (
+              <span className="flex items-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                {t("licencia.save")}
+              </span>
+            ) : (
+              t("licencia.save")
+            )}
+          </button>
         </div>
-        <div className="mb-6">
-          <label
-            htmlFor="razonSocial"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Nombre/Razón social
-          </label>
-          <input
-            type="text"
-            id="razonSocial"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder=""
-            maxLength="100"
-            defaultValue={datosFiscales.razonSocial}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="codigoPostal"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Código postal
-          </label>
-          <input
-            type="text"
-            id="codigoPostal"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="01000"
-            maxLength="10"
-            defaultValue={datosFiscales.codigoPostal}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="regimenFiscal"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Régimen fiscal
-          </label>
-          <input
-            type="text"
-            id="regimenFiscal"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder=""
-            maxLength="70"
-            defaultValue={datosFiscales.regimenFiscal}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="usoCdfi"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Uso de CDFI
-          </label>
-          <input
-            type="text"
-            id="usoCdfi"
-            className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder=""
-            maxLength="24"
-            defaultValue={datosFiscales.usoCdfi}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label
-            htmlFor="email"
-            className="block mb-2 text-sm font-medium text-gray-900"
-          >
-            Tu correo electrónico
-          </label>
-          <input
-            type="email"
-            id="email"
-            className="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            placeholder="ejemplo@gmail.com"
-            defaultValue={datosFiscales.email}
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center"
-        >
-          Guardar
-        </button>
       </form>
-    </section>
+    </div>
   );
 }
 
-function DatosNegocio({ currentUser }) {
-  return (
-    <section className="px-8 py-12">
-      <h1>Datos de Negocio</h1>
-      <div className="relative overflow-x-auto">
-        <table className="w-full text-sm text-left text-gray-500">
-          <tbody>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Nombre
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.nombre : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Apellido
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.apellido : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Correo
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.email : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Teléfono de contacto
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.telefono : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Fecha de Inicio
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.inicio : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Fecha de expiración
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.final : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Tipo de membresía
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.tipoPlan : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Número de licencias
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.total : ""}
-              </td>
-            </tr>
-            <tr className="bg-white border-b">
-              <th
-                scope="row"
-                className="px-6 py-4 font-extrabold text-gray-900"
-              >
-                Nombre de la empresa
-              </th>
-              <td className="px-6 py-4">
-                {currentUser ? currentUser.empresa : ""}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
-}
+// Account data section removed as requested
 
 export default Licencia;
