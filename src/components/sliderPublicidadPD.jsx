@@ -370,7 +370,7 @@ const AdvertisementSlider = ({
             height: windowSize.width,
             top: (windowSize.height - windowSize.width) / 2,
             left: (windowSize.width - windowSize.height) / 2,
-            transform: "rotate(90deg)",
+            transform: "rotate(-90deg)",
             display: "flex",
             flexDirection: "column",
             backgroundColor: "white",

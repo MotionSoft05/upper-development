@@ -399,7 +399,7 @@ const PDTemplate1Vertical = ({
           height: windowSize.width,
           top: (windowSize.height - windowSize.width) / 2,
           left: (windowSize.width - windowSize.height) / 2,
-          transform: "rotate(90deg)",
+          transform: "rotate(-90deg)",
           fontFamily: templateActual.fontStyle,
           display: "flex",
           flexDirection: "column",
