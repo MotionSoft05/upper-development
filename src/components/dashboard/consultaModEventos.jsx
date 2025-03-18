@@ -455,40 +455,54 @@ function ConsultaModEvento() {
     setImagenesPendientesEliminar([]); // Limpiar la lista de imágenes eliminadas
     setCambiosPendientes(false);
   };
-
   const guardarCambios = async () => {
     try {
+      console.log("Starting guardarCambios function");
+
       // Eliminar imágenes pendientes del almacenamiento
-      if (cambiosPendientes) {
-        if (imagenesPendientesEliminar.length > 0) {
+      if (cambiosPendientes && imagenesPendientesEliminar.length > 0) {
+        try {
+          console.log("Attempting to delete pending images");
           await Promise.all(
             imagenesPendientesEliminar.map(async (imagen) => {
-              // Extraer el path relativo del archivo desde la URL
-              const path = decodeURIComponent(
-                imagen.split("/o/")[1].split("?alt=media")[0]
-              );
-
-              // Crear la referencia al archivo en Firebase Storage
-              const imagenRef = ref(storage, path);
-
               try {
-                // Verificar si la imagen existe antes de intentar eliminarla
-                //await imagenRef.getMetadata();
+                // Extraer el path relativo del archivo desde la URL
+                if (
+                  imagen &&
+                  imagen.includes("/o/") &&
+                  imagen.includes("?alt=media")
+                ) {
+                  const path = decodeURIComponent(
+                    imagen.split("/o/")[1].split("?alt=media")[0]
+                  );
 
-                // Si la imagen existe, entonces eliminarla
-                await deleteObject(imagenRef);
+                  // Crear la referencia al archivo en Firebase Storage
+                  const imagenRef = ref(storage, path);
+
+                  // Intentar eliminar la imagen
+                  await deleteObject(imagenRef);
+                  console.log(`Imagen eliminada con éxito: ${path}`);
+                } else {
+                  console.warn(`Formato de URL inválido: ${imagen}`);
+                }
               } catch (error) {
-                // Manejar el error si la imagen no existe
-                console.warn(`La imagen no existe: ${imagen}`);
+                // Capturar error pero seguir con la ejecución
+                console.warn(`Error al eliminar imagen: ${imagen}`, error);
               }
             })
           );
+        } catch (error) {
+          console.error("Error general al eliminar imágenes:", error);
+          // Continuar con el guardado a pesar del error
         }
       }
 
-      // Guardar cambios en el evento
+      console.log("Preparing to update Firestore document");
+
+      // Guardar cambios en el evento independientemente de si hubo errores al eliminar imágenes
       const fechaInicioFormateada = eventoEditado.fechaInicio;
       const fechaFinalFormateada = eventoEditado.fechaFinal;
+
       await firebase
         .firestore()
         .collection("eventos")
@@ -504,19 +518,21 @@ function ConsultaModEvento() {
           devices: eventoEditado.devices || [],
         });
 
-      // Cerrar el modal y restablecer estados
-      setModalAbierto(false);
-      setEventoEditado(null);
-      setHoraInicialReal("");
-      setHoraFinalReal("");
-      setDescription("");
-      setImagenesPendientesEliminar([]); // Limpiar la lista de imágenes eliminadas
-      setCambiosPendientes(false);
+      console.log("Firestore document updated successfully");
+
+      // Ensure modal gets closed by calling cerrarModal directly
+      cerrarModal();
+
+      console.log("Modal should be closed now");
     } catch (error) {
       console.error("Error al guardar cambios:", error);
+
+      // Even if there's an error, try to close the modal
+      cerrarModal();
+
+      console.log("Attempted to close modal after error");
     }
   };
-
   const handleFieldEdit = (field, value) => {
     setEventoEditado((prevEventoEditado) => ({
       ...prevEventoEditado,
