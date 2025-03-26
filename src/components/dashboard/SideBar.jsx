@@ -15,6 +15,7 @@ import {
   faUserTie,
   faSignOutAlt,
   faChevronRight,
+  faDesktop,
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
@@ -34,6 +35,8 @@ function Sidebar(props) {
     props.setShowGuia(false);
     props.setShowSoporte(false);
     props.setShowPantallaServicio(false);
+    // Añadir el nuevo panel
+    props.setShowMonitorScreen(false);
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
@@ -44,6 +47,8 @@ function Sidebar(props) {
   const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos);
   const showAjustesPantalla = [10, 3].includes(permisos);
   const showInformacion = [10, 2, 3].includes(permisos);
+  // Añadir permiso para MonitorScreen - visible para usuarios con permiso de Admin y AjustesPantalla
+  const showMonitor = [10, 3].includes(permisos);
   //? --------------
 
   const isActive = (show) => show === true;
@@ -312,6 +317,40 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+            {/* AÑADIR AQUÍ: Monitor de Pantallas */}
+            {showMonitor && (
+              <div className="mb-1">
+                <button
+                  onClick={() => changePanel("setShowMonitorScreen")}
+                  className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                    isActive(props.showMonitorScreen)
+                      ? "bg-white shadow-md text-blue-700 font-medium"
+                      : "text-blue-100 hover:bg-blue-700/50"
+                  }`}
+                >
+                  <span
+                    className={`flex-shrink-0 ${
+                      isActive(props.showMonitorScreen)
+                        ? "text-blue-600"
+                        : "text-blue-200 group-hover:text-white"
+                    }`}
+                  >
+                    <FontAwesomeIcon icon={faDesktop} className="w-5 h-5" />
+                  </span>
+                  <span className="ml-3">
+                    {t("sidebar.monitorScreen") || "Monitor de Pantallas"}
+                  </span>
+                  {isActive(props.showMonitorScreen) && (
+                    <span className="ml-auto">
+                      <FontAwesomeIcon
+                        icon={faChevronRight}
+                        className="w-3 h-3"
+                      />
+                    </span>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Publicidad */}
             <div className="mb-1">

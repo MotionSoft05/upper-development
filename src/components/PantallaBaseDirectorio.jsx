@@ -19,6 +19,8 @@ import AdvertisementSlider from "@/components/sliderPublicidadPD";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PDTemplateManager";
 import { formatDate, getCurrentTime } from "@/utils/dateUtils";
+import useHeartbeat from "@/hook/useHeartbeat";
+import { v4 as uuidv4 } from "uuid"; // Si aún no está importado
 
 import { fetchWeatherData } from "@/utils/weatherUtils";
 
@@ -62,7 +64,7 @@ const retryOperation = async (operation, retries = MAX_RETRIES) => {
   }
 };
 
-export default function BaseDirectorioClient({ id }) {
+export default function BaseDirectorioClient({ id, empresa }) {
   const screenNumber = parseInt(id, 10);
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -75,7 +77,7 @@ export default function BaseDirectorioClient({ id }) {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const isMounted = useRef(true);
   const allEventsRef = useRef([]);
-
+  const [screenId, setScreenId] = useState("");
   const [screenData, setScreenData] = useState({
     events: [],
     ads: [],
@@ -637,7 +639,38 @@ export default function BaseDirectorioClient({ id }) {
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
   }, [user, db, screenNumber, t, getScreenOrientation]);
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    const storageKey = `pantalla_directorio_${screenNumber}`;
+    let storedId = localStorage.getItem(storageKey);
 
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `directorio_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      localStorage.setItem(storageKey, storedId);
+    }
+
+    setScreenId(storedId);
+  }, [screenNumber]);
+  // Integrar hook de heartbeat
+  // Integrar hook de heartbeat
+  const heartbeat = useHeartbeat({
+    screenId,
+    screenType: "Directorio",
+    screenNumber,
+    deviceName: screenData.deviceName || `Pantalla ${screenNumber}`,
+    userId: user?.uid,
+    companyName: screenData.usuario?.empresa || empresa,
+    interval: 30000, // Cada 30 segundos
+  });
+
+  // Opcional: Puedes mostrar algún indicador de conexión para depuración
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Estado de conexión:", heartbeat.isConnected);
+      console.log("Último heartbeat:", heartbeat.lastBeat);
+    }
+  }, [heartbeat.isConnected, heartbeat.lastBeat]);
   // Rendering states
   if (!user) {
     return <LogIn url={pathname} />;
@@ -693,25 +726,39 @@ export default function BaseDirectorioClient({ id }) {
 
   // Render appropriate content
   return screenData.events.length > 0 ? (
-    <TemplateManager
-      templateId={templates.template}
-      events={screenData.events}
-      template={templates}
-      weatherData={weatherData}
-      currentTime={screenData.currentTime}
-      isPortrait={isPortrait}
-      t={t}
-      qrCodeUrl={qrCodeUrl}
-      screenNumber={screenNumber}
-      publicidad={
-        isPortrait
-          ? templates.publicidadPortrait
-          : templates.publicidadLandscape
-      }
-      nombrePantallasDirectorio={Object.values(
-        screenData.usuario?.nombrePantallasDirectorio || {}
+    <>
+      <TemplateManager
+        templateId={templates.template}
+        events={screenData.events}
+        template={templates}
+        weatherData={weatherData}
+        currentTime={screenData.currentTime}
+        isPortrait={isPortrait}
+        t={t}
+        qrCodeUrl={qrCodeUrl}
+        screenNumber={screenNumber}
+        publicidad={
+          isPortrait
+            ? templates.publicidadPortrait
+            : templates.publicidadLandscape
+        }
+        nombrePantallasDirectorio={Object.values(
+          screenData.usuario?.nombrePantallasDirectorio || {}
+        )}
+      />
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="fixed bottom-2 right-2 z-50 rounded-full w-4 h-4 border border-gray-300"
+          style={{
+            backgroundColor: heartbeat.isConnected ? "#10b981" : "#ef4444",
+            boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+          }}
+          title={`Monitoreo: ${
+            heartbeat.isConnected ? "Conectado" : "Desconectado"
+          }`}
+        ></div>
       )}
-    />
+    </>
   ) : (
     <AdvertisementSlider
       advertisements={screenData.ads}

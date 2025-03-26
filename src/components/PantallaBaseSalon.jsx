@@ -20,6 +20,8 @@ import AdvertisementSlider from "@/components/sliderPublicidadPS";
 import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PSTemplateManager";
+import useHeartbeat from "@/hook/useHeartbeat";
+import { v4 as uuidv4 } from "uuid"; // Necesitamos importar uuid para generar IDs únicos
 
 const DEFAULT_HOUR = "00:00";
 const MAX_RETRIES = 3;
@@ -64,6 +66,26 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     templates: null,
     matchingDevice: null,
   });
+  const [screenId, setScreenId] = useState("");
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const docRef = doc(db, "usuarios", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+    fetchUserData();
+  }, [user]);
+  // Generar un ID de pantalla único y persistente
+
   console.log(
     "🚀 ~ PantallaBaseSalon.jsx:67 ~ BaseScreen ~ screenData:",
     screenData
@@ -74,6 +96,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   const currentEvent = useMemo(() => screenData.events[0], [screenData.events]);
   const currentAd = useMemo(() => screenData.ads[0], [screenData.ads]);
   const templates = useMemo(() => screenData.templates, [screenData.templates]);
+
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    let storedId = localStorage.getItem(`pantalla_salon_${screenNumber}`);
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `salon_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      localStorage.setItem(`pantalla_salon_${screenNumber}`, storedId);
+    }
+    setScreenId(storedId);
+  }, [screenNumber]);
 
   const debouncedSetCurrentHour = useCallback(
     debounce(() => setCurrentHour(getHour()), 1000),
@@ -143,7 +176,28 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       return isWithinDateRange && isWithinTimeRange && matchesCompany;
     });
   }, []);
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    const storageKey = `pantalla_salon_${screenNumber}`;
+    let storedId =
+      typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
 
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `salon_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(storageKey, storedId);
+        } catch (e) {
+          console.error("Error al guardar screenId:", e);
+        }
+      }
+    }
+
+    setScreenId(storedId);
+  }, [screenNumber]);
+
+  // Mantén tu función findMatchingDevice como está
   const findMatchingDevice = useCallback(
     (event, screenNames, currentScreenNumber) => {
       const devices = event.devices || [];
@@ -180,6 +234,24 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       return [];
     }
   }, []);
+  // Integrar hook de heartbeat
+  const heartbeat = useHeartbeat({
+    screenId,
+    screenType: "salon",
+    screenNumber,
+    deviceName: screenData.deviceName || `Pantalla ${screenNumber}`,
+    userId: user?.uid,
+    companyName: screenData.usuario?.empresa || empresa,
+    interval: 30000, // Cada 30 segundos
+  });
+
+  // Opcional: Puedes mostrar algún indicador de conexión para depuración
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Estado de conexión:", heartbeat.isConnected);
+      console.log("Último heartbeat:", heartbeat.lastBeat);
+    }
+  }, [heartbeat.isConnected, heartbeat.lastBeat]);
 
   // Check for active events based on current time (memory-based filtering)
   const checkCurrentEvents = useCallback(() => {
@@ -583,14 +655,29 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   }
 
   return (
-    <TemplateManager
-      templateId={templates.template}
-      event={currentEvent || {}}
-      templates={templates}
-      currentHour={currentHour}
-      t={t}
-      matchingDevice={screenData.matchingDevice || null}
-    />
+    <>
+      <TemplateManager
+        templateId={templates.template}
+        event={currentEvent || {}}
+        templates={templates}
+        currentHour={currentHour}
+        t={t}
+        matchingDevice={screenData.matchingDevice || null}
+      />
+      {/* Indicador de conexión - solo visible en modo desarrollo */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="fixed bottom-2 right-2 z-50 rounded-full w-4 h-4 border border-gray-300"
+          style={{
+            backgroundColor: heartbeat.isConnected ? "#10b981" : "#ef4444",
+            boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+          }}
+          title={`Monitoreo: ${
+            heartbeat.isConnected ? "Conectado" : "Desconectado"
+          }`}
+        ></div>
+      )}
+    </>
   );
 };
 

@@ -13,6 +13,7 @@ import Admin from "@/components/dashboard/admin/admin";
 import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
+import MonitorScreen from "@/components/dashboard/MonitorScreen";
 
 import React, { useState, useEffect } from "react";
 
@@ -45,6 +46,7 @@ function DashBoard() {
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
+  const [showMonitorScreen, setShowMonitorScreen] = useState(false);
 
   // Estado para controlar la visibilidad del sidebar en dispositivos móviles
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -115,6 +117,9 @@ function DashBoard() {
           setShowSoporte={setShowSoporte}
           showSoporte={showSoporte}
           toggleSidebar={toggleSidebar}
+          // Añadir las propiedades para el nuevo panel
+          setShowMonitorScreen={setShowMonitorScreen}
+          showMonitorScreen={showMonitorScreen}
         />
       </aside>
       <main className="flex-1 flex flex-col md:ml-64 transition-all duration-150 ease-in min-h-screen overflow-x-auto">
@@ -129,6 +134,7 @@ function DashBoard() {
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
+          {showMonitorScreen && <MonitorScreen userEmail={userEmail} />}
           {/* GESTION DE USUARIOS */}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && (

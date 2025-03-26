@@ -279,7 +279,35 @@
     "myData": "Datos facturación",
     "userGuides": "Guías de usuario",
     "supportContact": "Contacto soporte",
-    "logout": "Salir"
+    "logout": "Salir",
+    "monitorScreen": "Monitor de Pantallas"
+  },
+
+  "monitorScreen": {
+    "title": "Monitor de Pantallas",
+    "description": "Visualiza el estado de todas las pantallas activas",
+    "statusFilter": "Estado",
+    "all": "Todos",
+    "online": "En línea",
+    "offline": "Desconectadas",
+    "companyFilter": "Empresa",
+    "allCompanies": "Todas las empresas",
+    "search": "Buscar",
+    "searchPlaceholder": "Buscar por nombre...",
+    "refreshInterval": "Intervalo de actualización",
+    "totalScreens": "Total de Pantallas",
+    "onlineScreens": "Pantallas En Línea",
+    "offlineScreens": "Pantallas Desconectadas",
+    "lastUpdate": "Última Actualización",
+    "noScreensFound": "No se encontraron pantallas que coincidan con los filtros seleccionados.",
+    "deviceName": "Nombre",
+    "type": "Tipo",
+    "company": "Empresa",
+    "lastActivity": "Última Actividad",
+    "beatCount": "Latidos",
+    "status": "Estado",
+    "firstSeen": "Primera Conexión",
+    "details": "Detalles"
   },
   "userAdmin": {
     "welcome": "Bienvenido",
