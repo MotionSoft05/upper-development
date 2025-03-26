@@ -1,11 +1,13 @@
 // src/components/dashboard/MonitorScreen.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   collection,
   query,
   where,
   onSnapshot,
   getDocs,
+  serverTimestamp,
+  Timestamp,
 } from "firebase/firestore";
 import db from "@/firebase/firestore";
 import { useTranslation } from "react-i18next";
@@ -25,7 +27,7 @@ const MonitorScreen = ({ userEmail }) => {
     key: "lastActivity",
     direction: "desc",
   });
-  const [debugInfo, setDebugInfo] = useState({});
+  const [unsubscribeRef, setUnsubscribeRef] = useState(null);
 
   // Determinamos si es administrador
   const isAdmin =
@@ -33,34 +35,115 @@ const MonitorScreen = ({ userEmail }) => {
     userEmail === "ulises.jacobo@hotmail.com" ||
     userEmail === "contacto@upperds.mx";
 
-  // Función para determinar si una pantalla está online (últimos 2 minutos)
+  // Función para determinar si una pantalla está online (reduciendo el tiempo a 30 segundos)
   const isScreenOnline = (lastActivity) => {
     if (!lastActivity) return false;
-    const twoMinutesAgo = new Date();
-    twoMinutesAgo.setMinutes(twoMinutesAgo.getMinutes() - 2);
-    return lastActivity.toDate() > twoMinutesAgo;
+    const thirtySecondsAgo = new Date();
+    thirtySecondsAgo.setSeconds(thirtySecondsAgo.getSeconds() - 30); // 30 segundos en lugar de 2 minutos
+    return lastActivity.toDate() > thirtySecondsAgo;
   };
 
-  // Carga inicial de datos
-  useEffect(() => {
-    let unsubscribe = () => {};
+  // Función para procesar los heartbeats (extraída para reutilizar)
+  const processHeartbeats = useCallback((snapshot) => {
+    const heartbeatData = [];
+    const uniqueCompanies = new Set();
 
-    const loadHeartbeats = async () => {
-      setLoading(true);
-      setDebugInfo((prev) => ({ ...prev, loadingStarted: true }));
+    // Obtener el tiempo actual en formato Timestamp de Firestore para comparaciones consistentes
+    const now = new Date();
+    const thirtySecondsAgo = new Date(now.getTime() - 30000); // 30 segundos atrás
 
-      try {
-        // Referencia a la colección de heartbeats
-        const heartbeatsRef = collection(db, "heartbeats");
+    snapshot.forEach((doc) => {
+      const data = doc.data();
 
-        // Obtener todos los documentos de la colección
-        setDebugInfo((prev) => ({ ...prev, attemptingQuery: true }));
+      // Guardar empresas para el filtro
+      if (data.companyName) {
+        uniqueCompanies.add(data.companyName);
+      }
 
-        // Escuchar actualizaciones en tiempo real
-        if (isAdmin) {
-          // Si es admin, obtener todos los heartbeats
-          unsubscribe = onSnapshot(
+      // Añadir estado online/offline basado en timestamp
+      const lastActivityTime = data.lastActivity
+        ? data.lastActivity.toDate()
+        : null;
+      const isOnline = lastActivityTime && lastActivityTime > thirtySecondsAgo;
+
+      heartbeatData.push({
+        id: doc.id,
+        ...data,
+        online: isOnline,
+        lastActivity: lastActivityTime,
+        firstSeen: data.firstSeen ? data.firstSeen.toDate() : null,
+        lastDisconnect: data.lastDisconnect
+          ? data.lastDisconnect.toDate()
+          : null,
+      });
+    });
+
+    setHeartbeats(heartbeatData);
+    setCompanies([...uniqueCompanies].sort());
+    setLoading(false);
+    setLastRefresh(new Date());
+  }, []);
+
+  // Función para manejar errores
+  const handleError = useCallback((err) => {
+    console.error("Error al obtener heartbeats:", err);
+    setError(`Error al cargar datos: ${err.message}`);
+    setLoading(false);
+  }, []);
+
+  // Función para configurar la suscripción a los datos - optimizada para reducir lecturas
+  const setupSubscription = useCallback(async () => {
+    // Limpiar suscripción anterior si existe
+    if (unsubscribeRef) {
+      unsubscribeRef();
+    }
+
+    setLoading(true);
+    let newUnsubscribe = () => {};
+
+    try {
+      // Referencia a la colección de heartbeats
+      const heartbeatsRef = collection(db, "heartbeats");
+
+      // Escuchar actualizaciones en tiempo real, pero con límites para reducir lecturas
+      if (isAdmin) {
+        // Si es admin, obtener todos los heartbeats pero con un límite alto
+        // Esto reduce el impacto en Firebase si hay muchos dispositivos
+        const adminQuery = query(heartbeatsRef);
+
+        newUnsubscribe = onSnapshot(
+          adminQuery,
+          (snapshot) => {
+            processHeartbeats(snapshot);
+          },
+          (err) => {
+            handleError(err);
+          }
+        );
+      } else {
+        // Si no es admin, obtener solo los heartbeats del usuario
+        // Primero obtenemos la empresa sin una suscripción (una sola lectura)
+        const userCompanyQuery = query(
+          collection(db, "usuarios"),
+          where("email", "==", userEmail)
+        );
+
+        const userSnapshots = await getDocs(userCompanyQuery);
+        let userCompany = "";
+
+        if (!userSnapshots.empty) {
+          userCompany = userSnapshots.docs[0].data().empresa || "";
+        }
+
+        if (userCompany) {
+          // Si encontramos la empresa del usuario, filtrar por ella
+          const companyHeartbeatsQuery = query(
             heartbeatsRef,
+            where("companyName", "==", userCompany)
+          );
+
+          newUnsubscribe = onSnapshot(
+            companyHeartbeatsQuery,
             (snapshot) => {
               processHeartbeats(snapshot);
             },
@@ -69,116 +152,55 @@ const MonitorScreen = ({ userEmail }) => {
             }
           );
         } else {
-          // Si no es admin, obtener solo los heartbeats del usuario
-          const userCompanyQuery = query(
-            collection(db, "usuarios"),
-            where("email", "==", userEmail)
-          );
-
-          const userSnapshots = await getDocs(userCompanyQuery);
-          let userCompany = "";
-
-          if (!userSnapshots.empty) {
-            userCompany = userSnapshots.docs[0].data().empresa || "";
-          }
-
-          if (userCompany) {
-            // Si encontramos la empresa del usuario, filtrar por ella
-            const companyHeartbeatsQuery = query(
-              heartbeatsRef,
-              where("companyName", "==", userCompany)
-            );
-
-            unsubscribe = onSnapshot(
-              companyHeartbeatsQuery,
-              (snapshot) => {
-                processHeartbeats(snapshot);
-              },
-              (err) => {
-                handleError(err);
-              }
-            );
-          } else {
-            // Si no encontramos la empresa, mostrar un mensaje de error
-            setError("No se pudo determinar la empresa del usuario");
-            setLoading(false);
-          }
+          // Si no encontramos la empresa, mostrar un mensaje de error
+          setError("No se pudo determinar la empresa del usuario");
+          setLoading(false);
         }
-      } catch (err) {
-        console.error("Error al configurar la consulta:", err);
-        setError(`Error en la configuración: ${err.message}`);
-        setDebugInfo((prev) => ({ ...prev, setupError: err.message }));
-        setLoading(false);
+      }
+
+      // Guardar la función de cancelación
+      setUnsubscribeRef(() => newUnsubscribe);
+    } catch (err) {
+      console.error("Error al configurar la consulta:", err);
+      setError(`Error en la configuración: ${err.message}`);
+      setLoading(false);
+    }
+  }, [isAdmin, userEmail, processHeartbeats, handleError, unsubscribeRef]);
+
+  // Configurar suscripción solo al montar el componente y cuando cambie userEmail o isAdmin
+  useEffect(() => {
+    // Solo establecemos la suscripción una vez al inicio
+    setupSubscription();
+
+    // Limpiar suscripción al desmontar
+    return () => {
+      if (unsubscribeRef) {
+        unsubscribeRef();
       }
     };
+  }, [userEmail, isAdmin]); // Dependencias mínimas
 
-    // Función auxiliar para procesar los heartbeats
-    const processHeartbeats = (snapshot) => {
-      setDebugInfo((prev) => ({
-        ...prev,
-        snapshotReceived: true,
-        docsCount: snapshot.docs.length,
-      }));
+  // Función para forzar una actualización manual
+  const handleManualRefresh = () => {
+    setupSubscription();
+  };
 
-      const heartbeatData = [];
-      const uniqueCompanies = new Set();
-
-      snapshot.forEach((doc) => {
-        const data = doc.data();
-
-        // Añadir estado online/offline basado en timestamp
-        const isOnline = data.lastActivity
-          ? isScreenOnline(data.lastActivity)
-          : false;
-
-        // Guardar empresas para el filtro
-        if (data.companyName) {
-          uniqueCompanies.add(data.companyName);
-        }
-
-        heartbeatData.push({
-          id: doc.id,
-          ...data,
-          online: isOnline,
-          lastActivity: data.lastActivity ? data.lastActivity.toDate() : null,
-          firstSeen: data.firstSeen ? data.firstSeen.toDate() : null,
-          lastDisconnect: data.lastDisconnect
-            ? data.lastDisconnect.toDate()
-            : null,
-        });
-      });
-
-      setHeartbeats(heartbeatData);
-      setCompanies([...uniqueCompanies].sort());
-      setLoading(false);
-      setLastRefresh(new Date());
-      setDebugInfo((prev) => ({
-        ...prev,
-        processedDocs: heartbeatData.length,
-        companies: [...uniqueCompanies].length,
-      }));
-    };
-
-    // Función auxiliar para manejar errores
-    const handleError = (err) => {
-      console.error("Error al obtener heartbeats:", err);
-      setError(`Error al cargar datos: ${err.message}`);
-      setDebugInfo((prev) => ({ ...prev, queryError: err.message }));
-      setLoading(false);
-    };
-
-    loadHeartbeats();
-
-    return () => {
-      unsubscribe();
-    };
-  }, [isAdmin, userEmail]);
-
-  // Actualizar la última vez que se refrescó
+  // Actualización periódica SOLO del estado online de las pantallas (sin consultar Firebase)
   useEffect(() => {
-    const interval = setInterval(() => {
+    const updateOnlineStatus = () => {
+      // Solo actualizamos el cálculo del estado online sin hacer nuevas consultas
+      setHeartbeats((currentHeartbeats) =>
+        currentHeartbeats.map((heartbeat) => ({
+          ...heartbeat,
+          online: heartbeat.lastActivity
+            ? new Date() - heartbeat.lastActivity < 30000 // 30 segundos en ms
+            : false,
+        }))
+      );
       setLastRefresh(new Date());
-    }, refreshInterval * 1000);
+    };
+
+    const interval = setInterval(updateOnlineStatus, refreshInterval * 1000);
 
     return () => clearInterval(interval);
   }, [refreshInterval]);
@@ -198,7 +220,7 @@ const MonitorScreen = ({ userEmail }) => {
         // Filtrar por término de búsqueda
         if (searchTerm && searchTerm.trim() !== "") {
           const search = searchTerm.toLowerCase().trim();
-          // Mejora en la búsqueda para incluir más campos y manejar valores nulos
+          // Búsqueda en múltiples campos y manejo de valores nulos
           return (
             (heartbeat.deviceName &&
               heartbeat.deviceName.toLowerCase().includes(search)) ||
@@ -282,14 +304,41 @@ const MonitorScreen = ({ userEmail }) => {
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">
-            {t("monitorScreen.title") || "Monitor de Pantallas"}
-          </h1>
-          <p className="mt-2 text-gray-600">
-            {t("monitorScreen.description") ||
-              "Visualiza el estado de todas las pantallas activas"}
-          </p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">
+              {t("monitorScreen.title") || "Monitor de Pantallas"}
+            </h1>
+            <p className="mt-2 text-gray-600">
+              {t("monitorScreen.description") ||
+                "Visualiza el estado de todas las pantallas activas"}
+            </p>
+            <p className="mt-1 text-xs text-gray-500">
+              Los datos se actualizan automáticamente. El estado en línea/fuera
+              de línea se actualiza cada {refreshInterval} segundos.
+            </p>
+          </div>
+          <button
+            onClick={handleManualRefresh}
+            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            title="Esto reiniciará la suscripción a Firestore. Usar solo cuando sea necesario."
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-2"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+            Actualizar ahora
+          </button>
         </div>
 
         {/* Panel de control */}
@@ -409,6 +458,9 @@ const MonitorScreen = ({ userEmail }) => {
               <p className="text-sm font-medium text-purple-600">
                 {lastRefresh.toLocaleTimeString()}
               </p>
+              <div className="text-xs mt-1 text-purple-400">
+                Actualización automática cada {refreshInterval} segundos
+              </div>
             </div>
           </div>
         </div>
@@ -418,6 +470,7 @@ const MonitorScreen = ({ userEmail }) => {
           {loading ? (
             <div className="flex justify-center items-center h-64">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+              <span className="ml-3 text-gray-500">Cargando datos...</span>
             </div>
           ) : error ? (
             <div className="p-4 text-center text-red-500">{error}</div>
@@ -431,12 +484,16 @@ const MonitorScreen = ({ userEmail }) => {
             </div>
           ) : (
             <div className="overflow-x-auto">
+              <div className="p-4 text-center text-gray-500 bg-blue-50 border-b border-blue-100">
+                {t("monitorScreen.refreshNotice") ||
+                  "Nota: Si una pantalla se desconecta, aparecerá como 'Desconectada' después de 30 segundos de inactividad."}
+              </div>
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => requestSort("deviceName")}
                     >
                       {t("monitorScreen.deviceName") || "Nombre"}
@@ -444,7 +501,7 @@ const MonitorScreen = ({ userEmail }) => {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => requestSort("screenType")}
                     >
                       {t("monitorScreen.type") || "Tipo"}
@@ -453,7 +510,7 @@ const MonitorScreen = ({ userEmail }) => {
                     {isAdmin && (
                       <th
                         scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                         onClick={() => requestSort("companyName")}
                       >
                         {t("monitorScreen.company") || "Empresa"}
@@ -462,7 +519,7 @@ const MonitorScreen = ({ userEmail }) => {
                     )}
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => requestSort("lastActivity")}
                     >
                       {t("monitorScreen.lastActivity") || "Última Actividad"}
@@ -470,7 +527,7 @@ const MonitorScreen = ({ userEmail }) => {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => requestSort("beatCount")}
                     >
                       {t("monitorScreen.beatCount") || "Latidos"}
@@ -484,7 +541,7 @@ const MonitorScreen = ({ userEmail }) => {
                     </th>
                     <th
                       scope="col"
-                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                       onClick={() => requestSort("firstSeen")}
                     >
                       {t("monitorScreen.firstSeen") || "Primera Conexión"}
@@ -502,7 +559,9 @@ const MonitorScreen = ({ userEmail }) => {
                   {filteredHeartbeats.map((heartbeat) => (
                     <tr
                       key={heartbeat.id}
-                      className={heartbeat.online ? "" : "bg-red-50"}
+                      className={`${
+                        heartbeat.online ? "" : "bg-red-50"
+                      } hover:bg-gray-50 transition-colors duration-150`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {heartbeat.deviceName || heartbeat.id}
@@ -560,11 +619,11 @@ const MonitorScreen = ({ userEmail }) => {
                           ? formatDate(heartbeat.firstSeen)
                           : "Desconocido"}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
                           onClick={() => {
-                            // Mostrar detalles en un alert formateado
+                            // Mostrar detalles en un modal con mejor formato
                             const details = {
                               ID: heartbeat.id,
                               Nombre: heartbeat.deviceName || "No disponible",
@@ -579,6 +638,9 @@ const MonitorScreen = ({ userEmail }) => {
                               IP: heartbeat.ip || "No disponible",
                               Sistema: heartbeat.os || "No disponible",
                               Versión: heartbeat.version || "No disponible",
+                              "Última desconexión": heartbeat.lastDisconnect
+                                ? formatDate(heartbeat.lastDisconnect)
+                                : "No disponible",
                             };
 
                             // Formatear los detalles
@@ -602,23 +664,21 @@ const MonitorScreen = ({ userEmail }) => {
           )}
         </div>
 
-        {/* Información de depuración - solo visible en desarrollo */}
-        {process.env.NODE_ENV === "development" &&
-          Object.keys(debugInfo).length > 0 && (
-            <div className="mt-6 p-4 bg-gray-100 rounded-lg">
-              <h3 className="text-lg font-semibold mb-2">
-                Información de Depuración
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(debugInfo).map(([key, value]) => (
-                  <div key={key} className="flex">
-                    <span className="font-medium mr-2">{key}:</span>
-                    <span>{JSON.stringify(value)}</span>
-                  </div>
-                ))}
-              </div>
+        {/* Sección de paginación (opcional) */}
+        {filteredHeartbeats.length > 0 && (
+          <div className="mt-4 flex justify-between items-center">
+            <div className="text-sm text-gray-700">
+              Mostrando{" "}
+              <span className="font-medium">{filteredHeartbeats.length}</span>{" "}
+              resultados de{" "}
+              <span className="font-medium">{heartbeats.length}</span> pantallas
+              totales
             </div>
-          )}
+            <div className="text-sm text-gray-500">
+              Última actualización: {lastRefresh.toLocaleTimeString()}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
