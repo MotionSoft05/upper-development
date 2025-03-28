@@ -1,6 +1,7 @@
 // src/components/sliderPublicidadPD.jsx
 import { useState, useEffect, useRef, useMemo } from "react";
 import "keen-slider/keen-slider.min.css";
+import VideoPlayer from "./VideoPlayer";
 
 const AdvertisementSlider = ({
   advertisements,
@@ -18,7 +19,7 @@ const AdvertisementSlider = ({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
-
+  const [videoError, setVideoError] = useState(false);
   // Monitor window size for responsive adjustments
   useEffect(() => {
     const handleResize = () => {
@@ -317,18 +318,16 @@ const AdvertisementSlider = ({
       }}
     >
       {currentAd.videoUrl ? (
-        <video
-          key={`video-${currentIndex}`}
-          className={`${
-            isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
-          }`}
-          autoPlay
-          muted
-          playsInline
-          loop
+        <VideoPlayer
           src={currentAd.videoUrl}
+          autoPlay={true}
+          muted={true}
+          loop={false}
           onEnded={moveToNextAd}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
+          onError={() => {
+            setVideoError(true);
+            moveToNextAd();
+          }}
         />
       ) : // Para modo landscape (isPortrait es falso)
       isPortrait ? (

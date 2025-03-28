@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
+import VideoPlayer from "./VideoPlayer";
 
 const AdvertisementSlider = ({
   advertisements,
@@ -11,7 +12,7 @@ const AdvertisementSlider = ({
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
   const transitioningRef = useRef(false);
-
+  const [videoError, setVideoError] = useState(false);
   // Get current advertisement
   const getCurrentAd = useCallback(() => {
     if (!advertisements || advertisements.length === 0) return null;
@@ -112,14 +113,16 @@ const AdvertisementSlider = ({
           style={{ opacity }}
         >
           {currentAd.videoUrl ? (
-            <video
-              key={`video-${currentIndex}`}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              playsInline
+            <VideoPlayer
               src={currentAd.videoUrl}
+              autoPlay={true}
+              muted={true}
+              loop={false}
               onEnded={moveToNextAd}
+              onError={() => {
+                setVideoError(true);
+                moveToNextAd();
+              }}
             />
           ) : (
             <img

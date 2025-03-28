@@ -9,6 +9,9 @@ import {
 } from "firebase/firestore";
 import db from "@/firebase/firestore";
 
+// Verificar si estamos en el navegador
+const isBrowser = typeof window !== "undefined";
+
 /**
  * Hook para registrar la actividad (heartbeat) de una pantalla en Firestore
  *
@@ -31,16 +34,21 @@ export default function useHeartbeat({
   companyName,
   interval = 60000, // Default: cada minuto
 }) {
+  // Definir todos los hooks primero, independientemente del entorno
   const [lastBeat, setLastBeat] = useState(null);
-  const [isConnected, setIsConnected] = useState(true);
-  const [error, setError] = useState(null);
-  const [debugInfo, setDebugInfo] = useState({});
+  const [isConnected, setIsConnected] = useState(isBrowser);
+  const [error, setError] = useState(
+    isBrowser ? null : "El hook solo funciona en el navegador"
+  );
+  const [debugInfo, setDebugInfo] = useState(
+    isBrowser ? {} : { ssrMode: true }
+  );
   const timerRef = useRef(null);
   const counterRef = useRef(0);
   const lastErrorRef = useRef(null);
 
-  // Solo procedemos si tenemos los datos mínimos necesarios
-  const canSendHeartbeat = !!screenId && !!userId && !!screenType;
+  // Solo procedemos si tenemos los datos mínimos necesarios y estamos en el navegador
+  const canSendHeartbeat = isBrowser && !!screenId && !!userId && !!screenType;
 
   // Función que envía el heartbeat a Firestore
   const sendHeartbeat = async () => {
@@ -138,6 +146,9 @@ export default function useHeartbeat({
 
   // Efecto para enviar heartbeats periódicamente
   useEffect(() => {
+    // Si no estamos en el navegador, no hacer nada
+    if (!isBrowser) return;
+
     // Verificamos si tenemos los datos necesarios para operar
     if (!canSendHeartbeat) {
       console.warn("[Heartbeat] Datos insuficientes para enviar heartbeat", {
@@ -156,7 +167,9 @@ export default function useHeartbeat({
 
     // Limpieza al desmontar el componente
     return () => {
-      clearInterval(timerRef.current);
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
 
       // Actualizar estado a 'offline' al desmontar
       if (canSendHeartbeat) {
@@ -192,6 +205,9 @@ export default function useHeartbeat({
 
   // Escuchar cambios en la conectividad de la red
   useEffect(() => {
+    // Si no estamos en el navegador, no hacer nada
+    if (!isBrowser) return;
+
     const handleOnline = () => {
       setIsConnected(true);
       sendHeartbeat(); // Enviar heartbeat inmediatamente cuando la conexión se restablece
@@ -208,7 +224,7 @@ export default function useHeartbeat({
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []);
+  }, [canSendHeartbeat]); // Añadir canSendHeartbeat como dependencia
 
   return {
     isConnected,
