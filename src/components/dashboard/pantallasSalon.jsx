@@ -365,15 +365,73 @@ function PantallasSalon() {
 
   const handleImageChange = async (event) => {
     const file = event.target.files[0];
-    const storageRef = ref(storage, `pantallaSalonLogos/${file.name}`);
+    if (!file) return;
+
+    // Validar tipo y tamaño del archivo
+    const validTypes = ["image/jpeg", "image/png", "image/gif"];
+    const maxSize = 2 * 1024 * 1024; // 2MB
+
+    if (!validTypes.includes(file.type)) {
+      Swal.fire({
+        icon: "error",
+        title: "Tipo de archivo no válido",
+        text: "Por favor, seleccione una imagen en formato JPG, PNG o GIF.",
+      });
+      return;
+    }
+
+    if (file.size > maxSize) {
+      Swal.fire({
+        icon: "error",
+        title: "Archivo demasiado grande",
+        text: "El tamaño máximo permitido es de 2MB.",
+      });
+      return;
+    }
+
+    // Mostrar indicador de carga
+    Swal.fire({
+      title: "Subiendo imagen...",
+      text: "Por favor espere mientras se procesa la imagen",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
 
     try {
+      // Crear una referencia única para la imagen
+      const storageRef = ref(
+        storage,
+        `pantallaSalonLogos/${Date.now()}-${file.name}`
+      );
+
+      // Subir el archivo
       await uploadBytes(storageRef, file);
+
+      // Obtener URL de descarga
       const logoUrl = await getDownloadURL(storageRef);
 
+      // Actualizar estado
       setSelectedLogo(logoUrl);
+
+      // Cerrar indicador de carga
+      Swal.close();
+
+      // Mostrar mensaje de éxito
+      Swal.fire({
+        icon: "success",
+        title: "Imagen subida correctamente",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     } catch (error) {
       console.error("Error al subir el logo a Firebase Storage:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al subir la imagen",
+        text: "Por favor, intente de nuevo: " + error.message,
+      });
     }
   };
 
@@ -794,10 +852,18 @@ function PantallasSalon() {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     {t("screenSalon.logo")}
                   </label>
-                  <div className="mt-1 flex items-center space-x-4">
-                    <div className="flex-1">
-                      <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
-                        <div className="space-y-1 text-center">
+                  <div className="mt-1">
+                    <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                      <div className="space-y-3 text-center w-full">
+                        {selectedLogo ? (
+                          <div className="mx-auto">
+                            <img
+                              src={selectedLogo}
+                              alt="Logo Actual"
+                              className="h-24 w-auto object-contain mx-auto"
+                            />
+                          </div>
+                        ) : (
                           <svg
                             className="mx-auto h-12 w-12 text-gray-400"
                             stroke="currentColor"
@@ -812,33 +878,24 @@ function PantallasSalon() {
                               strokeLinejoin="round"
                             />
                           </svg>
-                          <div className="flex text-sm text-gray-600">
-                            <span>
-                              {t("screenSalon.uploadLogo") || "Subir logo"}
-                            </span>
-                            <input
-                              id="file-upload-logo"
-                              name="file-upload-logo"
-                              type="file"
-                              className="sr-only"
-                              onChange={handleImageChange}
-                            />
-                          </div>
-                          <p className="text-xs text-gray-500">
-                            PNG, JPG, GIF hasta 2MB
-                          </p>
+                        )}
+                        <div className="flex justify-center text-sm text-gray-600">
+                          <span>
+                            {selectedLogo ? "Cambiar logo" : "Subir logo"}
+                          </span>
+                          <input
+                            id="file-upload-logo"
+                            name="file-upload-logo"
+                            type="file"
+                            className="sr-only"
+                            onChange={handleImageChange}
+                          />
                         </div>
-                      </label>
-                    </div>
-                    {selectedLogo && (
-                      <div className="flex-shrink-0">
-                        <img
-                          src={selectedLogo}
-                          alt="Logo Actual"
-                          className="h-24 w-auto object-contain border rounded p-1"
-                        />
+                        <p className="text-xs text-gray-500">
+                          PNG, JPG, GIF hasta 2MB
+                        </p>
                       </div>
-                    )}
+                    </label>
                   </div>
                 </div>
 

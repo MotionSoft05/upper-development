@@ -16,6 +16,8 @@ import {
   faSignOutAlt,
   faChevronRight,
   faDesktop,
+  faMoneyBill, // Icono para el tarifario
+  faCashRegister, // Icono para información de tarifas
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
@@ -35,8 +37,11 @@ function Sidebar(props) {
     props.setShowGuia(false);
     props.setShowSoporte(false);
     props.setShowPantallaServicio(false);
-    // Añadir el nuevo panel
     props.setShowMonitorScreen(false);
+    // Añadir el nuevo panel
+    props.setShowPantallaTarifario(false);
+    // Añadir el componente de información de tarifas
+    props.setShowInformacionTarifa(false);
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
@@ -242,6 +247,37 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+
+            {/* Información de Tarifas */}
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showInformacionTarifa)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowInformacionTarifa")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showInformacionTarifa)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faCashRegister} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Información de Tarifas</span>
+                {isActive(props.showInformacionTarifa) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
           </li>
         )}
 
@@ -317,7 +353,39 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-            {/* AÑADIR AQUÍ: Monitor de Pantallas */}
+
+            {/* Pantallas Tarifario */}
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showPantallaTarifario)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowPantallaTarifario")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showPantallaTarifario)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faMoneyBill} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Pantallas Tarifario</span>
+                {isActive(props.showPantallaTarifario) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+
+            {/* Monitor de Pantallas */}
             {showMonitor && (
               <div className="mb-1">
                 <button
@@ -338,7 +406,7 @@ function Sidebar(props) {
                     <FontAwesomeIcon icon={faDesktop} className="w-5 h-5" />
                   </span>
                   <span className="ml-3">
-                    {t("sidebar.monitorScreen") || "Monitor de Pantallas"}
+                    {t("sidebar.monitorScreen") || "Monitoreo de Pantallas"}
                   </span>
                   {isActive(props.showMonitorScreen) && (
                     <span className="ml-auto">

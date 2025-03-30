@@ -12,6 +12,7 @@ export default function LayoutWrapper({ children }) {
     "/paginasAleatorias",
     "/pantallaDeServicio",
     "/pantallaDirec1",
+    "/pantallaTarifario",
   ];
 
   // Verifica si la ruta actual está en la lista de exclusión o coincide con el patrón de pantallas
@@ -29,9 +30,11 @@ export default function LayoutWrapper({ children }) {
       sanitizedPathname.match(/\/pantalla[1-9]|10/) || // Pantallas numeradas del 1-10
       sanitizedPathname.match(/\/pantallaDirec[1-9]|10/) || // Pantallas Directorio numeradas
       sanitizedPathname.match(/\/pantallaDirec\/[1-9]|10/) || // Pantallas Directorio con formato /pantallaDirec/1/
+      sanitizedPathname.match(/\/pantallaTarifario\/[1-9]|10/) || // Pantallas Directorio con formato /pantallaDirec/1/
       sanitizedPathname.includes("/pantalla/") || // Cualquier subruteo de /pantalla/
       sanitizedPathname.includes("/pantallaDirec/") || // Cualquier subruteo de /pantallaDirec/
       sanitizedPathname.includes("/paginasAleatorias"); // Incluye parámetros de query
+    sanitizedPathname.includes("/pantallaTarifario"); // Incluye parámetros de query
 
     return exactMatch || patternMatch;
   };

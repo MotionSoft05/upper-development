@@ -14,6 +14,9 @@ import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
 import MonitorScreen from "@/components/dashboard/MonitorScreen";
+// Importar los componentes de tarifario
+import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
+import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
 
 import React, { useState, useEffect } from "react";
 
@@ -47,6 +50,10 @@ function DashBoard() {
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
   const [showMonitorScreen, setShowMonitorScreen] = useState(false);
+
+  // Estados para componentes de tarifario
+  const [showPantallaTarifario, setShowPantallaTarifario] = useState(false);
+  const [showInformacionTarifa, setShowInformacionTarifa] = useState(false);
 
   // Estado para controlar la visibilidad del sidebar en dispositivos móviles
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -116,10 +123,14 @@ function DashBoard() {
           showGuia={showGuia}
           setShowSoporte={setShowSoporte}
           showSoporte={showSoporte}
-          toggleSidebar={toggleSidebar}
-          // Añadir las propiedades para el nuevo panel
           setShowMonitorScreen={setShowMonitorScreen}
           showMonitorScreen={showMonitorScreen}
+          // Añadir propiedades para componentes de tarifario
+          setShowPantallaTarifario={setShowPantallaTarifario}
+          showPantallaTarifario={showPantallaTarifario}
+          setShowInformacionTarifa={setShowInformacionTarifa}
+          showInformacionTarifa={showInformacionTarifa}
+          toggleSidebar={toggleSidebar}
         />
       </aside>
       <main className="flex-1 flex flex-col md:ml-64 transition-all duration-150 ease-in min-h-screen overflow-x-auto">
@@ -128,8 +139,7 @@ function DashBoard() {
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />}{" "}
-          {/* Usuarios y Licencias */}
+              userEmail === "contacto@upperds.mx") && <Admin />}
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
@@ -148,6 +158,9 @@ function DashBoard() {
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
+          {/* Componentes de Tarifario */}
+          {showPantallaTarifario && <PantallasTarifario />}
+          {showInformacionTarifa && <EditInformacionTarifa />}
           {showPublicidad && <Publicidad />}
           {/* INFORMACION DE USUARIO */}
           {showlicencia && <Licencia />}
