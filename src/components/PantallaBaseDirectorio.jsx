@@ -661,7 +661,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
     deviceName: screenData.deviceName || `Pantalla ${screenNumber}`,
     userId: user?.uid,
     companyName: screenData.usuario?.empresa || empresa,
-    interval: 30000, // Cada 30 segundos
+    interval: 60000, // Cada 60 segundos
   });
 
   // Opcional: Puedes mostrar algún indicador de conexión para depuración

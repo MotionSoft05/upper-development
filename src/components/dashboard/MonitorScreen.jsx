@@ -8,6 +8,10 @@ import {
   getDocs,
   serverTimestamp,
   Timestamp,
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
 } from "firebase/firestore";
 import db from "@/firebase/firestore";
 import { useTranslation } from "react-i18next";
@@ -29,11 +33,147 @@ const MonitorScreen = ({ userEmail }) => {
   });
   const [unsubscribeRef, setUnsubscribeRef] = useState(null);
 
+  // Estado para notificaciones por correo
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+  const [notificationEmails, setNotificationEmails] = useState(["", "", ""]);
+  const [showNotificationConfig, setShowNotificationConfig] = useState(false);
+  const [notificationHours, setNotificationHours] = useState(5);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState(null);
+
   // Determinamos si es administrador
   const isAdmin =
     userEmail === "uppermex10@gmail.com" ||
     userEmail === "ulises.jacobo@hotmail.com" ||
     userEmail === "contacto@upperds.mx";
+
+  // Cargar configuración de notificaciones al inicio
+  useEffect(() => {
+    const loadNotificationSettings = async () => {
+      try {
+        // Determinar la empresa del usuario
+        let company = "";
+
+        if (isAdmin && companyFilter) {
+          company = companyFilter;
+        } else if (!isAdmin) {
+          const userCompanyQuery = query(
+            collection(db, "usuarios"),
+            where("email", "==", userEmail)
+          );
+          const userSnapshots = await getDocs(userCompanyQuery);
+          if (!userSnapshots.empty) {
+            company = userSnapshots.docs[0].data().empresa || "";
+          }
+        }
+
+        if (!company && !isAdmin) return;
+
+        // Si es admin sin filtro de empresa, no cargamos configuración específica
+        const settingsRef = doc(
+          db,
+          "notificacionesConfig",
+          isAdmin ? companyFilter || userEmail : company
+        );
+        const settingsSnap = await getDoc(settingsRef);
+
+        if (settingsSnap.exists()) {
+          const data = settingsSnap.data();
+          setNotificationsEnabled(data.enabled || false);
+          setNotificationEmails(data.emails || ["", "", ""]);
+          setNotificationHours(data.hours || 5);
+        }
+      } catch (err) {
+        console.error("Error al cargar configuración de notificaciones:", err);
+      }
+    };
+
+    loadNotificationSettings();
+  }, [isAdmin, userEmail, companyFilter]);
+
+  // Guardar configuración de notificaciones
+  const saveNotificationSettings = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // Determinar la empresa del usuario
+      let company = "";
+
+      if (isAdmin && companyFilter) {
+        company = companyFilter;
+      } else if (!isAdmin) {
+        const userCompanyQuery = query(
+          collection(db, "usuarios"),
+          where("email", "==", userEmail)
+        );
+        const userSnapshots = await getDocs(userCompanyQuery);
+        if (!userSnapshots.empty) {
+          company = userSnapshots.docs[0].data().empresa || "";
+        }
+      }
+
+      if (!company && !isAdmin) {
+        setSaveMessage({
+          type: "error",
+          text: "No se pudo determinar la empresa",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Validar correos
+      const validEmails = notificationEmails.filter(
+        (email) =>
+          email &&
+          email.trim() !== "" &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      );
+
+      if (notificationsEnabled && validEmails.length === 0) {
+        setSaveMessage({
+          type: "error",
+          text: "Debes ingresar al menos un correo electrónico válido",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Guardamos en Firestore
+      const settingsRef = doc(
+        db,
+        "notificacionesConfig",
+        isAdmin ? companyFilter || userEmail : company
+      );
+
+      await setDoc(settingsRef, {
+        enabled: notificationsEnabled,
+        emails: notificationEmails,
+        hours: notificationHours,
+        updatedAt: serverTimestamp(),
+        updatedBy: userEmail,
+        company: isAdmin ? companyFilter : company,
+      });
+
+      setSaveMessage({
+        type: "success",
+        text: "Configuración guardada correctamente",
+      });
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      console.error("Error al guardar configuración de notificaciones:", err);
+      setSaveMessage({ type: "error", text: `Error: ${err.message}` });
+    }
+
+    setIsSaving(false);
+  };
+
+  // Función para manejar cambios en los correos
+  const handleEmailChange = (index, value) => {
+    const newEmails = [...notificationEmails];
+    newEmails[index] = value;
+    setNotificationEmails(newEmails);
+  };
 
   // Función para determinar si una pantalla está online (reduciendo el tiempo a 30 segundos)
   const isScreenOnline = (lastActivity) => {
@@ -83,6 +223,122 @@ const MonitorScreen = ({ userEmail }) => {
     setLoading(false);
     setLastRefresh(new Date());
   }, []);
+
+  // Comprobar pantallas offline durante mucho tiempo
+  useEffect(() => {
+    if (!notificationsEnabled || heartbeats.length === 0) return;
+
+    // Buscar pantallas offline por más de X horas
+    const offlineScreens = heartbeats.filter((heartbeat) => {
+      if (heartbeat.online) return false;
+
+      // Comprobar si está offline por más del tiempo configurado
+      if (!heartbeat.lastActivity) return false;
+
+      const offlineTime = new Date() - heartbeat.lastActivity;
+      const offlineHours = offlineTime / (1000 * 60 * 60);
+
+      return offlineHours >= notificationHours;
+    });
+
+    if (offlineScreens.length > 0) {
+      // Aquí iría el código para enviar la notificación
+      // Como no tenemos un backend para enviar emails directamente,
+      // podríamos crear un documento en Firestore para que una Cloud Function lo procese
+      console.log(
+        "Pantallas offline que necesitan notificación:",
+        offlineScreens
+      );
+
+      // Ejemplo: Crear un documento de notificación pendiente
+      const createNotification = async () => {
+        try {
+          // Determinar la empresa
+          let company = "";
+
+          if (isAdmin && companyFilter) {
+            company = companyFilter;
+          } else if (!isAdmin) {
+            const userCompanyQuery = query(
+              collection(db, "usuarios"),
+              where("email", "==", userEmail)
+            );
+            const userSnapshots = await getDocs(userCompanyQuery);
+            if (!userSnapshots.empty) {
+              company = userSnapshots.docs[0].data().empresa || "";
+            }
+          }
+
+          if (!company && !isAdmin) return;
+
+          // Verificar si ya se envió una notificación recientemente
+          const lastNotificationRef = doc(
+            db,
+            "ultimasNotificaciones",
+            isAdmin ? companyFilter || userEmail : company
+          );
+          const lastNotificationSnap = await getDoc(lastNotificationRef);
+
+          if (lastNotificationSnap.exists()) {
+            const lastSent = lastNotificationSnap.data().sentAt.toDate();
+            const hoursSinceLastNotification =
+              (new Date() - lastSent) / (1000 * 60 * 60);
+
+            // Evitar enviar notificaciones muy frecuentes (por ejemplo, cada 4 horas)
+            if (hoursSinceLastNotification < 4) {
+              return;
+            }
+          }
+
+          // Crear documento de notificación
+          const notificationId = `notification_${Date.now()}`;
+          await setDoc(doc(db, "notificacionesPendientes", notificationId), {
+            offlineScreens: offlineScreens.map((screen) => ({
+              id: screen.id,
+              deviceName: screen.deviceName || "Sin nombre",
+              screenType: screen.screenType || "Desconocido",
+              screenNumber: screen.screenNumber,
+              companyName: screen.companyName,
+              lastActivity: screen.lastActivity,
+              offlineTime: `${notificationHours}+ horas`,
+            })),
+            emails: notificationEmails.filter(
+              (email) => email && email.trim() !== ""
+            ),
+            company: isAdmin ? companyFilter : company,
+            createdAt: serverTimestamp(),
+            status: "pending",
+          });
+
+          // Actualizar última notificación enviada
+          await setDoc(lastNotificationRef, {
+            sentAt: serverTimestamp(),
+            offlineCount: offlineScreens.length,
+          });
+
+          console.log("Notificación creada con ID:", notificationId);
+        } catch (err) {
+          console.error("Error al crear notificación:", err);
+        }
+      };
+
+      // Ejecutar solo si hay pantallas offline que notificar y correos configurados
+      if (
+        offlineScreens.length > 0 &&
+        notificationEmails.some((email) => email && email.trim() !== "")
+      ) {
+        createNotification();
+      }
+    }
+  }, [
+    heartbeats,
+    notificationsEnabled,
+    notificationEmails,
+    notificationHours,
+    isAdmin,
+    userEmail,
+    companyFilter,
+  ]);
 
   // Función para manejar errores
   const handleError = useCallback((err) => {
@@ -318,28 +574,183 @@ const MonitorScreen = ({ userEmail }) => {
               de línea se actualiza cada {refreshInterval} segundos.
             </p>
           </div>
-          <button
-            onClick={handleManualRefresh}
-            className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            title="Esto reiniciará la suscripción a Firestore. Usar solo cuando sea necesario."
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5 mr-2"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
+          <div className="flex space-x-2">
+            <button
+              onClick={() => setShowNotificationConfig(!showNotificationConfig)}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+              title="Configurar notificaciones por correo"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-              />
-            </svg>
-            Actualizar ahora
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                />
+              </svg>
+              Notificaciones
+            </button>
+            <button
+              onClick={handleManualRefresh}
+              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              title="Esto reiniciará la suscripción a Firestore. Usar solo cuando sea necesario."
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              Actualizar ahora
+            </button>
+          </div>
         </div>
+
+        {/* Configuración de notificaciones por correo */}
+        {showNotificationConfig && (
+          <div className="bg-white rounded-lg shadow p-4 mb-6 animate-fadeIn">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">
+              Configuración de Notificaciones por Correo
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <div className="flex items-center mb-4">
+                  <input
+                    id="enableNotifications"
+                    type="checkbox"
+                    checked={notificationsEnabled}
+                    onChange={() =>
+                      setNotificationsEnabled(!notificationsEnabled)
+                    }
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="enableNotifications"
+                    className="ml-2 block text-sm text-gray-900"
+                  >
+                    Habilitar notificaciones por correo electrónico
+                  </label>
+                </div>
+
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Enviar alerta cuando una pantalla esté desconectada por:
+                  </label>
+                  <div className="mt-1 flex rounded-md shadow-sm">
+                    <input
+                      type="number"
+                      min="1"
+                      max="72"
+                      value={notificationHours}
+                      onChange={(e) =>
+                        setNotificationHours(parseInt(e.target.value) || 5)
+                      }
+                      disabled={!notificationsEnabled}
+                      className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+                    />
+                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
+                      horas
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Direcciones de correo electrónico para notificaciones:
+                </label>
+
+                {notificationEmails.map((email, index) => (
+                  <div key={index} className="mb-2">
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => handleEmailChange(index, e.target.value)}
+                      placeholder={`Correo electrónico ${index + 1}`}
+                      disabled={!notificationsEnabled}
+                      className="focus:ring-blue-500 focus:border-blue-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md disabled:bg-gray-100 disabled:text-gray-500"
+                    />
+                  </div>
+                ))}
+
+                <p className="text-xs text-gray-500 mt-1">
+                  Ingresa hasta 3 direcciones de correo electrónico que
+                  recibirán las notificaciones.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              {saveMessage && (
+                <div
+                  className={`mr-4 px-4 py-2 rounded text-sm ${
+                    saveMessage.type === "success"
+                      ? "bg-green-100 text-green-800"
+                      : "bg-red-100 text-red-800"
+                  }`}
+                >
+                  {saveMessage.text}
+                </div>
+              )}
+
+              <button
+                onClick={() => setShowNotificationConfig(false)}
+                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                Cancelar
+              </button>
+
+              <button
+                onClick={saveNotificationSettings}
+                disabled={isSaving}
+                className="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-300"
+              >
+                {isSaving ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      ></circle>
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      ></path>
+                    </svg>
+                    Guardando...
+                  </>
+                ) : (
+                  "Guardar configuración"
+                )}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Panel de control */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
@@ -461,6 +872,27 @@ const MonitorScreen = ({ userEmail }) => {
               <div className="text-xs mt-1 text-purple-400">
                 Actualización automática cada {refreshInterval} segundos
               </div>
+              {notificationsEnabled && (
+                <div className="text-xs mt-1 text-purple-600 font-medium">
+                  <span className="inline-flex items-center">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3 w-3 mr-1"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                      />
+                    </svg>
+                    Notificaciones activas ({notificationHours}h)
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -487,6 +919,12 @@ const MonitorScreen = ({ userEmail }) => {
               <div className="p-4 text-center text-gray-500 bg-blue-50 border-b border-blue-100">
                 {t("monitorScreen.refreshNotice") ||
                   "Nota: Si una pantalla se desconecta, aparecerá como 'Desconectada' después de 30 segundos de inactividad."}
+                {notificationsEnabled && (
+                  <span className="ml-1">
+                    Las alertas de correo se enviarán cuando una pantalla esté
+                    desconectada por {notificationHours} horas o más.
+                  </span>
+                )}
               </div>
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
@@ -556,108 +994,147 @@ const MonitorScreen = ({ userEmail }) => {
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {filteredHeartbeats.map((heartbeat) => (
-                    <tr
-                      key={heartbeat.id}
-                      className={`${
-                        heartbeat.online ? "" : "bg-red-50"
-                      } hover:bg-gray-50 transition-colors duration-150`}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {heartbeat.deviceName || heartbeat.id}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {heartbeat.screenType === "salon" ? (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
-                            Salón
-                          </span>
-                        ) : heartbeat.screenType === "directorio" ? (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
-                            Directorio
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
-                            {heartbeat.screenType || "Desconocido"}
-                          </span>
-                        )}
-                        {heartbeat.screenNumber && (
-                          <span className="ml-2">{heartbeat.screenNumber}</span>
-                        )}
-                      </td>
-                      {isAdmin && (
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                          {heartbeat.companyName || "-"}
+                  {filteredHeartbeats.map((heartbeat) => {
+                    // Calcular el tiempo de desconexión para resaltar pantallas con desconexión prolongada
+                    const offlineTime =
+                      !heartbeat.online && heartbeat.lastActivity
+                        ? (new Date() - heartbeat.lastActivity) /
+                          (1000 * 60 * 60)
+                        : 0;
+
+                    // Determinar clase CSS basada en estado y tiempo offline
+                    const rowClass = !heartbeat.online
+                      ? offlineTime >= notificationHours
+                        ? "bg-red-100" // Desconectada por mucho tiempo
+                        : "bg-red-50" // Desconectada normal
+                      : ""; // En línea
+
+                    return (
+                      <tr
+                        key={heartbeat.id}
+                        className={`${rowClass} hover:bg-gray-50 transition-colors duration-150`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          {heartbeat.deviceName || heartbeat.id}
                         </td>
-                      )}
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <div>
-                          {heartbeat.lastActivity
-                            ? formatDate(heartbeat.lastActivity)
-                            : "Nunca"}
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          Hace{" "}
-                          {getTimeSinceLastActivity(heartbeat.lastActivity)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {heartbeat.beatCount || 0}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {heartbeat.online ? (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                            En línea
-                          </span>
-                        ) : (
-                          <span className="px-2 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800">
-                            Desconectada
-                          </span>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {heartbeat.screenType === "salon" ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+                              Salón
+                            </span>
+                          ) : heartbeat.screenType === "directorio" ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-800">
+                              Directorio
+                            </span>
+                          ) : heartbeat.screenType === "tarifario" ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                              Tarifario
+                            </span>
+                          ) : (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
+                              {heartbeat.screenType || "Desconocido"}
+                            </span>
+                          )}
+                          {heartbeat.screenNumber && (
+                            <span className="ml-2">
+                              {heartbeat.screenNumber}
+                            </span>
+                          )}
+                        </td>
+                        {isAdmin && (
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {heartbeat.companyName || "-"}
+                          </td>
                         )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {heartbeat.firstSeen
-                          ? formatDate(heartbeat.firstSeen)
-                          : "Desconocido"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
-                          onClick={() => {
-                            // Mostrar detalles en un modal con mejor formato
-                            const details = {
-                              ID: heartbeat.id,
-                              Nombre: heartbeat.deviceName || "No disponible",
-                              Tipo: heartbeat.screenType || "No disponible",
-                              Número: heartbeat.screenNumber || "No disponible",
-                              Empresa: heartbeat.companyName || "No disponible",
-                              Resolución:
-                                heartbeat.screenResolution || "No disponible",
-                              Navegador:
-                                heartbeat.userAgent?.substring(0, 100) ||
-                                "No disponible",
-                              IP: heartbeat.ip || "No disponible",
-                              Sistema: heartbeat.os || "No disponible",
-                              Versión: heartbeat.version || "No disponible",
-                              "Última desconexión": heartbeat.lastDisconnect
-                                ? formatDate(heartbeat.lastDisconnect)
-                                : "No disponible",
-                            };
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <div>
+                            {heartbeat.lastActivity
+                              ? formatDate(heartbeat.lastActivity)
+                              : "Nunca"}
+                          </div>
+                          <div
+                            className={`text-xs ${
+                              !heartbeat.online &&
+                              offlineTime >= notificationHours
+                                ? "text-red-600 font-medium"
+                                : "text-gray-400"
+                            }`}
+                          >
+                            Hace{" "}
+                            {getTimeSinceLastActivity(heartbeat.lastActivity)}
+                            {!heartbeat.online &&
+                              offlineTime >= notificationHours && (
+                                <span className="ml-1">⚠️</span>
+                              )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {heartbeat.beatCount || 0}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {heartbeat.online ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+                              En línea
+                            </span>
+                          ) : (
+                            <span
+                              className={`px-2 py-1 text-xs font-medium rounded-full ${
+                                offlineTime >= notificationHours
+                                  ? "bg-red-200 text-red-800"
+                                  : "bg-red-100 text-red-800"
+                              }`}
+                            >
+                              Desconectada
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {heartbeat.firstSeen
+                            ? formatDate(heartbeat.firstSeen)
+                            : "Desconocido"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
+                            onClick={() => {
+                              // Mostrar detalles en un modal con mejor formato
+                              const details = {
+                                ID: heartbeat.id,
+                                Nombre: heartbeat.deviceName || "No disponible",
+                                Tipo: heartbeat.screenType || "No disponible",
+                                Número:
+                                  heartbeat.screenNumber || "No disponible",
+                                Empresa:
+                                  heartbeat.companyName || "No disponible",
+                                Resolución:
+                                  heartbeat.screenResolution || "No disponible",
+                                Navegador:
+                                  heartbeat.userAgent?.substring(0, 100) ||
+                                  "No disponible",
+                                IP: heartbeat.ip || "No disponible",
+                                Sistema: heartbeat.os || "No disponible",
+                                Versión: heartbeat.version || "No disponible",
+                                "Última desconexión": heartbeat.lastDisconnect
+                                  ? formatDate(heartbeat.lastDisconnect)
+                                  : "No disponible",
+                              };
 
-                            // Formatear los detalles
-                            const formattedDetails = Object.entries(details)
-                              .map(([key, value]) => `${key}: ${value}`)
-                              .join("\n");
+                              // Formatear los detalles
+                              const formattedDetails = Object.entries(details)
+                                .map(([key, value]) => `${key}: ${value}`)
+                                .join("\n");
 
-                            alert(
-                              `Detalles de la pantalla:\n\n${formattedDetails}`
-                            );
-                          }}
-                        >
-                          Ver detalles
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                              alert(
+                                `Detalles de la pantalla:\n\n${formattedDetails}`
+                              );
+                            }}
+                          >
+                            Ver detalles
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -677,6 +1154,39 @@ const MonitorScreen = ({ userEmail }) => {
             <div className="text-sm text-gray-500">
               Última actualización: {lastRefresh.toLocaleTimeString()}
             </div>
+          </div>
+        )}
+
+        {/* Nota sobre notificaciones */}
+        {notificationsEnabled && (
+          <div className="mt-6 p-4 bg-blue-50 rounded-lg shadow-sm border border-blue-100">
+            <h4 className="text-sm font-medium text-blue-800 flex items-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5 mr-2"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
+              Información sobre notificaciones
+            </h4>
+            <p className="mt-1 text-sm text-blue-700">
+              Las notificaciones están habilitadas. Se enviará un correo a{" "}
+              {notificationEmails.filter((e) => e).length} destinatario(s)
+              cuando una pantalla esté desconectada por {notificationHours}{" "}
+              horas o más.
+            </p>
+            <p className="mt-1 text-xs text-blue-600">
+              Para evitar sobrecarga, las notificaciones se envían con un
+              intervalo mínimo de 4 horas entre cada aviso.
+            </p>
           </div>
         )}
       </div>

@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore";
 import app from "@/firebase/firebaseConfig";
 import PTTemplateManager from "@/components/templates/PTTemplateManager";
+import useHeartbeat from "@/hook/useHeartbeat"; // Importamos el hook de heartbeat
+import { v4 as uuidv4 } from "uuid"; // Importamos uuid para generar IDs únicos
 
 const db = getFirestore(app);
 
@@ -22,6 +24,7 @@ const PantallaBaseTarifario = ({ id }) => {
   const [empresa, setEmpresa] = useState(null);
   const [tarifarioData, setTarifarioData] = useState(null);
   const [templateData, setTemplateData] = useState(null);
+  const [screenId, setScreenId] = useState(""); // Estado para almacenar el ID único de la pantalla
 
   useEffect(() => {
     // Obtener la empresa de la URL
@@ -29,9 +32,66 @@ const PantallaBaseTarifario = ({ id }) => {
     const empresaParam = urlParams.get("emp");
     setEmpresa(empresaParam);
 
+    // Generar o recuperar un ID único para esta pantalla
+    const storageKey = `pantalla_tarifario_${id}`;
+    let storedId =
+      typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `tarifario_${id}_${uuidv4().substring(0, 8)}`;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(storageKey, storedId);
+        } catch (e) {
+          console.error("Error al guardar screenId:", e);
+        }
+      }
+    }
+
+    setScreenId(storedId);
+
     // Obtener datos iniciales y configurar suscripciones
     setupDataAndSubscriptions(empresaParam, id);
   }, [id]);
+
+  // Integrar hook de heartbeat
+  const heartbeat = useHeartbeat({
+    screenId,
+    screenType: "tarifario",
+    screenNumber: parseInt(id, 10),
+    deviceName: pantalla?.nombre || `Tarifario ${id}`,
+    userId: "tarifario-user", // Usamos un ID fijo para cumplir con el requisito del hook
+    companyName: empresa,
+    interval: 60000, // Cada 60 segundos
+  });
+
+  // Opcional: Mostrar indicador de conexión para depuración
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Estado de conexión:", heartbeat.isConnected);
+      console.log("Último heartbeat:", heartbeat.lastBeat);
+      console.log("Información de heartbeat:", {
+        screenId,
+        screenType: "tarifario",
+        screenNumber: parseInt(id, 10),
+        deviceName: pantalla?.nombre || `Tarifario ${id}`,
+        userId: "tarifario-user",
+        companyName: empresa,
+        error: heartbeat.error,
+        debugInfo: heartbeat.debugInfo,
+      });
+    }
+  }, [
+    heartbeat.isConnected,
+    heartbeat.lastBeat,
+    heartbeat.error,
+    heartbeat.debugInfo,
+    pantalla,
+    id,
+    screenId,
+    empresa,
+  ]);
 
   // Función para configurar suscripciones y datos iniciales
   const setupDataAndSubscriptions = async (empresaParam, pantallaId) => {
@@ -342,6 +402,19 @@ const PantallaBaseTarifario = ({ id }) => {
   return (
     <div className="w-full h-screen overflow-hidden">
       <PTTemplateManager pantalla={pantalla} />
+      {/* Indicador de conexión - solo visible en modo desarrollo */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="fixed bottom-2 right-2 z-50 rounded-full w-4 h-4 border border-gray-300"
+          style={{
+            backgroundColor: heartbeat.isConnected ? "#10b981" : "#ef4444",
+            boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+          }}
+          title={`Monitoreo: ${
+            heartbeat.isConnected ? "Conectado" : "Desconectado"
+          }`}
+        ></div>
+      )}
     </div>
   );
 };

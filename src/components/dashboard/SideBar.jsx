@@ -16,8 +16,8 @@ import {
   faSignOutAlt,
   faChevronRight,
   faDesktop,
-  faMoneyBill, // Icono para el tarifario
-  faCashRegister, // Icono para información de tarifas
+  faMoneyBill,
+  faCashRegister,
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
@@ -38,36 +38,31 @@ function Sidebar(props) {
     props.setShowSoporte(false);
     props.setShowPantallaServicio(false);
     props.setShowMonitorScreen(false);
-    // Añadir el nuevo panel
     props.setShowPantallaTarifario(false);
-    // Añadir el componente de información de tarifas
     props.setShowInformacionTarifa(false);
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
 
   //? -- Permisos --
-  const permisos = props.userData?.permisos || 0;
-  const showAdministrador = [10].includes(permisos);
-  const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos);
-  const showAjustesPantalla = [10, 3].includes(permisos);
-  const showInformacion = [10, 2, 3].includes(permisos);
-  // Añadir permiso para MonitorScreen - visible para usuarios con permiso de Admin y AjustesPantalla
-  const showMonitor = [10, 3].includes(permisos);
-  //? --------------
+  const userData = props.userData || {};
+  const permisosSecciones = userData.permisosSecciones || {};
+
+  // Verificar permiso del SuperAdmin (valor 10)
+  const isSuperAdmin = userData.permisos === 10;
+
+  // Función para verificar permisos por sección
+  const tienePermiso = (seccion) => {
+    return isSuperAdmin || permisosSecciones[seccion] === true;
+  };
 
   const isActive = (show) => show === true;
 
   return (
-    <div className="sidebar-content rounded-r-lg ">
-      {/* Logo en la parte superior */}
-      {/* <div className="py-4 px-6 flex justify-center">
-        <img src="/img/logov2.png" alt="Upper Logo" className="h-10" />
-      </div> */}
-
+    <div className="sidebar-content rounded-r-lg">
       <ul className="flex flex-col w-full px-2">
         {/* ADMINISTRADOR permiso solo para SUPERADMIN */}
-        {showAdministrador && (
+        {isSuperAdmin && (
           <li className="mb-4">
             <div className="px-4 py-2">
               <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
@@ -142,17 +137,17 @@ function Sidebar(props) {
         )}
 
         {/* PERSONALICE SUS PANTALLAS */}
-        {showPersonalicePantallas && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.title")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.title")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Tablero */}
+          {/* Tablero */}
+          {tienePermiso("tablero") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -182,8 +177,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Alta de eventos */}
+          {/* Alta de eventos */}
+          {tienePermiso("altaEventos") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -213,8 +210,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Consulta de eventos */}
+          {/* Consulta de eventos */}
+          {tienePermiso("consultaEventos") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -247,8 +246,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Información de Tarifas */}
+          {/* Información de Tarifas */}
+          {tienePermiso("informacionTarifas") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -278,21 +279,21 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+        </li>
 
         {/* AJUSTES PANTALLAS */}
-        {showAjustesPantalla && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.screenSettings")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.screenSettings")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Pantallas salon */}
+          {/* Pantallas salon */}
+          {tienePermiso("pantallasSalon") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -322,8 +323,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Pantallas Directorio */}
+          {/* Pantallas Directorio */}
+          {tienePermiso("pantallasDirectorio") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -353,8 +356,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Pantallas Tarifario */}
+          {/* Pantallas Tarifario */}
+          {tienePermiso("pantallasTarifario") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -384,43 +389,45 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Monitor de Pantallas */}
-            {showMonitor && (
-              <div className="mb-1">
-                <button
-                  onClick={() => changePanel("setShowMonitorScreen")}
-                  className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+          {/* Monitor de Pantallas */}
+          {tienePermiso("monitoreo") && (
+            <div className="mb-1">
+              <button
+                onClick={() => changePanel("setShowMonitorScreen")}
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showMonitorScreen)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+              >
+                <span
+                  className={`flex-shrink-0 ${
                     isActive(props.showMonitorScreen)
-                      ? "bg-white shadow-md text-blue-700 font-medium"
-                      : "text-blue-100 hover:bg-blue-700/50"
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <span
-                    className={`flex-shrink-0 ${
-                      isActive(props.showMonitorScreen)
-                        ? "text-blue-600"
-                        : "text-blue-200 group-hover:text-white"
-                    }`}
-                  >
-                    <FontAwesomeIcon icon={faDesktop} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faDesktop} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">
+                  {t("sidebar.monitorScreen") || "Monitoreo de Pantallas"}
+                </span>
+                {isActive(props.showMonitorScreen) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
                   </span>
-                  <span className="ml-3">
-                    {t("sidebar.monitorScreen") || "Monitoreo de Pantallas"}
-                  </span>
-                  {isActive(props.showMonitorScreen) && (
-                    <span className="ml-auto">
-                      <FontAwesomeIcon
-                        icon={faChevronRight}
-                        className="w-3 h-3"
-                      />
-                    </span>
-                  )}
-                </button>
-              </div>
-            )}
+                )}
+              </button>
+            </div>
+          )}
 
-            {/* Publicidad */}
+          {/* Publicidad */}
+          {tienePermiso("publicidad") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -450,21 +457,21 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+        </li>
 
         {/* MAS INFORMACION */}
-        {showInformacion && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.moreInformation")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.moreInformation")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Mis Datos */}
+          {/* Mis Datos */}
+          {tienePermiso("datosUsuario") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -497,8 +504,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Guia de Usuario */}
+          {/* Guia de Usuario */}
+          {tienePermiso("guiaUsuario") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -531,8 +540,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Contacto soporte */}
+          {/* Contacto soporte */}
+          {tienePermiso("contactoSoporte") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -562,8 +573,8 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+        </li>
       </ul>
 
       {/* SALIR - Botón de cierre de sesión en la parte inferior */}
