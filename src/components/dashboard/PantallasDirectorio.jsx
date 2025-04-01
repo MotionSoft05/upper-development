@@ -47,6 +47,7 @@ function PantallasDirectorio() {
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("es");
   const [selectedTemplate, setSelectedTemplate] = useState("template1");
+  const [rotationDirections, setRotationDirections] = useState([]); // Array para guardar la dirección de rotación por pantalla
 
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México" },
@@ -122,11 +123,13 @@ function PantallasDirectorio() {
             const settings = user.pantallaSettings || [];
 
             // Asegurar que tenemos configuración para todas las pantallas
+            // Asegurar que tenemos configuración para todas las pantallas
             const updatedSettings = [...settings];
             while (updatedSettings.length < numberOfScreens) {
               updatedSettings.push({
                 isPortrait: false,
                 template: selectedTemplate,
+                rotationDirection: -90, // Valor por defecto
               });
             }
 
@@ -543,6 +546,7 @@ function PantallasDirectorio() {
         newSettings[index] = {
           isPortrait: false,
           template: selectedTemplate,
+          rotationDirection: -90, // Valor por defecto, -90 como era originalmente
         };
       }
 
@@ -1268,6 +1272,72 @@ function PantallasDirectorio() {
                                     : "Orientación: Horizontal"}
                                 </span>
                               </div>
+
+                              {/* Control de dirección de rotación - solo visible cuando está en modo vertical */}
+                              {pantallaSettings[index]?.isPortrait && (
+                                <div className="mt-2 pl-12">
+                                  <div className="flex items-center space-x-4">
+                                    <span className="text-xs text-gray-600">
+                                      Dirección de rotación:
+                                    </span>
+                                    <div className="flex space-x-4">
+                                      <div className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          id={`rotate-negative-${index}`}
+                                          name={`rotate-direction-${index}`}
+                                          value="-90"
+                                          checked={
+                                            (pantallaSettings[index]
+                                              ?.rotationDirection || -90) ===
+                                            -90
+                                          }
+                                          onChange={() =>
+                                            updatePantallaSettings(
+                                              index,
+                                              "rotationDirection",
+                                              -90
+                                            )
+                                          }
+                                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                        />
+                                        <label
+                                          htmlFor={`rotate-negative-${index}`}
+                                          className="ml-2 block text-xs text-gray-700"
+                                        >
+                                          -90° (Izquierda)
+                                        </label>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          id={`rotate-positive-${index}`}
+                                          name={`rotate-direction-${index}`}
+                                          value="90"
+                                          checked={
+                                            (pantallaSettings[index]
+                                              ?.rotationDirection || -90) === 90
+                                          }
+                                          onChange={() =>
+                                            updatePantallaSettings(
+                                              index,
+                                              "rotationDirection",
+                                              90
+                                            )
+                                          }
+                                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                        />
+                                        <label
+                                          htmlFor={`rotate-positive-${index}`}
+                                          className="ml-2 block text-xs text-gray-700"
+                                        >
+                                          90° (Derecha)
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* <div>

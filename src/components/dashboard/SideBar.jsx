@@ -2,22 +2,31 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBookOpenReader,
+  // Iconos para administración
+  faUserShield,
   faBuilding,
-  faBullhorn,
+
+  // Iconos para personalización de pantallas
+  faTachometerAlt,
   faCalendarPlus,
-  faCircleQuestion,
-  faClipboardQuestion,
-  faDisplay,
+  faCalendarDay,
+  faReceipt,
+
+  // Iconos para ajustes de pantallas
+  faTelevision,
+  faListUl,
+  faTags,
+  faDesktopAlt,
+  faAd,
+
+  // Iconos para más información
+  faIdCard,
+  faBook,
   faHeadset,
-  faSolarPanel,
-  faTableColumns,
-  faUserTie,
+
+  // Otros iconos
   faSignOutAlt,
   faChevronRight,
-  faDesktop,
-  faMoneyBill,
-  faCashRegister,
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
@@ -72,7 +81,7 @@ function Sidebar(props) {
               </h3>
             </div>
 
-            {/* Admin */}
+            {/* Admin - Cambio a faUserShield que representa mejor la administración */}
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -89,7 +98,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faUserTie} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faUserShield} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.admin")}</span>
                 {isActive(props.showAdmin) && (
@@ -103,7 +112,7 @@ function Sidebar(props) {
               </button>
             </div>
 
-            {/* Edicion de Empresas */}
+            {/* Edicion de Empresas - Se mantiene faBuilding que es apropiado */}
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -146,7 +155,7 @@ function Sidebar(props) {
             </h3>
           </div>
 
-          {/* Tablero */}
+          {/* Tablero - Cambio a faTachometerAlt que representa mejor un dashboard */}
           {tienePermiso("tablero") && (
             <div className="mb-1">
               <button
@@ -164,7 +173,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faTableColumns} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faTachometerAlt} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.dashboard")}</span>
                 {isActive(props.showUserAdmin) && (
@@ -179,7 +188,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Alta de eventos */}
+          {/* Alta de eventos - Se mantiene faCalendarPlus que es apropiado */}
           {tienePermiso("altaEventos") && (
             <div className="mb-1">
               <button
@@ -212,7 +221,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Consulta de eventos */}
+          {/* Consulta de eventos - Cambio a faCalendarDay que representa mejor la consulta de eventos */}
           {tienePermiso("consultaEventos") && (
             <div className="mb-1">
               <button
@@ -230,10 +239,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faClipboardQuestion}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faCalendarDay} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.eventQuery")}</span>
                 {isActive(props.showConsultaEvento) && (
@@ -248,7 +254,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Información de Tarifas */}
+          {/* Información de Tarifas - Cambio a faReceipt que representa mejor las tarifas */}
           {tienePermiso("informacionTarifas") && (
             <div className="mb-1">
               <button
@@ -266,7 +272,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faCashRegister} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faReceipt} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">Información de Tarifas</span>
                 {isActive(props.showInformacionTarifa) && (
@@ -292,7 +298,7 @@ function Sidebar(props) {
             </h3>
           </div>
 
-          {/* Pantallas salon */}
+          {/* Pantallas salon - Cambio a faTV que representa mejor una pantalla de salón */}
           {tienePermiso("pantallasSalon") && (
             <div className="mb-1">
               <button
@@ -310,7 +316,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faSolarPanel} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faTelevision} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.roomScreens")}</span>
                 {isActive(props.showPantallaSalon) && (
@@ -325,7 +331,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Pantallas Directorio */}
+          {/* Pantallas Directorio - Cambio a faListUl que representa mejor un directorio */}
           {tienePermiso("pantallasDirectorio") && (
             <div className="mb-1">
               <button
@@ -343,7 +349,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faDisplay} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faListUl} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.directoryScreens")}</span>
                 {isActive(props.showPantallaDirectorio) && (
@@ -358,7 +364,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Pantallas Tarifario */}
+          {/* Pantallas Tarifario - Cambio a faTags que representa mejor un tarifario */}
           {tienePermiso("pantallasTarifario") && (
             <div className="mb-1">
               <button
@@ -376,7 +382,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faMoneyBill} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faTags} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">Pantallas Tarifario</span>
                 {isActive(props.showPantallaTarifario) && (
@@ -391,7 +397,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Monitor de Pantallas */}
+          {/* Monitor de Pantallas - Cambio a faDesktopAlt que representa mejor un monitor */}
           {tienePermiso("monitoreo") && (
             <div className="mb-1">
               <button
@@ -409,7 +415,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faDesktop} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faDesktopAlt} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">
                   {t("sidebar.monitorScreen") || "Monitoreo de Pantallas"}
@@ -426,7 +432,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Publicidad */}
+          {/* Publicidad - Cambio a faAd que representa mejor la publicidad */}
           {tienePermiso("publicidad") && (
             <div className="mb-1">
               <button
@@ -444,7 +450,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faBullhorn} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faAd} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.advertisement")}</span>
                 {isActive(props.showPublicidad) && (
@@ -470,7 +476,7 @@ function Sidebar(props) {
             </h3>
           </div>
 
-          {/* Mis Datos */}
+          {/* Mis Datos - Cambio a faIdCard que representa mejor los datos personales */}
           {tienePermiso("datosUsuario") && (
             <div className="mb-1">
               <button
@@ -488,10 +494,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faBookOpenReader}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faIdCard} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.myData")}</span>
                 {isActive(props.showlicencia) && (
@@ -506,7 +509,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Guia de Usuario */}
+          {/* Guia de Usuario - Cambio a faBook que representa mejor una guía */}
           {tienePermiso("guiaUsuario") && (
             <div className="mb-1">
               <button
@@ -524,10 +527,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faCircleQuestion}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faBook} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.userGuides")}</span>
                 {isActive(props.showGuia) && (
@@ -542,7 +542,7 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Contacto soporte */}
+          {/* Contacto soporte - Se mantiene faHeadset que es apropiado */}
           {tienePermiso("contactoSoporte") && (
             <div className="mb-1">
               <button

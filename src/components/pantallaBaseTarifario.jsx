@@ -19,6 +19,10 @@ const db = getFirestore(app);
 
 const PantallaBaseTarifario = ({ id }) => {
   const [pantalla, setPantalla] = useState(null);
+  console.log(
+    "🚀 ~ pantallaBaseTarifario.jsx:22 ~ PantallaBaseTarifario ~ pantalla:",
+    pantalla
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [empresa, setEmpresa] = useState(null);
@@ -154,6 +158,8 @@ const PantallaBaseTarifario = ({ id }) => {
               tarifas: tarifarioData.tarifas || pantallaData.tarifas,
               gerente: tarifarioData.gerente || pantallaData.gerente,
               tipoCambio: tarifarioData.tipoCambio || pantallaData.tipoCambio,
+              tituloCambio:
+                tarifarioData.tituloCambio || pantallaData.tituloCambio, // Añadir esta línea
               leyendaTarifas:
                 tarifarioData.leyendaTarifas || pantallaData.leyendaTarifas,
               leyendaExtras:
@@ -243,6 +249,8 @@ const PantallaBaseTarifario = ({ id }) => {
               tarifas: tarifarioData.tarifas || templateData.tarifas,
               gerente: tarifarioData.gerente || templateData.gerente,
               tipoCambio: tarifarioData.tipoCambio || templateData.tipoCambio,
+              tituloCambio:
+                tarifarioData.tituloCambio || templateData.tituloCambio, // Añadir esta línea
               leyendaTarifas:
                 tarifarioData.leyendaTarifas || templateData.leyendaTarifas,
               leyendaExtras:
@@ -294,6 +302,8 @@ const PantallaBaseTarifario = ({ id }) => {
             tarifas: data.tarifas || prev.tarifas,
             gerente: data.gerente || prev.gerente,
             tipoCambio: data.tipoCambio || prev.tipoCambio,
+
+            tituloCambio: data.tituloCambio || prev.tituloCambio, // Añadir esta línea
             leyendaTarifas: data.leyendaTarifas || prev.leyendaTarifas,
             leyendaExtras: data.leyendaExtras || prev.leyendaExtras,
             checkIn: data.checkIn || prev.checkIn,
@@ -342,6 +352,7 @@ const PantallaBaseTarifario = ({ id }) => {
             tarifas: docData.tarifas || prev.tarifas,
             gerente: docData.gerente || prev.gerente,
             tipoCambio: docData.tipoCambio || prev.tipoCambio,
+            tituloCambio: docData.tituloCambio || prev.tituloCambio, // Añadir esta línea
             leyendaTarifas: docData.leyendaTarifas || prev.leyendaTarifas,
             leyendaExtras: docData.leyendaExtras || prev.leyendaExtras,
             checkIn: docData.checkIn || prev.checkIn,

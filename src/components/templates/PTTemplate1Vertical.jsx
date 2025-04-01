@@ -70,27 +70,64 @@ const PTTemplate1Vertical = ({ pantalla }) => {
 
   if (!pantalla) return null;
 
-  // Formatear la fecha en español e inglés
-  const formatFecha = () => {
-    if (pantalla.idioma === "es-en") {
-      // Formato bilingüe - mostrar ambos idiomas con estilo personalizado
-      const spanishDate = format(currentTime, "EEEE, dd 'de' MMMM", {
-        locale: es,
-      });
-      const englishDate = format(currentTime, "EEEE, MMMM dd");
-      return (
-        <>
-          <span className="font-semibold">{spanishDate}</span>
-          <br />
-          <span className="text-gray-600">{englishDate}</span>
-        </>
-      );
-    } else if (pantalla.idioma === "en") {
-      // Solo inglés
-      return format(currentTime, "EEEE, MMMM dd");
-    } else {
-      // Por defecto español
+  // Textos basados en el idioma seleccionado
+  const getText = (key) => {
+    const translations = {
+      // Textos en español
+      es: {
+        tarifasPublico: "TARIFAS AL PÚBLICO",
+        noticias: "NOTICIAS",
+        checkInOut: "CHECK IN-OUT",
+        gerenteTurno: "GERENTE EN TURNO",
+        noTarifas: "No se encontraron tarifas disponibles",
+        noGerente: "No se encontró gerente en turno",
+        espacioPublicidad: "Espacio para publicidad",
+        entrada: "ENTRADA",
+        salida: "SALIDA",
+        noHorarioEntrada: "Horario no disponible",
+        noHorarioSalida: "Horario no disponible",
+      },
+      // Textos en inglés
+      en: {
+        tarifasPublico: "PUBLIC RATES",
+        noticias: "NEWS",
+        checkInOut: "CHECK IN-OUT",
+        gerenteTurno: "MANAGER ON DUTY",
+        noTarifas: "No rates available",
+        noGerente: "No manager on duty found",
+        espacioPublicidad: "Space for advertising",
+        entrada: "CHECK IN",
+        salida: "CHECK OUT",
+        noHorarioEntrada: "Schedule not available",
+        noHorarioSalida: "Schedule not available",
+      },
+      // Textos en español e inglés (formato compacto)
+      "es-en": {
+        tarifasPublico: "TARIFAS/RATES",
+        noticias: "NOTICIAS/NEWS",
+        checkInOut: "CHECK IN-OUT",
+        gerenteTurno: "GERENTE/MANAGER",
+        noTarifas: "No se encontraron tarifas / No rates available",
+        noGerente: "No se encontró gerente / No manager found",
+        espacioPublicidad: "Espacio para publicidad / Space for advertising",
+        entrada: "ENTRADA/CHECK IN",
+        salida: "SALIDA/CHECK OUT",
+        noHorarioEntrada: "Horario no disponible / Schedule not available",
+        noHorarioSalida: "Horario no disponible / Schedule not available",
+      },
+    };
+
+    // Determina el idioma a utilizar (por defecto español)
+    const lang = pantalla.idioma || "es";
+    return translations[lang][key] || translations.es[key];
+  };
+
+  // Formatear la fecha según el idioma
+  const formatDate = (lang) => {
+    if (lang === "es") {
       return format(currentTime, "EEEE, dd 'de' MMMM", { locale: es });
+    } else {
+      return format(currentTime, "EEEE, MMMM dd");
     }
   };
 
@@ -103,14 +140,28 @@ const PTTemplate1Vertical = ({ pantalla }) => {
   const maxTarifas = 10;
   const displayTarifas = tarifas.slice(0, maxTarifas);
 
+  // Determina el tamaño de fuente basado en la cantidad de tarifas
+  const getTarifaFontSize = () => {
+    if (displayTarifas.length <= 3) return "text-xl";
+    if (displayTarifas.length <= 6) return "text-lg";
+    return "text-base";
+  };
+
+  const tarifaFontSize = getTarifaFontSize();
+
   // Calcular la altura proporcional para cada tarifa
   const calcularAlturaTarifa = () => {
     if (displayTarifas.length === 0) return "auto";
     // Cálculo para distribuir el espacio uniformemente
-    return `calc((100% - ${displayTarifas.length * 8}px) / ${
+    return `calc((100% - ${displayTarifas.length * 16}px) / ${
       displayTarifas.length
     })`;
   };
+
+  // Función para crear línea punteada
+  const DottedLine = () => (
+    <div className="w-full border-b border-dotted border-gray-400 my-1"></div>
+  );
 
   return (
     <div className="h-screen w-screen overflow-hidden bg-white">
@@ -131,55 +182,105 @@ const PTTemplate1Vertical = ({ pantalla }) => {
         {/* Diseño en columna única similar a la imagen de referencia */}
         <div className="h-full flex flex-col">
           {/* Sección de cabecera - Logo, fecha, clima y tipo de cambio */}
-          <div className="p-4 flex">
-            {/* Columna izquierda - Logo y fecha */}
-            <div className="w-1/2">
-              {/* Logo */}
+          <div className="p-4 flex justify-between items-center">
+            {/* Columna izquierda - Logo */}
+            <div className="flex-shrink-0">
+              {/* Logo (tamaño aumentado) */}
               {pantalla.logo && (
-                <div className="mb-2">
+                <div>
                   <img
                     src={pantalla.logo}
                     alt="Logo del hotel"
-                    className="h-16 object-contain"
+                    className="h-20 object-contain" // Aumentado de h-16 a h-20
                   />
                 </div>
               )}
+            </div>
 
-              {/* Fecha - Estilo actualizado similar a la segunda imagen */}
-              <div className="text-base text-gray-700">{formatFecha()}</div>
+            {/* Columna central - Fecha y hora centrada */}
+            <div className="flex-grow flex justify-center items-center text-center">
+              {/* Fecha y hora con formato según idioma */}
+              <div className="text-base text-gray-700">
+                {pantalla.idioma === "es" && (
+                  <>
+                    <p className="text-base font-semibold">
+                      {formatDate("es")}
+                    </p>
+                    <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                  </>
+                )}
+                {pantalla.idioma === "en" && (
+                  <>
+                    <p className="text-base font-semibold">
+                      {formatDate("en")}
+                    </p>
+                    <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                  </>
+                )}
+                {pantalla.idioma === "es-en" && (
+                  <>
+                    <p className="text-base font-semibold">
+                      {formatDate("es")}
+                    </p>
+                    <p className="text-sm text-gray-600">{formatDate("en")}</p>
+                    <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                  </>
+                )}
+              </div>
             </div>
 
             {/* Columna derecha - Clima y tipo de cambio */}
-            <div className="w-1/2 flex flex-col items-end">
-              {/* Clima - Usando el diseño de la segunda imagen */}
-              <div className="flex items-end">
-                <div className="flex flex-col items-end mr-1">
+            <div className="flex-shrink-0 flex flex-col items-end">
+              {/* Clima con icono a la izquierda */}
+              <div className="flex items-center">
+                {/* Icono del clima a la izquierda */}
+                <div className="mr-2">
+                  <svg
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    xmlns="http://www.w3.org/2000/svg"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="text-yellow-500"
+                  >
+                    <circle cx="12" cy="12" r="5" fill="currentColor" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg>
+                </div>
+
+                {/* Temperatura y rango */}
+                <div className="flex flex-col">
                   <span className="text-3xl font-semibold">{`29°C`}</span>
                   <div className="flex text-xs">
                     <span className="px-1 mr-1 bg-blue-500 text-white">13</span>
                     <span className="px-1 bg-red-500 text-white">31</span>
                   </div>
                 </div>
-                <div className="text-yellow-500">
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <circle cx="12" cy="12" r="8" fill="currentColor" />
-                  </svg>
-                </div>
               </div>
 
-              {/* Tipo de cambio - Estilo actualizado como en la segunda imagen */}
+              {/* Tipo de cambio */}
               <div className="text-right mt-2">
                 <p className="text-xs text-gray-500 uppercase">
-                  Tipo de cambio para consumos del día
+                  {pantalla.tituloCambio ||
+                    (pantalla.idioma === "en"
+                      ? "EXCHANGE RATE FOR DAILY EXPENSES"
+                      : pantalla.idioma === "es-en"
+                      ? "TIPO DE CAMBIO/EXCHANGE RATE"
+                      : "TIPO DE CAMBIO PARA CONSUMOS DEL DÍA")}
                 </p>
                 <p className="text-base font-medium">
-                  1USD= {pantalla.tipoCambio?.usd || "20.3893"}
+                  1USD= {pantalla.tipoCambio?.usd || "20.00"}
                 </p>
                 {pantalla.tipoCambio?.eur && (
                   <p className="text-base font-medium">
@@ -200,25 +301,32 @@ const PTTemplate1Vertical = ({ pantalla }) => {
               }}
             >
               <h2 className="text-xl md:text-2xl font-bold text-center text-white">
-                TARIFAS AL PÚBLICO
+                {getText("tarifasPublico")}
               </h2>
             </div>
 
             {/* Lista de tarifas - Adaptativa según cantidad */}
-            <div className="px-4 py-2 flex-grow">
+            <div className="px-4 py-3 flex-grow">
               <div className="h-full flex flex-col justify-between">
                 {displayTarifas.length > 0 ? (
-                  <>
+                  <div className="flex flex-col gap-y-3">
                     {displayTarifas.map((tarifa, index) => (
                       <div
                         key={index}
-                        className="flex justify-between py-1"
+                        className={`${tarifaFontSize}`}
                         style={{
                           minHeight: calcularAlturaTarifa(),
                         }}
                       >
-                        <span className="font-medium">{tarifa.tipo}</span>
-                        <span className="font-bold">${tarifa.precio}</span>
+                        <div className="flex justify-between items-center">
+                          <span className="font-medium">{tarifa.tipo}</span>
+                          <div className="flex-1 mx-4">
+                            <DottedLine />
+                          </div>
+                          <span className="font-bold text-right">
+                            ${tarifa.precio}
+                          </span>
+                        </div>
                       </div>
                     ))}
 
@@ -235,10 +343,12 @@ const PTTemplate1Vertical = ({ pantalla }) => {
                           }}
                         />
                       ))}
-                  </>
+                  </div>
                 ) : (
                   <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-500">No hay tarifas disponibles</p>
+                    <p className="text-gray-500 text-center">
+                      {getText("noTarifas")}
+                    </p>
                   </div>
                 )}
               </div>
@@ -247,13 +357,24 @@ const PTTemplate1Vertical = ({ pantalla }) => {
 
           {/* Sección CHECK IN-OUT y GERENTE EN TURNO */}
           <div>
-            {/* Leyenda debajo de las tarifas */}
+            {/* Leyenda debajo de las tarifas - Centrada y en pirámide invertida */}
             <div className="px-4 pb-2">
-              <p className="text-xs text-gray-600">
+              <p
+                className="text-xs text-gray-600 text-center mx-auto"
+                style={{
+                  maxWidth:
+                    pantalla.leyendaTarifas?.length > 100 ? "100%" : "80%",
+                }}
+              >
                 {pantalla.leyendaTarifas ||
-                  "Precios incluyen el 16% IVA y el 4% ISH. Precios expresados en moneda nacional. No se acepta moneda extranjera. Tipo de Cambio Informativo. Precio por habitación por noche máximo para 2 adultos y 2 menores de 12 años."}
+                  (pantalla.idioma === "en"
+                    ? "Prices include VAT and taxes. Foreign currency not accepted."
+                    : pantalla.idioma === "es-en"
+                    ? "Precios incluyen impuestos. / Prices include taxes."
+                    : "Precios incluyen impuestos. No se acepta moneda extranjera.")}
               </p>
             </div>
+
             {/* Encabezado combinado */}
             <div
               className="py-2 px-10 flex justify-between rounded-t-lg"
@@ -262,38 +383,63 @@ const PTTemplate1Vertical = ({ pantalla }) => {
               }}
             >
               <h2 className="text-xl pl-6 font-bold text-white">
-                CHECK IN-OUT
+                {getText("checkInOut")}
               </h2>
-              <h2 className="text-xl font-bold text-white">GERENTE EN TURNO</h2>
+              <h2 className="text-xl font-bold text-white">
+                {getText("gerenteTurno")}
+              </h2>
             </div>
+
             <div>
-              {/* Contenido en dos columnas - Estilo más parecido a la imagen de referencia */}
-              <div className="my-4 px-20 py-2 flex">
+              {/* Contenido en dos columnas con separador */}
+              <div className="relative my-2 px-20 py-2 flex">
+                {/* Línea separadora vertical */}
+                <div
+                  className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-full"
+                  style={{ backgroundColor: templateBgColor, opacity: 0.3 }}
+                ></div>
+
                 {/* CHECK IN-OUT columna izquierda */}
                 <div className="w-1/2">
                   <div className="flex mb-2">
-                    <p className="w-12 font-medium">IN</p>
-                    <p>{pantalla.checkIn || "15:00 hrs."}</p>
+                    <p className="w-40 font-medium">{getText("entrada")}</p>
+                    <p>
+                      {formatCheckTime(pantalla.checkIn) ||
+                        getText("noHorarioEntrada")}
+                    </p>
                   </div>
                   <div className="flex">
-                    <p className="w-12 font-medium">OUT</p>
-                    <p>{pantalla.checkOut || "12:00 hrs."}</p>
+                    <p className="w-40 font-medium">{getText("salida")}</p>
+                    <p>
+                      {formatCheckTime(pantalla.checkOut) ||
+                        getText("noHorarioSalida")}
+                    </p>
                   </div>
                 </div>
 
                 {/* Gerente en turno columna derecha */}
                 <div className="w-1/2 text-right justify-end items-center flex">
                   <p className="font-medium">
-                    {pantalla.gerente?.nombre || "Laura Ruiz"}
+                    {pantalla.gerente?.nombre || getText("noGerente")}
                   </p>
                 </div>
               </div>
 
-              {/* Leyenda extras */}
+              {/* Leyenda extras - Centrada y en pirámide invertida */}
               <div className="px-4 pb-2">
-                <p className="text-xs text-gray-600">
+                <p
+                  className="text-xs text-gray-600 text-center mx-auto"
+                  style={{
+                    maxWidth:
+                      pantalla.leyendaExtras?.length > 100 ? "100%" : "80%",
+                  }}
+                >
                   {pantalla.leyendaExtras ||
-                    "Tarifas no incluyen alimentos. Forma de pago en efectivo (moneda nacional), tarjeta de crédito o débito y transferencias bancarias (48Hrs de anticipación). Tarifa puede variar por ocupación y disponibilidad. Convenio estacionamiento $170.00 por auto, por noche."}
+                    (pantalla.idioma === "en"
+                      ? "Rates do not include meals. Payment in cash or card."
+                      : pantalla.idioma === "es-en"
+                      ? "Tarifas no incluyen alimentos. / Rates do not include meals."
+                      : "Tarifas no incluyen alimentos. Pago en efectivo o tarjeta.")}
                 </p>
               </div>
             </div>
@@ -309,12 +455,12 @@ const PTTemplate1Vertical = ({ pantalla }) => {
               }}
             >
               <h2 className="text-xl md:text-2xl font-bold text-center text-white">
-                NOTICIAS
+                {getText("noticias")}
               </h2>
             </div>
 
             {/* Feed de noticias */}
-            <div className="px-4 py-4">
+            <div className="px-4 py-4 h-32">
               <SliderRSS />
             </div>
           </div>
@@ -333,7 +479,9 @@ const PTTemplate1Vertical = ({ pantalla }) => {
                 className="w-full h-32 flex items-center justify-center rounded-t-lg"
                 style={{ backgroundColor: templateBgColor }}
               >
-                <p className="text-white text-lg">Espacio para publicidad</p>
+                <p className="text-white text-lg">
+                  {getText("espacioPublicidad")}
+                </p>
               </div>
             )}
           </div>
@@ -342,5 +490,26 @@ const PTTemplate1Vertical = ({ pantalla }) => {
     </div>
   );
 };
+
+// Función auxiliar para formatear la hora de check-in/check-out en formato HH:MM
+function formatCheckTime(timeString) {
+  if (!timeString) return null;
+
+  // Elimina cualquier texto que no sea la hora
+  const timeOnly = timeString.replace(/[^0-9:]/g, "");
+
+  // Si ya tiene formato HH:MM, lo devuelve tal cual
+  if (/^\d{1,2}:\d{2}$/.test(timeOnly)) {
+    return timeOnly + " hrs.";
+  }
+
+  // Si es solo un número, asume que son horas y agrega :00
+  if (/^\d{1,2}$/.test(timeOnly)) {
+    return timeOnly + ":00 hrs.";
+  }
+
+  // Si no puede interpretar el formato, devuelve el valor original
+  return timeString;
+}
 
 export default PTTemplate1Vertical;

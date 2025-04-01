@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/firestore";
+import { useTranslation } from "react-i18next";
 
 // Modifica esta línea de importación en la parte superior
 import {
@@ -26,6 +27,7 @@ import {
 const db = getFirestore();
 
 function EditInformacionTarifa() {
+  const { t } = useTranslation(); // Añadir esta línea
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [nombreEmpresa, setNombreEmpresa] = useState(null);
@@ -45,6 +47,7 @@ function EditInformacionTarifa() {
   // Nuevos estados para leyendas
   const [leyendaTarifas, setLeyendaTarifas] = useState("");
   const [leyendaExtras, setLeyendaExtras] = useState("");
+  const [tituloCambio, setTituloCambio] = useState("");
 
   // Estados para horarios de check-in/out
   const [checkIn, setCheckIn] = useState("");
@@ -129,6 +132,7 @@ function EditInformacionTarifa() {
             if (docData.tarifas && docData.tarifas.length > 0) {
               setTarifas(docData.tarifas);
             }
+            if (docData.tituloCambio) setTituloCambio(docData.tituloCambio);
             if (docData.gerente) setGerente(docData.gerente);
             if (docData.tipoCambio) setTipoCambio(docData.tipoCambio);
 
@@ -268,7 +272,17 @@ function EditInformacionTarifa() {
         }' a '${datosNuevos.gerente.nombre || "vacío"}'`
       );
     }
-
+    // Comprobar cambios en título del tipo de cambio
+    if (
+      !datosAnteriores ||
+      datosAnteriores.tituloCambio !== datosNuevos.tituloCambio
+    ) {
+      cambiosDetectados.push(
+        `Título de tipo de cambio cambió de '${
+          datosAnteriores?.tituloCambio || "vacío"
+        }' a '${datosNuevos.tituloCambio || "vacío"}'`
+      );
+    }
     // Comprobar cambios en tipo de cambio
     if (datosNuevos.monedaActiva === "usd") {
       if (
@@ -528,6 +542,8 @@ function EditInformacionTarifa() {
         empresa: empresaToUpdate,
         tarifas: tarifas,
         gerente: gerente,
+        tituloCambio: tituloCambio, // Aquí está correctamente
+
         // Solo guarda el tipo de cambio de la moneda actualmente visible
         tipoCambio: {
           usd: mostrarUSD ? tipoCambio.usd : "",
@@ -543,6 +559,10 @@ function EditInformacionTarifa() {
       };
 
       console.log("Guardando datos:", tarifarioData);
+      console.log(
+        "Guardando datos con tituloCambio:",
+        tarifarioData.tituloCambio
+      );
 
       // PASO 1: Guardar en Tarifarios
       let tarifarioId;
@@ -585,6 +605,7 @@ function EditInformacionTarifa() {
           empresa: empresaToUpdate,
           tarifas: tarifas,
           gerente: gerente,
+          tituloCambio: tituloCambio, // Aquí está correctamente
           // Actualizar para guardar solo la moneda activa igual que en tarifarioData
           tipoCambio: {
             usd: mostrarUSD ? tipoCambio.usd : "",
@@ -657,6 +678,7 @@ function EditInformacionTarifa() {
                 // Mantener datos completos para compatibilidad
                 tarifas: tarifas,
                 gerente: gerente,
+                tituloCambio: tituloCambio, // Aquí está correctamente
                 // Actualizar para guardar solo la moneda activa
                 tipoCambio: {
                   usd: mostrarUSD ? tipoCambio.usd : "",
@@ -682,6 +704,7 @@ function EditInformacionTarifa() {
             // Mantener datos completos para compatibilidad
             tarifas: tarifas,
             gerente: gerente,
+            tituloCambio: tituloCambio, // Aquí está correctamente
             // Actualizar para guardar solo la moneda activa
             tipoCambio: {
               usd: mostrarUSD ? tipoCambio.usd : "",
@@ -817,11 +840,10 @@ function EditInformacionTarifa() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Información de Tarifas
+            {t("editInformacionTarifa.title")}
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
-            Configure la información que se mostrará en las pantallas de
-            tarifario
+            {t("editInformacionTarifa.description")}
           </p>
         </div>
 
@@ -833,7 +855,7 @@ function EditInformacionTarifa() {
                 htmlFor="empresa"
                 className="text-gray-700 font-medium mb-2 sm:mb-0"
               >
-                Empresa:
+                {t("editInformacionTarifa.selectCompany")}:
               </label>
               <div className="w-full sm:w-2/3">
                 <select
@@ -842,7 +864,7 @@ function EditInformacionTarifa() {
                   onChange={(e) => setEmpresaSeleccionada(e.target.value)}
                   className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
                 >
-                  <option value="">Seleccionar...</option>
+                  <option value="">{t("sidebar.selectCompany")}</option>
                   {empresas.map((empresa) => (
                     <option key={empresa} value={empresa}>
                       {empresa}
@@ -860,85 +882,145 @@ function EditInformacionTarifa() {
             {/* Información General - MOVIDO AL PRINCIPIO */}
             <div className="space-y-6 mb-8">
               <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                Información General
+                {t("editInformacionTarifa.generalInfo")}
               </h2>
 
-              {/* Tipos de cambio con botón para alternar */}
-              <div>
-                <div className="flex justify-between items-center mb-3">
-                  <label className="text-sm font-medium text-gray-700">
-                    Tipo de Cambio
-                  </label>
-                  <button
-                    onClick={toggleMoneda}
-                    className="inline-flex items-center px-2 py-1 border border-transparent text-xs rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                  >
-                    {mostrarUSD ? "Mostrar EUR" : "Mostrar USD"}
-                  </button>
-                </div>
-
-                {mostrarUSD ? (
-                  <div className="mt-1 relative rounded-md shadow-sm w-full md:w-1/2">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">$</span>
-                    </div>
-                    <input
-                      type="text"
-                      name="usd"
-                      value={tipoCambio.usd}
-                      onChange={handleTipoCambioChange}
-                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Tipo de cambio USD (Ej: 18.50)"
-                    />
-                  </div>
-                ) : (
-                  <div className="mt-1 relative rounded-md shadow-sm w-full md:w-1/2">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">€</span>
-                    </div>
-                    <input
-                      type="text"
-                      name="eur"
-                      value={tipoCambio.eur}
-                      onChange={handleTipoCambioChange}
-                      className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md"
-                      placeholder="Tipo de cambio EUR (Ej: 19.80)"
-                    />
-                  </div>
-                )}
+              {/* Campo para título personalizado del tipo de cambio */}
+              <div className="mb-4">
+                <label className="block text-base font-medium text-gray-700 mb-1">
+                  {t("editInformacionTarifa.exchangeRateTitle")}
+                </label>
+                <input
+                  type="text"
+                  value={tituloCambio}
+                  onChange={(e) => setTituloCambio(e.target.value)}
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                  placeholder={t(
+                    "editInformacionTarifa.exchangeRateTitlePlaceholder"
+                  )}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t("editInformacionTarifa.exchangeRateTitleHelp")}
+                </p>
               </div>
 
-              {/* Gerente en turno */}
+              {/* Tipos de cambio */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Gerente en Turno
+                <label className="block text-base font-medium text-gray-700 mb-2">
+                  {t("editInformacionTarifa.exchangeRate")}
+                </label>
+
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Input para USD */}
+                  <div className="relative">
+                    <div className="flex items-center mb-1">
+                      <input
+                        type="radio"
+                        id="usd-radio"
+                        name="moneda-activa"
+                        checked={mostrarUSD}
+                        onChange={() => setMostrarUSD(true)}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor="usd-radio"
+                        className="ml-2 block text-sm font-medium text-gray-700"
+                      >
+                        USD ($)
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-gray-500 sm:text-sm">$</span>
+                      </div>
+                      <input
+                        type="text"
+                        name="usd"
+                        value={tipoCambio.usd}
+                        onChange={handleTipoCambioChange}
+                        className={`w-full bg-gray-50 border ${
+                          mostrarUSD
+                            ? "border-blue-500 ring-2 ring-blue-200"
+                            : "border-gray-300"
+                        } text-gray-900 rounded p-2 text-base pl-7`}
+                        placeholder="Ej: 18.50"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Input para EUR */}
+                  <div className="relative">
+                    <div className="flex items-center mb-1">
+                      <input
+                        type="radio"
+                        id="eur-radio"
+                        name="moneda-activa"
+                        checked={!mostrarUSD}
+                        onChange={() => setMostrarUSD(false)}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                      />
+                      <label
+                        htmlFor="eur-radio"
+                        className="ml-2 block text-sm font-medium text-gray-700"
+                      >
+                        EUR (€)
+                      </label>
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <span className="text-gray-500 sm:text-sm">€</span>
+                      </div>
+                      <input
+                        type="text"
+                        name="eur"
+                        value={tipoCambio.eur}
+                        onChange={handleTipoCambioChange}
+                        className={`w-full bg-gray-50 border ${
+                          !mostrarUSD
+                            ? "border-blue-500 ring-2 ring-blue-200"
+                            : "border-gray-300"
+                        } text-gray-900 rounded p-2 text-base pl-7`}
+                        placeholder="Ej: 19.80"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6">
+                <label className="block text-base font-medium text-gray-700 mb-1">
+                  {t("editInformacionTarifa.manager")}
                 </label>
                 <input
                   type="text"
                   value={gerente.nombre}
                   onChange={handleGerenteChange}
-                  placeholder="Ej: María González, Juan Pérez, etc."
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400"
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                  placeholder={t(
+                    "editInformacionTarifa.managerNamePlaceholder"
+                  )}
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t("editInformacionTarifa.managerNameHelp")}
+                </p>
               </div>
             </div>
 
             {/* Tarifas */}
             <div className="space-y-6">
               <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                Tarifas de Habitaciones
+                {t("editInformacionTarifa.roomRates")}
               </h2>
 
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <p className="text-sm text-gray-500">
-                    Configure los títulos y precios a mostrar
+                    {t("editInformacionTarifa.rateConfig")}
                   </p>
                   <button
                     onClick={handleAddTarifa}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
                   >
-                    + Añadir Item
+                    {t("editInformacionTarifa.addItem")}
                   </button>
                 </div>
 
@@ -946,8 +1028,7 @@ function EditInformacionTarifa() {
                   {tarifas.length === 0 ? (
                     <div className="text-center p-4 bg-gray-50 rounded-md">
                       <p className="text-sm text-gray-500">
-                        No hay items configurados. Haga clic en &quot;Añadir
-                        Item&quot; para comenzar.
+                        {t("editInformacionTarifa.noItems")}
                       </p>
                     </div>
                   ) : (
@@ -959,8 +1040,8 @@ function EditInformacionTarifa() {
                         <div className="flex-grow">
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-1">
-                                Título
+                              <label className="block text-base font-medium text-gray-700 mb-1">
+                                {t("editInformacionTarifa.title")}
                               </label>
                               <input
                                 type="text"
@@ -972,15 +1053,17 @@ function EditInformacionTarifa() {
                                     e.target.value
                                   )
                                 }
-                                className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm placeholder-gray-400"
-                                placeholder="Ej: Habitación Sencilla, Suite Junior, Master Suite, etc."
+                                className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                                placeholder={t(
+                                  "editInformacionTarifa.titlePlaceholder"
+                                )}
                               />
                             </div>
                             <div>
-                              <label className="block text-xs font-medium text-gray-500 mb-1">
-                                Precio
+                              <label className="block text-base font-medium text-gray-700 mb-1">
+                                {t("editInformacionTarifa.price")}
                               </label>
-                              <div className="relative rounded-md shadow-sm">
+                              <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                   <span className="text-gray-500 sm:text-sm">
                                     $
@@ -996,8 +1079,10 @@ function EditInformacionTarifa() {
                                       e.target.value
                                     )
                                   }
-                                  className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-7 pr-3 sm:text-sm border-gray-300 rounded-md placeholder-gray-400"
-                                  placeholder="Ej: 1200, 1800, 2500, etc."
+                                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base pl-7"
+                                  placeholder={t(
+                                    "editInformacionTarifa.pricePlaceholder"
+                                  )}
                                 />
                               </div>
                             </div>
@@ -1029,18 +1114,18 @@ function EditInformacionTarifa() {
 
               {/* Leyenda 1 - sección tarifas */}
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Leyenda 1 (sección tarifas)
+                <label className="block text-base font-medium text-gray-700 mb-1">
+                  {t("editInformacionTarifa.legend1")}
                 </label>
                 <textarea
                   value={leyendaTarifas}
                   onChange={(e) => setLeyendaTarifas(e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm placeholder-gray-400"
-                  placeholder="Precios incluyen el 16% IVA y el 4% ISH. Precios expresados en moneda nacional."
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                  placeholder={t("editInformacionTarifa.legend1Placeholder")}
                   rows="2"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Esta leyenda aparecerá debajo de la tabla de tarifas.
+                  {t("editInformacionTarifa.legend1Help")}
                 </p>
               </div>
             </div>
@@ -1048,52 +1133,55 @@ function EditInformacionTarifa() {
             {/* Horarios y Leyenda 2 */}
             <div className="mt-8 space-y-6">
               <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                Horarios
+                {t("editInformacionTarifa.schedules")}
               </h2>
 
               {/* CHECK IN-OUT */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Horario de Check-In
+                  <label className="block text-base font-medium text-gray-700 mb-1">
+                    {t("editInformacionTarifa.checkInTime")}
                   </label>
                   <input
                     type="text"
                     value={checkIn}
                     onChange={(e) => setCheckIn(e.target.value)}
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400"
-                    placeholder="Ej: 15:00 hrs."
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                    placeholder={t(
+                      "editInformacionTarifa.checkInTimePlaceholder"
+                    )}
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Horario de Check-Out
+                  <label className="block text-base font-medium text-gray-700 mb-1">
+                    {t("editInformacionTarifa.checkOutTime")}
                   </label>
                   <input
                     type="text"
                     value={checkOut}
                     onChange={(e) => setCheckOut(e.target.value)}
-                    className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 placeholder-gray-400"
-                    placeholder="Ej: 12:00 hrs."
+                    className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                    placeholder={t(
+                      "editInformacionTarifa.checkOutTimePlaceholder"
+                    )}
                   />
                 </div>
               </div>
 
               {/* Leyenda 2 - sección extras */}
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Leyenda 2 (sección extras)
+                <label className="block text-base font-medium text-gray-700 mb-1">
+                  {t("editInformacionTarifa.legend2")}
                 </label>
                 <textarea
                   value={leyendaExtras}
                   onChange={(e) => setLeyendaExtras(e.target.value)}
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm placeholder-gray-400"
-                  placeholder="Tarifas no incluyen alimentos. Forma de pago en efectivo (moneda nacional), tarjeta de crédito o débito y transferencias bancarias."
+                  className="w-full bg-gray-50 border border-gray-300 text-gray-900 rounded p-2 text-base"
+                  placeholder={t("editInformacionTarifa.legend2Placeholder")}
                   rows="3"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Esta leyenda aparecerá debajo de la sección de check-in/out y
-                  gerente.
+                  {t("editInformacionTarifa.legend2Help")}
                 </p>
               </div>
             </div>
@@ -1104,11 +1192,7 @@ function EditInformacionTarifa() {
             <button
               onClick={() => {
                 // Reiniciar a valores por defecto
-                if (
-                  window.confirm(
-                    "¿Está seguro que desea restablecer todos los valores?"
-                  )
-                ) {
+                if (window.confirm(t("editInformacionTarifa.confirmReset"))) {
                   setTarifas([{ id: uuidv4(), tipo: "", precio: "" }]);
                   setGerente({ nombre: "" });
                   setTipoCambio({ usd: "", eur: "" });
@@ -1120,23 +1204,23 @@ function EditInformacionTarifa() {
               }}
               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
-              Restablecer
+              {t("editInformacionTarifa.reset")}
             </button>
 
             <button
               onClick={guardarInformacionTarifa}
               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
             >
-              Guardar
+              {t("editInformacionTarifa.save")}
             </button>
           </div>
         </div>
         {/* Botón flotante para mostrar cambios recientes */}
-        <div className="fixed bottom-4 right-4">
+        <div className="fixed bottom-4 right-4 z-30">
           <button
             onClick={() => setMostrarCambios(!mostrarCambios)}
             className="bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            title="Ver cambios recientes"
+            title={t("editInformacionTarifa.recentChanges")}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -1161,7 +1245,7 @@ function EditInformacionTarifa() {
             <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[80vh] overflow-hidden">
               <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-900">
-                  Historial de Cambios Recientes
+                  {t("editInformacionTarifa.recentChanges")}
                 </h3>
                 <button
                   onClick={() => setMostrarCambios(false)}
@@ -1186,23 +1270,23 @@ function EditInformacionTarifa() {
               <div className="p-4 overflow-y-auto max-h-[calc(80vh-8rem)]">
                 {cambiosRecientes.length === 0 ? (
                   <p className="text-gray-500 italic text-center py-4">
-                    No hay cambios registrados
+                    {t("editInformacionTarifa.noChanges")}
                   </p>
                 ) : (
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Fecha/Hora
+                          {t("editInformacionTarifa.dateTime")}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Usuario
+                          {t("editInformacionTarifa.user")}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Acción
+                          {t("editInformacionTarifa.action")}
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Detalles
+                          {t("editInformacionTarifa.details")}
                         </th>
                       </tr>
                     </thead>
@@ -1221,7 +1305,9 @@ function EditInformacionTarifa() {
                           <td className="px-6 py-4 text-sm text-gray-500">
                             <details>
                               <summary className="cursor-pointer text-blue-600 hover:text-blue-800">
-                                Ver detalles ({cambio.detalles.length} cambios)
+                                {t("editInformacionTarifa.viewDetails")} (
+                                {cambio.detalles.length}{" "}
+                                {t("editInformacionTarifa.changes")})
                               </summary>
                               <div className="mt-2 p-3 bg-gray-50 rounded-md text-xs overflow-auto max-h-72">
                                 {Array.isArray(cambio.detalles) ? (
@@ -1250,7 +1336,7 @@ function EditInformacionTarifa() {
                   onClick={() => setMostrarCambios(false)}
                   className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md"
                 >
-                  Cerrar
+                  {t("editInformacionTarifa.close")}
                 </button>
               </div>
             </div>
@@ -1276,7 +1362,7 @@ function EditInformacionTarifa() {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
-                  ¡Información guardada correctamente!
+                  {t("editInformacionTarifa.savedSuccessfully")}
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -1285,7 +1371,9 @@ function EditInformacionTarifa() {
                     onClick={() => setShowSuccessMessage(false)}
                     className="inline-flex rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
-                    <span className="sr-only">Cerrar</span>
+                    <span className="sr-only">
+                      {t("editInformacionTarifa.close")}
+                    </span>
                     <svg
                       className="h-5 w-5"
                       xmlns="http://www.w3.org/2000/svg"

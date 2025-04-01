@@ -510,12 +510,12 @@ const EventRow = ({
       style={{ height: `${heightPercentage}%` }}
     >
       {/* Image container with fixed dimensions */}
-      <div className="flex-shrink-0 h-24 w-24 relative mr-4">
+      <div className="flex-shrink-0 h-28 w-28 relative mr-4">
         {event.images && event.images.length > 0 ? (
           <img
             src={event.images[0]}
             alt={event.nombreEvento}
-            className="h-full w-full object-cover rounded-lg cursor-pointer"
+            className="h-full w-full object-contain rounded-lg cursor-pointer"
             onClick={() => onImageClick && onImageClick(event.images[0])}
           />
         ) : (

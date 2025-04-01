@@ -78,6 +78,11 @@ export default function BaseDirectorioClient({ id, empresa }) {
   const isMounted = useRef(true);
   const allEventsRef = useRef([]);
   const [screenId, setScreenId] = useState("");
+  const [rotationDirection, setRotationDirection] = useState(-90);
+  console.log(
+    "🚀 ~ PantallaBaseDirectorio.jsx:82 ~ BaseDirectorioClient ~ rotationDirection:",
+    rotationDirection
+  );
   const [screenData, setScreenData] = useState({
     events: [],
     ads: [],
@@ -127,49 +132,104 @@ export default function BaseDirectorioClient({ id, empresa }) {
         // Opción 1: Buscar en screenSettings si existe
         if (
           templateData.screenSettings &&
-          templateData.screenSettings[screenNumber] &&
-          typeof templateData.screenSettings[screenNumber].setPortrait !==
-            "undefined"
+          templateData.screenSettings[screenNumber]
         ) {
-          const orientation =
-            !!templateData.screenSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.screenSettings[screenNumber].setPortrait !==
+            "undefined"
+          ) {
+            const orientation =
+              !!templateData.screenSettings[screenNumber].setPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.screenSettings[screenNumber]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.screenSettings[screenNumber].rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
         // Opción 2: Buscar en pantallasSettings si existe (formato alternativo)
         if (
           templateData.pantallasSettings &&
-          templateData.pantallasSettings[screenNumber] &&
-          typeof templateData.pantallasSettings[screenNumber].setPortrait !==
-            "undefined"
+          templateData.pantallasSettings[screenNumber]
         ) {
-          const orientation =
-            !!templateData.pantallasSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.pantallasSettings[screenNumber].setPortrait !==
+            "undefined"
+          ) {
+            const orientation =
+              !!templateData.pantallasSettings[screenNumber].setPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.pantallasSettings[screenNumber]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.pantallasSettings[screenNumber].rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
-        // Opción 3: Buscar en pantallaDirectorioSettings si existe (otro formato posible)
+        // Opción 3: Buscar en pantallaSettings si existe (usará el nuevo formato)
         if (
-          templateData.pantallaDirectorioSettings &&
-          templateData.pantallaDirectorioSettings[screenNumber] &&
-          typeof templateData.pantallaDirectorioSettings[screenNumber]
-            .setPortrait !== "undefined"
+          templateData.pantallaSettings &&
+          templateData.pantallaSettings[screenNumber - 1]
         ) {
-          const orientation =
-            !!templateData.pantallaDirectorioSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.pantallaSettings[screenNumber - 1]
+              .isPortrait !== "undefined"
+          ) {
+            const orientation =
+              !!templateData.pantallaSettings[screenNumber - 1].isPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.pantallaSettings[screenNumber - 1]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.pantallaSettings[screenNumber - 1]
+                  .rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
         // Opción 4: Usar la configuración global como respaldo
@@ -734,6 +794,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         weatherData={weatherData}
         currentTime={screenData.currentTime}
         isPortrait={isPortrait}
+        rotationDirection={rotationDirection} // Añadir esta prop
         t={t}
         qrCodeUrl={qrCodeUrl}
         screenNumber={screenNumber}

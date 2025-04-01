@@ -15,7 +15,7 @@ import {
 } from "firebase/firestore";
 import db from "@/firebase/firestore";
 import { useTranslation } from "react-i18next";
-
+import emailjs from "emailjs-com";
 const MonitorScreen = ({ userEmail }) => {
   const { t } = useTranslation();
   const [heartbeats, setHeartbeats] = useState([]);
@@ -25,13 +25,14 @@ const MonitorScreen = ({ userEmail }) => {
   const [companyFilter, setCompanyFilter] = useState("");
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [refreshInterval, setRefreshInterval] = useState(30); // Segundos
+  const [refreshInterval, setRefreshInterval] = useState(60); // Cambiado de 30 a 60 segundos
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [sortConfig, setSortConfig] = useState({
     key: "lastActivity",
     direction: "desc",
   });
   const [unsubscribeRef, setUnsubscribeRef] = useState(null);
+  const [notificationMinutes, setNotificationMinutes] = useState(30); // 30 minutos por defecto
 
   // Estado para notificaciones por correo
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -81,7 +82,7 @@ const MonitorScreen = ({ userEmail }) => {
           const data = settingsSnap.data();
           setNotificationsEnabled(data.enabled || false);
           setNotificationEmails(data.emails || ["", "", ""]);
-          setNotificationHours(data.hours || 5);
+          setNotificationMinutes(data.minutes || 30); // Usar minutes en lugar de hours
         }
       } catch (err) {
         console.error("Error al cargar configuración de notificaciones:", err);
@@ -149,7 +150,7 @@ const MonitorScreen = ({ userEmail }) => {
       await setDoc(settingsRef, {
         enabled: notificationsEnabled,
         emails: notificationEmails,
-        hours: notificationHours,
+        minutes: notificationMinutes, // Cambiar hours por minutes
         updatedAt: serverTimestamp(),
         updatedBy: userEmail,
         company: isAdmin ? companyFilter : company,
@@ -163,6 +164,112 @@ const MonitorScreen = ({ userEmail }) => {
     } catch (err) {
       console.error("Error al guardar configuración de notificaciones:", err);
       setSaveMessage({ type: "error", text: `Error: ${err.message}` });
+    }
+
+    setIsSaving(false);
+  };
+  const sendTestNotification = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      // Validar correos
+      const validEmails = notificationEmails.filter(
+        (email) =>
+          email &&
+          email.trim() !== "" &&
+          /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      );
+
+      if (validEmails.length === 0) {
+        setSaveMessage({
+          type: "error",
+          text: "Debes ingresar al menos un correo electrónico válido",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Determinar la empresa del usuario
+      let company = "";
+
+      if (isAdmin && companyFilter) {
+        company = companyFilter;
+      } else if (!isAdmin) {
+        const userCompanyQuery = query(
+          collection(db, "usuarios"),
+          where("email", "==", userEmail)
+        );
+        const userSnapshots = await getDocs(userCompanyQuery);
+        if (!userSnapshots.empty) {
+          company = userSnapshots.docs[0].data().empresa || "";
+        }
+      }
+
+      if (!company && !isAdmin) {
+        setSaveMessage({
+          type: "error",
+          text: "No se pudo determinar la empresa",
+        });
+        setIsSaving(false);
+        return;
+      }
+
+      // Configurar los parámetros del correo de prueba
+      const emailParams = {
+        to_email: validEmails.join(","),
+        company_name: company || "Sistema de Monitoreo",
+        subject: "PRUEBA: Sistema de Notificaciones de Pantallas",
+        message:
+          "Este es un correo de prueba para verificar que las notificaciones estén funcionando correctamente.",
+        notification_time: new Date().toLocaleString(),
+      };
+
+      // Configurar EmailJS
+      const serviceID = "service_y3wemni"; // Usa el ID de tu servicio EmailJS
+      const templateID = "template_e59a0mr"; // Tu template ID
+      const userID = "IVTJPKKd0ooe1am6U"; // Tu User ID
+
+      // Enviar el correo de prueba
+      const response = await emailjs.send(
+        serviceID,
+        templateID,
+        emailParams,
+        userID
+      );
+      console.log("Email de prueba enviado:", response.status, response.text);
+
+      setSaveMessage({
+        type: "success",
+        text: "Correo de prueba enviado correctamente",
+      });
+
+      // Registrar la prueba exitosa
+      const testLogRef = doc(collection(db, "notificacionesPruebas"));
+      await setDoc(testLogRef, {
+        timestamp: serverTimestamp(),
+        emails: validEmails,
+        company: company || "Sin empresa",
+        success: true,
+      });
+
+      setTimeout(() => setSaveMessage(null), 3000);
+    } catch (err) {
+      console.error("Error al enviar correo de prueba:", err);
+      setSaveMessage({ type: "error", text: `Error: ${err.message}` });
+
+      // Registrar el error
+      try {
+        const errorLogRef = doc(collection(db, "notificacionesErrores"));
+        await setDoc(errorLogRef, {
+          error: err.message,
+          timestamp: serverTimestamp(),
+          type: "test_email",
+          userEmail: userEmail,
+        });
+      } catch (logError) {
+        console.error("Error al registrar fallo de prueba:", logError);
+      }
     }
 
     setIsSaving(false);
@@ -228,34 +335,29 @@ const MonitorScreen = ({ userEmail }) => {
   useEffect(() => {
     if (!notificationsEnabled || heartbeats.length === 0) return;
 
-    // Buscar pantallas offline por más de X horas
+    // Buscar pantallas offline por más de X minutos
     const offlineScreens = heartbeats.filter((heartbeat) => {
       if (heartbeat.online) return false;
-
-      // Comprobar si está offline por más del tiempo configurado
       if (!heartbeat.lastActivity) return false;
 
       const offlineTime = new Date() - heartbeat.lastActivity;
-      const offlineHours = offlineTime / (1000 * 60 * 60);
+      const offlineMinutes = offlineTime / (1000 * 60);
 
-      return offlineHours >= notificationHours;
+      return offlineMinutes >= notificationMinutes;
     });
 
     if (offlineScreens.length > 0) {
-      // Aquí iría el código para enviar la notificación
-      // Como no tenemos un backend para enviar emails directamente,
-      // podríamos crear un documento en Firestore para que una Cloud Function lo procese
-      console.log(
-        "Pantallas offline que necesitan notificación:",
-        offlineScreens
+      // Verificar si hay al menos un correo configurado
+      const validEmails = notificationEmails.filter(
+        (email) => email && email.trim() !== ""
       );
+      if (validEmails.length === 0) return;
 
-      // Ejemplo: Crear un documento de notificación pendiente
-      const createNotification = async () => {
+      // Función para enviar notificación por correo
+      const sendOfflineNotification = async () => {
         try {
           // Determinar la empresa
           let company = "";
-
           if (isAdmin && companyFilter) {
             company = companyFilter;
           } else if (!isAdmin) {
@@ -284,57 +386,122 @@ const MonitorScreen = ({ userEmail }) => {
             const hoursSinceLastNotification =
               (new Date() - lastSent) / (1000 * 60 * 60);
 
-            // Evitar enviar notificaciones muy frecuentes (por ejemplo, cada 4 horas)
-            if (hoursSinceLastNotification < 4) {
+            // Evitar enviar notificaciones muy frecuentes (cada 15 minutos)
+            if (hoursSinceLastNotification < 0.25) {
               return;
             }
           }
 
-          // Crear documento de notificación
-          const notificationId = `notification_${Date.now()}`;
-          await setDoc(doc(db, "notificacionesPendientes", notificationId), {
-            offlineScreens: offlineScreens.map((screen) => ({
-              id: screen.id,
-              deviceName: screen.deviceName || "Sin nombre",
-              screenType: screen.screenType || "Desconocido",
-              screenNumber: screen.screenNumber,
-              companyName: screen.companyName,
-              lastActivity: screen.lastActivity,
-              offlineTime: `${notificationHours}+ horas`,
-            })),
-            emails: notificationEmails.filter(
-              (email) => email && email.trim() !== ""
-            ),
-            company: isAdmin ? companyFilter : company,
-            createdAt: serverTimestamp(),
-            status: "pending",
-          });
+          // Preparar datos para el correo
+          const formattedScreens = offlineScreens.map((screen) => ({
+            name: screen.deviceName || "Sin nombre",
+            type: screen.screenType || "Desconocido",
+            number: screen.screenNumber || "N/A",
+            lastActive: screen.lastActivity
+              ? screen.lastActivity.toLocaleString()
+              : "Desconocido",
+            offlineTime: `${notificationMinutes} minutos`,
+          }));
 
-          // Actualizar última notificación enviada
+          // Crear texto de lista de pantallas para el cuerpo del correo
+          const screensList = formattedScreens
+            .map(
+              (screen) =>
+                `- ${screen.name} (${screen.type} ${screen.number}): Desconectada por ${screen.offlineTime}`
+            )
+            .join("\n");
+
+          // Configurar los parámetros del correo
+          const emailParams = {
+            to_email: validEmails.join(","),
+            company_name: company || "Sistema de Monitoreo",
+            subject: `ALERTA: ${offlineScreens.length} pantallas desconectadas`,
+            screens_count: offlineScreens.length,
+            screens_list: screensList,
+            notification_time: new Date().toLocaleString(),
+            minutes_threshold: notificationMinutes,
+          };
+
+          // Configurar EmailJS
+          const serviceID = "service_y3wemni"; // Usa el ID de tu servicio EmailJS
+          const templateID = "template_e59a0mr"; // Deberás crear una plantilla específica para esto
+          const userID = "IVTJPKKd0ooe1am6U"; // Tu User ID de EmailJS
+
+          // Enviar el correo
+          const response = await emailjs.send(
+            serviceID,
+            templateID,
+            emailParams,
+            userID
+          );
+          console.log(
+            "Email enviado correctamente:",
+            response.status,
+            response.text
+          );
+
+          // Actualizar registro de última notificación
           await setDoc(lastNotificationRef, {
             sentAt: serverTimestamp(),
             offlineCount: offlineScreens.length,
+            emailsSent: validEmails.length,
+            success: true,
           });
 
-          console.log("Notificación creada con ID:", notificationId);
-        } catch (err) {
-          console.error("Error al crear notificación:", err);
+          // Almacenar en localStorage para tener redundancia
+          try {
+            const notificationRecord = {
+              timestamp: new Date().toISOString(),
+              offlineCount: offlineScreens.length,
+              company: company,
+              success: true,
+            };
+
+            // Obtener historial existente o inicializar
+            const notificationHistory = JSON.parse(
+              localStorage.getItem("offlineNotifications") || "[]"
+            );
+            notificationHistory.push(notificationRecord);
+
+            // Mantener solo las últimas 20 notificaciones
+            if (notificationHistory.length > 20) {
+              notificationHistory.shift();
+            }
+
+            localStorage.setItem(
+              "offlineNotifications",
+              JSON.stringify(notificationHistory)
+            );
+          } catch (storageError) {
+            console.warn("No se pudo guardar en localStorage:", storageError);
+          }
+        } catch (error) {
+          console.error("Error al enviar notificación por correo:", error);
+
+          // Registrar el error en Firestore para seguimiento
+          try {
+            const errorLogRef = doc(collection(db, "notificacionesErrores"));
+            await setDoc(errorLogRef, {
+              error: error.message,
+              timestamp: serverTimestamp(),
+              offlineScreens: offlineScreens.length,
+              userEmail: userEmail,
+              company: isAdmin ? companyFilter : company,
+            });
+          } catch (logError) {
+            console.error("Error al registrar fallo:", logError);
+          }
         }
       };
 
-      // Ejecutar solo si hay pantallas offline que notificar y correos configurados
-      if (
-        offlineScreens.length > 0 &&
-        notificationEmails.some((email) => email && email.trim() !== "")
-      ) {
-        createNotification();
-      }
+      // Ejecutar la función de notificación
+      sendOfflineNotification();
     }
   }, [
     heartbeats,
     notificationsEnabled,
     notificationEmails,
-    notificationHours,
+    notificationMinutes,
     isAdmin,
     userEmail,
     companyFilter,
@@ -652,20 +819,18 @@ const MonitorScreen = ({ userEmail }) => {
                     Enviar alerta cuando una pantalla esté desconectada por:
                   </label>
                   <div className="mt-1 flex rounded-md shadow-sm">
-                    <input
-                      type="number"
-                      min="1"
-                      max="72"
-                      value={notificationHours}
+                    <select
+                      value={notificationMinutes}
                       onChange={(e) =>
-                        setNotificationHours(parseInt(e.target.value) || 5)
+                        setNotificationMinutes(parseInt(e.target.value))
                       }
                       disabled={!notificationsEnabled}
-                      className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-none rounded-l-md sm:text-sm border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
-                    />
-                    <span className="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">
-                      horas
-                    </span>
+                      className="focus:ring-blue-500 focus:border-blue-500 flex-1 block w-full rounded-md sm:text-sm border-gray-300 disabled:bg-gray-100 disabled:text-gray-500"
+                    >
+                      <option value={10}>10 minutos</option>
+                      <option value={15}>15 minutos</option>
+                      <option value={30}>30 minutos</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -713,6 +878,13 @@ const MonitorScreen = ({ userEmail }) => {
                 className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancelar
+              </button>
+              <button
+                onClick={sendTestNotification}
+                disabled={isSaving || !notificationsEnabled}
+                className="px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-100 disabled:text-gray-400"
+              >
+                Enviar correo de prueba
               </button>
 
               <button
@@ -820,16 +992,9 @@ const MonitorScreen = ({ userEmail }) => {
                 {t("monitorScreen.refreshInterval") ||
                   "Intervalo de actualización"}
               </label>
-              <select
-                value={refreshInterval}
-                onChange={(e) => setRefreshInterval(Number(e.target.value))}
-                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              >
-                <option value={10}>10 segundos</option>
-                <option value={30}>30 segundos</option>
-                <option value={60}>1 minuto</option>
-                <option value={300}>5 minutos</option>
-              </select>
+              <div className="block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-700 sm:text-sm">
+                1 minuto
+              </div>
             </div>
           </div>
 
@@ -889,7 +1054,7 @@ const MonitorScreen = ({ userEmail }) => {
                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
                       />
                     </svg>
-                    Notificaciones activas ({notificationHours}h)
+                    Notificaciones activas ({notificationMinutes}m)
                   </span>
                 </div>
               )}
@@ -922,7 +1087,7 @@ const MonitorScreen = ({ userEmail }) => {
                 {notificationsEnabled && (
                   <span className="ml-1">
                     Las alertas de correo se enviarán cuando una pantalla esté
-                    desconectada por {notificationHours} horas o más.
+                    desconectada por {notificationMinutes} minutos o más.
                   </span>
                 )}
               </div>
@@ -998,13 +1163,12 @@ const MonitorScreen = ({ userEmail }) => {
                     // Calcular el tiempo de desconexión para resaltar pantallas con desconexión prolongada
                     const offlineTime =
                       !heartbeat.online && heartbeat.lastActivity
-                        ? (new Date() - heartbeat.lastActivity) /
-                          (1000 * 60 * 60)
+                        ? (new Date() - heartbeat.lastActivity) / (1000 * 60) // En minutos
                         : 0;
 
                     // Determinar clase CSS basada en estado y tiempo offline
                     const rowClass = !heartbeat.online
-                      ? offlineTime >= notificationHours
+                      ? offlineTime >= notificationMinutes
                         ? "bg-red-100" // Desconectada por mucho tiempo
                         : "bg-red-50" // Desconectada normal
                       : ""; // En línea
@@ -1055,7 +1219,7 @@ const MonitorScreen = ({ userEmail }) => {
                           <div
                             className={`text-xs ${
                               !heartbeat.online &&
-                              offlineTime >= notificationHours
+                              offlineTime >= notificationMinutes
                                 ? "text-red-600 font-medium"
                                 : "text-gray-400"
                             }`}
@@ -1063,7 +1227,7 @@ const MonitorScreen = ({ userEmail }) => {
                             Hace{" "}
                             {getTimeSinceLastActivity(heartbeat.lastActivity)}
                             {!heartbeat.online &&
-                              offlineTime >= notificationHours && (
+                              offlineTime >= notificationMinutes && (
                                 <span className="ml-1">⚠️</span>
                               )}
                           </div>
@@ -1079,7 +1243,7 @@ const MonitorScreen = ({ userEmail }) => {
                           ) : (
                             <span
                               className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                offlineTime >= notificationHours
+                                offlineTime >= notificationMinutes
                                   ? "bg-red-200 text-red-800"
                                   : "bg-red-100 text-red-800"
                               }`}
@@ -1180,12 +1344,12 @@ const MonitorScreen = ({ userEmail }) => {
             <p className="mt-1 text-sm text-blue-700">
               Las notificaciones están habilitadas. Se enviará un correo a{" "}
               {notificationEmails.filter((e) => e).length} destinatario(s)
-              cuando una pantalla esté desconectada por {notificationHours}{" "}
-              horas o más.
+              cuando una pantalla esté desconectada por {notificationMinutes}{" "}
+              minutos o más.
             </p>
             <p className="mt-1 text-xs text-blue-600">
               Para evitar sobrecarga, las notificaciones se envían con un
-              intervalo mínimo de 4 horas entre cada aviso.
+              intervalo mínimo de 15 minutos entre cada aviso.
             </p>
           </div>
         )}

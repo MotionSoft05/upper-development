@@ -52,7 +52,7 @@ const EventImageSlider = ({ images, templateStyle }) => {
               <img
                 src={image}
                 alt={`Slide ${index + 1}`}
-                className="object-contain w-full h-full"
+                className="object-contain w-full h-96"
                 style={{
                   display: "block",
                   aspectRatio: "auto",
