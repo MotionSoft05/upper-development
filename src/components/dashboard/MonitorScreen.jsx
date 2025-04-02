@@ -25,7 +25,7 @@ const MonitorScreen = ({ userEmail }) => {
   const [companyFilter, setCompanyFilter] = useState("");
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [refreshInterval, setRefreshInterval] = useState(60); // Cambiado de 30 a 60 segundos
+  const [refreshInterval, setRefreshInterval] = useState(120); // Cambiado de 30 a 60 segundos
   const [lastRefresh, setLastRefresh] = useState(new Date());
   const [sortConfig, setSortConfig] = useState({
     key: "lastActivity",
@@ -297,7 +297,7 @@ const MonitorScreen = ({ userEmail }) => {
 
     // Obtener el tiempo actual en formato Timestamp de Firestore para comparaciones consistentes
     const now = new Date();
-    const thirtySecondsAgo = new Date(now.getTime() - 30000); // 30 segundos atrás
+    const thirtySecondsAgo = new Date(now.getTime() - 120000); // 30 segundos atrás
 
     snapshot.forEach((doc) => {
       const data = doc.data();
@@ -616,7 +616,7 @@ const MonitorScreen = ({ userEmail }) => {
         currentHeartbeats.map((heartbeat) => ({
           ...heartbeat,
           online: heartbeat.lastActivity
-            ? new Date() - heartbeat.lastActivity < 30000 // 30 segundos en ms
+            ? new Date() - heartbeat.lastActivity < 120000 // 30 segundos en ms
             : false,
         }))
       );
@@ -762,27 +762,6 @@ const MonitorScreen = ({ userEmail }) => {
                 />
               </svg>
               Notificaciones
-            </button>
-            <button
-              onClick={handleManualRefresh}
-              className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              title="Esto reiniciará la suscripción a Firestore. Usar solo cuando sea necesario."
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5 mr-2"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
-              Actualizar ahora
             </button>
           </div>
         </div>
@@ -993,7 +972,7 @@ const MonitorScreen = ({ userEmail }) => {
                   "Intervalo de actualización"}
               </label>
               <div className="block w-full border-gray-300 rounded-md shadow-sm py-2 px-3 bg-gray-100 text-gray-700 sm:text-sm">
-                1 minuto
+                2 minuto
               </div>
             </div>
           </div>
@@ -1084,12 +1063,6 @@ const MonitorScreen = ({ userEmail }) => {
               <div className="p-4 text-center text-gray-500 bg-blue-50 border-b border-blue-100">
                 {t("monitorScreen.refreshNotice") ||
                   "Nota: Si una pantalla se desconecta, aparecerá como 'Desconectada' después de 30 segundos de inactividad."}
-                {notificationsEnabled && (
-                  <span className="ml-1">
-                    Las alertas de correo se enviarán cuando una pantalla esté
-                    desconectada por {notificationMinutes} minutos o más.
-                  </span>
-                )}
               </div>
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">

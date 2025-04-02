@@ -152,10 +152,22 @@ const PTTemplate1Vertical = ({ pantalla }) => {
   // Calcular la altura proporcional para cada tarifa
   const calcularAlturaTarifa = () => {
     if (displayTarifas.length === 0) return "auto";
-    // Cálculo para distribuir el espacio uniformemente
-    return `calc((100% - ${displayTarifas.length * 16}px) / ${
-      displayTarifas.length
-    })`;
+
+    // Ajustamos dinámicamente la altura en función del número de tarifas
+    if (displayTarifas.length <= 4) {
+      return `calc((100% - ${displayTarifas.length * 8}px) / ${
+        displayTarifas.length
+      })`;
+    } else if (displayTarifas.length <= 6) {
+      return `calc((100% - ${displayTarifas.length * 6}px) / ${
+        displayTarifas.length
+      })`;
+    } else {
+      // Para muchas tarifas, reducimos aún más el espacio
+      return `calc((100% - ${displayTarifas.length * 4}px) / ${
+        displayTarifas.length
+      })`;
+    }
   };
 
   // Función para crear línea punteada
@@ -174,7 +186,9 @@ const PTTemplate1Vertical = ({ pantalla }) => {
           height: windowSize.width,
           top: (windowSize.height - windowSize.width) / 2,
           left: (windowSize.width - windowSize.height) / 2,
-          transform: "rotate(-90deg)",
+          transform: `rotate(${
+            pantalla.direccionRotacion === "derecha" ? "90deg" : "-90deg"
+          })`,
           fontFamily: pantalla.fontStyle || "Arial, sans-serif",
           backgroundColor: "white",
         }}
@@ -270,6 +284,7 @@ const PTTemplate1Vertical = ({ pantalla }) => {
               </div>
 
               {/* Tipo de cambio */}
+              {/* Tipo de cambio */}
               <div className="text-right mt-2">
                 <p className="text-xs text-gray-500 uppercase">
                   {pantalla.tituloCambio ||
@@ -292,7 +307,9 @@ const PTTemplate1Vertical = ({ pantalla }) => {
           </div>
 
           {/* Sección TARIFAS AL PÚBLICO */}
-          <div className="flex-grow flex flex-col">
+          <div className="flex flex-col" style={{ height: "80vh" }}>
+            {" "}
+            {/* Altura fija para la sección */}
             {/* Encabezado Tarifas */}
             <div
               className="py-2 px-4 rounded-t-lg"
@@ -304,54 +321,39 @@ const PTTemplate1Vertical = ({ pantalla }) => {
                 {getText("tarifasPublico")}
               </h2>
             </div>
-
-            {/* Lista de tarifas - Adaptativa según cantidad */}
-            <div className="px-4 py-3 flex-grow">
-              <div className="h-full flex flex-col justify-between">
-                {displayTarifas.length > 0 ? (
-                  <div className="flex flex-col gap-y-3">
-                    {displayTarifas.map((tarifa, index) => (
-                      <div
-                        key={index}
-                        className={`${tarifaFontSize}`}
-                        style={{
-                          minHeight: calcularAlturaTarifa(),
-                        }}
-                      >
-                        <div className="flex justify-between items-center">
-                          <span className="font-medium">{tarifa.tipo}</span>
-                          <div className="flex-1 mx-4">
-                            <DottedLine />
-                          </div>
-                          <span className="font-bold text-right">
-                            ${tarifa.precio}
-                          </span>
+            {/* Lista de tarifas - Con altura fija distribuida uniformemente */}
+            <div className="px-4 py-2 flex-1 overflow-auto">
+              {displayTarifas.length > 0 ? (
+                <div className="flex flex-col h-full justify-between">
+                  {displayTarifas.map((tarifa, index) => (
+                    <div
+                      key={index}
+                      className="py-2"
+                      style={{
+                        height: `${100 / displayTarifas.length}%`,
+                      }}
+                    >
+                      <div className="flex justify-between items-center">
+                        <span className="font-medium text-xl">
+                          {tarifa.tipo}
+                        </span>
+                        <div className="flex-1 mx-4">
+                          <DottedLine />
                         </div>
+                        <span className="font-bold text-right text-xl">
+                          ${tarifa.precio}
+                        </span>
                       </div>
-                    ))}
-
-                    {/* Si tenemos menos de 10 tarifas, añadir filas vacías para mantener la distribución */}
-                    {displayTarifas.length < maxTarifas &&
-                      Array.from({
-                        length: maxTarifas - displayTarifas.length,
-                      }).map((_, index) => (
-                        <div
-                          key={`empty-${index}`}
-                          className="flex-grow"
-                          style={{
-                            minHeight: calcularAlturaTarifa(),
-                          }}
-                        />
-                      ))}
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <p className="text-gray-500 text-center">
-                      {getText("noTarifas")}
-                    </p>
-                  </div>
-                )}
-              </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <p className="text-gray-500 text-center">
+                    {getText("noTarifas")}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
@@ -460,28 +462,23 @@ const PTTemplate1Vertical = ({ pantalla }) => {
             </div>
 
             {/* Feed de noticias */}
-            <div className="px-4 py-4 h-32">
+            <div className="w-3/4">
               <SliderRSS />
             </div>
           </div>
 
           {/* Sección de publicidad con imagen completa */}
-          <div className="mt-auto w-full">
+          <div className="">
             {pantalla.publicidad && pantalla.publicidad.length > 0 ? (
-              <div className="w-full h-48 overflow-hidden bg-white">
+              <div className="">
                 <TarifarioImageSlider
                   images={pantalla.publicidad}
                   templateStyle={{ color: textColor }}
                 />
               </div>
             ) : (
-              <div
-                className="w-full h-32 flex items-center justify-center rounded-t-lg"
-                style={{ backgroundColor: templateBgColor }}
-              >
-                <p className="text-white text-lg">
-                  {getText("espacioPublicidad")}
-                </p>
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center rounded-lg">
+                <span className="text-gray-400">Espacio publicitario</span>
               </div>
             )}
           </div>

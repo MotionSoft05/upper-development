@@ -1189,7 +1189,7 @@ function PublicidadDirec() {
             ) : (
               <>
                 <PlusCircleIcon className="mr-2 h-5" />
-                {t("advertisement.salon.addAdvertisement") ||
+                {t("advertisement.salon.saveAdvertisement") ||
                   "Agregar publicidad"}
               </>
             )}

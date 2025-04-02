@@ -33,7 +33,7 @@ const EventRow = ({
           <img
             src={event.images[0]}
             alt={event.nombreEvento}
-            className="h-full w-full object-contain rounded-lg cursor-pointer"
+            className="h-full w-full  rounded-lg cursor-pointer"
             onClick={() => onImageClick && onImageClick(event.images[0])}
           />
         ) : (

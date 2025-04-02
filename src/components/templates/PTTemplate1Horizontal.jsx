@@ -235,7 +235,8 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
               </div>
 
               {/* Tipo de cambio */}
-              <div className="text-right">
+              {/* Tipo de cambio */}
+              <div className="text-right mt-2">
                 <p className="text-xs text-gray-500 uppercase">
                   {pantalla.tituloCambio ||
                     (pantalla.idioma === "en"
@@ -261,7 +262,9 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
             {/* Columna izquierda (70%) - Tarifas */}
             <div className="w-[70%] flex flex-col mr-2">
               {/* Sección TARIFAS AL PÚBLICO */}
-              <div className="flex-1 flex flex-col">
+              <div className="flex flex-col" style={{ height: "66vh" }}>
+                {" "}
+                {/* Altura controlada */}
                 {/* Encabezado Tarifas */}
                 <div
                   className="py-2 px-4 rounded-t-lg"
@@ -273,80 +276,42 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                     {getText("tarifasPublico")}
                   </h2>
                 </div>
-
-                {/* Lista de tarifas en dos columnas con separador */}
-                <div className="py-3 flex-1 overflow-hidden">
-                  <div className="h-full flex relative">
-                    {/* Separador vertical entre columnas de tarifas */}
-                    <div
-                      className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-[90%]"
-                      style={{ backgroundColor: templateBgColor, opacity: 0.3 }}
-                    ></div>
-
-                    {/* Columna 1 de tarifas */}
-                    <div className="w-1/2 pr-4">
-                      {columna1.length > 0 ? (
-                        <div className="flex flex-col gap-y-2">
-                          {columna1.map((tarifa, index) => (
-                            <div
-                              key={index}
-                              className={`flex items-center ${tarifaFontSize}`}
-                            >
-                              <span className="font-medium">{tarifa.tipo}</span>
+                {/* Lista de tarifas en una sola columna */}
+                <div className="py-2 flex-1 overflow-auto px-10">
+                  {displayTarifas.length > 0 ? (
+                    <div className="flex flex-col h-full justify-between">
+                      {displayTarifas.map((tarifa, index) => (
+                        <div
+                          key={index}
+                          className="py-1"
+                          style={{
+                            // Calculamos la altura de manera dinámica basada en la cantidad de tarifas
+                            height: `calc(100% / ${displayTarifas.length})`,
+                            display: "flex",
+                            alignItems: "center",
+                          }}
+                        >
+                          <div className="flex justify-between items-center w-full">
+                            <span className="font-medium text-xl">
+                              {tarifa.tipo}
+                            </span>
+                            <div className="flex-1 mx-8">
                               <DottedLine />
-                              <span className="font-bold text-right w-20">
-                                ${tarifa.precio}
-                              </span>
                             </div>
-                          ))}
+                            <span className="font-bold text-right text-xl w-24">
+                              ${tarifa.precio}
+                            </span>
+                          </div>
                         </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center h-full w-full">
-                          <p className="text-gray-500 text-center px-4">
-                            {getText("noTarifas")}
-                          </p>
-                        </div>
-                      )}
+                      ))}
                     </div>
-
-                    {/* Columna 2 de tarifas */}
-                    <div className="w-1/2 pl-4">
-                      {columna2.length > 0 ? (
-                        <div className="flex flex-col gap-y-2">
-                          {columna2.map((tarifa, index) => (
-                            <div
-                              key={index}
-                              className={`flex items-center ${tarifaFontSize}`}
-                            >
-                              <span className="font-medium">{tarifa.tipo}</span>
-                              <DottedLine />
-                              <span className="font-bold text-right w-20">
-                                ${tarifa.precio}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      ) : null}
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <p className="text-gray-500 text-center">
+                        {getText("noTarifas")}
+                      </p>
                     </div>
-                  </div>
-                </div>
-
-                {/* Leyenda debajo de las tarifas - Centrada y en pirámide invertida */}
-                <div className="px-4 pb-2">
-                  <p
-                    className="text-xs text-gray-600 text-center mx-auto"
-                    style={{
-                      maxWidth:
-                        pantalla.leyendaTarifas?.length > 100 ? "100%" : "80%",
-                    }}
-                  >
-                    {pantalla.leyendaTarifas ||
-                      (pantalla.idioma === "en"
-                        ? "Prices include VAT and taxes. Foreign currency not accepted."
-                        : pantalla.idioma === "es-en"
-                        ? "Precios incluyen impuestos. / Prices include taxes."
-                        : "Precios incluyen impuestos. No se acepta moneda extranjera.")}
-                  </p>
+                  )}
                 </div>
               </div>
 
@@ -378,7 +343,9 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                     {/* CHECK IN-OUT columna izquierda */}
                     <div className="w-1/2">
                       <div className="flex mb-2">
-                        <p className="w-40 font-medium">{getText("entrada")}</p>
+                        <p className="w-40 font-medium mr-0.5">
+                          {getText("entrada")}{" "}
+                        </p>
                         <p>
                           {formatCheckTime(pantalla.checkIn) ||
                             getText("noHorarioEntrada")}

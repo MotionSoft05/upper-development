@@ -82,6 +82,8 @@ function PantallasTarifario() {
   const [publicidadItems, setPublicidadItems] = useState([]);
   const [editingPublicidadIndex, setEditingPublicidadIndex] = useState(null);
   const [isLoadingPublicidad, setIsLoadingPublicidad] = useState(false);
+  const [direccionRotacion, setDireccionRotacion] = useState("derecha"); // "derecha" para 90 grados, "izquierda" para -90 grados
+
   // Obtener la lista de empresas disponibles
   useEffect(() => {
     const obtenerEmpresas = async () => {
@@ -646,6 +648,7 @@ function PantallasTarifario() {
               setFontColor(templateData.fontColor || "#000000");
               setTemplateColor(templateData.templateColor || "#D1D5DB");
               setOrientacion(templateData.orientacion || "horizontal");
+              setDireccionRotacion(templateData.direccionRotacion || "derecha");
 
               // Establecer ciudad si existe
               if (templateData.ciudad) {
@@ -917,7 +920,7 @@ function PantallasTarifario() {
 
       await Promise.all(updateNombrePantallasPromises);
 
-      // Datos a guardar en TemplateTarifario
+      // Datos a guardar en TemplateTarifariof
       const configuracionData = {
         template: selectedTemplate,
         fontColor: fontColor,
@@ -927,6 +930,8 @@ function PantallasTarifario() {
         empresa: empresaToUpdate,
         idioma: selectedLanguage,
         orientacion: orientacion,
+        direccionRotacion:
+          orientacion === "vertical" ? direccionRotacion : null, // Guardar solo si es vertical
         ciudad: selectedCity ? selectedCity.value : null,
         timestamp: serverTimestamp(),
       };
@@ -971,6 +976,8 @@ function PantallasTarifario() {
               fontStyle: selectedFontStyle.value,
               logo: selectedLogo,
               orientacion: orientacion,
+              direccionRotacion:
+                orientacion === "vertical" ? direccionRotacion : null, // Añadir esta línea
               ciudad: selectedCity ? selectedCity.value : null,
               publicidad: publicidadItems || [], // Añadir los items de publicidad
               idioma: selectedLanguage, // Añadir el idioma seleccionado
@@ -993,6 +1000,8 @@ function PantallasTarifario() {
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
           orientacion: orientacion,
+          direccionRotacion:
+            orientacion === "vertical" ? direccionRotacion : null, // Añadir esta línea
           empresa: empresaToUpdate,
           idioma: selectedLanguage,
           ciudad: selectedCity ? selectedCity.value : null,
@@ -1207,6 +1216,7 @@ function PantallasTarifario() {
                 </div>
 
                 {/* Orientación */}
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Orientación de la Pantalla
@@ -1247,6 +1257,55 @@ function PantallasTarifario() {
                       </label>
                     </div>
                   </div>
+
+                  {/* Agregar esto: Control de dirección de rotación (visible solo cuando orientación es vertical) */}
+                  {orientacion === "vertical" && (
+                    <div className="mt-4 border-t pt-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Dirección de Rotación
+                      </label>
+                      <div className="flex space-x-4">
+                        <div className="flex items-center">
+                          <input
+                            id="rotacion-derecha"
+                            name="direccionRotacion"
+                            type="radio"
+                            value="derecha"
+                            checked={direccionRotacion === "derecha"}
+                            onChange={(e) =>
+                              setDireccionRotacion(e.target.value)
+                            }
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <label
+                            htmlFor="rotacion-derecha"
+                            className="ml-2 block text-sm font-medium text-gray-700"
+                          >
+                            90° (Derecha)
+                          </label>
+                        </div>
+                        <div className="flex items-center">
+                          <input
+                            id="rotacion-izquierda"
+                            name="direccionRotacion"
+                            type="radio"
+                            value="izquierda"
+                            checked={direccionRotacion === "izquierda"}
+                            onChange={(e) =>
+                              setDireccionRotacion(e.target.value)
+                            }
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <label
+                            htmlFor="rotacion-izquierda"
+                            className="ml-2 block text-sm font-medium text-gray-700"
+                          >
+                            -90° (Izquierda)
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Idioma */}
@@ -1858,6 +1917,7 @@ function PantallasTarifario() {
                     setSelectedFontStyle(fontStyleOptions[0]);
                     setSelectedTemplate(templates[0]?.id || 1);
                     setOrientacion("horizontal");
+                    setDireccionRotacion("derecha"); // Restablecer dirección de rotación
                     setSelectedCity(null); // Resetear la ciudad seleccionada
                   }
                 }}

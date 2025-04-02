@@ -104,19 +104,15 @@ const TarifarioImageSlider = ({ images = [], templateStyle }) => {
   if (!currentImage) return null;
 
   return (
-    <div className="w-full h-full overflow-hidden bg-white">
+    <div className="w-full flex justify-center">
       <div
-        className="w-full h-full transition-opacity duration-500 flex items-center justify-center"
+        className="h-64 mb-2 w-[35rem] bg-white rounded-lg overflow-hidden"
         style={{ opacity }}
       >
         <img
           src={getImageUrl(currentImage)}
           alt="Publicidad"
-          style={{
-            height: "100%",
-            width: "100%",
-            objectFit: "fill",
-          }}
+          className="object-contain"
         />
       </div>
     </div>

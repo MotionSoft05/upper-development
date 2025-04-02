@@ -43,6 +43,10 @@ function EditInformacionTarifa() {
 
   // Mostrar USD o EUR
   const [mostrarUSD, setMostrarUSD] = useState(true);
+  const [monedasActivas, setMonedasActivas] = useState({
+    usd: true,
+    eur: false,
+  });
 
   // Nuevos estados para leyendas
   const [leyendaTarifas, setLeyendaTarifas] = useState("");
@@ -272,6 +276,7 @@ function EditInformacionTarifa() {
         }' a '${datosNuevos.gerente.nombre || "vacío"}'`
       );
     }
+
     // Comprobar cambios en título del tipo de cambio
     if (
       !datosAnteriores ||
@@ -283,29 +288,45 @@ function EditInformacionTarifa() {
         }' a '${datosNuevos.tituloCambio || "vacío"}'`
       );
     }
-    // Comprobar cambios en tipo de cambio
-    if (datosNuevos.monedaActiva === "usd") {
-      if (
-        !datosAnteriores ||
-        datosAnteriores.tipoCambio?.usd !== datosNuevos.tipoCambio.usd
-      ) {
-        cambiosDetectados.push(
-          `Tipo de cambio USD cambió de ${
-            datosAnteriores?.tipoCambio?.usd || "vacío"
-          } a ${datosNuevos.tipoCambio.usd || "vacío"}`
-        );
-      }
-    } else {
-      if (
-        !datosAnteriores ||
-        datosAnteriores.tipoCambio?.eur !== datosNuevos.tipoCambio.eur
-      ) {
-        cambiosDetectados.push(
-          `Tipo de cambio EUR cambió de ${
-            datosAnteriores?.tipoCambio?.eur || "vacío"
-          } a ${datosNuevos.tipoCambio.eur || "vacío"}`
-        );
-      }
+
+    // Comprobar cambios en tipo de cambio USD
+    if (
+      (datosNuevos.monedaActiva === "usd" ||
+        datosNuevos.monedaActiva === "ambos") &&
+      (!datosAnteriores ||
+        datosAnteriores.tipoCambio?.usd !== datosNuevos.tipoCambio.usd ||
+        (datosAnteriores.monedaActiva !== "usd" &&
+          datosAnteriores.monedaActiva !== "ambos"))
+    ) {
+      cambiosDetectados.push(
+        `Tipo de cambio USD cambió de ${
+          datosAnteriores &&
+          (datosAnteriores.monedaActiva === "usd" ||
+            datosAnteriores.monedaActiva === "ambos")
+            ? datosAnteriores.tipoCambio?.usd || "vacío"
+            : "inactivo"
+        } a ${datosNuevos.tipoCambio.usd || "vacío"}`
+      );
+    }
+
+    // Comprobar cambios en tipo de cambio EUR
+    if (
+      (datosNuevos.monedaActiva === "eur" ||
+        datosNuevos.monedaActiva === "ambos") &&
+      (!datosAnteriores ||
+        datosAnteriores.tipoCambio?.eur !== datosNuevos.tipoCambio.eur ||
+        (datosAnteriores.monedaActiva !== "eur" &&
+          datosAnteriores.monedaActiva !== "ambos"))
+    ) {
+      cambiosDetectados.push(
+        `Tipo de cambio EUR cambió de ${
+          datosAnteriores &&
+          (datosAnteriores.monedaActiva === "eur" ||
+            datosAnteriores.monedaActiva === "ambos")
+            ? datosAnteriores.tipoCambio?.eur || "vacío"
+            : "inactivo"
+        } a ${datosNuevos.tipoCambio.eur || "vacío"}`
+      );
     }
 
     // Comprobar cambio de moneda activa
@@ -313,8 +334,15 @@ function EditInformacionTarifa() {
       datosAnteriores &&
       datosAnteriores.monedaActiva !== datosNuevos.monedaActiva
     ) {
+      let monedaAnterior = datosAnteriores.monedaActiva.toUpperCase();
+      let monedaNueva = datosNuevos.monedaActiva.toUpperCase();
+
+      // Formatear mejor los valores para el registro
+      if (monedaAnterior === "AMBOS") monedaAnterior = "USD y EUR";
+      if (monedaNueva === "AMBOS") monedaNueva = "USD y EUR";
+
       cambiosDetectados.push(
-        `Moneda activa cambió de ${datosAnteriores.monedaActiva.toUpperCase()} a ${datosNuevos.monedaActiva.toUpperCase()}`
+        `Moneda activa cambió de ${monedaAnterior} a ${monedaNueva}`
       );
     }
 
@@ -413,6 +441,18 @@ function EditInformacionTarifa() {
   }, []);
   // Manejo de tarifas
   const handleAddTarifa = () => {
+    // Verificar si ya se alcanzó el límite de 10 tarifas
+    if (tarifas.length >= 10) {
+      // Mostrar una alerta utilizando SweetAlert2
+      Swal.fire({
+        icon: "info",
+        title: "Límite alcanzado",
+        text: "Se ha alcanzado el límite máximo de 10 tarifas.",
+      });
+      return; // No añadir más tarifas
+    }
+
+    // Si no hemos alcanzado el límite, añadir una nueva tarifa
     const nuevaTarifa = { id: uuidv4(), tipo: "", precio: "" };
     setTarifas([...tarifas, nuevaTarifa]);
   };
@@ -451,22 +491,17 @@ function EditInformacionTarifa() {
     });
   };
 
-  const toggleMoneda = () => {
-    // Guardar tipo de cambio actual según la moneda mostrada
-    const monedaActual = mostrarUSD ? "usd" : "eur";
-    const valorActual = tipoCambio[monedaActual];
+  const toggleMoneda = (moneda) => {
+    setMonedasActivas((prev) => {
+      // Evitar que se desactiven ambas monedas
+      if (moneda === "usd" && !prev.eur && prev.usd) return prev;
+      if (moneda === "eur" && !prev.usd && prev.eur) return prev;
 
-    // Crear un nuevo objeto tipoCambio que solo conserva el valor de la moneda actual
-    const nuevoTipoCambio = {
-      usd: mostrarUSD ? valorActual : "",
-      eur: !mostrarUSD ? valorActual : "",
-    };
-
-    // Actualizar el estado con el nuevo objeto
-    setTipoCambio(nuevoTipoCambio);
-
-    // Cambiar la moneda que se muestra
-    setMostrarUSD(!mostrarUSD);
+      return {
+        ...prev,
+        [moneda]: !prev[moneda],
+      };
+    });
   };
 
   const guardarInformacionTarifa = async () => {
@@ -546,8 +581,8 @@ function EditInformacionTarifa() {
 
         // Solo guarda el tipo de cambio de la moneda actualmente visible
         tipoCambio: {
-          usd: mostrarUSD ? tipoCambio.usd : "",
-          eur: !mostrarUSD ? tipoCambio.eur : "",
+          usd: monedasActivas.usd ? tipoCambio.usd : "",
+          eur: monedasActivas.eur ? tipoCambio.eur : "",
         },
         leyendaTarifas: leyendaTarifas,
         leyendaExtras: leyendaExtras,
@@ -555,7 +590,12 @@ function EditInformacionTarifa() {
         checkOut: checkOut,
         ultimaActualizacion: serverTimestamp(),
         // Agregar propiedad para rastrear la moneda activamente configurada
-        monedaActiva: mostrarUSD ? "usd" : "eur",
+        monedaActiva:
+          monedasActivas.usd && monedasActivas.eur
+            ? "ambos"
+            : monedasActivas.usd
+            ? "usd"
+            : "eur",
       };
 
       console.log("Guardando datos:", tarifarioData);
@@ -608,10 +648,15 @@ function EditInformacionTarifa() {
           tituloCambio: tituloCambio, // Aquí está correctamente
           // Actualizar para guardar solo la moneda activa igual que en tarifarioData
           tipoCambio: {
-            usd: mostrarUSD ? tipoCambio.usd : "",
-            eur: !mostrarUSD ? tipoCambio.eur : "",
+            usd: monedasActivas.usd ? tipoCambio.usd : "",
+            eur: monedasActivas.eur ? tipoCambio.eur : "",
           },
-          monedaActiva: mostrarUSD ? "usd" : "eur",
+          monedaActiva:
+            monedasActivas.usd && monedasActivas.eur
+              ? "ambos"
+              : monedasActivas.usd
+              ? "usd"
+              : "eur",
           leyendaTarifas: leyendaTarifas,
           leyendaExtras: leyendaExtras,
           checkIn: checkIn,
@@ -681,10 +726,15 @@ function EditInformacionTarifa() {
                 tituloCambio: tituloCambio, // Aquí está correctamente
                 // Actualizar para guardar solo la moneda activa
                 tipoCambio: {
-                  usd: mostrarUSD ? tipoCambio.usd : "",
-                  eur: !mostrarUSD ? tipoCambio.eur : "",
+                  usd: monedasActivas.usd ? tipoCambio.usd : "",
+                  eur: monedasActivas.eur ? tipoCambio.eur : "",
                 },
-                monedaActiva: mostrarUSD ? "usd" : "eur",
+                monedaActiva:
+                  monedasActivas.usd && monedasActivas.eur
+                    ? "ambos"
+                    : monedasActivas.usd
+                    ? "usd"
+                    : "eur",
                 leyendaTarifas: leyendaTarifas,
                 leyendaExtras: leyendaExtras,
                 checkIn: checkIn,
@@ -707,10 +757,15 @@ function EditInformacionTarifa() {
             tituloCambio: tituloCambio, // Aquí está correctamente
             // Actualizar para guardar solo la moneda activa
             tipoCambio: {
-              usd: mostrarUSD ? tipoCambio.usd : "",
-              eur: !mostrarUSD ? tipoCambio.eur : "",
+              usd: monedasActivas.usd ? tipoCambio.usd : "",
+              eur: monedasActivas.eur ? tipoCambio.eur : "",
             },
-            monedaActiva: mostrarUSD ? "usd" : "eur",
+            monedaActiva:
+              monedasActivas.usd && monedasActivas.eur
+                ? "ambos"
+                : monedasActivas.usd
+                ? "usd"
+                : "eur",
             leyendaTarifas: leyendaTarifas,
             leyendaExtras: leyendaExtras,
             checkIn: checkIn,
@@ -765,10 +820,15 @@ function EditInformacionTarifa() {
               precio: t.precio,
             })),
             gerente: gerente,
-            monedaActiva: mostrarUSD ? "usd" : "eur",
+            monedaActiva:
+              monedasActivas.usd && monedasActivas.eur
+                ? "ambos"
+                : monedasActivas.usd
+                ? "usd"
+                : "eur",
             tipoCambio: {
-              usd: mostrarUSD ? tipoCambio.usd : "",
-              eur: !mostrarUSD ? tipoCambio.eur : "",
+              usd: monedasActivas.usd ? tipoCambio.usd : "",
+              eur: monedasActivas.eur ? tipoCambio.eur : "",
             },
             leyendaTarifas: leyendaTarifas,
             leyendaExtras: leyendaExtras,
@@ -915,15 +975,14 @@ function EditInformacionTarifa() {
                   <div className="relative">
                     <div className="flex items-center mb-1">
                       <input
-                        type="radio"
-                        id="usd-radio"
-                        name="moneda-activa"
-                        checked={mostrarUSD}
-                        onChange={() => setMostrarUSD(true)}
+                        type="checkbox"
+                        id="usd-checkbox"
+                        checked={monedasActivas.usd}
+                        onChange={() => toggleMoneda("usd")}
                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
                       <label
-                        htmlFor="usd-radio"
+                        htmlFor="usd-checkbox"
                         className="ml-2 block text-sm font-medium text-gray-700"
                       >
                         USD ($)
@@ -937,9 +996,10 @@ function EditInformacionTarifa() {
                         type="text"
                         name="usd"
                         value={tipoCambio.usd}
+                        disabled={!monedasActivas.usd}
                         onChange={handleTipoCambioChange}
                         className={`w-full bg-gray-50 border ${
-                          mostrarUSD
+                          monedasActivas.usd
                             ? "border-blue-500 ring-2 ring-blue-200"
                             : "border-gray-300"
                         } text-gray-900 rounded p-2 text-base pl-7`}
@@ -952,15 +1012,14 @@ function EditInformacionTarifa() {
                   <div className="relative">
                     <div className="flex items-center mb-1">
                       <input
-                        type="radio"
-                        id="eur-radio"
-                        name="moneda-activa"
-                        checked={!mostrarUSD}
-                        onChange={() => setMostrarUSD(false)}
+                        type="checkbox"
+                        id="eur-checkbox"
+                        checked={monedasActivas.eur}
+                        onChange={() => toggleMoneda("eur")}
                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
                       />
                       <label
-                        htmlFor="eur-radio"
+                        htmlFor="eur-checkbox"
                         className="ml-2 block text-sm font-medium text-gray-700"
                       >
                         EUR (€)
@@ -974,9 +1033,10 @@ function EditInformacionTarifa() {
                         type="text"
                         name="eur"
                         value={tipoCambio.eur}
+                        disabled={!monedasActivas.eur}
                         onChange={handleTipoCambioChange}
                         className={`w-full bg-gray-50 border ${
-                          !mostrarUSD
+                          monedasActivas.eur
                             ? "border-blue-500 ring-2 ring-blue-200"
                             : "border-gray-300"
                         } text-gray-900 rounded p-2 text-base pl-7`}
@@ -1013,12 +1073,22 @@ function EditInformacionTarifa() {
 
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <p className="text-sm text-gray-500">
-                    {t("editInformacionTarifa.rateConfig")}
-                  </p>
+                  <div>
+                    <p className="text-sm text-gray-500">
+                      {t("editInformacionTarifa.rateConfig")}
+                    </p>
+                    <p className="text-xs text-gray-400">
+                      {tarifas.length}/10 {t("editInformacionTarifa.maxRates")}
+                    </p>
+                  </div>
                   <button
                     onClick={handleAddTarifa}
-                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    className={`inline-flex items-center px-3 py-1.5 border border-transparent text-sm font-medium rounded-md ${
+                      tarifas.length >= 10
+                        ? "text-gray-400 bg-gray-200"
+                        : "text-white bg-blue-600 hover:bg-blue-700"
+                    }`}
+                    disabled={tarifas.length >= 10}
                   >
                     {t("editInformacionTarifa.addItem")}
                   </button>

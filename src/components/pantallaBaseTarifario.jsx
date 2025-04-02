@@ -241,6 +241,7 @@ const PantallaBaseTarifario = ({ id }) => {
           const pantallaData = {
             id: templateDoc.id,
             ...templateData,
+            direccionRotacion: templateData.direccionRotacion || "derecha",
           };
 
           // Si tenemos datos de tarifario, combinarlos
