@@ -33,6 +33,7 @@ const MonitorScreen = ({ userEmail }) => {
   });
   const [unsubscribeRef, setUnsubscribeRef] = useState(null);
   const [notificationMinutes, setNotificationMinutes] = useState(30); // 30 minutos por defecto
+  const [notifiedScreens, setNotifiedScreens] = useState({});
 
   // Estado para notificaciones por correo
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
@@ -333,11 +334,24 @@ const MonitorScreen = ({ userEmail }) => {
 
   // Comprobar pantallas offline durante mucho tiempo
   useEffect(() => {
+    // Si las notificaciones están desactivadas, no hacer nada
     if (!notificationsEnabled || heartbeats.length === 0) return;
 
     // Buscar pantallas offline por más de X minutos
     const offlineScreens = heartbeats.filter((heartbeat) => {
-      if (heartbeat.online) return false;
+      if (heartbeat.online) {
+        // Si la pantalla está online y estaba en nuestra lista de notificados,
+        // la removemos para permitir futuras notificaciones si se vuelve a desconectar
+        if (notifiedScreens[heartbeat.id]) {
+          setNotifiedScreens((prev) => {
+            const updated = { ...prev };
+            delete updated[heartbeat.id];
+            return updated;
+          });
+        }
+        return false;
+      }
+
       if (!heartbeat.lastActivity) return false;
 
       const offlineTime = new Date() - heartbeat.lastActivity;
@@ -352,6 +366,14 @@ const MonitorScreen = ({ userEmail }) => {
         (email) => email && email.trim() !== ""
       );
       if (validEmails.length === 0) return;
+
+      // Filtrar solo pantallas que no hayan sido notificadas ya
+      const newOfflineScreens = offlineScreens.filter(
+        (screen) => !notifiedScreens[screen.id]
+      );
+
+      // Si no hay nuevas pantallas offline, no enviar notificación
+      if (newOfflineScreens.length === 0) return;
 
       // Función para enviar notificación por correo
       const sendOfflineNotification = async () => {
@@ -393,7 +415,7 @@ const MonitorScreen = ({ userEmail }) => {
           }
 
           // Preparar datos para el correo
-          const formattedScreens = offlineScreens.map((screen) => ({
+          const formattedScreens = newOfflineScreens.map((screen) => ({
             name: screen.deviceName || "Sin nombre",
             type: screen.screenType || "Desconocido",
             number: screen.screenNumber || "N/A",
@@ -415,8 +437,8 @@ const MonitorScreen = ({ userEmail }) => {
           const emailParams = {
             to_email: validEmails.join(","),
             company_name: company || "Sistema de Monitoreo",
-            subject: `ALERTA: ${offlineScreens.length} pantallas desconectadas`,
-            screens_count: offlineScreens.length,
+            subject: `ALERTA: ${newOfflineScreens.length} pantallas desconectadas`,
+            screens_count: newOfflineScreens.length,
             screens_list: screensList,
             notification_time: new Date().toLocaleString(),
             minutes_threshold: notificationMinutes,
@@ -440,10 +462,17 @@ const MonitorScreen = ({ userEmail }) => {
             response.text
           );
 
+          // Marcar estas pantallas como ya notificadas
+          const newNotifiedScreens = { ...notifiedScreens };
+          newOfflineScreens.forEach((screen) => {
+            newNotifiedScreens[screen.id] = true;
+          });
+          setNotifiedScreens(newNotifiedScreens);
+
           // Actualizar registro de última notificación
           await setDoc(lastNotificationRef, {
             sentAt: serverTimestamp(),
-            offlineCount: offlineScreens.length,
+            offlineCount: newOfflineScreens.length,
             emailsSent: validEmails.length,
             success: true,
           });
@@ -452,7 +481,7 @@ const MonitorScreen = ({ userEmail }) => {
           try {
             const notificationRecord = {
               timestamp: new Date().toISOString(),
-              offlineCount: offlineScreens.length,
+              offlineCount: newOfflineScreens.length,
               company: company,
               success: true,
             };
@@ -484,7 +513,7 @@ const MonitorScreen = ({ userEmail }) => {
             await setDoc(errorLogRef, {
               error: error.message,
               timestamp: serverTimestamp(),
-              offlineScreens: offlineScreens.length,
+              offlineScreens: newOfflineScreens.length,
               userEmail: userEmail,
               company: isAdmin ? companyFilter : company,
             });
@@ -505,6 +534,7 @@ const MonitorScreen = ({ userEmail }) => {
     isAdmin,
     userEmail,
     companyFilter,
+    notifiedScreens,
   ]);
 
   // Función para manejar errores
