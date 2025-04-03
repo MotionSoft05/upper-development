@@ -24,12 +24,15 @@ function UserAdmin() {
   const [cantidadPd, setCantidadPd] = useState(0);
   const [cantidadPs, setCantidadPs] = useState(0);
   const [cantidadPservice, setCantidadPservice] = useState(0);
+  const [cantidadPtarifario, setCantidadPtarifario] = useState(0); // Nueva variable para pantallas tarifario
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
   const [cantidadPublicidadSalon, setCantidadPublicidadSalon] = useState(0);
   const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
     useState(0);
+  const [cantidadPublicidadTarifario, setCantidadPublicidadTarifario] =
+    useState(0); // Nueva variable para publicidad tarifario
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [loading, setLoading] = useState(true);
@@ -46,28 +49,35 @@ function UserAdmin() {
     tipoPlan: "",
   });
 
+  // Actualizado para incluir pantallas tarifario
   const total =
-    parseInt(cantidadPd) + parseInt(cantidadPs) + parseInt(cantidadPservice);
+    parseInt(cantidadPd) +
+    parseInt(cantidadPs) +
+    parseInt(cantidadPservice) +
+    parseInt(cantidadPtarifario);
 
-  // Datos para el gráfico de suscripciones
+  // Datos para el gráfico de suscripciones (actualizado con tarifario)
   const subscriptionChartData = {
     labels: [
       t("userAdmin.roomScreen"),
       t("userAdmin.directoryScreen"),
       t("userAdmin.servicescreen"),
+      t("userAdmin.rateScreen"), // Nuevo label para pantalla tarifario
     ],
     datasets: [
       {
-        data: [cantidadPs, cantidadPd, cantidadPservice],
+        data: [cantidadPs, cantidadPd, cantidadPservice, cantidadPtarifario],
         backgroundColor: [
           "rgba(54, 162, 235, 0.6)",
           "rgba(75, 192, 192, 0.6)",
           "rgba(153, 102, 255, 0.6)",
+          "rgba(255, 159, 64, 0.6)", // Nuevo color para tarifario
         ],
         borderColor: [
           "rgba(54, 162, 235, 1)",
           "rgba(75, 192, 192, 1)",
           "rgba(153, 102, 255, 1)",
+          "rgba(255, 159, 64, 1)", // Nuevo borde de color para tarifario
         ],
         borderWidth: 1,
       },
@@ -139,10 +149,13 @@ function UserAdmin() {
             const cantidadPd = userData.pd || 0;
             const cantidadPs = userData.ps || 0;
             const cantidadPservice = userData.pservice || 0;
+            // Obtenemos la cantidad de pantallas tarifario del campo "pt"
+            const cantidadPtarifario = userData.pt || 0;
 
             setCantidadPd(cantidadPd);
             setCantidadPs(cantidadPs);
             setCantidadPservice(cantidadPservice);
+            setCantidadPtarifario(cantidadPtarifario); // Establecer la cantidad de pantallas tarifario
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
@@ -179,6 +192,18 @@ function UserAdmin() {
             );
             const cantidadDirectorio = publicidadDirectorioSnapshot.docs.length;
             setCantidadPublicidadDirectorio(cantidadDirectorio);
+
+            // Publicidad de tarifario
+            const publicidadTarifarioQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", userData.empresa),
+              where("tipo", "==", "tarifario")
+            );
+            const publicidadTarifarioSnapshot = await getDocs(
+              publicidadTarifarioQuery
+            );
+            const cantidadTarifario = publicidadTarifarioSnapshot.docs.length;
+            setCantidadPublicidadTarifario(cantidadTarifario);
 
             // Eventos
             const eventsQuery = query(
@@ -276,6 +301,7 @@ function UserAdmin() {
             setCantidadPd(datosEmpresa.pd || 0);
             setCantidadPs(datosEmpresa.ps || 0);
             setCantidadPservice(datosEmpresa.pservice || 0);
+            setCantidadPtarifario(datosEmpresa.pt || 0); // Usando el campo "pt" para pantallas tarifario
 
             // Actualizar datos de empresa
             setEmpresaData({
@@ -308,6 +334,19 @@ function UserAdmin() {
             );
             setCantidadPublicidadDirectorio(
               publicidadDirectorioSnapshot.docs.length
+            );
+
+            // Obtener cantidad de publicidades de tarifario
+            const publicidadTarifarioQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", empresaSeleccionada),
+              where("tipo", "==", "tarifario")
+            );
+            const publicidadTarifarioSnapshot = await getDocs(
+              publicidadTarifarioQuery
+            );
+            setCantidadPublicidadTarifario(
+              publicidadTarifarioSnapshot.docs.length
             );
 
             // Obtener eventos
@@ -484,7 +523,11 @@ function UserAdmin() {
             />
             <StatCard
               title={t("userAdmin.totalAds")}
-              value={cantidadPublicidadSalon + cantidadPublicidadDirectorio}
+              value={
+                cantidadPublicidadSalon +
+                cantidadPublicidadDirectorio +
+                cantidadPublicidadTarifario
+              }
               icon={<i className="fas fa-ad">🎯</i>}
               bgColor="bg-gradient-to-r from-purple-500 to-purple-600"
             />
@@ -669,6 +712,14 @@ function UserAdmin() {
                     </span>
                     <span className="text-lg text-blue-600 font-bold">
                       {cantidadPservice}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.rateScreen")}:
+                    </span>
+                    <span className="text-lg text-blue-600 font-bold">
+                      {cantidadPtarifario}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-gray-100">

@@ -235,7 +235,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
               </div>
 
               {/* Tipo de cambio */}
-              {/* Tipo de cambio */}
+
               <div className="text-right mt-2">
                 <p className="text-xs text-gray-500 uppercase">
                   {pantalla.tituloCambio ||
@@ -245,14 +245,56 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                       ? "TIPO DE CAMBIO/EXCHANGE RATE"
                       : "TIPO DE CAMBIO PARA CONSUMOS DEL DÍA")}
                 </p>
-                <p className="text-base font-medium">
-                  1USD= {pantalla.tipoCambio?.usd || "20.00"}
-                </p>
-                {pantalla.tipoCambio?.eur && (
-                  <p className="text-base font-medium">
-                    1EUR= {pantalla.tipoCambio.eur}
-                  </p>
+
+                {/* Caso 1: monedaActiva es "ambos" - mostrar ambas monedas */}
+                {pantalla.monedaActiva === "ambos" && (
+                  <>
+                    {pantalla.tipoCambio?.usd && (
+                      <p className="text-base font-medium">
+                        1USD= {pantalla.tipoCambio.usd}
+                      </p>
+                    )}
+                    {pantalla.tipoCambio?.eur && (
+                      <p className="text-base font-medium">
+                        1EUR= {pantalla.tipoCambio.eur}
+                      </p>
+                    )}
+                  </>
                 )}
+
+                {/* Caso 2: monedaActiva es "eur" - mostrar EUR primero y USD después si existe */}
+                {pantalla.monedaActiva === "eur" && (
+                  <>
+                    {pantalla.tipoCambio?.eur && (
+                      <p className="text-base font-medium">
+                        1EUR= {pantalla.tipoCambio.eur}
+                      </p>
+                    )}
+                    {pantalla.tipoCambio?.usd && (
+                      <p className="text-base font-medium">
+                        1USD= {pantalla.tipoCambio.usd}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {/* Caso 3: monedaActiva es "usd" o no está definida - mostrar USD primero y EUR después si existe */}
+                {(!pantalla.monedaActiva || pantalla.monedaActiva === "usd") &&
+                  pantalla.monedaActiva !== "ambos" &&
+                  pantalla.monedaActiva !== "eur" && (
+                    <>
+                      {pantalla.tipoCambio?.usd && (
+                        <p className="text-base font-medium">
+                          1USD= {pantalla.tipoCambio.usd}
+                        </p>
+                      )}
+                      {pantalla.tipoCambio?.eur && (
+                        <p className="text-base font-medium">
+                          1EUR= {pantalla.tipoCambio.eur}
+                        </p>
+                      )}
+                    </>
+                  )}
               </div>
             </div>
           </div>
@@ -314,7 +356,22 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                   )}
                 </div>
               </div>
-
+              <div className="px-4 pb-2">
+                <p
+                  className="text-xs text-gray-600 text-center mx-auto"
+                  style={{
+                    maxWidth:
+                      pantalla.leyendaTarifas?.length > 100 ? "100%" : "80%",
+                  }}
+                >
+                  {pantalla.leyendaTarifas ||
+                    (pantalla.idioma === "en"
+                      ? "Prices include VAT and taxes. Foreign currency not accepted."
+                      : pantalla.idioma === "es-en"
+                      ? "Precios incluyen impuestos. / Prices include taxes."
+                      : "Precios incluyen impuestos. No se acepta moneda extranjera.")}
+                </p>
+              </div>
               {/* Sección CHECK IN-OUT y GERENTE EN TURNO */}
               <div className="mt-2">
                 {/* Encabezado combinado */}

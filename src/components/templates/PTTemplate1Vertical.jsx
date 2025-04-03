@@ -284,7 +284,7 @@ const PTTemplate1Vertical = ({ pantalla }) => {
               </div>
 
               {/* Tipo de cambio */}
-              {/* Tipo de cambio */}
+
               <div className="text-right mt-2">
                 <p className="text-xs text-gray-500 uppercase">
                   {pantalla.tituloCambio ||
@@ -294,14 +294,56 @@ const PTTemplate1Vertical = ({ pantalla }) => {
                       ? "TIPO DE CAMBIO/EXCHANGE RATE"
                       : "TIPO DE CAMBIO PARA CONSUMOS DEL DÍA")}
                 </p>
-                <p className="text-base font-medium">
-                  1USD= {pantalla.tipoCambio?.usd || "20.00"}
-                </p>
-                {pantalla.tipoCambio?.eur && (
-                  <p className="text-base font-medium">
-                    1EUR= {pantalla.tipoCambio.eur}
-                  </p>
+
+                {/* Caso 1: monedaActiva es "ambos" - mostrar ambas monedas */}
+                {pantalla.monedaActiva === "ambos" && (
+                  <>
+                    {pantalla.tipoCambio?.usd && (
+                      <p className="text-base font-medium">
+                        1USD= {pantalla.tipoCambio.usd}
+                      </p>
+                    )}
+                    {pantalla.tipoCambio?.eur && (
+                      <p className="text-base font-medium">
+                        1EUR= {pantalla.tipoCambio.eur}
+                      </p>
+                    )}
+                  </>
                 )}
+
+                {/* Caso 2: monedaActiva es "eur" - mostrar EUR primero y USD después si existe */}
+                {pantalla.monedaActiva === "eur" && (
+                  <>
+                    {pantalla.tipoCambio?.eur && (
+                      <p className="text-base font-medium">
+                        1EUR= {pantalla.tipoCambio.eur}
+                      </p>
+                    )}
+                    {pantalla.tipoCambio?.usd && (
+                      <p className="text-base font-medium">
+                        1USD= {pantalla.tipoCambio.usd}
+                      </p>
+                    )}
+                  </>
+                )}
+
+                {/* Caso 3: monedaActiva es "usd" o no está definida - mostrar USD primero y EUR después si existe */}
+                {(!pantalla.monedaActiva || pantalla.monedaActiva === "usd") &&
+                  pantalla.monedaActiva !== "ambos" &&
+                  pantalla.monedaActiva !== "eur" && (
+                    <>
+                      {pantalla.tipoCambio?.usd && (
+                        <p className="text-base font-medium">
+                          1USD= {pantalla.tipoCambio.usd}
+                        </p>
+                      )}
+                      {pantalla.tipoCambio?.eur && (
+                        <p className="text-base font-medium">
+                          1EUR= {pantalla.tipoCambio.eur}
+                        </p>
+                      )}
+                    </>
+                  )}
               </div>
             </div>
           </div>
