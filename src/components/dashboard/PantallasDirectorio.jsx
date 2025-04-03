@@ -21,6 +21,7 @@ import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
+import { fetchWeatherData } from "@/utils/weatherUtils";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -50,9 +51,86 @@ function PantallasDirectorio() {
   const [rotationDirections, setRotationDirections] = useState([]); // Array para guardar la dirección de rotación por pantalla
 
   const [cityOptions, setCityOptions] = useState([
-    { value: "Ciudad de México", label: "Ciudad de México" },
-    { value: "Tijuana", label: "Tijuana" },
-    // ... (otros elementos)
+    { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
+    { value: "Ecatepec", label: "Ecatepec, Estado de México" },
+    { value: "Guadalajara", label: "Guadalajara, Jalisco" },
+    { value: "Monterrey", label: "Monterrey, Nuevo León" },
+    { value: "Puebla", label: "Puebla, Puebla" },
+    { value: "Tijuana", label: "Tijuana, Baja California" },
+    { value: "León", label: "León, Guanajuato" },
+    { value: "Zapopan", label: "Zapopan, Jalisco" },
+    { value: "Ciudad Juárez", label: "Ciudad Juárez, Chihuahua" },
+    { value: "Nezahualcóyotl", label: "Nezahualcóyotl, Estado de México" },
+    { value: "Mexicali", label: "Mexicali, Baja California" },
+    { value: "Mérida", label: "Mérida, Yucatán" },
+    { value: "San Luis Potosí", label: "San Luis Potosí, San Luis Potosí" },
+    { value: "Querétaro", label: "Querétaro, Querétaro" },
+    { value: "Aguascalientes", label: "Aguascalientes, Aguascalientes" },
+    { value: "Hermosillo", label: "Hermosillo, Sonora" },
+    { value: "Saltillo", label: "Saltillo, Coahuila" },
+    { value: "Morelia", label: "Morelia, Michoacán" },
+    { value: "Culiacán", label: "Culiacán, Sinaloa" },
+    { value: "Chihuahua", label: "Chihuahua, Chihuahua" },
+    { value: "Toluca", label: "Toluca, Estado de México" },
+    { value: "Cancún", label: "Cancún, Quintana Roo" },
+    { value: "Reynosa", label: "Reynosa, Tamaulipas" },
+    { value: "Tuxtla Gutiérrez", label: "Tuxtla Gutiérrez, Chiapas" },
+    { value: "Villahermosa", label: "Villahermosa, Tabasco" },
+    { value: "Xalapa", label: "Xalapa, Veracruz" },
+    { value: "Coatzacoalcos", label: "Coatzacoalcos, Veracruz" },
+    { value: "Celaya", label: "Celaya, Guanajuato" },
+    { value: "Irapuato", label: "Irapuato, Guanajuato" },
+    { value: "Ensenada", label: "Ensenada, Baja California" },
+    { value: "Tepic", label: "Tepic, Nayarit" },
+    { value: "La Paz", label: "La Paz, Baja California Sur" },
+    { value: "Los Cabos", label: "Los Cabos, Baja California Sur" },
+    { value: "Matamoros", label: "Matamoros, Tamaulipas" },
+    { value: "Nuevo Laredo", label: "Nuevo Laredo, Tamaulipas" },
+    { value: "Tlalnepantla", label: "Tlalnepantla, Estado de México" },
+    { value: "Cuernavaca", label: "Cuernavaca, Morelos" },
+    { value: "Uruapan", label: "Uruapan, Michoacán" },
+    { value: "Zacatecas", label: "Zacatecas, Zacatecas" },
+    { value: "Durango", label: "Durango, Durango" },
+    {
+      value: "San Cristóbal de las Casas",
+      label: "San Cristóbal de las Casas, Chiapas",
+    },
+    { value: "Tehuacán", label: "Tehuacán, Puebla" },
+    { value: "Manzanillo", label: "Manzanillo, Colima" },
+    { value: "Orizaba", label: "Orizaba, Veracruz" },
+    { value: "Tula de Allende", label: "Tula de Allende, Hidalgo" },
+    { value: "Pátzcuaro", label: "Pátzcuaro, Michoacán" },
+    { value: "Comitán", label: "Comitán, Chiapas" },
+    { value: "Puerto Escondido", label: "Puerto Escondido, Oaxaca" },
+    { value: "Taxco", label: "Taxco, Guerrero" },
+    { value: "Huatulco", label: "Huatulco, Oaxaca" },
+    { value: "San Juan del Río", label: "San Juan del Río, Querétaro" },
+    { value: "Zamora", label: "Zamora, Michoacán" },
+    { value: "Lagos de Moreno", label: "Lagos de Moreno, Jalisco" },
+    { value: "Tuxpan", label: "Tuxpan, Veracruz" },
+    { value: "Guaymas", label: "Guaymas, Sonora" },
+    { value: "Navojoa", label: "Navojoa, Sonora" },
+    { value: "Piedras Negras", label: "Piedras Negras, Coahuila" },
+    { value: "Delicias", label: "Delicias, Chihuahua" },
+    { value: "Parral", label: "Parral, Chihuahua" },
+    { value: "Tecomán", label: "Tecomán, Colima" },
+    { value: "Playa del Carmen", label: "Playa del Carmen, Quintana Roo" },
+    { value: "Isla Mujeres", label: "Isla Mujeres, Quintana Roo" },
+    { value: "Holbox", label: "Holbox, Quintana Roo" },
+    { value: "Mazatlán", label: "Mazatlán, Sinaloa" },
+    { value: "Acapulco", label: "Acapulco, Guerrero" },
+    { value: "Puerto Vallarta", label: "Puerto Vallarta, Jalisco" },
+    { value: "Sayulita", label: "Sayulita, Nayarit" },
+    { value: "Bahías de Huatulco", label: "Bahías de Huatulco, Oaxaca" },
+    { value: "Ixtapa", label: "Ixtapa, Guerrero" },
+    { value: "Zihuatanejo", label: "Zihuatanejo, Guerrero" },
+    { value: "Progreso", label: "Progreso, Yucatán" },
+    { value: "Campeche", label: "Campeche, Campeche" },
+    { value: "Rosarito", label: "Rosarito, Baja California" },
+    { value: "San Felipe", label: "San Felipe, Baja California" },
+    { value: "Loreto", label: "Loreto, Baja California Sur" },
+    { value: "Todos Santos", label: "Todos Santos, Baja California Sur" },
+    { value: "Oaxaca", label: "Oaxaca, Oaxaca" },
   ]);
 
   // Ordenar alfabéticamente
@@ -595,6 +673,33 @@ function PantallasDirectorio() {
         return;
       }
 
+      // Validar que la ciudad sea válida para la API de clima
+      try {
+        // Mostrar un indicador de carga mientras verificamos
+        Swal.fire({
+          title: "Verificando ciudad...",
+          didOpen: () => {
+            Swal.showLoading();
+          },
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+
+        // Intentar obtener datos del clima para la ciudad seleccionada
+        await fetchWeatherData(selectedCity.value);
+
+        // Si llegamos aquí, la ciudad es válida, cerrar el indicador de carga
+        Swal.close();
+      } catch (error) {
+        // Si hay un error, la ciudad podría no ser válida para la API
+        Swal.fire({
+          icon: "error",
+          title: "Error de validación",
+          text: "No se pudo verificar la ciudad seleccionada. Por favor, seleccione otra ciudad o inténtelo más tarde.",
+        });
+        return;
+      }
+
       if (!selectedLogo) {
         Swal.fire({
           icon: "error",
@@ -769,6 +874,7 @@ function PantallasDirectorio() {
       });
     }
   };
+
   const handlePublicidadLandscapeChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -876,7 +982,7 @@ function PantallasDirectorio() {
         )}
 
         {/* Contenido principal */}
-        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg ">
           {/* Pestañas de navegación */}
           <div className="flex border-b border-gray-200">
             <button

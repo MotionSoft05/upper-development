@@ -15,8 +15,16 @@ const CACHE_DURATION = 30 * 60 * 1000; // 30 minutos en milisegundos
  */
 export const fetchWeatherData = async (city) => {
   try {
+    // Verificar que tenemos una ciudad válida
+    if (!city || typeof city !== "string" || city.trim() === "") {
+      console.error("Ciudad inválida proporcionada:", city);
+      throw new Error("Ciudad inválida");
+    }
+
+    // Crear una clave de caché que incluya la ciudad completa
+    const cacheKey = `current_${city.trim()}`;
+
     // Verificar si hay datos en caché
-    const cacheKey = `current_${city}`;
     if (
       weatherCache[cacheKey] &&
       Date.now() - weatherCache[cacheKey].timestamp < CACHE_DURATION
@@ -25,10 +33,17 @@ export const fetchWeatherData = async (city) => {
       return weatherCache[cacheKey].data;
     }
 
+    // Codificar la ciudad para la URL
+    const encodedCity = encodeURIComponent(city.trim());
+
     // Obtener datos frescos de la API
+    console.log(`Solicitando clima para: ${city} (${encodedCity})`);
     const response = await axios.get(
-      `${BASE_URL}/current.json?key=${API_KEY}&q=${city}&lang=es`
+      `${BASE_URL}/current.json?key=${API_KEY}&q=${encodedCity}&lang=es`
     );
+
+    // Log para depuración
+    console.log(`Datos del clima recibidos para ${city}:`, response.data);
 
     const weatherData = {
       temp_c: response.data.current.temp_c,
@@ -51,7 +66,7 @@ export const fetchWeatherData = async (city) => {
 
     return weatherData;
   } catch (error) {
-    console.error("Error fetching weather data:", error);
+    console.error("Error fetching weather data for " + city + ":", error);
     throw new Error("No se pudo obtener la información del clima");
   }
 };

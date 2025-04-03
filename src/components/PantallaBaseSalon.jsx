@@ -147,13 +147,19 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         id,
       } = event;
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // CORRECCIÓN: Usar fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Compare strings directamente - mucho más seguro
+      // Compare strings directamente
       const isWithinDateRange =
         formattedToday >= fechaInicio && formattedToday <= fechaFinal;
+
+      console.log(
+        `Evento ${nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}, en rango: ${isWithinDateRange}`
+      );
 
       let startMinutes, endMinutes;
 
@@ -275,13 +281,19 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       const { fechaInicio, fechaFinal, horaInicialSalon, horaFinalSalon } =
         event;
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // CORRECCIÓN: Usar fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Compare strings directamente - mucho más seguro
+      // Compare strings directamente
       const isWithinDateRange =
         formattedToday >= fechaInicio && formattedToday <= fechaFinal;
+
+      console.log(
+        `Evento ${event.nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}, en rango: ${isWithinDateRange}`
+      );
 
       // Check time range
       let startMinutes, endMinutes;
@@ -483,15 +495,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
                 horaFinalSalon,
               } = event;
 
-              // Usar una comparación de strings de fecha en lugar de objetos Date
+              // CORRECCIÓN: Usar fecha local en lugar de UTC
               const today = new Date();
-              const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+              const formattedToday = `${today.getFullYear()}-${String(
+                today.getMonth() + 1
+              ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
               console.log(
-                "🚀 ~ PantallaBaseSalon.jsx:417 ~ currentlyActiveEvents ~ formattedToday:",
-                formattedToday
+                `Evento ${event.nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}`
               );
 
-              // Compare strings directamente - mucho más seguro
+              // Compare strings directamente
               const isWithinDateRange =
                 formattedToday >= fechaInicio && formattedToday <= fechaFinal;
 

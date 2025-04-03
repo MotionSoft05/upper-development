@@ -14,6 +14,7 @@ import app from "@/firebase/firebaseConfig";
 import PTTemplateManager from "@/components/templates/PTTemplateManager";
 import useHeartbeat from "@/hook/useHeartbeat"; // Importamos el hook de heartbeat
 import { v4 as uuidv4 } from "uuid"; // Importamos uuid para generar IDs únicos
+import { fetchWeatherData } from "@/utils/weatherUtils";
 
 const db = getFirestore(app);
 
@@ -145,7 +146,49 @@ const PantallaBaseTarifario = ({ id }) => {
 
           const pantallaData = pantallaDoc.data();
           console.log("Pantalla actualizada (tiempo real):", pantallaData);
+          // Agregar esta parte para obtener el clima:
+          if (pantallaData.ciudad) {
+            console.log(
+              "Obteniendo datos del clima para:",
+              pantallaData.ciudad
+            );
 
+            fetchWeatherData(pantallaData.ciudad)
+              .then((weatherData) => {
+                console.log("Datos del clima recibidos:", weatherData);
+
+                // Actualizar pantalla con el clima integrado directamente en sus propiedades
+                setPantalla((prev) => {
+                  // Si prev es null, comenzar con un objeto vacío
+                  const updatedPantalla = prev || {};
+
+                  return {
+                    ...updatedPantalla,
+                    // Mantener id si existe
+                    id: updatedPantalla.id || pantallaDoc.id,
+                    // Mantener todos los datos originales de la pantalla
+                    ...pantallaData,
+                    // Añadir datos del clima en múltiples formatos para asegurar compatibilidad
+                    weatherData: weatherData,
+                    clima: weatherData,
+                    // También añadir propiedades individuales por si acaso
+                    temperatura: weatherData.temp_c,
+                    condicionClima: weatherData.condition,
+                    iconoClima: weatherData.iconUrl,
+                  };
+                });
+              })
+              .catch((error) => {
+                console.error(
+                  "Error al obtener clima para " + pantallaData.ciudad + ":",
+                  error
+                );
+              });
+          } else {
+            console.log(
+              "No se encontró ciudad en el template para obtener el clima"
+            );
+          }
           // Guardar los datos de la pantalla
           const pantallaCompleta = {
             id: pantallaDoc.id,
@@ -227,6 +270,31 @@ const PantallaBaseTarifario = ({ id }) => {
         const templateData = templateDoc.data();
         console.log("Template actualizado (tiempo real):", templateData);
         setTemplateData(templateData);
+
+        // Agregar esta parte para obtener el clima:
+        if (templateData.ciudad) {
+          console.log("Obteniendo datos del clima para:", templateData.ciudad);
+
+          fetchWeatherData(templateData.ciudad)
+            .then((weatherData) => {
+              console.log("Datos del clima recibidos:", weatherData);
+              // Asumiendo que tienes un estado para guardar los datos del clima
+              setPantalla((prev) => ({
+                ...prev,
+                weatherData: weatherData,
+              }));
+            })
+            .catch((error) => {
+              console.error(
+                "Error al obtener clima para " + templateData.ciudad + ":",
+                error
+              );
+            });
+        } else {
+          console.log(
+            "No se encontró ciudad en el template para obtener el clima"
+          );
+        }
 
         // Configurar suscripción a Tarifarios si hay un tarifarioId
         if (templateData.tarifarioId) {

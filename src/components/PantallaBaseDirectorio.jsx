@@ -279,15 +279,21 @@ export default function BaseDirectorioClient({ id, empresa }) {
     const filteredEvents = allEventsRef.current.filter((event) => {
       console.log("\nRevisando evento:", event.nombreEvento);
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // Date validation - usando fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Comparar strings directamente - mucho más seguro
+      // Comparar strings directamente con el formato correcto
       const isWithinDateRange =
         formattedToday >= event.fechaInicio &&
         formattedToday <= event.fechaFinal;
 
+      console.log("V2 Fecha formateada local:", formattedToday);
+      console.log("V2 Fecha inicio evento:", event.fechaInicio);
+      console.log("V2 Fecha final evento:", event.fechaFinal);
+      console.log("V2 ¿Está dentro del rango?", isWithinDateRange);
       // Time validation
       let startMinutes, endMinutes;
       if (
@@ -523,18 +529,21 @@ export default function BaseDirectorioClient({ id, empresa }) {
 
           const filteredEvents = events.filter((event) => {
             // Date validation
-            // Usar una comparación de strings de fecha en lugar de objetos Date
+            // Date validation - usando fecha local en lugar de UTC
             const today = new Date();
-            console.log(
-              "🚀 ~ PantallaBaseDirectorio.jsx:466 ~ filteredEvents ~ today:",
-              today
-            );
-            const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+            const formattedToday = `${today.getFullYear()}-${String(
+              today.getMonth() + 1
+            ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-            // Comparar strings directamente - mucho más seguro
+            // Comparar strings directamente con el formato correcto
             const isWithinDateRange =
               formattedToday >= event.fechaInicio &&
               formattedToday <= event.fechaFinal;
+
+            console.log("Fecha formateada local:", formattedToday);
+            console.log("Fecha inicio evento:", event.fechaInicio);
+            console.log("Fecha final evento:", event.fechaFinal);
+            console.log("¿Está dentro del rango?", isWithinDateRange);
             // Time validation
             let startMinutes, endMinutes;
             if (
@@ -623,9 +632,12 @@ export default function BaseDirectorioClient({ id, empresa }) {
                 templates.publicidadPortrait || templates.publicidad || null,
             };
             if (templates.ciudad) {
+              console.log("Obteniendo datos del clima para:", templates.ciudad);
+
               fetchWeatherData(templates.ciudad)
                 .then((weatherData) => {
                   if (isMounted.current) {
+                    console.log("Datos del clima recibidos:", weatherData);
                     setScreenData((prev) => ({
                       ...prev,
                       templates: enrichedTemplates,
@@ -634,9 +646,16 @@ export default function BaseDirectorioClient({ id, empresa }) {
                   }
                 })
                 .catch((error) => {
+                  console.error(
+                    "Error al obtener clima para " + templates.ciudad + ":",
+                    error
+                  );
                   console.error(t("errors.weather"), error);
                 });
             } else {
+              console.log(
+                "No se encontró ciudad en el template para obtener el clima"
+              );
               setScreenData((prev) => ({
                 ...prev,
                 templates: enrichedTemplates,
