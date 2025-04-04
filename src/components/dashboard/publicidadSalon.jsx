@@ -900,23 +900,23 @@ function PublicidadSalon() {
                     {(editIndex === index || !publicidadesIds[index]) && (
                       <>
                         {/* VideoUploader */}
-                        <div className="mb-4">
+                        {/* <div className="mb-4">
                           <VideoUploader
                             onVideoUploaded={(videoData) =>
                               handleVideoUploaded(videoData, index)
                             }
                             onError={handleVideoError}
                           />
-                        </div>
+                        </div> */}
 
                         {/* Separador con texto */}
-                        <div className="flex items-center my-4">
+                        {/* <div className="flex items-center my-4">
                           <div className="flex-grow border-t border-gray-300"></div>
                           <span className="flex-shrink mx-4 text-gray-600 text-sm">
                             {t("advertisement.salon.or") || "O BIEN"}
                           </span>
                           <div className="flex-grow border-t border-gray-300"></div>
-                        </div>
+                        </div> */}
 
                         {/* Selector de imagen tradicional */}
                         <div className="mb-4">
