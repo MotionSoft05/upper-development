@@ -198,39 +198,13 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
             <div className="flex items-center space-x-6">
               {/* Clima con icono a la izquierda */}
               <div className="flex items-center">
-                {/* Icono del clima a la izquierda */}
-                <div className="mr-2">
-                  <svg
-                    width="32"
-                    height="32"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="text-yellow-500"
-                  >
-                    <circle cx="12" cy="12" r="5" fill="currentColor" />
-                    <line x1="12" y1="1" x2="12" y2="3" />
-                    <line x1="12" y1="21" x2="12" y2="23" />
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                    <line x1="1" y1="12" x2="3" y2="12" />
-                    <line x1="21" y1="12" x2="23" y2="12" />
-                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-                  </svg>
-                </div>
-
                 {/* Temperatura y rango */}
                 <div className="flex flex-col">
-                  <span className="text-3xl font-semibold">{`29°C`}</span>
-                  <div className="flex text-xs">
-                    <span className="px-1 mr-1 bg-blue-500 text-white">13</span>
-                    <span className="px-1 bg-red-500 text-white">31</span>
-                  </div>
+                  <WeatherWidget
+                    ciudad={pantalla.ciudad}
+                    showForecast={true}
+                    variant="horizontal" // Usar la nueva variante
+                  />
                 </div>
               </div>
 
@@ -304,7 +278,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
             {/* Columna izquierda (70%) - Tarifas */}
             <div className="w-[70%] flex flex-col mr-2">
               {/* Sección TARIFAS AL PÚBLICO */}
-              <div className="flex flex-col" style={{ height: "66vh" }}>
+              <div className="flex flex-col" style={{ height: "52vh" }}>
                 {" "}
                 {/* Altura controlada */}
                 {/* Encabezado Tarifas */}

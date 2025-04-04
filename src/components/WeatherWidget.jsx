@@ -72,36 +72,32 @@ const WeatherWidget = ({
       return (
         <div className="flex flex-col">
           {/* Clima actual */}
-          <div className="flex items-center mb-1">
+          <div className="flex items-center">
             {weatherData.current.iconUrl && (
               <img
                 src={weatherData.current.iconUrl}
                 alt={weatherData.current.condition}
-                className="h-8 w-8 mr-1"
+                className="h-6 w-6 mr-1"
               />
             )}
-            <span className="text-lg font-bold">
-              {weatherData.current.temp_c}°C
-            </span>
-            <span className="text-xs ml-2">
-              {weatherData.current.condition}
+            <span className="text-lg font-medium">
+              {weatherData.current.temp_c.toFixed(1)}°C
             </span>
           </div>
 
-          {/* Pronóstico mini */}
+          {/* Mínimo y máximo con formato coloreado */}
           {showForecast && (
-            <div className="flex justify-between text-xs text-gray-600">
-              <div className="text-blue-600 font-medium">
-                Máx: {weatherData.hourly.maxTemp}°
-              </div>
-              <div className="text-blue-900 font-medium">
-                Mín: {weatherData.hourly.minTemp}°
-              </div>
+            <div className="flex text-xs justify-center">
+              <span className="px-1 mr-1 rounded-md bg-blue-500 text-white">
+                {weatherData.hourly.minTemp}
+              </span>
+              <span className="px-1 rounded-md bg-red-500 text-white">
+                {weatherData.hourly.maxTemp}
+              </span>
             </div>
           )}
         </div>
       );
-
     case "expanded":
       return (
         <div className="bg-white/80 backdrop-blur-sm rounded-lg p-2 shadow-sm">

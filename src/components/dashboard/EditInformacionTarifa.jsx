@@ -140,6 +140,19 @@ function EditInformacionTarifa() {
             if (docData.gerente) setGerente(docData.gerente);
             if (docData.tipoCambio) setTipoCambio(docData.tipoCambio);
 
+            // Actualizar correctamente el estado de las monedas activas
+            if (docData.monedaActiva) {
+              const newMonedasActivas = {
+                usd:
+                  docData.monedaActiva === "usd" ||
+                  docData.monedaActiva === "ambos",
+                eur:
+                  docData.monedaActiva === "eur" ||
+                  docData.monedaActiva === "ambos",
+              };
+              setMonedasActivas(newMonedasActivas);
+            }
+
             // Cargar las nuevas propiedades
             if (docData.leyendaTarifas)
               setLeyendaTarifas(docData.leyendaTarifas);
@@ -168,6 +181,19 @@ function EditInformacionTarifa() {
               if (templateData.tipoCambio)
                 setTipoCambio(templateData.tipoCambio);
 
+              // Actualizar correctamente el estado de las monedas activas
+              if (templateData.monedaActiva) {
+                const newMonedasActivas = {
+                  usd:
+                    templateData.monedaActiva === "usd" ||
+                    templateData.monedaActiva === "ambos",
+                  eur:
+                    templateData.monedaActiva === "eur" ||
+                    templateData.monedaActiva === "ambos",
+                };
+                setMonedasActivas(newMonedasActivas);
+              }
+
               // Cargar las nuevas propiedades
               if (templateData.leyendaTarifas)
                 setLeyendaTarifas(templateData.leyendaTarifas);
@@ -185,7 +211,6 @@ function EditInformacionTarifa() {
 
     cargarDatosTarifario();
   }, [empresaSeleccionada]);
-
   const registrarCambio = (datosAnteriores, datosNuevos) => {
     const fechaHora = new Date();
 
@@ -266,9 +291,12 @@ function EditInformacionTarifa() {
     }
 
     // Comprobar cambio en nombre de gerente
+    // Corregido para verificar correctamente si el nombre del gerente ha cambiado
     if (
       !datosAnteriores ||
-      datosAnteriores.gerente?.nombre !== datosNuevos.gerente.nombre
+      !datosAnteriores.gerente ||
+      (datosAnteriores.gerente?.nombre !== datosNuevos.gerente.nombre &&
+        (datosAnteriores.gerente?.nombre || datosNuevos.gerente.nombre))
     ) {
       cambiosDetectados.push(
         `Gerente cambió de '${
@@ -280,7 +308,8 @@ function EditInformacionTarifa() {
     // Comprobar cambios en título del tipo de cambio
     if (
       !datosAnteriores ||
-      datosAnteriores.tituloCambio !== datosNuevos.tituloCambio
+      (datosAnteriores.tituloCambio !== datosNuevos.tituloCambio &&
+        (datosAnteriores.tituloCambio || datosNuevos.tituloCambio))
     ) {
       cambiosDetectados.push(
         `Título de tipo de cambio cambió de '${
@@ -294,6 +323,7 @@ function EditInformacionTarifa() {
       (datosNuevos.monedaActiva === "usd" ||
         datosNuevos.monedaActiva === "ambos") &&
       (!datosAnteriores ||
+        !datosAnteriores.tipoCambio ||
         datosAnteriores.tipoCambio?.usd !== datosNuevos.tipoCambio.usd ||
         (datosAnteriores.monedaActiva !== "usd" &&
           datosAnteriores.monedaActiva !== "ambos"))
@@ -314,6 +344,7 @@ function EditInformacionTarifa() {
       (datosNuevos.monedaActiva === "eur" ||
         datosNuevos.monedaActiva === "ambos") &&
       (!datosAnteriores ||
+        !datosAnteriores.tipoCambio ||
         datosAnteriores.tipoCambio?.eur !== datosNuevos.tipoCambio.eur ||
         (datosAnteriores.monedaActiva !== "eur" &&
           datosAnteriores.monedaActiva !== "ambos"))
@@ -349,20 +380,26 @@ function EditInformacionTarifa() {
     // Comprobar cambios en leyendas
     if (
       !datosAnteriores ||
-      datosAnteriores.leyendaTarifas !== datosNuevos.leyendaTarifas
+      (datosAnteriores.leyendaTarifas !== datosNuevos.leyendaTarifas &&
+        (datosAnteriores.leyendaTarifas || datosNuevos.leyendaTarifas))
     ) {
       cambiosDetectados.push(`Leyenda de tarifas modificada`);
     }
 
     if (
       !datosAnteriores ||
-      datosAnteriores.leyendaExtras !== datosNuevos.leyendaExtras
+      (datosAnteriores.leyendaExtras !== datosNuevos.leyendaExtras &&
+        (datosAnteriores.leyendaExtras || datosNuevos.leyendaExtras))
     ) {
       cambiosDetectados.push(`Leyenda de extras modificada`);
     }
 
     // Comprobar cambios en horarios
-    if (!datosAnteriores || datosAnteriores.checkIn !== datosNuevos.checkIn) {
+    if (
+      !datosAnteriores ||
+      (datosAnteriores.checkIn !== datosNuevos.checkIn &&
+        (datosAnteriores.checkIn || datosNuevos.checkIn))
+    ) {
       cambiosDetectados.push(
         `Horario de Check-In cambió de '${
           datosAnteriores?.checkIn || "vacío"
@@ -370,7 +407,11 @@ function EditInformacionTarifa() {
       );
     }
 
-    if (!datosAnteriores || datosAnteriores.checkOut !== datosNuevos.checkOut) {
+    if (
+      !datosAnteriores ||
+      (datosAnteriores.checkOut !== datosNuevos.checkOut &&
+        (datosAnteriores.checkOut || datosNuevos.checkOut))
+    ) {
       cambiosDetectados.push(
         `Horario de Check-Out cambió de '${
           datosAnteriores?.checkOut || "vacío"
@@ -801,7 +842,7 @@ function EditInformacionTarifa() {
                     tipo: t.tipo,
                     precio: t.precio,
                   })) || [],
-                gerente: datosAnteriores.gerente?.nombre || "",
+                gerente: datosAnteriores.gerente || { nombre: "" }, // CORREGIDO: Mantiene la estructura completa
                 monedaActiva: datosAnteriores.monedaActiva || "usd",
                 tipoCambio: {
                   usd: datosAnteriores.tipoCambio?.usd || "",

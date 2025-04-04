@@ -142,7 +142,7 @@ export default function TarifarioRssSlider({ templateColor }) {
             disableOnInteraction: false,
           }}
           modules={[Autoplay]}
-          className="w-full h-[30rem]" // Definida altura fija
+          className="w-full h-[22rem]" // Definida altura fija
         >
           {rssItems.map((item, index) => (
             <SwiperSlide key={index}>

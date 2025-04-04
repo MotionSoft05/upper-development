@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 import QRCode from "qrcode.react";
 import "keen-slider/keen-slider.min.css";
 import SliderRSS from "../SliderRSS";
-
+import WeatherWidget from "../WeatherWidget";
 const PDTemplate1Horizontal = ({
   events,
   template,
@@ -16,6 +16,7 @@ const PDTemplate1Horizontal = ({
   publicidad,
   nombrePantallasDirectorio = [],
 }) => {
+  console.log("🚀 ~ PDTemplate1Horizontal.jsx:19 ~ weatherData:", weatherData);
   const [isLoading, setIsLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [windowSize, setWindowSize] = useState({
@@ -270,20 +271,11 @@ const PDTemplate1Horizontal = ({
           </div>
         ) : weatherData ? (
           <>
-            <div className="flex items-center">
-              {weatherData.icon && (
-                <img
-                  src={weatherData.icon}
-                  alt="Weather"
-                  className="h-6 w-6 mr-1"
-                />
-              )}
-              <span className="text-lg font-medium text-color">
-                {weatherData.temp_c
-                  ? `${weatherData.temp_c.toFixed(1)} °C`
-                  : "Sin datos"}
-              </span>
-            </div>
+            <WeatherWidget
+              ciudad={template.ciudad}
+              showForecast={true}
+              variant="horizontal"
+            />
             <div className="flex items-center">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
               <div className="text-xl font-semibold text-gray-800 mt-0.5">

@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import QRCode from "qrcode.react";
 import "keen-slider/keen-slider.min.css";
 import SliderRSS from "../SliderRSS";
+import WeatherWidget from "../WeatherWidget";
 
 // Event display component for vertical layout
 const EventRow = ({
@@ -393,24 +394,14 @@ const PDTemplate1Vertical = ({
           </div>
         ) : weatherData ? (
           <>
-            <div className="flex items-center">
-              {weatherData.icon && (
-                <img
-                  src={weatherData.icon}
-                  alt="Weather"
-                  className="h-5 w-5 mr-1"
-                />
-              )}
-              <span className="text-base font-medium text-color">
-                {weatherData.temp_c
-                  ? `${weatherData.temp_c.toFixed(1)} °C`
-                  : "Sin datos"}
-              </span>
-            </div>
-
+            <WeatherWidget
+              ciudad={template.ciudad}
+              showForecast={true}
+              variant="horizontal"
+            />
             <div className="flex items-center">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
-              <div className="text-lg font-semibold text-color mt-0.5">
+              <div className="text-xl font-semibold text-gray-800 mt-0.5">
                 {currentTime}
               </div>
             </div>
