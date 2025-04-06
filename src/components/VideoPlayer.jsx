@@ -1,8 +1,10 @@
 // src/components/VideoPlayer.jsx
-import React, { useState, useEffect } from "react";
-
-// Verificar si estamos en el navegador
-const isBrowser = typeof window !== "undefined";
+import React, { useState, useEffect, useRef } from "react";
+import {
+  isVideoMarkedAsCached,
+  markVideoAsCached,
+  updateVideoAccess,
+} from "@/utils/dexieVideoCache";
 
 const VideoPlayer = ({
   src,
@@ -11,115 +13,87 @@ const VideoPlayer = ({
   loop = true,
   controls = false,
   onError,
+  onEnded,
   className = "",
   style = {},
 }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [iframeKey, setIframeKey] = useState(Date.now());
-
-  // Crear un ID único para este iframe
-  const frameId = `video-frame-${Math.random().toString(36).substring(2, 15)}`;
+  const videoRef = useRef(null);
+  const retryCount = useRef(0);
+  const maxRetries = 3;
 
   useEffect(() => {
-    // Temporizador para ocultar el loader después de un tiempo
-    const timer = setTimeout(() => {
+    // Función para verificar y actualizar caché
+    const checkCache = async () => {
+      if (!src) return;
+
+      try {
+        // Verificar si tenemos el video marcado como cacheado
+        const isCached = await isVideoMarkedAsCached(src);
+
+        if (isCached) {
+          console.log("Video marcado como cacheado:", src);
+          await updateVideoAccess(src);
+        } else {
+          console.log("Video no marcado como cacheado:", src);
+          // Lo marcaremos como cacheado cuando se cargue completamente
+        }
+      } catch (err) {
+        console.error("Error al verificar caché:", err);
+      }
+    };
+
+    checkCache();
+  }, [src]);
+
+  // Manejo de eventos del video
+  const handleLoadedData = async () => {
+    console.log("Video cargado correctamente:", src);
+    setIsLoading(false);
+    setError(null);
+
+    // Marcar el video como cacheado en nuestra base de datos
+    try {
+      await markVideoAsCached(src);
+    } catch (err) {
+      console.error("Error al marcar video como cacheado:", err);
+    }
+  };
+
+  const handleError = (e) => {
+    console.error("Error de video:", e);
+
+    // Intentar recargar un número limitado de veces
+    if (retryCount.current < maxRetries) {
+      retryCount.current += 1;
+      console.log(
+        `Reintentando carga (${retryCount.current}/${maxRetries})...`
+      );
+
+      // Pequeño retraso antes de reintentar
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 1000);
+    } else {
+      setError("No se pudo cargar el video después de varios intentos");
       setIsLoading(false);
-    }, 2000);
+      if (onError) onError(e);
+    }
+  };
 
-    return () => clearTimeout(timer);
-  }, [src, iframeKey]);
-
-  // Función para reintentar la carga
+  // Función para reintentar manualmente
   const handleRetry = () => {
     setIsLoading(true);
     setError(null);
-    setIframeKey(Date.now());
+    retryCount.current = 0;
+
+    if (videoRef.current) {
+      videoRef.current.load();
+    }
   };
-
-  // Si no estamos en el navegador o no hay URL de video, no renderizar nada
-  if (!isBrowser || !src) {
-    return null;
-  }
-
-  // Crear HTML para el iframe con el video integrado directamente
-  const iframeContent = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <meta charset="utf-8">
-      <style>
-        html, body {
-          margin: 0;
-          padding: 0;
-          width: 100%;
-          height: 100%;
-          overflow: hidden;
-          background: #000;
-        }
-        .video-container {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          position: relative;
-        }
-        video {
-          max-width: 100%;
-          max-height: 100%;
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .fallback {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          display: none;
-          flex-direction: column;
-          justify-content: center;
-          align-items: center;
-          color: white;
-          text-align: center;
-          padding: 20px;
-          background: #000;
-        }
-        video::-webkit-media-controls-timeline {
-          display: ${controls ? "block" : "none"};
-        }
-      </style>
-    </head>
-    <body>
-      <div class="video-container">
-        <video 
-          src="${src}" 
-          ${autoPlay ? "autoplay" : ""} 
-          ${muted ? "muted" : ""} 
-          ${loop ? "loop" : ""} 
-          ${controls ? "controls" : ""} 
-          playsinline
-          onloadeddata="document.getElementById('loading').style.display='none';"
-          onerror="handleVideoError()"
-        ></video>
-        <div id="loading" class="fallback">
-          <div>Cargando video...</div>
-        </div>
-        <div id="error" class="fallback">
-          <div>Error al cargar el video</div>
-          <div>Por favor intenta de nuevo</div>
-        </div>
-      </div>
-      <script>
-        function handleVideoError() {
-          document.getElementById('loading').style.display = 'none';
-          document.getElementById('error').style.display = 'flex';
-          window.parent.postMessage('video-error', '*');
-        }
-      </script>
-    </body>
-    </html>
-  `;
 
   return (
     <div
@@ -129,9 +103,30 @@ const VideoPlayer = ({
         width: "100%",
         height: "100%",
         overflow: "hidden",
+        background: "#000",
         ...style,
       }}
     >
+      {/* Video Element */}
+      <video
+        ref={videoRef}
+        src={src}
+        autoPlay={autoPlay}
+        muted={muted}
+        loop={loop}
+        controls={controls}
+        playsInline
+        className="w-full h-full object-contain"
+        style={{
+          display: isLoading || error ? "none" : "block",
+          background: "#000",
+        }}
+        onLoadedData={handleLoadedData}
+        onError={handleError}
+        onEnded={onEnded}
+      />
+
+      {/* Loading Indicator */}
       {isLoading && (
         <div
           style={{
@@ -164,6 +159,7 @@ const VideoPlayer = ({
         </div>
       )}
 
+      {/* Error Display */}
       {error && (
         <div
           style={{
@@ -180,9 +176,7 @@ const VideoPlayer = ({
             zIndex: 2,
           }}
         >
-          <div style={{ color: "white", marginBottom: "10px" }}>
-            Error al cargar el video
-          </div>
+          <div style={{ color: "white", marginBottom: "10px" }}>{error}</div>
           <button
             onClick={handleRetry}
             style={{
@@ -198,24 +192,6 @@ const VideoPlayer = ({
           </button>
         </div>
       )}
-
-      <iframe
-        id={frameId}
-        key={iframeKey}
-        src={`data:text/html;charset=utf-8,${encodeURIComponent(
-          iframeContent
-        )}`}
-        style={{
-          border: "none",
-          width: "100%",
-          height: "100%",
-          background: "#000",
-        }}
-        allow="autoplay; fullscreen"
-        frameBorder="0"
-        scrolling="no"
-        title="Video Player"
-      />
 
       <style jsx>{`
         @keyframes spin {
