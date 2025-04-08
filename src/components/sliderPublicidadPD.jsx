@@ -17,6 +17,10 @@ const AdvertisementSlider = ({
   console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ isPortrait:", isPortrait);
   console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ weatherData:", weatherData);
   console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ screenNumber:", screenNumber);
+  console.log(
+    "🚀 ~ sliderPublicidadPD.jsx:15 ~ advertisements:",
+    advertisements
+  );
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [opacity, setOpacity] = useState(1);
@@ -148,47 +152,6 @@ const AdvertisementSlider = ({
     }
   }, [rotateScreen]);
 
-  // Filtrar anuncios por orientación de manera estricta
-  const filteredAds = useMemo(() => {
-    if (!advertisements || advertisements.length === 0) return [];
-
-    const expectedValue = rotateScreen ? "vertical" : "horizontal";
-
-    // Imprimir los valores exactos para depuración
-    if (advertisements.length > 0 && advertisements[0].tipoPantalla) {
-      console.log(
-        "Caracteres en tipoPantalla:",
-        JSON.stringify(advertisements[0].tipoPantalla)
-      );
-      console.log(
-        "Caracteres en expectedValue:",
-        JSON.stringify(expectedValue)
-      );
-    }
-
-    // Filtrado más tolerante
-    const orientationFiltered = advertisements.filter((ad) => {
-      // Asegúrate que existe el campo y usa trim() para eliminar espacios
-      if (!ad.tipoPantalla) return false;
-
-      // Comparación normalizada
-      const adValue = ad.tipoPantalla.toString().toLowerCase().trim();
-      const matches = adValue === expectedValue;
-
-      console.log(
-        `Anuncio - tipoPantalla: '${adValue}', esperado: '${expectedValue}', coincide: ${matches}`
-      );
-      return matches;
-    });
-
-    console.log(`Filtrado de anuncios:`, {
-      total: advertisements.length,
-      filtrados: orientationFiltered.length,
-    });
-
-    return orientationFiltered;
-  }, [advertisements, rotateScreen]);
-
   // Format date based on language
   const formatDate = (lang) => {
     const now = new Date();
@@ -212,15 +175,19 @@ const AdvertisementSlider = ({
     }
   };
 
-  // Get current advertisement
+  // Get current advertisement - ahora usamos directamente los anuncios ya filtrados
   const getCurrentAd = () => {
-    if (!filteredAds || filteredAds.length === 0) return null;
-    return filteredAds[currentIndex];
+    if (!advertisements || advertisements.length === 0) return null;
+    return advertisements[currentIndex];
   };
 
   // Handle transition to next ad
   const moveToNextAd = () => {
-    if (!filteredAds || filteredAds.length <= 1 || transitioningRef.current)
+    if (
+      !advertisements ||
+      advertisements.length <= 1 ||
+      transitioningRef.current
+    )
       return;
 
     transitioningRef.current = true;
@@ -230,7 +197,7 @@ const AdvertisementSlider = ({
 
     // After fade out completes, change ad and fade in
     setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredAds.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
 
       // Small delay before starting fade in
       setTimeout(() => {
@@ -240,14 +207,14 @@ const AdvertisementSlider = ({
     }, 500); // Wait for fade out to complete
   };
 
-  // Reset index when filtered ads change
+  // Reset index when advertisements change
   useEffect(() => {
     setCurrentIndex(0);
-  }, [filteredAds.length]);
+  }, [advertisements.length]);
 
   // Set up timer for ad rotation
   useEffect(() => {
-    if (!filteredAds || filteredAds.length === 0) return;
+    if (!advertisements || advertisements.length === 0) return;
 
     const currentAd = getCurrentAd();
     if (!currentAd) return;
@@ -274,9 +241,9 @@ const AdvertisementSlider = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, filteredAds]);
+  }, [currentIndex, advertisements]);
 
-  if (!filteredAds || filteredAds.length === 0) {
+  if (!advertisements || advertisements.length === 0) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100">
         <p className="text-2xl text-gray-500">

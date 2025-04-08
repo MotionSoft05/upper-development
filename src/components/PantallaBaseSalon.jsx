@@ -67,6 +67,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     matchingDevice: null,
   });
   const [screenId, setScreenId] = useState("");
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -84,7 +85,6 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     };
     fetchUserData();
   }, [user]);
-  // Generar un ID de pantalla único y persistente
 
   console.log(
     "🚀 ~ PantallaBaseSalon.jsx:67 ~ BaseScreen ~ screenData:",
@@ -182,6 +182,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       return isWithinDateRange && isWithinTimeRange && matchesCompany;
     });
   }, []);
+
   useEffect(() => {
     // Intentar recuperar screenId del localStorage para consistencia entre recargas
     const storageKey = `pantalla_salon_${screenNumber}`;
@@ -218,28 +219,36 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     []
   );
 
-  const loadAds = useCallback(async (userCompany) => {
-    try {
-      const adsRef = collection(db, "Publicidad");
-      const adsQuery = query(
-        adsRef,
-        where("empresa", "==", userCompany),
-        where("tipo", "==", "salon")
-      );
+  // Filtrar anuncios basados en el número de pantalla
+  const filterAdsForScreen = useCallback((ads, screenNumber, screenNames) => {
+    if (!ads || !ads.length || !screenNames) return [];
 
-      const adsSnapshot = await getDocs(adsQuery);
-      const ads = [];
+    // Obtener el nombre de pantalla para este número de pantalla
+    const screenName = `salon${screenNumber}`;
+    const screenDisplayName = screenNames[screenNumber - 1];
 
-      adsSnapshot.forEach((doc) => {
-        ads.push({ id: doc.id, ...doc.data() });
-      });
+    console.log(
+      `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}`
+    );
 
-      return ads;
-    } catch (error) {
-      console.error("Error loading ads:", error);
-      return [];
-    }
+    return ads.filter((ad) => {
+      // Casos de filtro:
+      // 1. Si destino es "todas", mostrar en todas las pantallas
+      if (ad.destino === "todas") {
+        return true;
+      }
+
+      // 2. Si destino es "especificas", verificar si esta pantalla está en pantallasAsignadas
+      if (ad.destino === "especificas" && ad.pantallasAsignadas) {
+        const isAssigned = ad.pantallasAsignadas.includes(screenName);
+        console.log(`Ad ${ad.nombre}: asignado a esta pantalla: ${isAssigned}`);
+        return isAssigned;
+      }
+
+      return false;
+    });
   }, []);
+
   // Integrar hook de heartbeat
   const heartbeat = useHeartbeat({
     screenId,
@@ -408,13 +417,25 @@ const BaseScreen = ({ screenNumber, empresa }) => {
           adsRef,
           (adsSnapshot) => {
             if (!isMounted.current) return;
-            const ads = adsSnapshot.docs.map((doc) => ({
+            const allAds = adsSnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
+
+            // Filtrar anuncios específicos para esta pantalla
+            const filteredAds = filterAdsForScreen(
+              allAds,
+              screenNumber,
+              screenNames
+            );
+
+            console.log(
+              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`
+            );
+
             setScreenData((prev) => ({
               ...prev,
-              ads,
+              ads: filteredAds,
             }));
           },
           (error) => {
@@ -571,6 +592,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     findMatchingDevice,
     getHourInMinutes,
     convertTimeToMinutes,
+    filterAdsForScreen,
   ]); // Removed currentHour dependency
 
   // Schedule updates at the start of each minute

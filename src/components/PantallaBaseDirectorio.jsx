@@ -1,7 +1,6 @@
 "use client";
 import {
   collection,
-  getDocs,
   where,
   query,
   doc,
@@ -118,6 +117,71 @@ export default function BaseDirectorioClient({ id, empresa }) {
     const defaultOrientation = window.innerHeight > window.innerWidth;
     setIsPortrait(defaultOrientation);
   }, []);
+
+  // Filtrar anuncios basados en el número de pantalla y orientación
+  const filterAdsForScreen = useCallback(
+    (ads, screenNumber, screenNames, currentIsPortrait) => {
+      if (!ads || !ads.length || !screenNames) return [];
+
+      // Obtener el nombre de pantalla para este número de pantalla
+      const screenName = `dir${screenNumber}`;
+      const screenDisplayName = screenNames[screenNumber - 1];
+
+      // Obtener la orientación esperada para el filtrado
+      const expectedOrientation = currentIsPortrait ? "vertical" : "horizontal";
+
+      console.log(
+        `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}, orientación: ${expectedOrientation}`
+      );
+
+      return ads.filter((ad) => {
+        // PASO 1: Verificar orientación primero (aplica a todas las publicidades)
+        let orientationMatches = true;
+        if (ad.tipoPantalla && ad.tipoPantalla.length > 0) {
+          // Normalizar la comparación para evitar problemas de espacios o mayúsculas
+          const adOrientation = ad.tipoPantalla[0]
+            .toString()
+            .toLowerCase()
+            .trim();
+          orientationMatches = adOrientation === expectedOrientation;
+
+          console.log(
+            `Ad ${ad.nombre}: orientación anuncio: ${adOrientation}, orientación pantalla: ${expectedOrientation}, coincide: ${orientationMatches}`
+          );
+
+          // Si la orientación no coincide, descartamos inmediatamente
+          if (!orientationMatches) {
+            return false;
+          }
+        }
+
+        // PASO 2: Verificar destino
+        // Si es "todas", mostrar en todas las pantallas (ya verificamos orientación)
+        if (ad.destino === "todas") {
+          console.log(
+            `Ad ${ad.nombre}: destino 'todas', orientación correcta: ${orientationMatches}`
+          );
+          return true;
+        }
+
+        // Si destino es "especificas", verificar si esta pantalla está en pantallasAsignadas
+        if (ad.destino === "especificas" && ad.pantallasAsignadas) {
+          const isAssigned = ad.pantallasAsignadas.includes(screenName);
+          console.log(
+            `Ad ${
+              ad.nombre
+            }: destino 'especificas', está asignado: ${isAssigned}, pantalla actual: ${screenName}, pantallas asignadas: ${JSON.stringify(
+              ad.pantallasAsignadas
+            )}`
+          );
+          return isAssigned;
+        }
+
+        return false;
+      });
+    },
+    []
+  );
 
   // Obtiene la configuración de orientación para esta pantalla específica
   const getScreenOrientation = useCallback(
@@ -348,26 +412,6 @@ export default function BaseDirectorioClient({ id, empresa }) {
       events: filteredEvents,
     }));
   }, [screenData.usuario, screenNumber]);
-
-  const loadAds = useCallback(
-    async (userCompany) => {
-      try {
-        const adsRef = collection(db, "Publicidad");
-        const adsQuery = query(
-          adsRef,
-          where("empresa", "==", userCompany),
-          where("tipo", "==", "directorio")
-        );
-
-        const adsSnapshot = await getDocs(adsQuery);
-        return adsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      } catch (error) {
-        console.error(t("errors.adsLoading"), error);
-        return [];
-      }
-    },
-    [t]
-  );
 
   // Effects
   useEffect(() => {
@@ -678,17 +722,30 @@ export default function BaseDirectorioClient({ id, empresa }) {
           (snapshot) => {
             if (!isMounted.current) return;
 
-            const ads = snapshot.docs.map((doc) => ({
+            const allAds = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
 
             console.log("\n=== PUBLICIDADES RECIBIDAS DE FIRESTORE ===");
-            console.log("Total publicidades:", ads.length);
+            console.log("Total publicidades:", allAds.length);
+
+            // Filtrar anuncios según orientación y pantalla específica
+            const currentOrientation = isPortrait;
+            const filteredAds = filterAdsForScreen(
+              allAds,
+              screenNumber,
+              screenNames,
+              currentOrientation
+            );
+
+            console.log(
+              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`
+            );
 
             setScreenData((prev) => ({
               ...prev,
-              ads,
+              ads: filteredAds,
             }));
 
             // Solo marcamos como cargado después de obtener todos los datos iniciales
@@ -717,7 +774,16 @@ export default function BaseDirectorioClient({ id, empresa }) {
       isMounted.current = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [user, db, screenNumber, t, getScreenOrientation]);
+  }, [
+    user,
+    db,
+    screenNumber,
+    t,
+    getScreenOrientation,
+    filterAdsForScreen,
+    isPortrait,
+  ]);
+
   useEffect(() => {
     // Intentar recuperar screenId del localStorage para consistencia entre recargas
     const storageKey = `pantalla_directorio_${screenNumber}`;
@@ -731,7 +797,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
 
     setScreenId(storedId);
   }, [screenNumber]);
-  // Integrar hook de heartbeat
+
   // Integrar hook de heartbeat
   const heartbeat = useHeartbeat({
     screenId,
@@ -750,6 +816,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       console.log("Último heartbeat:", heartbeat.lastBeat);
     }
   }, [heartbeat.isConnected, heartbeat.lastBeat]);
+
   // Rendering states
   if (!user) {
     return <LogIn url={pathname} />;
@@ -849,6 +916,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       currentTime={screenData.currentTime}
       weatherData={weatherData}
       isPortrait={isPortrait}
+      screenNumber={screenNumber}
     />
   );
 }

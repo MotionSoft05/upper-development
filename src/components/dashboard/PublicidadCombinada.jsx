@@ -6,7 +6,6 @@ import "firebase/compat/storage";
 import "firebase/compat/firestore";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import PublicidadList from "./PublicidadList";
-import PlaylistManager from "./PlaylistManager.jsx";
 import PublicidadForm from "./PublicidadForm";
 
 // Inicializar Firebase si no está inicializado
@@ -29,9 +28,6 @@ const PublicidadCombinada = () => {
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [pantallas, setPantallas] = useState([]);
-  const [playlists, setPlaylists] = useState([]);
-  const [createPlaylistMode, setCreatePlaylistMode] = useState(false);
-  const [editingPlaylistId, setEditingPlaylistId] = useState(null);
 
   // Cargar datos de usuario al iniciar
   useEffect(() => {
@@ -45,7 +41,6 @@ const PublicidadCombinada = () => {
         await obtenerEmpresas();
         await obtenerPublicidades(empresaUsuario, "todos");
         await obtenerPantallas(empresaUsuario);
-        await obtenerPlaylists(empresaUsuario);
       } else {
         console.warn(t("advertisement.salon.userNull"));
       }
@@ -72,7 +67,6 @@ const PublicidadCombinada = () => {
     setEmpresaSeleccionada(empresaSeleccionada);
     await obtenerPublicidades(empresaSeleccionada, "todos");
     await obtenerPantallas(empresaSeleccionada);
-    await obtenerPlaylists(empresaSeleccionada);
   };
 
   const obtenerPantallas = async (empresa) => {
@@ -194,7 +188,6 @@ const PublicidadCombinada = () => {
             mediaType: imageUrl ? "image" : "video",
             destino: data.destino || "todas",
             pantallasAsignadas: data.pantallasAsignadas || [],
-            esParteDePlaylist: data.esParteDePlaylist || false,
           };
         })
       );
@@ -211,91 +204,6 @@ const PublicidadCombinada = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const obtenerPlaylists = async (empresa) => {
-    try {
-      if (!empresa) {
-        setPlaylists([]);
-        return;
-      }
-
-      // Buscar playlists en Firestore
-      const playlistsSnapshot = await db
-        .collection("Playlists")
-        .where("empresa", "==", empresa)
-        .get();
-
-      if (playlistsSnapshot.empty) {
-        console.log("No hay playlists registradas para esta empresa");
-        setPlaylists([]);
-        return;
-      }
-
-      const playlistsData = await Promise.all(
-        playlistsSnapshot.docs.map(async (doc) => {
-          const data = doc.data();
-
-          // Obtenemos información sobre los elementos de la playlist
-          const elementosConInfo = await Promise.all(
-            (data.elementos || []).map(async (elemento) => {
-              try {
-                if (elemento.publicidadId) {
-                  const publicidadDoc = await db
-                    .collection("Publicidad")
-                    .doc(elemento.publicidadId)
-                    .get();
-                  if (publicidadDoc.exists) {
-                    const publicidadData = publicidadDoc.data();
-                    return {
-                      ...elemento,
-                      publicidad: {
-                        id: publicidadDoc.id,
-                        nombre: publicidadData.nombre,
-                        mediaUrl:
-                          publicidadData.imageUrl || publicidadData.videoUrl,
-                        mediaType: publicidadData.imageUrl ? "image" : "video",
-                      },
-                    };
-                  }
-                }
-                return elemento;
-              } catch (error) {
-                console.error(
-                  "Error al obtener publicidad de la playlist:",
-                  error
-                );
-                return elemento;
-              }
-            })
-          );
-
-          return {
-            id: doc.id,
-            ...data,
-            elementos: elementosConInfo,
-          };
-        })
-      );
-
-      // Ordenar por fecha de creación
-      playlistsData.sort((a, b) => {
-        const timeA = a.fechaCreacion ? a.fechaCreacion.toMillis() : 0;
-        const timeB = b.fechaCreacion ? b.fechaCreacion.toMillis() : 0;
-        return timeB - timeA; // Orden descendente
-      });
-
-      setPlaylists(playlistsData);
-    } catch (error) {
-      console.error("Error al obtener playlists:", error);
-      setPlaylists([]);
-    }
-  };
-
-  const handleEditarPlaylist = (playlist) => {
-    setEditingPlaylistId(playlist.id);
-    setCreatePlaylistMode(true);
-    setActiveTab("crear");
   };
 
   const handleEliminarPublicidad = async (publicidadId) => {
@@ -325,81 +233,8 @@ const PublicidadCombinada = () => {
     }
   };
 
-  const handleEliminarPlaylist = async (playlistId) => {
-    try {
-      const confirmacion = window.confirm(
-        "¿Está seguro que desea eliminar esta playlist?"
-      );
-      if (!confirmacion) return;
-
-      setIsLoading(true);
-
-      // Obtener la playlist para ver qué elementos contiene
-      const playlistDoc = await db
-        .collection("Playlists")
-        .doc(playlistId)
-        .get();
-      if (playlistDoc.exists) {
-        const playlistData = playlistDoc.data();
-        const elementos = playlistData.elementos || [];
-
-        // Opcionalmente, eliminar también las publicidades individuales
-        const confirmEliminarPublicidades = window.confirm(
-          "¿Desea eliminar también las publicidades individuales que forman parte de esta playlist?"
-        );
-
-        if (confirmEliminarPublicidades) {
-          // Eliminar cada publicidad de la playlist
-          for (const elemento of elementos) {
-            if (elemento.publicidadId) {
-              try {
-                // Comprobar si la publicidad solo está en esta playlist
-                const publicidadDoc = await db
-                  .collection("Publicidad")
-                  .doc(elemento.publicidadId)
-                  .get();
-                if (
-                  publicidadDoc.exists &&
-                  publicidadDoc.data().esParteDePlaylist
-                ) {
-                  await db
-                    .collection("Publicidad")
-                    .doc(elemento.publicidadId)
-                    .delete();
-                }
-              } catch (error) {
-                console.error(
-                  "Error al eliminar publicidad de playlist:",
-                  error
-                );
-              }
-            }
-          }
-        }
-      }
-
-      // Eliminar la playlist
-      await db.collection("Playlists").doc(playlistId).delete();
-
-      setSuccessMessage("Playlist eliminada con éxito");
-      setTimeout(() => setSuccessMessage(null), 3000);
-
-      // Actualizar listas
-      const empresa = empresaSeleccionada || empresaUsuario;
-      await obtenerPlaylists(empresa);
-      await obtenerPublicidades(empresa, "todos");
-    } catch (error) {
-      console.error("Error al eliminar playlist:", error);
-      setSuccessMessage("Error al eliminar la playlist");
-      setTimeout(() => setSuccessMessage(null), 3000);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   const resetForm = () => {
-    setCreatePlaylistMode(false);
-    setEditingPlaylistId(null);
+    // Mantener este método aunque esté vacío ya que podría usarse en algún lugar
   };
 
   return (
@@ -438,27 +273,6 @@ const PublicidadCombinada = () => {
               </svg>
               Publicidades
               {activeTab === "listado" && (
-                <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("playlists")}
-              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base relative ${
-                activeTab === "playlists"
-                  ? "text-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              <svg
-                className="inline-block w-5 h-5 mr-1"
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
-              </svg>
-              Playlists
-              {activeTab === "playlists" && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
               )}
             </button>
@@ -608,32 +422,15 @@ const PublicidadCombinada = () => {
             />
           )}
 
-          {activeTab === "playlists" && (
-            <PlaylistManager
-              playlists={playlists}
-              pantallas={pantallas}
-              onEdit={handleEditarPlaylist}
-              onDelete={handleEliminarPlaylist}
-              setActiveTab={setActiveTab}
-              setCreatePlaylistMode={setCreatePlaylistMode}
-              resetForm={resetForm}
-              t={t}
-            />
-          )}
-
           {activeTab === "crear" && (
             <PublicidadForm
-              createPlaylistMode={createPlaylistMode}
-              editingPlaylistId={editingPlaylistId}
               publicidades={publicidades}
-              playlists={playlists}
               pantallas={pantallas}
               empresaSeleccionada={empresaSeleccionada}
               empresaUsuario={empresaUsuario}
               setActiveTab={setActiveTab}
               setSuccessMessage={setSuccessMessage}
               obtenerPublicidades={obtenerPublicidades}
-              obtenerPlaylists={obtenerPlaylists}
               resetForm={resetForm}
               t={t}
               db={db}
@@ -667,11 +464,6 @@ const PublicidadCombinada = () => {
                 <p>
                   {t("advertisement.infoText") ||
                     "Las imágenes o videos que agregue se mostrarán cuando no haya eventos programados en las pantallas. Puede agregar hasta 10 elementos por tipo de pantalla."}
-                </p>
-                <p className="mt-2">
-                  Utilice playlists para definir secuencias de contenido que se
-                  mostrarán en orden. Es ideal para campañas de marketing o
-                  información que requiere múltiples pantallas secuenciales.
                 </p>
               </div>
             </div>
