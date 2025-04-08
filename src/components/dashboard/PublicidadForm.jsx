@@ -26,6 +26,7 @@ function PublicidadForm({
     minutos: 0,
     segundos: 10,
   });
+  const [videosHabilitados, setVideosHabilitados] = useState(false);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -40,6 +41,14 @@ function PublicidadForm({
     if (!file) return;
 
     const isVideo = file.type.startsWith("video/");
+
+    // Verificar si los videos están deshabilitados
+    if (isVideo && !videosHabilitados) {
+      setSuccessMessage("Los videos están temporalmente deshabilitados");
+      setTimeout(() => setSuccessMessage(null), 3000);
+      return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -227,7 +236,13 @@ function PublicidadForm({
       nombre.trim() !== ""
     );
   };
-
+  const toggleVideosHabilitados = () => {
+    setVideosHabilitados((prev) => !prev);
+    setSuccessMessage(
+      `Videos ${!videosHabilitados ? "habilitados" : "deshabilitados"}`
+    );
+    setTimeout(() => setSuccessMessage(null), 3000);
+  };
   // Reemplaza la definición actual de pantallasFiltradas con esta
   const pantallasFiltradas = useMemo(() => {
     if (tipoPublicidad === "salon") {
@@ -331,10 +346,34 @@ function PublicidadForm({
       <div className="max-w-3xl mx-auto">
         <div className="bg-white shadow overflow-hidden sm:rounded-lg">
           <div className="px-4 py-5 sm:p-6">
-            {/* Título del formulario */}
-            <h3 className="text-lg font-medium leading-6 text-gray-900 mb-4">
-              Crear Nueva Publicidad
-            </h3>
+            {/* Header con título e interruptor de videos */}
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-medium leading-6 text-gray-900">
+                Crear Nueva Publicidad
+              </h3>
+              {/* 
+              <div className="flex items-center">
+                <span className="text-sm text-gray-700 mr-2">
+                  Videos {videosHabilitados ? "habilitados" : "deshabilitados"}
+                </span>
+                <button
+                  type="button"
+                  onClick={toggleVideosHabilitados}
+                  className={`relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    videosHabilitados ? "bg-blue-600" : "bg-gray-200"
+                  }`}
+                >
+                  <span className="sr-only">
+                    {videosHabilitados ? "Deshabilitar" : "Habilitar"} videos
+                  </span>
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200 ${
+                      videosHabilitados ? "translate-x-5" : "translate-x-0"
+                    }`}
+                  />
+                </button>
+              </div> */}
+            </div>
 
             {/* Nombre */}
             <div className="mb-6">
@@ -828,6 +867,35 @@ function PublicidadForm({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Imagen o video
               </label>
+
+              {/* Mensaje de advertencia para videos deshabilitados */}
+              {!videosHabilitados && (
+                <div className="mb-2 bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <svg
+                        className="h-5 w-5 text-yellow-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-sm text-yellow-700">
+                        La subida de videos está temporalmente deshabilitada.
+                        Solo se permiten imágenes.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               <div className="mt-1 flex items-center justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
                 <div className="space-y-1 text-center">
                   {mediaPreview ? (
@@ -904,7 +972,9 @@ function PublicidadForm({
                         <p className="pl-1">o arrastrar y soltar</p>
                       </div>
                       <p className="text-xs text-gray-500">
-                        PNG, JPG, GIF, MP4, WEBM hasta 10MB
+                        {videosHabilitados
+                          ? "PNG, JPG, GIF, MP4, WEBM hasta 10MB"
+                          : "PNG, JPG, GIF hasta 10MB. Videos deshabilitados."}
                       </p>
                     </>
                   )}

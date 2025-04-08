@@ -76,59 +76,111 @@ const PublicidadCombinada = () => {
         return;
       }
 
-      // Aquí asumimos que existe una colección "Pantallas" en Firestore
+      // Primero, obtener pantallas de la colección "Pantallas"
       const pantallasSnapshot = await db
         .collection("Pantallas")
         .where("empresa", "==", empresa)
         .get();
 
-      // Si no hay pantallas en la base de datos, podrías crear algunas de demo
-      if (pantallasSnapshot.empty) {
-        console.log("No hay pantallas registradas para esta empresa");
-        const pantallasDemoSalon = [
-          {
-            id: "salon1",
-            nombre: "Salón Principal",
-            tipo: "salon",
-            ubicacion: "Lobby",
-            activa: true,
-          },
-          {
-            id: "salon2",
-            nombre: "Salón Eventos",
-            tipo: "salon",
-            ubicacion: "Piso 2",
-            activa: true,
-          },
-        ];
+      let pantallasData = [];
 
-        const pantallasDemoDirectorio = [
-          {
-            id: "dir1",
-            nombre: "Directorio Recepción",
-            tipo: "directorio",
-            orientacion: "horizontal",
-            ubicacion: "Entrada",
-            activa: true,
-          },
-          {
-            id: "dir2",
-            nombre: "Directorio Ascensores",
-            tipo: "directorio",
-            orientacion: "vertical",
-            ubicacion: "Piso 1",
-            activa: true,
-          },
-        ];
-
-        setPantallas([...pantallasDemoSalon, ...pantallasDemoDirectorio]);
-        return;
+      if (!pantallasSnapshot.empty) {
+        pantallasData = pantallasSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
       }
 
-      const pantallasData = pantallasSnapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      // Ahora, obtener información adicional de pantallas desde el usuario
+      try {
+        const usuariosSnapshot = await db
+          .collection("usuarios")
+          .where("empresa", "==", empresa)
+          .get();
+
+        if (!usuariosSnapshot.empty) {
+          const usuarioData = usuariosSnapshot.docs[0].data();
+
+          // Obtener los nombres de las pantallas de salón
+          const salonPantallas = usuarioData.nombrePantallas || [];
+          const salonPantallasArray = Array.isArray(salonPantallas)
+            ? salonPantallas
+            : Object.values(salonPantallas);
+
+          // Obtener los nombres de las pantallas de directorio
+          const directorioPantallas =
+            usuarioData.nombrePantallasDirectorio || [];
+          const directorioPantallasArray = Array.isArray(directorioPantallas)
+            ? directorioPantallas
+            : Object.values(directorioPantallas);
+
+          // Agregar esta información al objeto pantallas para que esté disponible
+          // en PublicidadList
+          const pantallasCompletas = {
+            ...pantallasData,
+            nombrePantallas: salonPantallasArray,
+            nombrePantallasDirectorio: directorioPantallasArray,
+          };
+
+          // Crear entradas para cada pantalla de salón si no existe ya
+          salonPantallasArray.forEach((nombre, index) => {
+            const id = `salon${index + 1}`;
+            // Verificar si ya existe una pantalla con este ID
+            const existente = pantallasData.find((p) => p.id === id);
+            if (!existente) {
+              pantallasData.push({
+                id,
+                nombre,
+                tipo: "salon",
+                ubicacion: `Salón ${index + 1}`,
+                activa: true,
+              });
+            }
+          });
+
+          // Crear entradas para cada pantalla de directorio si no existe ya
+          directorioPantallasArray.forEach((nombre, index) => {
+            const id = `dir${index + 1}`;
+            // Verificar si ya existe una pantalla con este ID
+            const existente = pantallasData.find((p) => p.id === id);
+            if (!existente) {
+              pantallasData.push({
+                id,
+                nombre,
+                tipo: "directorio",
+                orientacion: index % 2 === 0 ? "horizontal" : "vertical",
+                ubicacion: `Directorio ${index + 1}`,
+                activa: true,
+              });
+            }
+          });
+
+          // Incluir las propiedades nombrePantallas y nombrePantallasDirectorio en el objeto pantallas
+          pantallasData.nombrePantallas = salonPantallasArray;
+          pantallasData.nombrePantallasDirectorio = directorioPantallasArray;
+        }
+      } catch (error) {
+        console.error(
+          "Error al obtener información de pantallas desde usuario:",
+          error
+        );
+      }
+
+      // Si no hay pantallas, usar los datos de demo
+      if (pantallasData.length === 0) {
+        console.log(
+          "No hay pantallas registradas para esta empresa, usando datos de demo"
+        );
+
+        pantallasData = [...pantallasDemoSalon, ...pantallasDemoDirectorio];
+
+        // Incluir nombres como propiedades
+        pantallasData.nombrePantallas = ["Salón Principal", "Salón Eventos"];
+        pantallasData.nombrePantallasDirectorio = [
+          "Directorio Recepción",
+          "Directorio Ascensores",
+        ];
+      }
 
       setPantallas(pantallasData);
     } catch (error) {

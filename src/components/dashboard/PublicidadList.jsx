@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
 function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
+  console.log(
+    "🚀 ~ PublicidadList.jsx:4 ~ PublicidadList ~ publicidades:",
+    publicidades
+  );
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchTerm, setSearchTerm] = useState("");
@@ -54,84 +58,89 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
     setExpandedItemId(expandedItemId === id ? null : id);
   };
 
-  // Función auxiliar para obtener el nombre de la pantalla
-  const getNombrePantalla = (pantallaId, tipo) => {
-    // Mapa de nombres conocidos (especialmente para los casos problemáticos)
-    const nombresConocidos = {
-      // Para salón
-      salon1: "Pantalla Salón 1 Test",
-      salon2: "Pantalla Salón 2 Test",
-      salon3: "Pantalla Salón 3 Test",
-      salon4: "Pantalla Salón 4 Test",
-      salon5: "Pantalla Salón 5 Test",
-      // Para directorio
-      dir1: "Salon 'Maria' 1º",
-      dir2: "Salon 'Antoine' 2º",
-      dir3: "Pantalla Directorio 3 Test",
-      dir5: "Pantalla Directorio 5 Test",
+  const getNombrePantalla = (pantallaId, tipo, pantallas) => {
+    // Si es un ID del tipo "salon1" o "salon2"
+    if (typeof pantallaId === "string" && pantallaId.startsWith("salon")) {
+      const index = parseInt(pantallaId.replace("salon", ""), 10) - 1;
+
+      // Primero buscar en el array de pantallas por ID exacto
+      const pantallaPorId =
+        Array.isArray(pantallas) && pantallas.find((p) => p.id === pantallaId);
+
+      if (pantallaPorId) {
+        return {
+          nombre: pantallaPorId.nombre,
+          ubicacion: pantallaPorId.ubicacion || "",
+        };
+      }
+
+      // Si no encontramos por ID, buscar en las propiedades de salón si existen
+      if (
+        pantallas &&
+        pantallas.nombrePantallas &&
+        Array.isArray(pantallas.nombrePantallas) &&
+        index >= 0 &&
+        index < pantallas.nombrePantallas.length
+      ) {
+        return {
+          nombre: pantallas.nombrePantallas[index],
+          ubicacion: `Salón ${index + 1}`,
+        };
+      }
+    }
+
+    // Si es un ID del tipo "dir1" o "dir2"
+    if (typeof pantallaId === "string" && pantallaId.startsWith("dir")) {
+      const index = parseInt(pantallaId.replace("dir", ""), 10) - 1;
+
+      // Primero buscar en el array de pantallas por ID exacto
+      const pantallaPorId =
+        Array.isArray(pantallas) && pantallas.find((p) => p.id === pantallaId);
+
+      if (pantallaPorId) {
+        return {
+          nombre: pantallaPorId.nombre,
+          ubicacion: pantallaPorId.ubicacion || "",
+          orientacion: pantallaPorId.orientacion || "",
+        };
+      }
+
+      // Si no encontramos por ID, buscar en las propiedades de directorio si existen
+      if (
+        pantallas &&
+        pantallas.nombrePantallasDirectorio &&
+        Array.isArray(pantallas.nombrePantallasDirectorio) &&
+        index >= 0 &&
+        index < pantallas.nombrePantallasDirectorio.length
+      ) {
+        return {
+          nombre: pantallas.nombrePantallasDirectorio[index],
+          ubicacion: `Directorio ${index + 1}`,
+          orientacion: index % 2 === 0 ? "horizontal" : "vertical",
+        };
+      }
+
+      // Para las pantallas de demo que se cargan cuando no hay en Firestore
+      if (pantallaId === "dir1") {
+        return {
+          nombre: "Directorio Recepción",
+          ubicacion: "Entrada",
+          orientacion: "horizontal",
+        };
+      } else if (pantallaId === "dir2") {
+        return {
+          nombre: "Directorio Ascensores",
+          ubicacion: "Piso 1",
+          orientacion: "vertical",
+        };
+      }
+    }
+
+    // Si no pudimos encontrar información detallada, devolver algo genérico pero útil
+    return {
+      nombre: `Pantalla ${pantallaId}`,
+      ubicacion: tipo === "salon" ? "Salón" : "Directorio",
     };
-
-    // 1. Primero intentamos con nombres conocidos específicos
-    if (typeof pantallaId === "string" && nombresConocidos[pantallaId]) {
-      return nombresConocidos[pantallaId];
-    }
-
-    // 2. Buscamos en la lista de pantallas proporcionada como array de objetos
-    if (pantallas && Array.isArray(pantallas)) {
-      const pantalla = pantallas.find((p) => p.id === pantallaId);
-      if (pantalla && pantalla.nombre) {
-        return pantalla.nombre;
-      }
-    }
-
-    // 3. Intentamos recuperar del objeto de pantallas si tiene las propiedades adecuadas
-    if (typeof pantallaId === "string") {
-      // Para pantallas de salón
-      if (pantallaId.match(/^salon\d+$/i)) {
-        const numero = parseInt(pantallaId.replace(/^salon/i, ""), 10);
-
-        // Captura explícita "salon1" y "salon2" para los casos problemáticos
-        if (numero === 1) return "Pantalla Salón 1 Test";
-        if (numero === 2) return "Pantalla Salón 2 Test";
-
-        // Intentar obtener el nombre del listado según el índice
-        if (
-          pantallas &&
-          pantallas.nombrePantallas &&
-          Array.isArray(pantallas.nombrePantallas) &&
-          numero - 1 < pantallas.nombrePantallas.length
-        ) {
-          return pantallas.nombrePantallas[numero - 1];
-        }
-
-        // Retorno genérico formateado
-        return `Pantalla Salón ${numero} Test`;
-      }
-      // Para pantallas de directorio
-      else if (pantallaId.match(/^dir\d+$/i)) {
-        const numero = parseInt(pantallaId.replace(/^dir/i, ""), 10);
-
-        // Captura explícita casos problemáticos
-        if (numero === 1) return "Salon 'Maria' 1º";
-        if (numero === 2) return "Salon 'Antoine' 2º";
-
-        // Intentar obtener el nombre del listado según el índice
-        if (
-          pantallas &&
-          pantallas.nombrePantallasDirectorio &&
-          Array.isArray(pantallas.nombrePantallasDirectorio) &&
-          numero - 1 < pantallas.nombrePantallasDirectorio.length
-        ) {
-          return pantallas.nombrePantallasDirectorio[numero - 1];
-        }
-
-        // Retorno genérico formateado
-        return `Pantalla Directorio ${numero} Test`;
-      }
-    }
-
-    // Si no podemos determinar un nombre mejor, devolvemos el ID
-    return pantallaId;
   };
 
   return (
@@ -632,67 +641,13 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                                             <div className="mt-1 space-y-2">
                                               {item.pantallasAsignadas.map(
                                                 (pantallaId, index) => {
-                                                  // Obtener el nombre completo de la pantalla
-                                                  const nombreCompleto =
+                                                  // Obtener información de la pantalla
+                                                  const pantallaInfo =
                                                     getNombrePantalla(
                                                       pantallaId,
-                                                      item.tipo
+                                                      item.tipo,
+                                                      pantallas
                                                     );
-
-                                                  // Mapa de ubicaciones específicas para casos problemáticos
-                                                  const ubicacionesEspeciales =
-                                                    {
-                                                      salon1: "Salón 1",
-                                                      salon2: "Salón 2",
-                                                      dir1: "Directorio 1",
-                                                      dir2: "Directorio 2",
-                                                    };
-
-                                                  // Extraer información para la ubicación
-                                                  let ubicacion = "";
-
-                                                  // Primero intentar con ubicaciones especiales conocidas
-                                                  if (
-                                                    typeof pantallaId ===
-                                                      "string" &&
-                                                    ubicacionesEspeciales[
-                                                      pantallaId
-                                                    ]
-                                                  ) {
-                                                    ubicacion =
-                                                      ubicacionesEspeciales[
-                                                        pantallaId
-                                                      ];
-                                                  }
-                                                  // Si no, extraer del ID
-                                                  else if (
-                                                    typeof pantallaId ===
-                                                    "string"
-                                                  ) {
-                                                    if (
-                                                      pantallaId.match(
-                                                        /^salon\d+$/i
-                                                      )
-                                                    ) {
-                                                      const numero =
-                                                        pantallaId.replace(
-                                                          /^salon/i,
-                                                          ""
-                                                        );
-                                                      ubicacion = `Salón ${numero}`;
-                                                    } else if (
-                                                      pantallaId.match(
-                                                        /^dir\d+$/i
-                                                      )
-                                                    ) {
-                                                      const numero =
-                                                        pantallaId.replace(
-                                                          /^dir/i,
-                                                          ""
-                                                        );
-                                                      ubicacion = `Directorio ${numero}`;
-                                                    }
-                                                  }
 
                                                   return (
                                                     <div
@@ -701,11 +656,18 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                                                     >
                                                       <div className="ml-3 text-sm">
                                                         <span className="font-medium text-gray-700">
-                                                          {nombreCompleto}
+                                                          {pantallaInfo.nombre}
                                                         </span>
                                                         <p className="text-gray-500 text-xs">
-                                                          {ubicacion &&
-                                                            `Ubicación: ${ubicacion}`}
+                                                          {pantallaInfo.ubicacion &&
+                                                            `Ubicación: ${pantallaInfo.ubicacion}`}
+                                                          {pantallaInfo.orientacion &&
+                                                            ` • ${
+                                                              pantallaInfo.orientacion ===
+                                                              "horizontal"
+                                                                ? "Horizontal"
+                                                                : "Vertical"
+                                                            }`}
                                                         </p>
                                                       </div>
                                                     </div>
