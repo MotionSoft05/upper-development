@@ -742,7 +742,7 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                                   </div>
                                 </dl>
                               </div>
-                              <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                              {/* <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
                                 <button
                                   type="button"
                                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 mr-2"
@@ -756,7 +756,7 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                                 >
                                   Eliminar
                                 </button>
-                              </div>
+                              </div> */}
                             </div>
                           </div>
                         </div>
