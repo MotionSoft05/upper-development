@@ -172,6 +172,44 @@ const PublicidadCombinada = () => {
           "No hay pantallas registradas para esta empresa, usando datos de demo"
         );
 
+        // Datos demo para pantallas de salón
+        const pantallasDemoSalon = [
+          {
+            id: "salon1",
+            nombre: "Salón Principal",
+            tipo: "salon",
+            ubicacion: "Lobby",
+            activa: true,
+          },
+          {
+            id: "salon2",
+            nombre: "Salón Eventos",
+            tipo: "salon",
+            ubicacion: "Piso 2",
+            activa: true,
+          },
+        ];
+
+        // Datos demo para pantallas de directorio
+        const pantallasDemoDirectorio = [
+          {
+            id: "dir1",
+            nombre: "Directorio Recepción",
+            tipo: "directorio",
+            orientacion: "horizontal",
+            ubicacion: "Entrada",
+            activa: true,
+          },
+          {
+            id: "dir2",
+            nombre: "Directorio Ascensores",
+            tipo: "directorio",
+            orientacion: "vertical",
+            ubicacion: "Piso 1",
+            activa: true,
+          },
+        ];
+
         pantallasData = [...pantallasDemoSalon, ...pantallasDemoDirectorio];
 
         // Incluir nombres como propiedades
@@ -279,6 +317,41 @@ const PublicidadCombinada = () => {
     } catch (error) {
       console.error("Error al eliminar publicidad:", error);
       setSuccessMessage("Error al eliminar la publicidad");
+      setTimeout(() => setSuccessMessage(null), 3000);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Nueva función para editar publicidad
+  const handleEditarPublicidad = async (publicidadActualizada) => {
+    try {
+      setIsLoading(true);
+
+      // Actualizar el documento en Firestore
+      await db
+        .collection("Publicidad")
+        .doc(publicidadActualizada.id)
+        .update({
+          nombre: publicidadActualizada.nombre,
+          horas: publicidadActualizada.horas,
+          minutos: publicidadActualizada.minutos,
+          segundos: publicidadActualizada.segundos,
+          destino: publicidadActualizada.destino,
+          pantallasAsignadas: publicidadActualizada.pantallasAsignadas,
+          tipoPantalla: publicidadActualizada.tipoPantalla || [],
+          ultimaEdicion: firebase.firestore.FieldValue.serverTimestamp(),
+        });
+
+      setSuccessMessage("Publicidad actualizada con éxito");
+      setTimeout(() => setSuccessMessage(null), 3000);
+
+      // Actualizar la lista
+      const empresa = empresaSeleccionada || empresaUsuario;
+      await obtenerPublicidades(empresa, "todos");
+    } catch (error) {
+      console.error("Error al actualizar publicidad:", error);
+      setSuccessMessage("Error al actualizar la publicidad");
       setTimeout(() => setSuccessMessage(null), 3000);
     } finally {
       setIsLoading(false);
@@ -469,6 +542,7 @@ const PublicidadCombinada = () => {
               publicidades={publicidades}
               isLoading={isLoading}
               onDelete={handleEliminarPublicidad}
+              onEdit={handleEditarPublicidad}
               pantallas={pantallas}
               t={t}
             />

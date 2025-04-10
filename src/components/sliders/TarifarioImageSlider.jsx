@@ -112,7 +112,7 @@ const TarifarioImageSlider = ({ images = [], templateStyle }) => {
         <img
           src={getImageUrl(currentImage)}
           alt="Publicidad"
-          className="object-contain"
+          className="object-contain rounded-lg"
         />
       </div>
     </div>

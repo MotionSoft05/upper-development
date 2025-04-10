@@ -1,15 +1,23 @@
 import React, { useState } from "react";
+import EditarPublicidadModal from "./EditarPublicidadModal";
 
-function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
-  console.log(
-    "🚀 ~ PublicidadList.jsx:4 ~ PublicidadList ~ publicidades:",
-    publicidades
-  );
+function PublicidadList({
+  publicidades,
+  isLoading,
+  onDelete,
+  onEdit,
+  pantallas,
+  t,
+}) {
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState("fechaCreacion");
   const [sortDirection, setSortDirection] = useState("desc");
+
+  // Estados para el modal de edición
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [publicidadEnEdicion, setPublicidadEnEdicion] = useState(null);
 
   const handleSort = (field) => {
     if (sortField === field) {
@@ -56,6 +64,21 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
 
   const handleExpandRow = (id) => {
     setExpandedItemId(expandedItemId === id ? null : id);
+  };
+
+  // Función para abrir el modal de edición
+  const handleEditClick = (publicidad) => {
+    setPublicidadEnEdicion(publicidad);
+    setIsEditModalOpen(true);
+  };
+
+  // Función para guardar los cambios
+  const handleSaveEdit = (publicidadActualizada) => {
+    if (onEdit) {
+      onEdit(publicidadActualizada);
+    }
+    setIsEditModalOpen(false);
+    setPublicidadEnEdicion(null);
   };
 
   const getNombrePantalla = (pantallaId, tipo, pantallas) => {
@@ -117,21 +140,6 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
           nombre: pantallas.nombrePantallasDirectorio[index],
           ubicacion: `Directorio ${index + 1}`,
           orientacion: index % 2 === 0 ? "horizontal" : "vertical",
-        };
-      }
-
-      // Para las pantallas de demo que se cargan cuando no hay en Firestore
-      if (pantallaId === "dir1") {
-        return {
-          nombre: "Directorio Recepción",
-          ubicacion: "Entrada",
-          orientacion: "horizontal",
-        };
-      } else if (pantallaId === "dir2") {
-        return {
-          nombre: "Directorio Ascensores",
-          ubicacion: "Piso 1",
-          orientacion: "vertical",
         };
       }
     }
@@ -505,6 +513,29 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex justify-center space-x-2">
+                        {/* Botón de editar - Nuevo */}
+                        <button
+                          className="text-blue-600 hover:text-blue-900"
+                          onClick={() => handleEditClick(item)}
+                          title="Editar"
+                        >
+                          <svg
+                            className="w-5 h-5"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            ></path>
+                          </svg>
+                        </button>
+
+                        {/* Botón de eliminar */}
                         <button
                           className="text-red-600 hover:text-red-900"
                           onClick={() => onDelete(item.id)}
@@ -708,6 +739,7 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
                                 <button
                                   type="button"
                                   className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 mr-2"
+                                  onClick={() => handleEditClick(item)}
                                 >
                                   Editar
                                 </button>
@@ -776,6 +808,16 @@ function PublicidadList({ publicidades, isLoading, onDelete, pantallas, t }) {
           </div>
         </div>
       </div>
+
+      {/* Modal de edición */}
+      <EditarPublicidadModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        publicidad={publicidadEnEdicion}
+        pantallas={pantallas}
+        onSave={handleSaveEdit}
+        t={t}
+      />
     </>
   );
 }

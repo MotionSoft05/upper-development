@@ -4,7 +4,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import SliderPublicidadTarifario from "@/components/sliderPublicidadTarifario";
 import TarifarioImageSlider from "@/components/sliders/TarifarioImageSlider";
-import TarifarioRssSlider from "@/components/TarifarioRssSlider";
+import SliderRSS from "@/components/SliderRSS";
 import WeatherWidget from "../WeatherWidget";
 
 const PTTemplate1Horizontal = ({ pantalla }) => {
@@ -159,7 +159,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                   <img
                     src={pantalla.logo}
                     alt="Logo del hotel"
-                    className="h-20 object-contain" // Aumentado de h-16 a h-20
+                    className="h-20 object-contain rounded-lg" // Aumentado de h-16 a h-20
                   />
                 </div>
               )}
@@ -188,7 +188,14 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                       {formatDate("es")}
                     </p>
                     <p className="text-sm text-gray-600">{formatDate("en")}</p>
-                    <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                    <div className="flex text-center items-center">
+                      <img
+                        src="/img/reloj.png"
+                        className="p-1 h-8 mt-1"
+                        alt="Clock"
+                      />
+                      <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                    </div>
                   </>
                 )}
               </div>
@@ -276,7 +283,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
           {/* Contenido principal - Layout en dos columnas */}
           <div className="flex-1 flex">
             {/* Columna izquierda (70%) - Tarifas */}
-            <div className="w-[70%] flex flex-col mr-2">
+            <div className="w-[60%] flex flex-col mr-2">
               {/* Sección TARIFAS AL PÚBLICO */}
               <div className="flex flex-col" style={{ height: "52vh" }}>
                 {" "}
@@ -364,7 +371,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                 </div>
                 <div>
                   {/* Contenido en dos columnas con separador */}
-                  <div className="relative my-2 px-20 py-2 flex">
+                  <div className="relative my-2 px-5 py-2 flex">
                     {/* Línea separadora vertical */}
                     <div
                       className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-full"
@@ -392,7 +399,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                     </div>
 
                     {/* Gerente en turno columna derecha */}
-                    <div className="w-1/2 text-right justify-end items-center flex">
+                    <div className="w-1/2 text-right justify-end items-center flex mr-20">
                       <p className="font-medium">
                         {pantalla.gerente?.nombre || getText("noGerente")}
                       </p>
@@ -420,31 +427,11 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
               </div>
             </div>
 
-            {/* Columna derecha (30%) - Noticias y Publicidad */}
-            <div className="w-[30%] flex flex-col">
-              {/* Sección de noticias */}
-              <div className="flex-1 flex flex-col">
-                {/* Encabezado Noticias */}
-                <div
-                  className="py-2 px-4 rounded-t-lg"
-                  style={{
-                    backgroundColor: templateBgColor,
-                  }}
-                >
-                  <h2 className="text-xl font-bold text-center text-white">
-                    {getText("noticias")}
-                  </h2>
-                </div>
-
-                {/* Feed de noticias */}
-                {/* Feed de noticias */}
-                <div className="px-2 py-2 flex-1 overflow-hidden">
-                  <TarifarioRssSlider templateColor={templateBgColor} />
-                </div>
-              </div>
-
-              {/* Sección de publicidad */}
-              <div className="mt-2 h-48">
+            {/* Columna derecha (30%) - Publicidad y Noticias (MODIFICADO: Orden invertido) */}
+            <div className="w-[40%] flex flex-col mt-24">
+              {/* Sección de publicidad (MOVIDA ARRIBA) */}
+              <div className="flex-1 flex flex-col mb-16">
+                {/* Publicidad */}
                 {pantalla.publicidad && pantalla.publicidad.length > 0 ? (
                   <div className="w-full h-full overflow-hidden bg-white">
                     <TarifarioImageSlider
@@ -462,6 +449,26 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                     </p>
                   </div>
                 )}
+              </div>
+
+              {/* Sección de noticias (MOVIDA ABAJO) */}
+              <div className="flex-1 flex flex-col">
+                {/* Encabezado Noticias */}
+                <div
+                  className="py-2 px-4 rounded-t-lg"
+                  style={{
+                    backgroundColor: templateBgColor,
+                  }}
+                >
+                  <h2 className="text-xl font-bold text-center text-white">
+                    {getText("noticias")}
+                  </h2>
+                </div>
+
+                {/* Feed de noticias */}
+                <div className="px-2 py-2 flex-1 overflow-hidden">
+                  <SliderRSS templateColor={templateBgColor} />
+                </div>
               </div>
             </div>
           </div>

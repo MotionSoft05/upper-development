@@ -875,7 +875,7 @@ function PantallasTarifario() {
     {
       id: 1,
       name: "Template 1",
-      previewUrl: "/img/tarifario-template1.jpg",
+      previewUrl: "/img/previewTarifario.png",
       description: "Diseño clásico con información clara y ordenada",
     },
   ];

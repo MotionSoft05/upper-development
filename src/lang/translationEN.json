@@ -568,6 +568,8 @@
       "noNewMediaSelected": "Warning! No new media file has been selected.",
       "completeAtLeastOneField": "Alert! Complete at least one of the three fields.",
       "errorLoadingMedia": "Error loading media:",
+      "loading": "Loading media",
+
       "errorSavingChanges": "Error saving changes:",
       "noValidDataToAdd": "Warning! No valid data to add.",
       "errorAddAdvertising": "Error adding advertising:",

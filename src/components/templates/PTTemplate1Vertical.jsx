@@ -237,7 +237,14 @@ const PTTemplate1Vertical = ({ pantalla }) => {
                       {formatDate("es")}
                     </p>
                     <p className="text-sm text-gray-600">{formatDate("en")}</p>
-                    <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                    <div className="flex text-center items-center">
+                      <img
+                        src="/img/reloj.png"
+                        className="p-1 h-8 mt-1"
+                        alt="Clock"
+                      />
+                      <p className="text-lg">{format(currentTime, "HH:mm")}</p>
+                    </div>
                   </>
                 )}
               </div>

@@ -1029,14 +1029,23 @@ function PantallasDirectorio() {
                 {/* Logo y Publicidad */}
                 <div className="grid grid-cols-1 gap-6">
                   {/* Logo */}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {t("screensDirectory.logo")}
                     </label>
-                    <div className="mt-1 flex items-center space-x-4">
-                      <div className="flex-1">
-                        <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
-                          <div className="space-y-1 text-center">
+                    <div className="mt-1">
+                      <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                        <div className="space-y-3 text-center w-full">
+                          {selectedLogo ? (
+                            <div className="mx-auto">
+                              <img
+                                src={selectedLogo}
+                                alt="Logo Actual"
+                                className="h-24 w-auto object-contain mx-auto"
+                              />
+                            </div>
+                          ) : (
                             <svg
                               className="mx-auto h-12 w-12 text-gray-400"
                               stroke="currentColor"
@@ -1051,31 +1060,26 @@ function PantallasDirectorio() {
                                 strokeLinejoin="round"
                               />
                             </svg>
-                            <div className="flex text-sm text-gray-600">
-                              <span>{t("screensDirectory.uploadLogo")}</span>
-                              <input
-                                id="file-upload-logo"
-                                name="file-upload-logo"
-                                type="file"
-                                className="sr-only"
-                                onChange={handleImageChange}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG, GIF hasta 2MB
-                            </p>
+                          )}
+                          <div className="flex justify-center text-sm text-gray-600">
+                            <span>
+                              {selectedLogo
+                                ? "Cambiar logo"
+                                : t("screensDirectory.uploadLogo")}
+                            </span>
+                            <input
+                              id="file-upload-logo"
+                              name="file-upload-logo"
+                              type="file"
+                              className="sr-only"
+                              onChange={handleImageChange}
+                            />
                           </div>
-                        </label>
-                      </div>
-                      {selectedLogo && (
-                        <div className="flex-shrink-0">
-                          <img
-                            src={selectedLogo}
-                            alt="Logo Actual"
-                            className="h-24 w-auto object-contain border rounded p-1"
-                          />
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG, GIF hasta 2MB
+                          </p>
                         </div>
-                      )}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -1089,7 +1093,7 @@ function PantallasDirectorio() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     {/* Publicidad Horizontal */}
-                    <div className=" p-4 rounded-lg">
+                    <div className="p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("screensDirectory.horizontalAdvertisement")}
                       </label>
@@ -1098,10 +1102,20 @@ function PantallasDirectorio() {
                           "screensDirectory.horizontalAdvertisementDescription"
                         )}
                       </p>
-                      <div className="mt-1 flex items-center space-x-4">
-                        <div className="flex-1">
-                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
-                            <div className="space-y-1 text-center">
+                      <div className="mt-1">
+                        <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-3 text-center w-full">
+                            {selectedPublicidadLandscape ? (
+                              <div className="mx-auto">
+                                <img
+                                  src={selectedPublicidadLandscape}
+                                  alt={t(
+                                    "screensDirectory.horizontalAdvertisement"
+                                  )}
+                                  className="h-24 w-auto object-contain mx-auto"
+                                />
+                              </div>
+                            ) : (
                               <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
                                 stroke="currentColor"
@@ -1116,49 +1130,53 @@ function PantallasDirectorio() {
                                   strokeLinejoin="round"
                                 />
                               </svg>
-                              <div className="flex text-sm text-gray-600">
-                                <span>
-                                  {t(
-                                    "screensDirectory.uploadHorizontalAdvertisement"
-                                  )}
-                                </span>
-                                <input
-                                  id="file-upload-landscape"
-                                  name="file-upload-landscape"
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handlePublicidadLandscapeChange}
-                                />
-                              </div>
+                            )}
+                            <div className="flex justify-center text-sm text-gray-600">
+                              <span>
+                                {selectedPublicidadLandscape
+                                  ? "Cambiar imagen"
+                                  : t(
+                                      "screensDirectory.uploadHorizontalAdvertisement"
+                                    )}
+                              </span>
+                              <input
+                                id="file-upload-landscape"
+                                name="file-upload-landscape"
+                                type="file"
+                                className="sr-only"
+                                onChange={handlePublicidadLandscapeChange}
+                              />
                             </div>
-                          </label>
-                        </div>
-                        {selectedPublicidadLandscape && (
-                          <div className="flex-shrink-0">
-                            <img
-                              src={selectedPublicidadLandscape}
-                              alt={t(
-                                "screensDirectory.horizontalAdvertisement"
-                              )}
-                              className="h-24 w-auto object-contain border rounded p-1"
-                            />
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF hasta 2MB
+                            </p>
                           </div>
-                        )}
+                        </label>
                       </div>
                     </div>
 
                     {/* Publicidad Vertical */}
-                    <div className=" p-4 rounded-lg">
+                    <div className="p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("screensDirectory.verticalAdvertisement")}
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
                         {t("screensDirectory.verticalAdvertisementDescription")}
                       </p>
-                      <div className="mt-1 flex items-center space-x-4">
-                        <div className="flex-1">
-                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
-                            <div className="space-y-1 text-center">
+                      <div className="mt-1">
+                        <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-3 text-center w-full">
+                            {selectedPublicidadPortrait ? (
+                              <div className="mx-auto">
+                                <img
+                                  src={selectedPublicidadPortrait}
+                                  alt={t(
+                                    "screensDirectory.verticalAdvertisement"
+                                  )}
+                                  className="h-24 w-auto object-contain mx-auto"
+                                />
+                              </div>
+                            ) : (
                               <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
                                 stroke="currentColor"
@@ -1173,32 +1191,28 @@ function PantallasDirectorio() {
                                   strokeLinejoin="round"
                                 />
                               </svg>
-                              <div className="flex text-sm text-gray-600">
-                                <span>
-                                  {t(
-                                    "screensDirectory.uploadVerticalAdvertisement"
-                                  )}
-                                </span>
-                                <input
-                                  id="file-upload-portrait"
-                                  name="file-upload-portrait"
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handlePublicidadPortraitChange}
-                                />
-                              </div>
+                            )}
+                            <div className="flex justify-center text-sm text-gray-600">
+                              <span>
+                                {selectedPublicidadPortrait
+                                  ? "Cambiar imagen"
+                                  : t(
+                                      "screensDirectory.uploadVerticalAdvertisement"
+                                    )}
+                              </span>
+                              <input
+                                id="file-upload-portrait"
+                                name="file-upload-portrait"
+                                type="file"
+                                className="sr-only"
+                                onChange={handlePublicidadPortraitChange}
+                              />
                             </div>
-                          </label>
-                        </div>
-                        {selectedPublicidadPortrait && (
-                          <div className="flex-shrink-0">
-                            <img
-                              src={selectedPublicidadPortrait}
-                              alt={t("screensDirectory.verticalAdvertisement")}
-                              className="h-24 w-auto object-contain border rounded p-1"
-                            />
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF hasta 2MB
+                            </p>
                           </div>
-                        )}
+                        </label>
                       </div>
                     </div>
                   </div>

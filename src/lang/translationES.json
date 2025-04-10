@@ -570,6 +570,7 @@
       "noNewMediaSelected": "¡Advertencia! No se ha seleccionado un nuevo archivo de media.",
       "completeAtLeastOneField": "¡Alerta! Completa por lo menos uno de los tres campos.",
       "errorLoadingMedia": "¡Error! Error durante la carga de la media:",
+      "loading": "Cargando media",
       "errorSavingChanges": "Error al guardar cambios:",
       "noValidDataToAdd": "¡Advertencia! No hay datos válidos para agregar.",
       "errorAddAdvertising": "Error al agregar publicidad:",
