@@ -511,7 +511,7 @@ const PTTemplate1Vertical = ({ pantalla }) => {
             </div>
 
             {/* Feed de noticias */}
-            <div className="w-3/4">
+            <div className="">
               <SliderRSS />
             </div>
           </div>
