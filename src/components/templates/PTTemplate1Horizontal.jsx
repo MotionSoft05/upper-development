@@ -281,7 +281,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                       <div className="flex-1 mx-4">
                         <DottedLine />
                       </div>
-                      <span className="font-bold text-right text-base w-20">
+                      <span className="font-bold text-right text-base whitespace-nowrap">
                         ${tarifa.precio}
                       </span>
                     </div>
