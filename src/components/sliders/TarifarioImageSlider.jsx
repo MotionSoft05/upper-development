@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 
-const TarifarioImageSlider = ({ images = [], templateStyle }) => {
+const TarifarioImageSlider = ({
+  images = [],
+  templateStyle,
+  fullWidth = false,
+}) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
@@ -104,15 +108,20 @@ const TarifarioImageSlider = ({ images = [], templateStyle }) => {
   if (!currentImage) return null;
 
   return (
-    <div className="w-full flex justify-center">
+    <div className={`w-full flex justify-center ${fullWidth ? "h-full" : ""}`}>
       <div
-        className="h-64 mb-2 w-[35rem] bg-white rounded-lg overflow-hidden"
+        className={`${
+          fullWidth ? "h-full w-full" : "h-64 mb-2 w-[35rem]"
+        } bg-white rounded-lg overflow-hidden flex items-center justify-center`}
         style={{ opacity }}
       >
         <img
           src={getImageUrl(currentImage)}
           alt="Publicidad"
-          className="object-contain rounded-lg"
+          className={`${
+            fullWidth ? "max-h-full max-w-full" : "object-contain"
+          } rounded-lg`}
+          style={{ objectFit: fullWidth ? "contain" : "contain" }}
         />
       </div>
     </div>

@@ -516,12 +516,16 @@ const PTTemplate1Vertical = ({ pantalla }) => {
             </div>
           </div>
 
-          {/* Sección de publicidad con imagen completa */}
+          {/* Sección de publicidad con imagen completa - Solo mostrar publicidad vertical */}
           <div className="">
-            {pantalla.publicidad && pantalla.publicidad.length > 0 ? (
+            {pantalla.publicidad &&
+            pantalla.publicidad.filter((img) => img.orientacion === "vertical")
+              .length > 0 ? (
               <div className="">
                 <TarifarioImageSlider
-                  images={pantalla.publicidad}
+                  images={pantalla.publicidad.filter(
+                    (img) => img.orientacion === "vertical"
+                  )}
                   templateStyle={{ color: textColor }}
                 />
               </div>

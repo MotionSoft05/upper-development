@@ -283,7 +283,7 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
           {/* Contenido principal - Layout en dos columnas */}
           <div className="flex-1 flex">
             {/* Columna izquierda (70%) - Tarifas */}
-            <div className="w-[60%] flex flex-col mr-2">
+            <div className="w-[68%] flex flex-col mr-2">
               {/* Sección TARIFAS AL PÚBLICO */}
               <div className="flex flex-col" style={{ height: "52vh" }}>
                 {" "}
@@ -428,15 +428,22 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
             </div>
 
             {/* Columna derecha (30%) - Publicidad y Noticias (MODIFICADO: Orden invertido) */}
-            <div className="w-[40%] flex flex-col mt-24">
+            <div className="w-[32%]  flex flex-col ">
               {/* Sección de publicidad (MOVIDA ARRIBA) */}
-              <div className="flex-1 flex flex-col mb-16">
-                {/* Publicidad */}
-                {pantalla.publicidad && pantalla.publicidad.length > 0 ? (
+              <div className="flex-1 flex flex-col h-[55%]">
+                {/* Publicidad - Solo mostrar publicidad horizontal */}
+                {pantalla.publicidad &&
+                pantalla.publicidad.filter(
+                  (img) => !img.orientacion || img.orientacion === "horizontal"
+                ).length > 0 ? (
                   <div className="w-full h-full overflow-hidden bg-white">
                     <TarifarioImageSlider
-                      images={pantalla.publicidad}
+                      images={pantalla.publicidad.filter(
+                        (img) =>
+                          !img.orientacion || img.orientacion === "horizontal"
+                      )}
                       templateStyle={{ color: textColor }}
+                      fullWidth={true} // Añadir propiedad para indicar que debe ocupar todo el ancho
                     />
                   </div>
                 ) : (

@@ -155,6 +155,9 @@ function PantallasTarifario() {
     minutos: 0,
     segundos: 10,
   });
+  const [publicidadOrientacion, setPublicidadOrientacion] =
+    useState("horizontal");
+
   const [publicidadItems, setPublicidadItems] = useState([]);
   const [editingPublicidadIndex, setEditingPublicidadIndex] = useState(null);
   const [isLoadingPublicidad, setIsLoadingPublicidad] = useState(false);
@@ -386,6 +389,7 @@ function PantallasTarifario() {
         horas: publicidadTiempos.horas,
         minutos: publicidadTiempos.minutos,
         segundos: publicidadTiempos.segundos,
+        orientacion: publicidadOrientacion, // Añadir esta línea
         fechaCreacion: new Date(),
       };
 
@@ -420,6 +424,7 @@ function PantallasTarifario() {
       setImagenSeleccionada(null);
       setPreviewImagen(null);
       setPublicidadTiempos({ horas: 0, minutos: 0, segundos: 10 });
+      setPublicidadOrientacion("horizontal"); // Reset a la orientación por defecto
 
       // Cerrar indicador de carga
       Swal.close();
@@ -1804,6 +1809,7 @@ function PantallasTarifario() {
                     </div>
 
                     {/* Tiempo de visualización */}
+                    {/* Tiempo de visualización */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Tiempo de visualización
@@ -1829,6 +1835,151 @@ function PantallasTarifario() {
                       <p className="mt-1 text-xs text-gray-500">
                         Tiempo recomendado: 10-15 segundos por imagen
                       </p>
+                      {/* Selector de orientación para la publicidad */}
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Orientación de la pantalla
+                        </label>
+                        <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
+                          <div
+                            className={`relative border rounded-lg p-3 cursor-pointer ${
+                              publicidadOrientacion === "horizontal"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                            onClick={() =>
+                              setPublicidadOrientacion("horizontal")
+                            }
+                          >
+                            <div className="flex items-start">
+                              <div
+                                className={`flex-shrink-0 h-5 w-5 ${
+                                  publicidadOrientacion === "horizontal"
+                                    ? "text-blue-600"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {publicidadOrientacion === "horizontal" ? (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    ></path>
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path>
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="ml-3">
+                                <h4 className="text-sm font-medium text-gray-900">
+                                  Horizontal
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  Para pantallas en formato normal
+                                </p>
+                              </div>
+                            </div>
+                            <input
+                              id="pub-horizontal"
+                              name="publicidadOrientacion"
+                              type="radio"
+                              value="horizontal"
+                              checked={publicidadOrientacion === "horizontal"}
+                              onChange={(e) =>
+                                setPublicidadOrientacion(e.target.value)
+                              }
+                              className="sr-only" // Oculto visualmente pero accesible
+                            />
+                          </div>
+
+                          <div
+                            className={`relative border rounded-lg p-3 cursor-pointer ${
+                              publicidadOrientacion === "vertical"
+                                ? "border-blue-500 bg-blue-50"
+                                : "border-gray-300 hover:border-gray-400"
+                            }`}
+                            onClick={() => setPublicidadOrientacion("vertical")}
+                          >
+                            <div className="flex items-start">
+                              <div
+                                className={`flex-shrink-0 h-5 w-5 ${
+                                  publicidadOrientacion === "vertical"
+                                    ? "text-blue-600"
+                                    : "text-gray-400"
+                                }`}
+                              >
+                                {publicidadOrientacion === "vertical" ? (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="currentColor"
+                                    viewBox="0 0 20 20"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                      clipRule="evenodd"
+                                    ></path>
+                                  </svg>
+                                ) : (
+                                  <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth="2"
+                                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    ></path>
+                                  </svg>
+                                )}
+                              </div>
+                              <div className="ml-3">
+                                <h4 className="text-sm font-medium text-gray-900">
+                                  Vertical
+                                </h4>
+                                <p className="text-xs text-gray-500">
+                                  Para pantallas rotadas 90 grados
+                                </p>
+                              </div>
+                            </div>
+                            <input
+                              id="pub-vertical"
+                              name="publicidadOrientacion"
+                              type="radio"
+                              value="vertical"
+                              checked={publicidadOrientacion === "vertical"}
+                              onChange={(e) =>
+                                setPublicidadOrientacion(e.target.value)
+                              }
+                              className="sr-only" // Oculto visualmente pero accesible
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
@@ -1939,11 +2090,19 @@ function PantallasTarifario() {
                             />
                           </div>
                           <div className="text-xs text-gray-600 flex justify-between">
-                            <span>
-                              Tiempo: {item.horas > 0 ? `${item.horas}h ` : ""}
-                              {item.minutos > 0 ? `${item.minutos}m ` : ""}
-                              {item.segundos}s
-                            </span>
+                            <div>
+                              <span>
+                                Tiempo:{" "}
+                                {item.horas > 0 ? `${item.horas}h ` : ""}
+                                {item.minutos > 0 ? `${item.minutos}m ` : ""}
+                                {item.segundos}s
+                              </span>
+                              <span className="ml-2 bg-gray-200 px-2 py-1 rounded-full">
+                                {item.orientacion === "vertical"
+                                  ? "Vertical"
+                                  : "Horizontal"}
+                              </span>
+                            </div>
                             <span>
                               {item.fechaCreacion
                                 ? new Date(
