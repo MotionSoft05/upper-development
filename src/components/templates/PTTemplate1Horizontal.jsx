@@ -280,175 +280,100 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
             </div>
           </div>
 
-          {/* Contenido principal - Layout en dos columnas */}
-          <div className="flex-1 flex">
-            {/* Columna izquierda (70%) - Tarifas */}
-            <div className="w-[68%] flex flex-col mr-2">
-              {/* Sección TARIFAS AL PÚBLICO */}
-              <div className="flex flex-col" style={{ height: "52vh" }}>
-                {" "}
-                {/* Altura controlada */}
-                {/* Encabezado Tarifas */}
-                <div
-                  className="py-2 px-4 rounded-t-lg"
-                  style={{
-                    backgroundColor: templateBgColor,
-                  }}
-                >
-                  <h2 className="text-xl font-bold text-center text-white">
-                    {getText("tarifasPublico")}
-                  </h2>
-                </div>
-                {/* Lista de tarifas en una sola columna */}
-                <div className="py-2 flex-1 overflow-auto px-10">
-                  {displayTarifas.length > 0 ? (
-                    <div className="flex flex-col h-full justify-between">
-                      {displayTarifas.map((tarifa, index) => (
-                        <div
-                          key={index}
-                          className="py-1"
-                          style={{
-                            // Calculamos la altura de manera dinámica basada en la cantidad de tarifas
-                            height: `calc(100% / ${displayTarifas.length})`,
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <div className="flex justify-between items-center w-full">
-                            <span className="font-medium text-xl">
-                              {tarifa.tipo}
-                            </span>
-                            <div className="flex-1 mx-8">
-                              <DottedLine />
+          {/* Contenido principal - Layout en estilo grilla 2x2 */}
+          <div className="flex flex-col h-full">
+            {/* Sección superior - Dos columnas (75% - 25%) */}
+            <div className="flex mb-2 flex-grow">
+              {/* Columna izquierda superior (75%) - Tarifas */}
+              <div className="w-3/4 flex flex-col mr-2">
+                {/* Sección TARIFAS AL PÚBLICO */}
+                <div className="flex flex-col h-full">
+                  {/* Encabezado Tarifas */}
+                  <div
+                    className="py-2 px-4 rounded-t-lg"
+                    style={{
+                      backgroundColor: templateBgColor,
+                    }}
+                  >
+                    <h2 className="text-xl font-bold text-center text-white">
+                      {getText("tarifasPublico")}
+                    </h2>
+                  </div>
+                  {/* Lista de tarifas en una sola columna */}
+                  <div className="py-2 flex-1 overflow-auto px-10">
+                    {displayTarifas.length > 0 ? (
+                      <div className="flex flex-col h-full justify-between">
+                        {displayTarifas.map((tarifa, index) => (
+                          <div
+                            key={index}
+                            className="py-1"
+                            style={{
+                              // Calculamos la altura de manera dinámica basada en la cantidad de tarifas
+                              height: `calc(100% / ${displayTarifas.length})`,
+                              display: "flex",
+                              alignItems: "center",
+                            }}
+                          >
+                            <div className="flex justify-between items-center w-full">
+                              <span className="font-medium text-xl">
+                                {tarifa.tipo}
+                              </span>
+                              <div className="flex-1 mx-8">
+                                <DottedLine />
+                              </div>
+                              <span className="font-bold text-right text-xl w-24">
+                                ${tarifa.precio}
+                              </span>
                             </div>
-                            <span className="font-bold text-right text-xl w-24">
-                              ${tarifa.precio}
-                            </span>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <p className="text-gray-500 text-center">
-                        {getText("noTarifas")}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div className="px-4 pb-2">
-                <p
-                  className="text-xs text-gray-600 text-center mx-auto"
-                  style={{
-                    maxWidth:
-                      pantalla.leyendaTarifas?.length > 100 ? "100%" : "80%",
-                  }}
-                >
-                  {pantalla.leyendaTarifas ||
-                    (pantalla.idioma === "en"
-                      ? "Prices include VAT and taxes. Foreign currency not accepted."
-                      : pantalla.idioma === "es-en"
-                      ? "Precios incluyen impuestos. / Prices include taxes."
-                      : "Precios incluyen impuestos. No se acepta moneda extranjera.")}
-                </p>
-              </div>
-              {/* Sección CHECK IN-OUT y GERENTE EN TURNO */}
-              <div className="mt-2">
-                {/* Encabezado combinado */}
-                <div
-                  className="py-2 px-10 flex justify-between rounded-t-lg"
-                  style={{
-                    backgroundColor: templateBgColor,
-                  }}
-                >
-                  <h2 className="text-xl pl-6 font-bold text-white">
-                    {getText("checkInOut")}
-                  </h2>
-                  <h2 className="text-xl font-bold text-white">
-                    {getText("gerenteTurno")}
-                  </h2>
-                </div>
-                <div>
-                  {/* Contenido en dos columnas con separador */}
-                  <div className="relative my-2 px-5 py-2 flex">
-                    {/* Línea separadora vertical */}
-                    <div
-                      className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-full"
-                      style={{ backgroundColor: templateBgColor, opacity: 0.3 }}
-                    ></div>
-
-                    {/* CHECK IN-OUT columna izquierda */}
-                    <div className="w-1/2">
-                      <div className="flex mb-2">
-                        <p className="w-40 font-medium mr-0.5">
-                          {getText("entrada")}{" "}
-                        </p>
-                        <p>
-                          {formatCheckTime(pantalla.checkIn) ||
-                            getText("noHorarioEntrada")}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <p className="text-gray-500 text-center">
+                          {getText("noTarifas")}
                         </p>
                       </div>
-                      <div className="flex">
-                        <p className="w-40 font-medium">{getText("salida")}</p>
-                        <p>
-                          {formatCheckTime(pantalla.checkOut) ||
-                            getText("noHorarioSalida")}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Gerente en turno columna derecha */}
-                    <div className="w-1/2 text-right justify-end items-center flex mr-20">
-                      <p className="font-medium">
-                        {pantalla.gerente?.nombre || getText("noGerente")}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Leyenda extras - Centrada y en pirámide invertida */}
-                  <div className="px-4 pb-2">
-                    <p
-                      className="text-xs text-gray-600 text-center mx-auto"
-                      style={{
-                        maxWidth:
-                          pantalla.leyendaExtras?.length > 100 ? "100%" : "80%",
-                      }}
-                    >
-                      {pantalla.leyendaExtras ||
-                        (pantalla.idioma === "en"
-                          ? "Rates do not include meals. Payment in cash or card."
-                          : pantalla.idioma === "es-en"
-                          ? "Tarifas no incluyen alimentos. / Rates do not include meals."
-                          : "Tarifas no incluyen alimentos. Pago en efectivo o tarjeta.")}
-                    </p>
+                    )}
                   </div>
                 </div>
+                <div className="px-4 pb-2">
+                  <p
+                    className="text-xs text-gray-600 text-center mx-auto"
+                    style={{
+                      maxWidth:
+                        pantalla.leyendaTarifas?.length > 100 ? "100%" : "80%",
+                    }}
+                  >
+                    {pantalla.leyendaTarifas ||
+                      (pantalla.idioma === "en"
+                        ? "Prices include VAT and taxes. Foreign currency not accepted."
+                        : pantalla.idioma === "es-en"
+                        ? "Precios incluyen impuestos. / Prices include taxes."
+                        : "Precios incluyen impuestos. No se acepta moneda extranjera.")}
+                  </p>
+                </div>
               </div>
-            </div>
 
-            {/* Columna derecha (30%) - Publicidad y Noticias (MODIFICADO: Orden invertido) */}
-            <div className="w-[32%]  flex flex-col ">
-              {/* Sección de publicidad (MOVIDA ARRIBA) */}
-              <div className="flex-1 flex flex-col h-[55%]">
-                {/* Publicidad - Solo mostrar publicidad horizontal */}
+              {/* Columna derecha superior (25%) - Publicidad */}
+              <div className="w-1/4 h-full">
+                {/* Publicidad - Ocupando todo el espacio disponible */}
                 {pantalla.publicidad &&
                 pantalla.publicidad.filter(
                   (img) => !img.orientacion || img.orientacion === "horizontal"
                 ).length > 0 ? (
-                  <div className="w-full h-full overflow-hidden bg-white">
+                  <div className="w-full h-full">
                     <TarifarioImageSlider
                       images={pantalla.publicidad.filter(
                         (img) =>
                           !img.orientacion || img.orientacion === "horizontal"
                       )}
-                      templateStyle={{ color: textColor }}
-                      fullWidth={true} // Añadir propiedad para indicar que debe ocupar todo el ancho
+                      fullWidth={true}
                     />
                   </div>
                 ) : (
                   <div
-                    className="w-full h-full flex items-center justify-center rounded-t-lg"
+                    className="w-full h-full flex items-center justify-center"
                     style={{ backgroundColor: templateBgColor }}
                   >
                     <p className="text-white text-lg">
@@ -457,24 +382,113 @@ const PTTemplate1Horizontal = ({ pantalla }) => {
                   </div>
                 )}
               </div>
+            </div>
 
-              {/* Sección de noticias (MOVIDA ABAJO) */}
-              <div className="flex-1 flex flex-col">
-                {/* Encabezado Noticias */}
-                <div
-                  className="py-2 px-4 rounded-t-lg"
-                  style={{
-                    backgroundColor: templateBgColor,
-                  }}
-                >
-                  <h2 className="text-xl font-bold text-center text-white">
-                    {getText("noticias")}
-                  </h2>
+            {/* Sección inferior - Dos columnas del mismo ancho */}
+            <div className="flex">
+              {/* Columna izquierda inferior (75%) - CHECK IN-OUT y GERENTE */}
+              <div className="w-3/4 mr-2">
+                {/* Sección CHECK IN-OUT y GERENTE EN TURNO */}
+                <div>
+                  {/* Encabezado combinado */}
+                  <div
+                    className="py-2 px-10 flex justify-between rounded-t-lg"
+                    style={{
+                      backgroundColor: templateBgColor,
+                    }}
+                  >
+                    <h2 className="text-xl pl-6 font-bold text-white">
+                      {getText("checkInOut")}
+                    </h2>
+                    <h2 className="text-xl font-bold text-white">
+                      {getText("gerenteTurno")}
+                    </h2>
+                  </div>
+                  <div>
+                    {/* Contenido en dos columnas con separador */}
+                    <div className="relative my-2 px-5 py-2 flex">
+                      {/* Línea separadora vertical */}
+                      <div
+                        className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-px h-full"
+                        style={{
+                          backgroundColor: templateBgColor,
+                          opacity: 0.3,
+                        }}
+                      ></div>
+
+                      {/* CHECK IN-OUT columna izquierda */}
+                      <div className="w-1/2">
+                        <div className="flex mb-2">
+                          <p className="w-40 font-medium mr-0.5">
+                            {getText("entrada")}{" "}
+                          </p>
+                          <p>
+                            {formatCheckTime(pantalla.checkIn) ||
+                              getText("noHorarioEntrada")}
+                          </p>
+                        </div>
+                        <div className="flex">
+                          <p className="w-40 font-medium">
+                            {getText("salida")}
+                          </p>
+                          <p>
+                            {formatCheckTime(pantalla.checkOut) ||
+                              getText("noHorarioSalida")}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Gerente en turno columna derecha */}
+                      <div className="w-1/2 text-right justify-end items-center flex mr-20">
+                        <p className="font-medium">
+                          {pantalla.gerente?.nombre || getText("noGerente")}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Leyenda extras - Centrada y en pirámide invertida */}
+                    <div className="px-4 pb-2">
+                      <p
+                        className="text-xs text-gray-600 text-center mx-auto"
+                        style={{
+                          maxWidth:
+                            pantalla.leyendaExtras?.length > 100
+                              ? "100%"
+                              : "80%",
+                        }}
+                      >
+                        {pantalla.leyendaExtras ||
+                          (pantalla.idioma === "en"
+                            ? "Rates do not include meals. Payment in cash or card."
+                            : pantalla.idioma === "es-en"
+                            ? "Tarifas no incluyen alimentos. / Rates do not include meals."
+                            : "Tarifas no incluyen alimentos. Pago en efectivo o tarjeta.")}
+                      </p>
+                    </div>
+                  </div>
                 </div>
+              </div>
 
-                {/* Feed de noticias */}
-                <div className="px-2 py-2 flex-1 overflow-hidden">
-                  <SliderRSS templateColor={templateBgColor} />
+              {/* Columna derecha inferior (25%) - Noticias */}
+              <div className="w-1/4">
+                {/* Sección de noticias */}
+                <div className="flex-1 flex flex-col">
+                  {/* Encabezado Noticias */}
+                  <div
+                    className="py-2 px-4 rounded-t-lg"
+                    style={{
+                      backgroundColor: templateBgColor,
+                    }}
+                  >
+                    <h2 className="text-xl font-bold text-center text-white">
+                      {getText("noticias")}
+                    </h2>
+                  </div>
+
+                  {/* Feed de noticias */}
+                  <div className="">
+                    <SliderRSS templateColor={templateBgColor} />
+                  </div>
                 </div>
               </div>
             </div>
