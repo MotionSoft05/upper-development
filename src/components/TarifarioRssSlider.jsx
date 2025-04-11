@@ -99,10 +99,10 @@ export default function TarifarioRssSlider({ templateColor }) {
   // Si no hay datos, mostrar un estado de carga o error
   if (loading) {
     return (
-      <div className="bg-gray-800 text-white rounded-t-md">
-        <div className="bg-white text-gray-900 flex items-center justify-center h-20">
+      <div className="bg-gray-800 text-white rounded-t-md h-full">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-full">
           <div className="w-5 h-5 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mr-2"></div>
-          <span className="text-base">Cargando noticias...</span>
+          <span className="text-sm">Cargando noticias...</span>
         </div>
       </div>
     );
@@ -110,8 +110,8 @@ export default function TarifarioRssSlider({ templateColor }) {
 
   if (error) {
     return (
-      <div className="bg-gray-800 text-white rounded-t-md">
-        <div className="bg-white text-gray-900 flex items-center justify-center h-20 text-red-500 text-base">
+      <div className="bg-gray-800 text-white rounded-t-md h-full">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-full text-red-500 text-sm">
           {error}
         </div>
       </div>
@@ -120,8 +120,8 @@ export default function TarifarioRssSlider({ templateColor }) {
 
   if (rssItems.length === 0) {
     return (
-      <div className="bg-gray-800 text-white rounded-t-md">
-        <div className="bg-white text-gray-900 flex items-center justify-center h-20 text-base">
+      <div className="bg-gray-800 text-white rounded-t-md h-full">
+        <div className="bg-white text-gray-900 flex items-center justify-center h-full text-sm">
           No hay noticias disponibles
         </div>
       </div>
@@ -129,31 +129,36 @@ export default function TarifarioRssSlider({ templateColor }) {
   }
 
   return (
-    <div className="bg-gray-800 text-white rounded-t-md">
-      <div className="bg-white text-gray-900">
-        <Swiper
-          direction="vertical" // Cambiado a vertical
-          slidesPerView={2}
-          spaceBetween={0}
-          loop={true}
-          speed={1000}
-          autoplay={{
-            delay: 10000, // 10 segundos para dar tiempo a leer el contenido completo
-            disableOnInteraction: false,
-          }}
-          modules={[Autoplay]}
-          className="w-full h-[22rem]" // Definida altura fija
-        >
-          {rssItems.map((item, index) => (
-            <SwiperSlide key={index}>
-              <div className="p-2 overflow-y-auto h-full">
-                <h3 className="font-bold text-base mb-1">{item.title}</h3>
-                <p className="text-sm text-gray-800">{item.description}</p>
-              </div>
-            </SwiperSlide>
-          ))}
-        </Swiper>
-      </div>
+    <div
+      className="bg-white text-gray-900 rounded-b-md h-full overflow-hidden"
+      style={{
+        borderTopWidth: "1px",
+        borderTopStyle: "solid",
+        borderTopColor: templateColor || "#444444",
+      }}
+    >
+      <Swiper
+        direction="vertical"
+        slidesPerView={1}
+        spaceBetween={0}
+        loop={true}
+        speed={1000}
+        autoplay={{
+          delay: 10000,
+          disableOnInteraction: false,
+        }}
+        modules={[Autoplay]}
+        className="w-full h-full"
+      >
+        {rssItems.map((item, index) => (
+          <SwiperSlide key={index}>
+            <div className="p-2 overflow-y-auto h-full">
+              <h3 className="font-bold text-sm mb-1 ">{item.title}</h3>
+              <p className="text-xs text-gray-800">{item.description}</p>
+            </div>
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
   );
 }
