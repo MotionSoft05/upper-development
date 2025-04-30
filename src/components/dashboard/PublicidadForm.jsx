@@ -26,7 +26,7 @@ function PublicidadForm({
     minutos: 0,
     segundos: 10,
   });
-  const [videosHabilitados, setVideosHabilitados] = useState(false);
+  const [videosHabilitados, setVideosHabilitados] = useState(true);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
