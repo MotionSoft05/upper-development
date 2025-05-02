@@ -87,7 +87,8 @@ function Admin() {
     ps: "",
     pd: "",
     pservice: "",
-    pt: "", // Añadir campo para pantallas de tarifario
+    pt: "",
+    pp: "",
     tipoPlan: "",
     empresa: "",
     inicio: "",
@@ -398,7 +399,6 @@ function Admin() {
     // Resetear a la página 1 cuando cambien los criterios de búsqueda o filtrado
     setCurrentPage(1);
   }, [searchTerm, filtroSeleccionado]);
-  // Cambio a la función handleGuardarCambios para permitir más pantallas directorio
   const handleGuardarCambios = async () => {
     try {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
@@ -408,8 +408,9 @@ function Admin() {
         telefono: usuarioEditado.telefono,
         ps: usuarioEditado.ps,
         pd: usuarioEditado.pd,
+        pp: usuarioEditado.pp,
         pservice: usuarioEditado.pservice,
-        pt: usuarioEditado.pt, // Añadir el campo pt
+        pt: usuarioEditado.pt,
         tipoPlan: usuarioEditado.tipoPlan,
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
@@ -503,7 +504,8 @@ function Admin() {
           ps: "",
           pd: "",
           pservice: "",
-          pt: "", // Asegúrate de incluir el campo pt aquí
+          pp: "",
+          pt: "",
           tipoPlan: "",
           empresa: "",
           inicio: "",
@@ -966,8 +968,9 @@ function Admin() {
                     {renderColumnHeader("telefono", t("admin.phone"))}
                     <th className="px-4 py-3 text-center">PS</th>
                     <th className="px-4 py-3 text-center">PD</th>
-                    <th className="px-4 py-3 text-center">PDS</th>
-                    <th className="px-4 py-3 text-center">PT</th>{" "}
+
+                    <th className="px-4 py-3 text-center">PT</th>
+                    <th className="px-4 py-3 text-center">PP</th>
                     {/* Nueva columna para PT */}
                     <th className="px-4 py-3 text-center">
                       {t("admin.start")}
@@ -1142,27 +1145,6 @@ function Admin() {
                         )}
                       </td>
 
-                      {/* PDS */}
-                      <td className="px-4 py-3 text-center">
-                        {modoEdicion && usuarioEditado.id === usuario.id ? (
-                          <input
-                            type="number"
-                            value={usuarioEditado.pservice}
-                            onChange={(e) =>
-                              setUsuarioEditado({
-                                ...usuarioEditado,
-                                pservice: e.target.value,
-                              })
-                            }
-                            className="w-16 px-2 py-1 text-sm text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          />
-                        ) : (
-                          <div className="inline-flex items-center justify-center bg-purple-100 text-purple-800 text-sm font-semibold w-8 h-8 rounded-full">
-                            {usuario.pservice || 0}
-                          </div>
-                        )}
-                      </td>
-
                       {/* PT - Nueva celda para pantallas de tarifario */}
                       <td className="px-4 py-3 text-center">
                         {modoEdicion && usuarioEditado.id === usuario.id ? (
@@ -1181,6 +1163,27 @@ function Admin() {
                         ) : (
                           <div className="inline-flex items-center justify-center bg-amber-100 text-amber-800 text-sm font-semibold w-8 h-8 rounded-full">
                             {usuario.pt || 0}
+                          </div>
+                        )}
+                      </td>
+                      {/* PP - Nueva celda para pantallas de promociones */}
+                      <td className="px-4 py-3 text-center">
+                        {modoEdicion && usuarioEditado.id === usuario.id ? (
+                          <input
+                            type="number"
+                            min="0"
+                            value={usuarioEditado.pp}
+                            onChange={(e) =>
+                              setUsuarioEditado({
+                                ...usuarioEditado,
+                                pp: e.target.value,
+                              })
+                            }
+                            className="w-16 px-2 py-1 text-sm text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <div className="inline-flex items-center justify-center bg-pink-100 text-pink-800 text-sm font-semibold w-8 h-8 rounded-full">
+                            {usuario.pp || 0}
                           </div>
                         )}
                       </td>

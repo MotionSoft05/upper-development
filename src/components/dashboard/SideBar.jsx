@@ -18,6 +18,7 @@ import {
   faTags,
   faDesktopAlt,
   faAd,
+  faImages,
 
   // Iconos para más información
   faIdCard,
@@ -41,6 +42,7 @@ function Sidebar(props) {
     props.setShowConsultaEvento(false);
     props.setShowPantallaSalon(false);
     props.setShowPantallaDirectorio(false);
+    props.setShowPantallaPromociones(false);
     props.setShowPublicidad(false);
     props.setShowlicencia(false);
     props.setShowGuia(false);
@@ -363,7 +365,38 @@ function Sidebar(props) {
               </button>
             </div>
           )}
-
+          {/* Pantallas Promociones */}
+          {tienePermiso("pantallasPromociones") && (
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showPantallaPromociones)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowPantallaPromociones")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showPantallaPromociones)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faImages} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Pantallas Promociones</span>
+                {isActive(props.showPantallaPromociones) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
           {/* Pantallas Tarifario - Cambio a faTags que representa mejor un tarifario */}
           {tienePermiso("pantallasTarifario") && (
             <div className="mb-1">

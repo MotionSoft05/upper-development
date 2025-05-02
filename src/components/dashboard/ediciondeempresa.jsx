@@ -24,6 +24,7 @@ import {
   faChevronDown,
   faChevronUp,
   faHeadset,
+  faImages,
 } from "@fortawesome/free-solid-svg-icons";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import { Tooltip } from "react-tooltip";
@@ -97,6 +98,7 @@ const Ediciondeempresa = () => {
                 informacionTarifas: permisoAntiguo > 0,
                 pantallasSalon: permisoAntiguo === 3,
                 pantallasDirectorio: permisoAntiguo === 3,
+                pantallasPromociones: permisoAntiguo === 3,
                 pantallasTarifario: permisoAntiguo === 3,
                 monitoreo: permisoAntiguo === 3,
                 publicidad: permisoAntiguo === 3,
@@ -275,6 +277,11 @@ const Ediciondeempresa = () => {
           id: "pantallasTarifario",
           nombre: "Pantallas Tarifario",
           icon: faMoneyBill,
+        },
+        {
+          id: "pantallasPromociones",
+          nombre: "Pantallas Promociones",
+          icon: faImages,
         },
         { id: "monitoreo", nombre: "Monitoreo de Pantallas", icon: faDesktop },
         { id: "publicidad", nombre: "Publicidad", icon: faBullhorn },

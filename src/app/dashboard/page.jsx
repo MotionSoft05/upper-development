@@ -14,9 +14,9 @@ import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
 import MonitorScreen from "@/components/dashboard/MonitorScreen";
-// Importar los componentes de tarifario
 import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
 import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
+import PantallasPromociones from "@/components/dashboard/pantallasPromociones";
 
 import React, { useState, useEffect } from "react";
 
@@ -45,6 +45,7 @@ function DashBoard() {
   const [showPantallaDirectorio, setShowPantallaDirectorio] = useState(false);
   const [showPantallaServicio, setShowPantallaServicio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
+  const [showPantallaPromociones, setShowPantallaPromociones] = useState(false);
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
@@ -115,6 +116,8 @@ function DashBoard() {
           showPantallaDirectorio={showPantallaDirectorio}
           setShowPantallaServicio={setShowPantallaServicio}
           showPantallaServicio={showPantallaServicio}
+          setShowPantallaPromociones={setShowPantallaPromociones}
+          showPantallaPromociones={showPantallaPromociones}
           setShowPublicidad={setShowPublicidad}
           showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
@@ -158,6 +161,8 @@ function DashBoard() {
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
+          {showPantallaPromociones && <PantallasPromociones />}
+
           {/* Componentes de Tarifario */}
           {showPantallaTarifario && <PantallasTarifario />}
           {showInformacionTarifa && <EditInformacionTarifa />}
