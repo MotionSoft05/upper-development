@@ -16,7 +16,7 @@ import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
 import MonitorScreen from "@/components/dashboard/MonitorScreen";
 import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
 import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
-import PantallasPromociones from "@/components/dashboard/pantallasPromociones";
+import PantallasPromociones from "@/components/dashboard/PantallasPromociones";
 
 import React, { useState, useEffect } from "react";
 
