@@ -29,6 +29,9 @@ import {
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
+import Datepicker from "react-tailwindcss-datepicker";
+import moment from "moment";
+import { CalendarIcon } from "@heroicons/react/20/solid";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -50,6 +53,7 @@ function PantallasPromociones() {
   const [nombreEmpresa, setNombreEmpresa] = useState(null);
   const [activeTab, setActiveTab] = useState("general");
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   // Gestión de pantallas y contenido
   const [selectedPantalla, setSelectedPantalla] = useState(null);
@@ -63,9 +67,52 @@ function PantallasPromociones() {
     url: "",
     duration: 10,
     name: "",
+    date: {
+      startDate: new Date().toISOString(),
+      endDate: new Date(
+        new Date().setMonth(new Date().getMonth() + 1)
+      ).toISOString(),
+    },
+  });
+  const [contentDate, setContentDate] = useState({
+    startDate: new Date(),
+    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Lista de ciudades para el clima
+  const [cityOptions, setCityOptions] = useState([
+    { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
+    { value: "Ecatepec", label: "Ecatepec, Estado de México" },
+    { value: "Guadalajara", label: "Guadalajara, Jalisco" },
+    { value: "Monterrey", label: "Monterrey, Nuevo León" },
+    { value: "Puebla", label: "Puebla, Puebla" },
+    { value: "Tijuana", label: "Tijuana, Baja California" },
+    { value: "León", label: "León, Guanajuato" },
+    { value: "Zapopan", label: "Zapopan, Jalisco" },
+    { value: "Ciudad Juárez", label: "Ciudad Juárez, Chihuahua" },
+    { value: "Nezahualcóyotl", label: "Nezahualcóyotl, Estado de México" },
+    { value: "Mexicali", label: "Mexicali, Baja California" },
+    { value: "Mérida", label: "Mérida, Yucatán" },
+    { value: "San Luis Potosí", label: "San Luis Potosí, San Luis Potosí" },
+    { value: "Querétaro", label: "Querétaro, Querétaro" },
+    { value: "Aguascalientes", label: "Aguascalientes, Aguascalientes" },
+    { value: "Hermosillo", label: "Hermosillo, Sonora" },
+    { value: "Saltillo", label: "Saltillo, Coahuila" },
+    { value: "Morelia", label: "Morelia, Michoacán" },
+    { value: "Culiacán", label: "Culiacán, Sinaloa" },
+    { value: "Chihuahua", label: "Chihuahua, Chihuahua" },
+    { value: "Toluca", label: "Toluca, Estado de México" },
+    { value: "Cancún", label: "Cancún, Quintana Roo" },
+    { value: "Acapulco", label: "Acapulco, Guerrero" },
+    { value: "Oaxaca", label: "Oaxaca, Oaxaca" },
+  ]);
+
+  // Ordenar alfabéticamente
+  cityOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+  const [selectedCity, setSelectedCity] = useState(null);
 
   // Templates disponibles
   const templates = [
@@ -218,8 +265,12 @@ function PantallasPromociones() {
                 selectedFontStyleOption || fontStyleOptions[0]
               );
 
-              // Cargar idioma
+              // Cargar idioma y ciudad seleccionada
               setSelectedLanguage(templatePromoData.idioma || "es");
+
+              if (templatePromoData.selectedCity) {
+                setSelectedCity(templatePromoData.selectedCity);
+              }
 
               // Cargar configuración por pantalla
               if (templatePromoData.pantallasConfig) {
@@ -242,10 +293,25 @@ function PantallasPromociones() {
 
   const handleColorChange = (color) => {
     setFontColor(color.hex);
+    setHasUnsavedChanges(true);
   };
 
   const handleFontStyleChange = (selectedOption) => {
     setSelectedFontStyle(selectedOption);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleDateValueChange = (newValue) => {
+    setContentDate(newValue);
+    setNewContentItem({
+      ...newContentItem,
+      date: newValue,
+    });
   };
 
   const handleContentFileUpload = async (event) => {
@@ -292,8 +358,7 @@ function PantallasPromociones() {
         `pantallaPromocionesContent/${fileType}/${Date.now()}-${file.name}`
       );
 
-      // En lugar de usar uploadTask.on, usaremos uploadBytesResumable
-      // que es la versión modular equivalente que sí soporta monitoreo de progreso
+      // Usar uploadBytesResumable para monitoreo de progreso
       const uploadTask = uploadBytesResumable(storageRef, file);
 
       // Agregar oyente para el progreso de carga
@@ -352,6 +417,26 @@ function PantallasPromociones() {
   };
 
   const handleSelectPantalla = async (pantallaIndex) => {
+    // Si hay cambios sin guardar, mostrar advertencia
+    if (hasUnsavedChanges) {
+      const result = await Swal.fire({
+        title: "Cambios sin guardar",
+        text: "Tiene cambios sin guardar. ¿Desea guardarlos antes de continuar?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Guardar",
+        cancelButtonText: "Descartar cambios",
+      });
+
+      if (result.isConfirmed) {
+        await guardarInformacionPersonalizacion();
+      }
+
+      setHasUnsavedChanges(false);
+    }
+
     // Obtener la configuración actual de la pantalla
     const pantallaNombre = nombrePantallas[pantallaIndex];
     const pantallaId = `promo${pantallaIndex + 1}`;
@@ -424,6 +509,7 @@ function PantallasPromociones() {
       [selectedPantalla.id]: updatedConfig,
     });
 
+    setHasUnsavedChanges(true);
     setShowContentModal(false);
     setEditingContent(null);
     setNewContentItem({
@@ -431,6 +517,12 @@ function PantallasPromociones() {
       url: "",
       duration: 10,
       name: "",
+      date: {
+        startDate: new Date().toISOString(),
+        endDate: new Date(
+          new Date().setMonth(new Date().getMonth() + 1)
+        ).toISOString(),
+      },
     });
   };
 
@@ -442,6 +534,16 @@ function PantallasPromociones() {
       url: "",
       duration: 10,
       name: "",
+      date: {
+        startDate: new Date().toISOString(),
+        endDate: new Date(
+          new Date().setMonth(new Date().getMonth() + 1)
+        ).toISOString(),
+      },
+    });
+    setContentDate({
+      startDate: new Date(),
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
     });
     setShowContentModal(true);
   };
@@ -451,7 +553,28 @@ function PantallasPromociones() {
       selectedPantalla.config.sections[sectionId].content[contentIndex];
     setSelectedSection({ id: sectionId });
     setEditingContent({ index: contentIndex });
-    setNewContentItem({ ...content });
+
+    // Recuperar las fechas o usar fechas por defecto si no existen
+    const startDate = content.date?.startDate
+      ? new Date(content.date.startDate)
+      : new Date();
+    const endDate = content.date?.endDate
+      ? new Date(content.date.endDate)
+      : new Date(new Date().setMonth(new Date().getMonth() + 1));
+
+    setContentDate({
+      startDate: startDate,
+      endDate: endDate,
+    });
+
+    setNewContentItem({
+      ...content,
+      date: {
+        startDate: startDate.toISOString(),
+        endDate: endDate.toISOString(),
+      },
+    });
+
     setShowContentModal(true);
   };
 
@@ -485,6 +608,8 @@ function PantallasPromociones() {
           [selectedPantalla.id]: updatedConfig,
         });
 
+        setHasUnsavedChanges(true);
+
         Swal.fire(
           "Eliminado",
           "El contenido ha sido eliminado correctamente.",
@@ -500,6 +625,39 @@ function PantallasPromociones() {
 
     if (!template) return;
 
+    // Verificar si ya hay contenido configurado
+    let hasContent = false;
+    if (selectedPantalla.config.sections) {
+      for (const sectionId in selectedPantalla.config.sections) {
+        if (selectedPantalla.config.sections[sectionId].content?.length > 0) {
+          hasContent = true;
+          break;
+        }
+      }
+    }
+
+    // Si hay contenido y se está cambiando de template, mostrar advertencia
+    if (hasContent && selectedPantalla.config.templateId !== templateId) {
+      Swal.fire({
+        title: "¿Está seguro?",
+        text: "Cambiar de template puede afectar al contenido configurado. Es posible que deba volver a configurar el contenido para las nuevas secciones.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, cambiar template",
+        cancelButtonText: "Cancelar",
+      }).then((result) => {
+        if (result.isConfirmed) {
+          applyTemplateChange(template, templateId);
+        }
+      });
+    } else {
+      applyTemplateChange(template, templateId);
+    }
+  };
+
+  const applyTemplateChange = (template, templateId) => {
     // Crear nueva configuración basada en el template
     const newSections = {};
     for (let i = 1; i <= template.sections; i++) {
@@ -532,6 +690,8 @@ function PantallasPromociones() {
       ...pantallaSettings,
       [selectedPantalla.id]: updatedConfig,
     });
+
+    setHasUnsavedChanges(true);
   };
 
   const handleMoveContent = (sectionId, contentIndex, direction) => {
@@ -571,6 +731,8 @@ function PantallasPromociones() {
       ...pantallaSettings,
       [selectedPantalla.id]: updatedConfig,
     });
+
+    setHasUnsavedChanges(true);
   };
 
   const guardarInformacionPersonalizacion = async () => {
@@ -673,6 +835,7 @@ function PantallasPromociones() {
         empresa: empresaToUpdate,
         idioma: selectedLanguage,
         pantallasConfig: pantallaSettings,
+        selectedCity: selectedCity,
         timestamp: serverTimestamp(),
       };
 
@@ -696,6 +859,10 @@ function PantallasPromociones() {
       setTimeout(() => {
         setShowSuccessMessage(false);
       }, 3000);
+
+      setHasUnsavedChanges(false);
+
+      return true;
     } catch (error) {
       console.error("Error al guardar la información:", error);
       Swal.fire({
@@ -703,16 +870,32 @@ function PantallasPromociones() {
         title: "Error al guardar la información",
         text: error.message,
       });
+      return false;
     }
   };
 
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
+    setHasUnsavedChanges(true);
   };
 
   // Función para guardar con feedback
   const handleSaveWithFeedback = () => {
     guardarInformacionPersonalizacion();
+  };
+
+  // Función para volver a lista de pantallas guardando cambios
+  const handleBackToScreensList = async () => {
+    if (hasUnsavedChanges) {
+      const result = await guardarInformacionPersonalizacion();
+      if (result) {
+        setActiveTab("screens");
+        setSelectedPantalla(null);
+      }
+    } else {
+      setActiveTab("screens");
+      setSelectedPantalla(null);
+    }
   };
 
   // Función para renderizar el preview del template
@@ -817,8 +1000,28 @@ function PantallasPromociones() {
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => {
-                setActiveTab("general");
-                setSelectedPantalla(null);
+                if (hasUnsavedChanges) {
+                  Swal.fire({
+                    title: "Cambios sin guardar",
+                    text: "¿Desea guardar los cambios antes de cambiar de pestaña?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Descartar",
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      guardarInformacionPersonalizacion();
+                    }
+                    setActiveTab("general");
+                    setSelectedPantalla(null);
+                    setHasUnsavedChanges(false);
+                  });
+                } else {
+                  setActiveTab("general");
+                  setSelectedPantalla(null);
+                }
               }}
               className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
                 activeTab === "general"
@@ -830,8 +1033,28 @@ function PantallasPromociones() {
             </button>
             <button
               onClick={() => {
-                setActiveTab("screens");
-                setSelectedPantalla(null);
+                if (hasUnsavedChanges) {
+                  Swal.fire({
+                    title: "Cambios sin guardar",
+                    text: "¿Desea guardar los cambios antes de cambiar de pestaña?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Descartar",
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      guardarInformacionPersonalizacion();
+                    }
+                    setActiveTab("screens");
+                    setSelectedPantalla(null);
+                    setHasUnsavedChanges(false);
+                  });
+                } else {
+                  setActiveTab("screens");
+                  setSelectedPantalla(null);
+                }
               }}
               className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
                 activeTab === "screens"
@@ -842,7 +1065,28 @@ function PantallasPromociones() {
               Pantallas
             </button>
             <button
-              onClick={() => setActiveTab("appearance")}
+              onClick={() => {
+                if (hasUnsavedChanges) {
+                  Swal.fire({
+                    title: "Cambios sin guardar",
+                    text: "¿Desea guardar los cambios antes de cambiar de pestaña?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#3085d6",
+                    cancelButtonColor: "#d33",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Descartar",
+                  }).then((result) => {
+                    if (result.isConfirmed) {
+                      guardarInformacionPersonalizacion();
+                    }
+                    setActiveTab("appearance");
+                    setHasUnsavedChanges(false);
+                  });
+                } else {
+                  setActiveTab("appearance");
+                }
+              }}
               className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
                 activeTab === "appearance"
                   ? "text-blue-600 border-b-2 border-blue-500"
@@ -933,35 +1177,24 @@ function PantallasPromociones() {
                   </div>
                 </div>
 
-                {/* Instrucciones generales */}
-                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-                  <h3 className="text-sm font-medium text-blue-800 mb-2">
-                    Instrucciones de uso
-                  </h3>
-                  <p className="text-sm text-blue-700 mb-2">
-                    Para configurar sus pantallas de promociones, siga estos
-                    pasos:
+                {/* Ciudad para el clima */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Seleccionar Ciudad (Clima)
+                  </label>
+                  <Select
+                    options={cityOptions}
+                    value={selectedCity}
+                    onChange={handleCityChange}
+                    placeholder="Seleccione una ciudad para mostrar el clima"
+                    className="w-full"
+                    isSearchable
+                    isClearable={true}
+                  />
+                  <p className="mt-1 text-xs text-gray-500">
+                    La ciudad seleccionada se utilizará para mostrar la
+                    información del clima en la pantalla.
                   </p>
-                  <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1 ml-2">
-                    <li>
-                      Vaya a la pestaña &quot;Pantallas&quot; para nombrar cada
-                      pantalla
-                    </li>
-                    <li>
-                      Seleccione una pantalla para configurarla individualmente
-                    </li>
-                    <li>
-                      Elija un template con 1, 3 o 6 secciones según sus
-                      necesidades
-                    </li>
-                    <li>
-                      Agregue contenido (imágenes o videos) a cada sección
-                    </li>
-                    <li>
-                      Configure el tiempo de visualización para cada contenido
-                    </li>
-                    <li>Guarde los cambios cuando haya terminado</li>
-                  </ol>
                 </div>
               </div>
             )}
@@ -999,6 +1232,7 @@ function PantallasPromociones() {
                                 const updatedNombres = [...nombrePantallas];
                                 updatedNombres[index] = truncatedValue;
                                 setNombrePantallas(updatedNombres);
+                                setHasUnsavedChanges(true);
                               }}
                             />
                           </div>
@@ -1010,15 +1244,6 @@ function PantallasPromociones() {
                           >
                             Configurar
                           </button>
-                          <Link
-                            href={`/pantallaPromo/${
-                              index + 1
-                            }${isProduction}/?emp=${nombreEmpresa?.empresa}`}
-                            target="_blank"
-                            className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                          >
-                            URL
-                          </Link>
                         </div>
                       </div>
                     </div>
@@ -1034,6 +1259,35 @@ function PantallasPromociones() {
                     </p>
                   </div>
                 )}
+                {/* Instrucciones generales */}
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
+                  <h3 className="text-sm font-medium text-blue-800 mb-2">
+                    Instrucciones de uso
+                  </h3>
+                  <p className="text-sm text-blue-700 mb-2">
+                    Para configurar sus pantallas de promociones, siga estos
+                    pasos:
+                  </p>
+                  <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1 ml-2">
+                    <li>Asigne nombres descriptivos a cada pantalla</li>
+                    <li>
+                      Haga clic en &quot;Configurar&quot; para personalizar cada
+                      pantalla individualmente
+                    </li>
+                    <li>
+                      Elija un template con 1, 3 o 6 secciones según sus
+                      necesidades
+                    </li>
+                    <li>
+                      Agregue contenido (imágenes o videos) a cada sección
+                    </li>
+                    <li>
+                      Configure el tiempo de visualización y fechas para cada
+                      contenido
+                    </li>
+                    <li>Guarde los cambios cuando haya terminado</li>
+                  </ol>
+                </div>
               </div>
             )}
 
@@ -1134,18 +1388,11 @@ function PantallasPromociones() {
             {activeTab === "pantalla" && selectedPantalla && (
               <div className="space-y-6">
                 <div className="flex justify-between items-center border-b pb-2">
-                  <h2 className="text-lg font-semibold text-gray-900">
-                    Configuración de &quot;{selectedPantalla.nombre}&quot;
-                  </h2>
-                  <button
-                    onClick={() => {
-                      setActiveTab("screens");
-                      setSelectedPantalla(null);
-                    }}
-                    className="text-sm text-blue-600 hover:text-blue-800"
-                  >
-                    Volver a lista de pantallas
-                  </button>
+                  <div className="border-b pb-2">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Configuración de &quot;{selectedPantalla.nombre}&quot;
+                    </h2>
+                  </div>
                 </div>
 
                 {/* Selección de Template */}
@@ -1261,6 +1508,18 @@ function PantallasPromociones() {
                                               ? "Imagen"
                                               : "Video"}{" "}
                                             • Duración: {item.duration}s
+                                          </p>
+                                          <p className="text-xs text-gray-500">
+                                            Vigencia:{" "}
+                                            {item.date
+                                              ? new Date(
+                                                  item.date.startDate
+                                                ).toLocaleDateString() +
+                                                " - " +
+                                                new Date(
+                                                  item.date.endDate
+                                                ).toLocaleDateString()
+                                              : "No definida"}
                                           </p>
                                         </div>
                                       </div>
@@ -1421,33 +1680,62 @@ function PantallasPromociones() {
                       )}
                   </div>
                 </div>
+                {/* Botones de acción para la pantalla seleccionada */}
+                <div className="mt-8 flex justify-end space-x-3">
+                  <button
+                    onClick={() => {
+                      setActiveTab("screens");
+                      setSelectedPantalla(null);
+                      setHasUnsavedChanges(false);
+                    }}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    onClick={() => {
+                      guardarInformacionPersonalizacion().then(() => {
+                        setActiveTab("screens");
+                        setSelectedPantalla(null);
+                        setHasUnsavedChanges(false);
+                      });
+                    }}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                  >
+                    Guardar imagenes/videos
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* Botones de acción */}
-            <div className="mt-8 flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "¿Está seguro que desea restablecer todos los valores?"
-                    )
-                  ) {
-                    setFontColor("#000000");
-                    setSelectedFontStyle(fontStyleOptions[0]);
-                  }
-                }}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-              >
-                Restablecer
-              </button>
-              <button
-                onClick={handleSaveWithFeedback}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Guardar
-              </button>
-            </div>
+            {/* Botones de acción - Solo mostrar cuando no se está editando una pantalla */}
+            {activeTab !== "pantalla" && (
+              <div className="mt-8 flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    if (
+                      window.confirm(
+                        "¿Está seguro que desea restablecer todos los valores?"
+                      )
+                    ) {
+                      setFontColor("#000000");
+                      setSelectedFontStyle(fontStyleOptions[0]);
+                      setSelectedCity(null);
+                      setHasUnsavedChanges(true);
+                    }
+                  }}
+                  className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                >
+                  Restablecer
+                </button>
+                <button
+                  onClick={handleSaveWithFeedback}
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Guardar
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1520,6 +1808,12 @@ function PantallasPromociones() {
                     url: "",
                     duration: 10,
                     name: "",
+                    date: {
+                      startDate: new Date().toISOString(),
+                      endDate: new Date(
+                        new Date().setMonth(new Date().getMonth() + 1)
+                      ).toISOString(),
+                    },
                   });
                 }}
                 className="text-gray-500 hover:text-gray-700"
@@ -1740,6 +2034,30 @@ function PantallasPromociones() {
                   pasar al siguiente.
                 </p>
               </div>
+
+              {/* Selector de fecha */}
+              <div>
+                <div className="flex items-center mb-2">
+                  <CalendarIcon className="h-4 w-4 text-blue-500 mr-1" />
+                  <label
+                    htmlFor="date-picker"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Periodo de vigencia
+                  </label>
+                </div>
+                <Datepicker
+                  useRange={true}
+                  value={contentDate}
+                  onChange={handleDateValueChange}
+                  inputClassName="w-full py-2 bg-gray-50 border border-gray-300 text-gray-900 rounded text-base"
+                  displayFormat={"DD/MM/YYYY"}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  Periodo durante el cual este contenido será mostrado. Fuera de
+                  este periodo, el contenido no aparecerá en la pantalla.
+                </p>
+              </div>
             </div>
 
             <div className="mt-6 flex justify-end space-x-3">
@@ -1752,6 +2070,12 @@ function PantallasPromociones() {
                     url: "",
                     duration: 10,
                     name: "",
+                    date: {
+                      startDate: new Date().toISOString(),
+                      endDate: new Date(
+                        new Date().setMonth(new Date().getMonth() + 1)
+                      ).toISOString(),
+                    },
                   });
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
