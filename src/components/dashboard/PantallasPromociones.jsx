@@ -41,6 +41,7 @@ const storage = getStorage();
 
 function PantallasPromociones() {
   const isProduction = process.env.NEXT_PUBLIC_PRODUCTION;
+  const currentDate = new Date();
 
   const { t } = useTranslation();
   const [nombrePantallas, setNombrePantallas] = useState([]);
@@ -68,15 +69,13 @@ function PantallasPromociones() {
     duration: 10,
     name: "",
     date: {
-      startDate: new Date().toISOString(),
-      endDate: new Date(
-        new Date().setMonth(new Date().getMonth() + 1)
-      ).toISOString(),
+      startDate: null,
+      endDate: null,
     },
   });
   const [contentDate, setContentDate] = useState({
-    startDate: new Date(),
-    endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+    startDate: null,
+    endDate: null,
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -478,7 +477,14 @@ function PantallasPromociones() {
       });
       return;
     }
-
+    if (!newContentItem.date.startDate || !newContentItem.date.endDate) {
+      Swal.fire({
+        icon: "error",
+        title: "Fechas no seleccionadas",
+        text: "Por favor, seleccione las fechas de inicio y fin para el contenido.",
+      });
+      return;
+    }
     const sectionId = selectedSection.id;
 
     // Crear una copia de la configuración actual
@@ -518,10 +524,8 @@ function PantallasPromociones() {
       duration: 10,
       name: "",
       date: {
-        startDate: new Date().toISOString(),
-        endDate: new Date(
-          new Date().setMonth(new Date().getMonth() + 1)
-        ).toISOString(),
+        startDate: null,
+        endDate: null,
       },
     });
   };
@@ -535,16 +539,15 @@ function PantallasPromociones() {
       duration: 10,
       name: "",
       date: {
-        startDate: new Date().toISOString(),
-        endDate: new Date(
-          new Date().setMonth(new Date().getMonth() + 1)
-        ).toISOString(),
+        startDate: null,
+        endDate: null,
       },
     });
     setContentDate({
-      startDate: new Date(),
-      endDate: new Date(new Date().setMonth(new Date().getMonth() + 1)),
+      startDate: null,
+      endDate: null,
     });
+
     setShowContentModal(true);
   };
 
@@ -1508,6 +1511,50 @@ function PantallasPromociones() {
                                               ? "Imagen"
                                               : "Video"}{" "}
                                             • Duración: {item.duration}s
+                                            {/* Agregar la lógica de estado basada en fecha */}
+                                            {item.date &&
+                                              (() => {
+                                                const startDate = new Date(
+                                                  item.date.startDate
+                                                );
+                                                const endDate = new Date(
+                                                  item.date.endDate
+                                                );
+                                                let statusText = "";
+                                                let statusClass = "";
+
+                                                if (currentDate < startDate) {
+                                                  statusText =
+                                                    item.type === "image"
+                                                      ? " (imagen programada)"
+                                                      : " (video programado)";
+                                                  statusClass =
+                                                    "text-amber-500"; // Amarillo para contenido programado
+                                                } else if (
+                                                  currentDate > endDate
+                                                ) {
+                                                  statusText =
+                                                    item.type === "image"
+                                                      ? " (imagen finalizada)"
+                                                      : " (video finalizado)";
+                                                  statusClass = "text-red-600"; // Rojo para contenido finalizado
+                                                } else {
+                                                  statusText =
+                                                    item.type === "image"
+                                                      ? " (imagen en vivo)"
+                                                      : " (video en vivo)";
+                                                  statusClass =
+                                                    "text-green-600"; // Verde para contenido en vivo
+                                                }
+
+                                                return (
+                                                  <span
+                                                    className={`ml-1 font-medium ${statusClass}`}
+                                                  >
+                                                    {statusText}
+                                                  </span>
+                                                );
+                                              })()}
                                           </p>
                                           <p className="text-xs text-gray-500">
                                             Vigencia:{" "}
@@ -1809,10 +1856,8 @@ function PantallasPromociones() {
                     duration: 10,
                     name: "",
                     date: {
-                      startDate: new Date().toISOString(),
-                      endDate: new Date(
-                        new Date().setMonth(new Date().getMonth() + 1)
-                      ).toISOString(),
+                      startDate: null,
+                      endDate: null,
                     },
                   });
                 }}
@@ -2052,6 +2097,7 @@ function PantallasPromociones() {
                   onChange={handleDateValueChange}
                   inputClassName="w-full py-2 bg-gray-50 border border-gray-300 text-gray-900 rounded text-base"
                   displayFormat={"DD/MM/YYYY"}
+                  placeholder="Seleccione fechas de inicio y fin"
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   Periodo durante el cual este contenido será mostrado. Fuera de
@@ -2071,10 +2117,8 @@ function PantallasPromociones() {
                     duration: 10,
                     name: "",
                     date: {
-                      startDate: new Date().toISOString(),
-                      endDate: new Date(
-                        new Date().setMonth(new Date().getMonth() + 1)
-                      ).toISOString(),
+                      startDate: null,
+                      endDate: null,
                     },
                   });
                 }}
