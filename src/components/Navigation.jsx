@@ -112,8 +112,8 @@ function Navigation() {
           <div className="flex-shrink-0 flex items-center">
             <Link href="/">
               <img
-                src="/img/logov2.png"
-                className="h-12 md:h-16"
+                src="/img/UpperNewLogo-removebg-preview.png"
+                className="h-20 md:h-32"
                 alt="Upper Logo"
               />
             </Link>

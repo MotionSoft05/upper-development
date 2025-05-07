@@ -47,8 +47,8 @@ function Footer() {
             <div className={`flex items-center mb-4 md:mb-0$`}></div>
             <div>
               <img
-                src="/img/logov2.png"
-                className="h-8 mr-3"
+                src="/img/UpperNewLogoCut.png"
+                className="h-5 md:h-10"
                 alt="Upper Logo"
               />
               <span className="text-sm text-gray-500">
@@ -72,8 +72,8 @@ function Footer() {
           <div className="mb-6 md:mb-0 md:w-1/3">
             <Link href="/" className="flex items-center mb-4">
               <img
-                src="/img/logov2.png"
-                className="h-10 mr-3"
+                src="/img/UpperNewLogoCut.png"
+                className="h-5 md:h-10"
                 alt="Upper Logo"
               />
             </Link>
