@@ -1,6 +1,8 @@
 // src/components/sliderPublicidadPD.jsx
 import { useState, useEffect, useRef, useMemo } from "react";
 import "keen-slider/keen-slider.min.css";
+import VideoPlayer from "./VideoPlayer";
+import WeatherWidget from "./WeatherWidget";
 
 const AdvertisementSlider = ({
   advertisements,
@@ -9,7 +11,17 @@ const AdvertisementSlider = ({
   currentTime,
   weatherData,
   isPortrait = false,
+  screenNumber, // Añadido para poder acceder a la configuración específica de la pantalla
 }) => {
+  console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ templates:", templates);
+  console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ isPortrait:", isPortrait);
+  console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ weatherData:", weatherData);
+  console.log("🚀 ~ sliderPublicidadPD.jsx:15 ~ screenNumber:", screenNumber);
+  console.log(
+    "🚀 ~ sliderPublicidadPD.jsx:15 ~ advertisements:",
+    advertisements
+  );
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
@@ -18,6 +30,81 @@ const AdvertisementSlider = ({
     width: typeof window !== "undefined" ? window.innerWidth : 0,
     height: typeof window !== "undefined" ? window.innerHeight : 0,
   });
+  const [videoError, setVideoError] = useState(false);
+
+  // Obtener la dirección de rotación basado en el nuevo método
+  const getRotationDirection = () => {
+    // Si recibimos pantallasSettings, verificamos primero allí
+    if (templates?.pantallasSettings && screenNumber) {
+      const screenSpecificSetting =
+        templates.pantallasSettings[screenNumber.toString()];
+      if (screenSpecificSetting?.setPortrait === true) {
+        // Pantalla vertical detectada en pantallasSettings
+        return -90; // Valor por defecto para pantallas verticales
+      }
+    }
+
+    // Luego buscamos en pantallaSettings si existe
+    if (
+      templates?.pantallaSettings &&
+      Array.isArray(templates.pantallaSettings)
+    ) {
+      // Restamos 1 porque los índices de array comienzan en 0 y screenNumber comienza en 1
+      const screenIndex = screenNumber ? screenNumber - 1 : 0;
+      const screenSetting = templates.pantallaSettings[screenIndex];
+
+      if (
+        screenSetting?.isPortrait &&
+        screenSetting?.rotationDirection !== undefined
+      ) {
+        return screenSetting.rotationDirection;
+      } else if (screenSetting?.isPortrait) {
+        return -90; // Valor por defecto para pantallas verticales
+      }
+    }
+
+    // Si no se encuentra configuración específica pero isPortrait es verdadero
+    if (isPortrait) {
+      return -90; // Valor por defecto para pantallas verticales
+    }
+
+    // No es una pantalla vertical, no se necesita rotación
+    return 0;
+  };
+  console.log(
+    "🚀 ~ sliderPublicidadPD.jsx:33 ~ getRotationDirection ~ getRotationDirection:",
+    getRotationDirection
+  );
+
+  // Determinar si la pantalla debe rotarse basado en la configuración
+  const shouldRotate = () => {
+    // Primero verificar pantallasSettings
+    if (templates?.pantallasSettings && screenNumber) {
+      const screenSpecificSetting =
+        templates.pantallasSettings[screenNumber.toString()];
+      if (screenSpecificSetting?.setPortrait === true) {
+        return true;
+      }
+    }
+
+    // Luego verificar pantallaSettings
+    if (
+      templates?.pantallaSettings &&
+      Array.isArray(templates.pantallaSettings)
+    ) {
+      const screenIndex = screenNumber ? screenNumber - 1 : 0;
+      const screenSetting = templates.pantallaSettings[screenIndex];
+      if (screenSetting?.isPortrait) {
+        return true;
+      }
+    }
+
+    // Finalmente usar el prop isPortrait
+    return isPortrait;
+  };
+
+  const rotationDirection = getRotationDirection();
+  const rotateScreen = shouldRotate();
 
   // Monitor window size for responsive adjustments
   useEffect(() => {
@@ -42,7 +129,7 @@ const AdvertisementSlider = ({
 
   // Prevent scrolling when component is mounted
   useEffect(() => {
-    if (isPortrait) {
+    if (rotateScreen) {
       // Prevent scrolling on the body
       document.body.style.overflow = "hidden";
       document.body.style.margin = "0";
@@ -63,48 +150,7 @@ const AdvertisementSlider = ({
         document.documentElement.style.height = "";
       };
     }
-  }, [isPortrait]);
-
-  // Filtrar anuncios por orientación de manera estricta
-  const filteredAds = useMemo(() => {
-    if (!advertisements || advertisements.length === 0) return [];
-
-    const expectedValue = isPortrait ? "vertical" : "horizontal";
-
-    // Imprimir los valores exactos para depuración
-    if (advertisements.length > 0 && advertisements[0].tipoPantalla) {
-      console.log(
-        "Caracteres en tipoPantalla:",
-        JSON.stringify(advertisements[0].tipoPantalla)
-      );
-      console.log(
-        "Caracteres en expectedValue:",
-        JSON.stringify(expectedValue)
-      );
-    }
-
-    // Filtrado más tolerante
-    const orientationFiltered = advertisements.filter((ad) => {
-      // Asegúrate que existe el campo y usa trim() para eliminar espacios
-      if (!ad.tipoPantalla) return false;
-
-      // Comparación normalizada
-      const adValue = ad.tipoPantalla.toString().toLowerCase().trim();
-      const matches = adValue === expectedValue;
-
-      console.log(
-        `Anuncio - tipoPantalla: '${adValue}', esperado: '${expectedValue}', coincide: ${matches}`
-      );
-      return matches;
-    });
-
-    console.log(`Filtrado de anuncios:`, {
-      total: advertisements.length,
-      filtrados: orientationFiltered.length,
-    });
-
-    return orientationFiltered;
-  }, [advertisements, isPortrait]);
+  }, [rotateScreen]);
 
   // Format date based on language
   const formatDate = (lang) => {
@@ -129,15 +175,19 @@ const AdvertisementSlider = ({
     }
   };
 
-  // Get current advertisement
+  // Get current advertisement - ahora usamos directamente los anuncios ya filtrados
   const getCurrentAd = () => {
-    if (!filteredAds || filteredAds.length === 0) return null;
-    return filteredAds[currentIndex];
+    if (!advertisements || advertisements.length === 0) return null;
+    return advertisements[currentIndex];
   };
 
   // Handle transition to next ad
   const moveToNextAd = () => {
-    if (!filteredAds || filteredAds.length <= 1 || transitioningRef.current)
+    if (
+      !advertisements ||
+      advertisements.length <= 1 ||
+      transitioningRef.current
+    )
       return;
 
     transitioningRef.current = true;
@@ -147,7 +197,7 @@ const AdvertisementSlider = ({
 
     // After fade out completes, change ad and fade in
     setTimeout(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % filteredAds.length);
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % advertisements.length);
 
       // Small delay before starting fade in
       setTimeout(() => {
@@ -157,14 +207,14 @@ const AdvertisementSlider = ({
     }, 500); // Wait for fade out to complete
   };
 
-  // Reset index when filtered ads change
+  // Reset index when advertisements change
   useEffect(() => {
     setCurrentIndex(0);
-  }, [filteredAds.length]);
+  }, [advertisements.length]);
 
   // Set up timer for ad rotation
   useEffect(() => {
-    if (!filteredAds || filteredAds.length === 0) return;
+    if (!advertisements || advertisements.length === 0) return;
 
     const currentAd = getCurrentAd();
     if (!currentAd) return;
@@ -191,14 +241,14 @@ const AdvertisementSlider = ({
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, filteredAds]);
+  }, [currentIndex, advertisements]);
 
-  if (!filteredAds || filteredAds.length === 0) {
+  if (!advertisements || advertisements.length === 0) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-gray-100">
         <p className="text-2xl text-gray-500">
           No hay publicidades disponibles para la orientación{" "}
-          {isPortrait ? "vertical" : "horizontal"}
+          {rotateScreen ? "vertical" : "horizontal"}
         </p>
       </div>
     );
@@ -274,25 +324,14 @@ const AdvertisementSlider = ({
           </div>
         ) : weatherData ? (
           <>
-            <div className="flex items-center">
-              {(weatherData.current?.condition?.icon || weatherData.icon) && (
-                <img
-                  src={weatherData.current?.condition?.icon || weatherData.icon}
-                  alt="Weather"
-                  className="h-6 w-6 mr-1"
-                />
-              )}
-              <span className="text-lg font-medium text-color">
-                {weatherData.current?.temp_c || weatherData.temp_c
-                  ? `${(
-                      weatherData.current?.temp_c || weatherData.temp_c
-                    ).toFixed(1)} °C`
-                  : "Sin datos"}
-              </span>
-            </div>
+            <WeatherWidget
+              ciudad={weatherData.location}
+              showForecast={true}
+              variant="horizontal"
+            />
             <div className="flex items-center">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
-              <div className="text-xl font-semibold mt-0.5 text-color">
+              <div className="text-xl font-semibold text-gray-800 mt-0.5">
                 {currentTime}
               </div>
             </div>
@@ -317,21 +356,19 @@ const AdvertisementSlider = ({
       }}
     >
       {currentAd.videoUrl ? (
-        <video
-          key={`video-${currentIndex}`}
-          className={`${
-            isPortrait ? "h-full mx-auto" : "w-full h-full object-cover"
-          }`}
-          autoPlay
-          muted
-          playsInline
-          loop
+        <VideoPlayer
           src={currentAd.videoUrl}
+          autoPlay={true}
+          muted={true}
+          loop={false}
           onEnded={moveToNextAd}
-          style={{ maxWidth: "100%", maxHeight: "100%" }}
+          onError={() => {
+            setVideoError(true);
+            moveToNextAd();
+          }}
         />
-      ) : // Para modo landscape (isPortrait es falso)
-      isPortrait ? (
+      ) : // Para modo portrait (rotateScreen es verdadero)
+      rotateScreen ? (
         <img
           key={`image-${currentIndex}`}
           className="h-full mx-auto"
@@ -361,7 +398,7 @@ const AdvertisementSlider = ({
       className="fixed inset-0 w-full h-full bg-white overflow-hidden z-20"
       style={{ fontFamily: templateActual.fontStyle }}
     >
-      {isPortrait ? (
+      {rotateScreen ? (
         // Portrait mode with rotation
         <div
           style={{
@@ -370,7 +407,7 @@ const AdvertisementSlider = ({
             height: windowSize.width,
             top: (windowSize.height - windowSize.width) / 2,
             left: (windowSize.width - windowSize.height) / 2,
-            transform: "rotate(-90deg)",
+            transform: `rotate(${rotationDirection}deg)`,
             display: "flex",
             flexDirection: "column",
             backgroundColor: "white",

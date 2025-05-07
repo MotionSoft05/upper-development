@@ -21,6 +21,7 @@ import { getDownloadURL, ref, uploadBytes, getStorage } from "firebase/storage";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
+import { fetchWeatherData } from "@/utils/weatherUtils";
 
 firebase.initializeApp(firebaseConfig);
 
@@ -47,11 +48,89 @@ function PantallasDirectorio() {
   const [nombreEmpresa, setNombreEmpresa] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("es");
   const [selectedTemplate, setSelectedTemplate] = useState("template1");
+  const [rotationDirections, setRotationDirections] = useState([]); // Array para guardar la dirección de rotación por pantalla
 
   const [cityOptions, setCityOptions] = useState([
-    { value: "Ciudad de México", label: "Ciudad de México" },
-    { value: "Tijuana", label: "Tijuana" },
-    // ... (otros elementos)
+    { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
+    { value: "Ecatepec", label: "Ecatepec, Estado de México" },
+    { value: "Guadalajara", label: "Guadalajara, Jalisco" },
+    { value: "Monterrey", label: "Monterrey, Nuevo León" },
+    { value: "Puebla", label: "Puebla, Puebla" },
+    { value: "Tijuana", label: "Tijuana, Baja California" },
+    { value: "León", label: "León, Guanajuato" },
+    { value: "Zapopan", label: "Zapopan, Jalisco" },
+    { value: "Ciudad Juárez", label: "Ciudad Juárez, Chihuahua" },
+    { value: "Nezahualcóyotl", label: "Nezahualcóyotl, Estado de México" },
+    { value: "Mexicali", label: "Mexicali, Baja California" },
+    { value: "Mérida", label: "Mérida, Yucatán" },
+    { value: "San Luis Potosí", label: "San Luis Potosí, San Luis Potosí" },
+    { value: "Querétaro", label: "Querétaro, Querétaro" },
+    { value: "Aguascalientes", label: "Aguascalientes, Aguascalientes" },
+    { value: "Hermosillo", label: "Hermosillo, Sonora" },
+    { value: "Saltillo", label: "Saltillo, Coahuila" },
+    { value: "Morelia", label: "Morelia, Michoacán" },
+    { value: "Culiacán", label: "Culiacán, Sinaloa" },
+    { value: "Chihuahua", label: "Chihuahua, Chihuahua" },
+    { value: "Toluca", label: "Toluca, Estado de México" },
+    { value: "Cancún", label: "Cancún, Quintana Roo" },
+    { value: "Reynosa", label: "Reynosa, Tamaulipas" },
+    { value: "Tuxtla Gutiérrez", label: "Tuxtla Gutiérrez, Chiapas" },
+    { value: "Villahermosa", label: "Villahermosa, Tabasco" },
+    { value: "Xalapa", label: "Xalapa, Veracruz" },
+    { value: "Coatzacoalcos", label: "Coatzacoalcos, Veracruz" },
+    { value: "Celaya", label: "Celaya, Guanajuato" },
+    { value: "Irapuato", label: "Irapuato, Guanajuato" },
+    { value: "Ensenada", label: "Ensenada, Baja California" },
+    { value: "Tepic", label: "Tepic, Nayarit" },
+    { value: "La Paz", label: "La Paz, Baja California Sur" },
+    { value: "Los Cabos", label: "Los Cabos, Baja California Sur" },
+    { value: "Matamoros", label: "Matamoros, Tamaulipas" },
+    { value: "Nuevo Laredo", label: "Nuevo Laredo, Tamaulipas" },
+    { value: "Tlalnepantla", label: "Tlalnepantla, Estado de México" },
+    { value: "Cuernavaca", label: "Cuernavaca, Morelos" },
+    { value: "Uruapan", label: "Uruapan, Michoacán" },
+    { value: "Zacatecas", label: "Zacatecas, Zacatecas" },
+    { value: "Durango", label: "Durango, Durango" },
+    {
+      value: "San Cristóbal de las Casas",
+      label: "San Cristóbal de las Casas, Chiapas",
+    },
+    { value: "Tehuacán", label: "Tehuacán, Puebla" },
+    { value: "Manzanillo", label: "Manzanillo, Colima" },
+    { value: "Orizaba", label: "Orizaba, Veracruz" },
+    { value: "Tula de Allende", label: "Tula de Allende, Hidalgo" },
+    { value: "Pátzcuaro", label: "Pátzcuaro, Michoacán" },
+    { value: "Comitán", label: "Comitán, Chiapas" },
+    { value: "Puerto Escondido", label: "Puerto Escondido, Oaxaca" },
+    { value: "Taxco", label: "Taxco, Guerrero" },
+    { value: "Huatulco", label: "Huatulco, Oaxaca" },
+    { value: "San Juan del Río", label: "San Juan del Río, Querétaro" },
+    { value: "Zamora", label: "Zamora, Michoacán" },
+    { value: "Lagos de Moreno", label: "Lagos de Moreno, Jalisco" },
+    { value: "Tuxpan", label: "Tuxpan, Veracruz" },
+    { value: "Guaymas", label: "Guaymas, Sonora" },
+    { value: "Navojoa", label: "Navojoa, Sonora" },
+    { value: "Piedras Negras", label: "Piedras Negras, Coahuila" },
+    { value: "Delicias", label: "Delicias, Chihuahua" },
+    { value: "Parral", label: "Parral, Chihuahua" },
+    { value: "Tecomán", label: "Tecomán, Colima" },
+    { value: "Playa del Carmen", label: "Playa del Carmen, Quintana Roo" },
+    { value: "Isla Mujeres", label: "Isla Mujeres, Quintana Roo" },
+    { value: "Holbox", label: "Holbox, Quintana Roo" },
+    { value: "Mazatlán", label: "Mazatlán, Sinaloa" },
+    { value: "Acapulco", label: "Acapulco, Guerrero" },
+    { value: "Puerto Vallarta", label: "Puerto Vallarta, Jalisco" },
+    { value: "Sayulita", label: "Sayulita, Nayarit" },
+    { value: "Bahías de Huatulco", label: "Bahías de Huatulco, Oaxaca" },
+    { value: "Ixtapa", label: "Ixtapa, Guerrero" },
+    { value: "Zihuatanejo", label: "Zihuatanejo, Guerrero" },
+    { value: "Progreso", label: "Progreso, Yucatán" },
+    { value: "Campeche", label: "Campeche, Campeche" },
+    { value: "Rosarito", label: "Rosarito, Baja California" },
+    { value: "San Felipe", label: "San Felipe, Baja California" },
+    { value: "Loreto", label: "Loreto, Baja California Sur" },
+    { value: "Todos Santos", label: "Todos Santos, Baja California Sur" },
+    { value: "Oaxaca", label: "Oaxaca, Oaxaca" },
   ]);
 
   // Ordenar alfabéticamente
@@ -122,11 +201,13 @@ function PantallasDirectorio() {
             const settings = user.pantallaSettings || [];
 
             // Asegurar que tenemos configuración para todas las pantallas
+            // Asegurar que tenemos configuración para todas las pantallas
             const updatedSettings = [...settings];
             while (updatedSettings.length < numberOfScreens) {
               updatedSettings.push({
                 isPortrait: false,
                 template: selectedTemplate,
+                rotationDirection: -90, // Valor por defecto
               });
             }
 
@@ -543,6 +624,7 @@ function PantallasDirectorio() {
         newSettings[index] = {
           isPortrait: false,
           template: selectedTemplate,
+          rotationDirection: -90, // Valor por defecto, -90 como era originalmente
         };
       }
 
@@ -587,6 +669,33 @@ function PantallasDirectorio() {
           icon: "error",
           title: "Oops...",
           text: "Por favor, seleccione una ciudad.",
+        });
+        return;
+      }
+
+      // Validar que la ciudad sea válida para la API de clima
+      try {
+        // Mostrar un indicador de carga mientras verificamos
+        Swal.fire({
+          title: "Verificando ciudad...",
+          didOpen: () => {
+            Swal.showLoading();
+          },
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        });
+
+        // Intentar obtener datos del clima para la ciudad seleccionada
+        await fetchWeatherData(selectedCity.value);
+
+        // Si llegamos aquí, la ciudad es válida, cerrar el indicador de carga
+        Swal.close();
+      } catch (error) {
+        // Si hay un error, la ciudad podría no ser válida para la API
+        Swal.fire({
+          icon: "error",
+          title: "Error de validación",
+          text: "No se pudo verificar la ciudad seleccionada. Por favor, seleccione otra ciudad o inténtelo más tarde.",
         });
         return;
       }
@@ -765,6 +874,7 @@ function PantallasDirectorio() {
       });
     }
   };
+
   const handlePublicidadLandscapeChange = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -872,7 +982,7 @@ function PantallasDirectorio() {
         )}
 
         {/* Contenido principal */}
-        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg ">
           {/* Pestañas de navegación */}
           <div className="flex border-b border-gray-200">
             <button
@@ -919,14 +1029,23 @@ function PantallasDirectorio() {
                 {/* Logo y Publicidad */}
                 <div className="grid grid-cols-1 gap-6">
                   {/* Logo */}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {t("screensDirectory.logo")}
                     </label>
-                    <div className="mt-1 flex items-center space-x-4">
-                      <div className="flex-1">
-                        <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
-                          <div className="space-y-1 text-center">
+                    <div className="mt-1">
+                      <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                        <div className="space-y-3 text-center w-full">
+                          {selectedLogo ? (
+                            <div className="mx-auto">
+                              <img
+                                src={selectedLogo}
+                                alt="Logo Actual"
+                                className="h-24 w-auto object-contain mx-auto"
+                              />
+                            </div>
+                          ) : (
                             <svg
                               className="mx-auto h-12 w-12 text-gray-400"
                               stroke="currentColor"
@@ -941,31 +1060,26 @@ function PantallasDirectorio() {
                                 strokeLinejoin="round"
                               />
                             </svg>
-                            <div className="flex text-sm text-gray-600">
-                              <span>{t("screensDirectory.uploadLogo")}</span>
-                              <input
-                                id="file-upload-logo"
-                                name="file-upload-logo"
-                                type="file"
-                                className="sr-only"
-                                onChange={handleImageChange}
-                              />
-                            </div>
-                            <p className="text-xs text-gray-500">
-                              PNG, JPG, GIF hasta 2MB
-                            </p>
+                          )}
+                          <div className="flex justify-center text-sm text-gray-600">
+                            <span>
+                              {selectedLogo
+                                ? "Cambiar logo"
+                                : t("screensDirectory.uploadLogo")}
+                            </span>
+                            <input
+                              id="file-upload-logo"
+                              name="file-upload-logo"
+                              type="file"
+                              className="sr-only"
+                              onChange={handleImageChange}
+                            />
                           </div>
-                        </label>
-                      </div>
-                      {selectedLogo && (
-                        <div className="flex-shrink-0">
-                          <img
-                            src={selectedLogo}
-                            alt="Logo Actual"
-                            className="h-24 w-auto object-contain border rounded p-1"
-                          />
+                          <p className="text-xs text-gray-500">
+                            PNG, JPG, GIF hasta 2MB
+                          </p>
                         </div>
-                      )}
+                      </label>
                     </div>
                   </div>
                 </div>
@@ -979,7 +1093,7 @@ function PantallasDirectorio() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                     {/* Publicidad Horizontal */}
-                    <div className=" p-4 rounded-lg">
+                    <div className="p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("screensDirectory.horizontalAdvertisement")}
                       </label>
@@ -988,10 +1102,20 @@ function PantallasDirectorio() {
                           "screensDirectory.horizontalAdvertisementDescription"
                         )}
                       </p>
-                      <div className="mt-1 flex items-center space-x-4">
-                        <div className="flex-1">
-                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
-                            <div className="space-y-1 text-center">
+                      <div className="mt-1">
+                        <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-3 text-center w-full">
+                            {selectedPublicidadLandscape ? (
+                              <div className="mx-auto">
+                                <img
+                                  src={selectedPublicidadLandscape}
+                                  alt={t(
+                                    "screensDirectory.horizontalAdvertisement"
+                                  )}
+                                  className="h-24 w-auto object-contain mx-auto"
+                                />
+                              </div>
+                            ) : (
                               <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
                                 stroke="currentColor"
@@ -1006,49 +1130,53 @@ function PantallasDirectorio() {
                                   strokeLinejoin="round"
                                 />
                               </svg>
-                              <div className="flex text-sm text-gray-600">
-                                <span>
-                                  {t(
-                                    "screensDirectory.uploadHorizontalAdvertisement"
-                                  )}
-                                </span>
-                                <input
-                                  id="file-upload-landscape"
-                                  name="file-upload-landscape"
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handlePublicidadLandscapeChange}
-                                />
-                              </div>
+                            )}
+                            <div className="flex justify-center text-sm text-gray-600">
+                              <span>
+                                {selectedPublicidadLandscape
+                                  ? "Cambiar imagen"
+                                  : t(
+                                      "screensDirectory.uploadHorizontalAdvertisement"
+                                    )}
+                              </span>
+                              <input
+                                id="file-upload-landscape"
+                                name="file-upload-landscape"
+                                type="file"
+                                className="sr-only"
+                                onChange={handlePublicidadLandscapeChange}
+                              />
                             </div>
-                          </label>
-                        </div>
-                        {selectedPublicidadLandscape && (
-                          <div className="flex-shrink-0">
-                            <img
-                              src={selectedPublicidadLandscape}
-                              alt={t(
-                                "screensDirectory.horizontalAdvertisement"
-                              )}
-                              className="h-24 w-auto object-contain border rounded p-1"
-                            />
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF hasta 2MB
+                            </p>
                           </div>
-                        )}
+                        </label>
                       </div>
                     </div>
 
                     {/* Publicidad Vertical */}
-                    <div className=" p-4 rounded-lg">
+                    <div className="p-4 rounded-lg">
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         {t("screensDirectory.verticalAdvertisement")}
                       </label>
                       <p className="text-xs text-gray-500 mb-3">
                         {t("screensDirectory.verticalAdvertisementDescription")}
                       </p>
-                      <div className="mt-1 flex items-center space-x-4">
-                        <div className="flex-1">
-                          <label className="w-full flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400 bg-white">
-                            <div className="space-y-1 text-center">
+                      <div className="mt-1">
+                        <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
+                          <div className="space-y-3 text-center w-full">
+                            {selectedPublicidadPortrait ? (
+                              <div className="mx-auto">
+                                <img
+                                  src={selectedPublicidadPortrait}
+                                  alt={t(
+                                    "screensDirectory.verticalAdvertisement"
+                                  )}
+                                  className="h-24 w-auto object-contain mx-auto"
+                                />
+                              </div>
+                            ) : (
                               <svg
                                 className="mx-auto h-12 w-12 text-gray-400"
                                 stroke="currentColor"
@@ -1063,32 +1191,28 @@ function PantallasDirectorio() {
                                   strokeLinejoin="round"
                                 />
                               </svg>
-                              <div className="flex text-sm text-gray-600">
-                                <span>
-                                  {t(
-                                    "screensDirectory.uploadVerticalAdvertisement"
-                                  )}
-                                </span>
-                                <input
-                                  id="file-upload-portrait"
-                                  name="file-upload-portrait"
-                                  type="file"
-                                  className="sr-only"
-                                  onChange={handlePublicidadPortraitChange}
-                                />
-                              </div>
+                            )}
+                            <div className="flex justify-center text-sm text-gray-600">
+                              <span>
+                                {selectedPublicidadPortrait
+                                  ? "Cambiar imagen"
+                                  : t(
+                                      "screensDirectory.uploadVerticalAdvertisement"
+                                    )}
+                              </span>
+                              <input
+                                id="file-upload-portrait"
+                                name="file-upload-portrait"
+                                type="file"
+                                className="sr-only"
+                                onChange={handlePublicidadPortraitChange}
+                              />
                             </div>
-                          </label>
-                        </div>
-                        {selectedPublicidadPortrait && (
-                          <div className="flex-shrink-0">
-                            <img
-                              src={selectedPublicidadPortrait}
-                              alt={t("screensDirectory.verticalAdvertisement")}
-                              className="h-24 w-auto object-contain border rounded p-1"
-                            />
+                            <p className="text-xs text-gray-500">
+                              PNG, JPG, GIF hasta 2MB
+                            </p>
                           </div>
-                        )}
+                        </label>
                       </div>
                     </div>
                   </div>
@@ -1268,6 +1392,72 @@ function PantallasDirectorio() {
                                     : "Orientación: Horizontal"}
                                 </span>
                               </div>
+
+                              {/* Control de dirección de rotación - solo visible cuando está en modo vertical */}
+                              {pantallaSettings[index]?.isPortrait && (
+                                <div className="mt-2 pl-12">
+                                  <div className="flex items-center space-x-4">
+                                    <span className="text-xs text-gray-600">
+                                      Dirección de rotación:
+                                    </span>
+                                    <div className="flex space-x-4">
+                                      <div className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          id={`rotate-negative-${index}`}
+                                          name={`rotate-direction-${index}`}
+                                          value="-90"
+                                          checked={
+                                            (pantallaSettings[index]
+                                              ?.rotationDirection || -90) ===
+                                            -90
+                                          }
+                                          onChange={() =>
+                                            updatePantallaSettings(
+                                              index,
+                                              "rotationDirection",
+                                              -90
+                                            )
+                                          }
+                                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                        />
+                                        <label
+                                          htmlFor={`rotate-negative-${index}`}
+                                          className="ml-2 block text-xs text-gray-700"
+                                        >
+                                          -90° (Izquierda)
+                                        </label>
+                                      </div>
+                                      <div className="flex items-center">
+                                        <input
+                                          type="radio"
+                                          id={`rotate-positive-${index}`}
+                                          name={`rotate-direction-${index}`}
+                                          value="90"
+                                          checked={
+                                            (pantallaSettings[index]
+                                              ?.rotationDirection || -90) === 90
+                                          }
+                                          onChange={() =>
+                                            updatePantallaSettings(
+                                              index,
+                                              "rotationDirection",
+                                              90
+                                            )
+                                          }
+                                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                        />
+                                        <label
+                                          htmlFor={`rotate-positive-${index}`}
+                                          className="ml-2 block text-xs text-gray-700"
+                                        >
+                                          90° (Derecha)
+                                        </label>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
                             </div>
 
                             {/* <div>

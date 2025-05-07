@@ -1,7 +1,6 @@
 "use client";
 import {
   collection,
-  getDocs,
   where,
   query,
   doc,
@@ -19,6 +18,8 @@ import AdvertisementSlider from "@/components/sliderPublicidadPD";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PDTemplateManager";
 import { formatDate, getCurrentTime } from "@/utils/dateUtils";
+import useHeartbeat from "@/hook/useHeartbeat";
+import { v4 as uuidv4 } from "uuid"; // Si aún no está importado
 
 import { fetchWeatherData } from "@/utils/weatherUtils";
 
@@ -62,7 +63,7 @@ const retryOperation = async (operation, retries = MAX_RETRIES) => {
   }
 };
 
-export default function BaseDirectorioClient({ id }) {
+export default function BaseDirectorioClient({ id, empresa }) {
   const screenNumber = parseInt(id, 10);
   const { t } = useTranslation();
   const pathname = usePathname();
@@ -75,7 +76,12 @@ export default function BaseDirectorioClient({ id }) {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const isMounted = useRef(true);
   const allEventsRef = useRef([]);
-
+  const [screenId, setScreenId] = useState("");
+  const [rotationDirection, setRotationDirection] = useState(-90);
+  console.log(
+    "🚀 ~ PantallaBaseDirectorio.jsx:82 ~ BaseDirectorioClient ~ rotationDirection:",
+    rotationDirection
+  );
   const [screenData, setScreenData] = useState({
     events: [],
     ads: [],
@@ -112,6 +118,71 @@ export default function BaseDirectorioClient({ id }) {
     setIsPortrait(defaultOrientation);
   }, []);
 
+  // Filtrar anuncios basados en el número de pantalla y orientación
+  const filterAdsForScreen = useCallback(
+    (ads, screenNumber, screenNames, currentIsPortrait) => {
+      if (!ads || !ads.length || !screenNames) return [];
+
+      // Obtener el nombre de pantalla para este número de pantalla
+      const screenName = `dir${screenNumber}`;
+      const screenDisplayName = screenNames[screenNumber - 1];
+
+      // Obtener la orientación esperada para el filtrado
+      const expectedOrientation = currentIsPortrait ? "vertical" : "horizontal";
+
+      console.log(
+        `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}, orientación: ${expectedOrientation}`
+      );
+
+      return ads.filter((ad) => {
+        // PASO 1: Verificar orientación primero (aplica a todas las publicidades)
+        let orientationMatches = true;
+        if (ad.tipoPantalla && ad.tipoPantalla.length > 0) {
+          // Normalizar la comparación para evitar problemas de espacios o mayúsculas
+          const adOrientation = ad.tipoPantalla[0]
+            .toString()
+            .toLowerCase()
+            .trim();
+          orientationMatches = adOrientation === expectedOrientation;
+
+          console.log(
+            `Ad ${ad.nombre}: orientación anuncio: ${adOrientation}, orientación pantalla: ${expectedOrientation}, coincide: ${orientationMatches}`
+          );
+
+          // Si la orientación no coincide, descartamos inmediatamente
+          if (!orientationMatches) {
+            return false;
+          }
+        }
+
+        // PASO 2: Verificar destino
+        // Si es "todas", mostrar en todas las pantallas (ya verificamos orientación)
+        if (ad.destino === "todas") {
+          console.log(
+            `Ad ${ad.nombre}: destino 'todas', orientación correcta: ${orientationMatches}`
+          );
+          return true;
+        }
+
+        // Si destino es "especificas", verificar si esta pantalla está en pantallasAsignadas
+        if (ad.destino === "especificas" && ad.pantallasAsignadas) {
+          const isAssigned = ad.pantallasAsignadas.includes(screenName);
+          console.log(
+            `Ad ${
+              ad.nombre
+            }: destino 'especificas', está asignado: ${isAssigned}, pantalla actual: ${screenName}, pantallas asignadas: ${JSON.stringify(
+              ad.pantallasAsignadas
+            )}`
+          );
+          return isAssigned;
+        }
+
+        return false;
+      });
+    },
+    []
+  );
+
   // Obtiene la configuración de orientación para esta pantalla específica
   const getScreenOrientation = useCallback(
     (templateData) => {
@@ -125,49 +196,104 @@ export default function BaseDirectorioClient({ id }) {
         // Opción 1: Buscar en screenSettings si existe
         if (
           templateData.screenSettings &&
-          templateData.screenSettings[screenNumber] &&
-          typeof templateData.screenSettings[screenNumber].setPortrait !==
-            "undefined"
+          templateData.screenSettings[screenNumber]
         ) {
-          const orientation =
-            !!templateData.screenSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.screenSettings[screenNumber].setPortrait !==
+            "undefined"
+          ) {
+            const orientation =
+              !!templateData.screenSettings[screenNumber].setPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.screenSettings[screenNumber]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.screenSettings[screenNumber].rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
         // Opción 2: Buscar en pantallasSettings si existe (formato alternativo)
         if (
           templateData.pantallasSettings &&
-          templateData.pantallasSettings[screenNumber] &&
-          typeof templateData.pantallasSettings[screenNumber].setPortrait !==
-            "undefined"
+          templateData.pantallasSettings[screenNumber]
         ) {
-          const orientation =
-            !!templateData.pantallasSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.pantallasSettings[screenNumber].setPortrait !==
+            "undefined"
+          ) {
+            const orientation =
+              !!templateData.pantallasSettings[screenNumber].setPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.pantallasSettings[screenNumber]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.pantallasSettings[screenNumber].rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
-        // Opción 3: Buscar en pantallaDirectorioSettings si existe (otro formato posible)
+        // Opción 3: Buscar en pantallaSettings si existe (usará el nuevo formato)
         if (
-          templateData.pantallaDirectorioSettings &&
-          templateData.pantallaDirectorioSettings[screenNumber] &&
-          typeof templateData.pantallaDirectorioSettings[screenNumber]
-            .setPortrait !== "undefined"
+          templateData.pantallaSettings &&
+          templateData.pantallaSettings[screenNumber - 1]
         ) {
-          const orientation =
-            !!templateData.pantallaDirectorioSettings[screenNumber].setPortrait;
-          console.log(
-            `Encontrada orientación específica para pantalla ${screenNumber}:`,
-            orientation
-          );
-          return orientation;
+          if (
+            typeof templateData.pantallaSettings[screenNumber - 1]
+              .isPortrait !== "undefined"
+          ) {
+            const orientation =
+              !!templateData.pantallaSettings[screenNumber - 1].isPortrait;
+            console.log(
+              `Encontrada orientación específica para pantalla ${screenNumber}:`,
+              orientation
+            );
+
+            // También obtener la dirección de rotación si está definida
+            if (
+              typeof templateData.pantallaSettings[screenNumber - 1]
+                .rotationDirection !== "undefined"
+            ) {
+              const rotation =
+                templateData.pantallaSettings[screenNumber - 1]
+                  .rotationDirection;
+              setRotationDirection(rotation);
+              console.log(
+                `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
+                rotation
+              );
+            }
+
+            return orientation;
+          }
         }
 
         // Opción 4: Usar la configuración global como respaldo
@@ -217,15 +343,21 @@ export default function BaseDirectorioClient({ id }) {
     const filteredEvents = allEventsRef.current.filter((event) => {
       console.log("\nRevisando evento:", event.nombreEvento);
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // Date validation - usando fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Comparar strings directamente - mucho más seguro
+      // Comparar strings directamente con el formato correcto
       const isWithinDateRange =
         formattedToday >= event.fechaInicio &&
         formattedToday <= event.fechaFinal;
 
+      console.log("V2 Fecha formateada local:", formattedToday);
+      console.log("V2 Fecha inicio evento:", event.fechaInicio);
+      console.log("V2 Fecha final evento:", event.fechaFinal);
+      console.log("V2 ¿Está dentro del rango?", isWithinDateRange);
       // Time validation
       let startMinutes, endMinutes;
       if (
@@ -280,26 +412,6 @@ export default function BaseDirectorioClient({ id }) {
       events: filteredEvents,
     }));
   }, [screenData.usuario, screenNumber]);
-
-  const loadAds = useCallback(
-    async (userCompany) => {
-      try {
-        const adsRef = collection(db, "Publicidad");
-        const adsQuery = query(
-          adsRef,
-          where("empresa", "==", userCompany),
-          where("tipo", "==", "directorio")
-        );
-
-        const adsSnapshot = await getDocs(adsQuery);
-        return adsSnapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      } catch (error) {
-        console.error(t("errors.adsLoading"), error);
-        return [];
-      }
-    },
-    [t]
-  );
 
   // Effects
   useEffect(() => {
@@ -461,18 +573,21 @@ export default function BaseDirectorioClient({ id }) {
 
           const filteredEvents = events.filter((event) => {
             // Date validation
-            // Usar una comparación de strings de fecha en lugar de objetos Date
+            // Date validation - usando fecha local en lugar de UTC
             const today = new Date();
-            console.log(
-              "🚀 ~ PantallaBaseDirectorio.jsx:466 ~ filteredEvents ~ today:",
-              today
-            );
-            const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+            const formattedToday = `${today.getFullYear()}-${String(
+              today.getMonth() + 1
+            ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-            // Comparar strings directamente - mucho más seguro
+            // Comparar strings directamente con el formato correcto
             const isWithinDateRange =
               formattedToday >= event.fechaInicio &&
               formattedToday <= event.fechaFinal;
+
+            console.log("Fecha formateada local:", formattedToday);
+            console.log("Fecha inicio evento:", event.fechaInicio);
+            console.log("Fecha final evento:", event.fechaFinal);
+            console.log("¿Está dentro del rango?", isWithinDateRange);
             // Time validation
             let startMinutes, endMinutes;
             if (
@@ -561,9 +676,12 @@ export default function BaseDirectorioClient({ id }) {
                 templates.publicidadPortrait || templates.publicidad || null,
             };
             if (templates.ciudad) {
+              console.log("Obteniendo datos del clima para:", templates.ciudad);
+
               fetchWeatherData(templates.ciudad)
                 .then((weatherData) => {
                   if (isMounted.current) {
+                    console.log("Datos del clima recibidos:", weatherData);
                     setScreenData((prev) => ({
                       ...prev,
                       templates: enrichedTemplates,
@@ -572,9 +690,16 @@ export default function BaseDirectorioClient({ id }) {
                   }
                 })
                 .catch((error) => {
+                  console.error(
+                    "Error al obtener clima para " + templates.ciudad + ":",
+                    error
+                  );
                   console.error(t("errors.weather"), error);
                 });
             } else {
+              console.log(
+                "No se encontró ciudad en el template para obtener el clima"
+              );
               setScreenData((prev) => ({
                 ...prev,
                 templates: enrichedTemplates,
@@ -597,17 +722,30 @@ export default function BaseDirectorioClient({ id }) {
           (snapshot) => {
             if (!isMounted.current) return;
 
-            const ads = snapshot.docs.map((doc) => ({
+            const allAds = snapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
 
             console.log("\n=== PUBLICIDADES RECIBIDAS DE FIRESTORE ===");
-            console.log("Total publicidades:", ads.length);
+            console.log("Total publicidades:", allAds.length);
+
+            // Filtrar anuncios según orientación y pantalla específica
+            const currentOrientation = isPortrait;
+            const filteredAds = filterAdsForScreen(
+              allAds,
+              screenNumber,
+              screenNames,
+              currentOrientation
+            );
+
+            console.log(
+              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`
+            );
 
             setScreenData((prev) => ({
               ...prev,
-              ads,
+              ads: filteredAds,
             }));
 
             // Solo marcamos como cargado después de obtener todos los datos iniciales
@@ -636,7 +774,48 @@ export default function BaseDirectorioClient({ id }) {
       isMounted.current = false;
       unsubscribers.forEach((unsubscribe) => unsubscribe());
     };
-  }, [user, db, screenNumber, t, getScreenOrientation]);
+  }, [
+    user,
+    db,
+    screenNumber,
+    t,
+    getScreenOrientation,
+    filterAdsForScreen,
+    isPortrait,
+  ]);
+
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    const storageKey = `pantalla_directorio_${screenNumber}`;
+    let storedId = localStorage.getItem(storageKey);
+
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `directorio_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      localStorage.setItem(storageKey, storedId);
+    }
+
+    setScreenId(storedId);
+  }, [screenNumber]);
+
+  // Integrar hook de heartbeat
+  const heartbeat = useHeartbeat({
+    screenId,
+    screenType: "Directorio",
+    screenNumber,
+    deviceName: screenData.deviceName || `Pantalla ${screenNumber}`,
+    userId: user?.uid,
+    companyName: screenData.usuario?.empresa || empresa,
+    interval: 60000, // Cada 60 segundos
+  });
+
+  // Opcional: Puedes mostrar algún indicador de conexión para depuración
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Estado de conexión:", heartbeat.isConnected);
+      console.log("Último heartbeat:", heartbeat.lastBeat);
+    }
+  }, [heartbeat.isConnected, heartbeat.lastBeat]);
 
   // Rendering states
   if (!user) {
@@ -693,25 +872,40 @@ export default function BaseDirectorioClient({ id }) {
 
   // Render appropriate content
   return screenData.events.length > 0 ? (
-    <TemplateManager
-      templateId={templates.template}
-      events={screenData.events}
-      template={templates}
-      weatherData={weatherData}
-      currentTime={screenData.currentTime}
-      isPortrait={isPortrait}
-      t={t}
-      qrCodeUrl={qrCodeUrl}
-      screenNumber={screenNumber}
-      publicidad={
-        isPortrait
-          ? templates.publicidadPortrait
-          : templates.publicidadLandscape
-      }
-      nombrePantallasDirectorio={Object.values(
-        screenData.usuario?.nombrePantallasDirectorio || {}
+    <>
+      <TemplateManager
+        templateId={templates.template}
+        events={screenData.events}
+        template={templates}
+        weatherData={weatherData}
+        currentTime={screenData.currentTime}
+        isPortrait={isPortrait}
+        rotationDirection={rotationDirection} // Añadir esta prop
+        t={t}
+        qrCodeUrl={qrCodeUrl}
+        screenNumber={screenNumber}
+        publicidad={
+          isPortrait
+            ? templates.publicidadPortrait
+            : templates.publicidadLandscape
+        }
+        nombrePantallasDirectorio={Object.values(
+          screenData.usuario?.nombrePantallasDirectorio || {}
+        )}
+      />
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="fixed bottom-2 right-2 z-50 rounded-full w-4 h-4 border border-gray-300"
+          style={{
+            backgroundColor: heartbeat.isConnected ? "#10b981" : "#ef4444",
+            boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+          }}
+          title={`Monitoreo: ${
+            heartbeat.isConnected ? "Conectado" : "Desconectado"
+          }`}
+        ></div>
       )}
-    />
+    </>
   ) : (
     <AdvertisementSlider
       advertisements={screenData.ads}
@@ -722,6 +916,7 @@ export default function BaseDirectorioClient({ id }) {
       currentTime={screenData.currentTime}
       weatherData={weatherData}
       isPortrait={isPortrait}
+      screenNumber={screenNumber}
     />
   );
 }

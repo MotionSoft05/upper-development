@@ -12,6 +12,8 @@ const PDTemplateManager = ({
   isPortrait,
   t,
   qrCodeUrl,
+  rotationDirection, // Asegúrate de recibir esta prop
+
   screenNumber,
   nombrePantallasDirectorio,
 }) => {
@@ -38,6 +40,7 @@ const PDTemplateManager = ({
             screenNumber={screenNumber}
             publicidad={publicidad}
             nombrePantallasDirectorio={nombrePantallasDirectorio}
+            rotationDirection={rotationDirection} // Y pasarla al componente de plantilla
           />
         ) : (
           <PDTemplate1Horizontal

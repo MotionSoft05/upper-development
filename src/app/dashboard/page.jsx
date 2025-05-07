@@ -13,6 +13,10 @@ import Admin from "@/components/dashboard/admin/admin";
 import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
+import MonitorScreen from "@/components/dashboard/MonitorScreen";
+import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
+import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
+import PantallasPromociones from "@/components/dashboard/PantallasPromociones";
 
 import React, { useState, useEffect } from "react";
 
@@ -41,10 +45,16 @@ function DashBoard() {
   const [showPantallaDirectorio, setShowPantallaDirectorio] = useState(false);
   const [showPantallaServicio, setShowPantallaServicio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
+  const [showPantallaPromociones, setShowPantallaPromociones] = useState(false);
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
   const [showSoporte, setShowSoporte] = useState(false);
+  const [showMonitorScreen, setShowMonitorScreen] = useState(false);
+
+  // Estados para componentes de tarifario
+  const [showPantallaTarifario, setShowPantallaTarifario] = useState(false);
+  const [showInformacionTarifa, setShowInformacionTarifa] = useState(false);
 
   // Estado para controlar la visibilidad del sidebar en dispositivos móviles
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -106,6 +116,8 @@ function DashBoard() {
           showPantallaDirectorio={showPantallaDirectorio}
           setShowPantallaServicio={setShowPantallaServicio}
           showPantallaServicio={showPantallaServicio}
+          setShowPantallaPromociones={setShowPantallaPromociones}
+          showPantallaPromociones={showPantallaPromociones}
           setShowPublicidad={setShowPublicidad}
           showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
@@ -114,6 +126,13 @@ function DashBoard() {
           showGuia={showGuia}
           setShowSoporte={setShowSoporte}
           showSoporte={showSoporte}
+          setShowMonitorScreen={setShowMonitorScreen}
+          showMonitorScreen={showMonitorScreen}
+          // Añadir propiedades para componentes de tarifario
+          setShowPantallaTarifario={setShowPantallaTarifario}
+          showPantallaTarifario={showPantallaTarifario}
+          setShowInformacionTarifa={setShowInformacionTarifa}
+          showInformacionTarifa={showInformacionTarifa}
           toggleSidebar={toggleSidebar}
         />
       </aside>
@@ -123,12 +142,12 @@ function DashBoard() {
           {showAdmin &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
-              userEmail === "contacto@upperds.mx") && <Admin />}{" "}
-          {/* Usuarios y Licencias */}
+              userEmail === "contacto@upperds.mx") && <Admin />}
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
+          {showMonitorScreen && <MonitorScreen userEmail={userEmail} />}
           {/* GESTION DE USUARIOS */}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && (
@@ -142,6 +161,11 @@ function DashBoard() {
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
+          {showPantallaPromociones && <PantallasPromociones />}
+
+          {/* Componentes de Tarifario */}
+          {showPantallaTarifario && <PantallasTarifario />}
+          {showInformacionTarifa && <EditInformacionTarifa />}
           {showPublicidad && <Publicidad />}
           {/* INFORMACION DE USUARIO */}
           {showlicencia && <Licencia />}

@@ -1,5 +1,8 @@
+// src/components/sliderPublicidadPS.jsx
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import PropTypes from "prop-types";
+import VideoPlayer from "./VideoPlayer";
+import { isVideoMarkedAsCached } from "@/utils/dexieVideoCache";
 
 const AdvertisementSlider = ({
   advertisements,
@@ -11,11 +14,68 @@ const AdvertisementSlider = ({
   const [opacity, setOpacity] = useState(1);
   const timeoutRef = useRef(null);
   const transitioningRef = useRef(false);
+  const [videoError, setVideoError] = useState(false);
+  const [isPreloading, setIsPreloading] = useState(false);
 
   // Get current advertisement
   const getCurrentAd = useCallback(() => {
     if (!advertisements || advertisements.length === 0) return null;
     return advertisements[currentIndex];
+  }, [advertisements, currentIndex]);
+
+  // Preload next video in background
+  const preloadNextAd = useCallback(async () => {
+    if (!advertisements || advertisements.length <= 1) return;
+
+    const nextIndex = (currentIndex + 1) % advertisements.length;
+    const nextAd = advertisements[nextIndex];
+
+    if (nextAd && nextAd.videoUrl) {
+      try {
+        setIsPreloading(true);
+        const isCached = await isVideoMarkedAsCached(nextAd.videoUrl);
+
+        if (!isCached) {
+          console.log("Precargando video:", nextAd.videoUrl);
+
+          // Crear un elemento de link para hint al navegador
+          const linkEl = document.createElement("link");
+          linkEl.rel = "preload";
+          linkEl.href = nextAd.videoUrl;
+          linkEl.as = "video";
+          document.head.appendChild(linkEl);
+
+          // También crear un video oculto
+          const preloadVideo = document.createElement("video");
+          preloadVideo.style.display = "none";
+          preloadVideo.src = nextAd.videoUrl;
+          preloadVideo.preload = "auto";
+
+          // Remover después de un tiempo
+          setTimeout(() => {
+            document.head.removeChild(linkEl);
+            if (document.body.contains(preloadVideo)) {
+              document.body.removeChild(preloadVideo);
+            }
+            setIsPreloading(false);
+            console.log("Precarga completada:", nextAd.videoUrl);
+          }, 10000);
+
+          document.body.appendChild(preloadVideo);
+        } else {
+          console.log("Video ya marcado como cacheado:", nextAd.videoUrl);
+          setIsPreloading(false);
+        }
+      } catch (error) {
+        console.error("Error en precarga:", error);
+        setIsPreloading(false);
+      }
+    } else if (nextAd && nextAd.imageUrl) {
+      // Precargar imagen
+      const img = new Image();
+      img.src = nextAd.imageUrl;
+      setIsPreloading(false);
+    }
   }, [advertisements, currentIndex]);
 
   // Handle transition to next ad
@@ -40,9 +100,12 @@ const AdvertisementSlider = ({
       setTimeout(() => {
         setOpacity(1);
         transitioningRef.current = false;
+
+        // Preload next ad after transition
+        preloadNextAd();
       }, 50);
     }, 500); // Wait for fade out to complete
-  }, [advertisements]);
+  }, [advertisements, preloadNextAd]);
 
   // Set up timer for ad rotation
   useEffect(() => {
@@ -67,13 +130,16 @@ const AdvertisementSlider = ({
     // Set timer for next ad
     timeoutRef.current = setTimeout(moveToNextAd, totalSeconds * 1000);
 
+    // Preload next ad when current ad starts
+    preloadNextAd();
+
     // Clean up on unmount or when current ad changes
     return () => {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
     };
-  }, [currentIndex, advertisements, getCurrentAd, moveToNextAd]);
+  }, [currentIndex, advertisements, getCurrentAd, moveToNextAd, preloadNextAd]);
 
   if (!advertisements || advertisements.length === 0) {
     return null;
@@ -112,14 +178,16 @@ const AdvertisementSlider = ({
           style={{ opacity }}
         >
           {currentAd.videoUrl ? (
-            <video
-              key={`video-${currentIndex}`}
-              className="w-full h-full object-cover"
-              autoPlay
-              muted
-              playsInline
+            <VideoPlayer
               src={currentAd.videoUrl}
+              autoPlay={true}
+              muted={true}
+              loop={false}
               onEnded={moveToNextAd}
+              onError={() => {
+                setVideoError(true);
+                moveToNextAd();
+              }}
             />
           ) : (
             <img
@@ -131,6 +199,13 @@ const AdvertisementSlider = ({
           )}
         </div>
       </div>
+
+      {/* Indicador de precarga (opcional, solo para desarrollo) */}
+      {process.env.NODE_ENV === "development" && isPreloading && (
+        <div className="fixed bottom-2 left-2 bg-blue-500 text-white text-xs px-2 py-1 rounded-full opacity-75">
+          Precargando siguiente...
+        </div>
+      )}
     </div>
   );
 };

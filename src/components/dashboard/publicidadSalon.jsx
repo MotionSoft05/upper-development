@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-
 import firebase from "firebase/compat/app";
 import "firebase/compat/auth";
 import "firebase/compat/storage";
 import "firebase/compat/firestore";
 import { useTranslation } from "react-i18next";
-import { firebaseConfig } from "@/firebase/firebaseConfig"; // .env
+import { firebaseConfig } from "@/firebase/firebaseConfig";
+import VideoUploader from "../VideoUploader";
 
 import {
   ClockIcon,
@@ -16,8 +16,9 @@ import {
   PhotoIcon,
   PlusCircleIcon,
   ArrowPathIcon,
+  VideoCameraIcon,
 } from "@heroicons/react/20/solid";
-//TODO verificar que haga falta inicializar y getFirestore, getStorage que se deban llamar vacios o con app
+
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
 }
@@ -51,9 +52,11 @@ function PublicidadSalon() {
   const [originalImageUrl, setOriginalImageUrl] = useState(null);
   const [currentAction, setCurrentAction] = useState(null);
   const [empresaUsuario, setEmpresaUsuario] = useState(null);
-  const [empresas, setEmpresas] = useState([]); // Estado para almacenar las empresas disponibles
-  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null); // Estado para la empresa seleccionada
+  const [empresas, setEmpresas] = useState([]);
+  const [empresaSeleccionada, setEmpresaSeleccionada] = useState(null);
   const [publicidadesSalon, setPublicidadesSalon] = useState([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [currentUploadingIndex, setCurrentUploadingIndex] = useState(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -62,7 +65,7 @@ function PublicidadSalon() {
         const usuarioDoc = await db.collection("usuarios").doc(user.uid).get();
         const usuarioData = usuarioDoc.data();
         const empresaUsuario = usuarioData.empresa;
-        await obtenerEmpresas(); // Obtener empresas disponibles
+        await obtenerEmpresas();
         await obtenerPublicidades(empresaUsuario, "salon");
       } else {
         console.warn(t("advertisement.salon.userNull"));
@@ -108,15 +111,23 @@ function PublicidadSalon() {
             let imageUrl, videoUrl;
 
             if (data.imageUrl) {
-              imageUrl = await storage
-                .refFromURL(data.imageUrl)
-                .getDownloadURL();
+              try {
+                imageUrl = await storage
+                  .refFromURL(data.imageUrl)
+                  .getDownloadURL();
+              } catch (error) {
+                console.error("Error al obtener URL de imagen:", error);
+              }
             }
 
             if (data.videoUrl) {
-              videoUrl = await storage
-                .refFromURL(data.videoUrl)
-                .getDownloadURL();
+              try {
+                videoUrl = await storage
+                  .refFromURL(data.videoUrl)
+                  .getDownloadURL();
+              } catch (error) {
+                console.error("Error al obtener URL de video:", error);
+              }
             }
 
             return {
@@ -128,21 +139,16 @@ function PublicidadSalon() {
           })
         );
 
-        publicidadesData.sort((a, b) => a.fechaDeSubida - b.fechaDeSubida);
+        publicidadesData.sort((a, b) => {
+          // Usar timestamp si está disponible, o usar 0 si no está disponible
+          const timeA = a.fechaDeSubida ? a.fechaDeSubida.toMillis() : 0;
+          const timeB = b.fechaDeSubida ? b.fechaDeSubida.toMillis() : 0;
+          return timeA - timeB;
+        });
 
         const cantidadPublicidades = publicidadesData.length;
         const cantidadNuevasPublicidades = 1;
-        const nuevasImagenes = Array.from(
-          { length: cantidadNuevasPublicidades },
-          (_, index) =>
-            storage
-              .ref()
-              .child(
-                `publicidad/salon_${
-                  cantidadPublicidades + index + 1
-                }_${Date.now()}.jpg`
-              )
-        );
+        const nuevasImagenes = Array(cantidadNuevasPublicidades).fill(null);
         const nuevosTiempos = Array.from(
           { length: cantidadNuevasPublicidades },
           () => ({
@@ -152,7 +158,9 @@ function PublicidadSalon() {
           })
         );
 
-        const nuevasVistasPrevias = nuevasImagenes.map(() => null);
+        const nuevasVistasPrevias = Array(cantidadNuevasPublicidades).fill(
+          null
+        );
 
         setPublicidadesIds(publicidadesData.map((publicidad) => publicidad.id));
         setImagenesSalon([
@@ -167,22 +175,29 @@ function PublicidadSalon() {
           })),
           ...nuevosTiempos,
         ]);
-        setPreviewImages(
-          publicidadesData.map((publicidad) => ({
-            url: publicidad.videoUrl || publicidad.imageUrl,
-            type: publicidad.videoUrl ? "video" : "image",
-          })),
-          // Asegúrate de agregar las nuevas vistas previas para las imágenes recién agregadas
-          ...nuevasVistasPrevias
-        );
 
+        const previews = publicidadesData.map((publicidad) => {
+          // Determinamos si es video o imagen
+          if (publicidad.videoUrl) {
+            return {
+              url: publicidad.videoUrl,
+              type: "video",
+            };
+          } else if (publicidad.imageUrl) {
+            return {
+              url: publicidad.imageUrl,
+              type: "image",
+            };
+          }
+          return null;
+        });
+
+        setPreviewImages([...previews, ...nuevasVistasPrevias]);
         setImagenesSalonOriginales(publicidadesData.map(() => null));
       } else {
-        // El objeto user es nulo o no tiene la propiedad uid.
         console.warn(t("advertisement.salon.userNullUidProperty"));
       }
     } catch (error) {
-      // Error al obtener publicidades:
       console.error(
         t("advertisement.salon.errorFetchingAdvertisements"),
         error
@@ -224,6 +239,7 @@ function PublicidadSalon() {
       setIsLoading(true);
       setIsUploading(true);
       setCurrentAction("Guardar Cambios");
+      setCurrentUploadingIndex(index);
 
       const nuevaImagen = imagenesSalon[index];
       const { horas, minutos, segundos } = tiemposSalon[index];
@@ -232,7 +248,6 @@ function PublicidadSalon() {
       const hasNewMedia = nuevaImagen && nuevaImagen.name !== undefined;
 
       if (!isEditingExistingPublicidad && !hasNewMedia) {
-        // "No se ha seleccionado un nuevo archivo de media"
         console.warn(t("advertisement.salon.noNewMediaSelected"));
         return;
       }
@@ -245,16 +260,13 @@ function PublicidadSalon() {
         segundos <= 59;
 
       if (!hasValidData) {
-        // "Completa por lo menos uno de los tres campos"
-        console.alert(t("advertisement.salon.completeAtLeastOneField"));
+        alert(t("advertisement.salon.completeAtLeastOneField"));
         return;
       }
 
-      const userUid = user.uid;
       const publicidadId = publicidadesIds[index];
-
       const publicidadRef = db.collection("Publicidad").doc(publicidadId);
-      let mediaUrl = previewImages[index].url;
+      let mediaUrl = previewImages[index]?.url;
 
       if (hasNewMedia) {
         const isImage = nuevaImagen.type.startsWith("image");
@@ -274,10 +286,15 @@ function PublicidadSalon() {
           (snapshot) => {
             const progress =
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadProgress(Math.round(progress));
           },
           (error) => {
-            // "Error durante la carga de la media:"
             console.error(t("advertisement.salon.errorLoadingMedia"), error);
+            setSuccessMessage(
+              t("advertisement.salon.errorUploading") ||
+                "Error al subir el medio"
+            );
+            setTimeout(() => setSuccessMessage(null), 3000);
           },
           async () => {
             mediaUrl = await mediaRef.getDownloadURL();
@@ -303,6 +320,36 @@ function PublicidadSalon() {
 
             setEditIndex(null);
             setIsUploading(false);
+            setUploadProgress(0);
+            setCurrentUploadingIndex(null);
+
+            // Actualizar vista previa
+            setPreviewImages((prevPreviews) => {
+              const newPreviews = [...prevPreviews];
+              newPreviews[index] = {
+                url: mediaUrl,
+                type: isVideo ? "video" : "image",
+              };
+              return newPreviews;
+            });
+
+            setSuccessMessage(
+              t("advertisement.salon.mediaUpdated") ||
+                "Contenido actualizado con éxito"
+            );
+            setTimeout(() => setSuccessMessage(null), 3000);
+
+            // Recargar las publicidades para asegurar que tenemos los datos más recientes
+            const usuarioDoc = await db
+              .collection("usuarios")
+              .doc(user.uid)
+              .get();
+            const usuarioData = usuarioDoc.data();
+            const empresaUsuario = usuarioData.empresa;
+            const empresa = empresaSeleccionada
+              ? empresaSeleccionada
+              : empresaUsuario;
+            await obtenerPublicidades(empresa, "salon");
           }
         );
       } else {
@@ -314,14 +361,18 @@ function PublicidadSalon() {
 
         setEditIndex(null);
         setIsUploading(false);
+        setSuccessMessage(
+          t("advertisement.salon.timeUpdated") || "Tiempo actualizado con éxito"
+        );
+        setTimeout(() => setSuccessMessage(null), 3000);
       }
     } catch (error) {
-      // "Error al guardar cambios:"
       console.error(t("advertisement.salon.errorSavingChanges"), error);
       setIsUploading(false);
     } finally {
       setIsLoading(false);
       setCurrentAction(null);
+      setCurrentUploadingIndex(null);
     }
   };
 
@@ -353,25 +404,77 @@ function PublicidadSalon() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setImagenesSalon((prevImages) => {
-        const newImages = [...prevImages];
-        newImages[index] = file;
-        return newImages;
-      });
+    // Determinar si es un video
+    const isVideo = file.type.startsWith("video/");
 
-      setPreviewImages((prevPreviews) => {
-        const newPreviews = [...prevPreviews];
-        newPreviews[index] = {
-          url: reader.result,
-          type: file.type.startsWith("video/") ? "video" : "image",
-        };
-        return newPreviews;
-      });
-    };
+    if (isVideo) {
+      // Si es video, no hacer nada aquí, dejar que VideoUploader se encargue
+    } else {
+      // Si es imagen, procesarla normalmente
+      const reader = new FileReader();
+      reader.onload = () => {
+        setImagenesSalon((prevImages) => {
+          const newImages = [...prevImages];
+          newImages[index] = file;
+          return newImages;
+        });
 
-    reader.readAsDataURL(file);
+        setPreviewImages((prevPreviews) => {
+          const newPreviews = [...prevPreviews];
+          newPreviews[index] = {
+            url: reader.result,
+            type: "image",
+          };
+          return newPreviews;
+        });
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // Función para manejar la subida de video desde VideoUploader
+  const handleVideoUploaded = (videoData, index) => {
+    // Actualizar el estado con la información del video
+    setImagenesSalon((prevImages) => {
+      const newImages = [...prevImages];
+      // Guardar un objeto con la información del video en lugar del archivo
+      newImages[index] = {
+        ...videoData,
+        name: videoData.filename, // Para compatibilidad con el código existente
+        type: "video/mp4", // Asumimos mp4 para compatibilidad
+      };
+      return newImages;
+    });
+
+    setPreviewImages((prevPreviews) => {
+      const newPreviews = [...prevPreviews];
+      newPreviews[index] = {
+        url: videoData.url,
+        type: "video",
+        metadata: videoData.metadata,
+      };
+      return newPreviews;
+    });
+
+    // Mostrar mensaje de éxito
+    setSuccessMessage(
+      t("advertisement.salon.videoUploaded") || "Video cargado correctamente"
+    );
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
+  };
+
+  // Función para manejar errores de carga de video
+  const handleVideoError = (error) => {
+    console.error("Error al cargar el video:", error);
+    setSuccessMessage(
+      t("advertisement.salon.videoError") || "Error al cargar el video"
+    );
+    setTimeout(() => {
+      setSuccessMessage(null);
+    }, 3000);
   };
 
   const handleAgregarPublicidad = async () => {
@@ -394,84 +497,119 @@ function PublicidadSalon() {
         ? empresaSeleccionada
         : empresaUsuario;
 
-      for (let index = 0; index < imagenesSalon.length; index++) {
-        const imagen = imagenesSalon[index];
+      const lastIndex = imagenesSalon.length - 1;
+      setCurrentUploadingIndex(lastIndex);
 
-        if (imagen) {
-          const isImage = imagen.type.startsWith("image");
-          const isVideo = imagen.type.startsWith("video");
+      const media = imagenesSalon[lastIndex];
+      const preview = previewImages[lastIndex];
+
+      if (media) {
+        let mediaUrl;
+        const { horas, minutos, segundos } = tiemposSalon[lastIndex];
+
+        // Determinar si es un video o una imagen
+        const isVideo = preview?.type === "video";
+        const isImage = preview?.type === "image";
+
+        // Si ya tenemos la URL (de VideoUploader)
+        if (preview && preview.url && isVideo) {
+          mediaUrl = preview.url;
+        }
+        // Si tenemos que subir una imagen
+        else if (isImage) {
           const mediaRef = storageRef.child(
-            `publicidad/${
-              isImage ? "imagenes" : "videos"
-            }/${index}_${Date.now()}_${imagen.name}`
+            `publicidad/imagenes/${lastIndex}_${Date.now()}_${media.name}`
           );
 
-          await mediaRef.put(imagen);
-          const mediaUrl = await mediaRef.getDownloadURL();
-          const { horas, minutos, segundos } = tiemposSalon[index];
-          hasValidData = true;
+          const uploadTask = mediaRef.put(media);
 
-          if (horas > 0 || minutos > 0 || segundos > 0) {
-            const fechaDeSubida =
-              firebase.firestore.FieldValue.serverTimestamp();
-            const publicidadRef = await db.collection("Publicidad").add({
-              imageUrl: isImage ? mediaUrl : null,
-              videoUrl: isVideo ? mediaUrl : null,
-              horas,
-              minutos,
-              segundos,
-              tipo: "salon",
-              empresa: empresa, // Usar la empresa seleccionada o la del usuario logueado
-              fechaDeSubida,
-            });
+          // Monitorear progreso
+          uploadTask.on(
+            "state_changed",
+            (snapshot) => {
+              const progress = Math.round(
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              );
+              setUploadProgress(progress);
+            },
+            (error) => {
+              console.error("Error al subir imagen:", error);
+              setSuccessMessage("Error al subir imagen");
+              setTimeout(() => setSuccessMessage(null), 3000);
+            }
+          );
 
-            newIds = [...newIds, publicidadRef.id];
+          // Esperar a que termine la subida
+          await uploadTask;
+          mediaUrl = await mediaRef.getDownloadURL();
+        }
 
-            setImagenesSalon((prevImages) => {
-              const newImages = [...prevImages];
-              newImages[index] = null;
-              return newImages;
-            });
+        hasValidData = true;
 
-            setTiemposSalon((prevTiempos) => [
-              ...prevTiempos,
-              { horas: 0, minutos: 0, segundos: 10 },
-            ]);
+        if (hasValidData && (horas > 0 || minutos > 0 || segundos > 0)) {
+          const fechaDeSubida = firebase.firestore.FieldValue.serverTimestamp();
 
-            setPreviewImages((prevPreviews) => [...prevPreviews, null]);
-          }
+          // Crear el documento en Firestore
+          const publicidadRef = await db.collection("Publicidad").add({
+            imageUrl: isImage ? mediaUrl : null,
+            videoUrl: isVideo ? mediaUrl : null,
+            horas,
+            minutos,
+            segundos,
+            tipo: "salon",
+            empresa,
+            fechaDeSubida,
+          });
+
+          newIds = [...newIds, publicidadRef.id];
+
+          // Actualizar estados
+          setImagenesSalon((prevImages) => [...prevImages, null]);
+          setTiemposSalon((prevTiempos) => [
+            ...prevTiempos,
+            { horas: 0, minutos: 0, segundos: 10 },
+          ]);
+          setPreviewImages((prevPreviews) => [...prevPreviews, null]);
+
+          // Mostrar mensaje de éxito
+          setSuccessMessage(
+            t("advertisement.salon.addSuccess") ||
+              "Publicidad agregada con éxito"
+          );
+          setTimeout(() => {
+            setSuccessMessage(null);
+          }, 3000);
         }
       }
 
       if (hasValidData) {
         setPublicidadesIds((prevIds) => [...prevIds, ...newIds]);
+
+        // Recargar las publicidades
+        await obtenerPublicidades(empresa, "salon");
       } else {
-        // "No hay datos válidos para agregar"
         console.warn(t("advertisement.salon.noValidDataToAdd"));
       }
-
-      setImagenesSalon((prevImages) => [...prevImages, null]);
-      setTiemposSalon((prevTiempos) => [
-        ...prevTiempos,
-        { horas: 0, minutos: 0, segundos: 10 },
-      ]);
-      setPreviewImages((prevPreviews) => [...prevPreviews, null]);
     } catch (error) {
-      // "Error al agregar publicidad:"
       console.error(t("advertisement.salon.errorAddAdvertising"), error);
+      setSuccessMessage("Error al agregar publicidad");
+      setTimeout(() => setSuccessMessage(null), 3000);
     } finally {
       setCurrentAction(null);
       setIsUploading(false);
       setIsLoading(false);
+      setUploadProgress(0);
+      setCurrentUploadingIndex(null);
     }
   };
 
   const handleEliminarPublicidad = async (publicidadId, index) => {
     try {
       const confirmacion = window.confirm(
-        // "¿Estás seguro de que quieres eliminar esta publicidad?"
         t("advertisement.salon.confirmDeleteAdvertisement")
       );
+      if (!confirmacion) return;
+
       setIsLoading(true);
       await db.collection("Publicidad").doc(publicidadId).delete();
       const newImages = [...imagenesSalon];
@@ -490,8 +628,16 @@ function PublicidadSalon() {
       setPreviewImages(newPreviewImages);
       setTiemposSalon(newTiemposSalon);
       setPublicidadesIds(newIds);
+
+      // Mostrar mensaje de éxito
+      setSuccessMessage(
+        t("advertisement.salon.deleteSuccess") ||
+          "Publicidad eliminada con éxito"
+      );
+      setTimeout(() => {
+        setSuccessMessage(null);
+      }, 3000);
     } catch (error) {
-      // "Error al eliminar publicidad:"
       console.error(t("advertisement.salon.errorDeleteAdvertising"), error);
     } finally {
       setIsLoading(false);
@@ -499,151 +645,19 @@ function PublicidadSalon() {
   };
 
   const isValidData = (index) => {
-    const hasImage = imagenesSalon[index] !== null;
-    const isNewImageSelected =
-      imagenesSalon[index] && imagenesSalon[index].name !== undefined;
+    if (index < 0 || index >= imagenesSalon.length) return false;
+
+    const hasMedia = imagenesSalon[index] !== null;
+    const hasPreview = previewImages[index] !== null;
     const { horas, minutos, segundos } = tiemposSalon[index];
+    const hasValidTime = horas > 0 || minutos > 0 || segundos > 0;
     const isAdditionalField = index >= publicidadesIds.length;
+
     if (isAdditionalField) {
-      return (
-        isNewImageSelected &&
-        (horas > 0 || minutos > 0 || segundos > 0) &&
-        previewImages[index] !== null
-      );
+      return hasMedia && hasValidTime && hasPreview;
     }
-    return (
-      hasImage &&
-      (horas > 0 || minutos > 0 || segundos > 0) &&
-      previewImages[index] !== null
-    );
+    return hasValidTime && hasPreview;
   };
-
-  const renderCamposImagenes = () => (
-    <section>
-      <div className="mb-8">
-        {imagenesSalon.slice(0, 10).map((imagen, index) => (
-          <div key={index} className="mb-8">
-            <h3 className="text-xl font-semibold text-gray-800">
-              {/* Salón de Eventos */}
-              {`${t("advertisement.salon.title")}  ${index + 1}`}
-            </h3>
-            <div className="mt-4">
-              <label className="block p-3 border rounded-lg cursor-pointer text-blue-500 border-blue-500 hover:bg-blue-100 hover:text-blue-700 w-1/2">
-                {/* Seleccionar Imagen o Video */}
-                {t("advertisement.salon.selectMedia")}
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  id={`imagenSalon-${index}`}
-                  onChange={(event) => handleImagenSelect(event, index)}
-                  disabled={
-                    (editIndex !== null && editIndex !== index) ||
-                    (editIndex === null && publicidadesIds[index])
-                  }
-                />
-              </label>
-            </div>
-            {previewImages[index] && (
-              <div className="mt-4">
-                {previewImages[index].type === "image" ? (
-                  <img
-                    src={previewImages[index].url}
-                    alt={`Vista previa de la imagen ${index + 1}`}
-                    className="mt-4"
-                    style={{ maxWidth: "200px", height: "auto" }}
-                  />
-                ) : (
-                  <video
-                    src={previewImages[index].url}
-                    alt={`Vista previa del video ${index + 1}`}
-                    className="mt-4"
-                    style={{ maxWidth: "200px", height: "auto" }}
-                    controls
-                    preload="metadata"
-                  />
-                )}
-              </div>
-            )}
-
-            <div className="mt-4">
-              <label className="text-gray-800">
-                {/* Tiempo de visualización: */}
-                {t("advertisement.salon.displayTime")}
-              </label>
-              <div className="flex mt-2">
-                {["horas", "minutos", "segundos"].map((unit) => (
-                  <div key={unit} className="flex items-center">
-                    <input
-                      type="number"
-                      name={unit}
-                      min="0"
-                      max={unit === "horas" ? "23" : "59"}
-                      value={tiemposSalon[index][unit] || 0}
-                      onChange={(event) =>
-                        handleInputChange(event, index, tiemposSalon)
-                      }
-                      className="w-16 px-2 py-1 ml-4 border rounded-md border-gray-300 focus:outline-none"
-                      disabled={
-                        (editIndex !== null && editIndex !== index) ||
-                        (editIndex === null && publicidadesIds[index])
-                      }
-                      pattern="\d*"
-                    />
-                    <span className="text-gray-600 ml-1">
-                      {t(`advertisement.salon.${unit}`)}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {publicidadesIds[index] && (
-              <div className="flex mt-4">
-                {editIndex === null && (
-                  <>
-                    <button
-                      onClick={() => handleEditarPublicidad(index)}
-                      className="text-yellow-500 p-2 px-4 bg-white border border-yellow-500 rounded-full cursor-pointer hover:bg-yellow-100 hover:text-yellow-700 mr-4"
-                    >
-                      {/* Editar */}
-                      {t("advertisement.salon.edit")}
-                    </button>
-                    <button
-                      onClick={() =>
-                        handleEliminarPublicidad(publicidadesIds[index], index)
-                      }
-                      className="text-red-500 p-2 px-4 bg-white border border-red-500 rounded-full cursor-pointer hover:bg-red-100 hover:text-red-700"
-                    >
-                      {/* Eliminar */}
-                      {t("advertisement.salon.delete")}
-                    </button>
-                  </>
-                )}
-                {editIndex === index && (
-                  <>
-                    <button
-                      onClick={() => handleCancelarEdicion()}
-                      className="text-gray-500 p-2 px-4 bg-white border border-gray-500 rounded-full cursor-pointer hover:bg-gray-100 hover:text-gray-700 mr-4"
-                    >
-                      {/* Cancelar */}
-                      {t("advertisement.salon.cancel")}
-                    </button>
-                    <button
-                      onClick={() => handleGuardarCambios(index)}
-                      className="text-green-500 p-2 px-4 bg-white border border-green-500 rounded-full cursor-pointer hover:bg-green-100 hover:text-green-700"
-                    >
-                      {/* Guardar Cambios */}
-                      {t("advertisement.salon.saveChanges")}
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </section>
-  );
 
   return (
     <div className="space-y-6">
@@ -682,13 +696,23 @@ function PublicidadSalon() {
           </div>
         )}
 
-      {/* Mensaje de éxito */}
+      {/* Mensaje de éxito o error */}
       {successMessage && (
-        <div className="bg-green-50 p-4 rounded-md border-l-4 border-green-500">
+        <div
+          className={`p-4 rounded-md border-l-4 ${
+            successMessage.includes("Error")
+              ? "bg-red-50 border-red-500"
+              : "bg-green-50 border-green-500"
+          }`}
+        >
           <div className="flex">
             <div className="flex-shrink-0">
               <svg
-                className="h-5 w-5 text-green-400"
+                className={`h-5 w-5 ${
+                  successMessage.includes("Error")
+                    ? "text-red-400"
+                    : "text-green-400"
+                }`}
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 20 20"
                 fill="currentColor"
@@ -701,11 +725,44 @@ function PublicidadSalon() {
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-green-800">
+              <p
+                className={`text-sm font-medium ${
+                  successMessage.includes("Error")
+                    ? "text-red-800"
+                    : "text-green-800"
+                }`}
+              >
                 {successMessage}
               </p>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Estado global de carga */}
+      {isLoading && !isUploading && (
+        <div className="bg-blue-50 p-4 rounded-md flex items-center justify-center">
+          <svg
+            className="animate-spin h-5 w-5 mr-3 text-blue-500"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            ></circle>
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+            ></path>
+          </svg>
+          <span className="text-blue-700">
+            {t("advertisement.salon.loading") || "Cargando..."}
+          </span>
         </div>
       )}
 
@@ -720,8 +777,14 @@ function PublicidadSalon() {
           >
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                <PhotoIcon className="mr-2 h-5 text-blue-500" />
-                {`${t("advertisement.salon.title")} ${index + 1}`}
+                {previewImages[index]?.type === "video" ? (
+                  <VideoCameraIcon className="mr-2 h-5 text-blue-500" />
+                ) : (
+                  <PhotoIcon className="mr-2 h-5 text-blue-500" />
+                )}
+                {`${t("advertisement.salon.title") || "Publicidad Salón"} ${
+                  index + 1
+                }`}
               </h3>
 
               {publicidadesIds[index] && (
@@ -733,7 +796,7 @@ function PublicidadSalon() {
                         className="flex items-center text-yellow-500 px-3 py-1 rounded-md border border-yellow-500 hover:bg-yellow-50"
                       >
                         <PencilSquareIcon className="mr-1 h-5" />
-                        {t("advertisement.salon.edit")}
+                        {t("advertisement.salon.edit") || "Editar"}
                       </button>
                       <button
                         onClick={() =>
@@ -745,7 +808,7 @@ function PublicidadSalon() {
                         className="flex items-center text-red-500 px-3 py-1 rounded-md border border-red-500 hover:bg-red-50"
                       >
                         <TrashIcon className="mr-1 h-5" />
-                        {t("advertisement.salon.delete")}
+                        {t("advertisement.salon.delete") || "Eliminar"}
                       </button>
                     </>
                   ) : (
@@ -757,14 +820,15 @@ function PublicidadSalon() {
                             className="flex items-center text-gray-500 px-3 py-1 rounded-md border border-gray-500 hover:bg-gray-50"
                           >
                             <XMarkIcon className="mr-1 h-5" />
-                            {t("advertisement.salon.cancel")}
+                            {t("advertisement.salon.cancel") || "Cancelar"}
                           </button>
                           <button
                             onClick={() => handleGuardarCambios(index)}
                             className="flex items-center text-green-500 px-3 py-1 rounded-md border border-green-500 hover:bg-green-50"
                           >
                             <BookmarkIcon className="mr-1 h-5" />
-                            {t("advertisement.salon.saveChanges")}
+                            {t("advertisement.salon.saveChanges") ||
+                              "Guardar Cambios"}
                           </button>
                         </>
                       )}
@@ -775,75 +839,144 @@ function PublicidadSalon() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Selector de imagen */}
+              {/* Selector de media (imagen o video) */}
               <div>
-                <div className="mb-4">
-                  <label
-                    className={`
-                  flex justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none hover:border-blue-400 focus:outline-none
-                  ${
-                    (editIndex !== null && editIndex !== index) ||
-                    (editIndex === null && publicidadesIds[index])
-                      ? "opacity-50 cursor-not-allowed"
-                      : "cursor-pointer"
-                  }
-                `}
-                  >
-                    <span className="flex items-center space-x-2 h-full">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="w-6 h-6 text-gray-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
-                        />
-                      </svg>
-                      <span className="font-medium text-gray-600">
-                        {t("advertisement.salon.selectMedia")}
-                        <span className="text-blue-600 underline">
-                          {" "}
-                          {t("advertisement.salon.browse")}
+                {/* Vista previa del media */}
+                {previewImages[index] ? (
+                  <div className="mb-4">
+                    <div className="bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="font-medium text-gray-700 flex items-center">
+                          {previewImages[index].type === "video" ? (
+                            <>
+                              <VideoCameraIcon className="mr-2 h-5 text-blue-500" />
+                              {t("advertisement.salon.video") || "Video"}
+                            </>
+                          ) : (
+                            <>
+                              <PhotoIcon className="mr-2 h-5 text-blue-500" />
+                              {t("advertisement.salon.image") || "Imagen"}
+                            </>
+                          )}
                         </span>
-                      </span>
-                    </span>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      id={`imagenSalon-${index}`}
-                      onChange={(event) => handleImagenSelect(event, index)}
-                      disabled={
-                        (editIndex !== null && editIndex !== index) ||
-                        (editIndex === null && publicidadesIds[index])
-                      }
-                    />
-                  </label>
-                </div>
 
-                {/* Vista previa de la imagen */}
-                {previewImages[index] && (
-                  <div className="mt-4 flex justify-center">
-                    {previewImages[index].type === "image" ? (
-                      <img
-                        src={previewImages[index].url}
-                        alt={`Vista previa de la imagen ${index + 1}`}
-                        className="object-cover rounded-lg border border-gray-200 shadow-sm max-h-48"
-                      />
-                    ) : (
-                      <video
-                        src={previewImages[index].url}
-                        alt={`Vista previa del video ${index + 1}`}
-                        className="rounded-lg border border-gray-200 shadow-sm max-h-48"
-                        controls
-                        preload="metadata"
-                      />
+                        {/* Sólo mostrar botón de cambiar cuando estamos editando */}
+                        {editIndex === index && (
+                          <button
+                            className="text-xs bg-gray-200 hover:bg-gray-300 text-gray-700 px-2 py-1 rounded"
+                            onClick={() =>
+                              document
+                                .getElementById(`mediaSelector-${index}`)
+                                .click()
+                            }
+                          >
+                            {t("advertisement.salon.change") || "Cambiar"}
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="flex justify-center bg-gray-100 rounded-lg overflow-hidden border border-gray-300">
+                        {previewImages[index].type === "image" ? (
+                          <img
+                            src={previewImages[index].url}
+                            alt={`Vista previa ${index + 1}`}
+                            className="object-contain max-h-48 w-auto"
+                          />
+                        ) : (
+                          <video
+                            src={previewImages[index].url}
+                            alt={`Vista previa ${index + 1}`}
+                            className="max-h-48 w-auto"
+                            controls
+                            preload="metadata"
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    {/* Si no hay media seleccionado y es un campo editable */}
+                    {(editIndex === index || !publicidadesIds[index]) && (
+                      <>
+                        {/* VideoUploader */}
+                        {/* <div className="mb-4">
+                          <VideoUploader
+                            onVideoUploaded={(videoData) =>
+                              handleVideoUploaded(videoData, index)
+                            }
+                            onError={handleVideoError}
+                          />
+                        </div> */}
+
+                        {/* Separador con texto */}
+                        {/* <div className="flex items-center my-4">
+                          <div className="flex-grow border-t border-gray-300"></div>
+                          <span className="flex-shrink mx-4 text-gray-600 text-sm">
+                            {t("advertisement.salon.or") || "O BIEN"}
+                          </span>
+                          <div className="flex-grow border-t border-gray-300"></div>
+                        </div> */}
+
+                        {/* Selector de imagen tradicional */}
+                        <div className="mb-4">
+                          <label className="flex justify-center w-full h-32 px-4 transition bg-white border-2 border-gray-300 border-dashed rounded-md appearance-none cursor-pointer hover:border-blue-400 focus:outline-none">
+                            <span className="flex items-center space-x-2 h-full">
+                              <PhotoIcon className="w-6 h-6 text-gray-600" />
+                              <span className="font-medium text-gray-600">
+                                {t("advertisement.salon.selectImage") ||
+                                  "Seleccionar imagen"}
+                                <span className="text-blue-600 underline ml-1">
+                                  {t("advertisement.salon.browse") ||
+                                    "Explorar"}
+                                </span>
+                              </span>
+                            </span>
+                            <input
+                              id={`mediaSelector-${index}`}
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              onChange={(event) =>
+                                handleImagenSelect(event, index)
+                              }
+                            />
+                          </label>
+                        </div>
+                      </>
                     )}
+                  </>
+                )}
+
+                {/* Barra de progreso durante la carga */}
+                {isUploading && currentUploadingIndex === index && (
+                  <div className="mb-4">
+                    <label className="text-sm font-medium text-gray-700 flex items-center mb-1">
+                      <ArrowPathIcon className="animate-spin mr-1 h-4 w-4 text-blue-500" />
+                      {t("advertisement.salon.uploading") || "Subiendo..."}
+                    </label>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5">
+                      <div
+                        className="bg-blue-600 h-2.5 rounded-full"
+                        style={{ width: `${uploadProgress}%` }}
+                      ></div>
+                    </div>
+                    <p className="text-xs text-center mt-1 text-gray-500">
+                      {uploadProgress}%
+                    </p>
+                  </div>
+                )}
+
+                {/* Opción para cambiar el medio (solo en modo edición) */}
+                {editIndex === index && previewImages[index] && (
+                  <div className="mt-2">
+                    <input
+                      id={`mediaSelector-${index}`}
+                      type="file"
+                      accept="image/*,video/mp4,video/webm"
+                      className="hidden"
+                      onChange={(event) => handleImagenSelect(event, index)}
+                    />
                   </div>
                 )}
               </div>
@@ -853,7 +986,8 @@ function PublicidadSalon() {
                 <div className="mb-2">
                   <label className="text-base font-medium text-gray-700 flex items-center">
                     <ClockIcon className="mr-2 h-5 text-blue-500" />
-                    {t("advertisement.salon.displayTime")}
+                    {t("advertisement.salon.displayTime") ||
+                      "Tiempo de visualización"}
                   </label>
                   <p className="text-sm text-gray-500 mb-2">
                     {t("advertisement.salon.displayTimeHelper") ||
@@ -865,7 +999,7 @@ function PublicidadSalon() {
                   {["horas", "minutos", "segundos"].map((unit) => (
                     <div key={unit} className="flex flex-col">
                       <label className="text-sm text-gray-600 mb-1">
-                        {t(`advertisement.salon.${unit}`)}
+                        {t(`advertisement.salon.${unit}`) || unit}
                       </label>
                       <div className="relative">
                         <input
@@ -932,13 +1066,17 @@ function PublicidadSalon() {
           `}
           >
             {isUploading && currentAction === "Guardar Publicidad" ? (
-              <ArrowPathIcon spin className="mr-2 h-5" />
+              <>
+                <ArrowPathIcon className="mr-2 h-5 animate-spin" />
+                {t("advertisement.salon.saving") || "Guardando..."}
+              </>
             ) : (
-              <PlusCircleIcon className="mr-2 h-5" />
+              <>
+                <PlusCircleIcon className="mr-2 h-5" />
+                {t("advertisement.salon.saveAdvertisement") ||
+                  "Agregar publicidad"}
+              </>
             )}
-            {currentAction === "Guardar Publicidad"
-              ? t("advertisement.salon.saveAdvertisement")
-              : t("advertisement.salon.saveChanges")}
           </button>
         </div>
       )}
@@ -960,10 +1098,29 @@ function PublicidadSalon() {
               />
             </svg>
           </div>
-          <p className="ml-2">
-            {t("advertisement.salon.helpText") ||
-              "Las imágenes se mostrarán cuando no haya eventos programados. El tiempo recomendado por imagen es entre 10 y 15 segundos."}
-          </p>
+          <div className="ml-2">
+            <p className="font-medium text-gray-700 mb-1">
+              {t("advertisement.salon.helpTitle") || "Ayuda con el contenido"}
+            </p>
+            <ul className="list-disc list-inside space-y-1 pl-1">
+              <li>
+                {t("advertisement.salon.helpText") ||
+                  "Los contenidos se mostrarán cuando no haya eventos programados."}
+              </li>
+              <li>
+                {t("advertisement.salon.timeTip") ||
+                  "El tiempo recomendado por imagen es entre 10 y 15 segundos."}
+              </li>
+              <li>
+                {t("advertisement.salon.videoHelp") ||
+                  "Los videos deben ser de máximo 15MB y 60 segundos de duración. Formatos aceptados: MP4, WEBM."}
+              </li>
+              <li>
+                {t("advertisement.salon.resolutionTip") ||
+                  "La resolución recomendada es de 720p (1280×720) para mejor rendimiento."}
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>

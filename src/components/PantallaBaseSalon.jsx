@@ -20,6 +20,8 @@ import AdvertisementSlider from "@/components/sliderPublicidadPS";
 import PropTypes from "prop-types";
 import debounce from "lodash/debounce";
 import TemplateManager from "./templates/PSTemplateManager";
+import useHeartbeat from "@/hook/useHeartbeat";
+import { v4 as uuidv4 } from "uuid"; // Necesitamos importar uuid para generar IDs únicos
 
 const DEFAULT_HOUR = "00:00";
 const MAX_RETRIES = 3;
@@ -64,6 +66,26 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     templates: null,
     matchingDevice: null,
   });
+  const [screenId, setScreenId] = useState("");
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user) {
+        try {
+          const docRef = doc(db, "usuarios", user.uid);
+          const docSnap = await getDoc(docRef);
+          if (docSnap.exists()) {
+            setUserData(docSnap.data());
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+    fetchUserData();
+  }, [user]);
+
   console.log(
     "🚀 ~ PantallaBaseSalon.jsx:67 ~ BaseScreen ~ screenData:",
     screenData
@@ -74,6 +96,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   const currentEvent = useMemo(() => screenData.events[0], [screenData.events]);
   const currentAd = useMemo(() => screenData.ads[0], [screenData.ads]);
   const templates = useMemo(() => screenData.templates, [screenData.templates]);
+
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    let storedId = localStorage.getItem(`pantalla_salon_${screenNumber}`);
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `salon_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      localStorage.setItem(`pantalla_salon_${screenNumber}`, storedId);
+    }
+    setScreenId(storedId);
+  }, [screenNumber]);
 
   const debouncedSetCurrentHour = useCallback(
     debounce(() => setCurrentHour(getHour()), 1000),
@@ -114,13 +147,19 @@ const BaseScreen = ({ screenNumber, empresa }) => {
         id,
       } = event;
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // CORRECCIÓN: Usar fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Compare strings directamente - mucho más seguro
+      // Compare strings directamente
       const isWithinDateRange =
         formattedToday >= fechaInicio && formattedToday <= fechaFinal;
+
+      console.log(
+        `Evento ${nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}, en rango: ${isWithinDateRange}`
+      );
 
       let startMinutes, endMinutes;
 
@@ -144,6 +183,28 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     });
   }, []);
 
+  useEffect(() => {
+    // Intentar recuperar screenId del localStorage para consistencia entre recargas
+    const storageKey = `pantalla_salon_${screenNumber}`;
+    let storedId =
+      typeof window !== "undefined" ? localStorage.getItem(storageKey) : null;
+
+    if (!storedId) {
+      // Si no existe, crear uno nuevo y guardarlo
+      storedId = `salon_${screenNumber}_${uuidv4().substring(0, 8)}`;
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.setItem(storageKey, storedId);
+        } catch (e) {
+          console.error("Error al guardar screenId:", e);
+        }
+      }
+    }
+
+    setScreenId(storedId);
+  }, [screenNumber]);
+
+  // Mantén tu función findMatchingDevice como está
   const findMatchingDevice = useCallback(
     (event, screenNames, currentScreenNumber) => {
       const devices = event.devices || [];
@@ -158,28 +219,54 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     []
   );
 
-  const loadAds = useCallback(async (userCompany) => {
-    try {
-      const adsRef = collection(db, "Publicidad");
-      const adsQuery = query(
-        adsRef,
-        where("empresa", "==", userCompany),
-        where("tipo", "==", "salon")
-      );
+  // Filtrar anuncios basados en el número de pantalla
+  const filterAdsForScreen = useCallback((ads, screenNumber, screenNames) => {
+    if (!ads || !ads.length || !screenNames) return [];
 
-      const adsSnapshot = await getDocs(adsQuery);
-      const ads = [];
+    // Obtener el nombre de pantalla para este número de pantalla
+    const screenName = `salon${screenNumber}`;
+    const screenDisplayName = screenNames[screenNumber - 1];
 
-      adsSnapshot.forEach((doc) => {
-        ads.push({ id: doc.id, ...doc.data() });
-      });
+    console.log(
+      `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}`
+    );
 
-      return ads;
-    } catch (error) {
-      console.error("Error loading ads:", error);
-      return [];
-    }
+    return ads.filter((ad) => {
+      // Casos de filtro:
+      // 1. Si destino es "todas", mostrar en todas las pantallas
+      if (ad.destino === "todas") {
+        return true;
+      }
+
+      // 2. Si destino es "especificas", verificar si esta pantalla está en pantallasAsignadas
+      if (ad.destino === "especificas" && ad.pantallasAsignadas) {
+        const isAssigned = ad.pantallasAsignadas.includes(screenName);
+        console.log(`Ad ${ad.nombre}: asignado a esta pantalla: ${isAssigned}`);
+        return isAssigned;
+      }
+
+      return false;
+    });
   }, []);
+
+  // Integrar hook de heartbeat
+  const heartbeat = useHeartbeat({
+    screenId,
+    screenType: "salon",
+    screenNumber,
+    deviceName: screenData.deviceName || `Pantalla ${screenNumber}`,
+    userId: user?.uid,
+    companyName: screenData.usuario?.empresa || empresa,
+    interval: 60000, // Cada 60 segundos
+  });
+
+  // Opcional: Puedes mostrar algún indicador de conexión para depuración
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      console.log("Estado de conexión:", heartbeat.isConnected);
+      console.log("Último heartbeat:", heartbeat.lastBeat);
+    }
+  }, [heartbeat.isConnected, heartbeat.lastBeat]);
 
   // Check for active events based on current time (memory-based filtering)
   const checkCurrentEvents = useCallback(() => {
@@ -203,13 +290,19 @@ const BaseScreen = ({ screenNumber, empresa }) => {
       const { fechaInicio, fechaFinal, horaInicialSalon, horaFinalSalon } =
         event;
 
-      // Usar una comparación de strings de fecha en lugar de objetos Date
+      // CORRECCIÓN: Usar fecha local en lugar de UTC
       const today = new Date();
-      const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+      const formattedToday = `${today.getFullYear()}-${String(
+        today.getMonth() + 1
+      ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-      // Compare strings directamente - mucho más seguro
+      // Compare strings directamente
       const isWithinDateRange =
         formattedToday >= fechaInicio && formattedToday <= fechaFinal;
+
+      console.log(
+        `Evento ${event.nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}, en rango: ${isWithinDateRange}`
+      );
 
       // Check time range
       let startMinutes, endMinutes;
@@ -324,13 +417,25 @@ const BaseScreen = ({ screenNumber, empresa }) => {
           adsRef,
           (adsSnapshot) => {
             if (!isMounted.current) return;
-            const ads = adsSnapshot.docs.map((doc) => ({
+            const allAds = adsSnapshot.docs.map((doc) => ({
               id: doc.id,
               ...doc.data(),
             }));
+
+            // Filtrar anuncios específicos para esta pantalla
+            const filteredAds = filterAdsForScreen(
+              allAds,
+              screenNumber,
+              screenNames
+            );
+
+            console.log(
+              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`
+            );
+
             setScreenData((prev) => ({
               ...prev,
-              ads,
+              ads: filteredAds,
             }));
           },
           (error) => {
@@ -411,15 +516,17 @@ const BaseScreen = ({ screenNumber, empresa }) => {
                 horaFinalSalon,
               } = event;
 
-              // Usar una comparación de strings de fecha en lugar de objetos Date
+              // CORRECCIÓN: Usar fecha local en lugar de UTC
               const today = new Date();
-              const formattedToday = today.toISOString().split("T")[0]; // Obtiene YYYY-MM-DD
+              const formattedToday = `${today.getFullYear()}-${String(
+                today.getMonth() + 1
+              ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+
               console.log(
-                "🚀 ~ PantallaBaseSalon.jsx:417 ~ currentlyActiveEvents ~ formattedToday:",
-                formattedToday
+                `Evento ${event.nombreEvento} - fecha hoy: ${formattedToday}, inicio: ${fechaInicio}, fin: ${fechaFinal}`
               );
 
-              // Compare strings directamente - mucho más seguro
+              // Compare strings directamente
               const isWithinDateRange =
                 formattedToday >= fechaInicio && formattedToday <= fechaFinal;
 
@@ -485,6 +592,7 @@ const BaseScreen = ({ screenNumber, empresa }) => {
     findMatchingDevice,
     getHourInMinutes,
     convertTimeToMinutes,
+    filterAdsForScreen,
   ]); // Removed currentHour dependency
 
   // Schedule updates at the start of each minute
@@ -583,14 +691,29 @@ const BaseScreen = ({ screenNumber, empresa }) => {
   }
 
   return (
-    <TemplateManager
-      templateId={templates.template}
-      event={currentEvent || {}}
-      templates={templates}
-      currentHour={currentHour}
-      t={t}
-      matchingDevice={screenData.matchingDevice || null}
-    />
+    <>
+      <TemplateManager
+        templateId={templates.template}
+        event={currentEvent || {}}
+        templates={templates}
+        currentHour={currentHour}
+        t={t}
+        matchingDevice={screenData.matchingDevice || null}
+      />
+      {/* Indicador de conexión - solo visible en modo desarrollo */}
+      {process.env.NODE_ENV === "development" && (
+        <div
+          className="fixed bottom-2 right-2 z-50 rounded-full w-4 h-4 border border-gray-300"
+          style={{
+            backgroundColor: heartbeat.isConnected ? "#10b981" : "#ef4444",
+            boxShadow: "0 0 5px rgba(0,0,0,0.3)",
+          }}
+          title={`Monitoreo: ${
+            heartbeat.isConnected ? "Conectado" : "Desconectado"
+          }`}
+        ></div>
+      )}
+    </>
   );
 };
 

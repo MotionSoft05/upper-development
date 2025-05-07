@@ -87,6 +87,8 @@ function Admin() {
     ps: "",
     pd: "",
     pservice: "",
+    pt: "",
+    pp: "",
     tipoPlan: "",
     empresa: "",
     inicio: "",
@@ -397,18 +399,18 @@ function Admin() {
     // Resetear a la página 1 cuando cambien los criterios de búsqueda o filtrado
     setCurrentPage(1);
   }, [searchTerm, filtroSeleccionado]);
-  // Cambio a la función handleGuardarCambios para permitir más pantallas directorio
   const handleGuardarCambios = async () => {
     try {
       const usuarioDocRef = doc(db, "usuarios", usuarioEditado.id);
-
       const updateData = {
         nombre: usuarioEditado.nombre,
         apellido: usuarioEditado.apellido,
         telefono: usuarioEditado.telefono,
         ps: usuarioEditado.ps,
         pd: usuarioEditado.pd,
+        pp: usuarioEditado.pp,
         pservice: usuarioEditado.pservice,
+        pt: usuarioEditado.pt,
         tipoPlan: usuarioEditado.tipoPlan,
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
@@ -441,8 +443,11 @@ function Admin() {
           const empresaExistenteDoc = await getDoc(empresaExistenteDocRef);
 
           if (empresaExistenteDoc.exists()) {
-            const { nombrePantallas, nombrePantallasDirectorio } =
-              empresaExistenteDoc.data();
+            const {
+              nombrePantallas,
+              nombrePantallasDirectorio,
+              nombrePantallasTarifario,
+            } = empresaExistenteDoc.data();
 
             // Crear un objeto para almacenar los campos que se deben actualizar
             const updateFields = {};
@@ -456,6 +461,11 @@ function Admin() {
             if (nombrePantallasDirectorio !== undefined) {
               updateFields.nombrePantallasDirectorio =
                 nombrePantallasDirectorio;
+            }
+
+            // Solo actualizar si nombrePantallasTarifario existe y no es undefined
+            if (nombrePantallasTarifario !== undefined) {
+              updateFields.nombrePantallasTarifario = nombrePantallasTarifario;
             }
 
             if (Object.keys(updateFields).length > 0) {
@@ -494,6 +504,8 @@ function Admin() {
           ps: "",
           pd: "",
           pservice: "",
+          pp: "",
+          pt: "",
           tipoPlan: "",
           empresa: "",
           inicio: "",
@@ -956,7 +968,10 @@ function Admin() {
                     {renderColumnHeader("telefono", t("admin.phone"))}
                     <th className="px-4 py-3 text-center">PS</th>
                     <th className="px-4 py-3 text-center">PD</th>
-                    <th className="px-4 py-3 text-center">PDS</th>
+
+                    <th className="px-4 py-3 text-center">PT</th>
+                    <th className="px-4 py-3 text-center">PP</th>
+                    {/* Nueva columna para PT */}
                     <th className="px-4 py-3 text-center">
                       {t("admin.start")}
                     </th>
@@ -964,7 +979,6 @@ function Admin() {
                     <th className="px-4 py-3 text-center">
                       {t("admin.planType")}
                     </th>
-
                     <th className="px-4 py-3 text-center">
                       {t("admin.actions")}
                     </th>
@@ -1131,27 +1145,48 @@ function Admin() {
                         )}
                       </td>
 
-                      {/* PDS */}
+                      {/* PT - Nueva celda para pantallas de tarifario */}
                       <td className="px-4 py-3 text-center">
                         {modoEdicion && usuarioEditado.id === usuario.id ? (
                           <input
                             type="number"
-                            value={usuarioEditado.pservice}
+                            min="0"
+                            value={usuarioEditado.pt}
                             onChange={(e) =>
                               setUsuarioEditado({
                                 ...usuarioEditado,
-                                pservice: e.target.value,
+                                pt: e.target.value,
                               })
                             }
                             className="w-16 px-2 py-1 text-sm text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                           />
                         ) : (
-                          <div className="inline-flex items-center justify-center bg-purple-100 text-purple-800 text-sm font-semibold w-8 h-8 rounded-full">
-                            {usuario.pservice || 0}
+                          <div className="inline-flex items-center justify-center bg-amber-100 text-amber-800 text-sm font-semibold w-8 h-8 rounded-full">
+                            {usuario.pt || 0}
                           </div>
                         )}
                       </td>
-
+                      {/* PP - Nueva celda para pantallas de promociones */}
+                      <td className="px-4 py-3 text-center">
+                        {modoEdicion && usuarioEditado.id === usuario.id ? (
+                          <input
+                            type="number"
+                            min="0"
+                            value={usuarioEditado.pp}
+                            onChange={(e) =>
+                              setUsuarioEditado({
+                                ...usuarioEditado,
+                                pp: e.target.value,
+                              })
+                            }
+                            className="w-16 px-2 py-1 text-sm text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <div className="inline-flex items-center justify-center bg-pink-100 text-pink-800 text-sm font-semibold w-8 h-8 rounded-full">
+                            {usuario.pp || 0}
+                          </div>
+                        )}
+                      </td>
                       {/* Inicio */}
                       <td className="px-4 py-3 text-center">
                         {modoEdicion && usuarioEditado.id === usuario.id ? (

@@ -2,17 +2,30 @@ import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faBookOpenReader,
+  // Iconos para administración
+  faUserShield,
   faBuilding,
-  faBullhorn,
+
+  // Iconos para personalización de pantallas
+  faTachometerAlt,
   faCalendarPlus,
-  faCircleQuestion,
-  faClipboardQuestion,
-  faDisplay,
+  faCalendarDay,
+  faReceipt,
+
+  // Iconos para ajustes de pantallas
+  faTelevision,
+  faListUl,
+  faTags,
+  faDesktopAlt,
+  faAd,
+  faImages,
+
+  // Iconos para más información
+  faIdCard,
+  faBook,
   faHeadset,
-  faSolarPanel,
-  faTableColumns,
-  faUserTie,
+
+  // Otros iconos
   faSignOutAlt,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
@@ -29,35 +42,38 @@ function Sidebar(props) {
     props.setShowConsultaEvento(false);
     props.setShowPantallaSalon(false);
     props.setShowPantallaDirectorio(false);
+    props.setShowPantallaPromociones(false);
     props.setShowPublicidad(false);
     props.setShowlicencia(false);
     props.setShowGuia(false);
     props.setShowSoporte(false);
     props.setShowPantallaServicio(false);
+    props.setShowMonitorScreen(false);
+    props.setShowPantallaTarifario(false);
+    props.setShowInformacionTarifa(false);
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
 
   //? -- Permisos --
-  const permisos = props.userData?.permisos || 0;
-  const showAdministrador = [10].includes(permisos);
-  const showPersonalicePantallas = [10, 1, 2, 3].includes(permisos);
-  const showAjustesPantalla = [10, 3].includes(permisos);
-  const showInformacion = [10, 2, 3].includes(permisos);
-  //? --------------
+  const userData = props.userData || {};
+  const permisosSecciones = userData.permisosSecciones || {};
+
+  // Verificar permiso del SuperAdmin (valor 10)
+  const isSuperAdmin = userData.permisos === 10;
+
+  // Función para verificar permisos por sección
+  const tienePermiso = (seccion) => {
+    return isSuperAdmin || permisosSecciones[seccion] === true;
+  };
 
   const isActive = (show) => show === true;
 
   return (
-    <div className="sidebar-content rounded-r-lg ">
-      {/* Logo en la parte superior */}
-      {/* <div className="py-4 px-6 flex justify-center">
-        <img src="/img/logov2.png" alt="Upper Logo" className="h-10" />
-      </div> */}
-
+    <div className="sidebar-content rounded-r-lg">
       <ul className="flex flex-col w-full px-2">
         {/* ADMINISTRADOR permiso solo para SUPERADMIN */}
-        {showAdministrador && (
+        {isSuperAdmin && (
           <li className="mb-4">
             <div className="px-4 py-2">
               <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
@@ -67,7 +83,7 @@ function Sidebar(props) {
               </h3>
             </div>
 
-            {/* Admin */}
+            {/* Admin - Cambio a faUserShield que representa mejor la administración */}
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -84,7 +100,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faUserTie} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faUserShield} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.admin")}</span>
                 {isActive(props.showAdmin) && (
@@ -98,7 +114,7 @@ function Sidebar(props) {
               </button>
             </div>
 
-            {/* Edicion de Empresas */}
+            {/* Edicion de Empresas - Se mantiene faBuilding que es apropiado */}
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -132,17 +148,17 @@ function Sidebar(props) {
         )}
 
         {/* PERSONALICE SUS PANTALLAS */}
-        {showPersonalicePantallas && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.title")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.title")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Tablero */}
+          {/* Tablero - Cambio a faTachometerAlt que representa mejor un dashboard */}
+          {tienePermiso("tablero") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -159,7 +175,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faTableColumns} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faTachometerAlt} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.dashboard")}</span>
                 {isActive(props.showUserAdmin) && (
@@ -172,8 +188,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Alta de eventos */}
+          {/* Alta de eventos - Se mantiene faCalendarPlus que es apropiado */}
+          {tienePermiso("altaEventos") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -203,8 +221,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Consulta de eventos */}
+          {/* Consulta de eventos - Cambio a faCalendarDay que representa mejor la consulta de eventos */}
+          {tienePermiso("consultaEventos") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -221,10 +241,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faClipboardQuestion}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faCalendarDay} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.eventQuery")}</span>
                 {isActive(props.showConsultaEvento) && (
@@ -237,21 +254,54 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+
+          {/* Información de Tarifas - Cambio a faReceipt que representa mejor las tarifas */}
+          {tienePermiso("informacionTarifas") && (
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showInformacionTarifa)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowInformacionTarifa")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showInformacionTarifa)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faReceipt} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Información de Tarifas</span>
+                {isActive(props.showInformacionTarifa) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+        </li>
 
         {/* AJUSTES PANTALLAS */}
-        {showAjustesPantalla && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.screenSettings")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.screenSettings")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Pantallas salon */}
+          {/* Pantallas salon - Cambio a faTV que representa mejor una pantalla de salón */}
+          {tienePermiso("pantallasSalon") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -268,7 +318,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faSolarPanel} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faTelevision} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.roomScreens")}</span>
                 {isActive(props.showPantallaSalon) && (
@@ -281,8 +331,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Pantallas Directorio */}
+          {/* Pantallas Directorio - Cambio a faListUl que representa mejor un directorio */}
+          {tienePermiso("pantallasDirectorio") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -299,7 +351,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faDisplay} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faListUl} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.directoryScreens")}</span>
                 {isActive(props.showPantallaDirectorio) && (
@@ -312,8 +364,109 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
+          {/* Pantallas Promociones */}
+          {tienePermiso("pantallasPromociones") && (
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showPantallaPromociones)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowPantallaPromociones")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showPantallaPromociones)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faImages} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Pantallas Promociones</span>
+                {isActive(props.showPantallaPromociones) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+          {/* Pantallas Tarifario - Cambio a faTags que representa mejor un tarifario */}
+          {tienePermiso("pantallasTarifario") && (
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showPantallaTarifario)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowPantallaTarifario")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showPantallaTarifario)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faTags} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">Pantallas Tarifario</span>
+                {isActive(props.showPantallaTarifario) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
 
-            {/* Publicidad */}
+          {/* Monitor de Pantallas - Cambio a faDesktopAlt que representa mejor un monitor */}
+          {tienePermiso("monitoreo") && (
+            <div className="mb-1">
+              <button
+                onClick={() => changePanel("setShowMonitorScreen")}
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showMonitorScreen)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showMonitorScreen)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faDesktopAlt} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">
+                  {t("sidebar.monitorScreen") || "Monitoreo de Pantallas"}
+                </span>
+                {isActive(props.showMonitorScreen) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Publicidad - Cambio a faAd que representa mejor la publicidad */}
+          {tienePermiso("publicidad") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -330,7 +483,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faBullhorn} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faAd} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.advertisement")}</span>
                 {isActive(props.showPublicidad) && (
@@ -343,21 +496,21 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+        </li>
 
         {/* MAS INFORMACION */}
-        {showInformacion && (
-          <li className="mb-4">
-            <div className="px-4 py-2">
-              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
-                <span className="mr-2 w-6 border-t border-blue-300"></span>
-                {t("sidebar.moreInformation")}
-                <span className="ml-2 w-6 border-t border-blue-300"></span>
-              </h3>
-            </div>
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+              <span className="mr-2 w-6 border-t border-blue-300"></span>
+              {t("sidebar.moreInformation")}
+              <span className="ml-2 w-6 border-t border-blue-300"></span>
+            </h3>
+          </div>
 
-            {/* Mis Datos */}
+          {/* Mis Datos - Cambio a faIdCard que representa mejor los datos personales */}
+          {tienePermiso("datosUsuario") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -374,10 +527,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faBookOpenReader}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faIdCard} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.myData")}</span>
                 {isActive(props.showlicencia) && (
@@ -390,8 +540,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Guia de Usuario */}
+          {/* Guia de Usuario - Cambio a faBook que representa mejor una guía */}
+          {tienePermiso("guiaUsuario") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -408,10 +560,7 @@ function Sidebar(props) {
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon
-                    icon={faCircleQuestion}
-                    className="w-5 h-5"
-                  />
+                  <FontAwesomeIcon icon={faBook} className="w-5 h-5" />
                 </span>
                 <span className="ml-3">{t("sidebar.userGuides")}</span>
                 {isActive(props.showGuia) && (
@@ -424,8 +573,10 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
+          )}
 
-            {/* Contacto soporte */}
+          {/* Contacto soporte - Se mantiene faHeadset que es apropiado */}
+          {tienePermiso("contactoSoporte") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
@@ -455,8 +606,8 @@ function Sidebar(props) {
                 )}
               </button>
             </div>
-          </li>
-        )}
+          )}
+        </li>
       </ul>
 
       {/* SALIR - Botón de cierre de sesión en la parte inferior */}

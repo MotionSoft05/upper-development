@@ -4,6 +4,7 @@ import PropTypes from "prop-types";
 import QRCode from "qrcode.react";
 import "keen-slider/keen-slider.min.css";
 import SliderRSS from "../SliderRSS";
+import WeatherWidget from "../WeatherWidget";
 
 // Event display component for vertical layout
 const EventRow = ({
@@ -33,7 +34,7 @@ const EventRow = ({
           <img
             src={event.images[0]}
             alt={event.nombreEvento}
-            className="h-full w-full object-cover rounded-lg cursor-pointer"
+            className="h-full w-full  rounded-lg cursor-pointer"
             onClick={() => onImageClick && onImageClick(event.images[0])}
           />
         ) : (
@@ -168,11 +169,44 @@ const PDTemplate1Vertical = ({
     fontStyle: "sans-serif",
     ...template,
   };
+  console.log(
+    "🚀 ~ PDTemplate1Vertical.jsx:147 ~ templateActual:",
+    templateActual
+  );
 
   // Get the screen name from template if available
   const screenName =
     template?.nombrePantallas?.[screenNumber - 1] || `Pantalla ${screenNumber}`;
 
+  // Añadir aquí el nuevo código de rotación
+  const getRotationDirection = () => {
+    // Primero, buscar en pantallaSettings con isPortrait true
+    const portraitSetting = templateActual.pantallaSettings?.find(
+      (setting) => setting.isPortrait && setting.rotationDirection
+    );
+
+    // Si no se encuentra, buscar en pantallasSettings
+    if (!portraitSetting && templateActual.pantallasSettings) {
+      const portraitScreenSetting = Object.values(
+        templateActual.pantallasSettings
+      ).find((setting) => setting.setPortrait === true);
+
+      // Si se encuentra una pantalla en vertical, usar -90 por defecto
+      if (portraitScreenSetting) {
+        return -90;
+      }
+    }
+
+    // Si se encuentra en pantallaSettings, usar su rotationDirection
+    if (portraitSetting && portraitSetting.rotationDirection) {
+      return portraitSetting.rotationDirection;
+    }
+
+    // Por defecto, rotar -90 grados
+    return -90;
+  };
+
+  const rotationDirection = getRotationDirection();
   // Configuración del slider con autoplay
   const [sliderRef] = useKeenSlider(
     {
@@ -360,24 +394,14 @@ const PDTemplate1Vertical = ({
           </div>
         ) : weatherData ? (
           <>
-            <div className="flex items-center">
-              {weatherData.icon && (
-                <img
-                  src={weatherData.icon}
-                  alt="Weather"
-                  className="h-5 w-5 mr-1"
-                />
-              )}
-              <span className="text-base font-medium text-color">
-                {weatherData.temp_c
-                  ? `${weatherData.temp_c.toFixed(1)} °C`
-                  : "Sin datos"}
-              </span>
-            </div>
-
+            <WeatherWidget
+              ciudad={template.ciudad}
+              showForecast={true}
+              variant="horizontal"
+            />
             <div className="flex items-center">
               <img src="/img/reloj.png" className="p-1 h-8 mt-1" alt="Clock" />
-              <div className="text-lg font-semibold text-color mt-0.5">
+              <div className="text-xl font-semibold text-gray-800 mt-0.5">
                 {currentTime}
               </div>
             </div>
@@ -399,7 +423,7 @@ const PDTemplate1Vertical = ({
           height: windowSize.width,
           top: (windowSize.height - windowSize.width) / 2,
           left: (windowSize.width - windowSize.height) / 2,
-          transform: "rotate(-90deg)",
+          transform: `rotate(${rotationDirection}deg)`,
           fontFamily: templateActual.fontStyle,
           display: "flex",
           flexDirection: "column",
