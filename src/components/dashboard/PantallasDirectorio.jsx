@@ -993,7 +993,7 @@ function PantallasDirectorio() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Configuración General
+              {t("screensDirectory.generalSettings")}
             </button>
             <button
               onClick={() => setActiveTab("screens")}
@@ -1003,7 +1003,7 @@ function PantallasDirectorio() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Pantallas
+              {t("screensDirectory.screenNames")}
             </button>
             <button
               onClick={() => setActiveTab("appearance")}
@@ -1013,7 +1013,7 @@ function PantallasDirectorio() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Apariencia
+              {t("screensDirectory.appearance")}
             </button>
           </div>
 
@@ -1337,7 +1337,8 @@ function PantallasDirectorio() {
                         <div className="flex-1">
                           <div className="flex items-center mb-2">
                             <span className="text-sm font-medium text-gray-700 mr-2">
-                              Pantalla {index + 1}:
+                              {t("screensDirectory.screen")} {""}
+                              {index + 1}:
                             </span>
                             <input
                               type="text"
@@ -1494,7 +1495,7 @@ function PantallasDirectorio() {
                             target="_blank"
                             className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
-                            Ver Pantalla
+                            {t("screensDirectory.seeScreen")} {""}
                           </Link>
                           <span className="text-xs text-gray-500 mt-1">
                             ID: {index + 1}

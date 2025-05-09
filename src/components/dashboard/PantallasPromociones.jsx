@@ -115,9 +115,9 @@ function PantallasPromociones() {
 
   // Templates disponibles
   const templates = [
-    { id: 1, name: "Una sección", sections: 1 },
-    { id: 2, name: "Tres secciones", sections: 3 },
-    { id: 3, name: "Seis secciones", sections: 6 },
+    { id: 1, name: t("promotionScreens.oneSection"), sections: 1 },
+    { id: 2, name: t("promotionScreens.threeSections"), sections: 3 },
+    { id: 3, name: t("promotionScreens.sixSections"), sections: 6 },
   ];
 
   useEffect(() => {
@@ -908,7 +908,10 @@ function PantallasPromociones() {
         return (
           <div className="w-full aspect-[16/9] bg-black relative grid grid-cols-1 grid-rows-1 gap-2 p-2 rounded">
             <div className="bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-sm">Sección única</span>
+              <span className="text-white text-sm">
+                {" "}
+                {t("promotionScreens.uniqueSection")}
+              </span>
             </div>
           </div>
         );
@@ -916,13 +919,22 @@ function PantallasPromociones() {
         return (
           <div className="w-full aspect-[16/9] bg-black relative grid grid-cols-3 grid-rows-2 gap-2 p-2 rounded">
             <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">Sección 1</span>
+              <span className="text-white text-xs">
+                {" "}
+                {t("promotionScreens.sectionCount")} 1
+              </span>
             </div>
             <div className="col-span-2 row-span-2 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-sm">Sección 2</span>
+              <span className="text-white text-sm">
+                {" "}
+                {t("promotionScreens.sectionCount")} 3
+              </span>
             </div>
             <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">Sección 3</span>
+              <span className="text-white text-xs">
+                {" "}
+                {t("promotionScreens.sectionCount")} 2
+              </span>
             </div>
           </div>
         );
@@ -960,11 +972,10 @@ function PantallasPromociones() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Configuración de Pantallas de Promociones
+            {t("promotionScreens.title")}
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
-            Configure las opciones de visualización para sus pantallas de
-            promociones con múltiples secciones de contenido
+            {t("promotionScreens.description")}
           </p>
         </div>
 
@@ -1032,7 +1043,7 @@ function PantallasPromociones() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Configuración General
+              {t("promotionScreens.generalConfig")}
             </button>
             <button
               onClick={() => {
@@ -1065,9 +1076,9 @@ function PantallasPromociones() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Pantallas
+              {t("promotionScreens.screens")}
             </button>
-            <button
+            {/* <button
               onClick={() => {
                 if (hasUnsavedChanges) {
                   Swal.fire({
@@ -1096,8 +1107,8 @@ function PantallasPromociones() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Apariencia
-            </button>
+              {t("promotionScreens.appearance")}
+            </button> */}
             {selectedPantalla && (
               <button
                 onClick={() => setActiveTab("pantalla")}
@@ -1118,13 +1129,13 @@ function PantallasPromociones() {
             {activeTab === "general" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Configuración General
+                  {t("promotionScreens.generalConfig")}
                 </h2>
 
                 {/* Idioma */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Idioma
+                    {t("promotionScreens.language")}
                   </label>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center">
@@ -1140,7 +1151,7 @@ function PantallasPromociones() {
                         htmlFor="spanish"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Español
+                        {t("promotionScreens.spanish")}
                       </label>
                     </div>
 
@@ -1157,7 +1168,7 @@ function PantallasPromociones() {
                         htmlFor="english"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Inglés
+                        {t("promotionScreens.english")}
                       </label>
                     </div>
 
@@ -1174,7 +1185,7 @@ function PantallasPromociones() {
                         htmlFor="both"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Español/Inglés
+                        {t("promotionScreens.spanish/english")}
                       </label>
                     </div>
                   </div>
@@ -1183,7 +1194,7 @@ function PantallasPromociones() {
                 {/* Ciudad para el clima */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Seleccionar Ciudad (Clima)
+                    {t("promotionScreens.weatherCity")}
                   </label>
                   <Select
                     options={cityOptions}
@@ -1195,8 +1206,7 @@ function PantallasPromociones() {
                     isClearable={true}
                   />
                   <p className="mt-1 text-xs text-gray-500">
-                    La ciudad seleccionada se utilizará para mostrar la
-                    información del clima en la pantalla.
+                    {t("promotionScreens.weatherCityDescription")}
                   </p>
                 </div>
               </div>
@@ -1206,7 +1216,7 @@ function PantallasPromociones() {
             {activeTab === "screens" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Pantallas de Promociones
+                  {t("promotionScreens.screens")}
                 </h2>
 
                 <div className="space-y-4">
@@ -1219,7 +1229,7 @@ function PantallasPromociones() {
                         <div className="flex-1">
                           <div className="flex items-center mb-2">
                             <span className="text-sm font-medium text-gray-700 mr-2 w-32">
-                              Pantalla Promociones {index + 1}:
+                              {t("promotionScreens.screens")} {index + 1}:
                             </span>
                             <input
                               type="text"
@@ -1245,7 +1255,7 @@ function PantallasPromociones() {
                             onClick={() => handleSelectPantalla(index)}
                             className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                           >
-                            Configurar
+                            {t("promotionScreens.configure")}
                           </button>
                         </div>
                       </div>
@@ -1256,39 +1266,25 @@ function PantallasPromociones() {
                 {pp === 0 && (
                   <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-100">
                     <p className="text-yellow-600">
-                      No hay pantallas de promociones configuradas. Por favor,
-                      contacte al administrador para adquirir licencias de
-                      pantallas.
+                      {t("promotionScreens.noScreens")}
                     </p>
                   </div>
                 )}
                 {/* Instrucciones generales */}
                 <div className="bg-blue-50 p-4 rounded-lg border border-blue-100 mb-4">
                   <h3 className="text-sm font-medium text-blue-800 mb-2">
-                    Instrucciones de uso
+                    {t("promotionScreens.instructions.title")}
                   </h3>
                   <p className="text-sm text-blue-700 mb-2">
-                    Para configurar sus pantallas de promociones, siga estos
-                    pasos:
+                    {t("promotionScreens.instructions.description")}
                   </p>
                   <ol className="list-decimal list-inside text-sm text-blue-700 space-y-1 ml-2">
-                    <li>Asigne nombres descriptivos a cada pantalla</li>
-                    <li>
-                      Haga clic en &quot;Configurar&quot; para personalizar cada
-                      pantalla individualmente
-                    </li>
-                    <li>
-                      Elija un template con 1, 3 o 6 secciones según sus
-                      necesidades
-                    </li>
-                    <li>
-                      Agregue contenido (imágenes o videos) a cada sección
-                    </li>
-                    <li>
-                      Configure el tiempo de visualización y fechas para cada
-                      contenido
-                    </li>
-                    <li>Guarde los cambios cuando haya terminado</li>
+                    <li> {t("promotionScreens.instructions.step1")}</li>
+                    <li> {t("promotionScreens.instructions.step2")}</li>
+                    <li> {t("promotionScreens.instructions.step3")}</li>
+                    <li> {t("promotionScreens.instructions.step4")}</li>
+                    <li> {t("promotionScreens.instructions.step5")}</li>
+                    <li> {t("promotionScreens.instructions.step6")}</li>
                   </ol>
                 </div>
               </div>
@@ -1298,14 +1294,14 @@ function PantallasPromociones() {
             {activeTab === "appearance" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Apariencia
+                  {t("promotionScreens.appearance")}
                 </h2>
 
                 {/* Estilo de Texto */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Estilo de Texto
+                      {t("promotionScreens.textStyle")}
                     </label>
                     <Select
                       options={fontStyleOptions}
@@ -1320,21 +1316,21 @@ function PantallasPromociones() {
                         fontFamily: selectedFontStyle?.value || "Arial",
                       }}
                     >
-                      <p>Vista previa del texto</p>
+                      <p> {t("promotionScreens.exampleText")}</p>
                     </div>
                   </div>
 
                   {/* Color de Texto */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Color de Texto
+                      {t("promotionScreens.textColor")}
                     </label>
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={handleFontColorChange}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Seleccionar Color
+                        {t("promotionScreens.selectColor")}
                       </button>
                       <div
                         className="w-8 h-8 rounded-full border border-gray-300"
@@ -1356,7 +1352,7 @@ function PantallasPromociones() {
                           onClick={handleFontColorChange}
                           className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          Listo
+                          {t("promotionScreens.saveColor")}
                         </button>
                       </div>
                     )}
@@ -1366,7 +1362,7 @@ function PantallasPromociones() {
                 {/* Vista previa */}
                 <div className="mt-4 p-4 border rounded-md">
                   <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    Vista previa
+                    {t("promotionScreens.preview")}
                   </h3>
                   <div
                     className="p-4 rounded-md bg-gray-100"
@@ -1376,12 +1372,9 @@ function PantallasPromociones() {
                     }}
                   >
                     <div className="text-lg font-bold">
-                      Ejemplo de Título en Pantalla
+                      {t("promotionScreens.exampleTitle")}
                     </div>
-                    <p className="mt-2">
-                      Este es un ejemplo de cómo se verá el texto en sus
-                      pantallas de promociones.
-                    </p>
+                    <p className="mt-2">{t("promotionScreens.exampleText")}</p>
                   </div>
                 </div>
               </div>
@@ -1393,7 +1386,8 @@ function PantallasPromociones() {
                 <div className="flex justify-between items-center border-b pb-2">
                   <div className="border-b pb-2">
                     <h2 className="text-lg font-semibold text-gray-900">
-                      Configuración de &quot;{selectedPantalla.nombre}&quot;
+                      {t("promotionScreens.configOf")} &quot;
+                      {selectedPantalla.nombre}&quot;
                     </h2>
                   </div>
                 </div>
@@ -1401,7 +1395,7 @@ function PantallasPromociones() {
                 {/* Selección de Template */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Seleccione un template
+                    {t("promotionScreens.selectTemplate")}
                   </label>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     {templates.map((template) => (
@@ -1420,7 +1414,9 @@ function PantallasPromociones() {
                           </div>
                           <div className="text-xs text-center text-gray-500">
                             {template.sections}{" "}
-                            {template.sections === 1 ? "sección" : "secciones"}
+                            {t("promotionScreens.sectionCount", {
+                              count: template.sections,
+                            })}
                           </div>
                         </div>
                         <div className="p-3">
@@ -1435,8 +1431,8 @@ function PantallasPromociones() {
                             }`}
                           >
                             {selectedPantalla.config.templateId === template.id
-                              ? "Seleccionado"
-                              : "Seleccionar"}
+                              ? t("promotionScreens.selected")
+                              : t("promotionScreens.select")}
                           </div>
                         </div>
                       </div>
@@ -1447,7 +1443,7 @@ function PantallasPromociones() {
                 {/* Administración de Contenido por Sección */}
                 <div className="mt-8">
                   <h3 className="text-md font-medium text-gray-800 mb-3">
-                    Contenido por Sección
+                    {t("promotionScreens.contentPerSection")}
                   </h3>
 
                   <div className="space-y-6">
@@ -1460,13 +1456,13 @@ function PantallasPromociones() {
                           >
                             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                               <h4 className="font-medium text-gray-700">
-                                Sección {sectionId}
+                                {t("promotionScreens.sectionCount")} {sectionId}
                               </h4>
                               <button
                                 onClick={() => handleAddContent(sectionId)}
                                 className="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                               >
-                                Agregar Contenido
+                                {t("promotionScreens.addContent")}
                               </button>
                             </div>
 
@@ -1503,14 +1499,20 @@ function PantallasPromociones() {
                                           <p className="text-sm font-medium text-gray-900 truncate">
                                             {item.name ||
                                               (item.type === "image"
-                                                ? "Imagen"
-                                                : "Video")}
+                                                ? t("promotionScreens.image")
+                                                : t("promotionScreens.video"))}
                                           </p>
                                           <p className="text-xs text-gray-500">
                                             {item.type === "image"
-                                              ? "Imagen"
-                                              : "Video"}{" "}
-                                            • Duración: {item.duration}s
+                                              ? t("promotionScreens.image")
+                                              : t(
+                                                  "promotionScreens.video"
+                                                )}{" "}
+                                            •{" "}
+                                            {t(
+                                              "promotionScreens.durationLabel"
+                                            )}
+                                            : {item.duration}s
                                             {/* Agregar la lógica de estado basada en fecha */}
                                             {item.date &&
                                               (() => {
@@ -1520,29 +1522,29 @@ function PantallasPromociones() {
                                                 const endDate = new Date(
                                                   item.date.endDate
                                                 );
-                                                let statusText = "";
+                                                let statusKey = "";
                                                 let statusClass = "";
 
                                                 if (currentDate < startDate) {
-                                                  statusText =
+                                                  statusKey =
                                                     item.type === "image"
-                                                      ? " (imagen programada)"
-                                                      : " (video programado)";
+                                                      ? "promotionScreens.scheduledImage"
+                                                      : "promotionScreens.scheduledVideo";
                                                   statusClass =
                                                     "text-amber-500"; // Amarillo para contenido programado
                                                 } else if (
                                                   currentDate > endDate
                                                 ) {
-                                                  statusText =
+                                                  statusKey =
                                                     item.type === "image"
-                                                      ? " (imagen finalizada)"
-                                                      : " (video finalizado)";
+                                                      ? "promotionScreens.finishedImage"
+                                                      : "promotionScreens.finishedVideo";
                                                   statusClass = "text-red-600"; // Rojo para contenido finalizado
                                                 } else {
-                                                  statusText =
+                                                  statusKey =
                                                     item.type === "image"
-                                                      ? " (imagen en vivo)"
-                                                      : " (video en vivo)";
+                                                      ? "promotionScreens.liveImage"
+                                                      : "promotionScreens.liveVideo";
                                                   statusClass =
                                                     "text-green-600"; // Verde para contenido en vivo
                                                 }
@@ -1551,13 +1553,13 @@ function PantallasPromociones() {
                                                   <span
                                                     className={`ml-1 font-medium ${statusClass}`}
                                                   >
-                                                    {statusText}
+                                                    {t(statusKey)}
                                                   </span>
                                                 );
                                               })()}
                                           </p>
                                           <p className="text-xs text-gray-500">
-                                            Vigencia:{" "}
+                                            {t("promotionScreens.validity")}:{" "}
                                             {item.date
                                               ? new Date(
                                                   item.date.startDate
@@ -1566,7 +1568,9 @@ function PantallasPromociones() {
                                                 new Date(
                                                   item.date.endDate
                                                 ).toLocaleDateString()
-                                              : "No definida"}
+                                              : t(
+                                                  "promotionScreens.notDefined"
+                                                )}
                                           </p>
                                         </div>
                                       </div>
@@ -1692,10 +1696,10 @@ function PantallasPromociones() {
                                     />
                                   </svg>
                                   <h3 className="mt-2 text-sm font-medium text-gray-900">
-                                    Sin contenido
+                                    {t("promotionScreens.noContent")}
                                   </h3>
                                   <p className="mt-1 text-sm text-gray-500">
-                                    Agregue imágenes o videos a esta sección
+                                    {t("promotionScreens.addContentToSection")}
                                   </p>
                                   <div className="mt-4">
                                     <button
@@ -1716,7 +1720,7 @@ function PantallasPromociones() {
                                           clipRule="evenodd"
                                         />
                                       </svg>
-                                      Agregar Contenido
+                                      {t("promotionScreens.addContent")}
                                     </button>
                                   </div>
                                 </div>
@@ -1737,7 +1741,7 @@ function PantallasPromociones() {
                     }}
                     className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    Cancelar
+                    {t("promotionScreens.cancel")}
                   </button>
                   <button
                     onClick={() => {
@@ -1749,7 +1753,7 @@ function PantallasPromociones() {
                     }}
                     className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   >
-                    Guardar imagenes/videos
+                    {t("promotionScreens.saveVideosImages")}
                   </button>
                 </div>
               </div>
@@ -1773,13 +1777,13 @@ function PantallasPromociones() {
                   }}
                   className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
-                  Restablecer
+                  {t("promotionScreens.resetValues")}
                 </button>
                 <button
                   onClick={handleSaveWithFeedback}
                   className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                 >
-                  Guardar
+                  {t("promotionScreens.saveChanges")}
                 </button>
               </div>
             )}
@@ -1806,7 +1810,7 @@ function PantallasPromociones() {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
-                  ¡Cambios guardados correctamente!
+                  {t("promotionScreens.changesSaved")}
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -1815,7 +1819,10 @@ function PantallasPromociones() {
                     onClick={() => setShowSuccessMessage(false)}
                     className="inline-flex rounded-md p-1.5 text-green-500 hover:bg-green-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                   >
-                    <span className="sr-only">Cerrar</span>
+                    <span className="sr-only">
+                      {" "}
+                      {t("promotionScreens.back")}
+                    </span>
                     <svg
                       className="h-5 w-5"
                       xmlns="http://www.w3.org/2000/svg"
@@ -1843,8 +1850,8 @@ function PantallasPromociones() {
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
                 {editingContent
-                  ? "Editar Contenido"
-                  : "Agregar Contenido a la Sección"}
+                  ? t("promotionScreens.editContent")
+                  : t("promotionScreens.addContent")}
               </h3>
               <button
                 onClick={() => {
@@ -1882,7 +1889,7 @@ function PantallasPromociones() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Tipo de Contenido
+                  {t("promotionScreens.contentType")}
                 </label>
                 <div className="flex space-x-4">
                   <div className="flex items-center">
@@ -1901,7 +1908,7 @@ function PantallasPromociones() {
                       htmlFor="content-type-image"
                       className="ml-2 block text-sm text-gray-700"
                     >
-                      Imagen/GIF
+                      {t("promotionScreens.image")}
                     </label>
                   </div>
                   <div className="flex items-center">
@@ -1920,7 +1927,7 @@ function PantallasPromociones() {
                       htmlFor="content-type-video"
                       className="ml-2 block text-sm text-gray-700"
                     >
-                      Video
+                      {t("promotionScreens.video")}
                     </label>
                   </div>
                 </div>
@@ -1928,7 +1935,7 @@ function PantallasPromociones() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Archivo
+                  {t("promotionScreens.uploadFile")}
                 </label>
                 {newContentItem.url ? (
                   <div className="mb-2 p-3 border rounded-md">
@@ -1955,8 +1962,8 @@ function PantallasPromociones() {
                         <p className="text-sm font-medium truncate">
                           {newContentItem.name ||
                             (newContentItem.type === "image"
-                              ? "Imagen subida"
-                              : "Video subido")}
+                              ? t("promotionScreens.imageUploaded")
+                              : t("promotionScreens.videoUploaded"))}
                         </p>
                         <p className="text-xs text-gray-500">
                           {newContentItem.type === "image" ? "Imagen" : "Video"}
@@ -1987,7 +1994,7 @@ function PantallasPromociones() {
                             htmlFor="file-upload-content"
                             className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                           >
-                            <span>Subir archivo</span>
+                            <span> {t("promotionScreens.uploadFile")}</span>
                             <input
                               id="file-upload-content"
                               name="file-upload-content"
@@ -2001,12 +2008,15 @@ function PantallasPromociones() {
                               }
                             />
                           </label>
-                          <p className="pl-1">o arrastrar y soltar</p>
+                          <p className="pl-1">
+                            {" "}
+                            {t("promotionScreens.dragAndDrop")}
+                          </p>
                         </div>
                         <p className="text-xs text-gray-500">
                           {newContentItem.type === "image"
-                            ? "PNG, JPG, GIF hasta 5MB"
-                            : "MP4, WEBM, OGG hasta 50MB"}
+                            ? t("promotionScreens.imageFormats")
+                            : t("promotionScreens.videoFormats")}
                         </p>
                       </div>
                     </label>
@@ -2024,7 +2034,8 @@ function PantallasPromociones() {
                         ></div>
                       </div>
                       <div className="text-xs text-blue-600 text-center">
-                        Subiendo... {Math.round(uploadProgress)}%
+                        {t("promotionScreens.uploadingContent")}
+                        {Math.round(uploadProgress)}%
                       </div>
                     </div>
                   </div>
@@ -2036,7 +2047,7 @@ function PantallasPromociones() {
                   htmlFor="content-name"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Nombre (opcional)
+                  {t("promotionScreens.contentName")}
                 </label>
                 <input
                   type="text"
@@ -2049,7 +2060,7 @@ function PantallasPromociones() {
                     })
                   }
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Nombre para identificar este contenido"
+                  placeholder={t("promotionScreens.contentNamePlaceholder")}
                 />
               </div>
 
@@ -2058,7 +2069,7 @@ function PantallasPromociones() {
                   htmlFor="content-duration"
                   className="block text-sm font-medium text-gray-700 mb-1"
                 >
-                  Duración (segundos)
+                  {t("promotionScreens.duration")}
                 </label>
                 <input
                   type="number"
@@ -2072,11 +2083,9 @@ function PantallasPromociones() {
                   }
                   min="1"
                   className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Tiempo de visualización en segundos"
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Tiempo que este contenido se mostrará en pantalla antes de
-                  pasar al siguiente.
+                  {t("promotionScreens.durationDescription")}
                 </p>
               </div>
 
@@ -2088,7 +2097,7 @@ function PantallasPromociones() {
                     htmlFor="date-picker"
                     className="block text-sm font-medium text-gray-700"
                   >
-                    Periodo de vigencia
+                    {t("promotionScreens.validityPeriod")}
                   </label>
                 </div>
                 <Datepicker
@@ -2097,11 +2106,10 @@ function PantallasPromociones() {
                   onChange={handleDateValueChange}
                   inputClassName="w-full py-2 bg-gray-50 border border-gray-300 text-gray-900 rounded text-base"
                   displayFormat={"DD/MM/YYYY"}
-                  placeholder="Seleccione fechas de inicio y fin"
+                  placeholder={t("promotionScreens.selectDate")}
                 />
                 <p className="mt-1 text-xs text-gray-500">
-                  Periodo durante el cual este contenido será mostrado. Fuera de
-                  este periodo, el contenido no aparecerá en la pantalla.
+                  {t("promotionScreens.validityDescription")}
                 </p>
               </div>
             </div>
@@ -2124,7 +2132,7 @@ function PantallasPromociones() {
                 }}
                 className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50"
               >
-                Cancelar
+                {t("promotionScreens.cancel")}
               </button>
               <button
                 onClick={handleSaveContent}
@@ -2135,7 +2143,7 @@ function PantallasPromociones() {
                     : "bg-blue-600 hover:bg-blue-700"
                 }`}
               >
-                Guardar
+                {t("promotionScreens.save")}
               </button>
             </div>
           </div>

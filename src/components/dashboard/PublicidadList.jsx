@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import EditarPublicidadModal from "./EditarPublicidadModal";
+import { useTranslation } from "react-i18next";
 
 function PublicidadList({
   publicidades,
@@ -7,8 +8,8 @@ function PublicidadList({
   onDelete,
   onEdit,
   pantallas,
-  t,
 }) {
+  const { t } = useTranslation();
   const [expandedItemId, setExpandedItemId] = useState(null);
   const [activeFilter, setActiveFilter] = useState("todos");
   const [searchTerm, setSearchTerm] = useState("");
@@ -107,7 +108,7 @@ function PublicidadList({
       ) {
         return {
           nombre: pantallas.nombrePantallas[index],
-          ubicacion: `Salón ${index + 1}`,
+          ubicacion: `${t("advertisement.eventRoom")} ${index + 1}`,
         };
       }
     }
@@ -138,7 +139,7 @@ function PublicidadList({
       ) {
         return {
           nombre: pantallas.nombrePantallasDirectorio[index],
-          ubicacion: `Directorio ${index + 1}`,
+          ubicacion: `${t("advertisement.eventDirectory")} ${index + 1}`,
           orientacion: index % 2 === 0 ? "horizontal" : "vertical",
         };
       }
@@ -146,8 +147,11 @@ function PublicidadList({
 
     // Si no pudimos encontrar información detallada, devolver algo genérico pero útil
     return {
-      nombre: `Pantalla ${pantallaId}`,
-      ubicacion: tipo === "salon" ? "Salón" : "Directorio",
+      nombre: `${t("advertisement.list.tableHeaders.name")} ${pantallaId}`,
+      ubicacion:
+        tipo === "salon"
+          ? t("advertisement.eventRoom")
+          : t("advertisement.eventDirectory"),
     };
   };
 
@@ -157,7 +161,9 @@ function PublicidadList({
       <div className="p-4 border-b bg-white">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between space-y-3 md:space-y-0">
           <div className="flex flex-wrap items-center space-x-2">
-            <span className="text-sm font-medium text-gray-700">Filtrar:</span>
+            <span className="text-sm font-medium text-gray-700">
+              {t("advertisement.list.filter")}
+            </span>
             <button
               onClick={() => setActiveFilter("todos")}
               className={`px-3 py-1 text-sm rounded-md ${
@@ -166,7 +172,7 @@ function PublicidadList({
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              Todos
+              {t("advertisement.list.all")}
             </button>
             <button
               onClick={() => setActiveFilter("salon")}
@@ -176,7 +182,7 @@ function PublicidadList({
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              Salón
+              {t("advertisement.eventRoom")}
             </button>
             <button
               onClick={() => setActiveFilter("directorio")}
@@ -186,7 +192,7 @@ function PublicidadList({
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              Directorio
+              {t("advertisement.eventDirectory")}
             </button>
           </div>
 
@@ -210,7 +216,7 @@ function PublicidadList({
             <input
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              placeholder="Buscar publicidad..."
+              placeholder={t("advertisement.list.searchPlaceholder")}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -227,7 +233,9 @@ function PublicidadList({
                 scope="col"
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                <span className="sr-only">Expandir</span>
+                <span className="sr-only">
+                  {t("advertisement.list.tableHeaders.expand")}
+                </span>
               </th>
               <th
                 scope="col"
@@ -235,7 +243,7 @@ function PublicidadList({
                 onClick={() => handleSort("nombre")}
               >
                 <div className="flex items-center">
-                  Nombre
+                  {t("advertisement.list.tableHeaders.name")}
                   {sortField === "nombre" && (
                     <svg
                       className={`ml-1 w-4 h-4 ${
@@ -262,7 +270,7 @@ function PublicidadList({
                 onClick={() => handleSort("tipo")}
               >
                 <div className="flex items-center">
-                  Tipo
+                  {t("advertisement.list.tableHeaders.type")}
                   {sortField === "tipo" && (
                     <svg
                       className={`ml-1 w-4 h-4 ${
@@ -289,7 +297,7 @@ function PublicidadList({
                 onClick={() => handleSort("segundos")}
               >
                 <div className="flex items-center">
-                  Duración
+                  {t("advertisement.list.tableHeaders.duration")}
                   {sortField === "segundos" && (
                     <svg
                       className={`ml-1 w-4 h-4 ${
@@ -316,7 +324,7 @@ function PublicidadList({
                 onClick={() => handleSort("destino")}
               >
                 <div className="flex items-center">
-                  Destino
+                  {t("advertisement.list.tableHeaders.destination")}
                   {sortField === "destino" && (
                     <svg
                       className={`ml-1 w-4 h-4 ${
@@ -343,7 +351,7 @@ function PublicidadList({
                 onClick={() => handleSort("mediaType")}
               >
                 <div className="flex items-center">
-                  Formato
+                  {t("advertisement.list.tableHeaders.format")}
                   {sortField === "mediaType" && (
                     <svg
                       className={`ml-1 w-4 h-4 ${
@@ -368,7 +376,7 @@ function PublicidadList({
                 scope="col"
                 className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider"
               >
-                Acciones
+                {t("advertisement.list.tableHeaders.actions")}
               </th>
             </tr>
           </thead>
@@ -444,12 +452,14 @@ function PublicidadList({
                         </div>
                         <div>
                           {item.nombre ||
-                            `Publicidad ${
-                              item.tipo === "salon" ? "Salón" : "Directorio"
+                            `${t("advertisement.title")} ${
+                              item.tipo === "salon"
+                                ? t("advertisement.eventRoom")
+                                : t("advertisement.eventDirectory")
                             } ${item.id.substr(0, 4)}`}
                           {item.esParteDePlaylist && (
                             <span className="text-xs text-gray-500 ml-2 bg-gray-100 px-1 py-0.5 rounded">
-                              En playlist
+                              {t("advertisement.list.status.inPlaylist")}
                             </span>
                           )}
                         </div>
@@ -463,16 +473,26 @@ function PublicidadList({
                             : "bg-green-100 text-green-800"
                         }`}
                       >
-                        {item.tipo === "salon" ? "Salón" : "Directorio"}
+                        {item.tipo === "salon"
+                          ? t("advertisement.eventRoom")
+                          : t("advertisement.eventDirectory")}
                         {item.tipoPantalla &&
                           item.tipoPantalla.length > 0 &&
                           ` (${item.tipoPantalla[0]})`}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {item.horas > 0 && `${item.horas}h `}
-                      {item.minutos > 0 && `${item.minutos}m `}
-                      {`${item.segundos || 0}s`}
+                      {item.horas > 0 &&
+                        `${item.horas}${t(
+                          "advertisement.list.time.hours"
+                        ).charAt(0)} `}
+                      {item.minutos > 0 &&
+                        `${item.minutos}${t(
+                          "advertisement.list.time.minutes"
+                        ).charAt(0)} `}
+                      {`${item.segundos || 0}${t(
+                        "advertisement.list.time.seconds"
+                      ).charAt(0)}`}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       <span
@@ -485,10 +505,12 @@ function PublicidadList({
                         }`}
                       >
                         {item.destino === "todas"
-                          ? "Todas las pantallas"
+                          ? t("advertisement.list.status.allScreens")
                           : item.destino === "especificas"
-                          ? `${item.pantallasAsignadas?.length || 0} pantallas`
-                          : "Ninguna"}
+                          ? `${item.pantallasAsignadas?.length || 0} ${t(
+                              "advertisement.list.status.specificScreens"
+                            )}`
+                          : t("advertisement.list.status.none")}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -507,8 +529,8 @@ function PublicidadList({
                           <circle cx="4" cy="4" r="3" />
                         </svg>
                         {item.mediaType === "image" || item.imageUrl
-                          ? "Imagen"
-                          : "Video"}
+                          ? t("advertisement.list.format.image")
+                          : t("advertisement.list.format.video")}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
@@ -517,7 +539,7 @@ function PublicidadList({
                         <button
                           className="text-blue-600 hover:text-blue-900"
                           onClick={() => handleEditClick(item)}
-                          title="Editar"
+                          title={t("advertisement.list.actions.edit")}
                         >
                           <svg
                             className="w-5 h-5"
@@ -539,7 +561,7 @@ function PublicidadList({
                         <button
                           className="text-red-600 hover:text-red-900"
                           onClick={() => onDelete(item.id)}
-                          title="Eliminar"
+                          title={t("advertisement.list.actions.delete")}
                         >
                           <svg
                             className="w-5 h-5"
@@ -596,7 +618,9 @@ function PublicidadList({
                                           d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                                         />
                                       </svg>
-                                      <span className="text-sm">Video</span>
+                                      <span className="text-sm">
+                                        {t("advertisement.list.format.video")}
+                                      </span>
                                     </div>
                                   </div>
                                 )}
@@ -608,32 +632,32 @@ function PublicidadList({
                             <div className="bg-white shadow overflow-hidden sm:rounded-lg">
                               <div className="px-4 py-3 sm:px-6 bg-gray-50">
                                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                                  Detalles de la publicidad
+                                  {t("advertisement.list.details.title")}
                                 </h3>
                               </div>
                               <div className="border-t border-gray-200">
                                 <dl>
                                   <div className="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Nombre
+                                      {t("advertisement.list.details.name")}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.nombre ||
-                                        `Publicidad ${
+                                        `${t("advertisement.title")} ${
                                           item.tipo === "salon"
-                                            ? "Salón"
-                                            : "Directorio"
+                                            ? t("advertisement.eventRoom")
+                                            : t("advertisement.eventDirectory")
                                         } ${item.id.substr(0, 4)}`}
                                     </dd>
                                   </div>
                                   <div className="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Tipo
+                                      {t("advertisement.list.details.type")}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.tipo === "salon"
-                                        ? "Salón"
-                                        : "Directorio"}
+                                        ? t("advertisement.eventRoom")
+                                        : t("advertisement.eventDirectory")}
                                       {item.tipoPantalla &&
                                         item.tipoPantalla.length > 0 &&
                                         ` (${item.tipoPantalla[0]})`}
@@ -641,33 +665,47 @@ function PublicidadList({
                                   </div>
                                   <div className="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Duración
+                                      {t("advertisement.list.details.duration")}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.horas > 0 &&
-                                        `${item.horas} horas, `}
+                                        `${item.horas} ${t(
+                                          "advertisement.list.time.hours"
+                                        )}, `}
                                       {item.minutos > 0 &&
-                                        `${item.minutos} minutos, `}
-                                      {`${item.segundos || 0} segundos`}
+                                        `${item.minutos} ${t(
+                                          "advertisement.list.time.minutes"
+                                        )}, `}
+                                      {`${item.segundos || 0} ${t(
+                                        "advertisement.list.time.seconds"
+                                      )}`}
                                     </dd>
                                   </div>
                                   <div className="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Destino
+                                      {t(
+                                        "advertisement.list.details.destination"
+                                      )}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.destino === "todas"
-                                        ? "Todas las pantallas"
+                                        ? t(
+                                            "advertisement.list.details.allScreens"
+                                          )
                                         : item.destino === "especificas"
-                                        ? "Pantallas específicas"
-                                        : "Ninguna (parte de playlist)"}
+                                        ? t(
+                                            "advertisement.list.details.specificScreens"
+                                          )
+                                        : t("advertisement.list.details.none")}
 
                                       {item.destino === "especificas" &&
                                         item.pantallasAsignadas &&
                                         item.pantallasAsignadas.length > 0 && (
                                           <div className="mt-1">
                                             <span className="text-xs font-medium text-gray-500">
-                                              Pantallas asignadas:
+                                              {t(
+                                                "advertisement.list.details.assignedScreens"
+                                              )}
                                             </span>
                                             <div className="mt-1 space-y-2">
                                               {item.pantallasAsignadas.map(
@@ -691,13 +729,21 @@ function PublicidadList({
                                                         </span>
                                                         <p className="text-gray-500 text-xs">
                                                           {pantallaInfo.ubicacion &&
-                                                            `Ubicación: ${pantallaInfo.ubicacion}`}
+                                                            `${t(
+                                                              "advertisement.list.details.location"
+                                                            )} ${
+                                                              pantallaInfo.ubicacion
+                                                            }`}
                                                           {pantallaInfo.orientacion &&
                                                             ` • ${
                                                               pantallaInfo.orientacion ===
                                                               "horizontal"
-                                                                ? "Horizontal"
-                                                                : "Vertical"
+                                                                ? t(
+                                                                    "advertisement.list.orientation.horizontal"
+                                                                  )
+                                                                : t(
+                                                                    "advertisement.list.orientation.vertical"
+                                                                  )
                                                             }`}
                                                         </p>
                                                       </div>
@@ -712,18 +758,20 @@ function PublicidadList({
                                   </div>
                                   <div className="bg-white px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Formato
+                                      {t("advertisement.list.details.format")}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.mediaType === "image" ||
                                       item.imageUrl
-                                        ? "Imagen"
-                                        : "Video"}
+                                        ? t("advertisement.list.format.image")
+                                        : t("advertisement.list.format.video")}
                                     </dd>
                                   </div>
                                   <div className="bg-gray-50 px-4 py-3 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                                     <dt className="text-sm font-medium text-gray-500">
-                                      Fecha de creación
+                                      {t(
+                                        "advertisement.list.details.creationDate"
+                                      )}
                                     </dt>
                                     <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
                                       {item.fechaDeSubida
@@ -735,22 +783,6 @@ function PublicidadList({
                                   </div>
                                 </dl>
                               </div>
-                              {/* <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                                <button
-                                  type="button"
-                                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-yellow-600 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 mr-2"
-                                  onClick={() => handleEditClick(item)}
-                                >
-                                  Editar
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => onDelete(item.id)}
-                                  className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                                >
-                                  Eliminar
-                                </button>
-                              </div> */}
                             </div>
                           </div>
                         </div>
@@ -781,11 +813,10 @@ function PublicidadList({
                       ></path>
                     </svg>
                     <h3 className="mt-2 text-sm font-medium text-gray-900">
-                      No se encontraron resultados
+                      {t("advertisement.list.noResults")}
                     </h3>
                     <p className="mt-1 text-sm text-gray-500">
-                      No hay publicidades que coincidan con los criterios
-                      seleccionados.
+                      {t("advertisement.list.noResultsText")}
                     </p>
                   </div>
                 </td>
@@ -800,10 +831,11 @@ function PublicidadList({
         <div className="flex items-center justify-between flex-wrap sm:flex-nowrap">
           <div className="w-full sm:w-auto">
             <p className="text-sm text-gray-700">
-              Mostrando{" "}
-              <span className="font-medium">{filteredItems.length}</span> de{" "}
+              {t("advertisement.list.showing")}{" "}
+              <span className="font-medium">{filteredItems.length}</span>{" "}
+              {t("advertisement.list.of")}{" "}
               <span className="font-medium">{publicidades.length}</span>{" "}
-              publicidades
+              {t("advertisement.list.advertisements")}
             </p>
           </div>
         </div>
@@ -816,7 +848,6 @@ function PublicidadList({
         publicidad={publicidadEnEdicion}
         pantallas={pantallas}
         onSave={handleSaveEdit}
-        t={t}
       />
     </>
   );

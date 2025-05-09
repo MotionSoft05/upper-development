@@ -276,7 +276,7 @@ function Sidebar(props) {
                 >
                   <FontAwesomeIcon icon={faReceipt} className="w-5 h-5" />
                 </span>
-                <span className="ml-3">Información de Tarifas</span>
+                <span className="ml-3">{t("sidebar.rate")}</span>
                 {isActive(props.showInformacionTarifa) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon
@@ -385,7 +385,7 @@ function Sidebar(props) {
                 >
                   <FontAwesomeIcon icon={faImages} className="w-5 h-5" />
                 </span>
-                <span className="ml-3">Pantallas Promociones</span>
+                <span className="ml-3">{t("sidebar.promotion")}</span>
                 {isActive(props.showPantallaPromociones) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon
@@ -417,7 +417,7 @@ function Sidebar(props) {
                 >
                   <FontAwesomeIcon icon={faTags} className="w-5 h-5" />
                 </span>
-                <span className="ml-3">Pantallas Tarifario</span>
+                <span className="ml-3">{t("sidebar.rateScreen")}</span>
                 {isActive(props.showPantallaTarifario) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon

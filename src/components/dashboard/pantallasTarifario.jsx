@@ -1160,11 +1160,10 @@ function PantallasTarifario() {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
-            Pantallas de Tarifario
+            {t("rateScreens.title")}
           </h1>
           <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
-            Configure las opciones de visualización para sus pantallas de
-            tarifario
+            {t("rateScreens.description")}
           </p>
         </div>
 
@@ -1210,7 +1209,7 @@ function PantallasTarifario() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Configuración General
+              {t("rateScreens.generalConfig")}
             </button>
 
             <button
@@ -1221,7 +1220,7 @@ function PantallasTarifario() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Pantallas
+              {t("rateScreens.screens")}
             </button>
             <button
               onClick={() => setActiveTab("appearance")}
@@ -1231,7 +1230,7 @@ function PantallasTarifario() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Apariencia
+              {t("rateScreens.appearance")}
             </button>
             <button
               onClick={() => setActiveTab("publicidad")}
@@ -1241,7 +1240,7 @@ function PantallasTarifario() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              Publicidad
+              {t("rateScreens.publicity")}
             </button>
           </div>
 
@@ -1251,13 +1250,13 @@ function PantallasTarifario() {
             {activeTab === "general" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Configuración General
+                  {t("rateScreens.generalConfig")}
                 </h2>
 
                 {/* Logo */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Logo
+                    {t("rateScreens.logo")}
                   </label>
                   <div className="mt-1">
                     <label className="w-full flex flex-col justify-center items-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md cursor-pointer hover:border-gray-400">
@@ -1288,7 +1287,9 @@ function PantallasTarifario() {
                         )}
                         <div className="flex justify-center text-sm text-gray-600">
                           <span>
-                            {selectedLogo ? "Cambiar logo" : "Subir logo"}
+                            {selectedLogo
+                              ? t("rateScreens.changeLogo")
+                              : t("rateScreens.uploadLogo")}
                           </span>
                           <input
                             id="file-upload-logo"
@@ -1299,7 +1300,7 @@ function PantallasTarifario() {
                           />
                         </div>
                         <p className="text-xs text-gray-500">
-                          PNG, JPG, GIF hasta 2MB
+                          {t("rateScreens.logoDescription")}
                         </p>
                       </div>
                     </label>
@@ -1309,7 +1310,7 @@ function PantallasTarifario() {
                 {/* Ciudad */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Seleccionar Ciudad
+                    {t("rateScreens.weatherCity")}
                   </label>
                   <Select
                     options={cityOptions}
@@ -1327,7 +1328,7 @@ function PantallasTarifario() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Orientación de la Pantalla
+                    {t("rateScreens.orientation")}
                   </label>
                   <div className="mt-2 space-y-2 sm:space-y-0 sm:flex sm:items-center sm:space-x-6">
                     <div className="flex items-center">
@@ -1344,7 +1345,7 @@ function PantallasTarifario() {
                         htmlFor="horizontal"
                         className="ml-3 block text-sm font-medium text-gray-700"
                       >
-                        Horizontal
+                        {t("rateScreens.landscape")}
                       </label>
                     </div>
                     <div className="flex items-center">
@@ -1361,7 +1362,7 @@ function PantallasTarifario() {
                         htmlFor="vertical"
                         className="ml-3 block text-sm font-medium text-gray-700"
                       >
-                        Vertical
+                        {t("rateScreens.portrait")}
                       </label>
                     </div>
                   </div>
@@ -1370,7 +1371,7 @@ function PantallasTarifario() {
                   {orientacion === "vertical" && (
                     <div className="mt-4 border-t pt-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Dirección de Rotación
+                        {t("rateScreens.rotationDirection")}
                       </label>
                       <div className="flex space-x-4">
                         <div className="flex items-center">
@@ -1389,7 +1390,7 @@ function PantallasTarifario() {
                             htmlFor="rotacion-derecha"
                             className="ml-2 block text-sm font-medium text-gray-700"
                           >
-                            90° (Derecha)
+                            90° {t("rateScreens.right")}
                           </label>
                         </div>
                         <div className="flex items-center">
@@ -1408,7 +1409,7 @@ function PantallasTarifario() {
                             htmlFor="rotacion-izquierda"
                             className="ml-2 block text-sm font-medium text-gray-700"
                           >
-                            -90° (Izquierda)
+                            -90° {t("rateScreens.left")}
                           </label>
                         </div>
                       </div>
@@ -1419,7 +1420,7 @@ function PantallasTarifario() {
                 {/* Idioma */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Idioma de la Pantalla
+                    {t("rateScreens.language")}
                   </label>
                   <div className="flex flex-wrap gap-4">
                     <div className="flex items-center">
@@ -1435,7 +1436,7 @@ function PantallasTarifario() {
                         htmlFor="spanish"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Español
+                        {t("rateScreens.spanish")}
                       </label>
                     </div>
 
@@ -1452,7 +1453,7 @@ function PantallasTarifario() {
                         htmlFor="english"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Inglés
+                        {t("rateScreens.english")}
                       </label>
                     </div>
 
@@ -1469,7 +1470,7 @@ function PantallasTarifario() {
                         htmlFor="both"
                         className="ml-2 block text-sm text-gray-700"
                       >
-                        Español/Inglés
+                        {t("rateScreens.spanish/english")}
                       </label>
                     </div>
                   </div>
@@ -1481,7 +1482,7 @@ function PantallasTarifario() {
             {activeTab === "screens" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Pantallas de Tarifario
+                  {t("rateScreens.screens")}
                 </h2>
 
                 <div className="space-y-4">
@@ -1494,7 +1495,8 @@ function PantallasTarifario() {
                         <div className="flex-1">
                           <div className="flex items-center mb-2">
                             <span className="text-sm font-medium text-gray-700 mr-2 w-32">
-                              Pantalla Tarifario {index + 1}:
+                              {t("rateScreens.screens")} {""}
+                              {index + 1}:
                             </span>
                             <input
                               type="text"
@@ -1533,9 +1535,7 @@ function PantallasTarifario() {
                 {pt === 0 && (
                   <div className="text-center p-4 bg-yellow-50 rounded-lg border border-yellow-100">
                     <p className="text-yellow-600">
-                      No hay pantallas de tarifario configuradas. Por favor,
-                      contacte al administrador para adquirir licencias de
-                      pantallas.
+                      {t("rateScreens.noScreens")}
                     </p>
                   </div>
                 )}
@@ -1546,13 +1546,13 @@ function PantallasTarifario() {
             {activeTab === "appearance" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Apariencia
+                  {t("rateScreens.appearance")}
                 </h2>
 
                 {/* Selección de Template */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Seleccionar Template
+                    {t("rateScreens.selectTemplate")}
                   </label>
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {templates.map((template) => (
@@ -1628,7 +1628,7 @@ function PantallasTarifario() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Estilo de Texto
+                      {t("rateScreens.textStyle")}
                     </label>
                     <Select
                       options={fontStyleOptions}
@@ -1643,20 +1643,20 @@ function PantallasTarifario() {
                         fontFamily: selectedFontStyle?.value || "Arial",
                       }}
                     >
-                      <p>Vista previa del texto</p>
+                      <p> {t("rateScreens.exampleText")}</p>
                     </div>
                   </div>
                   {/* Color de Texto */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Color de Texto
+                      {t("rateScreens.textColor")}
                     </label>
                     <div className="flex items-center space-x-3">
                       <button
                         onClick={handleFontColorChange}
                         className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Seleccionar Color
+                        {t("rateScreens.selectColor")}
                       </button>
                       <div
                         className="w-8 h-8 rounded-full border border-gray-300"
@@ -1678,7 +1678,7 @@ function PantallasTarifario() {
                           onClick={handleFontColorChange}
                           className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                         >
-                          Listo
+                          {t("rateScreens.done")}
                         </button>
                       </div>
                     )}
@@ -1688,14 +1688,14 @@ function PantallasTarifario() {
                 {/* Color de Plantilla */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Color de Plantilla
+                    {t("rateScreens.templateColor")}
                   </label>
                   <div className="flex items-center space-x-3">
                     <button
                       onClick={handleTemplateColorChange}
                       className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
-                      Seleccionar Color
+                      {t("rateScreens.selectColor")}
                     </button>
                     <div
                       className="w-8 h-8 rounded-full border border-gray-300"
@@ -1715,7 +1715,7 @@ function PantallasTarifario() {
                         onClick={handleTemplateColorChange}
                         className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                       >
-                        Listo
+                        {t("rateScreens.done")}
                       </button>
                     </div>
                   )}
@@ -1726,20 +1726,20 @@ function PantallasTarifario() {
             {activeTab === "publicidad" && (
               <div className="space-y-6">
                 <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  Publicidad
+                  {t("rateScreens.publicity")}
                 </h2>
 
                 {/* Agregar nueva publicidad */}
                 <div className="bg-white p-4 rounded-lg border border-gray-200 mb-6">
                   <h3 className="text-md font-medium text-gray-800 mb-4">
-                    Agregar nueva imagen de publicidad
+                    {t("rateScreens.addNewPublicity")}
                   </h3>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Selector de imagen */}
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Seleccionar imagen
+                        {t("rateScreens.selectImage")}
                       </label>
                       {previewImagen ? (
                         <div className="mb-4">
@@ -1789,9 +1789,9 @@ function PantallasTarifario() {
                               />
                             </svg>
                             <span className="font-medium text-gray-600">
-                              Seleccionar imagen
+                              {t("rateScreens.uploadImage")}
                               <span className="text-blue-600 underline ml-1">
-                                Explorar
+                                {t("rateScreens.browse")}
                               </span>
                             </span>
                           </span>
@@ -1804,21 +1804,21 @@ function PantallasTarifario() {
                         </label>
                       )}
                       <p className="mt-1 text-xs text-gray-500">
-                        JPG, PNG o GIF. Máx. 2MB.
+                        {t("rateScreens.imageDescription")}
                       </p>
                     </div>
 
                     {/* Tiempo de visualización */}
-                    {/* Tiempo de visualización */}
+
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Tiempo de visualización
+                        {t("rateScreens.displayTime")}
                       </label>
                       <div className="grid grid-cols-3 gap-4">
                         {["horas", "minutos", "segundos"].map((unit) => (
                           <div key={unit} className="flex flex-col">
                             <label className="text-sm text-gray-600 mb-1 capitalize">
-                              {unit}
+                              {t(`rateScreens.${unit}`)}
                             </label>
                             <input
                               type="number"
@@ -1833,12 +1833,12 @@ function PantallasTarifario() {
                         ))}
                       </div>
                       <p className="mt-1 text-xs text-gray-500">
-                        Tiempo recomendado: 10-15 segundos por imagen
+                        {t("rateScreens.recommendedTime")}
                       </p>
                       {/* Selector de orientación para la publicidad */}
                       <div className="mt-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Orientación de la pantalla
+                          {t("rateScreens.screenOrientation")}
                         </label>
                         <div className="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-2">
                           <div
@@ -1891,10 +1891,10 @@ function PantallasTarifario() {
                               </div>
                               <div className="ml-3">
                                 <h4 className="text-sm font-medium text-gray-900">
-                                  Horizontal
+                                  {t("rateScreens.landscape")}
                                 </h4>
                                 <p className="text-xs text-gray-500">
-                                  Para pantallas en formato normal
+                                  {t("rateScreens.landscapeDescription")}
                                 </p>
                               </div>
                             </div>
@@ -1959,10 +1959,10 @@ function PantallasTarifario() {
                               </div>
                               <div className="ml-3">
                                 <h4 className="text-sm font-medium text-gray-900">
-                                  Vertical
+                                  {t("rateScreens.portrait")}
                                 </h4>
                                 <p className="text-xs text-gray-500">
-                                  Para pantallas rotadas 90 grados
+                                  {t("rateScreens.portraitDescription")}
                                 </p>
                               </div>
                             </div>
@@ -2015,10 +2015,10 @@ function PantallasTarifario() {
                               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                             ></path>
                           </svg>
-                          Agregando...
+                          {t("rateScreens.loading")}
                         </>
                       ) : (
-                        "Agregar publicidad"
+                        t("rateScreens.addAdvertisement")
                       )}
                     </button>
                   </div>
@@ -2027,7 +2027,8 @@ function PantallasTarifario() {
                 {/* Lista de publicidad actual */}
                 <div>
                   <h3 className="text-md font-medium text-gray-800 mb-4">
-                    Publicidad actual ({publicidadItems.length}/10)
+                    {t("rateScreens.currentAdvertisement")}(
+                    {publicidadItems.length}/10)
                   </h3>
 
                   {publicidadItems.length === 0 ? (
@@ -2047,10 +2048,10 @@ function PantallasTarifario() {
                         />
                       </svg>
                       <h3 className="mt-2 text-sm font-medium text-gray-900">
-                        No hay publicidad
+                        {t("rateScreens.noAdvertisement")}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500">
-                        Comienza agregando una imagen de publicidad
+                        {t("rateScreens.addAdvertisement")}
                       </p>
                     </div>
                   ) : (
@@ -2062,7 +2063,8 @@ function PantallasTarifario() {
                         >
                           <div className="flex justify-between items-start mb-2">
                             <h4 className="text-sm font-medium text-gray-700">
-                              Publicidad {index + 1}
+                              {t("rateScreens.advertisement")} {""}
+                              {index + 1}
                             </h4>
                             <button
                               onClick={() => eliminarPublicidad(index)}
@@ -2092,15 +2094,15 @@ function PantallasTarifario() {
                           <div className="text-xs text-gray-600 flex justify-between">
                             <div>
                               <span>
-                                Tiempo:{" "}
+                                {t("rateScreens.time")}{" "}
                                 {item.horas > 0 ? `${item.horas}h ` : ""}
                                 {item.minutos > 0 ? `${item.minutos}m ` : ""}
                                 {item.segundos}s
                               </span>
                               <span className="ml-2 bg-gray-200 px-2 py-1 rounded-full">
                                 {item.orientacion === "vertical"
-                                  ? "Vertical"
-                                  : "Horizontal"}
+                                  ? t("rateScreens.portrait")
+                                  : t("rateScreens.landscape")}
                               </span>
                             </div>
                             <span>
@@ -2110,7 +2112,7 @@ function PantallasTarifario() {
                                       ? item.fechaCreacion.seconds * 1000
                                       : item.fechaCreacion
                                   ).toLocaleDateString()
-                                : "Fecha desconocida"}
+                                : t("rateScreens.unknownDate")}
                             </span>
                           </div>
                         </div>
@@ -2138,25 +2140,14 @@ function PantallasTarifario() {
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-blue-800">
-                        Información sobre publicidad
+                        {t("rateScreens.publicityNote")}
                       </h3>
                       <div className="mt-2 text-sm text-blue-700">
                         <ul className="list-disc pl-5 space-y-1">
-                          <li>
-                            Se pueden agregar hasta 10 imágenes de publicidad.
-                          </li>
-                          <li>
-                            Las imágenes se mostrarán en la parte inferior de la
-                            pantalla de tarifario.
-                          </li>
-                          <li>
-                            El tiempo mínimo de visualización es de 10 segundos
-                            por imagen.
-                          </li>
-                          <li>
-                            Se recomienda usar imágenes con buena resolución y
-                            tamaño horizontal.
-                          </li>
+                          <li>{t("rateScreens.adImageLimit")}</li>
+                          <li>{t("rateScreens.imageDisplayLocation")}</li>
+                          <li>{t("rateScreens.minimumDisplayTime")}</li>
+                          <li>{t("rateScreens.imageRecommendation")}</li>
                         </ul>
                       </div>
                     </div>
@@ -2185,13 +2176,13 @@ function PantallasTarifario() {
                 }}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
               >
-                Restablecer
+                {t("rateScreens.reset")}
               </button>
               <button
                 onClick={handleSaveWithFeedback}
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Guardar
+                {t("rateScreens.save")}
               </button>
             </div>
           </div>
@@ -2217,7 +2208,7 @@ function PantallasTarifario() {
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-green-800">
-                  ¡Cambios guardados correctamente!
+                  {t("rateScreens.successMessage")}
                 </p>
               </div>
               <div className="ml-auto pl-3">
@@ -2253,7 +2244,7 @@ function PantallasTarifario() {
           <div className="bg-white rounded-lg p-6 max-w-4xl w-full">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">
-                Vista previa del Template
+                {t("rateScreens.templatePreview")}
               </h3>
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -2284,7 +2275,7 @@ function PantallasTarifario() {
                 onClick={() => setIsModalOpen(false)}
                 className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Cerrar
+                {t("rateScreens.close")}
               </button>
             </div>
           </div>

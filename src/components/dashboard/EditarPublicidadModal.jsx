@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 function EditarPublicidadModal({
   isOpen,
@@ -6,8 +7,9 @@ function EditarPublicidadModal({
   publicidad,
   pantallas,
   onSave,
-  t,
 }) {
+  const { t } = useTranslation();
+
   // Estados para los campos editables
   const [nombre, setNombre] = useState("");
   const [tiempoVisualizacion, setTiempoVisualizacion] = useState({
@@ -74,7 +76,7 @@ function EditarPublicidadModal({
           id: `salon${index + 1}`,
           nombre: nombre,
           tipo: "salon",
-          ubicacion: `Salón ${index + 1}`,
+          ubicacion: `${t("advertisement.modal.location")} ${index + 1}`,
           activa: true,
         }));
       } else if (publicidad.tipo === "directorio") {
@@ -83,7 +85,7 @@ function EditarPublicidadModal({
           nombre: nombre,
           tipo: "directorio",
           orientacion: index % 2 === 0 ? "horizontal" : "vertical",
-          ubicacion: `Ubicación ${index + 1}`,
+          ubicacion: `${t("advertisement.modal.location")} ${index + 1}`,
           activa: true,
         }));
 
@@ -97,7 +99,7 @@ function EditarPublicidadModal({
       }
     }
     return [];
-  }, [publicidad, orientacionPantalla, pantallasSalon, pantallasDirectorio]);
+  }, [publicidad, orientacionPantalla, pantallasSalon, pantallasDirectorio, t]);
 
   const handleTimeChange = (timeUnit, value) => {
     setTiempoVisualizacion((prev) => ({
@@ -121,7 +123,7 @@ function EditarPublicidadModal({
 
     // Validaciones
     if (!nombre.trim()) {
-      alert("El nombre es obligatorio");
+      alert(t("advertisement.modal.nameRequired"));
       setIsLoading(false);
       return;
     }
@@ -131,13 +133,13 @@ function EditarPublicidadModal({
       !tiempoVisualizacion.minutos &&
       tiempoVisualizacion.segundos < 10
     ) {
-      alert("El tiempo de visualización debe ser al menos de 10 segundos");
+      alert(t("advertisement.modal.minimumTimeRequired"));
       setIsLoading(false);
       return;
     }
 
     if (publicidad.tipo === "directorio" && !orientacionPantalla) {
-      alert("Debe seleccionar una orientación para pantalla de directorio");
+      alert(t("advertisement.modal.orientationRequired"));
       setIsLoading(false);
       return;
     }
@@ -146,9 +148,7 @@ function EditarPublicidadModal({
       destinoPublicidad === "especificas" &&
       pantallasSeleccionadas.length === 0
     ) {
-      alert(
-        "Debe seleccionar al menos una pantalla cuando el destino es específico"
-      );
+      alert(t("advertisement.modal.screensRequired"));
       setIsLoading(false);
       return;
     }
@@ -183,7 +183,7 @@ function EditarPublicidadModal({
         {/* Cabecera del modal */}
         <div className="border-b px-4 py-3 flex items-center justify-between bg-gray-50 rounded-t-lg">
           <h3 className="text-lg font-medium text-gray-900">
-            Editar Publicidad
+            {t("advertisement.modal.title")}
           </h3>
           <button
             type="button"
@@ -240,7 +240,9 @@ function EditarPublicidadModal({
                       d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                     />
                   </svg>
-                  <span className="text-sm">Video</span>
+                  <span className="text-sm">
+                    {t("advertisement.list.format.video")}
+                  </span>
                 </div>
               </div>
             )}
@@ -254,7 +256,7 @@ function EditarPublicidadModal({
                 htmlFor="nombre"
                 className="block text-sm font-medium text-gray-700"
               >
-                Nombre
+                {t("advertisement.form.name")}
               </label>
               <div className="mt-1">
                 <input
@@ -262,7 +264,7 @@ function EditarPublicidadModal({
                   name="nombre"
                   id="nombre"
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Nombre de la publicidad"
+                  placeholder={t("advertisement.form.namePlaceholder")}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                 />
@@ -272,7 +274,7 @@ function EditarPublicidadModal({
             {/* Tiempo de visualización */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tiempo de visualización
+                {t("advertisement.modal.displayTime")}
               </label>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -280,7 +282,7 @@ function EditarPublicidadModal({
                     htmlFor="horas"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Horas
+                    {t("advertisement.form.hours")}
                   </label>
                   <select
                     id="horas"
@@ -301,7 +303,7 @@ function EditarPublicidadModal({
                     htmlFor="minutos"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Minutos
+                    {t("advertisement.form.minutes")}
                   </label>
                   <select
                     id="minutos"
@@ -324,7 +326,7 @@ function EditarPublicidadModal({
                     htmlFor="segundos"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Segundos
+                    {t("advertisement.form.seconds")}
                   </label>
                   <select
                     id="segundos"
@@ -344,8 +346,7 @@ function EditarPublicidadModal({
                 </div>
               </div>
               <p className="mt-2 text-xs text-gray-500">
-                Tiempo que se mostrará este contenido antes de pasar al
-                siguiente. Mínimo recomendado: 10 segundos.
+                {t("advertisement.form.displayTimeDescription")}
               </p>
             </div>
 
@@ -353,7 +354,7 @@ function EditarPublicidadModal({
             {publicidad && publicidad.tipo === "directorio" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Orientación de pantalla
+                  {t("advertisement.form.screenOrientation")}
                 </label>
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                   <div
@@ -404,10 +405,10 @@ function EditarPublicidadModal({
                       </div>
                       <div className="ml-3">
                         <h4 className="text-sm font-medium text-gray-900">
-                          Horizontal
+                          {t("advertisement.form.horizontal")}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Pantalla en orientación normal
+                          {t("advertisement.form.horizontalDescription")}
                         </p>
                       </div>
                     </div>
@@ -461,10 +462,10 @@ function EditarPublicidadModal({
                       </div>
                       <div className="ml-3">
                         <h4 className="text-sm font-medium text-gray-900">
-                          Vertical
+                          {t("advertisement.form.vertical")}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Pantalla rotada 90 grados
+                          {t("advertisement.form.verticalDescription")}
                         </p>
                       </div>
                     </div>
@@ -476,7 +477,7 @@ function EditarPublicidadModal({
             {/* Destino de la publicidad */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Destino de la publicidad
+                {t("advertisement.form.advertisingDestination")}
               </label>
               <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 gap-x-4">
                 <div
@@ -527,11 +528,13 @@ function EditarPublicidadModal({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Todas las pantallas
+                        {t("advertisement.form.allScreens")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Se mostrará en todas las pantallas de{" "}
-                        {publicidad?.tipo === "salon" ? "salón" : "directorio"}
+                        {t("advertisement.form.allScreensDescription")}{" "}
+                        {publicidad?.tipo === "salon"
+                          ? t("advertisement.form.salon")
+                          : t("advertisement.form.directorio")}
                       </p>
                     </div>
                   </div>
@@ -585,10 +588,10 @@ function EditarPublicidadModal({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Pantallas específicas
+                        {t("advertisement.form.specificScreens")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Seleccione las pantallas donde se mostrará
+                        {t("advertisement.form.specificScreensDescription")}
                       </p>
                     </div>
                   </div>
@@ -600,14 +603,13 @@ function EditarPublicidadModal({
             {destinoPublicidad === "especificas" && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Seleccionar pantallas
+                  {t("advertisement.form.selectScreens")}
                 </label>
                 {pantallasFiltradas.length > 0 ? (
                   <div className="border rounded-md overflow-hidden">
                     <div className="bg-gray-50 px-4 py-2 border-b">
                       <span className="text-xs font-medium text-gray-500">
-                        Seleccione las pantallas donde desea mostrar esta
-                        publicidad
+                        {t("advertisement.modal.selectScreensInstruction")}
                       </span>
                     </div>
                     <div className="max-h-60 overflow-y-auto p-4">
@@ -637,12 +639,18 @@ function EditarPublicidadModal({
                               </label>
                               <p className="text-gray-500">
                                 {pantalla.ubicacion &&
-                                  `Ubicación: ${pantalla.ubicacion}`}
+                                  `${t("advertisement.modal.location")} ${
+                                    pantalla.ubicacion
+                                  }`}
                                 {pantalla.orientacion &&
                                   ` • ${
                                     pantalla.orientacion === "horizontal"
-                                      ? "Horizontal"
-                                      : "Vertical"
+                                      ? t(
+                                          "advertisement.list.orientation.horizontal"
+                                        )
+                                      : t(
+                                          "advertisement.list.orientation.vertical"
+                                        )
                                   }`}
                               </p>
                             </div>
@@ -653,8 +661,9 @@ function EditarPublicidadModal({
                     {pantallasFiltradas.length > 5 && (
                       <div className="bg-gray-50 px-4 py-2 border-t">
                         <span className="text-xs text-gray-500">
-                          Se han encontrado {pantallasFiltradas.length}{" "}
-                          pantallas compatibles
+                          {t("advertisement.form.foundScreens", {
+                            count: pantallasFiltradas.length,
+                          })}
                         </span>
                       </div>
                     )}
@@ -678,12 +687,19 @@ function EditarPublicidadModal({
                       </div>
                       <div className="ml-3">
                         <h3 className="text-sm font-medium text-yellow-800">
-                          No hay pantallas compatibles
+                          {t("advertisement.form.noCompatibleScreens")}
                         </h3>
                         <div className="mt-2 text-sm text-yellow-700">
                           <p>
-                            No se han encontrado pantallas del tipo
-                            seleccionado.
+                            {t(
+                              "advertisement.form.noCompatibleScreensDescription",
+                              {
+                                type:
+                                  publicidad?.tipo === "salon"
+                                    ? t("advertisement.form.salon")
+                                    : t("advertisement.form.directorio"),
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
@@ -702,7 +718,7 @@ function EditarPublicidadModal({
             onClick={onClose}
             className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
           >
-            Cancelar
+            {t("advertisement.modal.cancel")}
           </button>
           <button
             type="button"
@@ -732,10 +748,10 @@ function EditarPublicidadModal({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                Guardando...
+                {t("advertisement.modal.saving")}
               </>
             ) : (
-              "Guardar cambios"
+              t("advertisement.modal.saveChanges")
             )}
           </button>
         </div>
