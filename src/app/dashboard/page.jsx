@@ -18,6 +18,10 @@ import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
 import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
 import PantallasPromociones from "@/components/dashboard/PantallasPromociones";
 
+// Nuevos imports para Android TV
+import DevicesList from "@/components/DevicesList";
+import DeviceLinker from "@/components/DeviceLinker";
+
 import React, { useState, useEffect } from "react";
 
 import { getAuth, onAuthStateChanged } from "firebase/auth";
@@ -55,6 +59,10 @@ function DashBoard() {
   // Estados para componentes de tarifario
   const [showPantallaTarifario, setShowPantallaTarifario] = useState(false);
   const [showInformacionTarifa, setShowInformacionTarifa] = useState(false);
+
+  // NUEVOS ESTADOS para Android TV
+  const [showDevicesList, setShowDevicesList] = useState(false);
+  const [showDeviceLinker, setShowDeviceLinker] = useState(false);
 
   // Estado para controlar la visibilidad del sidebar en dispositivos móviles
   const [sidebarVisible, setSidebarVisible] = useState(false);
@@ -128,11 +136,16 @@ function DashBoard() {
           showSoporte={showSoporte}
           setShowMonitorScreen={setShowMonitorScreen}
           showMonitorScreen={showMonitorScreen}
-          // Añadir propiedades para componentes de tarifario
+          // Propiedades para componentes de tarifario
           setShowPantallaTarifario={setShowPantallaTarifario}
           showPantallaTarifario={showPantallaTarifario}
           setShowInformacionTarifa={setShowInformacionTarifa}
           showInformacionTarifa={showInformacionTarifa}
+          // NUEVAS PROPIEDADES para Android TV
+          setShowDevicesList={setShowDevicesList}
+          showDevicesList={showDevicesList}
+          setShowDeviceLinker={setShowDeviceLinker}
+          showDeviceLinker={showDeviceLinker}
           toggleSidebar={toggleSidebar}
         />
       </aside>
@@ -148,6 +161,7 @@ function DashBoard() {
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Ediciondeempresa />}
           {showMonitorScreen && <MonitorScreen userEmail={userEmail} />}
+
           {/* GESTION DE USUARIOS */}
           {showUserAdmin && <UserAdmin />}
           {showAltaEvento && (
@@ -157,6 +171,7 @@ function DashBoard() {
             />
           )}
           {showConsultaEvento && <ConsultaModEvento />}
+
           {/* CONFIGURACION DE PANTALLAS */}
           {showPantallaSalon && <PantallasSalon />}
           {showPantallaDirectorio && <PantallasDirectorio />}
@@ -167,6 +182,20 @@ function DashBoard() {
           {showPantallaTarifario && <PantallasTarifario />}
           {showInformacionTarifa && <EditInformacionTarifa />}
           {showPublicidad && <Publicidad />}
+
+          {/* NUEVAS SECCIONES - Android TV Devices */}
+          {showDevicesList && <DevicesList />}
+          {showDeviceLinker && (
+            <DeviceLinker
+              onDeviceLinked={(code, userData) => {
+                console.log(`Dispositivo ${code} vinculado exitosamente`);
+                // Opcional: cambiar a la lista después de vincular
+                setShowDeviceLinker(false);
+                setShowDevicesList(true);
+              }}
+            />
+          )}
+
           {/* INFORMACION DE USUARIO */}
           {showlicencia && <Licencia />}
           {showGuia && <Guia userData={userData} />}

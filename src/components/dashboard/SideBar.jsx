@@ -31,6 +31,76 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
+  // Agregar nuevas props para dispositivos Android TV
+  const {
+    setShowDevicesList,
+    showDevicesList,
+    setShowDeviceLinker,
+    showDeviceLinker,
+    // ...resto de props
+    setShowAdmin,
+    setShowUserAdmin,
+    setShowAltaEvento,
+    // ...otros setters existentes
+  } = props;
+
+  // Menú para Android TV
+  const deviceMenuItems = [
+    {
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+          />
+        </svg>
+      ),
+      label: "Mis Pantallas TV",
+      isActive: showDevicesList,
+      onClick: () => {
+        setShowAdmin(false);
+        setShowUserAdmin(false);
+        setShowAltaEvento(false);
+        // ... cerrar otros
+        setShowDevicesList(true);
+        setShowDeviceLinker(false);
+      },
+    },
+    {
+      icon: (
+        <svg
+          className="w-5 h-5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+          />
+        </svg>
+      ),
+      label: "Agregar Pantalla TV",
+      isActive: showDeviceLinker,
+      onClick: () => {
+        setShowAdmin(false);
+        setShowUserAdmin(false);
+        setShowAltaEvento(false);
+        // ... cerrar otros
+        setShowDeviceLinker(true);
+        setShowDevicesList(false);
+      },
+    },
+  ];
   const { t } = useTranslation();
 
   const changePanel = (setVisible) => {
@@ -289,7 +359,30 @@ function Sidebar(props) {
             </div>
           )}
         </li>
-
+        {/* Nueva sección para Android TV */}
+        <li className="mb-4">
+          <div className="px-4 py-2">
+            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
+              Android TV
+            </h3>
+          </div>
+          <div className="mt-1 space-y-1">
+            {deviceMenuItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={item.onClick}
+                className={`w-full text-left px-2 py-2 text-sm rounded-md flex items-center ${
+                  item.isActive
+                    ? "bg-blue-700 text-white"
+                    : "text-gray-300 hover:bg-blue-700 hover:text-white"
+                }`}
+              >
+                {item.icon}
+                <span className="ml-3">{item.label}</span>
+              </button>
+            ))}
+          </div>
+        </li>
         {/* AJUSTES PANTALLAS */}
         <li className="mb-4">
           <div className="px-4 py-2">
