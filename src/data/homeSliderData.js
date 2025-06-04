@@ -1,7 +1,7 @@
 export const homeSliderData = [
   {
     sliderId: 101,
-    sliderImage: "/img/ImagenSliderUpper1.jpg",
+    sliderImage: "/img/ImagenNuevaUpperDS.jpg",
     // sliderTag: "Impulsa tu negocio",
     // sliderTitle: "UPPER DS, el sistema de Señalización Digital",
     // sliderDescription:
@@ -12,7 +12,7 @@ export const homeSliderData = [
     // IF VIDEO ADD THIS FIELD
     // sliderVideo: '/assets/videos/ai-dev.jpg',
     // IF IMAGE ADD THIS FIELD
-    sliderImage: "/img/ImagenSliderUpper2.jpg",
+    sliderImage: "/img/ImagenNuevaUpperDS2.jpg",
     // sliderTag: "Gran impacto visual",
     // sliderTitle: "Artificial Intelligence ",
     // sliderDescription:
@@ -20,7 +20,7 @@ export const homeSliderData = [
   },
   {
     sliderId: 103,
-    sliderImage: "/img/ImagenSliderUpper3.jpg",
+    sliderImage: "/img/ImagenNuevaUpperDS3.jpg",
     // sliderTag: "Uso fácil y sencillo",
     // sliderTitle: "App Development",
     // sliderDescription:

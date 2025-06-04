@@ -396,7 +396,8 @@ const PublicidadCombinada = () => {
               >
                 <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
               </svg>
-              Publicidades
+              {t("advertisement.advertisementList")}
+
               {activeTab === "listado" && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
               )}
@@ -424,7 +425,7 @@ const PublicidadCombinada = () => {
                   clipRule="evenodd"
                 />
               </svg>
-              Crear Nuevo
+              {t("advertisement.createNew")}
               {activeTab === "crear" && (
                 <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600"></span>
               )}

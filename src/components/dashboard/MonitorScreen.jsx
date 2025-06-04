@@ -295,6 +295,7 @@ const MonitorScreen = ({ userEmail }) => {
   const processHeartbeats = useCallback((snapshot) => {
     const heartbeatData = [];
     const uniqueCompanies = new Set();
+    const groupedHeartbeats = {}; // Mapa para agrupar heartbeats duplicados
 
     // Obtener el tiempo actual en formato Timestamp de Firestore para comparaciones consistentes
     const now = new Date();
@@ -314,7 +315,8 @@ const MonitorScreen = ({ userEmail }) => {
         : null;
       const isOnline = lastActivityTime && lastActivityTime > thirtySecondsAgo;
 
-      heartbeatData.push({
+      // Crear objeto heartbeat con todos los datos
+      const heartbeat = {
         id: doc.id,
         ...data,
         online: isOnline,
@@ -323,10 +325,42 @@ const MonitorScreen = ({ userEmail }) => {
         lastDisconnect: data.lastDisconnect
           ? data.lastDisconnect.toDate()
           : null,
-      });
+      };
+
+      // Crear clave única para cada pantalla
+      const screenKey = createScreenKey(heartbeat);
+
+      // Si ya existe la pantalla, agregar esta instancia a sus instancias
+      if (groupedHeartbeats[screenKey]) {
+        // Agregar a las instancias
+        groupedHeartbeats[screenKey].instances.push(heartbeat);
+
+        // Actualizar heartbeat principal si este es más reciente
+        if (
+          heartbeat.lastActivity &&
+          (!groupedHeartbeats[screenKey].lastActivity ||
+            heartbeat.lastActivity > groupedHeartbeats[screenKey].lastActivity)
+        ) {
+          groupedHeartbeats[screenKey].lastActivity = heartbeat.lastActivity;
+          groupedHeartbeats[screenKey].online = heartbeat.online;
+        }
+
+        // Actualizar contador de beatCount
+        groupedHeartbeats[screenKey].beatCount += heartbeat.beatCount || 0;
+      } else {
+        // Si es la primera vez que vemos esta pantalla, inicializar el grupo
+        groupedHeartbeats[screenKey] = {
+          ...heartbeat,
+          instances: [heartbeat], // Guardar la primera instancia
+          instanceCount: 1,
+        };
+      }
     });
 
-    setHeartbeats(heartbeatData);
+    // Convertir el mapa de grupos a un array para el estado
+    const groupedHeartbeatArray = Object.values(groupedHeartbeats);
+
+    setHeartbeats(groupedHeartbeatArray);
     setCompanies([...uniqueCompanies].sort());
     setLoading(false);
     setLastRefresh(new Date());
@@ -641,14 +675,29 @@ const MonitorScreen = ({ userEmail }) => {
   // Actualización periódica SOLO del estado online de las pantallas (sin consultar Firebase)
   useEffect(() => {
     const updateOnlineStatus = () => {
-      // Solo actualizamos el cálculo del estado online sin hacer nuevas consultas
+      // Actualizar el cálculo del estado online sin hacer nuevas consultas
       setHeartbeats((currentHeartbeats) =>
-        currentHeartbeats.map((heartbeat) => ({
-          ...heartbeat,
-          online: heartbeat.lastActivity
+        currentHeartbeats.map((heartbeat) => {
+          // Actualizar estado principal
+          const isOnline = heartbeat.lastActivity
             ? new Date() - heartbeat.lastActivity < 120000 // 30 segundos en ms
-            : false,
-        }))
+            : false;
+
+          // También actualizar cada instancia individual
+          const updatedInstances =
+            heartbeat.instances?.map((instance) => ({
+              ...instance,
+              online: instance.lastActivity
+                ? new Date() - instance.lastActivity < 120000
+                : false,
+            })) || [];
+
+          return {
+            ...heartbeat,
+            online: isOnline,
+            instances: updatedInstances,
+          };
+        })
       );
       setLastRefresh(new Date());
     };
@@ -753,7 +802,11 @@ const MonitorScreen = ({ userEmail }) => {
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} día${diffDays !== 1 ? "s" : ""}`;
   };
-
+  // Agregar esta nueva función para crear una clave única por pantalla
+  const createScreenKey = (heartbeat) => {
+    // Usamos combinación de tipo y número para identificar la pantalla
+    return `${heartbeat.screenType}_${heartbeat.screenNumber}_${heartbeat.deviceName}`;
+  };
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -1202,11 +1255,6 @@ const MonitorScreen = ({ userEmail }) => {
                               {heartbeat.screenType || "Desconocido"}
                             </span>
                           )}
-                          {heartbeat.screenNumber && (
-                            <span className="ml-2">
-                              {heartbeat.screenNumber}
-                            </span>
-                          )}
                         </td>
                         {isAdmin && (
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -1264,8 +1312,11 @@ const MonitorScreen = ({ userEmail }) => {
                           <button
                             className="text-blue-600 hover:text-blue-900 transition-colors duration-150"
                             onClick={() => {
-                              // Mostrar detalles en un modal con mejor formato
-                              const details = {
+                              // Crear título del modal
+                              const title = heartbeat.deviceName || "Pantalla";
+
+                              // Información principal
+                              let mainInfo = {
                                 ID: heartbeat.id,
                                 Nombre: heartbeat.deviceName || "No disponible",
                                 Tipo: heartbeat.screenType || "No disponible",
@@ -1273,27 +1324,54 @@ const MonitorScreen = ({ userEmail }) => {
                                   heartbeat.screenNumber || "No disponible",
                                 Empresa:
                                   heartbeat.companyName || "No disponible",
-                                Resolución:
-                                  heartbeat.screenResolution || "No disponible",
-                                Navegador:
-                                  heartbeat.userAgent?.substring(0, 100) ||
-                                  "No disponible",
-                                IP: heartbeat.ip || "No disponible",
-                                Sistema: heartbeat.os || "No disponible",
-                                Versión: heartbeat.version || "No disponible",
-                                "Última desconexión": heartbeat.lastDisconnect
-                                  ? formatDate(heartbeat.lastDisconnect)
-                                  : "No disponible",
+                                "Número de instancias":
+                                  heartbeat.instances?.length || 1,
                               };
 
-                              // Formatear los detalles
-                              const formattedDetails = Object.entries(details)
+                              // Formato de la información principal
+                              let detailsText = Object.entries(mainInfo)
                                 .map(([key, value]) => `${key}: ${value}`)
                                 .join("\n");
 
-                              alert(
-                                `Detalles de la pantalla:\n\n${formattedDetails}`
-                              );
+                              // Agregar sección de instancias si hay múltiples
+                              if (
+                                heartbeat.instances &&
+                                heartbeat.instances.length > 1
+                              ) {
+                                detailsText +=
+                                  "\n\n=== INSTANCIAS DE DISPOSITIVOS ===\n";
+
+                                heartbeat.instances.forEach(
+                                  (instance, index) => {
+                                    detailsText += `\n[Dispositivo ${
+                                      index + 1
+                                    }]\n`;
+                                    detailsText += `ID: ${instance.id}\n`;
+                                    detailsText += `Última actividad: ${
+                                      instance.lastActivity
+                                        ? formatDate(instance.lastActivity)
+                                        : "No disponible"
+                                    }\n`;
+                                    detailsText += `IP: ${
+                                      instance.ip || "No disponible"
+                                    }\n`;
+                                    detailsText += `Resolución: ${
+                                      instance.screenResolution ||
+                                      "No disponible"
+                                    }\n`;
+                                    detailsText += `Navegador: ${
+                                      instance.userAgent?.substring(0, 50) ||
+                                      "No disponible"
+                                    }...\n`;
+                                    detailsText += `Latidos: ${
+                                      instance.beatCount || 0
+                                    }\n`;
+                                  }
+                                );
+                              }
+
+                              // Mostrar alert con toda la información
+                              alert(`Detalles de ${title}:\n\n${detailsText}`);
                             }}
                           >
                             Ver detalles

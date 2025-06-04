@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import firebase from "firebase/compat/app";
+import { useTranslation } from "react-i18next";
 
 function PublicidadForm({
   pantallas,
@@ -9,11 +10,12 @@ function PublicidadForm({
   setSuccessMessage,
   obtenerPublicidades,
   resetForm,
-  t,
   db,
   storage,
 }) {
   // Estados para el formulario
+  const { t } = useTranslation();
+
   const [tipoPublicidad, setTipoPublicidad] = useState("salon");
   const [orientacionPantalla, setOrientacionPantalla] = useState("");
   const [destinoPublicidad, setDestinoPublicidad] = useState("todas");
@@ -44,7 +46,7 @@ function PublicidadForm({
 
     // Verificar si los videos están deshabilitados
     if (isVideo && !videosHabilitados) {
-      setSuccessMessage("Los videos están temporalmente deshabilitados");
+      setSuccessMessage(t("advertisement.form.videosDisabled"));
       setTimeout(() => setSuccessMessage(null), 3000);
       return;
     }
@@ -82,7 +84,7 @@ function PublicidadForm({
   const handleGuardarPublicidad = async () => {
     try {
       if (!mediaFile) {
-        setSuccessMessage("Debe seleccionar una imagen o video");
+        setSuccessMessage(t("advertisement.form.selectImageOrVideo"));
         setTimeout(() => setSuccessMessage(null), 3000);
         return;
       }
@@ -92,23 +94,19 @@ function PublicidadForm({
         !tiempoVisualizacion.minutos &&
         tiempoVisualizacion.segundos < 10
       ) {
-        setSuccessMessage(
-          "El tiempo de visualización debe ser al menos 10 segundos"
-        );
+        setSuccessMessage(t("advertisement.form.minimumDisplayTime"));
         setTimeout(() => setSuccessMessage(null), 3000);
         return;
       }
 
       if (tipoPublicidad === "directorio" && !orientacionPantalla) {
-        setSuccessMessage(
-          "Debe seleccionar una orientación para pantalla de directorio"
-        );
+        setSuccessMessage(t("advertisement.form.selectOrientation"));
         setTimeout(() => setSuccessMessage(null), 3000);
         return;
       }
 
       if (!nombre.trim()) {
-        setSuccessMessage("Debe proporcionar un nombre para la publicidad");
+        setSuccessMessage(t("advertisement.form.nameRequired"));
         setTimeout(() => setSuccessMessage(null), 3000);
         return;
       }
@@ -118,9 +116,7 @@ function PublicidadForm({
         destinoPublicidad === "especificas" &&
         pantallasSeleccionadas.length === 0
       ) {
-        setSuccessMessage(
-          "Debe seleccionar al menos una pantalla cuando el destino es específico"
-        );
+        setSuccessMessage(t("advertisement.form.selectScreensRequired"));
         setTimeout(() => setSuccessMessage(null), 3000);
         return;
       }
@@ -146,8 +142,8 @@ function PublicidadForm({
             setUploadProgress(Math.round(progress));
           },
           (error) => {
-            console.error("Error al subir video:", error);
-            setSuccessMessage("Error al subir el video");
+            console.error(t("advertisement.form.videoUploadError"), error);
+            setSuccessMessage(t("advertisement.form.videoUploadError"));
             setIsUploading(false);
           }
         );
@@ -168,8 +164,8 @@ function PublicidadForm({
             setUploadProgress(Math.round(progress));
           },
           (error) => {
-            console.error("Error al subir imagen:", error);
-            setSuccessMessage("Error al subir la imagen");
+            console.error(t("advertisement.form.imageUploadError"), error);
+            setSuccessMessage(t("advertisement.form.imageUploadError"));
             setIsUploading(false);
           }
         );
@@ -197,7 +193,7 @@ function PublicidadForm({
           destinoPublicidad === "especificas" ? pantallasSeleccionadas : [],
       });
 
-      setSuccessMessage("Publicidad creada con éxito");
+      setSuccessMessage(t("advertisement.form.createdSuccess"));
       setTimeout(() => setSuccessMessage(null), 3000);
 
       // Limpiar el formulario y volver a la lista
@@ -207,8 +203,8 @@ function PublicidadForm({
       // Recargar las publicidades
       await obtenerPublicidades(empresa, "todos");
     } catch (error) {
-      console.error("Error al guardar publicidad:", error);
-      setSuccessMessage("Error al guardar la publicidad");
+      console.error(t("advertisement.form.saveError"), error);
+      setSuccessMessage(t("advertisement.form.saveError"));
       setTimeout(() => setSuccessMessage(null), 3000);
     } finally {
       setIsUploading(false);
@@ -239,7 +235,11 @@ function PublicidadForm({
   const toggleVideosHabilitados = () => {
     setVideosHabilitados((prev) => !prev);
     setSuccessMessage(
-      `Videos ${!videosHabilitados ? "habilitados" : "deshabilitados"}`
+      t(
+        videosHabilitados
+          ? "advertisement.form.videosDisabled"
+          : "advertisement.form.videosEnabled"
+      )
     );
     setTimeout(() => setSuccessMessage(null), 3000);
   };
@@ -250,7 +250,7 @@ function PublicidadForm({
         id: `salon${index + 1}`,
         nombre: nombre,
         tipo: "salon",
-        ubicacion: `Salón ${index + 1}`,
+        ubicacion: `${t("advertisement.form.location")} ${index + 1}`,
         activa: true,
       }));
     } else if (tipoPublicidad === "directorio") {
@@ -259,7 +259,7 @@ function PublicidadForm({
         nombre: nombre,
         tipo: "directorio",
         orientacion: index % 2 === 0 ? "horizontal" : "vertical", // Ejemplo de orientación
-        ubicacion: `Ubicación ${index + 1}`,
+        ubicacion: `${t("advertisement.form.location")} ${index + 1}`,
         activa: true,
       }));
 
@@ -278,6 +278,7 @@ function PublicidadForm({
     orientacionPantalla,
     pantallasSalon,
     pantallasDirectorio,
+    t,
   ]);
 
   // Reemplaza la función obtenerPantallas actual con esta versión mejorada
@@ -298,7 +299,7 @@ function PublicidadForm({
         .get();
 
       if (usuariosSnapshot.empty) {
-        console.log("No hay usuarios para esta empresa");
+        console.log(t("advertisement.form.noUsers"));
         setPantallasSalon([]);
         setPantallasDirectorio([]);
         setCargandoPantallas(false);
@@ -326,7 +327,7 @@ function PublicidadForm({
 
       setCargandoPantallas(false);
     } catch (error) {
-      console.error("Error al obtener pantallas:", error);
+      console.error(t("advertisement.form.screenFetchError"), error);
       setPantallasSalon([]);
       setPantallasDirectorio([]);
       setCargandoPantallas(false);
@@ -349,12 +350,12 @@ function PublicidadForm({
             {/* Header con título e interruptor de videos */}
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium leading-6 text-gray-900">
-                Crear Nueva Publicidad
+                {t("advertisement.form.title")}
               </h3>
               {/* 
               <div className="flex items-center">
                 <span className="text-sm text-gray-700 mr-2">
-                  Videos {videosHabilitados ? "habilitados" : "deshabilitados"}
+                  Videos {videosHabilitados ? t("advertisement.form.enabled") : t("advertisement.form.disabled")}
                 </span>
                 <button
                   type="button"
@@ -364,7 +365,7 @@ function PublicidadForm({
                   }`}
                 >
                   <span className="sr-only">
-                    {videosHabilitados ? "Deshabilitar" : "Habilitar"} videos
+                    {videosHabilitados ? t("advertisement.form.disable") : t("advertisement.form.enable")} videos
                   </span>
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow transform ring-0 transition ease-in-out duration-200 ${
@@ -381,7 +382,7 @@ function PublicidadForm({
                 htmlFor="nombre"
                 className="block text-sm font-medium text-gray-700"
               >
-                Nombre
+                {t("advertisement.form.name")}
               </label>
               <div className="mt-1">
                 <input
@@ -389,7 +390,7 @@ function PublicidadForm({
                   name="nombre"
                   id="nombre"
                   className="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 rounded-md"
-                  placeholder="Ej: Promoción especial"
+                  placeholder={t("advertisement.form.namePlaceholder")}
                   value={nombre}
                   onChange={(e) => setNombre(e.target.value)}
                 />
@@ -399,7 +400,7 @@ function PublicidadForm({
             {/* Tipo de publicidad */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tipo de publicidad
+                {t("advertisement.form.advertisingType")}
               </label>
               <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                 <div
@@ -450,10 +451,10 @@ function PublicidadForm({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Salón
+                        {t("advertisement.form.eventRoom")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Para pantallas en salas y eventos
+                        {t("advertisement.form.eventRoomDescription")}
                       </p>
                     </div>
                   </div>
@@ -507,10 +508,10 @@ function PublicidadForm({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Directorio
+                        {t("advertisement.form.directory")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Para pantallas informativas y directorios
+                        {t("advertisement.form.directoryDescription")}
                       </p>
                     </div>
                   </div>
@@ -522,7 +523,7 @@ function PublicidadForm({
             {tipoPublicidad === "directorio" && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Orientación de pantalla
+                  {t("advertisement.form.screenOrientation")}
                 </label>
                 <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
                   <div
@@ -573,10 +574,10 @@ function PublicidadForm({
                       </div>
                       <div className="ml-3">
                         <h4 className="text-sm font-medium text-gray-900">
-                          Horizontal
+                          {t("advertisement.form.horizontal")}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Pantalla en orientación normal
+                          {t("advertisement.form.horizontalDescription")}
                         </p>
                       </div>
                     </div>
@@ -630,10 +631,10 @@ function PublicidadForm({
                       </div>
                       <div className="ml-3">
                         <h4 className="text-sm font-medium text-gray-900">
-                          Vertical
+                          {t("advertisement.form.vertical")}
                         </h4>
                         <p className="text-xs text-gray-500">
-                          Pantalla rotada 90 grados
+                          {t("advertisement.form.verticalDescription")}
                         </p>
                       </div>
                     </div>
@@ -645,7 +646,7 @@ function PublicidadForm({
             {/* Destino de la publicidad */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Destino de la publicidad
+                {t("advertisement.form.advertisingDestination")}
               </label>
               <div className="grid grid-cols-1 gap-y-4 sm:grid-cols-2 gap-x-4">
                 <div
@@ -696,10 +697,11 @@ function PublicidadForm({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Todas las pantallas
+                        {t("advertisement.form.allScreens")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Se mostrará en todas las pantallas de {tipoPublicidad}
+                        {t("advertisement.form.allScreensDescription")}{" "}
+                        {t(`advertisement.form.${tipoPublicidad}`)}
                       </p>
                     </div>
                   </div>
@@ -753,10 +755,10 @@ function PublicidadForm({
                     </div>
                     <div className="ml-3">
                       <h4 className="text-sm font-medium text-gray-900">
-                        Pantallas específicas
+                        {t("advertisement.form.specificScreens")}
                       </h4>
                       <p className="text-xs text-gray-500">
-                        Seleccione las pantallas donde se mostrará
+                        {t("advertisement.form.specificScreensDescription")}
                       </p>
                     </div>
                   </div>
@@ -768,14 +770,13 @@ function PublicidadForm({
             {destinoPublicidad === "especificas" && (
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Seleccionar pantallas
+                  {t("advertisement.form.selectScreens")}
                 </label>
                 {pantallasFiltradas.length > 0 ? (
                   <div className="border rounded-md overflow-hidden">
                     <div className="bg-gray-50 px-4 py-2 border-b">
                       <span className="text-xs font-medium text-gray-500">
-                        Seleccione las pantallas donde desea mostrar esta
-                        publicidad
+                        {t("advertisement.form.selectScreensDescription")}
                       </span>
                     </div>
                     <div className="max-h-60 overflow-y-auto p-4">
@@ -805,12 +806,14 @@ function PublicidadForm({
                               </label>
                               <p className="text-gray-500">
                                 {pantalla.ubicacion &&
-                                  `Ubicación: ${pantalla.ubicacion}`}
+                                  `${t("advertisement.form.location")}: ${
+                                    pantalla.ubicacion
+                                  }`}
                                 {pantalla.orientacion &&
                                   ` • ${
                                     pantalla.orientacion === "horizontal"
-                                      ? "Horizontal"
-                                      : "Vertical"
+                                      ? t("advertisement.form.horizontal")
+                                      : t("advertisement.form.vertical")
                                   }`}
                               </p>
                             </div>
@@ -821,8 +824,9 @@ function PublicidadForm({
                     {pantallasFiltradas.length > 5 && (
                       <div className="bg-gray-50 px-4 py-2 border-t">
                         <span className="text-xs text-gray-500">
-                          Se han encontrado {pantallasFiltradas.length}{" "}
-                          pantallas compatibles
+                          {t("advertisement.form.foundScreens", {
+                            count: pantallasFiltradas.length,
+                          })}
                         </span>
                       </div>
                     )}
@@ -846,13 +850,16 @@ function PublicidadForm({
                       </div>
                       <div className="ml-3">
                         <h3 className="text-sm font-medium text-yellow-800">
-                          No hay pantallas compatibles
+                          {t("advertisement.form.noCompatibleScreens")}
                         </h3>
                         <div className="mt-2 text-sm text-yellow-700">
                           <p>
-                            No se han encontrado pantallas del tipo
-                            seleccionado. Por favor, cree primero una pantalla
-                            de {tipoPublicidad} o seleccione otro tipo.
+                            {t(
+                              "advertisement.form.noCompatibleScreensDescription",
+                              {
+                                type: t(`advertisement.form.${tipoPublicidad}`),
+                              }
+                            )}
                           </p>
                         </div>
                       </div>
@@ -865,7 +872,7 @@ function PublicidadForm({
             {/* Upload de archivos / Tiempo de visualización */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Imagen o video
+                {t("advertisement.form.imageOrVideo")}
               </label>
 
               {/* Mensaje de advertencia para videos deshabilitados */}
@@ -888,8 +895,7 @@ function PublicidadForm({
                     </div>
                     <div className="ml-3">
                       <p className="text-sm text-yellow-700">
-                        La subida de videos está temporalmente deshabilitada.
-                        Solo se permiten imágenes.
+                        {t("advertisement.form.videosTemporarilyDisabled")}
                       </p>
                     </div>
                   </div>
@@ -904,7 +910,7 @@ function PublicidadForm({
                         {mediaPreview.type === "image" ? (
                           <img
                             src={mediaPreview.url}
-                            alt="Vista previa"
+                            alt={t("advertisement.form.preview")}
                             className="h-40 mx-auto object-contain"
                           />
                         ) : (
@@ -959,7 +965,7 @@ function PublicidadForm({
                           htmlFor="file-upload"
                           className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
                         >
-                          <span>Subir un archivo</span>
+                          <span>{t("advertisement.form.uploadFile")}</span>
                           <input
                             id="file-upload"
                             name="file-upload"
@@ -969,12 +975,14 @@ function PublicidadForm({
                             onChange={handleMediaSelect}
                           />
                         </label>
-                        <p className="pl-1">o arrastrar y soltar</p>
+                        <p className="pl-1">
+                          {t("advertisement.form.orDragDrop")}
+                        </p>
                       </div>
                       <p className="text-xs text-gray-500">
                         {videosHabilitados
-                          ? "PNG, JPG, GIF, MP4, WEBM hasta 10MB"
-                          : "PNG, JPG, GIF hasta 10MB. Videos deshabilitados."}
+                          ? t("advertisement.form.acceptedFormatsAll")
+                          : t("advertisement.form.acceptedFormatsImages")}
                       </p>
                     </>
                   )}
@@ -985,7 +993,7 @@ function PublicidadForm({
             {/* Tiempo de visualización */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Tiempo de visualización
+                {t("advertisement.form.displayTime")}
               </label>
               <div className="grid grid-cols-3 gap-4">
                 <div>
@@ -993,7 +1001,7 @@ function PublicidadForm({
                     htmlFor="horas"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Horas
+                    {t("advertisement.form.hours")}
                   </label>
                   <select
                     id="horas"
@@ -1016,7 +1024,7 @@ function PublicidadForm({
                     htmlFor="minutos"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Minutos
+                    {t("advertisement.form.minutes")}
                   </label>
                   <select
                     id="minutos"
@@ -1039,7 +1047,7 @@ function PublicidadForm({
                     htmlFor="segundos"
                     className="block text-xs font-medium text-gray-500"
                   >
-                    Segundos
+                    {t("advertisement.form.seconds")}
                   </label>
                   <select
                     id="segundos"
@@ -1059,8 +1067,7 @@ function PublicidadForm({
                 </div>
               </div>
               <p className="mt-2 text-xs text-gray-500">
-                Tiempo que se mostrará este contenido antes de pasar al
-                siguiente. Mínimo recomendado: 10 segundos.
+                {t("advertisement.form.displayTimeDescription")}
               </p>
             </div>
 
@@ -1075,7 +1082,9 @@ function PublicidadForm({
                     ></div>
                   </div>
                   <p className="text-sm text-gray-600 mb-4">
-                    Subiendo {uploadProgress}%...
+                    {t("advertisement.form.uploading", {
+                      progress: uploadProgress,
+                    })}
                   </p>
                 </div>
               ) : (
@@ -1088,7 +1097,7 @@ function PublicidadForm({
                     }}
                     className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 mr-3"
                   >
-                    Cancelar
+                    {t("advertisement.form.cancel")}
                   </button>
                   <button
                     type="button"
@@ -1100,7 +1109,7 @@ function PublicidadForm({
                         : "bg-blue-400 cursor-not-allowed"
                     }`}
                   >
-                    Guardar
+                    {t("advertisement.form.save")}
                   </button>
                 </div>
               )}
