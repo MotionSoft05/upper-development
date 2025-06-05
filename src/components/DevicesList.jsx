@@ -2,12 +2,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useDeviceSync } from "@/hook/useDeviceSync";
+import { useAuthState } from "react-firebase-hooks/auth";
+import auth from "@/firebase/auth";
 import DeviceConfiguration from "./DeviceConfiguration";
 import {
   unlinkDevice,
   deleteDevice,
   updateDeviceHeartbeat,
-  syncUserDataToDevices,
+  checkDevicePermissions,
 } from "@/utils/deviceManager";
 import {
   ComputerDesktopIcon,
@@ -30,12 +32,193 @@ import {
 import Swal from "sweetalert2";
 
 const DevicesList = () => {
+  const [user] = useAuthState(auth); // Usuario autenticado
   const { devices, userData, loading, syncing, forceSyncDevices, stats } =
     useDeviceSync();
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [configurationModalOpen, setConfigurationModalOpen] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [expandedDevices, setExpandedDevices] = useState(new Set());
+
+  // Debug: Mostrar información del usuario y dispositivos
+  useEffect(() => {
+    if (user && devices.length > 0) {
+      console.log("🔍 Debug Info:", {
+        userUID: user.uid,
+        userDataUID: userData?.uid,
+        devicesCount: devices.length,
+        devices: devices.map((d) => ({
+          code: d.code || d.id,
+          ownerId: d.ownerId,
+          status: d.status,
+          isOwner: d.ownerId === user.uid,
+        })),
+      });
+    }
+  }, [user, userData, devices]);
+
+  // Función para verificar permisos antes de cualquier acción
+  const verifyPermissions = async (deviceCode, action) => {
+    if (!user) {
+      throw new Error("Usuario no autenticado");
+    }
+
+    const permissions = await checkDevicePermissions(deviceCode, user.uid);
+
+    console.log(`🔐 Verificando permisos para ${action}:`, permissions);
+
+    if (!permissions.hasPermission) {
+      throw new Error(permissions.reason);
+    }
+
+    return permissions;
+  };
+
+  // Función para desvincular dispositivo
+  const handleUnlinkDevice = async (deviceCode) => {
+    try {
+      // Verificar permisos primero
+      await verifyPermissions(deviceCode, "desvincular");
+
+      const result = await Swal.fire({
+        title: "¿Desvincular dispositivo?",
+        text: "El dispositivo volverá al estado de espera y deberá vincularse nuevamente.",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, desvincular",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        console.log(
+          `🔗 Desvinculando dispositivo ${deviceCode} para usuario ${user.uid}`
+        );
+
+        await unlinkDevice(deviceCode, user.uid);
+
+        Swal.fire({
+          icon: "success",
+          title: "Dispositivo desvinculado",
+          text: "El dispositivo ha sido desvinculado correctamente.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error desvinculando dispositivo:", error);
+
+      let errorMessage = "No se pudo desvincular el dispositivo.";
+
+      if (error.message.includes("permisos")) {
+        errorMessage = "No tienes permisos para desvincular este dispositivo.";
+      } else if (error.message.includes("no encontrado")) {
+        errorMessage = "Dispositivo no encontrado.";
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al desvincular",
+        text: errorMessage,
+        footer: `<small>Código de error: ${error.message}</small>`,
+      });
+    }
+  };
+
+  // Función para eliminar dispositivo
+  const handleDeleteDevice = async (deviceCode) => {
+    try {
+      // Verificar permisos primero
+      await verifyPermissions(deviceCode, "eliminar");
+
+      const result = await Swal.fire({
+        title: "¿Eliminar dispositivo?",
+        text: "Esta acción no se puede deshacer. El dispositivo será eliminado permanentemente.",
+        icon: "error",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Sí, eliminar",
+        cancelButtonText: "Cancelar",
+        input: "text",
+        inputPlaceholder: `Escribe "${deviceCode}" para confirmar`,
+        inputValidator: (value) => {
+          if (value !== deviceCode) {
+            return "Debes escribir el código del dispositivo correctamente";
+          }
+        },
+      });
+
+      if (result.isConfirmed) {
+        console.log(
+          `🗑️ Eliminando dispositivo ${deviceCode} para usuario ${user.uid}`
+        );
+
+        await deleteDevice(deviceCode, user.uid);
+
+        Swal.fire({
+          icon: "success",
+          title: "Dispositivo eliminado",
+          text: "El dispositivo ha sido eliminado permanentemente.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error eliminando dispositivo:", error);
+
+      let errorMessage = "No se pudo eliminar el dispositivo.";
+
+      if (error.message.includes("permisos")) {
+        errorMessage = "No tienes permisos para eliminar este dispositivo.";
+      } else if (error.message.includes("no encontrado")) {
+        errorMessage = "Dispositivo no encontrado.";
+      }
+
+      Swal.fire({
+        icon: "error",
+        title: "Error al eliminar",
+        text: errorMessage,
+        footer: `<small>Código de error: ${error.message}</small>`,
+      });
+    }
+  };
+
+  // Función para reiniciar dispositivo (forzar reconexión)
+  const handleRestartDevice = async (deviceCode) => {
+    try {
+      const result = await Swal.fire({
+        title: "¿Reiniciar dispositivo?",
+        text: "Esto enviará una señal al dispositivo para que se reconecte.",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Sí, reiniciar",
+        cancelButtonText: "Cancelar",
+      });
+
+      if (result.isConfirmed) {
+        await updateDeviceHeartbeat(deviceCode, { restartRequested: true });
+
+        Swal.fire({
+          icon: "success",
+          title: "Señal enviada",
+          text: "Se ha enviado la señal de reinicio al dispositivo.",
+          timer: 2000,
+          showConfirmButton: false,
+        });
+      }
+    } catch (error) {
+      console.error("Error reiniciando dispositivo:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo enviar la señal de reinicio.",
+      });
+    }
+  };
 
   // Función para obtener el color del estado
   const getStatusColor = (status, lastSeen) => {
@@ -121,6 +304,12 @@ const DevicesList = () => {
     }
   };
 
+  // Función para abrir modal de configuración
+  const handleConfigureDevice = (device) => {
+    setSelectedDevice(device);
+    setConfigurationModalOpen(true);
+  };
+
   // Filtrar dispositivos según el filtro seleccionado
   const filteredDevices = devices.filter((device) => {
     if (selectedFilter === "all") return true;
@@ -135,124 +324,6 @@ const DevicesList = () => {
     }
     return device.status === selectedFilter;
   });
-
-  // Función para abrir modal de configuración
-  const handleConfigureDevice = (device) => {
-    setSelectedDevice(device);
-    setConfigurationModalOpen(true);
-  };
-
-  // Función para reiniciar dispositivo (forzar reconexión)
-  const handleRestartDevice = async (deviceCode) => {
-    try {
-      const result = await Swal.fire({
-        title: "¿Reiniciar dispositivo?",
-        text: "Esto enviará una señal al dispositivo para que se reconecte.",
-        icon: "question",
-        showCancelButton: true,
-        confirmButtonColor: "#3085d6",
-        cancelButtonColor: "#d33",
-        confirmButtonText: "Sí, reiniciar",
-        cancelButtonText: "Cancelar",
-      });
-
-      if (result.isConfirmed) {
-        await updateDeviceHeartbeat(deviceCode, { restartRequested: true });
-
-        Swal.fire({
-          icon: "success",
-          title: "Señal enviada",
-          text: "Se ha enviado la señal de reinicio al dispositivo.",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error reiniciando dispositivo:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: "No se pudo enviar la señal de reinicio.",
-      });
-    }
-  };
-
-  // Función para desvincular dispositivo
-  const handleUnlinkDevice = async (deviceCode) => {
-    try {
-      const result = await Swal.fire({
-        title: "¿Desvincular dispositivo?",
-        text: "El dispositivo volverá al estado de espera y deberá vincularse nuevamente.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sí, desvincular",
-        cancelButtonText: "Cancelar",
-      });
-
-      if (result.isConfirmed) {
-        await unlinkDevice(deviceCode, userData.uid);
-
-        Swal.fire({
-          icon: "success",
-          title: "Dispositivo desvinculado",
-          text: "El dispositivo ha sido desvinculado correctamente.",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error desvinculando dispositivo:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "No se pudo desvincular el dispositivo.",
-      });
-    }
-  };
-
-  // Función para eliminar dispositivo
-  const handleDeleteDevice = async (deviceCode) => {
-    try {
-      const result = await Swal.fire({
-        title: "¿Eliminar dispositivo?",
-        text: "Esta acción no se puede deshacer. El dispositivo será eliminado permanentemente.",
-        icon: "error",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Sí, eliminar",
-        cancelButtonText: "Cancelar",
-        input: "text",
-        inputPlaceholder: `Escribe "${deviceCode}" para confirmar`,
-        inputValidator: (value) => {
-          if (value !== deviceCode) {
-            return "Debes escribir el código del dispositivo correctamente";
-          }
-        },
-      });
-
-      if (result.isConfirmed) {
-        await deleteDevice(deviceCode, userData.uid);
-
-        Swal.fire({
-          icon: "success",
-          title: "Dispositivo eliminado",
-          text: "El dispositivo ha sido eliminado permanentemente.",
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      }
-    } catch (error) {
-      console.error("Error eliminando dispositivo:", error);
-      Swal.fire({
-        icon: "error",
-        title: "Error",
-        text: error.message || "No se pudo eliminar el dispositivo.",
-      });
-    }
-  };
 
   // Función para expandir/contraer información del dispositivo
   const toggleDeviceExpansion = (deviceCode) => {
@@ -292,6 +363,11 @@ const DevicesList = () => {
     return `Hace ${Math.floor(diffMins / 1440)} días`;
   };
 
+  // Verificar si el usuario puede realizar acciones en el dispositivo
+  const canPerformActions = (device) => {
+    return device.ownerId === user?.uid || device.status === "waiting";
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -312,6 +388,12 @@ const DevicesList = () => {
             <p className="text-gray-600">
               Gestiona y monitorea tus dispositivos Android TV
             </p>
+            {/* Debug info */}
+            {user && (
+              <p className="text-xs text-gray-400 mt-1">
+                Usuario: {user.uid} | Dispositivos: {devices.length}
+              </p>
+            )}
           </div>
           <button
             onClick={forceSyncDevices}
@@ -531,6 +613,12 @@ const DevicesList = () => {
                             {getStatusText(device.status, device.lastSeen)}
                           </span>
                         </div>
+                        {/* Indicador de permisos */}
+                        {!canPerformActions(device) && (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                            Sin permisos
+                          </span>
+                        )}
                       </div>
                       <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                         {device.configuration ? (
@@ -597,20 +685,38 @@ const DevicesList = () => {
                       <ArrowPathIcon className="h-5 w-5" />
                     </button>
 
-                    {/* Botón de desvincular */}
+                    {/* Botón de desvincular - solo si tiene permisos */}
                     <button
                       onClick={() => handleUnlinkDevice(device.code)}
-                      className="p-2 text-yellow-600 hover:text-yellow-800 rounded-md hover:bg-yellow-50"
-                      title="Desvincular dispositivo"
+                      disabled={!canPerformActions(device)}
+                      className={`p-2 rounded-md ${
+                        canPerformActions(device)
+                          ? "text-yellow-600 hover:text-yellow-800 hover:bg-yellow-50"
+                          : "text-gray-300 cursor-not-allowed"
+                      }`}
+                      title={
+                        canPerformActions(device)
+                          ? "Desvincular dispositivo"
+                          : "Sin permisos para desvincular"
+                      }
                     >
                       <LinkIcon className="h-5 w-5" />
                     </button>
 
-                    {/* Botón de eliminar */}
+                    {/* Botón de eliminar - solo si tiene permisos */}
                     <button
                       onClick={() => handleDeleteDevice(device.code)}
-                      className="p-2 text-red-600 hover:text-red-800 rounded-md hover:bg-red-50"
-                      title="Eliminar dispositivo"
+                      disabled={!canPerformActions(device)}
+                      className={`p-2 rounded-md ${
+                        canPerformActions(device)
+                          ? "text-red-600 hover:text-red-800 hover:bg-red-50"
+                          : "text-gray-300 cursor-not-allowed"
+                      }`}
+                      title={
+                        canPerformActions(device)
+                          ? "Eliminar dispositivo"
+                          : "Sin permisos para eliminar"
+                      }
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -625,6 +731,34 @@ const DevicesList = () => {
                     </h5>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                       <div>
+                        <span className="font-medium text-gray-700">ID:</span>
+                        <span className="ml-2 text-gray-900 font-mono text-xs">
+                          {device.id}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Propietario:
+                        </span>
+                        <span className="ml-2 text-gray-900 font-mono text-xs">
+                          {device.ownerId || "Sin propietario"}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-gray-700">
+                          Puede gestionar:
+                        </span>
+                        <span
+                          className={`ml-2 font-medium ${
+                            canPerformActions(device)
+                              ? "text-green-600"
+                              : "text-red-600"
+                          }`}
+                        >
+                          {canPerformActions(device) ? "Sí" : "No"}
+                        </span>
+                      </div>
+                      <div>
                         <span className="font-medium text-gray-700">
                           Plataforma:
                         </span>
@@ -638,14 +772,6 @@ const DevicesList = () => {
                         </span>
                         <span className="ml-2 text-gray-900">
                           {device.deviceInfo?.appVersion || "N/A"}
-                        </span>
-                      </div>
-                      <div>
-                        <span className="font-medium text-gray-700">
-                          Resolución:
-                        </span>
-                        <span className="ml-2 text-gray-900">
-                          {device.deviceInfo?.screenResolution || "N/A"}
                         </span>
                       </div>
                       <div>
