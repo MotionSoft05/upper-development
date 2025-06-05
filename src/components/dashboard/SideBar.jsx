@@ -31,76 +31,6 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 function Sidebar(props) {
-  // Agregar nuevas props para dispositivos Android TV
-  const {
-    setShowDevicesList,
-    showDevicesList,
-    setShowDeviceLinker,
-    showDeviceLinker,
-    // ...resto de props
-    setShowAdmin,
-    setShowUserAdmin,
-    setShowAltaEvento,
-    // ...otros setters existentes
-  } = props;
-
-  // Menú para Android TV
-  const deviceMenuItems = [
-    {
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-          />
-        </svg>
-      ),
-      label: "Mis Pantallas TV",
-      isActive: showDevicesList,
-      onClick: () => {
-        setShowAdmin(false);
-        setShowUserAdmin(false);
-        setShowAltaEvento(false);
-        // ... cerrar otros
-        setShowDevicesList(true);
-        setShowDeviceLinker(false);
-      },
-    },
-    {
-      icon: (
-        <svg
-          className="w-5 h-5"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-          />
-        </svg>
-      ),
-      label: "Agregar Pantalla TV",
-      isActive: showDeviceLinker,
-      onClick: () => {
-        setShowAdmin(false);
-        setShowUserAdmin(false);
-        setShowAltaEvento(false);
-        // ... cerrar otros
-        setShowDeviceLinker(true);
-        setShowDevicesList(false);
-      },
-    },
-  ];
   const { t } = useTranslation();
 
   const changePanel = (setVisible) => {
@@ -121,6 +51,10 @@ function Sidebar(props) {
     props.setShowMonitorScreen(false);
     props.setShowPantallaTarifario(false);
     props.setShowInformacionTarifa(false);
+    // Agregar los nuevos estados de Android TV
+    props.setShowDevicesList && props.setShowDevicesList(false);
+    props.setShowDeviceLinker && props.setShowDeviceLinker(false);
+    
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
@@ -359,30 +293,106 @@ function Sidebar(props) {
             </div>
           )}
         </li>
-        {/* Nueva sección para Android TV */}
-        <li className="mb-4">
-          <div className="px-4 py-2">
-            <h3 className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
-              Android TV
-            </h3>
-          </div>
-          <div className="mt-1 space-y-1">
-            {deviceMenuItems.map((item, index) => (
+
+        {/* ANDROID TV - Nueva sección siguiendo el patrón establecido */}
+        {tienePermiso("androidTv") && (
+          <li className="mb-4">
+            <div className="px-4 py-2">
+              <h3 className="text-xs font-semibold tracking-wider text-blue-100 uppercase mb-2 flex items-center">
+                <span className="mr-2 w-6 border-t border-blue-300"></span>
+                Android TV
+                <span className="ml-2 w-6 border-t border-blue-300"></span>
+              </h3>
+            </div>
+
+            {/* Mis Pantallas TV */}
+            <div className="mb-1">
               <button
-                key={index}
-                onClick={item.onClick}
-                className={`w-full text-left px-2 py-2 text-sm rounded-md flex items-center ${
-                  item.isActive
-                    ? "bg-blue-700 text-white"
-                    : "text-gray-300 hover:bg-blue-700 hover:text-white"
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showDevicesList)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
                 }`}
+                onClick={() => changePanel("setShowDevicesList")}
               >
-                {item.icon}
-                <span className="ml-3">{item.label}</span>
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showDevicesList)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                    />
+                  </svg>
+                </span>
+                <span className="ml-3">Mis Pantallas TV</span>
+                {isActive(props.showDevicesList) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
               </button>
-            ))}
-          </div>
-        </li>
+            </div>
+
+            {/* Agregar Pantalla TV */}
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showDeviceLinker)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowDeviceLinker")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showDeviceLinker)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
+                    />
+                  </svg>
+                </span>
+                <span className="ml-3">Agregar Pantalla TV</span>
+                {isActive(props.showDeviceLinker) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          </li>
+        )}
+
         {/* AJUSTES PANTALLAS */}
         <li className="mb-4">
           <div className="px-4 py-2">
