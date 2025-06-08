@@ -23,8 +23,8 @@ function UserAdmin() {
 
   const [cantidadPd, setCantidadPd] = useState(0);
   const [cantidadPs, setCantidadPs] = useState(0);
-  const [cantidadPservice, setCantidadPservice] = useState(0);
-  const [cantidadPtarifario, setCantidadPtarifario] = useState(0); // Nueva variable para pantallas tarifario
+  const [cantidadPp, setCantidadPp] = useState(0); // Cambiado de cantidadPservice a cantidadPp
+  const [cantidadPtarifario, setCantidadPtarifario] = useState(0);
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
@@ -32,7 +32,9 @@ function UserAdmin() {
   const [cantidadPublicidadDirectorio, setCantidadPublicidadDirectorio] =
     useState(0);
   const [cantidadPublicidadTarifario, setCantidadPublicidadTarifario] =
-    useState(0); // Nueva variable para publicidad tarifario
+    useState(0);
+  const [cantidadPublicidadPromociones, setCantidadPublicidadPromociones] = // Nueva variable para publicidad promociones
+    useState(0);
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [loading, setLoading] = useState(true);
@@ -49,35 +51,35 @@ function UserAdmin() {
     tipoPlan: "",
   });
 
-  // Actualizado para incluir pantallas tarifario
+  // Actualizado para incluir pantallas promociones en lugar de servicio
   const total =
     parseInt(cantidadPd) +
     parseInt(cantidadPs) +
-    parseInt(cantidadPservice) +
+    parseInt(cantidadPp) + // Cambiado de cantidadPservice a cantidadPp
     parseInt(cantidadPtarifario);
 
-  // Datos para el gráfico de suscripciones (actualizado con tarifario)
+  // Datos para el gráfico de suscripciones (actualizado con promociones)
   const subscriptionChartData = {
     labels: [
       t("userAdmin.roomScreen"),
       t("userAdmin.directoryScreen"),
-      t("userAdmin.servicescreen"),
-      t("userAdmin.rateScreen"), // Nuevo label para pantalla tarifario
+      t("userAdmin.promotionScreen"), // Cambiado de servicescreen a promotionScreen
+      t("userAdmin.rateScreen"),
     ],
     datasets: [
       {
-        data: [cantidadPs, cantidadPd, cantidadPservice, cantidadPtarifario],
+        data: [cantidadPs, cantidadPd, cantidadPp, cantidadPtarifario], // Cambiado cantidadPservice por cantidadPp
         backgroundColor: [
           "rgba(54, 162, 235, 0.6)",
           "rgba(75, 192, 192, 0.6)",
-          "rgba(153, 102, 255, 0.6)",
-          "rgba(255, 159, 64, 0.6)", // Nuevo color para tarifario
+          "rgba(255, 99, 132, 0.6)", // Nuevo color para promociones (rosa/rojo)
+          "rgba(255, 159, 64, 0.6)",
         ],
         borderColor: [
           "rgba(54, 162, 235, 1)",
           "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)", // Nuevo borde de color para tarifario
+          "rgba(255, 99, 132, 1)", // Nuevo borde para promociones
+          "rgba(255, 159, 64, 1)",
         ],
         borderWidth: 1,
       },
@@ -148,14 +150,13 @@ function UserAdmin() {
 
             const cantidadPd = userData.pd || 0;
             const cantidadPs = userData.ps || 0;
-            const cantidadPservice = userData.pservice || 0;
-            // Obtenemos la cantidad de pantallas tarifario del campo "pt"
+            const cantidadPp = userData.pp || 0; // Cambiado de pservice a pp
             const cantidadPtarifario = userData.pt || 0;
 
             setCantidadPd(cantidadPd);
             setCantidadPs(cantidadPs);
-            setCantidadPservice(cantidadPservice);
-            setCantidadPtarifario(cantidadPtarifario); // Establecer la cantidad de pantallas tarifario
+            setCantidadPp(cantidadPp); // Cambiado de setCantidadPservice a setCantidadPp
+            setCantidadPtarifario(cantidadPtarifario);
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
@@ -204,6 +205,19 @@ function UserAdmin() {
             );
             const cantidadTarifario = publicidadTarifarioSnapshot.docs.length;
             setCantidadPublicidadTarifario(cantidadTarifario);
+
+            // Publicidad de promociones
+            const publicidadPromocionesQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", userData.empresa),
+              where("tipo", "==", "promociones")
+            );
+            const publicidadPromocionesSnapshot = await getDocs(
+              publicidadPromocionesQuery
+            );
+            const cantidadPromociones =
+              publicidadPromocionesSnapshot.docs.length;
+            setCantidadPublicidadPromociones(cantidadPromociones);
 
             // Eventos
             const eventsQuery = query(
@@ -300,8 +314,8 @@ function UserAdmin() {
 
             setCantidadPd(datosEmpresa.pd || 0);
             setCantidadPs(datosEmpresa.ps || 0);
-            setCantidadPservice(datosEmpresa.pservice || 0);
-            setCantidadPtarifario(datosEmpresa.pt || 0); // Usando el campo "pt" para pantallas tarifario
+            setCantidadPp(datosEmpresa.pp || 0); // Cambiado de pservice a pp
+            setCantidadPtarifario(datosEmpresa.pt || 0);
 
             // Actualizar datos de empresa
             setEmpresaData({
@@ -347,6 +361,19 @@ function UserAdmin() {
             );
             setCantidadPublicidadTarifario(
               publicidadTarifarioSnapshot.docs.length
+            );
+
+            // Obtener cantidad de publicidades de promociones
+            const publicidadPromocionesQuery = query(
+              collection(db, "Publicidad"),
+              where("empresa", "==", empresaSeleccionada),
+              where("tipo", "==", "promociones")
+            );
+            const publicidadPromocionesSnapshot = await getDocs(
+              publicidadPromocionesQuery
+            );
+            setCantidadPublicidadPromociones(
+              publicidadPromocionesSnapshot.docs.length
             );
 
             // Obtener eventos
@@ -526,7 +553,8 @@ function UserAdmin() {
               value={
                 cantidadPublicidadSalon +
                 cantidadPublicidadDirectorio +
-                cantidadPublicidadTarifario
+                cantidadPublicidadTarifario +
+                cantidadPublicidadPromociones // Agregado promociones al total
               }
               icon={<i className="fas fa-ad">🎯</i>}
               bgColor="bg-gradient-to-r from-purple-500 to-purple-600"
@@ -708,10 +736,12 @@ function UserAdmin() {
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-gray-100">
                     <span className="font-medium">
-                      {t("userAdmin.servicescreen")}:
+                      {t("userAdmin.promotionScreen")}:{" "}
+                      {/* Cambiado de servicescreen a promotionScreen */}
                     </span>
                     <span className="text-lg text-blue-600 font-bold">
-                      {cantidadPservice}
+                      {cantidadPp}{" "}
+                      {/* Cambiado de cantidadPservice a cantidadPp */}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-gray-100">
@@ -736,6 +766,15 @@ function UserAdmin() {
                     </span>
                     <span className="text-gray-700 font-bold">
                       {cantidadPublicidadDirectorio}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      {t("userAdmin.promotionAdvertisement")}:{" "}
+                      {/* Nueva línea para publicidad promociones */}
+                    </span>
+                    <span className="text-gray-700 font-bold">
+                      {cantidadPublicidadPromociones}
                     </span>
                   </div>
                 </div>

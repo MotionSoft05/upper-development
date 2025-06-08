@@ -54,7 +54,7 @@ function Sidebar(props) {
     // Agregar los nuevos estados de Android TV
     props.setShowDevicesList && props.setShowDevicesList(false);
     props.setShowDeviceLinker && props.setShowDeviceLinker(false);
-    
+
     props.toggleSidebar();
     props[setVisible](true); // hook que se llamara en la funcion para cambiar el estado
   };
@@ -338,49 +338,6 @@ function Sidebar(props) {
                 </span>
                 <span className="ml-3">Mis Pantallas TV</span>
                 {isActive(props.showDevicesList) && (
-                  <span className="ml-auto">
-                    <FontAwesomeIcon
-                      icon={faChevronRight}
-                      className="w-3 h-3"
-                    />
-                  </span>
-                )}
-              </button>
-            </div>
-
-            {/* Agregar Pantalla TV */}
-            <div className="mb-1">
-              <button
-                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
-                  isActive(props.showDeviceLinker)
-                    ? "bg-white shadow-md text-blue-700 font-medium"
-                    : "text-blue-100 hover:bg-blue-700/50"
-                }`}
-                onClick={() => changePanel("setShowDeviceLinker")}
-              >
-                <span
-                  className={`flex-shrink-0 ${
-                    isActive(props.showDeviceLinker)
-                      ? "text-blue-600"
-                      : "text-blue-200 group-hover:text-white"
-                  }`}
-                >
-                  <svg
-                    className="w-5 h-5"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth="2"
-                      d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
-                    />
-                  </svg>
-                </span>
-                <span className="ml-3">Agregar Pantalla TV</span>
-                {isActive(props.showDeviceLinker) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon
                       icon={faChevronRight}

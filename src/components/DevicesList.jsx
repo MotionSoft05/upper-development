@@ -5,6 +5,7 @@ import { useDeviceSync } from "@/hook/useDeviceSync";
 import { useAuthState } from "react-firebase-hooks/auth";
 import auth from "@/firebase/auth";
 import DeviceConfiguration from "./DeviceConfiguration";
+import DeviceLinkingModal from "./DeviceLinkingModal"; // Importar el nuevo modal
 import { deleteDevice } from "@/utils/deviceManager";
 import {
   ComputerDesktopIcon,
@@ -13,6 +14,7 @@ import {
   SignalSlashIcon,
   TrashIcon,
   EyeIcon,
+  PlusIcon, // Importar icono de plus para el botón
 } from "@heroicons/react/24/outline";
 import {
   CheckCircleIcon,
@@ -33,6 +35,7 @@ const DevicesList = () => {
 
   const [selectedFilter, setSelectedFilter] = useState("all");
   const [configurationModalOpen, setConfigurationModalOpen] = useState(false);
+  const [linkingModalOpen, setLinkingModalOpen] = useState(false); // Estado para el modal de vinculación
   const [selectedDevice, setSelectedDevice] = useState(null);
   const [expandedDevices, setExpandedDevices] = useState(new Set());
 
@@ -152,7 +155,7 @@ const DevicesList = () => {
     return device.status === selectedFilter;
   });
 
-  // ========== FUNCIONES PRINCIPALES (Solo 3) ==========
+  // ========== FUNCIONES PRINCIPALES ==========
 
   // 1. Función para abrir modal de configuración
   const handleConfigureDevice = (device) => {
@@ -206,11 +209,26 @@ const DevicesList = () => {
         confirmButtonText: "Sí, eliminar",
         cancelButtonText: "Cancelar",
         input: "text",
-        inputPlaceholder: `Escribe "${deviceCode}" para confirmar`,
+        inputPlaceholder: deviceCode,
+        inputAttributes: {
+          maxlength: 6,
+          style: `
+            text-align: center !important;
+            font-size: 1.5rem !important;
+            font-family: ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace !important;
+            letter-spacing: 0.3em !important;
+            font-weight: 600 !important;
+            padding: 12px 16px !important;
+            text-transform: uppercase !important;
+          `,
+        },
         inputValidator: (value) => {
           if (value !== deviceCode) {
             return "Debes escribir el código del dispositivo correctamente";
           }
+        },
+        customClass: {
+          input: "swal2-input-custom",
         },
       });
 
@@ -258,6 +276,12 @@ const DevicesList = () => {
       newExpanded.add(deviceCode);
     }
     setExpandedDevices(newExpanded);
+  };
+
+  // 4. Función para manejar dispositivos vinculados exitosamente
+  const handleDeviceLinked = (deviceCode, userData) => {
+    console.log(`Dispositivo ${deviceCode} vinculado correctamente:`, userData);
+    // El hook useDeviceSync automáticamente actualizará la lista
   };
 
   // Función para formatear fecha
@@ -327,30 +351,91 @@ const DevicesList = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              Mis Pantallas TV
+              Módulo de gestión de pantallas
             </h1>
-            <p className="text-gray-600">
-              Gestiona y monitorea tus dispositivos Android TV
-            </p>
-          </div>
-          {/* ✅ Información de debug (se puede quitar en producción) */}
-          <div className="text-xs text-gray-500 space-y-1">
-            <div>Usuario: {currentUser?.uid?.slice(-6) || "N/A"}</div>
-            <div>Loading: {loading || authLoading ? "Sí" : "No"}</div>
-            <div>Hook User: {user ? "Existe" : "No existe"}</div>
-            <div>Auth User: {authUser ? "Existe" : "No existe"}</div>
-            <div>Current User: {currentUser ? "Existe" : "No existe"}</div>
-            <div>UserData: {userData ? "Existe" : "No existe"}</div>
+            <p className="text-gray-600">Administra Dispositivos TVBox</p>
           </div>
         </div>
+
+        {/* Estadísticas rápidas */}
+        {devices.length > 0 && (
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="bg-green-50 rounded-lg p-3">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <SignalIcon className="h-5 w-5 text-green-500" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-green-900">En línea</p>
+                  <p className="text-lg font-semibold text-green-700">
+                    {stats.online}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-blue-50 rounded-lg p-3">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <CheckCircleIcon className="h-5 w-5 text-blue-500" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-blue-900">
+                    Configurados
+                  </p>
+                  <p className="text-lg font-semibold text-blue-700">
+                    {stats.linked}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 rounded-lg p-3">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <ClockIconSolid className="h-5 w-5 text-yellow-500" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-yellow-900">
+                    Esperando
+                  </p>
+                  <p className="text-lg font-semibold text-yellow-700">
+                    {stats.waiting}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <ComputerDesktopIcon className="h-5 w-5 text-gray-500" />
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-gray-900">Total</p>
+                  <p className="text-lg font-semibold text-gray-700">
+                    {stats.total}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Lista de dispositivos */}
       <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
           <h3 className="text-lg font-medium text-gray-900">
             Dispositivos ({filteredDevices.length})
           </h3>
+          <button
+            onClick={() => setLinkingModalOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition-colors duration-200"
+          >
+            <PlusIcon className="h-5 w-5 mr-2" />
+            Agregar Pantalla
+          </button>
         </div>
 
         {filteredDevices.length === 0 ? (
@@ -448,7 +533,7 @@ const DevicesList = () => {
                     </div>
                   </div>
 
-                  {/* BOTONES DE ACCIÓN - SOLO 3 FUNCIONES */}
+                  {/* BOTONES DE ACCIÓN */}
                   <div className="flex items-center space-x-2">
                     {/* 1. Botón para ver más información */}
                     <button
@@ -566,6 +651,13 @@ const DevicesList = () => {
         onConfigurationSaved={(deviceCode, config) => {
           console.log(`Dispositivo ${deviceCode} configurado:`, config);
         }}
+      />
+
+      {/* Modal de vinculación de dispositivos */}
+      <DeviceLinkingModal
+        isOpen={linkingModalOpen}
+        onClose={() => setLinkingModalOpen(false)}
+        onDeviceLinked={handleDeviceLinked}
       />
     </div>
   );

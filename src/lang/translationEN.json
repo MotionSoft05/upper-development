@@ -404,7 +404,9 @@
     "days": "days",
     "activeMessage": "Your subscription is active. Enjoy all the benefits of Upper DS.",
     "warningMessage": "Your subscription is about to expire. Contact support to renew it.",
-    "expiredMessage": "Your subscription has expired. Please contact support to reactivate it."
+    "expiredMessage": "Your subscription has expired. Please contact support to reactivate it.",
+    "promotionScreen": "Promotion Screens",
+    "promotionAdvertisement": "Promotion Advertisement"
   },
   "consultaModEventos": {
     "title": "Event Query",

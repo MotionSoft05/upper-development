@@ -16,6 +16,7 @@ import {
 import db from "@/firebase/firestore";
 import { useTranslation } from "react-i18next";
 import emailjs from "emailjs-com";
+
 const MonitorScreen = ({ userEmail }) => {
   const { t } = useTranslation();
   const [heartbeats, setHeartbeats] = useState([]);
@@ -23,6 +24,7 @@ const MonitorScreen = ({ userEmail }) => {
   const [error, setError] = useState(null);
   const [filter, setFilter] = useState("all"); // 'all', 'online', 'offline'
   const [companyFilter, setCompanyFilter] = useState("");
+  const [screenTypeFilter, setScreenTypeFilter] = useState(""); // NUEVO: Filtro para tipo de pantalla
   const [companies, setCompanies] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [refreshInterval, setRefreshInterval] = useState(120); // Cambiado de 30 a 60 segundos
@@ -169,6 +171,7 @@ const MonitorScreen = ({ userEmail }) => {
 
     setIsSaving(false);
   };
+
   const sendTestNotification = async () => {
     setIsSaving(true);
     setSaveMessage(null);
@@ -707,7 +710,7 @@ const MonitorScreen = ({ userEmail }) => {
     return () => clearInterval(interval);
   }, [refreshInterval]);
 
-  // Aplicar filtros y búsqueda a los heartbeats
+  // Aplicar filtros y búsqueda a los heartbeats - ACTUALIZADO para incluir filtro de tipo
   const filteredHeartbeats = React.useMemo(() => {
     return heartbeats
       .filter((heartbeat) => {
@@ -717,6 +720,10 @@ const MonitorScreen = ({ userEmail }) => {
 
         // Filtrar por empresa
         if (companyFilter && heartbeat.companyName !== companyFilter)
+          return false;
+
+        // Filtrar por tipo de pantalla - NUEVO
+        if (screenTypeFilter && heartbeat.screenType !== screenTypeFilter)
           return false;
 
         // Filtrar por término de búsqueda
@@ -761,7 +768,14 @@ const MonitorScreen = ({ userEmail }) => {
 
         return direction === "asc" ? comparison : -comparison;
       });
-  }, [heartbeats, filter, companyFilter, searchTerm, sortConfig]);
+  }, [
+    heartbeats,
+    filter,
+    companyFilter,
+    screenTypeFilter,
+    searchTerm,
+    sortConfig,
+  ]);
 
   // Función para cambiar el ordenamiento
   const requestSort = (key) => {
@@ -802,11 +816,13 @@ const MonitorScreen = ({ userEmail }) => {
     const diffDays = Math.floor(diffHours / 24);
     return `${diffDays} día${diffDays !== 1 ? "s" : ""}`;
   };
+
   // Agregar esta nueva función para crear una clave única por pantalla
   const createScreenKey = (heartbeat) => {
     // Usamos combinación de tipo y número para identificar la pantalla
     return `${heartbeat.screenType}_${heartbeat.screenNumber}_${heartbeat.deviceName}`;
   };
+
   return (
     <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50">
       <div className="max-w-7xl mx-auto">
@@ -986,9 +1002,9 @@ const MonitorScreen = ({ userEmail }) => {
           </div>
         )}
 
-        {/* Panel de control */}
+        {/* Panel de control - ACTUALIZADO para incluir filtro de tipo de pantalla */}
         <div className="bg-white rounded-lg shadow p-4 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
             {/* Filtro de estado */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -1031,6 +1047,24 @@ const MonitorScreen = ({ userEmail }) => {
                 </select>
               </div>
             )}
+
+            {/* Filtro de tipo de pantalla - NUEVO
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Pantalla
+              </label>
+              <select
+                value={screenTypeFilter}
+                onChange={(e) => setScreenTypeFilter(e.target.value)}
+                className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              >
+                <option value="">Todos los tipos</option>
+                <option value="salon">Salón</option>
+                <option value="directorio">Directorio</option>
+                <option value="tarifario">Tarifario</option>
+                <option value="promociones">Promociones</option>
+              </select>
+            </div> */}
 
             {/* Búsqueda */}
             <div>
@@ -1237,6 +1271,8 @@ const MonitorScreen = ({ userEmail }) => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                           {heartbeat.deviceName || heartbeat.id}
                         </td>
+
+                        {/* ACTUALIZADO: Columna de tipo con soporte para Promociones */}
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {heartbeat.screenType === "salon" ? (
                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
@@ -1250,12 +1286,17 @@ const MonitorScreen = ({ userEmail }) => {
                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
                               Tarifario
                             </span>
+                          ) : heartbeat.screenType === "promociones" ? (
+                            <span className="px-2 py-1 text-xs font-medium rounded-full bg-orange-100 text-orange-800">
+                              Promociones
+                            </span>
                           ) : (
                             <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">
                               {heartbeat.screenType || "Desconocido"}
                             </span>
                           )}
                         </td>
+
                         {isAdmin && (
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             {heartbeat.companyName || "-"}
