@@ -356,71 +356,6 @@ const DevicesList = () => {
             <p className="text-gray-600">Administra Dispositivos TVBox</p>
           </div>
         </div>
-
-        {/* Estadísticas rápidas */}
-        {devices.length > 0 && (
-          <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div className="bg-green-50 rounded-lg p-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <SignalIcon className="h-5 w-5 text-green-500" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-green-900">En línea</p>
-                  <p className="text-lg font-semibold text-green-700">
-                    {stats.online}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-blue-50 rounded-lg p-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <CheckCircleIcon className="h-5 w-5 text-blue-500" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-blue-900">
-                    Configurados
-                  </p>
-                  <p className="text-lg font-semibold text-blue-700">
-                    {stats.linked}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-yellow-50 rounded-lg p-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <ClockIconSolid className="h-5 w-5 text-yellow-500" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-yellow-900">
-                    Esperando
-                  </p>
-                  <p className="text-lg font-semibold text-yellow-700">
-                    {stats.waiting}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center">
-                <div className="flex-shrink-0">
-                  <ComputerDesktopIcon className="h-5 w-5 text-gray-500" />
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm font-medium text-gray-900">Total</p>
-                  <p className="text-lg font-semibold text-gray-700">
-                    {stats.total}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Lista de dispositivos */}
@@ -502,11 +437,7 @@ const DevicesList = () => {
                             <span className="font-medium">
                               {device.configuration.screenName}
                             </span>
-                            <span>•</span>
-                            <span className="capitalize">
-                              {device.configuration.screenType} #
-                              {device.configuration.screenNumber}
-                            </span>
+
                             {device.configuration.orientation && (
                               <>
                                 <span>•</span>
