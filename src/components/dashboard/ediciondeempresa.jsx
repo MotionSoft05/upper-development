@@ -25,6 +25,7 @@ import {
   faChevronUp,
   faHeadset,
   faImages,
+  faTv, // Nuevo icono para Android TV
 } from "@fortawesome/free-solid-svg-icons";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import { Tooltip } from "react-tooltip";
@@ -105,6 +106,8 @@ const Ediciondeempresa = () => {
                 datosUsuario: permisoAntiguo >= 2,
                 guiaUsuario: permisoAntiguo >= 2,
                 contactoSoporte: permisoAntiguo >= 2,
+                // Agregar el nuevo permiso de Android TV
+                androidTv: permisoAntiguo === 3, // Solo administradores completos por defecto
               };
 
               // Guardar inmediatamente los nuevos permisos si se crearon
@@ -287,6 +290,17 @@ const Ediciondeempresa = () => {
         { id: "publicidad", nombre: "Publicidad", icon: faBullhorn },
       ],
     },
+    // Nueva categoría para Android TV
+    {
+      nombre: "Android TV",
+      secciones: [
+        {
+          id: "androidTv",
+          nombre: "Gestión de Dispositivos TV",
+          icon: faTv,
+        },
+      ],
+    },
     {
       nombre: "Información",
       secciones: [
@@ -382,10 +396,11 @@ const Ediciondeempresa = () => {
                 <ul className="text-sm text-gray-600 list-disc list-inside space-y-1">
                   <li>Cada sección puede habilitarse individualmente</li>
                   <li>
-                    Los usuarios con nivel &quot;SuperAdmin tienen&quot; acceso
+                    Los usuarios con nivel &quot;SuperAdmin&quot; tienen acceso
                     a todas las secciones
                   </li>
                   <li>Los cambios se aplican inmediatamente</li>
+                  <li>Android TV permite gestionar dispositivos TV remotos</li>
                 </ul>
               </div>
 
@@ -397,6 +412,17 @@ const Ediciondeempresa = () => {
                   Los usuarios con nivel &quot;SuperAdmin&quot; pueden acceder a
                   todas las secciones y no se pueden modificar sus permisos
                   individuales.
+                </p>
+              </div>
+
+              <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                <h3 className="font-semibold text-green-700 mb-2">
+                  Nuevo: Android TV
+                </h3>
+                <p className="text-sm text-gray-600">
+                  La nueva sección Android TV permite a los usuarios gestionar
+                  dispositivos Android TV remotos, vincular nuevas pantallas y
+                  configurar sus opciones.
                 </p>
               </div>
             </div>
