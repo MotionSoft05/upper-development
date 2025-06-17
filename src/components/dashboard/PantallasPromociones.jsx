@@ -79,7 +79,21 @@ function PantallasPromociones() {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  // Función para formatear fechas sin problemas de zona horaria
+  const formatDate = (dateString) => {
+    if (!dateString) return "";
 
+    // Si es formato YYYY-MM-DD, convertir directamente
+    if (dateString.includes("-") && dateString.length === 10) {
+      const [year, month, day] = dateString.split("-");
+      return `${day}/${month}/${year}`;
+    }
+
+    // Si tiene formato con hora, extraer solo la fecha y formatear
+    const dateOnly = dateString.split("T")[0];
+    const [year, month, day] = dateOnly.split("-");
+    return `${day}/${month}/${year}`;
+  };
   // Lista de ciudades para el clima
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
@@ -557,13 +571,16 @@ function PantallasPromociones() {
     setSelectedSection({ id: sectionId });
     setEditingContent({ index: contentIndex });
 
-    // Recuperar las fechas o usar fechas por defecto si no existen
+    // Usar las fechas directamente sin convertir a Date object si ya son strings
     const startDate = content.date?.startDate
-      ? new Date(content.date.startDate)
-      : new Date();
+      ? content.date.startDate.split("T")[0] // Si tiene hora, tomar solo la fecha
+      : new Date().toISOString().split("T")[0]; // Fecha actual solo como YYYY-MM-DD
+
     const endDate = content.date?.endDate
-      ? new Date(content.date.endDate)
-      : new Date(new Date().setMonth(new Date().getMonth() + 1));
+      ? content.date.endDate.split("T")[0] // Si tiene hora, tomar solo la fecha
+      : new Date(new Date().setMonth(new Date().getMonth() + 1))
+          .toISOString()
+          .split("T")[0]; // Un mes después solo como YYYY-MM-DD
 
     setContentDate({
       startDate: startDate,
@@ -573,8 +590,8 @@ function PantallasPromociones() {
     setNewContentItem({
       ...content,
       date: {
-        startDate: startDate.toISOString(),
-        endDate: endDate.toISOString(),
+        startDate: startDate, // Ya está en formato YYYY-MM-DD
+        endDate: endDate, // Ya está en formato YYYY-MM-DD
       },
     });
 
@@ -1561,13 +1578,11 @@ function PantallasPromociones() {
                                           <p className="text-xs text-gray-500">
                                             {t("promotionScreens.validity")}:{" "}
                                             {item.date
-                                              ? new Date(
+                                              ? formatDate(
                                                   item.date.startDate
-                                                ).toLocaleDateString() +
+                                                ) +
                                                 " - " +
-                                                new Date(
-                                                  item.date.endDate
-                                                ).toLocaleDateString()
+                                                formatDate(item.date.endDate)
                                               : t(
                                                   "promotionScreens.notDefined"
                                                 )}
