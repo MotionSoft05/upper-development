@@ -2,10 +2,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { doc, getDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
-import { linkDevice } from "@/utils/deviceManager";
 import Swal from "sweetalert2";
 
 const DeviceLinker = ({ onDeviceLinked }) => {
@@ -54,48 +59,150 @@ const DeviceLinker = ({ onDeviceLinked }) => {
   const validateDevice = async () => {
     if (deviceCode.length !== 6) return;
 
+    console.log(`🔍 Validando código: ${deviceCode}`);
     setValidating(true);
     setDeviceInfo(null);
 
     try {
-      // Verificar que el dispositivo existe
-      const deviceRef = doc(db, "devices", deviceCode);
-      const deviceDoc = await getDoc(deviceRef);
+      // 🆕 NUEVA ARQUITECTURA: Buscar en devices_temp primero
+      console.log(`📋 Buscando en devices_temp/${deviceCode}`);
+      const tempCodeRef = doc(db, "devices_temp", deviceCode);
+      const tempDoc = await getDoc(tempCodeRef);
 
-      if (!deviceDoc.exists()) {
+      if (!tempDoc.exists()) {
+        console.log(`❌ No encontrado en devices_temp, buscando en devices...`);
+        // Si no está en devices_temp, verificar si ya está en devices (ya vinculado)
+        const deviceRef = doc(db, "devices", deviceCode);
+        const deviceDoc = await getDoc(deviceRef);
+
+        if (!deviceDoc.exists()) {
+          console.log(`❌ Tampoco encontrado en devices`);
+          setDeviceInfo({
+            error: "Código no encontrado",
+            message:
+              "Verifica que el código sea correcto o que el dispositivo esté encendido.",
+          });
+          return;
+        }
+
+        console.log(`✅ Encontrado en devices (ya vinculado)`);
+        const deviceData = deviceDoc.data();
+        if (deviceData.ownerId === user?.uid) {
+          setDeviceInfo({
+            error: "Ya es tuyo",
+            message: "Este dispositivo ya está vinculado a tu cuenta.",
+            isOwned: true,
+          });
+          return;
+        } else {
+          setDeviceInfo({
+            error: "Dispositivo ya vinculado",
+            message: "Este dispositivo ya está vinculado a otra cuenta.",
+          });
+          return;
+        }
+      }
+
+      console.log(`✅ Encontrado en devices_temp`);
+      const tempData = tempDoc.data();
+      console.log(`📋 Datos del código temporal:`, tempData);
+
+      // 🔧 FIX: Manejar tanto Timestamp como string ISO de manera más robusta
+      const now = new Date();
+      let createdAt;
+      let hoursDiff;
+
+      try {
+        if (tempData.createdAt) {
+          if (typeof tempData.createdAt.toDate === "function") {
+            // Es un Timestamp de Firebase
+            createdAt = tempData.createdAt.toDate();
+            console.log(`📅 Fecha como Timestamp:`, createdAt);
+          } else if (typeof tempData.createdAt === "string") {
+            // Es una string ISO
+            createdAt = new Date(tempData.createdAt);
+            console.log(
+              `📅 Fecha como string:`,
+              tempData.createdAt,
+              "→",
+              createdAt
+            );
+          } else if (tempData.createdAt instanceof Date) {
+            // Ya es un objeto Date
+            createdAt = tempData.createdAt;
+            console.log(`📅 Fecha como Date:`, createdAt);
+          } else {
+            // Objeto con seconds y nanoseconds (Timestamp serializado)
+            if (tempData.createdAt.seconds) {
+              createdAt = new Date(tempData.createdAt.seconds * 1000);
+              console.log(
+                `📅 Fecha como objeto seconds:`,
+                tempData.createdAt,
+                "→",
+                createdAt
+              );
+            } else {
+              throw new Error("Formato de fecha no reconocido");
+            }
+          }
+        } else {
+          // No hay fecha, asumir que es muy viejo
+          createdAt = new Date(0);
+          console.log(`📅 Sin fecha, usando fecha mínima`);
+        }
+
+        // 🔧 FIX: Forzar ambas fechas a UTC para evitar problemas de zona horaria
+        const nowUTC = now.getTime();
+        const createdAtUTC = createdAt.getTime();
+
+        hoursDiff = (nowUTC - createdAtUTC) / (1000 * 60 * 60);
+
+        console.log(`🌍 Fecha actual UTC:`, new Date(nowUTC).toISOString());
+        console.log(
+          `🌍 Fecha creación UTC:`,
+          new Date(createdAtUTC).toISOString()
+        );
+        console.log(`⏱️ Diferencia: ${hoursDiff.toFixed(2)} horas`);
+      } catch (error) {
+        console.error(`❌ Error procesando fecha:`, error, tempData.createdAt);
+        // En caso de error, asumir que no ha expirado para no bloquear
+        hoursDiff = 0;
+      }
+
+      if (hoursDiff > 24) {
+        // 🔧 Cambié de 1 hora a 24 horas
+        console.log(
+          `❌ Código expirado: ${hoursDiff.toFixed(2)} horas (límite: 24h)`
+        );
         setDeviceInfo({
-          error: "Dispositivo no encontrado",
-          message: "Verifica que el código sea correcto.",
+          error: "Código expirado",
+          message:
+            "Este código ha expirado. Genera un nuevo código en el dispositivo.",
         });
         return;
       }
 
-      const deviceData = deviceDoc.data();
-
-      // Verificar estado del dispositivo
-      if (deviceData.status === "linked" && deviceData.ownerId !== user?.uid) {
+      // Verificar estado
+      if (tempData.status !== "waiting") {
+        console.log(`❌ Código ya utilizado, status: ${tempData.status}`);
         setDeviceInfo({
-          error: "Dispositivo ya vinculado",
-          message: "Este dispositivo ya está vinculado a otra cuenta.",
+          error: "Código ya utilizado",
+          message:
+            "Este código ya ha sido utilizado. Genera uno nuevo en el dispositivo.",
         });
         return;
       }
 
-      if (deviceData.status === "linked" && deviceData.ownerId === user?.uid) {
-        setDeviceInfo({
-          error: "Ya es tuyo",
-          message: "Este dispositivo ya está vinculado a tu cuenta.",
-          isOwned: true,
-        });
-        return;
-      }
-
-      // Dispositivo disponible para vincular
+      console.log(`✅ Código válido y disponible`);
+      // Código temporal válido y disponible
+      const hoursRemaining = Math.max(0, 24 - hoursDiff);
       setDeviceInfo({
         success: true,
-        status: deviceData.status,
-        createdAt: deviceData.createdAt,
+        status: tempData.status,
+        createdAt: tempData.createdAt,
+        deviceInfo: tempData.deviceInfo,
         message: "Dispositivo disponible para vincular",
+        hoursRemaining: hoursRemaining.toFixed(1),
       });
     } catch (error) {
       console.error("Error validando dispositivo:", error);
@@ -114,7 +221,55 @@ const DeviceLinker = ({ onDeviceLinked }) => {
     setLinking(true);
 
     try {
-      await linkDevice(deviceCode, user.uid, userData);
+      // 🆕 NUEVA ARQUITECTURA: Proceso de vinculación actualizado
+
+      // 1. Leer datos del código temporal
+      const tempCodeRef = doc(db, "devices_temp", deviceCode);
+      const tempDoc = await getDoc(tempCodeRef);
+
+      if (!tempDoc.exists()) {
+        throw new Error("El código temporal ya no existe");
+      }
+
+      const tempData = tempDoc.data();
+
+      // 2. Crear dispositivo permanente con nuevo ID
+      const deviceId = `device_${Date.now()}_${user.uid}`;
+      const deviceRef = doc(db, "devices", deviceId);
+
+      const permanentDeviceData = {
+        deviceId,
+        code: deviceCode, // Mantener referencia al código original
+        ownerId: user.uid,
+        ownerEmail: userData.email,
+        status: "linked",
+        linkedAt: serverTimestamp(),
+        userData: userData,
+        deviceInfo: tempData.deviceInfo || {},
+        createdAt: tempData.createdAt,
+        lastUpdated: serverTimestamp(),
+        // Heredar datos del código temporal
+        ...tempData,
+        // Sobrescribir con nuevos datos permanentes
+        deviceId,
+        ownerId: user.uid,
+        ownerEmail: userData.email,
+        status: "linked",
+      };
+
+      await setDoc(deviceRef, permanentDeviceData);
+
+      // 3. Actualizar código temporal con deviceId para transición
+      await updateDoc(tempCodeRef, {
+        status: "linked",
+        deviceId: deviceId,
+        linkedAt: serverTimestamp(),
+        ownerId: user.uid,
+      });
+
+      // 4. El código temporal se eliminará automáticamente por el sistema de limpieza
+
+      console.log(`✅ Dispositivo vinculado: ${deviceCode} → ${deviceId}`);
 
       // Mostrar mensaje de éxito
       Swal.fire({
@@ -127,7 +282,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
 
       // Notificar al componente padre
       if (onDeviceLinked) {
-        onDeviceLinked(deviceCode, userData);
+        onDeviceLinked(deviceCode, userData, deviceId);
       }
 
       // Limpiar formulario
@@ -137,7 +292,10 @@ const DeviceLinker = ({ onDeviceLinked }) => {
       console.error("Error vinculando dispositivo:", error);
 
       let errorMessage = "No se pudo vincular el dispositivo.";
-      if (error.message.includes("ya está vinculado")) {
+      if (error.message.includes("ya no existe")) {
+        errorMessage =
+          "El código temporal ha expirado. Genera uno nuevo en el dispositivo.";
+      } else if (error.message.includes("ya está vinculado")) {
         errorMessage = "Este dispositivo ya está vinculado a otra cuenta.";
       } else if (error.message.includes("no encontrado")) {
         errorMessage = "Dispositivo no encontrado. Verifica el código.";
@@ -153,69 +311,36 @@ const DeviceLinker = ({ onDeviceLinked }) => {
     }
   };
 
-  // Estados de loading
-  if (loading) {
-    return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/3 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3 mb-6"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <h3 className="text-red-800 font-medium">Error de autenticación</h3>
-          <p className="text-red-600 text-sm mt-1">
-            No se pudo cargar la información del usuario.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-2xl mx-auto p-6">
+    <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
       {/* Header */}
       <div className="text-center mb-8">
-        <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-blue-100 mb-4">
-          <svg
-            className="h-8 w-8 text-blue-600"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-            />
-          </svg>
-        </div>
-        <h2 className="text-2xl font-bold text-gray-900">
-          Agregar Pantalla TV
+        <h2 className="text-3xl font-bold text-gray-900 mb-2">
+          Vincular Dispositivo Android TV
         </h2>
-        <p className="text-gray-600 mt-2">
-          Vincula un nuevo dispositivo Android TV a tu cuenta
+        <p className="text-gray-600">
+          Conecta tu dispositivo Android TV Box a tu cuenta de UpperDS
         </p>
       </div>
 
       {/* Instrucciones */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-        <h3 className="text-blue-800 font-medium mb-2">📋 Instrucciones</h3>
-        <ol className="text-blue-700 text-sm space-y-1 list-decimal list-inside">
+      <div className="bg-blue-50 rounded-lg p-6 mb-8">
+        <h3 className="text-lg font-semibold text-blue-900 mb-4">
+          Instrucciones para vincular:
+        </h3>
+        <ol className="space-y-1 list-decimal list-inside">
           <li>Enciende tu dispositivo Android TV</li>
           <li>Abre la aplicación UpperDS</li>
           <li>Se mostrará un código de 6 caracteres en pantalla</li>
           <li>Ingresa ese código aquí abajo</li>
           <li>Haz clic en &quot;Vincular Dispositivo&quot;</li>
         </ol>
+        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+          <p className="text-sm text-yellow-800">
+            ⏰ <strong>Importante:</strong> Los códigos expiran automáticamente
+            después de 24 horas.
+          </p>
+        </div>
       </div>
 
       {/* Formulario de código */}
@@ -299,7 +424,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                   >
                     <path
                       fillRule="evenodd"
-                      d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                      d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
                       clipRule="evenodd"
                     />
                   </svg>
@@ -312,8 +437,8 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                   }`}
                 >
                   {deviceInfo.success
-                    ? "✅ Dispositivo disponible"
-                    : `❌ ${deviceInfo.error}`}
+                    ? "Dispositivo encontrado"
+                    : deviceInfo.error || "Error"}
                 </h3>
                 <p
                   className={`text-sm mt-1 ${
@@ -322,9 +447,15 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                 >
                   {deviceInfo.message}
                 </p>
-                {deviceInfo.success && (
-                  <div className="text-xs text-green-600 mt-2">
-                    Estado: {deviceInfo.status} • Código: {deviceCode}
+                {deviceInfo.success && deviceInfo.hoursRemaining && (
+                  <p className="text-xs text-green-600 mt-1">
+                    ⏱️ Código válido por {deviceInfo.hoursRemaining} horas más
+                  </p>
+                )}
+                {deviceInfo.deviceInfo && (
+                  <div className="mt-2 text-xs text-green-600">
+                    <p>📱 {deviceInfo.deviceInfo.platform || "Android"}</p>
+                    <p>📦 App v{deviceInfo.deviceInfo.appVersion || "1.0.0"}</p>
                   </div>
                 )}
               </div>
@@ -332,131 +463,32 @@ const DeviceLinker = ({ onDeviceLinked }) => {
           </div>
         )}
 
-        {/* Información del usuario que se vinculará */}
-        {userData && deviceInfo?.success && (
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h3 className="text-sm font-medium text-gray-900 mb-3">
-              👤 Este dispositivo se vinculará a:
-            </h3>
-            <div className="space-y-2 text-sm text-gray-600">
-              <div className="flex justify-between">
-                <span>Usuario:</span>
-                <span className="font-medium">
-                  {userData.nombre} {userData.apellido}
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span>Email:</span>
-                <span className="font-medium">{userData.email}</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Empresa:</span>
-                <span className="font-medium">{userData.empresa}</span>
-              </div>
-              <hr className="my-2" />
-              <div className="text-xs text-gray-500">
-                <strong>Licencias disponibles:</strong>
-                <div className="grid grid-cols-2 gap-2 mt-1">
-                  <span>🎭 Salón: {userData.ps || 0}</span>
-                  <span>📋 Directorio: {userData.pd || 0}</span>
-                  <span>💰 Tarifario: {userData.pt || 0}</span>
-                  <span>📢 Promociones: {userData.pp || 0}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
         {/* Botón de vinculación */}
-        <div className="flex justify-center">
-          <button
-            onClick={handleLinkDevice}
-            disabled={!deviceInfo?.success || linking}
-            className={`px-8 py-3 rounded-lg font-medium transition-all ${
-              deviceInfo?.success && !linking
-                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
-                : "bg-gray-300 text-gray-500 cursor-not-allowed"
-            }`}
-          >
-            {linking ? (
-              <div className="flex items-center">
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                Vinculando...
-              </div>
-            ) : (
-              "🔗 Vincular Dispositivo"
-            )}
-          </button>
-        </div>
+        <button
+          onClick={handleLinkDevice}
+          disabled={!deviceInfo?.success || linking || loading}
+          className={`w-full py-3 px-4 rounded-md text-white font-medium transition-colors duration-200 ${
+            deviceInfo?.success && !linking && !loading
+              ? "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              : "bg-gray-400 cursor-not-allowed"
+          }`}
+        >
+          {linking
+            ? "Vinculando dispositivo..."
+            : loading
+            ? "Cargando..."
+            : "Vincular Dispositivo"}
+        </button>
 
-        {/* Información adicional */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">
-            💡 ¿Necesitas ayuda?
-          </h3>
-          <div className="text-xs text-gray-600 space-y-1">
-            <p>
-              • El código se genera automáticamente al abrir la app en tu TV
-            </p>
-            <p>• Si no aparece el código, reinicia la aplicación en la TV</p>
-            <p>• Cada código expira después de 10 minutos por seguridad</p>
-            <p>• Puedes vincular múltiples dispositivos a la misma cuenta</p>
-          </div>
+        {/* Info adicional */}
+        <div className="text-center text-sm text-gray-500">
+          <p>
+            ¿Problemas para conectar?{" "}
+            <a href="#" className="text-blue-600 hover:text-blue-500">
+              Consulta nuestra guía de ayuda
+            </a>
+          </p>
         </div>
-
-        {/* Estado sin licencias */}
-        {userData &&
-          !userData.ps &&
-          !userData.pd &&
-          !userData.pt &&
-          !userData.pp && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg
-                    className="h-5 w-5 text-yellow-400"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <h3 className="text-sm font-medium text-yellow-800">
-                    ⚠️ Sin licencias activas
-                  </h3>
-                  <p className="text-sm text-yellow-700 mt-1">
-                    Puedes vincular el dispositivo, pero necesitarás licencias
-                    activas para configurar pantallas. Contacta al administrador
-                    para activar licencias.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
       </div>
     </div>
   );

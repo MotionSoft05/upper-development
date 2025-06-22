@@ -7,7 +7,10 @@ import { XMarkIcon, CheckIcon } from "@heroicons/react/24/outline";
 import { updateDoc, doc, serverTimestamp } from "firebase/firestore";
 import db from "@/firebase/firestore";
 import Swal from "sweetalert2";
-import { syncUserDataToDevices } from "@/utils/deviceManager";
+import {
+  syncUserDataToDevices,
+  updateDeviceConfiguration,
+} from "@/utils/deviceManager";
 
 const DeviceConfiguration = ({
   isOpen,
@@ -19,43 +22,48 @@ const DeviceConfiguration = ({
   const [loading, setLoading] = useState(false);
   const [selectedScreenType, setSelectedScreenType] = useState("");
   const [selectedScreenNumber, setSelectedScreenNumber] = useState(1);
+  const [screenName, setScreenName] = useState("");
   const [orientation, setOrientation] = useState("landscape");
   const [autoStart, setAutoStart] = useState(true);
+
+  // Debug para entender qué device está recibiendo
+  useEffect(() => {
+    if (device) {
+      console.log("🔧 DeviceConfiguration recibió device:", device);
+      console.log("🔧 Device ID:", device.id);
+      console.log("🔧 Device Code:", device.code);
+      console.log("🔧 Device DeviceId:", device.deviceId);
+    }
+  }, [device]);
 
   // Configuración inicial cuando se abre el modal
   useEffect(() => {
     if (isOpen && device) {
       const config = device.configuration;
       if (config) {
-        // Solo establecer el tipo si no está deshabilitado
-        const availableTypes = getAvailableScreenTypes();
-        const selectedType = availableTypes.find(
-          (type) => type.type === config.screenType
-        );
-
-        setSelectedScreenType(
-          selectedType && !selectedType.disabled ? config.screenType : ""
-        );
+        setSelectedScreenType(config.screenType || "");
         setSelectedScreenNumber(config.screenNumber || 1);
+        setScreenName(config.screenName || "");
         setOrientation(config.orientation || "landscape");
         setAutoStart(config.autoStart !== false);
       } else {
         // Resetear a valores por defecto
         setSelectedScreenType("");
         setSelectedScreenNumber(1);
+        setScreenName("");
         setOrientation("landscape");
         setAutoStart(true);
       }
     }
-  }, [isOpen, device, userData]);
+  }, [isOpen, device]);
 
-  // Obtener todas las pantallas (algunas deshabilitadas)
+  // Obtener todas las pantallas (mostrando todas, algunas bloqueadas)
   const getAvailableScreenTypes = () => {
     if (!userData) return [];
 
     const screenTypes = [];
 
-    // Pantallas Salón - DESHABILITADO
+    // Pantallas Salón - BLOQUEADO
     screenTypes.push({
       type: "salon",
       name: "Pantallas Salón",
@@ -66,7 +74,7 @@ const DeviceConfiguration = ({
       disabledReason: "Próximamente disponible",
     });
 
-    // Pantallas Directorio - DESHABILITADO
+    // Pantallas Directorio - BLOQUEADO
     screenTypes.push({
       type: "directorio",
       name: "Pantallas Directorio",
@@ -77,7 +85,7 @@ const DeviceConfiguration = ({
       disabledReason: "Próximamente disponible",
     });
 
-    // Pantallas Tarifario - DESHABILITADO
+    // Pantallas Tarifario - BLOQUEADO
     screenTypes.push({
       type: "tarifario",
       name: "Pantallas Tarifario",
@@ -89,32 +97,49 @@ const DeviceConfiguration = ({
     });
 
     // Pantallas Promociones - HABILITADO
-    screenTypes.push({
-      type: "promociones",
-      name: "Pantallas Promociones",
-      description: "Para mostrar contenido promocional",
-      maxScreens: parseInt(userData.pp) || 0,
-      icon: "📢",
-      disabled: false, // HABILITADO
-    });
+    if (userData.pp > 0) {
+      screenTypes.push({
+        type: "promociones",
+        name: "Pantallas Promociones",
+        description: "Para mostrar contenido promocional",
+        maxScreens: parseInt(userData.pp) || 0,
+        icon: "📢",
+        disabled: false, // HABILITADO
+      });
+    }
 
     return screenTypes;
   };
 
-  // Generar opciones de número de pantalla (solo para pantallas habilitadas)
-  const getScreenNumberOptions = () => {
+  // Obtener opciones de pantallas con sus nombres
+  const getScreenOptions = () => {
+    if (!selectedScreenType || !userData) return [];
+
     const selectedType = getAvailableScreenTypes().find(
       (type) => type.type === selectedScreenType
     );
 
     if (!selectedType || selectedType.disabled) return [];
 
-    return Array.from({ length: selectedType.maxScreens }, (_, i) => i + 1);
+    const screens = [];
+    const maxScreens = selectedType.maxScreens;
+
+    for (let i = 1; i <= maxScreens; i++) {
+      const screenName = getScreenName(selectedScreenType, i);
+      screens.push({
+        number: i,
+        name: screenName,
+        displayText: `${i}. ${screenName}`,
+      });
+    }
+
+    return screens;
   };
 
-  // Obtener el nombre configurado de la pantalla según el tipo y número
-  const getConfiguredScreenName = (screenType, screenNumber) => {
-    if (!userData || !screenType || !screenNumber) return "";
+  // Obtener el nombre de la pantalla según tipo y número
+  const getScreenName = (screenType, screenNumber) => {
+    if (!userData || !screenType || !screenNumber)
+      return `Pantalla ${screenNumber}`;
 
     const index = screenNumber - 1; // Los arrays empiezan en 0
 
@@ -128,34 +153,18 @@ const DeviceConfiguration = ({
           userData.nombrePantallasDirectorio?.[index] ||
           `Pantalla Directorio ${screenNumber}`
         );
-      case "promociones":
-        return (
-          userData.nombrePantallasPromociones?.[index] ||
-          `Pantalla Promociones ${screenNumber}`
-        );
       case "tarifario":
         return (
           userData.nombrePantallasTarifario?.[index] ||
           `Pantalla Tarifario ${screenNumber}`
         );
+      case "promociones":
+        return (
+          userData.nombrePantallasPromociones?.[index] ||
+          `Pantalla Promociones ${screenNumber}`
+        );
       default:
         return `Pantalla ${screenNumber}`;
-    }
-  };
-
-  // Obtener el label para el selector de número según el tipo
-  const getScreenNumberLabel = (screenType) => {
-    switch (screenType) {
-      case "salon":
-        return "Pantalla de Salón";
-      case "directorio":
-        return "Pantalla de Directorio";
-      case "promociones":
-        return "Pantalla de Promociones";
-      case "tarifario":
-        return "Pantalla de Tarifario";
-      default:
-        return "Número de Pantalla";
     }
   };
 
@@ -174,7 +183,16 @@ const DeviceConfiguration = ({
       Swal.fire({
         icon: "error",
         title: "Número de pantalla requerido",
-        text: "Por favor selecciona un número de pantalla.",
+        text: "Por favor selecciona una pantalla.",
+      });
+      return;
+    }
+
+    if (!device || !device.id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de dispositivo",
+        text: "No se pudo identificar el dispositivo. Inténtalo de nuevo.",
       });
       return;
     }
@@ -182,8 +200,10 @@ const DeviceConfiguration = ({
     setLoading(true);
 
     try {
-      // Obtener el nombre configurado automáticamente
-      const configuredName = getConfiguredScreenName(
+      console.log(`🔧 Configurando dispositivo ID: ${device.id}`);
+
+      // Obtener el nombre automáticamente según la configuración del usuario
+      const configuredScreenName = getScreenName(
         selectedScreenType,
         selectedScreenNumber
       );
@@ -192,7 +212,7 @@ const DeviceConfiguration = ({
       const configuration = {
         screenType: selectedScreenType,
         screenNumber: selectedScreenNumber,
-        screenName: configuredName, // Usar el nombre configurado del usuario
+        screenName: configuredScreenName, // Usar el nombre configurado automáticamente
         autoStart,
         configuredAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
@@ -203,54 +223,70 @@ const DeviceConfiguration = ({
         configuration.orientation = orientation;
       }
 
-      // Actualizar dispositivo en Firestore
-      const deviceRef = doc(db, "devices", device.code);
+      // 🆕 NUEVA ARQUITECTURA: Usar device.id en lugar de device.code
+      const deviceRef = doc(db, "devices", device.id);
+      console.log(`🔧 Actualizando documento: devices/${device.id}`);
+
       await updateDoc(deviceRef, {
         status: "configured",
         configuration,
         lastUpdated: serverTimestamp(),
       });
 
-      // Sincronizar datos al dispositivo
+      // Sincronizar datos al dispositivo si es posible
       if (userData && device.ownerId) {
-        await syncUserDataToDevices(device.ownerId, userData);
+        try {
+          await syncUserDataToDevices(device.ownerId, userData);
+        } catch (syncError) {
+          console.warn("⚠️ Error sincronizando userData:", syncError);
+          // No fallar por este error
+        }
       }
+
+      console.log(
+        `✅ Dispositivo ${device.code || device.id} configurado exitosamente`
+      );
 
       // Mostrar mensaje de éxito
       Swal.fire({
         icon: "success",
         title: "Configuración guardada",
-        text: `Dispositivo ${device.code} configurado correctamente como "${configuredName}"`,
+        text: `Dispositivo configurado correctamente como "${configuredScreenName}"`,
         timer: 3000,
         showConfirmButton: false,
       });
 
       // Notificar al componente padre
       if (onConfigurationSaved) {
-        onConfigurationSaved(device.code, configuration);
+        onConfigurationSaved(device.code || device.id, configuration);
       }
 
       // Cerrar modal
       onClose();
     } catch (error) {
-      console.error("Error guardando configuración:", error);
+      console.error("❌ Error guardando configuración:", error);
+
+      let errorMessage =
+        "No se pudo guardar la configuración. Inténtalo de nuevo.";
+      if (error.message.includes("No document to update")) {
+        errorMessage =
+          "El dispositivo no se encontró. Por favor, recarga la página e inténtalo de nuevo.";
+      }
+
       Swal.fire({
         icon: "error",
         title: "Error al guardar",
-        text: "No se pudo guardar la configuración. Inténtalo de nuevo.",
+        text: errorMessage,
       });
     } finally {
       setLoading(false);
     }
   };
 
-  const availableTypes = getAvailableScreenTypes();
-  const enabledTypes = availableTypes.filter((type) => !type.disabled);
-  const screenNumberOptions = getScreenNumberOptions();
-  const currentScreenName = getConfiguredScreenName(
-    selectedScreenType,
-    selectedScreenNumber
-  );
+  // Si no hay dispositivo seleccionado, no mostrar el modal
+  if (!device) {
+    return null;
+  }
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -281,333 +317,233 @@ const DeviceConfiguration = ({
               <Dialog.Panel className="w-full max-w-2xl transform overflow-hidden rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <Dialog.Title
-                      as="h3"
-                      className="text-lg font-medium leading-6 text-gray-900"
-                    >
-                      Configurar Dispositivo
-                    </Dialog.Title>
-                    <p className="text-sm text-gray-500 mt-1">
-                      Código:{" "}
-                      <span className="font-mono font-semibold">
-                        {device?.code}
-                      </span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="rounded-md p-2 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <Dialog.Title
+                    as="h3"
+                    className="text-lg font-medium text-gray-900"
                   >
-                    <XMarkIcon className="h-6 w-6 text-gray-400" />
+                    Configurar Dispositivo {device.code || device.deviceId}
+                  </Dialog.Title>
+                  <button
+                    type="button"
+                    className="rounded-md text-gray-400 hover:text-gray-500"
+                    onClick={onClose}
+                  >
+                    <XMarkIcon className="h-6 w-6" />
                   </button>
                 </div>
 
-                {/* No hay licencias disponibles */}
-                {enabledTypes.length === 0 && (
-                  <div className="text-center py-8">
-                    <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
-                      <span className="text-2xl">⚠️</span>
-                    </div>
-                    <h3 className="mt-4 text-lg font-medium text-gray-900">
-                      No hay licencias de promociones disponibles
-                    </h3>
-                    <p className="mt-2 text-sm text-gray-500">
-                      Tu cuenta no tiene licencias activas para pantallas de
-                      promociones. Contacta al administrador para activar
-                      licencias.
-                    </p>
-                    <div className="mt-6">
-                      <button
-                        onClick={onClose}
-                        className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-                      >
-                        Entendido
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Formulario de configuración */}
-                {enabledTypes.length > 0 && (
-                  <div className="space-y-6">
-                    {/* Tipo de Pantalla */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-3">
-                        Tipo de Pantalla
-                      </label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {availableTypes.map((type) => (
-                          <div
-                            key={type.type}
-                            className={`relative rounded-lg border p-4 transition-all ${
-                              type.disabled
-                                ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
-                                : selectedScreenType === type.type
-                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500 cursor-pointer"
-                                : "border-gray-300 hover:border-gray-400 cursor-pointer"
-                            }`}
-                            onClick={() =>
-                              !type.disabled && setSelectedScreenType(type.type)
+                {/* Content */}
+                <div className="space-y-6">
+                  {/* Tipo de pantalla */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Tipo de Pantalla
+                    </label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      {getAvailableScreenTypes().map((screenType) => (
+                        <div
+                          key={screenType.type}
+                          className={`relative rounded-lg border p-4 transition-colors ${
+                            screenType.disabled
+                              ? "border-gray-200 bg-gray-50 cursor-not-allowed opacity-60"
+                              : selectedScreenType === screenType.type
+                              ? "border-blue-500 bg-blue-50 cursor-pointer"
+                              : "border-gray-300 hover:border-gray-400 cursor-pointer"
+                          }`}
+                          onClick={() => {
+                            if (!screenType.disabled) {
+                              setSelectedScreenType(screenType.type);
+                              setSelectedScreenNumber(1); // Reset al cambiar tipo
                             }
-                          >
-                            <div className="flex items-start">
-                              <div
-                                className={`text-2xl mr-3 ${
-                                  type.disabled ? "grayscale" : ""
+                          }}
+                        >
+                          <div className="flex items-center">
+                            <span className="text-2xl mr-3">
+                              {screenType.icon}
+                            </span>
+                            <div className="flex-1">
+                              <h4
+                                className={`text-sm font-medium ${
+                                  screenType.disabled
+                                    ? "text-gray-400"
+                                    : "text-gray-900"
                                 }`}
                               >
-                                {type.icon}
-                              </div>
-                              <div className="flex-1">
-                                <h4
-                                  className={`text-sm font-medium ${
-                                    type.disabled
-                                      ? "text-gray-500"
-                                      : "text-gray-900"
-                                  }`}
-                                >
-                                  {type.name}
-                                </h4>
-                                <p
-                                  className={`text-xs mt-1 ${
-                                    type.disabled
-                                      ? "text-gray-400"
-                                      : "text-gray-500"
-                                  }`}
-                                >
-                                  {type.description}
-                                </p>
-                                <p
-                                  className={`text-xs mt-2 ${
-                                    type.disabled
-                                      ? "text-gray-400"
-                                      : type.maxScreens > 0
-                                      ? "text-blue-600"
-                                      : "text-red-500"
-                                  }`}
-                                >
-                                  {type.disabled
-                                    ? type.disabledReason
-                                    : `Disponibles: ${type.maxScreens}`}
-                                </p>
-                              </div>
-                              {type.disabled && (
-                                <div className="flex items-center justify-center h-5 w-5 bg-gray-300 rounded-full">
-                                  <svg
-                                    className="h-3 w-3 text-gray-500"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M6 18L18 6M6 6l12 12"
-                                    />
-                                  </svg>
-                                </div>
-                              )}
-                              {!type.disabled &&
-                                selectedScreenType === type.type && (
-                                  <CheckIcon className="h-5 w-5 text-blue-600" />
-                                )}
+                                {screenType.name}
+                              </h4>
+                              <p
+                                className={`text-xs ${
+                                  screenType.disabled
+                                    ? "text-gray-400"
+                                    : "text-gray-500"
+                                }`}
+                              >
+                                {screenType.description}
+                              </p>
+                              <p
+                                className={`text-xs mt-1 ${
+                                  screenType.disabled
+                                    ? "text-gray-400"
+                                    : "text-blue-600"
+                                }`}
+                              >
+                                {screenType.disabled
+                                  ? screenType.disabledReason
+                                  : `Disponibles: ${screenType.maxScreens}`}
+                              </p>
                             </div>
                           </div>
-                        ))}
-                      </div>
+                          {selectedScreenType === screenType.type &&
+                            !screenType.disabled && (
+                              <CheckIcon className="absolute top-2 right-2 h-5 w-5 text-blue-500" />
+                            )}
+                          {screenType.disabled && (
+                            <div className="absolute top-2 right-2 text-gray-400">
+                              🔒
+                            </div>
+                          )}
+                        </div>
+                      ))}
                     </div>
+                  </div>
 
-                    {/* Número de Pantalla */}
-                    {selectedScreenType && (
+                  {/* Selección de pantalla específica */}
+                  {selectedScreenType &&
+                    !getAvailableScreenTypes().find(
+                      (t) => t.type === selectedScreenType
+                    )?.disabled && (
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">
-                          {getScreenNumberLabel(selectedScreenType)}
+                          Seleccionar Pantalla
                         </label>
                         <select
                           value={selectedScreenNumber}
                           onChange={(e) =>
                             setSelectedScreenNumber(parseInt(e.target.value))
                           }
-                          className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                          className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                         >
-                          {screenNumberOptions.map((num) => {
-                            const screenName = getConfiguredScreenName(
-                              selectedScreenType,
-                              num
-                            );
-                            return (
-                              <option key={num} value={num}>
-                                {screenName}
-                              </option>
-                            );
-                          })}
+                          {getScreenOptions().map((screen) => (
+                            <option key={screen.number} value={screen.number}>
+                              {screen.displayText}
+                            </option>
+                          ))}
                         </select>
                         <p className="text-xs text-gray-500 mt-1">
-                          Los nombres de pantallas se configuran en la sección
-                          de ajustes de pantallas.
+                          El nombre mostrado es el configurado en tu cuenta
                         </p>
                       </div>
                     )}
 
-                    {/* Orientación (solo para directorio) */}
-                    {selectedScreenType === "directorio" && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-3">
-                          Orientación de la Pantalla
-                        </label>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div
-                            className={`relative rounded-lg border cursor-pointer p-4 transition-all ${
-                              orientation === "landscape"
-                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onClick={() => setOrientation("landscape")}
-                          >
-                            <div className="text-center">
-                              <div className="text-2xl mb-2">📺</div>
-                              <h4 className="text-sm font-medium">
-                                Horizontal
-                              </h4>
-                              <p className="text-xs text-gray-500">Estándar</p>
-                            </div>
-                            {orientation === "landscape" && (
-                              <CheckIcon className="absolute top-2 right-2 h-5 w-5 text-blue-600" />
-                            )}
-                          </div>
-
-                          <div
-                            className={`relative rounded-lg border cursor-pointer p-4 transition-all ${
-                              orientation === "portrait"
-                                ? "border-blue-500 bg-blue-50 ring-2 ring-blue-500"
-                                : "border-gray-300 hover:border-gray-400"
-                            }`}
-                            onClick={() => setOrientation("portrait")}
-                          >
-                            <div className="text-center">
-                              <div className="text-2xl mb-2">📱</div>
-                              <h4 className="text-sm font-medium">Vertical</h4>
-                              <p className="text-xs text-gray-500">
-                                90° rotado
-                              </p>
-                            </div>
-                            {orientation === "portrait" && (
-                              <CheckIcon className="absolute top-2 right-2 h-5 w-5 text-blue-600" />
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Auto-inicio */}
+                  {/* Orientación (solo para directorio) */}
+                  {selectedScreenType === "directorio" && (
                     <div>
-                      <div className="flex items-center">
-                        <input
-                          id="auto-start"
-                          type="checkbox"
-                          checked={autoStart}
-                          onChange={(e) => setAutoStart(e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <label
-                          htmlFor="auto-start"
-                          className="ml-2 block text-sm text-gray-900"
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Orientación
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div
+                          className={`p-3 border rounded-lg cursor-pointer text-center ${
+                            orientation === "landscape"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-gray-300 hover:border-gray-400"
+                          }`}
+                          onClick={() => setOrientation("landscape")}
                         >
-                          Iniciar automáticamente al encender el dispositivo
-                        </label>
-                      </div>
-                      <p className="text-xs text-gray-500 mt-1 ml-6">
-                        La aplicación se abrirá automáticamente cuando se
-                        encienda la TV.
-                      </p>
-                    </div>
-
-                    {/* Vista previa de configuración */}
-                    {selectedScreenType && (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <h4 className="text-sm font-medium text-gray-900 mb-2">
-                          Vista Previa de Configuración
-                        </h4>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <p>
-                            <span className="font-medium">Tipo:</span>{" "}
-                            {selectedScreenType}
-                          </p>
-                          <p>
-                            <span className="font-medium">Pantalla:</span>{" "}
-                            {currentScreenName}
-                          </p>
-                          <p>
-                            <span className="font-medium">Número:</span> #
-                            {selectedScreenNumber}
-                          </p>
-                          {selectedScreenType === "directorio" && (
-                            <p>
-                              <span className="font-medium">Orientación:</span>{" "}
-                              {orientation === "landscape"
-                                ? "Horizontal"
-                                : "Vertical"}
-                            </p>
-                          )}
-                          <p>
-                            <span className="font-medium">Auto-inicio:</span>{" "}
-                            {autoStart ? "Sí" : "No"}
-                          </p>
+                          <div className="text-lg mb-1">📱</div>
+                          <div className="text-sm font-medium">Horizontal</div>
+                        </div>
+                        <div
+                          className={`p-3 border rounded-lg cursor-pointer text-center ${
+                            orientation === "portrait"
+                              ? "border-blue-500 bg-blue-50 text-blue-700"
+                              : "border-gray-300 hover:border-gray-400"
+                          }`}
+                          onClick={() => setOrientation("portrait")}
+                        >
+                          <div className="text-lg mb-1">📱</div>
+                          <div className="text-sm font-medium">Vertical</div>
                         </div>
                       </div>
-                    )}
-
-                    {/* Botones de acción */}
-                    <div className="flex justify-end space-x-3 pt-4 border-t">
-                      <button
-                        onClick={onClose}
-                        className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
-                        disabled={loading}
-                      >
-                        Cancelar
-                      </button>
-                      <button
-                        onClick={handleSaveConfiguration}
-                        disabled={!selectedScreenType || loading}
-                        className={`px-6 py-2 text-sm font-medium text-white rounded-md ${
-                          selectedScreenType && !loading
-                            ? "bg-blue-600 hover:bg-blue-700"
-                            : "bg-gray-300 cursor-not-allowed"
-                        }`}
-                      >
-                        {loading ? (
-                          <div className="flex items-center">
-                            <svg
-                              className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                            >
-                              <circle
-                                className="opacity-25"
-                                cx="12"
-                                cy="12"
-                                r="10"
-                                stroke="currentColor"
-                                strokeWidth="4"
-                              ></circle>
-                              <path
-                                className="opacity-75"
-                                fill="currentColor"
-                                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                              ></path>
-                            </svg>
-                            Guardando...
-                          </div>
-                        ) : (
-                          "Guardar Configuración"
-                        )}
-                      </button>
                     </div>
+                  )}
+
+                  {/* Auto inicio */}
+                  <div>
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={autoStart}
+                        onChange={(e) => setAutoStart(e.target.checked)}
+                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">
+                        Iniciar automáticamente al encender el dispositivo
+                      </span>
+                    </label>
                   </div>
-                )}
+                </div>
+
+                {/* Footer */}
+                <div className="mt-8 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                    onClick={onClose}
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveConfiguration}
+                    disabled={
+                      loading ||
+                      !selectedScreenType ||
+                      !selectedScreenNumber ||
+                      getAvailableScreenTypes().find(
+                        (t) => t.type === selectedScreenType
+                      )?.disabled
+                    }
+                    className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                      loading ||
+                      !selectedScreenType ||
+                      !selectedScreenNumber ||
+                      getAvailableScreenTypes().find(
+                        (t) => t.type === selectedScreenType
+                      )?.disabled
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700"
+                    }`}
+                  >
+                    {loading ? (
+                      <div className="flex items-center">
+                        <svg
+                          className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          ></circle>
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          ></path>
+                        </svg>
+                        Guardando...
+                      </div>
+                    ) : (
+                      "Guardar Configuración"
+                    )}
+                  </button>
+                </div>
               </Dialog.Panel>
             </Transition.Child>
           </div>
