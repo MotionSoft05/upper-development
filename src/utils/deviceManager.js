@@ -737,3 +737,201 @@ export default {
   createDevice,
   getDeviceData,
 };
+
+// Utilidad: Buscar dispositivo por code y devolver {id, ...data}
+export const getDeviceByCode = async (deviceCode) => {
+  const q = query(collection(db, "devices"), where("code", "==", deviceCode));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) return null;
+  const docSnap = querySnapshot.docs[0];
+  return { id: docSnap.id, ...docSnap.data() };
+};
+
+// ✅ NUEVA función: Solo busca en 'devices' (no en devices_temp) usando el campo code
+export const validateDeviceCode = async (deviceCode) => {
+  try {
+    console.log(`🔍 Validando código: ${deviceCode}`);
+    console.log(`📋 Buscando por campo 'code' = '${deviceCode}' en devices`);
+
+    const device = await getDeviceByCode(deviceCode);
+    if (!device) {
+      console.log(`❌ Dispositivo ${deviceCode} no encontrado en devices`);
+      return {
+        found: false,
+        error: "Dispositivo no encontrado",
+        message:
+          "Verifica que el código sea correcto o que el dispositivo esté encendido.",
+      };
+    }
+
+    console.log(`✅ Dispositivo encontrado:`, {
+      documentId: device.id,
+      code: device.code,
+      status: device.status,
+      ownerId: device.ownerId,
+    });
+
+    return {
+      found: true,
+      device: device,
+    };
+  } catch (error) {
+    console.error("❌ Error validando dispositivo:", error);
+    return {
+      found: false,
+      error: "Error de conexión",
+      message: "No se pudo verificar el dispositivo. Inténtalo de nuevo.",
+    };
+  }
+};
+
+// ✅ NUEVA función: Validación completa con verificación de estado (usando campo code)
+export const validateDeviceForLinking = async (deviceCode, userId) => {
+  try {
+    console.log(`🔍 Validando código para vinculación: ${deviceCode}`);
+
+    // Usar la nueva función de validación
+    const validation = await validateDeviceCode(deviceCode);
+
+    if (!validation.found) {
+      return validation; // Retornar error si no se encuentra
+    }
+
+    const deviceData = validation.device;
+
+    // Verificar estado del dispositivo
+    if (deviceData.status === "linked" && deviceData.ownerId !== userId) {
+      return {
+        found: true,
+        canLink: false,
+        error: "Dispositivo ya vinculado",
+        message: "Este dispositivo ya está vinculado a otra cuenta.",
+      };
+    }
+
+    if (deviceData.status === "linked" && deviceData.ownerId === userId) {
+      return {
+        found: true,
+        canLink: false,
+        error: "Ya es tuyo",
+        message: "Este dispositivo ya está vinculado a tu cuenta.",
+        isOwned: true,
+      };
+    }
+
+    // ✅ Dispositivo disponible para vincular
+    return {
+      found: true,
+      canLink: true,
+      success: true,
+      device: deviceData,
+      status: deviceData.status,
+      createdAt: deviceData.createdAt,
+      message: "Dispositivo disponible para vincular",
+    };
+  } catch (error) {
+    console.error("❌ Error validando dispositivo para vinculación:", error);
+    return {
+      found: false,
+      error: "Error de conexión",
+      message: "No se pudo verificar el dispositivo. Inténtalo de nuevo.",
+    };
+  }
+};
+
+// ✅ NUEVA función mejorada de vinculación (usando campo code)
+export const linkDeviceImproved = async (code, userId, userData) => {
+  try {
+    console.log(`🔗 Iniciando vinculación: ${code} -> Usuario: ${userId}`);
+
+    const device = await getDeviceByCode(code);
+    if (!device) {
+      throw new Error("Dispositivo no encontrado");
+    }
+
+    // Verificar que el dispositivo no esté vinculado a otro usuario
+    if (device.status === "linked" && device.ownerId !== userId) {
+      throw new Error("Este dispositivo ya está vinculado a otro usuario");
+    }
+
+    const updateData = {
+      status: "linked",
+      ownerId: userId,
+      ownerEmail: userData.email,
+      linkedAt: serverTimestamp(),
+      userData: userData, // ✅ Copiar userData completo
+      lastUpdated: serverTimestamp(),
+    };
+
+    const deviceRef = doc(db, "devices", device.id);
+    await updateDoc(deviceRef, updateData);
+
+    console.log(`✅ Dispositivo ${code} vinculado exitosamente`);
+    console.log(`📋 UserData copiado:`, {
+      nombre: userData.nombre,
+      empresa: userData.empresa,
+      email: userData.email,
+      licencias: {
+        ps: userData.ps,
+        pd: userData.pd,
+        pt: userData.pt,
+        pp: userData.pp,
+      },
+    });
+
+    return updateData;
+  } catch (error) {
+    console.error("❌ Error vinculando dispositivo:", error);
+    throw error;
+  }
+};
+
+// ✅ NUEVA función mejorada de desvinculación (usando campo code)
+export const unlinkDeviceImproved = async (
+  deviceCode,
+  userId,
+  action = "reset"
+) => {
+  try {
+    console.log(
+      `🔗 ${
+        action === "delete" ? "Eliminando" : "Desvinculando"
+      } dispositivo: ${deviceCode}`
+    );
+
+    const device = await getDeviceByCode(deviceCode);
+    if (!device) {
+      throw new Error("Dispositivo no encontrado");
+    }
+
+    // Verificar permisos
+    if (device.ownerId !== userId && device.status !== "waiting") {
+      throw new Error("No tienes permisos para realizar esta acción");
+    }
+
+    const deviceRef = doc(db, "devices", device.id);
+
+    if (action === "delete") {
+      // ✅ CAMBIO 5: Eliminar completamente
+      await deleteDoc(deviceRef);
+      console.log(`✅ Dispositivo ${deviceCode} eliminado completamente`);
+    } else {
+      // ✅ CAMBIO 6: Resetear a estado "waiting"
+      const resetData = {
+        status: "waiting",
+        ownerId: null,
+        ownerEmail: null,
+        linkedAt: null,
+        userData: null,
+        configuration: null,
+        lastUpdated: serverTimestamp(),
+      };
+
+      await updateDoc(deviceRef, resetData);
+      console.log(`✅ Dispositivo ${deviceCode} reseteado a "waiting"`);
+    }
+  } catch (error) {
+    console.error(`❌ Error en desvinculación:`, error);
+    throw error;
+  }
+};

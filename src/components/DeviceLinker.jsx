@@ -1,16 +1,14 @@
-/* eslint-disable @next/next/no-img-element */
+// src/components/DeviceLinker.jsx - ACTUALIZADO para usar solo 'devices'
 "use client";
 import React, { useState, useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import {
-  doc,
-  getDoc,
-  setDoc,
-  updateDoc,
-  serverTimestamp,
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
+import {
+  validateDeviceForLinking,
+  linkDeviceImproved,
+} from "@/utils/deviceManager";
 import Swal from "sweetalert2";
 
 const DeviceLinker = ({ onDeviceLinked }) => {
@@ -56,156 +54,45 @@ const DeviceLinker = ({ onDeviceLinked }) => {
     }
   }, [deviceCode]);
 
+  // ✅ NUEVA función de validación que solo busca en 'devices'
   const validateDevice = async () => {
-    if (deviceCode.length !== 6) return;
+    if (deviceCode.length !== 6 || !user?.uid) return;
 
-    console.log(`🔍 Validando código: ${deviceCode}`);
     setValidating(true);
     setDeviceInfo(null);
 
     try {
-      // 🆕 NUEVA ARQUITECTURA: Buscar en devices_temp primero
-      console.log(`📋 Buscando en devices_temp/${deviceCode}`);
-      const tempCodeRef = doc(db, "devices_temp", deviceCode);
-      const tempDoc = await getDoc(tempCodeRef);
+      console.log(`🔍 Validando código: ${deviceCode}`);
 
-      if (!tempDoc.exists()) {
-        console.log(`❌ No encontrado en devices_temp, buscando en devices...`);
-        // Si no está en devices_temp, verificar si ya está en devices (ya vinculado)
-        const deviceRef = doc(db, "devices", deviceCode);
-        const deviceDoc = await getDoc(deviceRef);
+      // ✅ Usar la nueva función que solo busca en 'devices'
+      const validation = await validateDeviceForLinking(deviceCode, user.uid);
 
-        if (!deviceDoc.exists()) {
-          console.log(`❌ Tampoco encontrado en devices`);
-          setDeviceInfo({
-            error: "Código no encontrado",
-            message:
-              "Verifica que el código sea correcto o que el dispositivo esté encendido.",
-          });
-          return;
-        }
-
-        console.log(`✅ Encontrado en devices (ya vinculado)`);
-        const deviceData = deviceDoc.data();
-        if (deviceData.ownerId === user?.uid) {
-          setDeviceInfo({
-            error: "Ya es tuyo",
-            message: "Este dispositivo ya está vinculado a tu cuenta.",
-            isOwned: true,
-          });
-          return;
-        } else {
-          setDeviceInfo({
-            error: "Dispositivo ya vinculado",
-            message: "Este dispositivo ya está vinculado a otra cuenta.",
-          });
-          return;
-        }
-      }
-
-      console.log(`✅ Encontrado en devices_temp`);
-      const tempData = tempDoc.data();
-      console.log(`📋 Datos del código temporal:`, tempData);
-
-      // 🔧 FIX: Manejar tanto Timestamp como string ISO de manera más robusta
-      const now = new Date();
-      let createdAt;
-      let hoursDiff;
-
-      try {
-        if (tempData.createdAt) {
-          if (typeof tempData.createdAt.toDate === "function") {
-            // Es un Timestamp de Firebase
-            createdAt = tempData.createdAt.toDate();
-            console.log(`📅 Fecha como Timestamp:`, createdAt);
-          } else if (typeof tempData.createdAt === "string") {
-            // Es una string ISO
-            createdAt = new Date(tempData.createdAt);
-            console.log(
-              `📅 Fecha como string:`,
-              tempData.createdAt,
-              "→",
-              createdAt
-            );
-          } else if (tempData.createdAt instanceof Date) {
-            // Ya es un objeto Date
-            createdAt = tempData.createdAt;
-            console.log(`📅 Fecha como Date:`, createdAt);
-          } else {
-            // Objeto con seconds y nanoseconds (Timestamp serializado)
-            if (tempData.createdAt.seconds) {
-              createdAt = new Date(tempData.createdAt.seconds * 1000);
-              console.log(
-                `📅 Fecha como objeto seconds:`,
-                tempData.createdAt,
-                "→",
-                createdAt
-              );
-            } else {
-              throw new Error("Formato de fecha no reconocido");
-            }
-          }
-        } else {
-          // No hay fecha, asumir que es muy viejo
-          createdAt = new Date(0);
-          console.log(`📅 Sin fecha, usando fecha mínima`);
-        }
-
-        // 🔧 FIX: Forzar ambas fechas a UTC para evitar problemas de zona horaria
-        const nowUTC = now.getTime();
-        const createdAtUTC = createdAt.getTime();
-
-        hoursDiff = (nowUTC - createdAtUTC) / (1000 * 60 * 60);
-
-        console.log(`🌍 Fecha actual UTC:`, new Date(nowUTC).toISOString());
-        console.log(
-          `🌍 Fecha creación UTC:`,
-          new Date(createdAtUTC).toISOString()
-        );
-        console.log(`⏱️ Diferencia: ${hoursDiff.toFixed(2)} horas`);
-      } catch (error) {
-        console.error(`❌ Error procesando fecha:`, error, tempData.createdAt);
-        // En caso de error, asumir que no ha expirado para no bloquear
-        hoursDiff = 0;
-      }
-
-      if (hoursDiff > 24) {
-        // 🔧 Cambié de 1 hora a 24 horas
-        console.log(
-          `❌ Código expirado: ${hoursDiff.toFixed(2)} horas (límite: 24h)`
-        );
+      if (!validation.found) {
         setDeviceInfo({
-          error: "Código expirado",
-          message:
-            "Este código ha expirado. Genera un nuevo código en el dispositivo.",
+          error: validation.error || "Dispositivo no encontrado",
+          message: validation.message || "Verifica que el código sea correcto.",
         });
         return;
       }
 
-      // Verificar estado
-      if (tempData.status !== "waiting") {
-        console.log(`❌ Código ya utilizado, status: ${tempData.status}`);
+      if (!validation.canLink) {
         setDeviceInfo({
-          error: "Código ya utilizado",
-          message:
-            "Este código ya ha sido utilizado. Genera uno nuevo en el dispositivo.",
+          error: validation.error,
+          message: validation.message,
+          isOwned: validation.isOwned,
         });
         return;
       }
 
-      console.log(`✅ Código válido y disponible`);
-      // Código temporal válido y disponible
-      const hoursRemaining = Math.max(0, 24 - hoursDiff);
+      // ✅ Dispositivo disponible para vincular
       setDeviceInfo({
         success: true,
-        status: tempData.status,
-        createdAt: tempData.createdAt,
-        deviceInfo: tempData.deviceInfo,
-        message: "Dispositivo disponible para vincular",
-        hoursRemaining: hoursRemaining.toFixed(1),
+        status: validation.status,
+        createdAt: validation.createdAt,
+        message: validation.message,
       });
     } catch (error) {
-      console.error("Error validando dispositivo:", error);
+      console.error("❌ Error validando dispositivo:", error);
       setDeviceInfo({
         error: "Error de conexión",
         message: "No se pudo verificar el dispositivo. Inténtalo de nuevo.",
@@ -215,61 +102,17 @@ const DeviceLinker = ({ onDeviceLinked }) => {
     }
   };
 
+  // ✅ NUEVA función de vinculación mejorada
   const handleLinkDevice = async () => {
     if (!user || !userData || !deviceCode || !deviceInfo?.success) return;
 
     setLinking(true);
 
     try {
-      // 🆕 NUEVA ARQUITECTURA: Proceso de vinculación actualizado
+      console.log(`🔗 Iniciando vinculación de ${deviceCode}`);
 
-      // 1. Leer datos del código temporal
-      const tempCodeRef = doc(db, "devices_temp", deviceCode);
-      const tempDoc = await getDoc(tempCodeRef);
-
-      if (!tempDoc.exists()) {
-        throw new Error("El código temporal ya no existe");
-      }
-
-      const tempData = tempDoc.data();
-
-      // 2. Crear dispositivo permanente con nuevo ID
-      const deviceId = `device_${Date.now()}_${user.uid}`;
-      const deviceRef = doc(db, "devices", deviceId);
-
-      const permanentDeviceData = {
-        deviceId,
-        code: deviceCode, // Mantener referencia al código original
-        ownerId: user.uid,
-        ownerEmail: userData.email,
-        status: "linked",
-        linkedAt: serverTimestamp(),
-        userData: userData,
-        deviceInfo: tempData.deviceInfo || {},
-        createdAt: tempData.createdAt,
-        lastUpdated: serverTimestamp(),
-        // Heredar datos del código temporal
-        ...tempData,
-        // Sobrescribir con nuevos datos permanentes
-        deviceId,
-        ownerId: user.uid,
-        ownerEmail: userData.email,
-        status: "linked",
-      };
-
-      await setDoc(deviceRef, permanentDeviceData);
-
-      // 3. Actualizar código temporal con deviceId para transición
-      await updateDoc(tempCodeRef, {
-        status: "linked",
-        deviceId: deviceId,
-        linkedAt: serverTimestamp(),
-        ownerId: user.uid,
-      });
-
-      // 4. El código temporal se eliminará automáticamente por el sistema de limpieza
-
-      console.log(`✅ Dispositivo vinculado: ${deviceCode} → ${deviceId}`);
+      // ✅ Usar la nueva función mejorada
+      await linkDeviceImproved(deviceCode, user.uid, userData);
 
       // Mostrar mensaje de éxito
       Swal.fire({
@@ -282,20 +125,17 @@ const DeviceLinker = ({ onDeviceLinked }) => {
 
       // Notificar al componente padre
       if (onDeviceLinked) {
-        onDeviceLinked(deviceCode, userData, deviceId);
+        onDeviceLinked(deviceCode, userData);
       }
 
       // Limpiar formulario
       setDeviceCode("");
       setDeviceInfo(null);
     } catch (error) {
-      console.error("Error vinculando dispositivo:", error);
+      console.error("❌ Error vinculando dispositivo:", error);
 
       let errorMessage = "No se pudo vincular el dispositivo.";
-      if (error.message.includes("ya no existe")) {
-        errorMessage =
-          "El código temporal ha expirado. Genera uno nuevo en el dispositivo.";
-      } else if (error.message.includes("ya está vinculado")) {
+      if (error.message.includes("ya está vinculado")) {
         errorMessage = "Este dispositivo ya está vinculado a otra cuenta.";
       } else if (error.message.includes("no encontrado")) {
         errorMessage = "Dispositivo no encontrado. Verifica el código.";
@@ -303,7 +143,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
 
       Swal.fire({
         icon: "error",
-        title: "Error al vincular",
+        title: "Error de vinculación",
         text: errorMessage,
       });
     } finally {
@@ -316,31 +156,25 @@ const DeviceLinker = ({ onDeviceLinked }) => {
       {/* Header */}
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-gray-900 mb-2">
-          Vincular Dispositivo Android TV
+          📱 Vincular Dispositivo
         </h2>
         <p className="text-gray-600">
-          Conecta tu dispositivo Android TV Box a tu cuenta de UpperDS
+          Conecta tu dispositivo Android TV a tu cuenta
         </p>
       </div>
 
       {/* Instrucciones */}
-      <div className="bg-blue-50 rounded-lg p-6 mb-8">
-        <h3 className="text-lg font-semibold text-blue-900 mb-4">
-          Instrucciones para vincular:
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+        <h3 className="text-lg font-medium text-blue-900 mb-2">
+          📋 Instrucciones:
         </h3>
-        <ol className="space-y-1 list-decimal list-inside">
+        <ol className="text-blue-800 space-y-1 list-decimal list-inside">
           <li>Enciende tu dispositivo Android TV</li>
           <li>Abre la aplicación UpperDS</li>
           <li>Se mostrará un código de 6 caracteres en pantalla</li>
           <li>Ingresa ese código aquí abajo</li>
           <li>Haz clic en &quot;Vincular Dispositivo&quot;</li>
         </ol>
-        <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-          <p className="text-sm text-yellow-800">
-            ⏰ <strong>Importante:</strong> Los códigos expiran automáticamente
-            después de 24 horas.
-          </p>
-        </div>
       </div>
 
       {/* Formulario de código */}
@@ -391,6 +225,14 @@ const DeviceLinker = ({ onDeviceLinked }) => {
           <p className="text-xs text-gray-500 mt-1 text-center">
             {deviceCode.length}/6 caracteres • Solo letras y números
           </p>
+
+          {/* ✅ AYUDA VISUAL para el código correcto */}
+          {deviceCode.length > 0 && (
+            <div className="text-xs text-blue-600 mt-2 text-center">
+              💡 Asegúrate de que el código sea exactamente como aparece en
+              pantalla
+            </div>
+          )}
         </div>
 
         {/* Estado del dispositivo */}
@@ -407,6 +249,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                 {deviceInfo.success ? (
                   <svg
                     className="h-5 w-5 text-green-400"
+                    xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -419,6 +262,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                 ) : (
                   <svg
                     className="h-5 w-5 text-red-400"
+                    xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 20 20"
                     fill="currentColor"
                   >
@@ -437,8 +281,8 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                   }`}
                 >
                   {deviceInfo.success
-                    ? "Dispositivo encontrado"
-                    : deviceInfo.error || "Error"}
+                    ? "✅ Dispositivo disponible"
+                    : `❌ ${deviceInfo.error}`}
                 </h3>
                 <p
                   className={`text-sm mt-1 ${
@@ -447,15 +291,9 @@ const DeviceLinker = ({ onDeviceLinked }) => {
                 >
                   {deviceInfo.message}
                 </p>
-                {deviceInfo.success && deviceInfo.hoursRemaining && (
-                  <p className="text-xs text-green-600 mt-1">
-                    ⏱️ Código válido por {deviceInfo.hoursRemaining} horas más
-                  </p>
-                )}
-                {deviceInfo.deviceInfo && (
-                  <div className="mt-2 text-xs text-green-600">
-                    <p>📱 {deviceInfo.deviceInfo.platform || "Android"}</p>
-                    <p>📦 App v{deviceInfo.deviceInfo.appVersion || "1.0.0"}</p>
+                {deviceInfo.success && (
+                  <div className="text-xs text-green-600 mt-2">
+                    Estado: {deviceInfo.status} • Código: {deviceCode}
                   </div>
                 )}
               </div>
@@ -463,31 +301,80 @@ const DeviceLinker = ({ onDeviceLinked }) => {
           </div>
         )}
 
-        {/* Botón de vinculación */}
-        <button
-          onClick={handleLinkDevice}
-          disabled={!deviceInfo?.success || linking || loading}
-          className={`w-full py-3 px-4 rounded-md text-white font-medium transition-colors duration-200 ${
-            deviceInfo?.success && !linking && !loading
-              ? "bg-blue-600 hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              : "bg-gray-400 cursor-not-allowed"
-          }`}
-        >
-          {linking
-            ? "Vinculando dispositivo..."
-            : loading
-            ? "Cargando..."
-            : "Vincular Dispositivo"}
-        </button>
+        {/* Información del usuario que se vinculará */}
+        {userData && deviceInfo?.success && (
+          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+            <h3 className="text-sm font-medium text-gray-900 mb-3">
+              👤 Este dispositivo se vinculará a:
+            </h3>
+            <div className="space-y-2 text-sm text-gray-600">
+              <div className="flex justify-between">
+                <span>Usuario:</span>
+                <span className="font-medium">
+                  {userData.nombre} {userData.apellido}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span>Email:</span>
+                <span className="font-medium">{userData.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Empresa:</span>
+                <span className="font-medium">{userData.empresa}</span>
+              </div>
+              <hr className="my-2" />
+              <div className="text-xs text-gray-500">
+                <strong>Licencias disponibles:</strong>
+                <div className="grid grid-cols-2 gap-2 mt-1">
+                  <span>🎭 Salón: {userData.ps || 0}</span>
+                  <span>📋 Directorio: {userData.pd || 0}</span>
+                  <span>💰 Tarifario: {userData.pt || 0}</span>
+                  <span>📢 Promociones: {userData.pp || 0}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
-        {/* Info adicional */}
-        <div className="text-center text-sm text-gray-500">
-          <p>
-            ¿Problemas para conectar?{" "}
-            <a href="#" className="text-blue-600 hover:text-blue-500">
-              Consulta nuestra guía de ayuda
-            </a>
-          </p>
+        {/* Botón de vinculación */}
+        <div className="flex justify-center">
+          <button
+            onClick={handleLinkDevice}
+            disabled={!deviceInfo?.success || linking}
+            className={`px-8 py-3 rounded-lg font-medium transition-all ${
+              deviceInfo?.success && !linking
+                ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-lg"
+                : "bg-gray-300 text-gray-500 cursor-not-allowed"
+            }`}
+          >
+            {linking ? (
+              <div className="flex items-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Vinculando...
+              </div>
+            ) : (
+              "🔗 Vincular Dispositivo"
+            )}
+          </button>
         </div>
       </div>
     </div>
