@@ -79,6 +79,10 @@ function PantallasPromociones() {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // NUEVO: Estado para orientación del template fullscreen
+  const [fullscreenOrientation, setFullscreenOrientation] = useState("16x9");
+
   // Función para formatear fechas sin problemas de zona horaria
   const formatDate = (dateString) => {
     if (!dateString) return "";
@@ -94,6 +98,7 @@ function PantallasPromociones() {
     const [year, month, day] = dateOnly.split("-");
     return `${day}/${month}/${year}`;
   };
+
   // Lista de ciudades para el clima
   const [cityOptions, setCityOptions] = useState([
     { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
@@ -127,11 +132,12 @@ function PantallasPromociones() {
 
   const [selectedCity, setSelectedCity] = useState(null);
 
-  // Templates disponibles
+  // ACTUALIZADO: Templates disponibles (agregado el 4to template fullscreen)
   const templates = [
     { id: 1, name: t("promotionScreens.oneSection"), sections: 1 },
     { id: 2, name: t("promotionScreens.threeSections"), sections: 3 },
     { id: 3, name: t("promotionScreens.sixSections"), sections: 6 },
+    { id: 4, name: "Pantalla Completa", sections: 1, isFullscreen: true },
   ];
 
   useEffect(() => {
@@ -285,6 +291,13 @@ function PantallasPromociones() {
                 setSelectedCity(templatePromoData.selectedCity);
               }
 
+              // NUEVO: Cargar orientación fullscreen
+              if (templatePromoData.fullscreenOrientation) {
+                setFullscreenOrientation(
+                  templatePromoData.fullscreenOrientation
+                );
+              }
+
               // Cargar configuración por pantalla
               if (templatePromoData.pantallasConfig) {
                 setPantallaSettings(templatePromoData.pantallasConfig);
@@ -316,6 +329,12 @@ function PantallasPromociones() {
 
   const handleCityChange = (selectedOption) => {
     setSelectedCity(selectedOption);
+    setHasUnsavedChanges(true);
+  };
+
+  // NUEVA: Función para manejar cambio de orientación fullscreen
+  const handleFullscreenOrientationChange = (orientation) => {
+    setFullscreenOrientation(orientation);
     setHasUnsavedChanges(true);
   };
 
@@ -697,6 +716,8 @@ function PantallasPromociones() {
       ...selectedPantalla.config,
       templateId: templateId,
       sections: newSections,
+      // NUEVO: Si es template fullscreen, agregar orientación
+      ...(template.isFullscreen && { orientation: fullscreenOrientation }),
     };
 
     // Actualizar el estado
@@ -856,6 +877,7 @@ function PantallasPromociones() {
         idioma: selectedLanguage,
         pantallasConfig: pantallaSettings,
         selectedCity: selectedCity,
+        fullscreenOrientation: fullscreenOrientation, // NUEVO: Guardar orientación
         timestamp: serverTimestamp(),
       };
 
@@ -918,63 +940,108 @@ function PantallasPromociones() {
     }
   };
 
-  // Función para renderizar el preview del template
+  // ACTUALIZADA: Función para renderizar el preview del template con marcos y fullscreen
   const renderTemplatePreview = (templateId) => {
+    const isSelected = selectedPantalla?.config.templateId === templateId;
+
     switch (templateId) {
       case 1:
         return (
-          <div className="w-full aspect-[16/9] bg-black relative grid grid-cols-1 grid-rows-1 gap-2 p-2 rounded">
-            <div className="bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-sm">
-                {" "}
-                {t("promotionScreens.uniqueSection")}
-              </span>
+          <div className="w-full aspect-[16/9] bg-black relative rounded">
+            {/* Marco superior para templates con secciones */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500 rounded-t"></div>
+
+            {/* Contenido principal */}
+            <div className="h-full p-2 pb-3">
+              <div className="h-full bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-sm">Sección única</span>
+              </div>
+            </div>
+
+            {/* Marco inferior - barra de remarco */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-600 rounded-b flex items-center justify-center">
+              <div className="h-0.5 w-8 bg-gray-400 rounded"></div>
             </div>
           </div>
         );
       case 2:
         return (
-          <div className="w-full aspect-[16/9] bg-black relative grid grid-cols-3 grid-rows-2 gap-2 p-2 rounded">
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">
-                {" "}
-                {t("promotionScreens.sectionCount")} 1
-              </span>
+          <div className="w-full aspect-[16/9] bg-black relative rounded">
+            {/* Marco superior */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500 rounded-t"></div>
+
+            {/* Contenido principal */}
+            <div className="h-full p-2 pb-3 grid grid-cols-3 grid-rows-2 gap-1">
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">sección 1</span>
+              </div>
+              <div className="col-span-2 row-span-2 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-sm">sección 3</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">sección 2</span>
+              </div>
             </div>
-            <div className="col-span-2 row-span-2 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-sm">
-                {" "}
-                {t("promotionScreens.sectionCount")} 3
-              </span>
-            </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">
-                {" "}
-                {t("promotionScreens.sectionCount")} 2
-              </span>
+
+            {/* Marco inferior - barra de remarco */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-600 rounded-b flex items-center justify-center">
+              <div className="h-0.5 w-8 bg-gray-400 rounded"></div>
             </div>
           </div>
         );
       case 3:
         return (
-          <div className="w-full aspect-[16/9] bg-black relative grid grid-cols-3 grid-rows-2 gap-2 p-2 rounded">
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">1</span>
+          <div className="w-full aspect-[16/9] bg-black relative rounded">
+            {/* Marco superior */}
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gray-500 rounded-t"></div>
+
+            {/* Contenido principal */}
+            <div className="h-full p-2 pb-3 grid grid-cols-3 grid-rows-2 gap-1">
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">1</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">2</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">3</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">4</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">5</span>
+              </div>
+              <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
+                <span className="text-white text-xs">6</span>
+              </div>
             </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">2</span>
+
+            {/* Marco inferior - barra de remarco */}
+            <div className="absolute bottom-0 left-0 right-0 h-2 bg-gray-600 rounded-b flex items-center justify-center">
+              <div className="h-0.5 w-8 bg-gray-400 rounded"></div>
             </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">3</span>
+          </div>
+        );
+      case 4:
+        // Template fullscreen - mantener aspecto fijo 16:9, sin deformación
+        return (
+          <div className="w-full aspect-[16/9] bg-black relative rounded overflow-hidden">
+            {/* Sin marcos - pantalla completa */}
+            <div className="h-full w-full flex items-center justify-center bg-gray-800">
+              <div className="text-center">
+                <span className="text-white text-sm font-bold">
+                  Pantalla Completa
+                </span>
+                <div className="mt-1 text-white text-xs opacity-75">
+                  Sin remarco
+                </div>
+              </div>
             </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">4</span>
-            </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">5</span>
-            </div>
-            <div className="col-span-1 row-span-1 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-white text-xs">6</span>
+
+            {/* Indicador de fullscreen */}
+            <div className="absolute top-2 right-2 bg-gray-600 text-white text-xs px-2 py-1 rounded">
+              FULL
             </div>
           </div>
         );
@@ -1095,37 +1162,6 @@ function PantallasPromociones() {
             >
               {t("promotionScreens.screens")}
             </button>
-            {/* <button
-              onClick={() => {
-                if (hasUnsavedChanges) {
-                  Swal.fire({
-                    title: "Cambios sin guardar",
-                    text: "¿Desea guardar los cambios antes de cambiar de pestaña?",
-                    icon: "warning",
-                    showCancelButton: true,
-                    confirmButtonColor: "#3085d6",
-                    cancelButtonColor: "#d33",
-                    confirmButtonText: "Guardar",
-                    cancelButtonText: "Descartar",
-                  }).then((result) => {
-                    if (result.isConfirmed) {
-                      guardarInformacionPersonalizacion();
-                    }
-                    setActiveTab("appearance");
-                    setHasUnsavedChanges(false);
-                  });
-                } else {
-                  setActiveTab("appearance");
-                }
-              }}
-              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
-                activeTab === "appearance"
-                  ? "text-blue-600 border-b-2 border-blue-500"
-                  : "text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              {t("promotionScreens.appearance")}
-            </button> */}
             {selectedPantalla && (
               <button
                 onClick={() => setActiveTab("pantalla")}
@@ -1226,6 +1262,57 @@ function PantallasPromociones() {
                     {t("promotionScreens.weatherCityDescription")}
                   </p>
                 </div>
+
+                {/* NUEVA: Configuración de orientación para template fullscreen */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Orientación por defecto para pantalla completa
+                  </label>
+                  <div className="flex flex-wrap gap-4">
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="orientation-16x9"
+                        value="16x9"
+                        checked={fullscreenOrientation === "16x9"}
+                        onChange={(e) =>
+                          handleFullscreenOrientationChange(e.target.value)
+                        }
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <label
+                        htmlFor="orientation-16x9"
+                        className="ml-2 block text-sm text-gray-700"
+                      >
+                        Horizontal (16:9)
+                      </label>
+                    </div>
+
+                    <div className="flex items-center">
+                      <input
+                        type="radio"
+                        id="orientation-9x16"
+                        value="9x16"
+                        checked={fullscreenOrientation === "9x16"}
+                        onChange={(e) =>
+                          handleFullscreenOrientationChange(e.target.value)
+                        }
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <label
+                        htmlFor="orientation-9x16"
+                        className="ml-2 block text-sm text-gray-700"
+                      >
+                        Vertical (9:16)
+                      </label>
+                    </div>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">
+                    Esta orientación se aplicará por defecto al template de
+                    pantalla completa. Puede cambiarla individualmente en cada
+                    pantalla.
+                  </p>
+                </div>
               </div>
             )}
 
@@ -1307,96 +1394,6 @@ function PantallasPromociones() {
               </div>
             )}
 
-            {/* Pestaña de Apariencia */}
-            {activeTab === "appearance" && (
-              <div className="space-y-6">
-                <h2 className="text-lg font-semibold text-gray-900 border-b pb-2">
-                  {t("promotionScreens.appearance")}
-                </h2>
-
-                {/* Estilo de Texto */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("promotionScreens.textStyle")}
-                    </label>
-                    <Select
-                      options={fontStyleOptions}
-                      value={selectedFontStyle}
-                      onChange={handleFontStyleChange}
-                      placeholder="Seleccionar estilo de texto"
-                      className="w-full"
-                    />
-                    <div
-                      className="mt-2 p-3 border rounded-md"
-                      style={{
-                        fontFamily: selectedFontStyle?.value || "Arial",
-                      }}
-                    >
-                      <p> {t("promotionScreens.exampleText")}</p>
-                    </div>
-                  </div>
-
-                  {/* Color de Texto */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      {t("promotionScreens.textColor")}
-                    </label>
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={handleFontColorChange}
-                        className="inline-flex items-center px-3 py-2 border border-gray-300 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                      >
-                        {t("promotionScreens.selectColor")}
-                      </button>
-                      <div
-                        className="w-8 h-8 rounded-full border border-gray-300"
-                        style={{ backgroundColor: fontColor }}
-                      ></div>
-                      <div className="text-sm" style={{ color: fontColor }}>
-                        {fontColor}
-                      </div>
-                    </div>
-                    {showFontColorPicker && (
-                      <div className="absolute z-10 mt-2">
-                        <div className="mb-2">
-                          <ChromePicker
-                            color={fontColor}
-                            onChange={handleColorChange}
-                          />
-                        </div>
-                        <button
-                          onClick={handleFontColorChange}
-                          className="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        >
-                          {t("promotionScreens.saveColor")}
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Vista previa */}
-                <div className="mt-4 p-4 border rounded-md">
-                  <h3 className="text-sm font-medium text-gray-700 mb-2">
-                    {t("promotionScreens.preview")}
-                  </h3>
-                  <div
-                    className="p-4 rounded-md bg-gray-100"
-                    style={{
-                      fontFamily: selectedFontStyle?.value || "Arial",
-                      color: fontColor,
-                    }}
-                  >
-                    <div className="text-lg font-bold">
-                      {t("promotionScreens.exampleTitle")}
-                    </div>
-                    <p className="mt-2">{t("promotionScreens.exampleText")}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
             {/* Pestaña de Pantalla Específica */}
             {activeTab === "pantalla" && selectedPantalla && (
               <div className="space-y-6">
@@ -1414,7 +1411,7 @@ function PantallasPromociones() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     {t("promotionScreens.selectTemplate")}
                   </label>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     {templates.map((template) => (
                       <div
                         key={template.id}
@@ -1426,14 +1423,15 @@ function PantallasPromociones() {
                         onClick={() => handleChangeTemplate(template.id)}
                       >
                         <div className="p-3 bg-gray-50 border-b">
-                          <div className="text-center font-medium">
+                          <div className="text-center font-medium text-sm">
                             {template.name}
                           </div>
                           <div className="text-xs text-center text-gray-500">
-                            {template.sections}{" "}
-                            {t("promotionScreens.sectionCount", {
-                              count: template.sections,
-                            })}
+                            {template.isFullscreen
+                              ? "Sin remarco"
+                              : `${template.sections} sección${
+                                  template.sections > 1 ? "es" : ""
+                                }`}
                           </div>
                         </div>
                         <div className="p-3">
@@ -1448,14 +1446,102 @@ function PantallasPromociones() {
                             }`}
                           >
                             {selectedPantalla.config.templateId === template.id
-                              ? t("promotionScreens.selected")
-                              : t("promotionScreens.select")}
+                              ? "Seleccionado"
+                              : "Seleccionar"}
                           </div>
                         </div>
                       </div>
                     ))}
                   </div>
                 </div>
+
+                {/* NUEVA: Configuración de orientación específica para template fullscreen */}
+                {selectedPantalla.config.templateId === 4 && (
+                  <div className=" p-4 rounded-lg  ">
+                    <h3 className="text-sm font-medium  mb-3">
+                      Configuración de Pantalla Completa
+                    </h3>
+                    <div>
+                      <label className="block text-sm font-medium  mb-2">
+                        Orientación de la pantalla
+                      </label>
+                      <div className="flex gap-4">
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            id={`screen-orientation-16x9-${selectedPantalla.id}`}
+                            value="16x9"
+                            checked={
+                              (selectedPantalla.config.orientation ||
+                                fullscreenOrientation) === "16x9"
+                            }
+                            onChange={(e) => {
+                              const updatedConfig = {
+                                ...selectedPantalla.config,
+                                orientation: e.target.value,
+                              };
+                              setSelectedPantalla({
+                                ...selectedPantalla,
+                                config: updatedConfig,
+                              });
+                              setPantallaSettings({
+                                ...pantallaSettings,
+                                [selectedPantalla.id]: updatedConfig,
+                              });
+                              setHasUnsavedChanges(true);
+                            }}
+                            className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                          />
+                          <label
+                            htmlFor={`screen-orientation-16x9-${selectedPantalla.id}`}
+                            className="ml-2 block text-sm "
+                          >
+                            Horizontal (16:9)
+                          </label>
+                        </div>
+
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            id={`screen-orientation-9x16-${selectedPantalla.id}`}
+                            value="9x16"
+                            checked={
+                              (selectedPantalla.config.orientation ||
+                                fullscreenOrientation) === "9x16"
+                            }
+                            onChange={(e) => {
+                              const updatedConfig = {
+                                ...selectedPantalla.config,
+                                orientation: e.target.value,
+                              };
+                              setSelectedPantalla({
+                                ...selectedPantalla,
+                                config: updatedConfig,
+                              });
+                              setPantallaSettings({
+                                ...pantallaSettings,
+                                [selectedPantalla.id]: updatedConfig,
+                              });
+                              setHasUnsavedChanges(true);
+                            }}
+                            className="h-4 w-4  focus:ring-purple-500 border-gray-300"
+                          />
+                          <label
+                            htmlFor={`screen-orientation-9x16-${selectedPantalla.id}`}
+                            className="ml-2 block text-sm "
+                          >
+                            Vertical (9:16)
+                          </label>
+                        </div>
+                      </div>
+                      <p className="mt-1 text-xs ">
+                        La orientación vertical es ideal para pantallas tipo
+                        reel o stories, mientras que la horizontal es mejor para
+                        contenido tradicional.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Administración de Contenido por Sección */}
                 <div className="mt-8">
@@ -1473,7 +1559,11 @@ function PantallasPromociones() {
                           >
                             <div className="bg-gray-50 px-4 py-3 border-b flex justify-between items-center">
                               <h4 className="font-medium text-gray-700">
-                                {t("promotionScreens.sectionCount")} {sectionId}
+                                {selectedPantalla.config.templateId === 4
+                                  ? "Contenido Fullscreen"
+                                  : `${t(
+                                      "promotionScreens.sectionCount"
+                                    )} ${sectionId}`}
                               </h4>
                               <button
                                 onClick={() => handleAddContent(sectionId)}
@@ -1787,6 +1877,7 @@ function PantallasPromociones() {
                       setFontColor("#000000");
                       setSelectedFontStyle(fontStyleOptions[0]);
                       setSelectedCity(null);
+                      setFullscreenOrientation("16x9");
                       setHasUnsavedChanges(true);
                     }
                   }}

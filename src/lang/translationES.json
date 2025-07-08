@@ -292,7 +292,6 @@
     "title": "Contáctanos",
     "content": "Ponte en contacto con nosotros para discutir cómo podemos ayudarte con tus necesidades comerciales."
   },
-
   "footer": {
     "title": "El contenido de este sitio está protegido por copyright y es propiedad de Upper Digital Signage.",
     "privacyPolicy": "Política de privacidad",
@@ -315,7 +314,6 @@
       "partners": "Socios"
     }
   },
-
   "sidebar": {
     "title": "GESTIÓN DE PANTALLAS",
     "admin": "Usuarios y licencias",
@@ -338,7 +336,6 @@
     "promotion": "pantalla Promociones",
     "rateScreen": "Pantallas Tarifario"
   },
-
   "monitorScreen": {
     "title": "Monitor de Pantallas",
     "description": "Visualiza el estado de todas las pantallas activas",
@@ -1171,6 +1168,20 @@
     "screenLabel": "Pantalla de Promociones",
     "configure": "Configurar",
     "noScreens": "No hay pantallas de promociones configuradas. Por favor, contacte al administrador para adquirir licencias de pantallas.",
+
+    "fullscreenTemplate": "Pantalla Completa",
+    "fullscreenDescription": "Template sin remarco para contenido inmersivo",
+    "orientationSettings": "Configuración de Orientación",
+    "defaultOrientation": "Orientación por defecto para pantalla completa",
+    "horizontal": "Horizontal (16:9)",
+    "vertical": "Vertical (9:16)",
+    "orientationDescription": "Esta orientación se aplicará por defecto al template de pantalla completa. Puede cambiarla individualmente en cada pantalla.",
+    "fullscreenConfig": "Configuración de Pantalla Completa",
+    "screenOrientation": "Orientación de la pantalla",
+    "orientationNote": "La orientación vertical es ideal para pantallas tipo reel o stories, mientras que la horizontal es mejor para contenido tradicional.",
+    "contentFullscreen": "Contenido Fullscreen",
+    "noFrame": "Sin remarco",
+
     "instructions": {
       "title": "Instrucciones de uso",
       "description": "Para configurar sus pantallas de promociones, siga estos pasos:",

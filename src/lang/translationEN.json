@@ -544,6 +544,20 @@
     "screenLabel": "Promotion Screen",
     "configure": "Configure",
     "noScreens": "No promotion screens configured. Please contact the administrator to acquire screen licenses.",
+
+    "fullscreenTemplate": "Full Screen",
+    "fullscreenDescription": "Template without frame for immersive content",
+    "orientationSettings": "Orientation Settings",
+    "defaultOrientation": "Default orientation for full screen",
+    "horizontal": "Horizontal (16:9)",
+    "vertical": "Vertical (9:16)",
+    "orientationDescription": "This orientation will be applied by default to the full screen template. You can change it individually on each screen.",
+    "fullscreenConfig": "Full Screen Configuration",
+    "screenOrientation": "Screen orientation",
+    "orientationNote": "Vertical orientation is ideal for reel or stories-type screens, while horizontal is better for traditional content.",
+    "contentFullscreen": "Fullscreen Content",
+    "noFrame": "No frame",
+
     "instructions": {
       "title": "Usage instructions",
       "description": "To configure your promotion screens, follow these steps:",
