@@ -464,7 +464,7 @@ const DeviceConfiguration = ({
                         {/* Campo de nombre personalizado */}
                         <div className="space-y-2 mt-4">
                           <label className="block text-sm font-medium text-gray-700">
-                            Nombre del dispositivo
+                            Nombre pantalla
                           </label>
                           <input
                             type="text"
