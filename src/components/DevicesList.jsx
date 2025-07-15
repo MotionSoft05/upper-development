@@ -131,13 +131,31 @@ const DevicesList = () => {
   const getScreenTypeIcon = (screenType) => {
     switch (screenType) {
       case "salon":
-        return "";
+        return "🎭";
       case "directorio":
-        return "";
+        return "📋";
       case "tarifario":
-        return "";
+        return "💰";
+      case "promociones":
+        return "📢";
       default:
-        return "";
+        return "📺";
+    }
+  };
+
+  // NUEVA FUNCIÓN: Obtener el nombre del tipo de pantalla
+  const getScreenTypeName = (screenType) => {
+    switch (screenType) {
+      case "salon":
+        return "Salón";
+      case "directorio":
+        return "Directorio";
+      case "tarifario":
+        return "Tarifario";
+      case "promociones":
+        return "Promociones";
+      default:
+        return "Desconocido";
     }
   };
 
@@ -235,7 +253,7 @@ const DevicesList = () => {
   }
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="p-6 bg-gay-50 min-h-screen">
       {/* Header */}
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
@@ -334,20 +352,37 @@ const DevicesList = () => {
                         </div>
                         <div className="mt-1 flex items-center space-x-4 text-sm text-gray-500">
                           {device.configuration ? (
-                            <span>
-                              {device.configuration.screenType === "salon"
-                                ? "Salón"
-                                : device.configuration.screenType ===
-                                  "directorio"
-                                ? "Directorio"
-                                : "Tarifario"}
-                            </span>
+                            <>
+                              {/* CORREGIDO: Mostrar el nombre del dispositivo si existe */}
+                              {device.configuration.screenName ? (
+                                <span className="font-medium text-gray-700">
+                                  {device.configuration.screenName}
+                                </span>
+                              ) : (
+                                <span>
+                                  {getScreenTypeName(
+                                    device.configuration.screenType
+                                  )}{" "}
+                                  #{device.configuration.screenNumber}
+                                </span>
+                              )}
+                              <span>•</span>
+                              <span>
+                                {getScreenTypeName(
+                                  device.configuration.screenType
+                                )}
+                              </span>
+                            </>
                           ) : (
                             <span>⚙️ No configurado</span>
                           )}
+                          <span>•</span>
                           <span>🔗 {formatDate(device.linkedAt)}</span>
                           {device.lastSeen && (
-                            <span>👁️ {formatDate(device.lastSeen)}</span>
+                            <>
+                              <span>•</span>
+                              <span>👁️ {formatDate(device.lastSeen)}</span>
+                            </>
                           )}
                         </div>
                       </div>
@@ -428,6 +463,26 @@ const DevicesList = () => {
                         )}
                         {device.configuration && (
                           <>
+                            <div>
+                              <span className="font-medium text-gray-700">
+                                Nombre del dispositivo:
+                              </span>
+                              <span className="ml-2 text-gray-900">
+                                {device.configuration.screenName ||
+                                  "Sin nombre"}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-gray-700">
+                                Tipo de pantalla:
+                              </span>
+                              <span className="ml-2 text-gray-900">
+                                {getScreenTypeName(
+                                  device.configuration.screenType
+                                )}{" "}
+                                #{device.configuration.screenNumber}
+                              </span>
+                            </div>
                             <div>
                               <span className="font-medium text-gray-700">
                                 Configurado:

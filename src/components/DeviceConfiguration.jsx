@@ -43,14 +43,14 @@ const DeviceConfiguration = ({
       if (config) {
         setSelectedScreenType(config.screenType || "");
         setSelectedScreenNumber(config.screenNumber || 1);
-        setScreenName(config.screenName || "");
+        setScreenName(config.screenName || ""); // ← Cargar el nombre existente
         setOrientation(config.orientation || "landscape");
         setAutoStart(config.autoStart !== false);
       } else {
         // Resetear a valores por defecto
         setSelectedScreenType("");
         setSelectedScreenNumber(1);
-        setScreenName("");
+        setScreenName(""); // ← Limpiar el campo de nombre
         setOrientation("landscape");
         setAutoStart(true);
       }
@@ -168,6 +168,35 @@ const DeviceConfiguration = ({
     }
   };
 
+  const getConfiguredScreenName = (screenType, screenNumber) => {
+    if (!userData || !screenType || !screenNumber)
+      return `Pantalla ${screenNumber}`;
+    const index = screenNumber - 1;
+    switch (screenType) {
+      case "salon":
+        return (
+          userData.nombrePantallas?.[index] || `Pantalla Salón ${screenNumber}`
+        );
+      case "directorio":
+        return (
+          userData.nombrePantallasDirectorio?.[index] ||
+          `Pantalla Directorio ${screenNumber}`
+        );
+      case "tarifario":
+        return (
+          userData.nombrePantallasTarifario?.[index] ||
+          `Pantalla Tarifario ${screenNumber}`
+        );
+      case "promociones":
+        return (
+          userData.nombrePantallasPromociones?.[index] ||
+          `Pantalla Promociones ${screenNumber}`
+        );
+      default:
+        return `Pantalla ${screenNumber}`;
+    }
+  };
+
   const handleSaveConfiguration = async () => {
     // Validaciones
     if (!selectedScreenType) {
@@ -202,17 +231,16 @@ const DeviceConfiguration = ({
     try {
       console.log(`🔧 Configurando dispositivo ID: ${device.id}`);
 
-      // Obtener el nombre automáticamente según la configuración del usuario
-      const configuredScreenName = getScreenName(
-        selectedScreenType,
-        selectedScreenNumber
-      );
+      // CORREGIDO: Usar el nombre del input o el nombre automático como fallback
+      const finalScreenName =
+        screenName.trim() ||
+        getScreenName(selectedScreenType, selectedScreenNumber);
 
       // Preparar configuración
       const configuration = {
         screenType: selectedScreenType,
         screenNumber: selectedScreenNumber,
-        screenName: configuredScreenName, // Usar el nombre configurado automáticamente
+        screenName: finalScreenName, // ← AQUÍ ESTÁ LA CORRECCIÓN
         autoStart,
         configuredAt: serverTimestamp(),
         lastUpdated: serverTimestamp(),
@@ -251,7 +279,7 @@ const DeviceConfiguration = ({
       Swal.fire({
         icon: "success",
         title: "Configuración guardada",
-        text: `Dispositivo configurado correctamente como "${configuredScreenName}"`,
+        text: `Dispositivo configurado correctamente como "${finalScreenName}"`,
         timer: 3000,
         showConfirmButton: false,
       });
@@ -432,6 +460,28 @@ const DeviceConfiguration = ({
                         <p className="text-xs text-gray-500 mt-1">
                           El nombre mostrado es el configurado en tu cuenta
                         </p>
+
+                        {/* Campo de nombre personalizado */}
+                        <div className="space-y-2 mt-4">
+                          <label className="block text-sm font-medium text-gray-700">
+                            Nombre del dispositivo
+                          </label>
+                          <input
+                            type="text"
+                            value={screenName}
+                            onChange={(e) => setScreenName(e.target.value)}
+                            placeholder={getConfiguredScreenName(
+                              selectedScreenType,
+                              selectedScreenNumber
+                            )}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            maxLength={50}
+                          />
+                          <p className="text-xs text-gray-500">
+                            Nombre personalizado para identificar este
+                            dispositivo
+                          </p>
+                        </div>
                       </div>
                     )}
 
@@ -467,21 +517,6 @@ const DeviceConfiguration = ({
                       </div>
                     </div>
                   )}
-
-                  {/* Auto inicio */}
-                  <div>
-                    <label className="flex items-center">
-                      <input
-                        type="checkbox"
-                        checked={autoStart}
-                        onChange={(e) => setAutoStart(e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-300 focus:ring focus:ring-blue-200 focus:ring-opacity-50"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">
-                        Iniciar automáticamente al encender el dispositivo
-                      </span>
-                    </label>
-                  </div>
                 </div>
 
                 {/* Footer */}
