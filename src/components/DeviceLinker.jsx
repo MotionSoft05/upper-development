@@ -293,7 +293,9 @@ const DeviceLinker = ({ onDeviceLinked }) => {
           <li>Abre la aplicación UpperDS</li>
           <li>Se mostrará un código de 6 caracteres en pantalla</li>
           <li>Ingresa ese código aquí abajo</li>
-          <li>Haz clic en "Vincular a {userData?.empresa || "empresa"}"</li>
+          <li>
+            Haz clic en &quot;Vincular a {userData?.empresa || "empresa"}&quot;
+          </li>
         </ol>
       </div>
 
