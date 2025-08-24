@@ -1,33 +1,62 @@
-// src/hooks/useDeviceSync.js
+// src/hook/useDeviceSync.js - Actualizado para empresa
 import { useState, useEffect, useCallback } from "react";
-import { doc, onSnapshot } from "firebase/firestore";
+import {
+  doc,
+  onSnapshot,
+  collection,
+  query,
+  where,
+  getDocs,
+} from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
 import {
   subscribeToUserDevices,
+  subscribeToCompanyDevices, // ✅ NUEVA importación
   syncUserDataToDevices,
+  syncUserDataToCompanyDevices, // ✅ NUEVA importación
   getUserDevices,
+  getCompanyDevices, // ✅ NUEVA importación
 } from "@/utils/deviceManager";
 
 /**
  * Hook para manejar sincronización automática de dispositivos
  * - Escucha cambios en userData del usuario
- * - Sincroniza automáticamente a todos sus dispositivos
+ * - Sincroniza automáticamente a todos los dispositivos de la empresa
  * - Proporciona lista de dispositivos en tiempo real
+ *
+ * ✅ ACTUALIZADO: Ahora maneja empresa en lugar de solo usuario
  */
-export const useDeviceSync = () => {
+export const useDeviceSync = (empresaSeleccionada = null) => {
   const [user, loading, error] = useAuthState(auth);
   const [devices, setDevices] = useState([]);
   const [userData, setUserData] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [syncError, setSyncError] = useState(null);
 
+  // ✅ NUEVOS estados para manejo de empresa
+  const [userCompany, setUserCompany] = useState(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // ✅ Determinar si el usuario es admin
+  useEffect(() => {
+    if (user?.email) {
+      const adminEmails = [
+        "uppermex10@gmail.com",
+        "ulises.jacobo@hotmail.com",
+        "contacto@upperds.mx",
+      ];
+      setIsAdmin(adminEmails.includes(user.email));
+    }
+  }, [user]);
+
   // Cargar datos iniciales del usuario
   useEffect(() => {
     if (!user) {
       setUserData(null);
       setDevices([]);
+      setUserCompany(null);
       return;
     }
 
@@ -39,14 +68,30 @@ export const useDeviceSync = () => {
         if (doc.exists()) {
           const newUserData = doc.data();
           setUserData(newUserData);
+          setUserCompany(newUserData.empresa);
 
           // Auto-sincronizar a dispositivos cuando userData cambia
           if (newUserData) {
             try {
               setSyncing(true);
               setSyncError(null);
-              await syncUserDataToDevices(user.uid, newUserData);
-              console.log("✅ Dispositivos sincronizados automáticamente");
+
+              // ✅ CAMBIO: Sincronizar por empresa en lugar de usuario
+              if (newUserData.empresa) {
+                await syncUserDataToCompanyDevices(
+                  newUserData.empresa,
+                  newUserData
+                );
+                console.log(
+                  "✅ Dispositivos de empresa sincronizados automáticamente"
+                );
+              } else {
+                // Fallback al método anterior
+                await syncUserDataToDevices(user.uid, newUserData);
+                console.log(
+                  "✅ Dispositivos de usuario sincronizados automáticamente"
+                );
+              }
             } catch (error) {
               console.error("❌ Error sincronizando dispositivos:", error);
               setSyncError(error.message);
@@ -65,40 +110,85 @@ export const useDeviceSync = () => {
     return () => unsubscribeUser();
   }, [user]);
 
-  // Escuchar dispositivos del usuario en tiempo real
+  // ✅ ACTUALIZADO: Escuchar dispositivos por empresa o usuario
   useEffect(() => {
     if (!user) {
       setDevices([]);
       return;
     }
 
-    const unsubscribeDevices = subscribeToUserDevices(
-      user.uid,
-      (userDevices) => {
+    let unsubscribeDevices;
+
+    // ✅ LÓGICA: Solo usar empresa si se especifica Y el usuario es admin
+    if (isAdmin && empresaSeleccionada) {
+      // Admin seleccionó una empresa específica - usar empresa
+      unsubscribeDevices = subscribeToCompanyDevices(
+        empresaSeleccionada,
+        (companyDevices) => {
+          setDevices(companyDevices);
+          console.log(
+            `📱 ${companyDevices.length} dispositivos cargados para empresa ${empresaSeleccionada}`
+          );
+        }
+      );
+    } else if (!isAdmin && userCompany) {
+      // Usuario normal - usar su empresa
+      unsubscribeDevices = subscribeToCompanyDevices(
+        userCompany,
+        (companyDevices) => {
+          setDevices(companyDevices);
+          console.log(
+            `📱 ${companyDevices.length} dispositivos cargados para empresa ${userCompany}`
+          );
+        }
+      );
+    } else {
+      // ✅ FALLBACK: Comportamiento original (por usuario)
+      unsubscribeDevices = subscribeToUserDevices(user.uid, (userDevices) => {
         setDevices(userDevices);
-        console.log(`📱 ${userDevices.length} dispositivos cargados`);
-      }
-    );
+        console.log(
+          `📱 ${userDevices.length} dispositivos cargados para usuario`
+        );
+      });
+    }
 
     return () => unsubscribeDevices();
-  }, [user]);
+  }, [user, isAdmin, empresaSeleccionada, userCompany]);
 
-  // Función para forzar sincronización manual
+  // ✅ ACTUALIZADA: Función para forzar sincronización manual
   const forceSyncDevices = useCallback(async () => {
     if (!user || !userData) return;
 
     try {
       setSyncing(true);
       setSyncError(null);
-      await syncUserDataToDevices(user.uid, userData);
-      console.log("✅ Sincronización manual completada");
+
+      // Determinar qué empresa usar
+      let targetCompany = null;
+
+      if (isAdmin && empresaSeleccionada) {
+        targetCompany = empresaSeleccionada;
+      } else if (userData.empresa) {
+        targetCompany = userData.empresa;
+      }
+
+      if (targetCompany) {
+        await syncUserDataToCompanyDevices(targetCompany, userData);
+        console.log(
+          `✅ Sincronización manual completada para empresa ${targetCompany}`
+        );
+      } else {
+        // Fallback al método original
+        await syncUserDataToDevices(user.uid, userData);
+        console.log("✅ Sincronización manual completada para usuario");
+      }
     } catch (error) {
       console.error("❌ Error en sincronización manual:", error);
       setSyncError(error.message);
     } finally {
       setSyncing(false);
     }
-  }, [user, userData]);
+  }, [user, userData, isAdmin, empresaSeleccionada]);
 
   // Función para obtener estadísticas de dispositivos
   const getDeviceStats = useCallback(() => {
@@ -150,6 +240,10 @@ export const useDeviceSync = () => {
     syncing,
     syncError,
 
+    // ✅ NUEVOS estados para empresa
+    userCompany,
+    isAdmin,
+
     // Funciones
     forceSyncDevices,
     getDeviceStats,
@@ -164,7 +258,35 @@ export const useDeviceSync = () => {
 };
 
 /**
+ * Hook simplificado para obtener dispositivos por empresa
+ * ✅ NUEVO: Específico para empresa
+ */
+export const useCompanyDevices = (empresa) => {
+  const [devices, setDevices] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!empresa) {
+      setLoading(false);
+      setDevices([]);
+      return;
+    }
+
+    setLoading(true);
+    const unsubscribe = subscribeToCompanyDevices(empresa, (companyDevices) => {
+      setDevices(companyDevices);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [empresa]);
+
+  return { devices, loading, hasDevices: devices.length > 0 };
+};
+
+/**
  * Hook simplificado solo para obtener dispositivos del usuario
+ * ✅ MANTENIDO: Para compatibilidad
  */
 export const useUserDevices = () => {
   const [user] = useAuthState(auth);
@@ -192,6 +314,7 @@ export const useUserDevices = () => {
 
 /**
  * Hook para monitorear estado de un dispositivo específico
+ * ✅ MANTENIDO: Sin cambios
  */
 export const useDeviceStatus = (deviceCode) => {
   const [device, setDevice] = useState(null);

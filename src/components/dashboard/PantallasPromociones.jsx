@@ -72,6 +72,7 @@ function PantallasPromociones() {
       startDate: null,
       endDate: null,
     },
+    useNativeDuration: false,
   });
   const [contentDate, setContentDate] = useState({
     startDate: null,
@@ -79,6 +80,8 @@ function PantallasPromociones() {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [useNativeDuration, setUseNativeDuration] = useState(false);
+  const [videoDuration, setVideoDuration] = useState(null);
 
   // NUEVO: Estado para orientación del template fullscreen
   const [fullscreenOrientation, setFullscreenOrientation] = useState("16x9");
@@ -346,6 +349,29 @@ function PantallasPromociones() {
     });
   };
 
+  // Función para obtener la duración de un video
+  const getVideoDuration = (file) => {
+    return new Promise((resolve, reject) => {
+      // Crear un elemento de video temporal para obtener la duración
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      
+      video.onloadedmetadata = () => {
+        // Obtener la duración en segundos y redondear
+        const durationSeconds = Math.round(video.duration);
+        URL.revokeObjectURL(video.src); // Liberar memoria
+        resolve(durationSeconds);
+      };
+      
+      video.onerror = () => {
+        URL.revokeObjectURL(video.src);
+        reject("Error al obtener la duración del video");
+      };
+      
+      video.src = URL.createObjectURL(file);
+    });
+  };
+
   const handleContentFileUpload = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
@@ -382,6 +408,22 @@ function PantallasPromociones() {
     // Mostrar indicador de carga
     setIsUploading(true);
     setUploadProgress(0);
+    
+    // Si es un video, obtener su duración
+    let duration = 10; // Valor por defecto
+    if (fileType === "video") {
+      try {
+        duration = await getVideoDuration(file);
+        setVideoDuration(duration);
+      } catch (error) {
+        console.error("Error al obtener la duración del video:", error);
+        // Continuar con el valor por defecto si hay error
+      }
+    } else {
+      // Resetear la duración del video si se sube una imagen
+      setVideoDuration(null);
+      setUseNativeDuration(false);
+    }
 
     try {
       // Crear una referencia única para el archivo
@@ -423,6 +465,10 @@ function PantallasPromociones() {
             type: fileType,
             url: fileUrl,
             name: file.name,
+            // Si es un video y se seleccionó usar duración nativa, actualizar la duración
+            duration: fileType === "video" && useNativeDuration ? duration : newContentItem.duration,
+            // Guardar la duración del video y el estado de uso de duración nativa
+            ...(fileType === "video" && { videoDuration: duration, useNativeDuration: useNativeDuration })
           });
 
           setIsUploading(false);
@@ -560,7 +606,10 @@ function PantallasPromociones() {
         startDate: null,
         endDate: null,
       },
+      useNativeDuration: false,
     });
+    setUseNativeDuration(false);
+    setVideoDuration(null);
   };
 
   const handleAddContent = (sectionId) => {
@@ -605,6 +654,14 @@ function PantallasPromociones() {
       startDate: startDate,
       endDate: endDate,
     });
+
+    // Resetear estados de duración de video
+    setUseNativeDuration(content.useNativeDuration || false);
+    if (content.type === "video" && content.videoDuration) {
+      setVideoDuration(content.videoDuration);
+    } else {
+      setVideoDuration(null);
+    }
 
     setNewContentItem({
       ...content,
@@ -1260,57 +1317,6 @@ function PantallasPromociones() {
                   />
                   <p className="mt-1 text-xs text-gray-500">
                     {t("promotionScreens.weatherCityDescription")}
-                  </p>
-                </div>
-
-                {/* NUEVA: Configuración de orientación para template fullscreen */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Orientación por defecto para pantalla completa
-                  </label>
-                  <div className="flex flex-wrap gap-4">
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        id="orientation-16x9"
-                        value="16x9"
-                        checked={fullscreenOrientation === "16x9"}
-                        onChange={(e) =>
-                          handleFullscreenOrientationChange(e.target.value)
-                        }
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <label
-                        htmlFor="orientation-16x9"
-                        className="ml-2 block text-sm text-gray-700"
-                      >
-                        Horizontal (16:9)
-                      </label>
-                    </div>
-
-                    <div className="flex items-center">
-                      <input
-                        type="radio"
-                        id="orientation-9x16"
-                        value="9x16"
-                        checked={fullscreenOrientation === "9x16"}
-                        onChange={(e) =>
-                          handleFullscreenOrientationChange(e.target.value)
-                        }
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <label
-                        htmlFor="orientation-9x16"
-                        className="ml-2 block text-sm text-gray-700"
-                      >
-                        Vertical (9:16)
-                      </label>
-                    </div>
-                  </div>
-                  <p className="mt-1 text-xs text-gray-500">
-                    Esta orientación se aplicará por defecto al template de
-                    pantalla completa. Puede cambiarla individualmente en cada
-                    pantalla.
                   </p>
                 </div>
               </div>
@@ -2188,11 +2194,46 @@ function PantallasPromociones() {
                     })
                   }
                   min="1"
-                  className="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  className={`w-full rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 ${
+                    newContentItem.type === "video" && useNativeDuration
+                      ? "bg-gray-200 text-gray-500 border-gray-400 cursor-not-allowed"
+                      : "border-gray-300 text-gray-900"
+                  }`}
+                  disabled={newContentItem.type === "video" && useNativeDuration}
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   {t("promotionScreens.durationDescription")}
                 </p>
+                
+                {/* Opción para usar duración nativa del video */}
+                {newContentItem.type === "video" && (
+                  <div className="mt-3 flex items-center p-2 bg-blue-50 border border-blue-200 rounded-md">
+                    <input
+                      type="checkbox"
+                      id="use-native-duration"
+                      className="mr-2 h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      checked={useNativeDuration}
+                      onChange={(e) => {
+                        const checked = e.target.checked;
+                        setUseNativeDuration(checked);
+                        if (checked && videoDuration) {
+                          // Si se activa y hay una duración de video disponible, actualizar
+                          setNewContentItem({
+                            ...newContentItem,
+                            duration: videoDuration
+                          });
+                        }
+                      }}
+                    />
+                    <label htmlFor="use-native-duration" className={`text-sm ${useNativeDuration ? "font-bold text-blue-700" : "text-gray-700"}`}>
+                      Usar duración nativa del video {videoDuration ? (
+                        <span className="inline-block ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full font-medium">
+                          {videoDuration} segundos
+                        </span>
+                      ) : ''}
+                    </label>
+                  </div>
+                )}
               </div>
 
               {/* Selector de fecha */}
