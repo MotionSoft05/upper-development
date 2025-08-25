@@ -369,121 +369,8 @@ const DevicesList = () => {
         </div>
       )}
 
-      {/* Estadísticas */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ComputerDesktopIcon
-                  className="h-6 w-6 text-gray-400"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Total dispositivos
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.total}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CheckCircleIcon
-                  className="h-6 w-6 text-green-400"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    En línea
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.online}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ExclamationCircleIcon
-                  className="h-6 w-6 text-red-400"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Desconectados
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.offline}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white overflow-hidden shadow-sm rounded-lg border border-gray-200">
-          <div className="p-5">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <ClockIconSolid
-                  className="h-6 w-6 text-yellow-400"
-                  aria-hidden="true"
-                />
-              </div>
-              <div className="ml-5 w-0 flex-1">
-                <dl>
-                  <dt className="text-sm font-medium text-gray-500 truncate">
-                    Esperando
-                  </dt>
-                  <dd className="text-lg font-medium text-gray-900">
-                    {stats.waiting}
-                  </dd>
-                </dl>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Controles */}
       <div className="bg-white shadow-sm rounded-lg border border-gray-200">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <div className="flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
-            <div className="flex items-center space-x-4">
-              <select
-                value={selectedFilter}
-                onChange={(e) => setSelectedFilter(e.target.value)}
-                className="block pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
-              >
-                <option value="all">Todos ({stats.total})</option>
-                <option value="online">En línea ({stats.online})</option>
-                <option value="offline">Desconectados ({stats.offline})</option>
-                <option value="waiting">Esperando ({stats.waiting})</option>
-                <option value="linked">Vinculados ({stats.linked})</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         {/* ✅ CONDICIONAL: Mostrar mensaje si admin no ha seleccionado empresa */}
         {isAdmin && !empresaSeleccionada ? (
           <div className="p-12 text-center">
@@ -597,7 +484,9 @@ const DevicesList = () => {
                       <EyeIcon className="h-5 w-5" />
                     </button>
 
-                    {(device.status === "linked" || device.status === "configured" || device.status === "online") && (
+                    {(device.status === "linked" ||
+                      device.status === "configured" ||
+                      device.status === "online") && (
                       <button
                         onClick={() => handleConfigureDevice(device)}
                         className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50"
