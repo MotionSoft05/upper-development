@@ -72,7 +72,7 @@ function PantallasPromociones() {
       startDate: null,
       endDate: null,
     },
-    useNativeDuration: false,
+    useNativeDuration: true,
   });
   const [contentDate, setContentDate] = useState({
     startDate: null,
@@ -80,7 +80,7 @@ function PantallasPromociones() {
   });
   const [isUploading, setIsUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [useNativeDuration, setUseNativeDuration] = useState(false);
+  const [useNativeDuration, setUseNativeDuration] = useState(true);
   const [videoDuration, setVideoDuration] = useState(null);
 
   // NUEVO: Estado para orientación del template fullscreen
@@ -606,9 +606,9 @@ function PantallasPromociones() {
         startDate: null,
         endDate: null,
       },
-      useNativeDuration: false,
+      useNativeDuration: true,
     });
-    setUseNativeDuration(false);
+    setUseNativeDuration(true);
     setVideoDuration(null);
   };
 
