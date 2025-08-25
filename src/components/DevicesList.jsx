@@ -597,7 +597,7 @@ const DevicesList = () => {
                       <EyeIcon className="h-5 w-5" />
                     </button>
 
-                    {device.status === "linked" && (
+                    {(device.status === "linked" || device.status === "configured" || device.status === "online") && (
                       <button
                         onClick={() => handleConfigureDevice(device)}
                         className="p-2 text-blue-600 hover:text-blue-800 rounded-full hover:bg-blue-50"
