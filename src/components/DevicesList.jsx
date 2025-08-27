@@ -217,9 +217,10 @@ const DevicesList = () => {
     // ✅ CORREGIDO: Usar el código del dispositivo, no el ID del documento
     const deviceCode = device.code || device.id;
 
+    const deviceName = device.configuration?.screenName || deviceCode;
     const result = await Swal.fire({
       title: "¿Eliminar dispositivo?",
-      text: `¿Estás seguro de que quieres eliminar el dispositivo ${deviceCode}? Esta acción no se puede deshacer.`,
+      text: `¿Estás seguro de que quieres eliminar el dispositivo ${deviceName}? Esta acción no se puede deshacer.`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc2626",
@@ -233,7 +234,7 @@ const DevicesList = () => {
         await deleteDevice(deviceCode, currentUser.uid);
         Swal.fire({
           title: "¡Eliminado!",
-          text: `El dispositivo ${deviceCode} ha sido eliminado.`,
+          text: `El dispositivo ${deviceName} ha sido eliminado.`,
           icon: "success",
           timer: 3000,
           showConfirmButton: false,
@@ -440,7 +441,16 @@ const DevicesList = () => {
                     <div className="flex-1">
                       <div className="flex items-center">
                         <p className="text-sm font-medium text-gray-900">
-                          {device.code || device.id}
+                          {device.configuration?.screenName ? (
+                            <>
+                              {device.configuration.screenName}
+                              <span className="text-gray-500 font-normal ml-2">
+                                ({device.code || device.id})
+                              </span>
+                            </>
+                          ) : (
+                            device.code || device.id
+                          )}
                         </p>
                         <span
                           className={`ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
@@ -519,6 +529,14 @@ const DevicesList = () => {
                             <dt className="text-gray-500">Estado:</dt>
                             <dd className="text-gray-900">{device.status}</dd>
                           </div>
+                          {device.configuration?.screenName && (
+                            <div className="flex justify-between">
+                              <dt className="text-gray-500">Nombre:</dt>
+                              <dd className="text-gray-900">
+                                {device.configuration.screenName}
+                              </dd>
+                            </div>
+                          )}
                           <div className="flex justify-between">
                             <dt className="text-gray-500">Código:</dt>
                             <dd className="text-gray-900 font-mono">
