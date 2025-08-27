@@ -185,6 +185,38 @@ const DevicesList = () => {
     return `Hace ${Math.floor(diffMins / 1440)} días`;
   };
 
+  // ✅ NUEVO: Función para obtener el nombre real de la pantalla
+  const getScreenName = (screenType, screenNumber) => {
+    if (!userData || !screenType || !screenNumber)
+      return `Pantalla ${screenNumber}`;
+
+    const index = screenNumber - 1; // Los arrays empiezan en 0
+
+    switch (screenType) {
+      case "salon":
+        return (
+          userData.nombrePantallas?.[index] || `Pantalla Salón ${screenNumber}`
+        );
+      case "directorio":
+        return (
+          userData.nombrePantallasDirectorio?.[index] ||
+          `Pantalla Directorio ${screenNumber}`
+        );
+      case "tarifario":
+        return (
+          userData.nombrePantallasTarifario?.[index] ||
+          `Pantalla Tarifario ${screenNumber}`
+        );
+      case "promociones":
+        return (
+          userData.nombrePantallasPromociones?.[index] ||
+          `Pantalla Promociones ${screenNumber}`
+        );
+      default:
+        return `Pantalla ${screenNumber}`;
+    }
+  };
+
   // Filtrar dispositivos según el filtro seleccionado
   const filteredDevices = devices.filter((device) => {
     if (selectedFilter === "all") return true;
@@ -447,9 +479,18 @@ const DevicesList = () => {
                               <span className="text-gray-500 font-normal ml-2">
                                 ({device.code || device.id})
                               </span>
+                              {/* ✅ NUEVO: Badge para mostrar que está configurado */}
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                Configurado
+                              </span>
                             </>
                           ) : (
-                            device.code || device.id
+                            <>
+                              {device.code || device.id}
+                              <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                                Sin configurar
+                              </span>
+                            </>
                           )}
                         </p>
                         <span
@@ -480,6 +521,24 @@ const DevicesList = () => {
                         {device.empresa && <span>🏢 {device.empresa}</span>}
                         {device.lastSeen && (
                           <span>🕒 {getTimeAgo(device.lastSeen)}</span>
+                        )}
+                        {/* ✅ NUEVO: Mostrar información de pantalla configurada */}
+                        {device.configuration?.screenType && (
+                          <span className="inline-flex items-center">
+                            {device.configuration.screenType === "salon" &&
+                              "🎭"}
+                            {device.configuration.screenType === "directorio" &&
+                              "📋"}
+                            {device.configuration.screenType ===
+                              "promociones" && "📢"}
+                            {device.configuration.screenType === "tarifario" &&
+                              "💰"}{" "}
+                            {/* ✅ ACTUALIZADO: Mostrar nombre real de la pantalla */}
+                            {getScreenName(
+                              device.configuration.screenType,
+                              device.configuration.screenNumber
+                            )}
+                          </span>
                         )}
                       </div>
                     </div>
@@ -525,24 +584,6 @@ const DevicesList = () => {
                           Información del dispositivo
                         </h4>
                         <dl className="space-y-1">
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Estado:</dt>
-                            <dd className="text-gray-900">{device.status}</dd>
-                          </div>
-                          {device.configuration?.screenName && (
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">Nombre:</dt>
-                              <dd className="text-gray-900">
-                                {device.configuration.screenName}
-                              </dd>
-                            </div>
-                          )}
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Código:</dt>
-                            <dd className="text-gray-900 font-mono">
-                              {device.code || device.id}
-                            </dd>
-                          </div>
                           {device.code && device.id !== device.code && (
                             <div className="flex justify-between">
                               <dt className="text-gray-500">ID documento:</dt>
@@ -551,27 +592,12 @@ const DevicesList = () => {
                               </dd>
                             </div>
                           )}
-                          <div className="flex justify-between">
-                            <dt className="text-gray-500">Empresa:</dt>
-                            <dd className="text-gray-900">
-                              {device.empresa || "No asignada"}
-                            </dd>
-                          </div>
+
                           {device.createdAt && (
                             <div className="flex justify-between">
                               <dt className="text-gray-500">Creado:</dt>
                               <dd className="text-gray-900">
                                 {formatDate(device.createdAt)}
-                              </dd>
-                            </div>
-                          )}
-                          {device.lastSeen && (
-                            <div className="flex justify-between">
-                              <dt className="text-gray-500">
-                                Última vez visto:
-                              </dt>
-                              <dd className="text-gray-900">
-                                {formatDate(device.lastSeen)}
                               </dd>
                             </div>
                           )}
@@ -598,12 +624,9 @@ const DevicesList = () => {
                               </dd>
                             </div>
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">Licencias:</dt>
+                              <dt className="text-gray-500">Empresa:</dt>
                               <dd className="text-gray-900">
-                                S:{device.userData.ps || 0} D:
-                                {device.userData.pd || 0} T:
-                                {device.userData.pt || 0} P:
-                                {device.userData.pp || 0}
+                                {device.empresa || "No asignada"}
                               </dd>
                             </div>
                           </dl>
