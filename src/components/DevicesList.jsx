@@ -529,8 +529,7 @@ const DevicesList = () => {
                               "🎭"}
                             {device.configuration.screenType === "directorio" &&
                               "📋"}
-                            {device.configuration.screenType ===
-                              "promociones" && "📢"}
+                            {device.configuration.screenType === "promociones"}
                             {device.configuration.screenType === "tarifario" &&
                               "💰"}{" "}
                             {/* ✅ ACTUALIZADO: Mostrar nombre real de la pantalla */}
