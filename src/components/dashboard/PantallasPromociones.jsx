@@ -83,8 +83,8 @@ function PantallasPromociones() {
   const [useNativeDuration, setUseNativeDuration] = useState(true);
   const [videoDuration, setVideoDuration] = useState(null);
 
-  // NUEVO: Estado para orientación del template fullscreen
-  const [fullscreenOrientation, setFullscreenOrientation] = useState("16x9");
+  // NUEVO: Estado para resolución del template fullscreen
+  const [selectedResolution, setSelectedResolution] = useState("16x9");
 
   // Función para formatear fechas sin problemas de zona horaria
   const formatDate = (dateString) => {
@@ -134,6 +134,20 @@ function PantallasPromociones() {
   cityOptions.sort((a, b) => a.label.localeCompare(b.label));
 
   const [selectedCity, setSelectedCity] = useState(null);
+
+  // NUEVO: Opciones de resolución para template fullscreen
+  const resolutionOptions = [
+    { value: "1x1", label: "Cuadrada (1:1) - 1080x1080px", ratio: "1/1" },
+    { value: "16x9", label: "Full HD (16:9) - 1920x1080px", ratio: "16/9" },
+    {
+      value: "9x16",
+      label: "Vertical/Stories (9:16) - 1080x1920px",
+      ratio: "9/16",
+    },
+    { value: "4x3", label: "Clásica (4:3) - 1024x768px", ratio: "4/3" },
+    { value: "3x2", label: "Fotográfica (3:2) - 1920x1280px", ratio: "3/2" },
+    { value: "21x9", label: "Ultra-wide (21:9) - 2560x1080px", ratio: "21/9" },
+  ];
 
   // ACTUALIZADO: Templates disponibles (agregado el 4to template fullscreen)
   const templates = [
@@ -294,11 +308,9 @@ function PantallasPromociones() {
                 setSelectedCity(templatePromoData.selectedCity);
               }
 
-              // NUEVO: Cargar orientación fullscreen
+              // NUEVO: Cargar resolución fullscreen
               if (templatePromoData.fullscreenOrientation) {
-                setFullscreenOrientation(
-                  templatePromoData.fullscreenOrientation
-                );
+                setSelectedResolution(templatePromoData.fullscreenOrientation);
               }
 
               // Cargar configuración por pantalla
@@ -335,9 +347,9 @@ function PantallasPromociones() {
     setHasUnsavedChanges(true);
   };
 
-  // NUEVA: Función para manejar cambio de orientación fullscreen
+  // NUEVA: Función para manejar cambio de resolución fullscreen
   const handleFullscreenOrientationChange = (orientation) => {
-    setFullscreenOrientation(orientation);
+    setSelectedResolution(orientation);
     setHasUnsavedChanges(true);
   };
 
@@ -353,21 +365,21 @@ function PantallasPromociones() {
   const getVideoDuration = (file) => {
     return new Promise((resolve, reject) => {
       // Crear un elemento de video temporal para obtener la duración
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      
+      const video = document.createElement("video");
+      video.preload = "metadata";
+
       video.onloadedmetadata = () => {
         // Obtener la duración en segundos y redondear
         const durationSeconds = Math.round(video.duration);
         URL.revokeObjectURL(video.src); // Liberar memoria
         resolve(durationSeconds);
       };
-      
+
       video.onerror = () => {
         URL.revokeObjectURL(video.src);
         reject("Error al obtener la duración del video");
       };
-      
+
       video.src = URL.createObjectURL(file);
     });
   };
@@ -408,7 +420,7 @@ function PantallasPromociones() {
     // Mostrar indicador de carga
     setIsUploading(true);
     setUploadProgress(0);
-    
+
     // Si es un video, obtener su duración
     let duration = 10; // Valor por defecto
     if (fileType === "video") {
@@ -466,9 +478,15 @@ function PantallasPromociones() {
             url: fileUrl,
             name: file.name,
             // Si es un video y se seleccionó usar duración nativa, actualizar la duración
-            duration: fileType === "video" && useNativeDuration ? duration : newContentItem.duration,
+            duration:
+              fileType === "video" && useNativeDuration
+                ? duration
+                : newContentItem.duration,
             // Guardar la duración del video y el estado de uso de duración nativa
-            ...(fileType === "video" && { videoDuration: duration, useNativeDuration: useNativeDuration })
+            ...(fileType === "video" && {
+              videoDuration: duration,
+              useNativeDuration: useNativeDuration,
+            }),
           });
 
           setIsUploading(false);
@@ -773,8 +791,11 @@ function PantallasPromociones() {
       ...selectedPantalla.config,
       templateId: templateId,
       sections: newSections,
-      // NUEVO: Si es template fullscreen, agregar orientación
-      ...(template.isFullscreen && { orientation: fullscreenOrientation }),
+      // NUEVO: Si es template fullscreen, agregar resolución
+      ...(template.isFullscreen && {
+        resolution: selectedResolution,
+        orientation: selectedResolution, // Mantener compatibilidad
+      }),
     };
 
     // Actualizar el estado
@@ -934,7 +955,7 @@ function PantallasPromociones() {
         idioma: selectedLanguage,
         pantallasConfig: pantallaSettings,
         selectedCity: selectedCity,
-        fullscreenOrientation: fullscreenOrientation, // NUEVO: Guardar orientación
+        fullscreenOrientation: selectedResolution, // NUEVO: Guardar resolución
         timestamp: serverTimestamp(),
       };
 
@@ -1461,89 +1482,57 @@ function PantallasPromociones() {
                   </div>
                 </div>
 
-                {/* NUEVA: Configuración de orientación específica para template fullscreen */}
+                {/* NUEVA: Configuración de resolución específica para template fullscreen */}
                 {selectedPantalla.config.templateId === 4 && (
-                  <div className=" p-4 rounded-lg  ">
-                    <h3 className="text-sm font-medium  mb-3">
+                  <div className="p-4 rounded-lg">
+                    <h3 className="text-sm font-medium mb-3">
                       Configuración de Pantalla Completa
                     </h3>
                     <div>
-                      <label className="block text-sm font-medium  mb-2">
-                        Orientación de la pantalla
+                      <label className="block text-sm font-medium mb-2">
+                        Resolución de pantalla
                       </label>
-                      <div className="flex gap-4">
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            id={`screen-orientation-16x9-${selectedPantalla.id}`}
-                            value="16x9"
-                            checked={
-                              (selectedPantalla.config.orientation ||
-                                fullscreenOrientation) === "16x9"
-                            }
-                            onChange={(e) => {
-                              const updatedConfig = {
-                                ...selectedPantalla.config,
-                                orientation: e.target.value,
-                              };
-                              setSelectedPantalla({
-                                ...selectedPantalla,
-                                config: updatedConfig,
-                              });
-                              setPantallaSettings({
-                                ...pantallaSettings,
-                                [selectedPantalla.id]: updatedConfig,
-                              });
-                              setHasUnsavedChanges(true);
-                            }}
-                            className="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
-                          />
-                          <label
-                            htmlFor={`screen-orientation-16x9-${selectedPantalla.id}`}
-                            className="ml-2 block text-sm "
-                          >
-                            Horizontal (16:9)
-                          </label>
-                        </div>
-
-                        <div className="flex items-center">
-                          <input
-                            type="radio"
-                            id={`screen-orientation-9x16-${selectedPantalla.id}`}
-                            value="9x16"
-                            checked={
-                              (selectedPantalla.config.orientation ||
-                                fullscreenOrientation) === "9x16"
-                            }
-                            onChange={(e) => {
-                              const updatedConfig = {
-                                ...selectedPantalla.config,
-                                orientation: e.target.value,
-                              };
-                              setSelectedPantalla({
-                                ...selectedPantalla,
-                                config: updatedConfig,
-                              });
-                              setPantallaSettings({
-                                ...pantallaSettings,
-                                [selectedPantalla.id]: updatedConfig,
-                              });
-                              setHasUnsavedChanges(true);
-                            }}
-                            className="h-4 w-4  focus:ring-purple-500 border-gray-300"
-                          />
-                          <label
-                            htmlFor={`screen-orientation-9x16-${selectedPantalla.id}`}
-                            className="ml-2 block text-sm "
-                          >
-                            Vertical (9:16)
-                          </label>
-                        </div>
-                      </div>
-                      <p className="mt-1 text-xs ">
-                        La orientación vertical es ideal para pantallas tipo
-                        reel o stories, mientras que la horizontal es mejor para
-                        contenido tradicional.
+                      <Select
+                        value={resolutionOptions.find(
+                          (option) =>
+                            option.value ===
+                            (selectedPantalla.config.resolution ||
+                              selectedResolution)
+                        )}
+                        onChange={(selectedOption) => {
+                          const updatedConfig = {
+                            ...selectedPantalla.config,
+                            resolution: selectedOption.value,
+                            orientation: selectedOption.value, // Mantener compatibilidad
+                          };
+                          setSelectedPantalla({
+                            ...selectedPantalla,
+                            config: updatedConfig,
+                          });
+                          setPantallaSettings({
+                            ...pantallaSettings,
+                            [selectedPantalla.id]: updatedConfig,
+                          });
+                          setSelectedResolution(selectedOption.value);
+                          setHasUnsavedChanges(true);
+                        }}
+                        options={resolutionOptions}
+                        placeholder="Seleccionar resolución..."
+                        className="text-sm"
+                        styles={{
+                          control: (provided) => ({
+                            ...provided,
+                            borderColor: "#d1d5db",
+                            boxShadow: "none",
+                            "&:hover": { borderColor: "#9ca3af" },
+                          }),
+                          menu: (provided) => ({ ...provided, zIndex: 9999 }),
+                        }}
+                      />
+                      <p className="mt-2 text-xs text-gray-500">
+                        Seleccione la resolución más adecuada para su pantalla.
+                        Esto afectará la relación de aspecto del contenido
+                        mostrado.
                       </p>
                     </div>
                   </div>
@@ -1883,7 +1872,7 @@ function PantallasPromociones() {
                       setFontColor("#000000");
                       setSelectedFontStyle(fontStyleOptions[0]);
                       setSelectedCity(null);
-                      setFullscreenOrientation("16x9");
+                      setSelectedResolution("16x9");
                       setHasUnsavedChanges(true);
                     }
                   }}
@@ -2001,48 +1990,11 @@ function PantallasPromociones() {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t("promotionScreens.contentType")}
+                  Subir imagen o video
                 </label>
-                <div className="flex space-x-4">
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="content-type-image"
-                      name="content-type"
-                      value="image"
-                      checked={newContentItem.type === "image"}
-                      onChange={() =>
-                        setNewContentItem({ ...newContentItem, type: "image" })
-                      }
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <label
-                      htmlFor="content-type-image"
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      {t("promotionScreens.image")}
-                    </label>
-                  </div>
-                  <div className="flex items-center">
-                    <input
-                      type="radio"
-                      id="content-type-video"
-                      name="content-type"
-                      value="video"
-                      checked={newContentItem.type === "video"}
-                      onChange={() =>
-                        setNewContentItem({ ...newContentItem, type: "video" })
-                      }
-                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                    />
-                    <label
-                      htmlFor="content-type-video"
-                      className="ml-2 block text-sm text-gray-700"
-                    >
-                      {t("promotionScreens.video")}
-                    </label>
-                  </div>
-                </div>
+                <p className="text-xs text-gray-500 mb-2">
+                  Suba una imagen o video. El tipo se detectará automáticamente.
+                </p>
               </div>
 
               <div>
@@ -2113,11 +2065,7 @@ function PantallasPromociones() {
                               type="file"
                               className="sr-only"
                               onChange={handleContentFileUpload}
-                              accept={
-                                newContentItem.type === "image"
-                                  ? "image/*"
-                                  : "video/*"
-                              }
+                              accept="image/*,video/*"
                             />
                           </label>
                           <p className="pl-1">
@@ -2126,9 +2074,8 @@ function PantallasPromociones() {
                           </p>
                         </div>
                         <p className="text-xs text-gray-500">
-                          {newContentItem.type === "image"
-                            ? t("promotionScreens.imageFormats")
-                            : t("promotionScreens.videoFormats")}
+                          Imágenes: PNG, JPG, GIF hasta 5MB | Videos: MP4, WEBM,
+                          OGG hasta 50MB
                         </p>
                       </div>
                     </label>
@@ -2199,12 +2146,14 @@ function PantallasPromociones() {
                       ? "bg-gray-200 text-gray-500 border-gray-400 cursor-not-allowed"
                       : "border-gray-300 text-gray-900"
                   }`}
-                  disabled={newContentItem.type === "video" && useNativeDuration}
+                  disabled={
+                    newContentItem.type === "video" && useNativeDuration
+                  }
                 />
                 <p className="mt-1 text-xs text-gray-500">
                   {t("promotionScreens.durationDescription")}
                 </p>
-                
+
                 {/* Opción para usar duración nativa del video */}
                 {newContentItem.type === "video" && (
                   <div className="mt-3 flex items-center p-2 bg-blue-50 border border-blue-200 rounded-md">
@@ -2220,17 +2169,27 @@ function PantallasPromociones() {
                           // Si se activa y hay una duración de video disponible, actualizar
                           setNewContentItem({
                             ...newContentItem,
-                            duration: videoDuration
+                            duration: videoDuration,
                           });
                         }
                       }}
                     />
-                    <label htmlFor="use-native-duration" className={`text-sm ${useNativeDuration ? "font-bold text-blue-700" : "text-gray-700"}`}>
-                      Usar duración nativa del video {videoDuration ? (
+                    <label
+                      htmlFor="use-native-duration"
+                      className={`text-sm ${
+                        useNativeDuration
+                          ? "font-bold text-blue-700"
+                          : "text-gray-700"
+                      }`}
+                    >
+                      Usar duración nativa del video{" "}
+                      {videoDuration ? (
                         <span className="inline-block ml-1 px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full font-medium">
                           {videoDuration} segundos
                         </span>
-                      ) : ''}
+                      ) : (
+                        ""
+                      )}
                     </label>
                   </div>
                 )}
