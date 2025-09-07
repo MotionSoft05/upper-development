@@ -89,6 +89,7 @@ function Admin() {
     pservice: "",
     pt: "",
     pp: "",
+    pv: "",
     tipoPlan: "",
     empresa: "",
     inicio: "",
@@ -102,6 +103,7 @@ function Admin() {
     ps: "",
     pd: "",
     pservice: "",
+    pv: "",
     tipoPlan: "",
   });
 
@@ -113,6 +115,7 @@ function Admin() {
     ps: "",
     pd: "",
     pservice: "",
+    pv: "",
   });
 
   const [transacciones, setTransacciones] = useState([]);
@@ -318,7 +321,8 @@ function Admin() {
         !nuevaTransaccion.monto ||
         !nuevaTransaccion.ps ||
         !nuevaTransaccion.pd ||
-        !nuevaTransaccion.pservice
+        !nuevaTransaccion.pservice ||
+        !nuevaTransaccion.pv
       ) {
         alert(t("admin.messages.alertTransactionFields"));
         return;
@@ -341,6 +345,7 @@ function Admin() {
         ps: "",
         pd: "",
         pservice: "",
+        pv: "",
       });
     } catch (error) {
       console.error(t("admin.messages.errorSavingTransactionFirebase"), error);
@@ -411,6 +416,7 @@ function Admin() {
         pp: usuarioEditado.pp,
         pservice: usuarioEditado.pservice,
         pt: usuarioEditado.pt,
+        pv: usuarioEditado.pv,
         tipoPlan: usuarioEditado.tipoPlan,
         empresa: usuarioEditado.empresa,
         inicio: usuarioEditado.inicio,
@@ -971,6 +977,7 @@ function Admin() {
 
                     <th className="px-4 py-3 text-center">PT</th>
                     <th className="px-4 py-3 text-center">PP</th>
+                    <th className="px-4 py-3 text-center">PV</th>
                     {/* Nueva columna para PT */}
                     <th className="px-4 py-3 text-center">
                       {t("admin.start")}
@@ -1184,6 +1191,27 @@ function Admin() {
                         ) : (
                           <div className="inline-flex items-center justify-center bg-pink-100 text-pink-800 text-sm font-semibold w-8 h-8 rounded-full">
                             {usuario.pp || 0}
+                          </div>
+                        )}
+                      </td>
+                      {/* PV - Nueva celda para pantallas de vuelos */}
+                      <td className="px-4 py-3 text-center">
+                        {modoEdicion && usuarioEditado.id === usuario.id ? (
+                          <input
+                            type="number"
+                            min="0"
+                            value={usuarioEditado.pv}
+                            onChange={(e) =>
+                              setUsuarioEditado({
+                                ...usuarioEditado,
+                                pv: e.target.value,
+                              })
+                            }
+                            className="w-16 px-2 py-1 text-sm text-center border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          />
+                        ) : (
+                          <div className="inline-flex items-center justify-center bg-blue-100 text-blue-800 text-sm font-semibold w-8 h-8 rounded-full">
+                            {usuario.pv || 0}
                           </div>
                         )}
                       </td>

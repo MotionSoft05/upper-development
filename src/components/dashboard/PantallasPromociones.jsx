@@ -361,23 +361,30 @@ function PantallasPromociones() {
     });
   };
 
-  // Función para obtener la duración de un video
-  const getVideoDuration = (file) => {
+  // Función para validar resolución permitida (solo HD/Full HD y relacionados)
+  const isAllowedHDResolution = (width, height) => {
+    const maxSide = Math.max(width, height);
+    const minSide = Math.min(width, height);
+    return maxSide <= 1920 && minSide <= 1080; // Permite 720p, 1080p, 1080x1080, vertical 1080x1920, etc.
+  };
+
+  // Función para obtener metadatos de video (duración y resolución)
+  const getVideoMetadata = (file) => {
     return new Promise((resolve, reject) => {
-      // Crear un elemento de video temporal para obtener la duración
       const video = document.createElement("video");
       video.preload = "metadata";
 
       video.onloadedmetadata = () => {
-        // Obtener la duración en segundos y redondear
         const durationSeconds = Math.round(video.duration);
-        URL.revokeObjectURL(video.src); // Liberar memoria
-        resolve(durationSeconds);
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+        URL.revokeObjectURL(video.src);
+        resolve({ duration: durationSeconds, width, height });
       };
 
       video.onerror = () => {
         URL.revokeObjectURL(video.src);
-        reject("Error al obtener la duración del video");
+        reject("Error al obtener los metadatos del video");
       };
 
       video.src = URL.createObjectURL(file);
@@ -395,7 +402,7 @@ function PantallasPromociones() {
     const validVideoTypes = ["video/mp4", "video/webm", "video/ogg"];
     const validTypes = [...validImageTypes, ...validVideoTypes];
 
-    const maxSize = fileType === "video" ? 50 * 1024 * 1024 : 5 * 1024 * 1024; // 50MB para videos, 5MB para imágenes
+    const maxSize = fileType === "video" ? 50 * 1024 * 1024 : 5 * 1024 * 1024; // 50MB videos, 5MB imágenes
 
     if (!validTypes.includes(file.type)) {
       Swal.fire({
@@ -417,18 +424,55 @@ function PantallasPromociones() {
       return;
     }
 
+    // Validar resolución según tipo
+    if (fileType === "image") {
+      try {
+        await new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => {
+            const { width, height } = img;
+            if (!isAllowedHDResolution(width, height)) {
+              Swal.fire({
+                icon: "error",
+                title: "Resolución no permitida",
+                text: "Solo se permiten imágenes en HD o Full HD (máximo 1920x1080 o 1080x1920). No se aceptan 2K/4K.",
+              });
+              reject(new Error("Image resolution not allowed"));
+              return;
+            }
+            resolve();
+          };
+          img.onerror = () => reject(new Error("No se pudo leer la imagen"));
+          img.src = URL.createObjectURL(file);
+        });
+      } catch (e) {
+        return;
+      }
+    }
+
     // Mostrar indicador de carga
     setIsUploading(true);
     setUploadProgress(0);
 
-    // Si es un video, obtener su duración
+    // Si es un video, obtener metadatos (duración y resolución)
     let duration = 10; // Valor por defecto
     if (fileType === "video") {
       try {
-        duration = await getVideoDuration(file);
+        const meta = await getVideoMetadata(file);
+        if (!isAllowedHDResolution(meta.width, meta.height)) {
+          Swal.fire({
+            icon: "error",
+            title: "Resolución no permitida",
+            text: "Solo se permiten videos en HD o Full HD (máximo 1920x1080 o 1080x1920). No se aceptan 2K/4K.",
+          });
+          setIsUploading(false);
+          setUploadProgress(0);
+          return;
+        }
+        duration = meta.duration;
         setVideoDuration(duration);
       } catch (error) {
-        console.error("Error al obtener la duración del video:", error);
+        console.error("Error al obtener los metadatos del video:", error);
         // Continuar con el valor por defecto si hay error
       }
     } else {
@@ -1994,6 +2038,9 @@ function PantallasPromociones() {
                 </label>
                 <p className="text-xs text-gray-500 mb-2">
                   Suba una imagen o video. El tipo se detectará automáticamente.
+                  Tamaño máx. de imagen: 5MB. Solo resoluciones HD/Full HD y
+                  relacionadas (máx. 1920x1080 o 1080x1920). No se aceptan
+                  2K/4K.
                 </p>
               </div>
 
@@ -2075,7 +2122,8 @@ function PantallasPromociones() {
                         </div>
                         <p className="text-xs text-gray-500">
                           Imágenes: PNG, JPG, GIF hasta 5MB | Videos: MP4, WEBM,
-                          OGG hasta 50MB
+                          OGG hasta 50MB. Solo HD/Full HD y relacionados. No
+                          2K/4K.
                         </p>
                       </div>
                     </label>

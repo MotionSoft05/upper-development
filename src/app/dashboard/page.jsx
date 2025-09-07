@@ -17,6 +17,7 @@ import MonitorScreen from "@/components/dashboard/MonitorScreen";
 import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
 import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
 import PantallasPromociones from "@/components/dashboard/PantallasPromociones";
+import PantallasVuelos from "@/components/dashboard/PantallasVuelos";
 
 // Nuevos imports para Android TV
 import DevicesList from "@/components/DevicesList";
@@ -50,6 +51,7 @@ function DashBoard() {
   const [showPantallaServicio, setShowPantallaServicio] = useState(false);
   const [showPublicidad, setShowPublicidad] = useState(false);
   const [showPantallaPromociones, setShowPantallaPromociones] = useState(false);
+  const [showPantallasVuelos, setShowPantallasVuelos] = useState(false);
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
@@ -126,6 +128,8 @@ function DashBoard() {
           showPantallaServicio={showPantallaServicio}
           setShowPantallaPromociones={setShowPantallaPromociones}
           showPantallaPromociones={showPantallaPromociones}
+          setShowPantallasVuelos={setShowPantallasVuelos}
+          showPantallasVuelos={showPantallasVuelos}
           setShowPublicidad={setShowPublicidad}
           showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
@@ -177,6 +181,7 @@ function DashBoard() {
           {showPantallaDirectorio && <PantallasDirectorio />}
           {showPantallaServicio && <EditPantallaServicio />}
           {showPantallaPromociones && <PantallasPromociones />}
+          {showPantallasVuelos && <PantallasVuelos />}
 
           {/* Componentes de Tarifario */}
           {showPantallaTarifario && <PantallasTarifario />}

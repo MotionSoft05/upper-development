@@ -26,6 +26,7 @@ import {
   faHeadset,
   faImages,
   faTv, // Nuevo icono para Android TV
+  faPlane,
 } from "@fortawesome/free-solid-svg-icons";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import { Tooltip } from "react-tooltip";
@@ -101,6 +102,7 @@ const Ediciondeempresa = () => {
                 pantallasDirectorio: permisoAntiguo === 3,
                 pantallasPromociones: permisoAntiguo === 3,
                 pantallasTarifario: permisoAntiguo === 3,
+                pantallasvuelos: permisoAntiguo === 3,
                 monitoreo: permisoAntiguo === 3,
                 publicidad: permisoAntiguo === 3,
                 datosUsuario: permisoAntiguo >= 2,
@@ -285,6 +287,11 @@ const Ediciondeempresa = () => {
           id: "pantallasPromociones",
           nombre: "Pantallas Promociones",
           icon: faImages,
+        },
+        {
+          id: "pantallasvuelos",
+          nombre: "Pantallas de Vuelos",
+          icon: faPlane,
         },
         { id: "monitoreo", nombre: "Monitoreo de Pantallas", icon: faDesktop },
         { id: "publicidad", nombre: "Publicidad", icon: faBullhorn },
