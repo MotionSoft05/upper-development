@@ -16,6 +16,7 @@ import {
   where,
   serverTimestamp,
   getDoc,
+  addDoc,
 } from "firebase/firestore";
 import Swal from "sweetalert2";
 import Select from "react-select";
@@ -145,12 +146,13 @@ function PantallasVuelos() {
     }
   };
 
-  // Función para cargar configuración de pantallas de vuelos
+  // Función para cargar configuración de pantallas de vuelos (siguiendo patrón de promociones)
   const loadFlightScreensConfig = async () => {
     try {
       const authUser = firebase.auth().currentUser;
       let empresa = empresaSeleccionada;
 
+      // Obtener empresa del usuario
       if (!empresa && !isAdmin) {
         const usuariosQuery = query(
           collection(db, "usuarios"),
@@ -158,37 +160,72 @@ function PantallasVuelos() {
         );
         const usuariosSnapshot = await getDocs(usuariosQuery);
         if (!usuariosSnapshot.empty) {
-          empresa = usuariosSnapshot.docs[0].data().empresa || "";
+          const userData = usuariosSnapshot.docs[0].data();
+          empresa = userData.empresa || "";
+          
+          // CARGAR LICENCIAS desde usuarios (no desde licencias)
+          setPv(parseInt(userData.pv) || 0);
+          
+          // CARGAR NOMBRES desde usuarios
+          if (userData.nombrePantallasVuelos) {
+            const nombresArray = Array.isArray(userData.nombrePantallasVuelos) 
+              ? userData.nombrePantallasVuelos 
+              : Object.values(userData.nombrePantallasVuelos);
+            setNombrePantallasVuelos(nombresArray);
+          }
+        }
+      } else if (empresa) {
+        // Para admin, cargar licencias de la empresa seleccionada
+        const usuariosQuery = query(
+          collection(db, "usuarios"),
+          where("empresa", "==", empresa)
+        );
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+
+        if (!usuariosSnapshot.empty) {
+          const usuarioData = usuariosSnapshot.docs[0].data();
+          setPv(parseInt(usuarioData.pv) || 0);
+          
+          // CARGAR NOMBRES desde usuarios
+          if (usuarioData.nombrePantallasVuelos) {
+            const nombresArray = Array.isArray(usuarioData.nombrePantallasVuelos) 
+              ? usuarioData.nombrePantallasVuelos 
+              : Object.values(usuarioData.nombrePantallasVuelos);
+            setNombrePantallasVuelos(nombresArray);
+          }
         }
       }
 
       if (!empresa) return;
 
-      // Cargar licencias desde la colección usuarios
-      const usuariosQuery = query(
-        collection(db, "usuarios"),
+      // Cargar configuración desde TemplateVuelos (no desde flightScreens)
+      const templateVuelosRef = collection(db, "TemplateVuelos");
+      const templateVuelosQuery = query(
+        templateVuelosRef,
         where("empresa", "==", empresa)
       );
-      const usuariosSnapshot = await getDocs(usuariosQuery);
+      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
-      if (!usuariosSnapshot.empty) {
-        // Obtener el primer usuario de la empresa para obtener las licencias
-        const usuarioData = usuariosSnapshot.docs[0].data();
-        setPv(parseInt(usuarioData.pv) || 0);
+      if (!templateVuelosSnapshot.empty) {
+        const templateData = templateVuelosSnapshot.docs[0].data();
+        setSelectedLanguage(templateData.idioma || "es");
+        setPantallaSettings(templateData.pantallasConfig || {});
+        setDynamicMessages(templateData.dynamicMessages || dynamicMessages);
+        setDistanceConfig(templateData.distanceConfig || distanceConfig);
+      } else {
+        // Fallback: cargar desde flightScreens si no existe en TemplateVuelos
+        const configDoc = doc(db, "flightScreens", empresa);
+        const configSnapshot = await getDoc(configDoc);
+
+        if (configSnapshot.exists()) {
+          const data = configSnapshot.data();
+          setPantallaSettings(data.screenSettings || {});
+          setSelectedLanguage(data.language || "es");
+          setDynamicMessages(data.dynamicMessages || dynamicMessages);
+          setDistanceConfig(data.distanceConfig || distanceConfig);
+        }
       }
 
-      // Cargar configuración existente
-      const configDoc = doc(db, "flightScreens", empresa);
-      const configSnapshot = await getDoc(configDoc);
-
-      if (configSnapshot.exists()) {
-        const data = configSnapshot.data();
-        setNombrePantallasVuelos(data.screenNames || []);
-        setPantallaSettings(data.screenSettings || {});
-        setSelectedLanguage(data.language || "es");
-        setDynamicMessages(data.dynamicMessages || dynamicMessages);
-        setDistanceConfig(data.distanceConfig || distanceConfig);
-      }
     } catch (error) {
       console.error("Error loading flight screens config:", error);
     }
@@ -274,17 +311,10 @@ function PantallasVuelos() {
     setActiveTab("pantalla");
   };
 
-  // Función para guardar configuración
+  // Función para guardar configuración (siguiendo patrón de promociones)
   const guardarConfiguracion = async () => {
     try {
       const authUser = firebase.auth().currentUser;
-      if (!authUser) {
-        Swal.fire({
-          icon: "error",
-          title: "Usuario no autenticado",
-        });
-        return;
-      }
 
       if (pv === 0) {
         Swal.fire({
@@ -294,27 +324,87 @@ function PantallasVuelos() {
         return;
       }
 
-      let empresa = empresaSeleccionada;
-      if (!empresa && !isAdmin) {
-        const usuariosQuery = query(
-          collection(db, "usuarios"),
-          where("email", "==", authUser.email)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-        if (!usuariosSnapshot.empty) {
-          empresa = usuariosSnapshot.docs[0].data().empresa || "";
-        }
-      }
-
-      if (!empresa) {
+      if (!authUser) {
         Swal.fire({
           icon: "error",
-          title: "No se pudo determinar la empresa",
+          title: "Usuario no autenticado",
         });
         return;
       }
 
-      // Preparar datos para guardar
+      // Obtener la empresa a actualizar
+      let empresaToUpdate = empresaSeleccionada;
+
+      if (!empresaToUpdate) {
+        const usuariosRef = collection(db, "usuarios");
+        const usuariosQuery = query(
+          usuariosRef,
+          where("email", "==", authUser.email)
+        );
+        const usuariosSnapshot = await getDocs(usuariosQuery);
+
+        if (!usuariosSnapshot.empty) {
+          empresaToUpdate = usuariosSnapshot.docs[0].data().empresa || "";
+        } else {
+          console.error("No se encontró la empresa del usuario autenticado");
+          return;
+        }
+      }
+
+      // 1. ACTUALIZAR NOMBRES EN USUARIOS (esto es lo que faltaba)
+      const usuariosRef = collection(db, "usuarios");
+      const usuariosEmpresaQuery = query(
+        usuariosRef,
+        where("empresa", "==", empresaToUpdate)
+      );
+      const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+
+      const updateNombrePantallasPromises = [];
+
+      usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
+        const usuarioRef = usuarioDoc.ref;
+        const usuarioData = usuarioDoc.data();
+
+        if (usuarioRef && usuarioData) {
+          const nombrePantallasObject = {};
+          nombrePantallasVuelos.forEach((nombre, index) => {
+            nombrePantallasObject[`nombrePantallasVuelos.${index}`] = nombre;
+          });
+          updateNombrePantallasPromises.push(
+            updateDoc(usuarioRef, nombrePantallasObject)
+          );
+        }
+      });
+
+      await Promise.all(updateNombrePantallasPromises);
+
+      // 2. GUARDAR EN TEMPLATE VUELOS (igual que promociones)
+      const templateVuelosRef = collection(db, "TemplateVuelos");
+      const templateVuelosQuery = query(
+        templateVuelosRef,
+        where("empresa", "==", empresaToUpdate)
+      );
+      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
+
+      const templateData = {
+        empresa: empresaToUpdate,
+        idioma: selectedLanguage,
+        pantallasConfig: pantallaSettings,
+        dynamicMessages: dynamicMessages,
+        distanceConfig: distanceConfig,
+        timestamp: serverTimestamp(),
+      };
+
+      if (!templateVuelosSnapshot.empty) {
+        // Actualizar documento existente
+        const templateVuelosDocRef = templateVuelosSnapshot.docs[0].ref;
+        await updateDoc(templateVuelosDocRef, templateData);
+      } else {
+        // Crear nuevo documento
+        await addDoc(templateVuelosRef, templateData);
+      }
+
+      // 3. También mantener flightScreens para compatibilidad
       const configData = {
         screenNames: nombrePantallasVuelos,
         screenSettings: pantallaSettings,
@@ -322,28 +412,30 @@ function PantallasVuelos() {
         dynamicMessages: dynamicMessages,
         distanceConfig: distanceConfig,
         updatedAt: serverTimestamp(),
-        updatedBy: authUser.email,
+        updatedBy: authUser.email || ""
       };
 
-      // Guardar en Firebase
-      const configRef = doc(db, "flightScreens", empresa);
-      await setDoc(configRef, configData, { merge: true });
+      const flightScreensRef = doc(db, "flightScreens", empresaToUpdate);
+      await setDoc(flightScreensRef, configData, { merge: true });
 
       Swal.fire({
         icon: "success",
-        title: "Configuración guardada correctamente",
+        title: "Configuración guardada con éxito",
         showConfirmButton: false,
-        timer: 1500,
+        timer: 2000,
       });
 
       setHasUnsavedChanges(false);
+      return true;
+
     } catch (error) {
-      console.error("Error saving configuration:", error);
+      console.error("Error al guardar configuración:", error);
       Swal.fire({
         icon: "error",
         title: "Error al guardar la configuración",
         text: error.message,
       });
+      return false;
     }
   };
 

@@ -108,6 +108,18 @@ const DeviceConfiguration = ({
       });
     }
 
+    // NUEVO: Pantallas Vuelos
+    if (userData.pv > 0) {
+      screenTypes.push({
+        type: "vuelos",
+        name: "Pantallas Vuelos",  
+        description: "Para mostrar información de vuelos",
+        maxScreens: userData.pv,
+        icon: "✈️",
+        disabled: false, // HABILITADO
+      });
+    }
+
     return screenTypes;
   };
 
@@ -163,6 +175,11 @@ const DeviceConfiguration = ({
           userData.nombrePantallasPromociones?.[index] ||
           `Pantalla Promociones ${screenNumber}`
         );
+      case "vuelos":
+        return (
+          userData.nombrePantallasVuelos?.[index] ||
+          `Pantalla Vuelos ${screenNumber}`
+        );
       default:
         return `Pantalla ${screenNumber}`;
     }
@@ -191,6 +208,11 @@ const DeviceConfiguration = ({
         return (
           userData.nombrePantallasPromociones?.[index] ||
           `Pantalla Promociones ${screenNumber}`
+        );
+      case "vuelos":
+        return (
+          userData.nombrePantallasVuelos?.[index] ||
+          `Pantalla Vuelos ${screenNumber}`
         );
       default:
         return `Pantalla ${screenNumber}`;

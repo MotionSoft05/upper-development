@@ -444,6 +444,38 @@ export const createDevice = async (code) => {
   }
 };
 
+// ✅ NUEVA FUNCIÓN: Enviar comando remoto a dispositivo
+export const sendRemoteCommand = async (deviceId, screenType, screenId, assignedBy) => {
+  try {
+    console.log(`📡 Enviando comando remoto: ${screenType} ${screenId} a dispositivo ${deviceId}`);
+    
+    const deviceRef = doc(db, 'devices', deviceId);
+    await updateDoc(deviceRef, {
+      configuration: {
+        type: screenType,
+        screenId: screenId.toString(), 
+        assignedAt: serverTimestamp(),
+        assignedBy: assignedBy,
+        
+        // Mantener compatibilidad con estructura actual
+        screenType: screenType,
+        screenNumber: parseInt(screenId),
+        screenName: `${screenType} ${screenId}`,
+        autoStart: true,
+        configuredAt: serverTimestamp(),
+        lastUpdated: serverTimestamp()
+      }
+    });
+    
+    console.log(`✅ Comando remoto enviado exitosamente`);
+    return true;
+    
+  } catch (error) {
+    console.error("❌ Error enviando comando remoto:", error);
+    throw error;
+  }
+};
+
 // ✅ NUEVA FUNCIÓN: Sincronizar datos de usuario a dispositivos (mantiene compatibilidad)
 export const syncUserDataToDevices = async (userId, userData) => {
   try {

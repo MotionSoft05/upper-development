@@ -25,6 +25,7 @@ function UserAdmin() {
   const [cantidadPs, setCantidadPs] = useState(0);
   const [cantidadPp, setCantidadPp] = useState(0); // Cambiado de cantidadPservice a cantidadPp
   const [cantidadPtarifario, setCantidadPtarifario] = useState(0);
+  const [cantidadPv, setCantidadPv] = useState(0); // NUEVO: Pantallas Vuelos
   const [nombreUsuario, setNombreUsuario] = useState("");
   const [userInfo, setUserInfo] = useState(null);
   const [userEvents, setUserEvents] = useState([]);
@@ -56,7 +57,8 @@ function UserAdmin() {
     parseInt(cantidadPd) +
     parseInt(cantidadPs) +
     parseInt(cantidadPp) + // Cambiado de cantidadPservice a cantidadPp
-    parseInt(cantidadPtarifario);
+    parseInt(cantidadPtarifario) +
+    parseInt(cantidadPv); // NUEVO: Agregar vuelos al total
 
   // Datos para el gráfico de suscripciones (actualizado con promociones)
   const subscriptionChartData = {
@@ -65,21 +67,24 @@ function UserAdmin() {
       t("userAdmin.directoryScreen"),
       t("userAdmin.promotionScreen"), // Cambiado de servicescreen a promotionScreen
       t("userAdmin.rateScreen"),
+      "Pantallas Vuelos", // NUEVO
     ],
     datasets: [
       {
-        data: [cantidadPs, cantidadPd, cantidadPp, cantidadPtarifario], // Cambiado cantidadPservice por cantidadPp
+        data: [cantidadPs, cantidadPd, cantidadPp, cantidadPtarifario, cantidadPv], // NUEVO: Agregado cantidadPv
         backgroundColor: [
           "rgba(54, 162, 235, 0.6)",
           "rgba(75, 192, 192, 0.6)",
           "rgba(255, 99, 132, 0.6)", // Nuevo color para promociones (rosa/rojo)
           "rgba(255, 159, 64, 0.6)",
+          "#3B82F6", // NUEVO: Azul para vuelos
         ],
         borderColor: [
           "rgba(54, 162, 235, 1)",
           "rgba(75, 192, 192, 1)",
           "rgba(255, 99, 132, 1)", // Nuevo borde para promociones
           "rgba(255, 159, 64, 1)",
+          "#1D4ED8", // NUEVO: Azul más oscuro para vuelos
         ],
         borderWidth: 1,
       },
@@ -152,11 +157,13 @@ function UserAdmin() {
             const cantidadPs = userData.ps || 0;
             const cantidadPp = userData.pp || 0; // Cambiado de pservice a pp
             const cantidadPtarifario = userData.pt || 0;
+            const cantidadPv = userData.pv || 0; // NUEVO: Pantallas Vuelos
 
             setCantidadPd(cantidadPd);
             setCantidadPs(cantidadPs);
             setCantidadPp(cantidadPp); // Cambiado de setCantidadPservice a setCantidadPp
             setCantidadPtarifario(cantidadPtarifario);
+            setCantidadPv(cantidadPv); // NUEVO
 
             const nombreUsuario = userData.nombre || "";
             setNombreUsuario(nombreUsuario);
@@ -316,6 +323,7 @@ function UserAdmin() {
             setCantidadPs(datosEmpresa.ps || 0);
             setCantidadPp(datosEmpresa.pp || 0); // Cambiado de pservice a pp
             setCantidadPtarifario(datosEmpresa.pt || 0);
+            setCantidadPv(datosEmpresa.pv || 0); // NUEVO
 
             // Actualizar datos de empresa
             setEmpresaData({
@@ -750,6 +758,14 @@ function UserAdmin() {
                     </span>
                     <span className="text-lg text-blue-600 font-bold">
                       {cantidadPtarifario}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-medium">
+                      Pantallas Vuelos: {/* NUEVO */}
+                    </span>
+                    <span className="text-lg text-blue-600 font-bold">
+                      {cantidadPv} {/* NUEVO */}
                     </span>
                   </div>
                   <div className="flex justify-between items-center pb-2 border-b border-gray-100">
