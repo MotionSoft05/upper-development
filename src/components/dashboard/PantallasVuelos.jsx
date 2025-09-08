@@ -44,19 +44,40 @@ function PantallasVuelos() {
   const [nombrePantallasVuelos, setNombrePantallasVuelos] = useState([]);
   const [pantallaSettings, setPantallaSettings] = useState({});
   const [pv, setPv] = useState(0); // Cantidad de pantallas de vuelos licenciadas
-  
+
   // Configuración de aeropuertos disponibles
   const [availableAirports] = useState([
-    { value: "MEX", label: "Ciudad de México (AICM)", name: "Aeropuerto Internacional Ciudad de México" },
-    { value: "TLC", label: "Toluca", name: "Aeropuerto Internacional de Toluca" },
-    { value: "NLU", label: "Felipe Ángeles", name: "Aeropuerto Internacional Felipe Ángeles" }
+    {
+      value: "MEX",
+      label: "Ciudad de México (AICM)",
+      name: "Aeropuerto Internacional Ciudad de México",
+    },
+    {
+      value: "TLC",
+      label: "Toluca",
+      name: "Aeropuerto Internacional de Toluca",
+    },
+    {
+      value: "NLU",
+      label: "Felipe Ángeles",
+      name: "Aeropuerto Internacional Felipe Ángeles",
+    },
   ]);
 
   // Aerolíneas disponibles para filtros
   const [availableAirlines] = useState([
-    "Aeromexico", "Volaris", "VivaAerobus", "Interjet", "Copa Airlines",
-    "American Airlines", "Delta Air Lines", "United Airlines", "Air France",
-    "Lufthansa", "KLM", "British Airways"
+    "Aeromexico",
+    "Volaris",
+    "VivaAerobus",
+    "Interjet",
+    "Copa Airlines",
+    "American Airlines",
+    "Delta Air Lines",
+    "United Airlines",
+    "Air France",
+    "Lufthansa",
+    "KLM",
+    "British Airways",
   ]);
 
   // Mensajes dinámicos
@@ -65,11 +86,11 @@ function PantallasVuelos() {
       id: "shuttle",
       text: {
         es: "🚐 Shuttle al aeropuerto cada hora - Contacte Concierge",
-        en: "🚐 Airport shuttle every hour - Contact Concierge"
+        en: "🚐 Airport shuttle every hour - Contact Concierge",
       },
       enabled: true,
-      displayDuration: 10
-    }
+      displayDuration: 10,
+    },
   ]);
 
   // Configuración de Distance Matrix
@@ -78,8 +99,8 @@ function PantallasVuelos() {
     hotelLocation: {
       lat: 19.4326, // CDMX centro por defecto
       lng: -99.1332,
-      address: ""
-    }
+      address: "",
+    },
   });
 
   // useEffect para cargar datos iniciales (siguiendo patrón existente)
@@ -101,7 +122,6 @@ function PantallasVuelos() {
 
         // Cargar configuración de pantallas de vuelos
         await loadFlightScreensConfig();
-        
       } catch (error) {
         console.error("Error loading initial data:", error);
       }
@@ -115,7 +135,7 @@ function PantallasVuelos() {
     try {
       const usuariosSnapshot = await getDocs(collection(db, "usuarios"));
       const empresasSet = new Set();
-      usuariosSnapshot.forEach(doc => {
+      usuariosSnapshot.forEach((doc) => {
         const empresa = doc.data().empresa;
         if (empresa) empresasSet.add(empresa);
       });
@@ -150,7 +170,7 @@ function PantallasVuelos() {
         where("empresa", "==", empresa)
       );
       const usuariosSnapshot = await getDocs(usuariosQuery);
-      
+
       if (!usuariosSnapshot.empty) {
         // Obtener el primer usuario de la empresa para obtener las licencias
         const usuarioData = usuariosSnapshot.docs[0].data();
@@ -160,7 +180,7 @@ function PantallasVuelos() {
       // Cargar configuración existente
       const configDoc = doc(db, "flightScreens", empresa);
       const configSnapshot = await getDoc(configDoc);
-      
+
       if (configSnapshot.exists()) {
         const data = configSnapshot.data();
         setNombrePantallasVuelos(data.screenNames || []);
@@ -169,7 +189,6 @@ function PantallasVuelos() {
         setDynamicMessages(data.dynamicMessages || dynamicMessages);
         setDistanceConfig(data.distanceConfig || distanceConfig);
       }
-
     } catch (error) {
       console.error("Error loading flight screens config:", error);
     }
@@ -205,11 +224,11 @@ function PantallasVuelos() {
     const pantallaNombre = nombrePantallasVuelos[pantallaIndex];
     const pantallaId = `vuelo${pantallaIndex + 1}`;
 
-    // Configuración por defecto
-    let config = pantallaSettings[pantallaId] || {
+    // Configuración por defecto con valores seguros
+    const defaultConfig = {
       airport: {
         code: "MEX",
-        name: "Aeropuerto Internacional Ciudad de México"
+        name: "Aeropuerto Internacional Ciudad de México",
       },
       displaySettings: {
         showDepartures: true,
@@ -217,14 +236,32 @@ function PantallasVuelos() {
         timeWindow: 5,
         maxFlights: 8,
         refreshInterval: 120,
-        language: selectedLanguage
+        language: selectedLanguage,
       },
       airlineFilters: {
         enabled: false,
-        selectedAirlines: []
+        selectedAirlines: [],
       },
       orientation: "horizontal",
-      rotationDirection: 0
+      rotationDirection: 0,
+    };
+
+    // Combinar configuración existente con valores por defecto
+    let config = {
+      ...defaultConfig,
+      ...pantallaSettings[pantallaId],
+      airport: {
+        ...defaultConfig.airport,
+        ...pantallaSettings[pantallaId]?.airport,
+      },
+      displaySettings: {
+        ...defaultConfig.displaySettings,
+        ...pantallaSettings[pantallaId]?.displaySettings,
+      },
+      airlineFilters: {
+        ...defaultConfig.airlineFilters,
+        ...pantallaSettings[pantallaId]?.airlineFilters,
+      },
     };
 
     setSelectedPantalla({
@@ -300,7 +337,6 @@ function PantallasVuelos() {
       });
 
       setHasUnsavedChanges(false);
-
     } catch (error) {
       console.error("Error saving configuration:", error);
       Swal.fire({
@@ -311,32 +347,29 @@ function PantallasVuelos() {
     }
   };
 
-  // Función para agregar/quitar mensajes dinámicos
-  const handleAddDynamicMessage = () => {
+  // Funciones para manejar mensajes dinámicos
+  const addDynamicMessage = () => {
     const newMessage = {
-      id: `message_${Date.now()}`,
-      text: {
-        es: "",
-        en: ""
-      },
+      id: `msg_${Date.now()}`,
+      text: { es: "", en: "" },
       enabled: true,
-      displayDuration: 10
+      displayDuration: 10,
     };
     setDynamicMessages([...dynamicMessages, newMessage]);
     setHasUnsavedChanges(true);
   };
 
-  const handleRemoveDynamicMessage = (messageId) => {
-    setDynamicMessages(dynamicMessages.filter(msg => msg.id !== messageId));
+  const removeDynamicMessage = (messageId) => {
+    setDynamicMessages(dynamicMessages.filter((msg) => msg.id !== messageId));
     setHasUnsavedChanges(true);
   };
 
-  const handleUpdateDynamicMessage = (messageId, field, value) => {
-    setDynamicMessages(dynamicMessages.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, [field]: value }
-        : msg
-    ));
+  const updateDynamicMessage = (messageId, field, value) => {
+    setDynamicMessages(
+      dynamicMessages.map((msg) =>
+        msg.id === messageId ? { ...msg, [field]: value } : msg
+      )
+    );
     setHasUnsavedChanges(true);
   };
 
@@ -344,11 +377,66 @@ function PantallasVuelos() {
   const updatePantallaConfig = (field, value) => {
     if (!selectedPantalla) return;
 
+    // VALIDACIONES ESPECÍFICAS
+    if (field === "displaySettings.timeWindow") {
+      if (value < 2 || value > 12) {
+        Swal.fire({
+          icon: "warning",
+          title: "Valor inválido",
+          text: "La ventana de tiempo debe estar entre 2 y 12 horas",
+        });
+        return;
+      }
+    }
+
+    if (field === "displaySettings.maxFlights") {
+      if (value < 4 || value > 20) {
+        Swal.fire({
+          icon: "warning",
+          title: "Valor inválido",
+          text: "El máximo de vuelos debe estar entre 4 y 20",
+        });
+        return;
+      }
+    }
+
+    if (field === "displaySettings.refreshInterval") {
+      if (value < 60 || value > 600) {
+        Swal.fire({
+          icon: "warning",
+          title: "Valor inválido",
+          text: "El intervalo debe estar entre 60 y 600 segundos",
+        });
+        return;
+      }
+    }
+
+    // Validar que al menos una opción esté habilitada
+    if (
+      field === "displaySettings.showDepartures" ||
+      field === "displaySettings.showArrivals"
+    ) {
+      const updatedSettings = { ...selectedPantalla.config.displaySettings };
+      if (field.includes(".")) {
+        const [parent, child] = field.split(".");
+        updatedSettings[child] = value;
+      }
+
+      if (!updatedSettings.showDepartures && !updatedSettings.showArrivals) {
+        Swal.fire({
+          icon: "warning",
+          title: "Configuración inválida",
+          text: "Debe habilitar al menos una opción: Salidas o Llegadas",
+        });
+        return;
+      }
+    }
+
     const updatedConfig = { ...selectedPantalla.config };
-    
+
     // Manejar campos anidados
-    if (field.includes('.')) {
-      const [parent, child] = field.split('.');
+    if (field.includes(".")) {
+      const [parent, child] = field.split(".");
       updatedConfig[parent] = { ...updatedConfig[parent], [child]: value };
     } else {
       updatedConfig[field] = value;
@@ -401,10 +489,10 @@ function PantallasVuelos() {
       {/* Contenido principal */}
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Pestañas de navegación */}
-        <div className="flex border-b border-gray-200">
+        <div className="flex flex-wrap border-b border-gray-200">
           <button
             onClick={() => setActiveTab("general")}
-            className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+            className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
               activeTab === "general"
                 ? "text-blue-600 border-b-2 border-blue-500"
                 : "text-gray-500 hover:text-gray-700"
@@ -415,7 +503,7 @@ function PantallasVuelos() {
 
           <button
             onClick={() => setActiveTab("screens")}
-            className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+            className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
               activeTab === "screens"
                 ? "text-blue-600 border-b-2 border-blue-500"
                 : "text-gray-500 hover:text-gray-700"
@@ -426,25 +514,30 @@ function PantallasVuelos() {
 
           <button
             onClick={() => setActiveTab("messages")}
-            className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+            className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
               activeTab === "messages"
                 ? "text-blue-600 border-b-2 border-blue-500"
                 : "text-gray-500 hover:text-gray-700"
             }`}
           >
-            {t("flightScreens.dynamicMessages")}
+            <span className="hidden sm:inline">
+              {t("flightScreens.dynamicMessages")}
+            </span>
+            <span className="sm:hidden">Mensajes</span>
           </button>
 
           {selectedPantalla && (
             <button
               onClick={() => setActiveTab("pantalla")}
-              className={`flex-1 py-4 px-4 text-center font-medium text-sm sm:text-base ${
+              className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
                 activeTab === "pantalla"
                   ? "text-blue-600 border-b-2 border-blue-500"
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {selectedPantalla.nombre}
+              <span className="truncate">
+                {selectedPantalla.nombre || "Pantalla"}
+              </span>
             </button>
           )}
         </div>
@@ -473,7 +566,10 @@ function PantallasVuelos() {
                       onChange={handleLanguageChange}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
-                    <label htmlFor="spanish" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="spanish"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       {t("flightScreens.spanish")}
                     </label>
                   </div>
@@ -487,7 +583,10 @@ function PantallasVuelos() {
                       onChange={handleLanguageChange}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
-                    <label htmlFor="english" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="english"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       {t("flightScreens.english")}
                     </label>
                   </div>
@@ -501,7 +600,10 @@ function PantallasVuelos() {
                       onChange={handleLanguageChange}
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                     />
-                    <label htmlFor="both" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="both"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       {t("flightScreens.bilingual")}
                     </label>
                   </div>
@@ -513,7 +615,7 @@ function PantallasVuelos() {
                 <h3 className="text-md font-medium text-gray-900 mb-3">
                   {t("flightScreens.distanceConfig")}
                 </h3>
-                
+
                 <div className="flex items-center mb-4">
                   <input
                     type="checkbox"
@@ -522,13 +624,16 @@ function PantallasVuelos() {
                     onChange={(e) => {
                       setDistanceConfig({
                         ...distanceConfig,
-                        enabled: e.target.checked
+                        enabled: e.target.checked,
                       });
                       setHasUnsavedChanges(true);
                     }}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="enableDistance" className="ml-2 block text-sm text-gray-700">
+                  <label
+                    htmlFor="enableDistance"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
                     {t("flightScreens.showTravelTime")}
                   </label>
                 </div>
@@ -547,8 +652,8 @@ function PantallasVuelos() {
                             ...distanceConfig,
                             hotelLocation: {
                               ...distanceConfig.hotelLocation,
-                              address: e.target.value
-                            }
+                              address: e.target.value,
+                            },
                           });
                           setHasUnsavedChanges(true);
                         }}
@@ -569,9 +674,15 @@ function PantallasVuelos() {
                   {t("flightScreens.usingAeroDataBox")}
                 </p>
                 <div className="text-xs text-gray-500">
-                  <p>• {t("flightScreens.supportedAirports")}: CDMX (MEX), Toluca (TLC), Felipe Ángeles (NLU)</p>
+                  <p>
+                    • {t("flightScreens.supportedAirports")}: CDMX (MEX), Toluca
+                    (TLC), Felipe Ángeles (NLU)
+                  </p>
                   <p>• {t("flightScreens.updateFrequency")}: 2-5 minutos</p>
-                  <p>• {t("flightScreens.dataProvided")}: Estados de vuelos, terminales, puertas, horarios</p>
+                  <p>
+                    • {t("flightScreens.dataProvided")}: Estados de vuelos,
+                    terminales, puertas, horarios
+                  </p>
                 </div>
               </div>
             </div>
@@ -586,7 +697,10 @@ function PantallasVuelos() {
 
               <div className="space-y-6">
                 {Array.from({ length: pv }, (_, index) => (
-                  <div className="bg-gray-50 p-4 rounded-lg shadow-sm" key={index}>
+                  <div
+                    className="bg-gray-50 p-4 rounded-lg shadow-sm"
+                    key={index}
+                  >
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-center mb-2">
@@ -597,7 +711,10 @@ function PantallasVuelos() {
                             type="text"
                             placeholder={`Monitor de Vuelos ${index + 1}`}
                             className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                            value={(nombrePantallasVuelos[index] || "").slice(0, 50)}
+                            value={(nombrePantallasVuelos[index] || "").slice(
+                              0,
+                              50
+                            )}
                             onChange={(e) => {
                               const updatedNombres = [...nombrePantallasVuelos];
                               updatedNombres[index] = e.target.value;
@@ -616,16 +733,22 @@ function PantallasVuelos() {
                                   type="checkbox"
                                   name={`toggle-portrait-${index}`}
                                   id={`toggle-portrait-${index}`}
-                                  checked={pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical"}
+                                  checked={
+                                    pantallaSettings[`vuelo${index + 1}`]
+                                      ?.orientation === "vertical"
+                                  }
                                   onChange={(e) => {
                                     const pantallaId = `vuelo${index + 1}`;
-                                    const currentConfig = pantallaSettings[pantallaId] || {};
+                                    const currentConfig =
+                                      pantallaSettings[pantallaId] || {};
                                     const updatedSettings = {
                                       ...pantallaSettings,
                                       [pantallaId]: {
                                         ...currentConfig,
-                                        orientation: e.target.checked ? "vertical" : "horizontal"
-                                      }
+                                        orientation: e.target.checked
+                                          ? "vertical"
+                                          : "horizontal",
+                                      },
                                     };
                                     setPantallaSettings(updatedSettings);
                                     setHasUnsavedChanges(true);
@@ -646,7 +769,8 @@ function PantallasVuelos() {
                             </div>
 
                             {/* Dirección de rotación */}
-                            {pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical" && (
+                            {pantallaSettings[`vuelo${index + 1}`]
+                              ?.orientation === "vertical" && (
                               <div className="mt-2 ml-12">
                                 <div className="text-xs text-gray-600 mb-1">
                                   {t("flightScreens.rotationDirection")}
@@ -657,16 +781,20 @@ function PantallasVuelos() {
                                       type="radio"
                                       id={`rotation-left-${index}`}
                                       name={`rotation-${index}`}
-                                      checked={pantallaSettings[`vuelo${index + 1}`]?.rotationDirection === -90}
+                                      checked={
+                                        pantallaSettings[`vuelo${index + 1}`]
+                                          ?.rotationDirection === -90
+                                      }
                                       onChange={() => {
                                         const pantallaId = `vuelo${index + 1}`;
-                                        const currentConfig = pantallaSettings[pantallaId] || {};
+                                        const currentConfig =
+                                          pantallaSettings[pantallaId] || {};
                                         const updatedSettings = {
                                           ...pantallaSettings,
                                           [pantallaId]: {
                                             ...currentConfig,
-                                            rotationDirection: -90
-                                          }
+                                            rotationDirection: -90,
+                                          },
                                         };
                                         setPantallaSettings(updatedSettings);
                                         setHasUnsavedChanges(true);
@@ -685,16 +813,20 @@ function PantallasVuelos() {
                                       type="radio"
                                       id={`rotation-right-${index}`}
                                       name={`rotation-${index}`}
-                                      checked={pantallaSettings[`vuelo${index + 1}`]?.rotationDirection === 90}
+                                      checked={
+                                        pantallaSettings[`vuelo${index + 1}`]
+                                          ?.rotationDirection === 90
+                                      }
                                       onChange={() => {
                                         const pantallaId = `vuelo${index + 1}`;
-                                        const currentConfig = pantallaSettings[pantallaId] || {};
+                                        const currentConfig =
+                                          pantallaSettings[pantallaId] || {};
                                         const updatedSettings = {
                                           ...pantallaSettings,
                                           [pantallaId]: {
                                             ...currentConfig,
-                                            rotationDirection: 90
-                                          }
+                                            rotationDirection: 90,
+                                          },
                                         };
                                         setPantallaSettings(updatedSettings);
                                         setHasUnsavedChanges(true);
@@ -749,86 +881,112 @@ function PantallasVuelos() {
                   {t("flightScreens.dynamicMessages")}
                 </h2>
                 <button
-                  onClick={handleAddDynamicMessage}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
+                  onClick={addDynamicMessage}
+                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
                 >
                   {t("flightScreens.addMessage")}
                 </button>
               </div>
 
-              <div className="space-y-4">
-                {dynamicMessages.map((message, index) => (
-                  <div key={message.id} className="bg-gray-50 p-4 rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="text-sm font-medium text-gray-900">
-                        {t("flightScreens.message")} {index + 1}
-                      </h3>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={message.enabled}
-                          onChange={(e) => handleUpdateDynamicMessage(message.id, 'enabled', e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                        />
-                        <span className="text-xs text-gray-600">{t("flightScreens.enabled")}</span>
-                        <button
-                          onClick={() => handleRemoveDynamicMessage(message.id)}
-                          className="text-red-600 hover:text-red-800 text-sm"
-                        >
-                          {t("flightScreens.remove")}
-                        </button>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {t("flightScreens.textSpanish")}
-                        </label>
-                        <input
-                          type="text"
-                          value={message.text.es}
-                          onChange={(e) => handleUpdateDynamicMessage(message.id, 'text', { ...message.text, es: e.target.value })}
-                          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                          placeholder="Mensaje en español"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-xs font-medium text-gray-700 mb-1">
-                          {t("flightScreens.textEnglish")}
-                        </label>
-                        <input
-                          type="text"
-                          value={message.text.en}
-                          onChange={(e) => handleUpdateDynamicMessage(message.id, 'text', { ...message.text, en: e.target.value })}
-                          className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                          placeholder="Message in English"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="mt-3">
-                      <label className="block text-xs font-medium text-gray-700 mb-1">
-                        {t("flightScreens.displayDuration")} (segundos)
-                      </label>
-                      <input
-                        type="number"
-                        min="5"
-                        max="60"
-                        value={message.displayDuration}
-                        onChange={(e) => handleUpdateDynamicMessage(message.id, 'displayDuration', parseInt(e.target.value))}
-                        className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 text-sm"
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {dynamicMessages.length === 0 && (
-                <div className="text-center p-4 bg-gray-50 rounded-lg">
-                  <p className="text-gray-600">
+              {dynamicMessages.length === 0 ? (
+                <div className="text-center p-8 bg-gray-50 rounded-lg">
+                  <p className="text-gray-500">
                     {t("flightScreens.noMessages")}
                   </p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {dynamicMessages.map((message, index) => (
+                    <div key={message.id} className="bg-gray-50 p-4 rounded-lg">
+                      <div className="flex justify-between items-start mb-4">
+                        <h3 className="text-md font-medium text-gray-900">
+                          {t("flightScreens.message")} {index + 1}
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          <label className="flex items-center">
+                            <input
+                              type="checkbox"
+                              checked={message.enabled}
+                              onChange={(e) =>
+                                updateDynamicMessage(
+                                  message.id,
+                                  "enabled",
+                                  e.target.checked
+                                )
+                              }
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">
+                              {t("flightScreens.enabled")}
+                            </span>
+                          </label>
+                          <button
+                            onClick={() => removeDynamicMessage(message.id)}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            {t("flightScreens.remove")}
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t("flightScreens.textSpanish")}
+                          </label>
+                          <textarea
+                            value={message.text.es}
+                            onChange={(e) =>
+                              updateDynamicMessage(message.id, "text", {
+                                ...message.text,
+                                es: e.target.value,
+                              })
+                            }
+                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            rows={2}
+                            placeholder="Mensaje en español..."
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {t("flightScreens.textEnglish")}
+                          </label>
+                          <textarea
+                            value={message.text.en}
+                            onChange={(e) =>
+                              updateDynamicMessage(message.id, "text", {
+                                ...message.text,
+                                en: e.target.value,
+                              })
+                            }
+                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                            rows={2}
+                            placeholder="Message in English..."
+                          />
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          {t("flightScreens.displayDuration")} (segundos)
+                        </label>
+                        <input
+                          type="number"
+                          min="5"
+                          max="60"
+                          value={message.displayDuration}
+                          onChange={(e) =>
+                            updateDynamicMessage(
+                              message.id,
+                              "displayDuration",
+                              parseInt(e.target.value)
+                            )
+                          }
+                          className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -839,7 +997,8 @@ function PantallasVuelos() {
             <div className="space-y-6">
               <div className="flex justify-between items-center border-b pb-2">
                 <h2 className="text-lg font-semibold text-gray-900">
-                  {t("flightScreens.configOf")} "{selectedPantalla.nombre}"
+                  {t("flightScreens.configOf")} &quot;{selectedPantalla.nombre}
+                  &quot;
                 </h2>
               </div>
 
@@ -850,13 +1009,16 @@ function PantallasVuelos() {
                 </label>
                 <Select
                   options={availableAirports}
-                  value={availableAirports.find(airport => 
-                    airport.value === selectedPantalla.config.airport.code
+                  value={availableAirports.find(
+                    (airport) =>
+                      airport.value === selectedPantalla.config.airport?.code
                   )}
-                  onChange={(option) => updatePantallaConfig('airport', {
-                    code: option.value,
-                    name: option.name
-                  })}
+                  onChange={(option) =>
+                    updatePantallaConfig("airport", {
+                      code: option.value,
+                      name: option.name,
+                    })
+                  }
                   placeholder={t("flightScreens.selectAirport")}
                   className="w-full"
                 />
@@ -874,11 +1036,22 @@ function PantallasVuelos() {
                     <input
                       type="checkbox"
                       id="showDepartures"
-                      checked={selectedPantalla.config.displaySettings.showDepartures}
-                      onChange={(e) => updatePantallaConfig('displaySettings.showDepartures', e.target.checked)}
+                      checked={
+                        selectedPantalla.config.displaySettings
+                          ?.showDepartures || false
+                      }
+                      onChange={(e) =>
+                        updatePantallaConfig(
+                          "displaySettings.showDepartures",
+                          e.target.checked
+                        )
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="showDepartures" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="showDepartures"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       {t("flightScreens.showDepartures")}
                     </label>
                   </div>
@@ -888,11 +1061,22 @@ function PantallasVuelos() {
                     <input
                       type="checkbox"
                       id="showArrivals"
-                      checked={selectedPantalla.config.displaySettings.showArrivals}
-                      onChange={(e) => updatePantallaConfig('displaySettings.showArrivals', e.target.checked)}
+                      checked={
+                        selectedPantalla.config.displaySettings?.showArrivals ||
+                        false
+                      }
+                      onChange={(e) =>
+                        updatePantallaConfig(
+                          "displaySettings.showArrivals",
+                          e.target.checked
+                        )
+                      }
                       className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label htmlFor="showArrivals" className="ml-2 block text-sm text-gray-700">
+                    <label
+                      htmlFor="showArrivals"
+                      className="ml-2 block text-sm text-gray-700"
+                    >
                       {t("flightScreens.showArrivals")}
                     </label>
                   </div>
@@ -906,8 +1090,15 @@ function PantallasVuelos() {
                       type="number"
                       min="2"
                       max="12"
-                      value={selectedPantalla.config.displaySettings.timeWindow}
-                      onChange={(e) => updatePantallaConfig('displaySettings.timeWindow', parseInt(e.target.value))}
+                      value={
+                        selectedPantalla.config.displaySettings?.timeWindow || 5
+                      }
+                      onChange={(e) =>
+                        updatePantallaConfig(
+                          "displaySettings.timeWindow",
+                          parseInt(e.target.value)
+                        )
+                      }
                       className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -921,8 +1112,15 @@ function PantallasVuelos() {
                       type="number"
                       min="4"
                       max="20"
-                      value={selectedPantalla.config.displaySettings.maxFlights}
-                      onChange={(e) => updatePantallaConfig('displaySettings.maxFlights', parseInt(e.target.value))}
+                      value={
+                        selectedPantalla.config.displaySettings?.maxFlights || 8
+                      }
+                      onChange={(e) =>
+                        updatePantallaConfig(
+                          "displaySettings.maxFlights",
+                          parseInt(e.target.value)
+                        )
+                      }
                       className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
@@ -933,8 +1131,16 @@ function PantallasVuelos() {
                       {t("flightScreens.refreshInterval")} (segundos)
                     </label>
                     <select
-                      value={selectedPantalla.config.displaySettings.refreshInterval}
-                      onChange={(e) => updatePantallaConfig('displaySettings.refreshInterval', parseInt(e.target.value))}
+                      value={
+                        selectedPantalla.config.displaySettings
+                          ?.refreshInterval || 120
+                      }
+                      onChange={(e) =>
+                        updatePantallaConfig(
+                          "displaySettings.refreshInterval",
+                          parseInt(e.target.value)
+                        )
+                      }
                       className="block w-32 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value={60}>1 minuto</option>
@@ -956,27 +1162,48 @@ function PantallasVuelos() {
                   <input
                     type="checkbox"
                     id="enableFilters"
-                    checked={selectedPantalla.config.airlineFilters.enabled}
-                    onChange={(e) => updatePantallaConfig('airlineFilters.enabled', e.target.checked)}
+                    checked={
+                      selectedPantalla.config.airlineFilters?.enabled || false
+                    }
+                    onChange={(e) =>
+                      updatePantallaConfig(
+                        "airlineFilters.enabled",
+                        e.target.checked
+                      )
+                    }
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
-                  <label htmlFor="enableFilters" className="ml-2 block text-sm text-gray-700">
+                  <label
+                    htmlFor="enableFilters"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
                     {t("flightScreens.filterByAirlines")}
                   </label>
                 </div>
 
-                {selectedPantalla.config.airlineFilters.enabled && (
+                {selectedPantalla.config.airlineFilters?.enabled && (
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       {t("flightScreens.selectAirlines")}
                     </label>
                     <Select
                       isMulti
-                      options={availableAirlines.map(airline => ({ value: airline, label: airline }))}
-                      value={selectedPantalla.config.airlineFilters.selectedAirlines.map(airline => ({ value: airline, label: airline }))}
-                      onChange={(selectedOptions) => updatePantallaConfig('airlineFilters.selectedAirlines', 
-                        selectedOptions ? selectedOptions.map(option => option.value) : []
-                      )}
+                      options={availableAirlines.map((airline) => ({
+                        value: airline,
+                        label: airline,
+                      }))}
+                      value={(
+                        selectedPantalla.config.airlineFilters
+                          ?.selectedAirlines || []
+                      ).map((airline) => ({ value: airline, label: airline }))}
+                      onChange={(selectedOptions) =>
+                        updatePantallaConfig(
+                          "airlineFilters.selectedAirlines",
+                          selectedOptions
+                            ? selectedOptions.map((option) => option.value)
+                            : []
+                        )
+                      }
                       placeholder={t("flightScreens.selectAirlinesPlaceholder")}
                       className="w-full"
                     />
@@ -991,7 +1218,11 @@ function PantallasVuelos() {
             <div className="mt-8 flex justify-end space-x-3">
               <button
                 onClick={() => {
-                  if (window.confirm("¿Está seguro que desea restablecer todos los valores?")) {
+                  if (
+                    window.confirm(
+                      "¿Está seguro que desea restablecer todos los valores?"
+                    )
+                  ) {
                     // Reset logic here
                     window.location.reload();
                   }
