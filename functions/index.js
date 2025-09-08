@@ -1,6 +1,7 @@
 const functions = require("firebase-functions");
 const admin = require("firebase-admin");
 const flightService = require("./services/flightService");
+const distanceService = require("./services/distanceService");
 
 // Inicializar Firebase Admin
 admin.initializeApp();
@@ -322,6 +323,173 @@ exports.getFlightStats = functions.https.onRequest(async (req, res) => {
       success: false,
       error: error.message,
       timestamp: new Date().toISOString(),
+    });
+  }
+});
+
+/**
+ * Función HTTP para calcular tiempo de viaje hotel-aeropuerto
+ */
+exports.calculateTravelTime = functions.https.onRequest(async (req, res) => {
+  // Configurar CORS
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    const { hotelLocation, airportCode, options } = req.method === "POST" ? req.body : req.query;
+
+    // Validaciones básicas
+    if (!hotelLocation) {
+      return res.status(400).json({
+        success: false,
+        error: "hotelLocation es requerido: {lat, lng, address?}"
+      });
+    }
+
+    // Validar ubicación
+    const validation = distanceService.validateLocation(hotelLocation);
+    if (!validation.valid) {
+      return res.status(400).json({
+        success: false,
+        error: validation.error
+      });
+    }
+
+    const airport = airportCode || "MEX";
+    const result = await distanceService.calculateTravelTime(hotelLocation, airport, options || {});
+
+    if (!result.success) {
+      return res.status(500).json(result);
+    }
+
+    console.log(`🗺️ Ruta calculada exitosamente para ${airport}`);
+
+    res.json({
+      success: true,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error("❌ Error en cálculo de ruta:", error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * Función HTTP para calcular múltiples rutas (hotel a todos los aeropuertos)
+ */
+exports.calculateMultipleRoutes = functions.https.onRequest(async (req, res) => {
+  // Configurar CORS
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, POST");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    const { hotelLocation, airportCodes, options } = req.method === "POST" ? req.body : req.query;
+
+    if (!hotelLocation) {
+      return res.status(400).json({
+        success: false,
+        error: "hotelLocation es requerido: {lat, lng, address?}"
+      });
+    }
+
+    // Validar ubicación
+    const validation = distanceService.validateLocation(hotelLocation);
+    if (!validation.valid) {
+      return res.status(400).json({
+        success: false,
+        error: validation.error
+      });
+    }
+
+    const airports = airportCodes || ["MEX", "TLC", "NLU"];
+    const result = await distanceService.calculateMultipleRoutes(hotelLocation, airports, options || {});
+
+    if (!result.success) {
+      return res.status(500).json(result);
+    }
+
+    console.log(`🗺️ ${result.summary.successful}/${result.summary.total} rutas calculadas exitosamente`);
+
+    res.json({
+      success: true,
+      ...result,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error("❌ Error en cálculo múltiple de rutas:", error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
+/**
+ * Función HTTP para validar ubicación y obtener información de aeropuertos
+ */
+exports.getAirportsInfo = functions.https.onRequest(async (req, res) => {
+  // Configurar CORS
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    const { hotelLocation } = req.query;
+
+    let locationInfo = null;
+    if (hotelLocation) {
+      try {
+        const location = JSON.parse(hotelLocation);
+        const validation = distanceService.validateLocation(location);
+        locationInfo = {
+          location: location,
+          validation: validation
+        };
+      } catch (error) {
+        locationInfo = {
+          error: "Formato de hotelLocation inválido, debe ser JSON válido"
+        };
+      }
+    }
+
+    res.json({
+      success: true,
+      airports: distanceService.AIRPORTS,
+      locationInfo: locationInfo,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error("❌ Error obteniendo información de aeropuertos:", error.message);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString()
     });
   }
 });
