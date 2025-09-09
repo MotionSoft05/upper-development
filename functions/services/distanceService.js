@@ -7,6 +7,9 @@
 
 const functions = require("firebase-functions");
 
+// Cargar variables de entorno
+require('dotenv').config();
+
 // Configuración de aeropuertos mexicanos con coordenadas precisas
 const AIRPORTS = {
   "MEX": {
@@ -29,11 +32,11 @@ const AIRPORTS = {
   }
 };
 
-// Google Maps API Key (debe configurarse en Firebase Functions config)
-const GOOGLE_MAPS_API_KEY = functions.config().google?.maps_api_key;
+// Google Maps API Key usando variables de entorno
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY;
 
 if (!GOOGLE_MAPS_API_KEY) {
-  console.warn("⚠️ Google Maps API Key no configurada. Use: firebase functions:config:set google.maps_api_key=\"YOUR_KEY\"");
+  console.warn("⚠️ Google Maps API Key no configurada en .env file");
 }
 
 /**

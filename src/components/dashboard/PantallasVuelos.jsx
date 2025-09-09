@@ -104,10 +104,6 @@ function PantallasVuelos() {
     },
   });
 
-  // Estados para funcionalidad de distancia mejorada
-  const [isTestingDistance, setIsTestingDistance] = useState(false);
-  const [distanceTestResult, setDistanceTestResult] = useState(null);
-  const [isGeocodingAddress, setIsGeocodingAddress] = useState(false);
 
   // useEffect para cargar datos iniciales (siguiendo patrón existente)
   useEffect(() => {
@@ -528,359 +524,8 @@ function PantallasVuelos() {
     setHasUnsavedChanges(true);
   };
 
-  // Estados adicionales para Google Maps
-  const [isMapMode, setIsMapMode] = useState(false);
-  const [autocompleteInstance, setAutocompleteInstance] = useState(null);
-  const [placesService, setPlacesService] = useState(null);
-  const [selectedPlace, setSelectedPlace] = useState(null);
 
-  // Función para manejar cambios en el input de ubicación
-  const handleLocationInputChange = (e) => {
-    const address = e.target.value;
-    setDistanceConfig({
-      ...distanceConfig,
-      hotelLocation: {
-        ...distanceConfig.hotelLocation,
-        address: address,
-      },
-    });
-    setHasUnsavedChanges(true);
 
-    // Limpiar resultado anterior si se cambia la dirección
-    if (distanceTestResult) {
-      setDistanceTestResult(null);
-    }
-  };
-
-  // Función mejorada para inicializar Google Places Autocomplete
-  const initializeGooglePlacesAutocomplete = () => {
-    if (typeof google !== 'undefined' && google.maps && google.maps.places) {
-      const input = document.getElementById('hotelLocationInput');
-      if (input && !autocompleteInstance) {
-        const autocomplete = new google.maps.places.Autocomplete(input, {
-          types: ['establishment', 'geocode'],
-          componentRestrictions: { country: 'mx' },
-          fields: ['place_id', 'geometry', 'name', 'formatted_address', 'types', 'address_components']
-        });
-
-        autocomplete.addListener('place_changed', () => {
-          const place = autocomplete.getPlace();
-          if (place.geometry) {
-            setSelectedPlace(place);
-            setDistanceConfig({
-              ...distanceConfig,
-              hotelLocation: {
-                lat: place.geometry.location.lat(),
-                lng: place.geometry.location.lng(),
-                address: place.formatted_address,
-                placeName: place.name,
-                placeId: place.place_id
-              }
-            });
-            setHasUnsavedChanges(true);
-            
-            // Limpiar resultado anterior
-            if (distanceTestResult) {
-              setDistanceTestResult(null);
-            }
-
-            // Mostrar notificación de ubicación encontrada
-            console.log('✅ Ubicación seleccionada:', place.name, '-', place.formatted_address);
-          } else {
-            console.log('❌ No se pudo obtener la ubicación del lugar seleccionado');
-          }
-        });
-
-        setAutocompleteInstance(autocomplete);
-        console.log('✅ Google Places Autocomplete inicializado correctamente');
-      }
-    } else {
-      console.log('⏳ Google Maps API no disponible, reintentando en 1 segundo...');
-      setTimeout(initializeGooglePlacesAutocomplete, 1000);
-    }
-  };
-
-  // Función para manejar el enfoque del input
-  const handleLocationInputFocus = () => {
-    if (!autocompleteInstance) {
-      initializeGooglePlacesAutocomplete();
-    }
-  };
-
-  // Función para seleccionar ubicación rápida
-  const selectQuickLocation = (location) => {
-    setDistanceConfig({
-      ...distanceConfig,
-      hotelLocation: {
-        lat: location.coords.lat,
-        lng: location.coords.lng,
-        address: location.name + ", Ciudad de México",
-        placeName: location.name
-      }
-    });
-    setHasUnsavedChanges(true);
-    
-    // Actualizar el input
-    const input = document.getElementById('hotelLocationInput');
-    if (input) {
-      input.value = location.name + ", Ciudad de México";
-    }
-    
-    // Limpiar resultado anterior
-    if (distanceTestResult) {
-      setDistanceTestResult(null);
-    }
-  };
-
-  // Función para probar el cálculo de distancia
-  const testDistanceCalculation = async () => {
-    if (!distanceConfig.hotelLocation.address) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Dirección requerida',
-        text: 'Por favor ingrese la dirección del hotel primero.',
-      });
-      return;
-    }
-
-    setIsTestingDistance(true);
-    setDistanceTestResult(null);
-
-    try {
-      // Primero geocodificar la dirección si no tenemos coordenadas precisas
-      let coordinates = {
-        lat: distanceConfig.hotelLocation.lat,
-        lng: distanceConfig.hotelLocation.lng,
-      };
-
-      // Si la dirección ha cambiado, geocodificar primero
-      if (distanceConfig.hotelLocation.address && 
-          distanceConfig.hotelLocation.address !== "Ciudad de México" &&
-          distanceConfig.hotelLocation.address.length > 10) {
-        
-        console.log('🔍 Geocodificando dirección:', distanceConfig.hotelLocation.address);
-        
-        // Usar servicio de geocoding (Google Maps Geocoding API)
-        const geocodeResult = await geocodeAddress(distanceConfig.hotelLocation.address);
-        
-        if (geocodeResult.success) {
-          coordinates = {
-            lat: geocodeResult.coordinates.lat,
-            lng: geocodeResult.coordinates.lng,
-          };
-
-          // Actualizar la configuración con las coordenadas precisas
-          setDistanceConfig({
-            ...distanceConfig,
-            hotelLocation: {
-              ...distanceConfig.hotelLocation,
-              lat: coordinates.lat,
-              lng: coordinates.lng,
-              address: geocodeResult.formattedAddress || distanceConfig.hotelLocation.address,
-            },
-          });
-          setHasUnsavedChanges(true);
-        }
-      }
-
-      // Ahora calcular distancias usando Firebase Functions
-      const response = await fetch('/api/calculateMultipleRoutes', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          hotelLocation: {
-            lat: coordinates.lat,
-            lng: coordinates.lng,
-            address: distanceConfig.hotelLocation.address,
-          },
-          airportCodes: ['MEX', 'TLC', 'NLU'],
-          options: {
-            language: 'es',
-            mode: 'driving',
-          },
-        }),
-      });
-
-      const data = await response.json();
-
-      if (data.success) {
-        setDistanceTestResult(data);
-        Swal.fire({
-          icon: 'success',
-          title: 'Distancias calculadas',
-          text: `Se calcularon exitosamente ${data.summary.successful} de ${data.summary.total} rutas.`,
-          timer: 2000,
-          showConfirmButton: false,
-        });
-      } else {
-        throw new Error(data.error || 'Error calculando distancias');
-      }
-
-    } catch (error) {
-      console.error('❌ Error calculando distancia:', error);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error calculando distancias',
-        text: 'No se pudieron calcular los tiempos de viaje. Verifique la dirección e intente nuevamente.',
-      });
-    } finally {
-      setIsTestingDistance(false);
-    }
-  };
-
-  // Función mejorada para geocoding con Google Maps API
-  const enhancedGeocode = async (address) => {
-    try {
-      // Primero intentar con Google Geocoding API si está disponible
-      if (typeof google !== 'undefined' && google.maps && google.maps.Geocoder) {
-        const geocoder = new google.maps.Geocoder();
-        
-        return new Promise((resolve) => {
-          geocoder.geocode({
-            address: address,
-            componentRestrictions: { country: 'MX' },
-            language: 'es',
-            region: 'mx'
-          }, (results, status) => {
-            if (status === 'OK' && results && results.length > 0) {
-              const result = results[0];
-              resolve({
-                success: true,
-                coordinates: {
-                  lat: result.geometry.location.lat(),
-                  lng: result.geometry.location.lng()
-                },
-                formattedAddress: result.formatted_address,
-                placeId: result.place_id,
-                addressComponents: result.address_components
-              });
-            } else {
-              console.log('Google Geocoding falló, usando fallback');
-              resolve(geocodeAddressFallback(address));
-            }
-          });
-        });
-      }
-      
-      // Fallback si Google Maps no está disponible
-      return geocodeAddressFallback(address);
-
-    } catch (error) {
-      console.error('❌ Error en geocoding mejorado:', error);
-      return geocodeAddressFallback(address);
-    }
-  };
-
-  // Función de fallback para geocoding
-  const geocodeAddressFallback = (address) => {
-    try {
-      const mexicoCityCoords = {
-        lat: 19.4326,
-        lng: -99.1332,
-      };
-
-      const knownLocations = {
-        'polanco': { lat: 19.4326, lng: -99.1949 },
-        'santa fe': { lat: 19.3598, lng: -99.2674 },
-        'roma norte': { lat: 19.4147, lng: -99.1635 },
-        'roma': { lat: 19.4147, lng: -99.1635 },
-        'condesa': { lat: 19.4110, lng: -99.1710 },
-        'centro histórico': { lat: 19.4285, lng: -99.1277 },
-        'centro': { lat: 19.4285, lng: -99.1277 },
-        'aeropuerto': { lat: 19.4363, lng: -99.0721 },
-        'insurgentes': { lat: 19.4200, lng: -99.1620 },
-        'zona rosa': { lat: 19.4260, lng: -99.1640 },
-        'del valle': { lat: 19.3800, lng: -99.1650 },
-        'coyoacán': { lat: 19.3467, lng: -99.1618 },
-        'san ángel': { lat: 19.3469, lng: -99.1906 },
-        'xochimilco': { lat: 19.2570, lng: -99.1030 }
-      };
-
-      const addressLower = address.toLowerCase();
-      for (const [location, coords] of Object.entries(knownLocations)) {
-        if (addressLower.includes(location)) {
-          return {
-            success: true,
-            coordinates: coords,
-            formattedAddress: `${location.charAt(0).toUpperCase() + location.slice(1)}, Ciudad de México, CDMX, México`,
-          };
-        }
-      }
-
-      return {
-        success: true,
-        coordinates: mexicoCityCoords,
-        formattedAddress: address + ", Ciudad de México, CDMX, México",
-      };
-
-    } catch (error) {
-      console.error('Error en fallback geocoding:', error);
-      return {
-        success: false,
-        error: error.message,
-      };
-    }
-  };
-
-  // Función para geocodificar dirección (mantener compatibilidad)
-  const geocodeAddress = enhancedGeocode;
-
-  // Función mejorada para calcular distancias con información de tráfico
-  const calculateDistancesWithTraffic = async (hotelLocation) => {
-    const airports = [
-      { code: 'MEX', name: 'AICM', coords: { lat: 19.4363, lng: -99.0721 } },
-      { code: 'TLC', name: 'Toluca', coords: { lat: 19.3371, lng: -99.5664 } },
-      { code: 'NLU', name: 'Felipe Ángeles', coords: { lat: 19.7411, lng: -99.0186 } }
-    ];
-
-    const results = await Promise.all(
-      airports.map(async (airport) => {
-        try {
-          const response = await fetch(`/api/distance-matrix`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              origins: [hotelLocation],
-              destinations: [airport.coords],
-              mode: 'driving',
-              departure_time: 'now', // Para considerar tráfico actual
-              traffic_model: 'best_guess',
-              language: 'es'
-            })
-          });
-
-          const data = await response.json();
-          
-          if (data.rows[0].elements[0].status === 'OK') {
-            const element = data.rows[0].elements[0];
-            return {
-              airport: airport.code,
-              airportName: airport.name,
-              distance: element.distance.text,
-              distanceValue: element.distance.value,
-              duration: element.duration.text,
-              durationValue: element.duration.value,
-              durationInTraffic: element.duration_in_traffic?.text || element.duration.text,
-              trafficDelay: element.duration_in_traffic 
-                ? (element.duration_in_traffic.value - element.duration.value) / 60 
-                : 0,
-              trafficConditions: element.duration_in_traffic 
-                ? (element.duration_in_traffic.value > element.duration.value * 1.3 ? 'heavy' : 
-                   element.duration_in_traffic.value > element.duration.value * 1.1 ? 'moderate' : 'light')
-                : 'light'
-            };
-          }
-        } catch (error) {
-          console.error(`Error calculando distancia a ${airport.code}:`, error);
-          return null;
-        }
-      })
-    );
-
-    return results.filter(result => result !== null);
-  };
 
   return (
     <div className="p-6">
@@ -1072,195 +717,95 @@ function PantallasVuelos() {
                         {t("flightScreens.hotelLocation")}
                       </label>
                       
-                      {/* Selector de método de ubicación mejorado */}
-                      <div className="flex space-x-4 mb-3">
-                        <button
-                          onClick={() => setIsMapMode(false)}
-                          type="button"
-                          className={`px-3 py-2 rounded-md text-sm font-medium ${!isMapMode ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                          🔍 Buscar por dirección
-                        </button>
-                        <button
-                          onClick={() => setIsMapMode(true)}
-                          type="button"
-                          className={`px-3 py-2 rounded-md text-sm font-medium ${isMapMode ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
-                        >
-                          📍 Seleccionar en mapa
-                        </button>
+                      {/* Mapa interactivo con buscador */}
+                      <div className="space-y-4">
+                        {/* Campo de búsqueda */}
+                        <div className="relative">
+                          <input
+                            type="text"
+                            placeholder="Buscar hotel o dirección..."
+                            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                            value={distanceConfig.hotelLocation.address || ''}
+                            onChange={(e) => {
+                              setDistanceConfig({
+                                ...distanceConfig,
+                                hotelLocation: {
+                                  ...distanceConfig.hotelLocation,
+                                  address: e.target.value
+                                }
+                              });
+                              setHasUnsavedChanges(true);
+                            }}
+                          />
+                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                          </div>
+                        </div>
+
+                        {/* Mapa interactivo principal */}
+                        <div className="relative">
+                          <div className="h-80 bg-gradient-to-br from-blue-50 to-gray-100 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
+                            <div className="text-center p-6">
+                              <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
+                                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                              </div>
+                              <h3 className="text-lg font-semibold text-gray-700 mb-2">Google Maps</h3>
+                              <p className="text-sm text-gray-600 mb-3">Haga clic en el mapa para seleccionar la ubicación exacta</p>
+                              <div className="text-xs text-gray-500">
+                                O use el buscador arriba para encontrar un lugar específico
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Overlay con información si ya hay ubicación seleccionada */}
+                          {distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng && (
+                            <div className="absolute top-4 left-4 right-4">
+                              <div className="bg-white rounded-lg shadow-lg p-4 border-l-4 border-green-500">
+                                <div className="flex items-center">
+                                  <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                    </svg>
+                                  </div>
+                                  <div className="ml-3 flex-1">
+                                    <h4 className="text-sm font-semibold text-green-900">Ubicación Confirmada</h4>
+                                    <p className="text-sm text-green-700 truncate">
+                                      {distanceConfig.hotelLocation.placeName || distanceConfig.hotelLocation.address || 'Ubicación personalizada'}
+                                    </p>
+                                  </div>
+                                  <button
+                                    onClick={() => {
+                                      setDistanceConfig({
+                                        ...distanceConfig,
+                                        hotelLocation: { lat: 19.4326, lng: -99.1332, address: '' }
+                                      });
+                                      setHasUnsavedChanges(true);
+                                    }}
+                                    className="ml-3 text-green-600 hover:text-green-800 transition-colors"
+                                  >
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Modo búsqueda mejorado */}
-                      {!isMapMode && (
-                        <div className="space-y-3">
-                          <div className="relative">
-                            <input
-                              id="hotelLocationInput"
-                              type="text"
-                              value={distanceConfig.hotelLocation.address}
-                              onChange={handleLocationInputChange}
-                              onFocus={handleLocationInputFocus}
-                              className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 pr-10"
-                              placeholder="Busque: Hotel Presidente, Polanco, Ciudad de México..."
-                            />
-                            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-                              <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                              </svg>
-                            </div>
-                          </div>
 
-                          {/* Ubicaciones sugeridas para hoteles comunes */}
-                          <div className="grid grid-cols-2 gap-2">
-                            {[
-                              { name: "Polanco", coords: { lat: 19.4326, lng: -99.1949 } },
-                              { name: "Santa Fe", coords: { lat: 19.3598, lng: -99.2674 } },
-                              { name: "Centro Histórico", coords: { lat: 19.4285, lng: -99.1277 } },
-                              { name: "Roma Norte", coords: { lat: 19.4147, lng: -99.1635 } },
-                              { name: "Condesa", coords: { lat: 19.4110, lng: -99.1710 } },
-                              { name: "Zona Rosa", coords: { lat: 19.4260, lng: -99.1640 } }
-                            ].map(location => (
-                              <button
-                                key={location.name}
-                                type="button"
-                                onClick={() => selectQuickLocation(location)}
-                                className="p-2 text-sm border rounded-md hover:bg-blue-50 text-left transition-colors"
-                              >
-                                📍 {location.name}
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Modo mapa */}
-                      {isMapMode && (
-                        <div className="h-64 bg-gray-100 rounded-md flex items-center justify-center border-2 border-dashed border-gray-300">
-                          <div className="text-center">
-                            <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
-                            <p className="text-gray-500 mt-2">Google Maps integration</p>
-                            <p className="text-xs text-gray-400 mt-1">Haga clic en el mapa para seleccionar ubicación</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Información de ubicación detectada */}
-                      {distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng && (
-                        <div className="mt-2 p-3 bg-blue-50 rounded-md">
-                          <div className="flex items-start">
-                            <svg className="h-5 w-5 text-blue-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <div className="ml-3">
-                              <h4 className="text-sm font-medium text-blue-900">Ubicación confirmada</h4>
-                              <p className="text-sm text-blue-700">
-                                📍 {distanceConfig.hotelLocation.address}
-                              </p>
-                              <p className="text-xs text-blue-600 mt-1">
-                                Coordenadas: {distanceConfig.hotelLocation.lat.toFixed(6)}, {distanceConfig.hotelLocation.lng.toFixed(6)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Botón para probar cálculo de distancia */}
-                      {distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng && (
-                        <div className="mt-3">
-                          <button
-                            onClick={testDistanceCalculation}
-                            disabled={isTestingDistance}
-                            className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-blue-700 bg-blue-100 hover:bg-blue-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
-                          >
-                            {isTestingDistance ? (
-                              <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-blue-700" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Calculando...
-                              </>
-                            ) : (
-                              <>
-                                🗺️ Probar cálculo de distancia
-                              </>
-                            )}
-                          </button>
-                        </div>
-                      )}
-
-                      {/* Resultados del test de distancia mejorados */}
-                      {distanceTestResult && (
-                        <div className="mt-4 space-y-3">
-                          <h4 className="font-medium text-gray-900 flex items-center">
-                            <svg className="w-5 h-5 text-green-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                            </svg>
-                            🛣️ Tiempos de viaje calculados:
-                          </h4>
-                          {distanceTestResult.results?.map((result, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-md border-l-4 border-blue-500">
-                              <div className="flex items-center space-x-3">
-                                <span className="font-mono text-sm bg-blue-100 px-2 py-1 rounded font-medium">
-                                  {result.data.destination.airport}
-                                </span>
-                                <span className="text-sm text-gray-600">
-                                  {result.data.destination.airportName || availableAirports.find(a => a.value === result.data.destination.airport)?.name || 'Aeropuerto'}
-                                </span>
-                              </div>
-                              <div className="text-right">
-                                <div className="text-sm font-medium text-gray-900">
-                                  {result.data.durationInTraffic?.text || result.data.duration.text}
-                                  {result.data.durationInTraffic && result.data.trafficConditions && result.data.trafficConditions !== 'light' && (
-                                    <span className={`ml-2 px-2 py-1 rounded-full text-xs font-medium ${
-                                      result.data.trafficConditions === 'heavy' 
-                                        ? 'bg-red-100 text-red-800' 
-                                        : 'bg-yellow-100 text-yellow-800'
-                                    }`}>
-                                      {result.data.trafficConditions === 'heavy' ? 'Tráfico intenso' : 'Tráfico moderado'}
-                                    </span>
-                                  )}
-                                </div>
-                                <div className="text-xs text-gray-500 flex items-center">
-                                  <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-                                  </svg>
-                                  {result.data.distance?.text || 'Calculando distancia...'}
-                                  {result.data.trafficDelay && result.data.trafficDelay > 5 && (
-                                    <span className="ml-2 text-orange-600">
-                                      +{Math.round(result.data.trafficDelay)} min por tráfico
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </div>
-                          ))}
-                          
-                          {/* Resumen de resultados */}
-                          <div className="mt-3 p-2 bg-blue-50 rounded-md">
-                            <div className="flex items-center text-sm text-blue-700">
-                              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              Se calcularon exitosamente {distanceTestResult.summary?.successful || distanceTestResult.results?.length || 0} de {distanceTestResult.summary?.total || 3} rutas.
-                              <span className="ml-2 text-xs text-blue-600">
-                                Incluye condiciones de tráfico en tiempo real
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Instrucciones de ayuda */}
+                      {/* Instrucciones simplificadas */}
                       <div className="mt-3 p-3 bg-gray-100 rounded-md">
-                        <h4 className="text-xs font-medium text-gray-700 mb-1">💡 Consejos:</h4>
+                        <h4 className="text-xs font-medium text-gray-700 mb-1">💡 Cómo usar:</h4>
                         <ul className="text-xs text-gray-600 space-y-1">
-                          <li>• Incluya el nombre del hotel para mejores resultados</li>
-                          <li>• Si no encuentra su ubicación, use la dirección completa</li>
-                          <li>• El sistema calculará automáticamente las coordenadas</li>
-                          <li>• Los tiempos incluyen consideraciones de tráfico en tiempo real</li>
+                          <li>• Use el buscador o haga clic directamente en el mapa</li>
+                          <li>• La ubicación se usará para mostrar tiempos de viaje a aeropuertos</li>
                         </ul>
                       </div>
                     </div>
@@ -1605,11 +1150,23 @@ function PantallasVuelos() {
                 </h2>
               </div>
 
-              {/* Selección de Aeropuerto */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {t("flightScreens.airport")}
-                </label>
+              {/* Selección de Aeropuerto por Pantalla */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-l-4 border-blue-500">
+                <div className="flex items-center mb-3">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-blue-900">
+                      Aeropuerto para esta pantalla
+                    </label>
+                    <p className="text-xs text-blue-700">
+                      Cada pantalla puede mostrar un aeropuerto diferente
+                    </p>
+                  </div>
+                </div>
                 <Select
                   options={availableAirports}
                   value={availableAirports.find(
@@ -1625,6 +1182,16 @@ function PantallasVuelos() {
                   placeholder={t("flightScreens.selectAirport")}
                   className="w-full"
                 />
+                
+                {/* Casos de uso sugeridos */}
+                <div className="mt-3 p-3 bg-white bg-opacity-60 rounded-md">
+                  <h4 className="text-xs font-medium text-blue-800 mb-2">💡 Casos de uso comunes:</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-blue-700">
+                    <div>• <strong>Lobby principal</strong> → AICM (MEX)</div>
+                    <div>• <strong>Área shuttle</strong> → Toluca (TLC)</div>
+                    <div>• <strong>Info turística</strong> → Felipe Ángeles (NLU)</div>
+                  </div>
+                </div>
               </div>
 
               {/* Configuraciones de Visualización */}
