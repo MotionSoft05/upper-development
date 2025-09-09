@@ -18,6 +18,32 @@ admin.initializeApp();
 const db = admin.firestore();
 
 /**
+ * Función para limpiar valores undefined de objetos (Firestore no los acepta)
+ */
+function cleanUndefinedValues(obj) {
+  if (obj === null || obj === undefined) {
+    return null;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map((item) => cleanUndefinedValues(item))
+        .filter((item) => item !== undefined);
+  }
+
+  if (typeof obj === "object") {
+    const cleaned = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = cleanUndefinedValues(value);
+      }
+    }
+    return cleaned;
+  }
+
+  return obj;
+}
+
+/**
  * Función que se ejecuta cada 15 minutos para actualizar datos de vuelos
  */
 exports.updateFlightData = onSchedule({
@@ -67,9 +93,12 @@ exports.updateFlightData = onSchedule({
       const flightData = await flightService.getFlightData(airport);
 
       if (flightData) {
+        // Limpiar datos antes de guardar (eliminar undefined values)
+        const cleanFlightData = cleanUndefinedValues(flightData);
+
         // Guardar en Firestore
         await db.collection("flightData").doc(airport).set({
-          ...flightData,
+          ...cleanFlightData,
           serverTimestamp: admin.firestore.FieldValue.serverTimestamp(),
         });
 
@@ -157,9 +186,12 @@ exports.testFlightUpdate = onRequest({
     const flightData = await flightService.getFlightData(airport.toUpperCase());
 
     if (forceUpdate && flightData) {
+      // Limpiar datos antes de guardar (eliminar undefined values)
+      const cleanFlightData = cleanUndefinedValues(flightData);
+
       // Guardar en Firestore si se solicita
       await db.collection("flightData").doc(airport.toUpperCase()).set({
-        ...flightData,
+        ...cleanFlightData,
         serverTimestamp: admin.firestore.FieldValue.serverTimestamp(),
         updatedVia: "manual_test",
       });

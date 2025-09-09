@@ -3,7 +3,8 @@
     "allow": [
       "Bash(npm run lint:*)",
       "Bash(node:*)",
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "Bash(firebase deploy:*)"
     ],
     "deny": [],
     "ask": []

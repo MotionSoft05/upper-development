@@ -65,6 +65,12 @@ function AdminAPIMonitor() {
     nextRun: null,
   });
 
+  // Nuevos estados para mejoras
+  const [nextExecution, setNextExecution] = useState(null);
+  const [isExecutingManual, setIsExecutingManual] = useState(false);
+  const [detailedLogs, setDetailedLogs] = useState([]);
+  const [showLogsModal, setShowLogsModal] = useState(false);
+
   // URLs específicas de Firebase Functions v2
   const FUNCTION_URLS = {
     systemHealth: "https://systemhealth-wsvcv36oca-uc.a.run.app",
@@ -79,6 +85,27 @@ function AdminAPIMonitor() {
     loadAPIStats();
     loadCronStatus();
   }, []);
+
+  // Auto-refresh cada 30 segundos
+  useEffect(() => {
+    const interval = setInterval(() => {
+      loadSystemStatus();
+      loadAPIStats();
+      loadCronStatus();
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Actualizar próxima ejecución cada minuto
+  useEffect(() => {
+    if (cronStatus.enabled) {
+      const interval = setInterval(() => {
+        const nextExec = calculateNextExecution(cronStatus.lastRun, cronStatus.enabled);
+        setNextExecution(nextExec);
+      }, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [cronStatus]);
 
   // Función para cargar estado del sistema
   const loadSystemStatus = async () => {
@@ -154,6 +181,115 @@ function AdminAPIMonitor() {
     }
   };
 
+  // NUEVA: Función para calcular próxima ejecución
+  const calculateNextExecution = (lastExecution, isEnabled) => {
+    if (!isEnabled) return "Sistema pausado";
+    
+    const now = new Date();
+    const next = new Date(now);
+    
+    // El cron job se ejecuta cada 15 minutos: 0, 15, 30, 45
+    const currentMinutes = now.getMinutes();
+    const nextMinutes = Math.ceil((currentMinutes + 1) / 15) * 15;
+    
+    if (nextMinutes >= 60) {
+      next.setHours(next.getHours() + 1, 0, 0, 0);
+    } else {
+      next.setMinutes(nextMinutes, 0, 0);
+    }
+    
+    const diffMinutes = Math.round((next - now) / (1000 * 60));
+    
+    if (diffMinutes <= 1) return "En menos de 1 minuto";
+    return `En ${diffMinutes} minutos (${next.toLocaleTimeString()})`;
+  };
+
+  // NUEVA: Función para ejecutar actualización manual
+  const executeManualUpdate = async () => {
+    setIsExecutingManual(true);
+    
+    try {
+      const airports = ['MEX', 'TLC', 'NLU'];
+      const results = [];
+      
+      for (const airport of airports) {
+        console.log(`🚀 Ejecutando actualización manual para ${airport}...`);
+        
+        const response = await fetch(
+          `${FUNCTION_URLS.testFlightUpdate}?airport=${airport}&force=true`,
+          { method: 'GET' }
+        );
+        
+        const result = await response.json();
+        results.push({
+          airport,
+          success: result.success,
+          data: result.data,
+          error: result.error
+        });
+      }
+      
+      // Mostrar resultado
+      const successful = results.filter(r => r.success).length;
+      const failed = results.filter(r => !r.success).length;
+      
+      Swal.fire({
+        title: "✅ Ejecución manual completada",
+        html: `
+          <div class="text-left">
+            <p><strong>Exitosos:</strong> ${successful}/${airports.length}</p>
+            <p><strong>Fallidos:</strong> ${failed}/${airports.length}</p>
+            ${failed > 0 ? '<p class="text-red-600 mt-2">Ver logs detallados para más información.</p>' : '<p class="text-green-600 mt-2">Todos los aeropuertos actualizados correctamente.</p>'}
+          </div>
+        `,
+        icon: "success",
+        timer: 5000,
+      });
+      
+      // Recargar estado del sistema
+      await loadSystemStatus();
+      await loadAPIStats();
+      
+    } catch (error) {
+      console.error('Error en ejecución manual:', error);
+      Swal.fire({
+        title: "❌ Error en ejecución manual",
+        text: error.message,
+        icon: "error"
+      });
+    } finally {
+      setIsExecutingManual(false);
+    }
+  };
+
+  // NUEVA: Función para obtener logs detallados
+  const fetchDetailedLogs = async () => {
+    try {
+      const response = await fetch(`${FUNCTION_URLS.systemHealth}`);
+      const data = await response.json();
+      
+      // Procesar logs para mostrar errores detallados
+      const errorLogs = data.recentLogs?.filter(log => 
+        log.level === 'error' || 
+        log.context?.includes('error') || 
+        log.message?.toLowerCase().includes('error') ||
+        log.message?.toLowerCase().includes('timeout') ||
+        log.message?.toLowerCase().includes('failed')
+      ) || [];
+      
+      setDetailedLogs(errorLogs);
+      setShowLogsModal(true);
+      
+    } catch (error) {
+      console.error('Error obteniendo logs:', error);
+      Swal.fire({
+        title: "❌ Error",
+        text: "Error obteniendo logs detallados",
+        icon: "error"
+      });
+    }
+  };
+
   // Función para cargar estado de cron jobs
   const loadCronStatus = async () => {
     try {
@@ -161,11 +297,16 @@ function AdminAPIMonitor() {
       if (response.ok) {
         const health = await response.json();
         if (health.cronJobs) {
-          setCronStatus({
+          const cronData = {
             enabled: health.cronJobs.enabled || false,
             lastRun: health.cronJobs.lastRun,
             nextRun: health.cronJobs.nextRun
-          });
+          };
+          setCronStatus(cronData);
+          
+          // Calcular próxima ejecución
+          const nextExec = calculateNextExecution(cronData.lastRun, cronData.enabled);
+          setNextExecution(nextExec);
         }
       }
     } catch (error) {
@@ -711,8 +852,8 @@ function AdminAPIMonitor() {
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-gray-100">
                       <span className="text-gray-600">Próxima ejecución</span>
-                      <span className="font-medium">
-                        {cronStatus.nextRun ? new Date(cronStatus.nextRun).toLocaleString() : 'N/A'}
+                      <span className="font-medium text-blue-600">
+                        {nextExecution || 'Calculando...'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-gray-100">
@@ -733,6 +874,32 @@ function AdminAPIMonitor() {
         {/* TAB: Estadísticas */}
         {activeTab === "stats" && (
           <div className="space-y-6">
+            {/* Stats Cards con botón ejecutar ahora */}
+            <div className="mb-6 flex justify-between items-center">
+              <h3 className="text-xl font-semibold text-gray-900">📈 Estadísticas de APIs</h3>
+              <button
+                onClick={executeManualUpdate}
+                disabled={isExecutingManual}
+                className={`px-6 py-3 rounded-lg text-white font-medium transition-colors ${
+                  isExecutingManual 
+                    ? 'bg-gray-400 cursor-not-allowed' 
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
+              >
+                {isExecutingManual ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                    </svg>
+                    Ejecutando...
+                  </>
+                ) : (
+                  '🚀 Ejecutar Ahora'
+                )}
+              </button>
+            </div>
+
             {/* Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="bg-white rounded-lg p-6 shadow-sm border">
@@ -753,6 +920,14 @@ function AdminAPIMonitor() {
                 <div className="text-center">
                   <p className="text-3xl font-bold text-red-600">{apiStats.failedRequests}</p>
                   <p className="text-sm text-gray-600 mt-1">Fallidas</p>
+                  {apiStats.failedRequests > 0 && (
+                    <button
+                      onClick={fetchDetailedLogs}
+                      className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+                    >
+                      Ver detalles
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -812,6 +987,85 @@ function AdminAPIMonitor() {
                 </div>
               </div>
             </div>
+
+            {/* NUEVO: Modal de Logs Detallados */}
+            {showLogsModal && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+                  <div className="flex justify-between items-center p-6 border-b">
+                    <h3 className="text-lg font-semibold">🔍 Logs Detallados de Errores</h3>
+                    <button
+                      onClick={() => setShowLogsModal(false)}
+                      className="text-gray-400 hover:text-gray-600"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  <div className="p-6 overflow-y-auto max-h-[60vh]">
+                    {detailedLogs.length > 0 ? (
+                      <div className="space-y-4">
+                        {detailedLogs.map((log, index) => (
+                          <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="text-sm font-medium text-red-800">
+                                {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Sin timestamp'}
+                              </span>
+                              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
+                                {log.context || log.level || 'Error'}
+                              </span>
+                            </div>
+                            <p className="text-sm text-red-700 font-mono mb-2">
+                              {log.message || 'Sin mensaje de error'}
+                            </p>
+                            {log.details && (
+                              <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-x-auto">
+                                {JSON.stringify(log.details, null, 2)}
+                              </pre>
+                            )}
+                            {log.error && (
+                              <div className="mt-2 text-xs bg-red-100 p-2 rounded">
+                                <strong>Error:</strong> {log.error}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <FontAwesomeIcon icon={faCheckCircle} className="text-4xl text-green-500 mb-4" />
+                        <p className="text-gray-500 font-medium">No se encontraron logs de errores recientes.</p>
+                        <p className="text-sm text-gray-400 mt-2">
+                          Esto significa que las APIs están funcionando correctamente.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="p-6 border-t bg-gray-50">
+                    <div className="flex justify-between items-center">
+                      <p className="text-sm text-gray-600">
+                        Mostrando errores de las últimas 24 horas
+                      </p>
+                      <div className="space-x-3">
+                        <button
+                          onClick={fetchDetailedLogs}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          🔄 Actualizar
+                        </button>
+                        <button
+                          onClick={() => setShowLogsModal(false)}
+                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+                        >
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

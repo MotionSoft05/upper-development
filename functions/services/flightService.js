@@ -9,7 +9,7 @@ class FlightService {
    * Initialize FlightService with API configuration
    */
   constructor() {
-    // Configurar APIs usando variables de entorno
+    // Firebase Functions v2 - Solo usar process.env (functions.config() no disponible)
     this.openSkyClientId = process.env.OPENSKY_CLIENT_ID;
     this.openSkyClientSecret = process.env.OPENSKY_CLIENT_SECRET;
     this.aviationStackKey = process.env.AVIATIONSTACK_KEY;
@@ -24,6 +24,7 @@ class FlightService {
       opensky: !!this.openSkyClientId,
       aviationstack: !!this.aviationStackKey,
       oauth2: !!(this.openSkyClientId && this.openSkyClientSecret),
+      source: "process.env (Functions v2)",
     });
 
     // Coordenadas aproximadas de aeropuertos mexicanos
