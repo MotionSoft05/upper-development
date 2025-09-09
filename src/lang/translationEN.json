@@ -317,6 +317,7 @@
   "sidebar": {
     "title": "SCREEN MANAGEMENT",
     "admin": "Users and licenses",
+    "apiMonitor": "API Monitor",
     "dashboard": "Dashboard",
     "eventEditing": "Company editing",
     "eventRegistration": "Event registration",

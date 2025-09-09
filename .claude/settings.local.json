@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(npm run lint:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

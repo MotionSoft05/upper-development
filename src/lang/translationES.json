@@ -317,6 +317,7 @@
   "sidebar": {
     "title": "GESTIÓN DE PANTALLAS",
     "admin": "Usuarios y licencias",
+    "apiMonitor": "Monitor de APIs",
     "dashboard": "Tablero",
     "eventEditing": "Edición de empresas",
     "eventRegistration": "Alta de eventos",

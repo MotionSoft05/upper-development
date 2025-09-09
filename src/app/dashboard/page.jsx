@@ -10,6 +10,7 @@ import PantallasSalon from "@/components/dashboard/pantallasSalon";
 import Publicidad from "@/components/dashboard/publicidad";
 import Soporte from "@/components/dashboard/soporte";
 import Admin from "@/components/dashboard/admin/admin";
+import AdminAPIMonitor from "@/components/dashboard/admin/AdminAPIMonitor";
 import UserAdmin from "@/components/dashboard/userAdmin";
 import Ediciondeempresa from "@/components/dashboard/ediciondeempresa";
 import EditPantallaServicio from "@/components/dashboard/EditPantallaServicio";
@@ -40,6 +41,7 @@ function DashBoard() {
   const [userEmail, setUserEmail] = useState(null);
   const [userData, setUserData] = useState(null);
   const [showAdmin, setShowAdmin] = useState(false);
+  const [showAPIMonitor, setShowAPIMonitor] = useState(false);
   const [showEdiciondeempresa, setShowEdiciondeempresa] = useState(false);
   const [showUserAdmin, setShowUserAdmin] = useState(true);
   const [showConsultaEvento, setShowConsultaEvento] = useState(false);
@@ -112,6 +114,8 @@ function DashBoard() {
           userData={userData}
           setShowAdmin={setShowAdmin}
           showAdmin={showAdmin}
+          setShowAPIMonitor={setShowAPIMonitor}
+          showAPIMonitor={showAPIMonitor}
           setShowEdiciondeempresa={setShowEdiciondeempresa}
           showEdiciondeempresa={showEdiciondeempresa}
           setShowUserAdmin={setShowUserAdmin}
@@ -160,6 +164,10 @@ function DashBoard() {
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
               userEmail === "contacto@upperds.mx") && <Admin />}
+          {showAPIMonitor &&
+            (userEmail === "uppermex10@gmail.com" ||
+              userEmail === "ulises.jacobo@hotmail.com" ||
+              userEmail === "contacto@upperds.mx") && <AdminAPIMonitor />}
           {showEdiciondeempresa &&
             (userEmail === "uppermex10@gmail.com" ||
               userEmail === "ulises.jacobo@hotmail.com" ||
