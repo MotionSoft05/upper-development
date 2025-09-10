@@ -474,6 +474,7 @@ class FlightService {
           withCargo: "false",
           withPrivate: "false",
           direction: "Both",
+          withLocation: "true",
         });
 
         const response = await axios.get(`${url}?${params}`, {
@@ -529,20 +530,31 @@ class FlightService {
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
         destination: flight.movement?.airport?.name || "Unknown",
         destinationCode: flight.movement?.airport?.iata || flight.movement?.airport?.icao || "",
+
+        // USAR HORARIOS REALES disponibles
         scheduledTime: this.extractTime(flight.movement?.scheduledTimeLocal),
-        actualTime: this.extractTime(flight.movement?.actualTimeLocal),
-        estimatedTime: this.extractTime(flight.movement?.estimatedTimeLocal),
-        status: this.mapAeroDataBoxStatus(flight.status),
+        estimatedTime: this.extractTime(flight.movement?.revisedTimeLocal ||
+            flight.movement?.estimatedTimeLocal),
+        actualTime: this.extractTime(flight.movement?.runwayTimeLocal ||
+            flight.movement?.actualTimeLocal),
+
+        // USAR ESTADO REAL con datos completos
+        status: this.mapAeroDataBoxStatus(flight.status, flight),
+
         terminal: flight.movement?.terminal || "",
         gate: flight.movement?.gate || "",
         checkInDesk: flight.movement?.checkInDesk || "",
         aircraft: flight.aircraft?.model || "",
         delay: this.calculateDelay(
             flight.movement?.scheduledTimeLocal,
-            flight.movement?.actualTimeLocal ||
+            flight.movement?.revisedTimeLocal ||
                 flight.movement?.estimatedTimeLocal,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
+
+        // NUEVA INFO: Calidad de datos
+        dataQuality: flight.quality || ["Basic"],
+        isLiveData: flight.quality?.includes("Live") || false,
       }));
     }
 
@@ -554,20 +566,31 @@ class FlightService {
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
         origin: flight.movement?.airport?.name || "Unknown",
         originCode: flight.movement?.airport?.iata || flight.movement?.airport?.icao || "",
+
+        // USAR HORARIOS REALES disponibles
         scheduledTime: this.extractTime(flight.movement?.scheduledTimeLocal),
-        actualTime: this.extractTime(flight.movement?.actualTimeLocal),
-        estimatedTime: this.extractTime(flight.movement?.estimatedTimeLocal),
-        status: this.mapAeroDataBoxStatus(flight.status),
+        estimatedTime: this.extractTime(flight.movement?.revisedTimeLocal ||
+            flight.movement?.estimatedTimeLocal),
+        actualTime: this.extractTime(flight.movement?.runwayTimeLocal ||
+            flight.movement?.actualTimeLocal),
+
+        // USAR ESTADO REAL con datos completos
+        status: this.mapAeroDataBoxStatus(flight.status, flight),
+
         terminal: flight.movement?.terminal || "",
         gate: flight.movement?.gate || "",
         baggage: flight.movement?.baggageBelt || "",
         aircraft: flight.aircraft?.model || "",
         delay: this.calculateDelay(
             flight.movement?.scheduledTimeLocal,
-            flight.movement?.actualTimeLocal ||
+            flight.movement?.revisedTimeLocal ||
                 flight.movement?.estimatedTimeLocal,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
+
+        // NUEVA INFO: Calidad de datos
+        dataQuality: flight.quality || ["Basic"],
+        isLiveData: flight.quality?.includes("Live") || false,
       }));
     }
 
@@ -596,22 +619,72 @@ class FlightService {
   }
 
   /**
-   * Mapear estado de vuelo de AeroDataBox
-   * @param {string} status - Raw status from API
+   * Mapear estado de vuelo de AeroDataBox con datos reales
+   * @param {string} rawStatus - Raw status from API
+   * @param {Object} flight - Complete flight object
    * @return {string} Mapped status in Spanish
    */
-  mapAeroDataBoxStatus(status) {
-    const statusMap = {
-      "Scheduled": "Programado",
-      "Active": "En vuelo",
-      "Landed": "Aterrizó",
-      "Cancelled": "Cancelado",
-      "Diverted": "Desviado",
-      "Delayed": "Retrasado",
-      "Boarding": "Abordando",
-      "GateClosed": "Puerta cerrada",
-    };
-    return statusMap[status] || status || "Desconocido";
+  mapAeroDataBoxStatus(rawStatus, flight) {
+    // Si hay estado real, usarlo
+    if (rawStatus && rawStatus !== "Unknown") {
+      const statusMap = {
+        "Departed": "DESPEGÓ",
+        "Boarding": "ABORDANDO",
+        "Delayed": "RETRASADO",
+        "On Time": "A TIEMPO",
+        "Cancelled": "CANCELADO",
+        "Diverted": "DESVIADO",
+        "Scheduled": "PROGRAMADO",
+        "Active": "EN VUELO",
+        "Landed": "ATERRIZÓ",
+        "GateClosed": "PUERTA CERRADA",
+      };
+      return statusMap[rawStatus] || rawStatus;
+    }
+
+    // Si no hay estado pero hay horarios, calcular estado inteligente
+    if (flight && flight.movement) {
+      return this.calculateSmartStatus(
+          flight.movement.scheduledTimeUtc,
+          flight.movement.revisedTimeUtc,
+          flight.movement.runwayTimeUtc,
+      );
+    }
+
+    return "PROGRAMADO";
+  }
+
+  /**
+   * Calcular estado inteligente basado en horarios reales
+   * @param {string} scheduled - Scheduled time UTC
+   * @param {string} revised - Revised time UTC
+   * @param {string} actual - Actual runway time UTC
+   * @return {string} Smart status in Spanish
+   */
+  calculateSmartStatus(scheduled, revised, actual) {
+    if (!scheduled) return "PROGRAMADO";
+
+    const now = new Date();
+    const scheduledTime = new Date(scheduled);
+    const revisedTime = revised ? new Date(revised) : null;
+    const actualTime = actual ? new Date(actual) : null;
+
+    // Si ya despegó
+    if (actualTime && actualTime < now) return "DESPEGÓ";
+
+    // Si hay tiempo revisado vs programado
+    if (revisedTime && scheduledTime) {
+      const delayMinutes = (revisedTime - scheduledTime) / (1000 * 60);
+      if (delayMinutes > 15) return "RETRASADO";
+    }
+
+    // Basado en tiempo restante
+    const timeToFlight = (scheduledTime - now) / (1000 * 60);
+
+    if (timeToFlight < 0) return "DESPEGÓ";
+    if (timeToFlight < 30) return "ABORDANDO";
+    if (timeToFlight < 90) return "PRÓXIMO";
+    return "A TIEMPO";
   }
 
   /**
