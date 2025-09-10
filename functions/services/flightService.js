@@ -272,7 +272,7 @@ class FlightService {
 
     const flights = data.states
         .filter((flight) => flight && flight[1]) // Filtrar vuelos con callsign
-        .slice(0, 15) // Limitar a 15 vuelos
+        // SIN LÍMITES - Procesar todos los vuelos disponibles
         .map((flight) => ({
           flightNumber: flight[1].trim() || "N/A",
           airline: this.extractAirlineFromCallsign(flight[1]),
@@ -454,27 +454,32 @@ class FlightService {
     }
 
     try {
-      console.log(`🛫 Consultando AeroDataBox para ${airport} (intentando plan gratuito primero)...`);
+      console.log(`🛫 Consultando AeroDataBox para ${airport} (intentando TIER 2 primero)...`);
 
-      // PASO 1: Intentar enfoque de plan gratuito primero
+      // PASO 1: Intentar TIER 2 completo primero
       try {
-        console.log(`📡 Intentando enfoque FREE TIER primero...`);
-        return await this.getFlightsFromAeroDataBoxFreeTier(airport);
-      } catch (freeTierError) {
-        console.log(`⚠️ Plan gratuito falló: ${freeTierError.message}`);
-        console.log(`📡 Intentando endpoint FIDS completo...`);
+        console.log(`📡 Intentando TIER 2 con timerange primero...`);
 
-        // PASO 2: Si falla, intentar con endpoint completo (plan pagado)
-        const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}`;
+        const now = new Date();
+        const fromTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
+        const toTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
+
+        const formatDateTime = (date) => {
+          return date.toISOString().slice(0, 16);
+        };
+
+        const fromLocal = formatDateTime(fromTime);
+        const toLocal = formatDateTime(toTime);
+        const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}/${fromLocal}/${toLocal}`;
 
         const params = new URLSearchParams({
           withLeg: "true",
+          direction: "Both",
           withCancelled: "true",
           withCodeshared: "true",
           withCargo: "false",
           withPrivate: "false",
-          direction: "Both",
-          withLocation: "true",
+          withLocation: "false",
         });
 
         const response = await axios.get(`${url}?${params}`, {
@@ -485,11 +490,21 @@ class FlightService {
           timeout: 15000,
         });
 
-        console.log(`✅ AeroDataBox FIDS completo ${airport}: ${response.data.departures?.length || 0} salidas, ${response.data.arrivals?.length || 0} llegadas`);
+        console.log(`✅ TIER 2 exitoso ${airport}: ${response.data.departures?.length || 0} salidas, ${response.data.arrivals?.length || 0} llegadas`);
 
         const fullData = this.processAeroDataBoxData(response.data, airport);
-        fullData.source = "AeroDataBox (full FIDS)";
+        fullData.source = "AeroDataBox (TIER 2 full)";
         return fullData;
+      } catch (tier2Error) {
+        console.log(`⚠️ TIER 2 falló (${tier2Error.response?.status}): ${tier2Error.message}`);
+        console.log(`📡 Cayendo a FREE TIER como fallback...`);
+
+        try {
+          return await this.getFlightsFromAeroDataBoxFreeTier(airport);
+        } catch (freeTierError) {
+          console.log(`⚠️ FREE TIER también falló: ${freeTierError.message}`);
+          throw tier2Error; // Propagar el error original del TIER 2
+        }
       }
     } catch (error) {
       console.error(`❌ Error AeroDataBox ${airport}:`, error.message);
@@ -522,33 +537,39 @@ class FlightService {
       source: "AeroDataBox",
     };
 
+    console.log(`🔄 Procesando datos de AeroDataBox para ${airport}...`);
+    console.log(`📊 Datos recibidos: ${data.departures?.length || 0} salidas, ${data.arrivals?.length || 0} llegadas`);
+
     // Procesar SALIDAS
     if (data.departures && Array.isArray(data.departures)) {
       processed.departures = data.departures.map((flight) => ({
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
-        destination: flight.movement?.airport?.name || "Unknown",
-        destinationCode: flight.movement?.airport?.iata || flight.movement?.airport?.icao || "",
+        destination: flight.arrival?.airport?.name || "Unknown",
+        destinationCode: flight.arrival?.airport?.iata || "",
 
-        // USAR HORARIOS REALES disponibles
-        scheduledTime: this.extractTime(flight.movement?.scheduledTimeLocal),
-        estimatedTime: this.extractTime(flight.movement?.revisedTimeLocal ||
-            flight.movement?.estimatedTimeLocal),
-        actualTime: this.extractTime(flight.movement?.runwayTimeLocal ||
-            flight.movement?.actualTimeLocal),
+        // USAR HORARIOS REALES con nueva estructura
+        scheduledTime: this.extractAeroDataBoxTime(
+            flight.departure?.scheduledTime),
+        estimatedTime: this.extractAeroDataBoxTime(
+            flight.departure?.revisedTime ||
+            flight.departure?.estimatedTime),
+        actualTime: this.extractAeroDataBoxTime(
+            flight.departure?.runwayTime ||
+            flight.departure?.actualTime),
 
         // USAR ESTADO REAL con datos completos
         status: this.mapAeroDataBoxStatus(flight.status, flight),
 
-        terminal: flight.movement?.terminal || "",
-        gate: flight.movement?.gate || "",
-        checkInDesk: flight.movement?.checkInDesk || "",
+        terminal: flight.departure?.terminal || "",
+        gate: flight.departure?.gate || "",
+        checkInDesk: flight.departure?.checkInDesk || "",
         aircraft: flight.aircraft?.model || "",
         delay: this.calculateDelay(
-            flight.movement?.scheduledTimeLocal,
-            flight.movement?.revisedTimeLocal ||
-                flight.movement?.estimatedTimeLocal,
+            flight.departure?.scheduledTime?.local,
+            flight.departure?.revisedTime?.local ||
+            flight.departure?.estimatedTime?.local,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
 
@@ -564,27 +585,30 @@ class FlightService {
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
-        origin: flight.movement?.airport?.name || "Unknown",
-        originCode: flight.movement?.airport?.iata || flight.movement?.airport?.icao || "",
+        origin: flight.departure?.airport?.name || "Unknown",
+        originCode: flight.departure?.airport?.iata || "",
 
-        // USAR HORARIOS REALES disponibles
-        scheduledTime: this.extractTime(flight.movement?.scheduledTimeLocal),
-        estimatedTime: this.extractTime(flight.movement?.revisedTimeLocal ||
-            flight.movement?.estimatedTimeLocal),
-        actualTime: this.extractTime(flight.movement?.runwayTimeLocal ||
-            flight.movement?.actualTimeLocal),
+        // USAR HORARIOS REALES con nueva estructura
+        scheduledTime: this.extractAeroDataBoxTime(
+            flight.arrival?.scheduledTime),
+        estimatedTime: this.extractAeroDataBoxTime(
+            flight.arrival?.revisedTime ||
+            flight.arrival?.estimatedTime),
+        actualTime: this.extractAeroDataBoxTime(
+            flight.arrival?.runwayTime ||
+            flight.arrival?.actualTime),
 
         // USAR ESTADO REAL con datos completos
         status: this.mapAeroDataBoxStatus(flight.status, flight),
 
-        terminal: flight.movement?.terminal || "",
-        gate: flight.movement?.gate || "",
-        baggage: flight.movement?.baggageBelt || "",
+        terminal: flight.arrival?.terminal || "",
+        gate: flight.arrival?.gate || "",
+        baggage: flight.arrival?.baggageBelt || "",
         aircraft: flight.aircraft?.model || "",
         delay: this.calculateDelay(
-            flight.movement?.scheduledTimeLocal,
-            flight.movement?.revisedTimeLocal ||
-                flight.movement?.estimatedTimeLocal,
+            flight.arrival?.scheduledTime?.local,
+            flight.arrival?.revisedTime?.local ||
+            flight.arrival?.estimatedTime?.local,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
 
@@ -596,6 +620,12 @@ class FlightService {
 
     processed.totalFlights = processed.departures.length +
         processed.arrivals.length;
+
+    console.log(`✅ Procesamiento completado:`);
+    console.log(`   - Salidas procesadas: ${processed.departures.length}`);
+    console.log(`   - Llegadas procesadas: ${processed.arrivals.length}`);
+    console.log(`   - Total vuelos: ${processed.totalFlights}`);
+
     return processed;
   }
 
@@ -615,6 +645,35 @@ class FlightService {
       });
     } catch {
       return timeString;
+    }
+  }
+
+  /**
+   * Extraer tiempo específico de AeroDataBox con estructura {utc, local}
+   * @param {Object} timeObj - Time object from AeroDataBox
+   * @return {string} Formatted time HH:mm
+   */
+  extractAeroDataBoxTime(timeObj) {
+    if (!timeObj) return "";
+
+    try {
+      // Para estructura del playground: {utc: "2025-04-05 02:00Z", local: "2025-04-04 20:00-06:00"}
+      if (timeObj.local) {
+        const localTime = timeObj.local.split(/[-+]/)[0]; // "2025-04-04 20:00"
+        const timePart = localTime.split(" ")[1]; // "20:00"
+        return timePart ? timePart.substring(0, 5) : ""; // "20:00"
+      }
+
+      if (timeObj.utc) {
+        const utcTime = timeObj.utc.replace("Z", ""); // "2025-04-05 02:00"
+        const timePart = utcTime.split(" ")[1]; // "02:00"
+        return timePart ? timePart.substring(0, 5) : "";
+      }
+
+      return "";
+    } catch (error) {
+      console.error("Error extrayendo tiempo:", error.message);
+      return "";
     }
   }
 
@@ -764,7 +823,7 @@ class FlightService {
         withCodeshared: "false", // Sin codeshare
         withCargo: "false",
         withPrivate: "false",
-        direction: "Departure", // Solo salidas para reducir datos
+        direction: "Both", // Obtener salidas Y llegadas
       });
 
       console.log(`📡 Intentando FIDS limitado: ${fidsUrl}?${params}`);
@@ -820,9 +879,9 @@ class FlightService {
       },
     };
 
-    // Procesar solo SALIDAS (limitado en plan gratuito)
+    // Procesar TODAS las salidas disponibles (sin límites artificiales)
     if (data.departures && Array.isArray(data.departures)) {
-      processed.departures = data.departures.slice(0, 5).map((flight) => ({
+      processed.departures = data.departures.map((flight) => ({
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
         destination: flight.movement?.airport?.name || "Unknown",
