@@ -81,6 +81,42 @@ function PantallasVuelos() {
     "British Airways",
   ]);
 
+  // Configuración de campos disponibles
+  const [availableFields] = useState({
+    // Campos obligatorios (no se pueden desactivar)
+    required: {
+      flightNumber: { label: 'Número de Vuelo', always: true },
+      airline: { label: 'Aerolínea', always: true },
+      destination: { label: 'Destino/Origen', always: true },
+      scheduledTime: { label: 'Hora Programada', always: true },
+      status: { label: 'Estado', always: true }
+    },
+    
+    // Campos opcionales (configurables por usuario)
+    optional: {
+      terminal: { 
+        label: 'Terminal', 
+        description: 'Mostrar terminal de salida/llegada',
+        defaultEnabled: true 
+      },
+      gate: { 
+        label: 'Puerta', 
+        description: 'Mostrar puerta de embarque/llegada',
+        defaultEnabled: true 
+      },
+      estimatedTime: { 
+        label: 'Hora Estimada', 
+        description: 'Hora revisada cuando difiere de programada',
+        defaultEnabled: true 
+      },
+      delay: { 
+        label: 'Retraso (minutos)', 
+        description: 'Mostrar minutos de retraso/adelanto',
+        defaultEnabled: true 
+      }
+    }
+  });
+
   // Mensajes dinámicos
   const [dynamicMessages, setDynamicMessages] = useState([
     {
@@ -261,9 +297,19 @@ function PantallasVuelos() {
         showArrivals: true,
         timeWindow: 5,
         maxFlights: 8,
-        refreshInterval: 120,
+        refreshInterval: 900,
         language: selectedLanguage,
       },
+      
+      // NUEVA SECCIÓN: Configuración de campos
+      displayFields: {
+        // Campos opcionales habilitados (los required siempre están activos)
+        terminal: true,
+        gate: true,
+        estimatedTime: true,
+        delay: true
+      },
+      
       airlineFilters: {
         enabled: false,
         selectedAirlines: [],
@@ -283,6 +329,10 @@ function PantallasVuelos() {
       displaySettings: {
         ...defaultConfig.displaySettings,
         ...pantallaSettings[pantallaId]?.displaySettings,
+      },
+      displayFields: {
+        ...defaultConfig.displayFields,
+        ...pantallaSettings[pantallaId]?.displayFields,
       },
       airlineFilters: {
         ...defaultConfig.airlineFilters,
@@ -459,22 +509,27 @@ function PantallasVuelos() {
     }
 
     if (field === "displaySettings.maxFlights") {
-      if (value < 4 || value > 20) {
+      // Límites dinámicos según si muestra salidas, llegadas o ambos
+      const currentSettings = selectedPantalla.config.displaySettings;
+      const showsBoth = currentSettings?.showDepartures && currentSettings?.showArrivals;
+      const maxLimit = showsBoth ? 12 : 20; // Menos vuelos si muestra ambos tipos
+      
+      if (value < 4 || value > maxLimit) {
         Swal.fire({
           icon: "warning",
           title: "Valor inválido",
-          text: "El máximo de vuelos debe estar entre 4 y 20",
+          text: `El máximo de vuelos debe estar entre 4 y ${maxLimit}${showsBoth ? ' (reducido porque muestra salidas y llegadas)' : ''}`,
         });
         return;
       }
     }
 
     if (field === "displaySettings.refreshInterval") {
-      if (value < 60 || value > 600) {
+      if (value < 300 || value > 1800) {
         Swal.fire({
           icon: "warning",
           title: "Valor inválido",
-          text: "El intervalo debe estar entre 60 y 600 segundos",
+          text: "El intervalo debe estar entre 5 y 30 minutos",
         });
         return;
       }
@@ -876,10 +931,9 @@ function PantallasVuelos() {
                           {/* Orientación */}
                           <div>
                             <div className="flex items-center">
-                              <div className="relative inline-block w-10 mr-2 align-middle select-none">
+                              <div className="relative inline-block mr-3">
                                 <input
                                   type="checkbox"
-                                  name={`toggle-portrait-${index}`}
                                   id={`toggle-portrait-${index}`}
                                   checked={
                                     pantallaSettings[`vuelo${index + 1}`]
@@ -901,16 +955,32 @@ function PantallasVuelos() {
                                     setPantallaSettings(updatedSettings);
                                     setHasUnsavedChanges(true);
                                   }}
-                                  className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer focus:outline-none"
+                                  className="sr-only"
                                 />
                                 <label
                                   htmlFor={`toggle-portrait-${index}`}
-                                  className="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"
-                                ></label>
+                                  className={`
+                                    relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+                                    ${pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical" 
+                                      ? 'bg-blue-600' 
+                                      : 'bg-gray-200'
+                                    }
+                                  `}
+                                >
+                                  <span
+                                    className={`
+                                      inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out
+                                      ${pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical" 
+                                        ? 'translate-x-6' 
+                                        : 'translate-x-1'
+                                      }
+                                    `}
+                                  />
+                                </label>
                               </div>
                               <label
                                 htmlFor={`toggle-portrait-${index}`}
-                                className="text-xs font-medium text-gray-700"
+                                className="text-xs font-medium text-gray-700 cursor-pointer"
                               >
                                 {t("flightScreens.verticalMode")}
                               </label>
@@ -1140,6 +1210,7 @@ function PantallasVuelos() {
             </div>
           )}
 
+
           {/* TAB: Configuración de Pantalla Específica */}
           {activeTab === "pantalla" && selectedPantalla && (
             <div className="space-y-6">
@@ -1277,11 +1348,20 @@ function PantallasVuelos() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {t("flightScreens.maxFlights")}
+                      {(() => {
+                        const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
+                                         selectedPantalla.config.displaySettings?.showArrivals;
+                        return showsBoth ? ' (máx. 12)' : ' (máx. 20)';
+                      })()}
                     </label>
                     <input
                       type="number"
                       min="4"
-                      max="20"
+                      max={(() => {
+                        const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
+                                         selectedPantalla.config.displaySettings?.showArrivals;
+                        return showsBoth ? 12 : 20;
+                      })()}
                       value={
                         selectedPantalla.config.displaySettings?.maxFlights || 8
                       }
@@ -1293,6 +1373,18 @@ function PantallasVuelos() {
                       }
                       className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
+                    {(() => {
+                      const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
+                                       selectedPantalla.config.displaySettings?.showArrivals;
+                      if (showsBoth) {
+                        return (
+                          <p className="text-xs text-amber-600 mt-1">
+                            Límite reducido porque muestra salidas y llegadas
+                          </p>
+                        );
+                      }
+                      return null;
+                    })()}
                   </div>
 
                   {/* Intervalo de Actualización */}
@@ -1303,7 +1395,7 @@ function PantallasVuelos() {
                     <select
                       value={
                         selectedPantalla.config.displaySettings
-                          ?.refreshInterval || 120
+                          ?.refreshInterval || 900
                       }
                       onChange={(e) =>
                         updatePantallaConfig(
@@ -1313,10 +1405,11 @@ function PantallasVuelos() {
                       }
                       className="block w-32 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     >
-                      <option value={60}>1 minuto</option>
-                      <option value={120}>2 minutos</option>
-                      <option value={180}>3 minutos</option>
                       <option value={300}>5 minutos</option>
+                      <option value={600}>10 minutos</option>
+                      <option value={900}>15 minutos</option>
+                      <option value={1200}>20 minutos</option>
+                      <option value={1800}>30 minutos</option>
                     </select>
                   </div>
                 </div>
@@ -1380,6 +1473,89 @@ function PantallasVuelos() {
                   </div>
                 )}
               </div>
+
+              {/* Configuración de Campos Visibles */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-md font-medium text-gray-900 mb-3">
+                  Configuración de Información Mostrada
+                </h3>
+                <p className="text-sm text-gray-600 mb-4">
+                  Seleccione qué información desea mostrar en esta pantalla. Los campos obligatorios siempre serán visibles.
+                </p>
+
+                {/* Campos obligatorios (solo informativo) */}
+                <div className="mb-6">
+                  <h4 className="font-medium text-gray-800 mb-3">
+                    Campos Obligatorios (Siempre Visibles)
+                  </h4>
+                  <div className="bg-white rounded-lg p-3 border">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {Object.entries(availableFields.required).map(([key, field]) => (
+                        <div key={key} className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            checked={true}
+                            disabled={true}
+                            className="h-4 w-4 text-blue-600 border-gray-300 rounded opacity-50"
+                          />
+                          <span className="text-sm text-gray-600">{field.label}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Campos opcionales (configurables) */}
+                <div>
+                  <h4 className="font-medium text-gray-800 mb-3">
+                    Campos Opcionales (Configurables)
+                  </h4>
+                  <div className="space-y-3">
+                    {Object.entries(availableFields.optional).map(([key, field]) => (
+                      <div key={key} className="flex items-start space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
+                        <input
+                          type="checkbox"
+                          id={`field-${key}`}
+                          checked={selectedPantalla.config.displayFields?.[key] ?? field.defaultEnabled}
+                          onChange={(e) => {
+                            updatePantallaConfig(`displayFields.${key}`, e.target.checked);
+                          }}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+                        />
+                        <div className="flex-1">
+                          <label 
+                            htmlFor={`field-${key}`}
+                            className="block text-sm font-medium text-gray-700 cursor-pointer"
+                          >
+                            {field.label}
+                          </label>
+                          <p className="text-xs text-gray-500 mt-1">
+                            {field.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Botón para restaurar defaults de campos */}
+                <div className="mt-4 pt-3 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      const defaultDisplayFields = {
+                        terminal: true,
+                        gate: true,
+                        estimatedTime: true,
+                        delay: true
+                      };
+                      updatePantallaConfig("displayFields", defaultDisplayFields);
+                    }}
+                    className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
+                  >
+                    Restaurar Campos por Defecto
+                  </button>
+                </div>
+              </div>
             </div>
           )}
 
@@ -1387,14 +1563,49 @@ function PantallasVuelos() {
           {activeTab !== "pantalla" && (
             <div className="mt-8 flex justify-end space-x-3">
               <button
-                onClick={() => {
-                  if (
-                    window.confirm(
-                      "¿Está seguro que desea restablecer todos los valores?"
-                    )
-                  ) {
-                    // Reset logic here
-                    window.location.reload();
+                onClick={async () => {
+                  const result = await Swal.fire({
+                    title: "Restablecer Configuración",
+                    text: "¿Está seguro que desea restablecer toda la configuración a los valores por defecto?",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                    confirmButtonText: "Sí, restablecer",
+                    cancelButtonText: "Cancelar"
+                  });
+
+                  if (result.isConfirmed) {
+                    // Reset logic
+                    setSelectedLanguage("es");
+                    setPantallaSettings({});
+                    setDynamicMessages([
+                      {
+                        id: "shuttle",
+                        text: {
+                          es: "🚐 Shuttle al aeropuerto cada hora - Contacte Concierge",
+                          en: "🚐 Airport shuttle every hour - Contact Concierge",
+                        },
+                        enabled: true,
+                        displayDuration: 10,
+                      },
+                    ]);
+                    setDistanceConfig({
+                      enabled: false,
+                      hotelLocation: {
+                        lat: 19.4326,
+                        lng: -99.1332,
+                        address: "",
+                      },
+                    });
+                    setHasUnsavedChanges(true);
+                    
+                    Swal.fire({
+                      title: "Configuración restablecida",
+                      text: "No olvide guardar los cambios",
+                      icon: "success",
+                      timer: 2000
+                    });
                   }
                 }}
                 className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"

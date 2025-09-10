@@ -1338,6 +1338,22 @@
     "reset": "Restablecer",
     "save": "Guardar",
     "cancel": "Cancelar",
-    "saveConfig": "Guardar Configuración"
+    "saveConfig": "Guardar Configuración",
+    "fieldConfiguration": "Configuración de Campos",
+    "requiredFields": "Campos Obligatorios (Siempre Visibles)",
+    "optionalFields": "Campos Opcionales (Configurables)",
+    "fieldDescriptions": {
+      "terminal": "Mostrar terminal de salida/llegada",
+      "gate": "Mostrar puerta de embarque/llegada",
+      "aircraft": "Modelo del avión (ej: Boeing 737)",
+      "estimatedTime": "Hora revisada cuando difiere de programada",
+      "delay": "Mostrar minutos de retraso/adelanto",
+      "checkInDesk": "Mostrador de facturación (solo salidas)",
+      "baggage": "Banda de equipaje (solo llegadas)",
+      "airlineCode": "Código IATA (AM, DL, etc.)",
+      "destinationCode": "Código aeropuerto (ATL, DFW, etc.)"
+    },
+    "restoreDefaults": "Restaurar Defaults",
+    "selectScreenToConfig": "Seleccione una pantalla para configurar los campos a mostrar"
   }
 }
