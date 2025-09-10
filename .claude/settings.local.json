@@ -4,7 +4,10 @@
       "Bash(npm run lint:*)",
       "Bash(node:*)",
       "Bash(mkdir:*)",
-      "Bash(firebase deploy:*)"
+      "Bash(firebase deploy:*)",
+      "Bash(firebase functions:shell:*)",
+      "Bash(curl:*)",
+      "Bash(firebase functions:log:*)"
     ],
     "deny": [],
     "ask": []

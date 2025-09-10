@@ -460,21 +460,14 @@ class FlightService {
       try {
         console.log(`📡 Intentando TIER 2 con timerange primero...`);
 
-        const now = new Date();
-        const fromTime = new Date(now.getTime() - (3 * 60 * 60 * 1000));
-        const toTime = new Date(now.getTime() + (9 * 60 * 60 * 1000));
-
-        const formatDateTime = (date) => {
-          return date.toISOString().slice(0, 16);
-        };
-
-        const fromLocal = formatDateTime(fromTime);
-        const toLocal = formatDateTime(toTime);
-        const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}/${fromLocal}/${toLocal}`;
+        // Usar endpoint relativo con parámetros optimizados para reducir de 512 a ~85 vuelos
+        const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}`;
 
         const params = new URLSearchParams({
-          withLeg: "true",
+          offsetMinutes: -30, // Comenzar 30 min antes (vs -180 default)
+          durationMinutes: 120, // Duración 2 horas (vs 720 default)
           direction: "Both",
+          withLeg: "true",
           withCancelled: "true",
           withCodeshared: "true",
           withCargo: "false",
@@ -540,7 +533,7 @@ class FlightService {
     console.log(`🔄 Procesando datos de AeroDataBox para ${airport}...`);
     console.log(`📊 Datos recibidos: ${data.departures?.length || 0} salidas, ${data.arrivals?.length || 0} llegadas`);
 
-    // Procesar SALIDAS
+    // Procesar SALIDAS con estructura real del playground
     if (data.departures && Array.isArray(data.departures)) {
       processed.departures = data.departures.map((flight) => ({
         flightNumber: flight.number || "N/A",
@@ -549,37 +542,38 @@ class FlightService {
         destination: flight.arrival?.airport?.name || "Unknown",
         destinationCode: flight.arrival?.airport?.iata || "",
 
-        // USAR HORARIOS REALES con nueva estructura
+        // HORARIOS usando función corregida
         scheduledTime: this.extractAeroDataBoxTime(
-            flight.departure?.scheduledTime),
+            flight.departure?.scheduledTime,
+        ),
         estimatedTime: this.extractAeroDataBoxTime(
-            flight.departure?.revisedTime ||
-            flight.departure?.estimatedTime),
+            flight.departure?.revisedTime || flight.departure?.predictedTime,
+        ),
         actualTime: this.extractAeroDataBoxTime(
-            flight.departure?.runwayTime ||
-            flight.departure?.actualTime),
+            flight.departure?.runwayTime || flight.departure?.actualTime,
+        ),
 
-        // USAR ESTADO REAL con datos completos
-        status: this.mapAeroDataBoxStatus(flight.status, flight),
-
+        // CAMPOS DE INFRAESTRUCTURA
         terminal: flight.departure?.terminal || "",
         gate: flight.departure?.gate || "",
         checkInDesk: flight.departure?.checkInDesk || "",
+
+        // INFORMACIÓN ADICIONAL
         aircraft: flight.aircraft?.model || "",
+        status: this.mapAeroDataBoxStatus(flight.status, flight),
+
+        // NUEVOS CAMPOS
         delay: this.calculateDelay(
             flight.departure?.scheduledTime?.local,
-            flight.departure?.revisedTime?.local ||
-            flight.departure?.estimatedTime?.local,
+            flight.departure?.revisedTime?.local,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
-
-        // NUEVA INFO: Calidad de datos
-        dataQuality: flight.quality || ["Basic"],
-        isLiveData: flight.quality?.includes("Live") || false,
+        dataQuality: flight.departure?.quality || flight.quality || ["Basic"],
+        isLiveData: (flight.departure?.quality || flight.quality || []).includes("Live"),
       }));
     }
 
-    // Procesar LLEGADAS
+    // Procesar LLEGADAS con estructura real del playground
     if (data.arrivals && Array.isArray(data.arrivals)) {
       processed.arrivals = data.arrivals.map((flight) => ({
         flightNumber: flight.number || "N/A",
@@ -588,33 +582,34 @@ class FlightService {
         origin: flight.departure?.airport?.name || "Unknown",
         originCode: flight.departure?.airport?.iata || "",
 
-        // USAR HORARIOS REALES con nueva estructura
+        // HORARIOS usando función corregida
         scheduledTime: this.extractAeroDataBoxTime(
-            flight.arrival?.scheduledTime),
+            flight.arrival?.scheduledTime,
+        ),
         estimatedTime: this.extractAeroDataBoxTime(
-            flight.arrival?.revisedTime ||
-            flight.arrival?.estimatedTime),
+            flight.arrival?.revisedTime || flight.arrival?.predictedTime,
+        ),
         actualTime: this.extractAeroDataBoxTime(
-            flight.arrival?.runwayTime ||
-            flight.arrival?.actualTime),
+            flight.arrival?.runwayTime || flight.arrival?.actualTime,
+        ),
 
-        // USAR ESTADO REAL con datos completos
-        status: this.mapAeroDataBoxStatus(flight.status, flight),
-
+        // CAMPOS DE INFRAESTRUCTURA
         terminal: flight.arrival?.terminal || "",
         gate: flight.arrival?.gate || "",
         baggage: flight.arrival?.baggageBelt || "",
+
+        // INFORMACIÓN ADICIONAL
         aircraft: flight.aircraft?.model || "",
+        status: this.mapAeroDataBoxStatus(flight.status, flight),
+
+        // NUEVOS CAMPOS
         delay: this.calculateDelay(
             flight.arrival?.scheduledTime?.local,
-            flight.arrival?.revisedTime?.local ||
-            flight.arrival?.estimatedTime?.local,
+            flight.arrival?.revisedTime?.local,
         ),
         isCodeshare: flight.codeshareStatus === "IsCodeshared",
-
-        // NUEVA INFO: Calidad de datos
-        dataQuality: flight.quality || ["Basic"],
-        isLiveData: flight.quality?.includes("Live") || false,
+        dataQuality: flight.arrival?.quality || flight.quality || ["Basic"],
+        isLiveData: (flight.arrival?.quality || flight.quality || []).includes("Live"),
       }));
     }
 
@@ -657,22 +652,64 @@ class FlightService {
     if (!timeObj) return "";
 
     try {
-      // Para estructura del playground: {utc: "2025-04-05 02:00Z", local: "2025-04-04 20:00-06:00"}
-      if (timeObj.local) {
-        const localTime = timeObj.local.split(/[-+]/)[0]; // "2025-04-04 20:00"
-        const timePart = localTime.split(" ")[1]; // "20:00"
-        return timePart ? timePart.substring(0, 5) : ""; // "20:00"
+      // Si es un string directo (formato ISO)
+      if (typeof timeObj === "string") {
+        if (timeObj.includes("T")) {
+          // Formato ISO: "2025-09-10T09:30:00Z"
+          const timePart = timeObj.split("T")[1];
+          return timePart ? timePart.substring(0, 5) : "";
+        } else if (timeObj.includes(" ")) {
+          // Formato: "2025-09-10 09:30-06:00" o "2025-09-10 09:30Z"
+          const timePart = timeObj.split(" ")[1];
+          if (timePart) {
+            return timePart.substring(0, 5);
+          }
+        }
       }
 
-      if (timeObj.utc) {
-        const utcTime = timeObj.utc.replace("Z", ""); // "2025-04-05 02:00"
-        const timePart = utcTime.split(" ")[1]; // "02:00"
-        return timePart ? timePart.substring(0, 5) : "";
+      // Si es un objeto con propiedades utc/local
+      if (typeof timeObj === "object" && timeObj !== null) {
+        if (timeObj.local) {
+          // Formato: "2025-09-10 09:30-06:00"
+          const localTime = timeObj.local;
+          if (localTime.includes(" ")) {
+            const timePart = localTime.split(" ")[1];
+            // Remover timezone si existe (-06:00 o +05:00)
+            const cleanTime = timePart.split(/[-+]/)[0];
+            return cleanTime ? cleanTime.substring(0, 5) : "";
+          }
+        }
+
+        if (timeObj.utc) {
+          // Formato: "2025-09-10 15:30Z" o "2025-09-10T15:30:00Z"
+          const utcTime = timeObj.utc.replace("Z", "");
+          let timePart;
+
+          if (utcTime.includes("T")) {
+            timePart = utcTime.split("T")[1];
+          } else if (utcTime.includes(" ")) {
+            timePart = utcTime.split(" ")[1];
+          }
+
+          if (timePart) {
+            // Convertir UTC a hora local de México
+            const [hours, minutes] = timePart.split(":");
+            const utcDate = new Date();
+            utcDate.setUTCHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+            return utcDate.toLocaleTimeString("es-MX", {
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+              timeZone: "America/Mexico_City",
+            });
+          }
+        }
       }
 
       return "";
     } catch (error) {
-      console.error("Error extrayendo tiempo:", error.message);
+      console.error("Error extrayendo tiempo:", error.message, "Input:", timeObj);
       return "";
     }
   }
@@ -684,30 +721,29 @@ class FlightService {
    * @return {string} Mapped status in Spanish
    */
   mapAeroDataBoxStatus(rawStatus, flight) {
-    // Si hay estado real, usarlo
-    if (rawStatus && rawStatus !== "Unknown") {
-      const statusMap = {
-        "Departed": "DESPEGÓ",
-        "Boarding": "ABORDANDO",
-        "Delayed": "RETRASADO",
-        "On Time": "A TIEMPO",
-        "Cancelled": "CANCELADO",
-        "Diverted": "DESVIADO",
-        "Scheduled": "PROGRAMADO",
-        "Active": "EN VUELO",
-        "Landed": "ATERRIZÓ",
-        "GateClosed": "PUERTA CERRADA",
-      };
-      return statusMap[rawStatus] || rawStatus;
+    // Estados reales confirmados en playground
+    const statusMap = {
+      "Unknown": "PROGRAMADO", // Estado más común
+      "Expected": "ESPERADO", // Visto en arrivals
+      "Scheduled": "PROGRAMADO",
+      "Departed": "DESPEGÓ",
+      "Boarding": "ABORDANDO",
+      "Delayed": "RETRASADO",
+      "On Time": "A TIEMPO",
+      "Cancelled": "CANCELADO",
+    };
+
+    if (rawStatus && statusMap[rawStatus]) {
+      return statusMap[rawStatus];
     }
 
-    // Si no hay estado pero hay horarios, calcular estado inteligente
-    if (flight && flight.movement) {
-      return this.calculateSmartStatus(
-          flight.movement.scheduledTimeUtc,
-          flight.movement.revisedTimeUtc,
-          flight.movement.runwayTimeUtc,
-      );
+    // Lógica inteligente basada en horarios
+    if (flight?.departure?.runwayTime || flight?.arrival?.runwayTime) {
+      return flight.departure ? "DESPEGÓ" : "ATERRIZÓ";
+    }
+
+    if (flight?.departure?.revisedTime || flight?.arrival?.revisedTime) {
+      return "RETRASADO";
     }
 
     return "PROGRAMADO";
@@ -748,17 +784,22 @@ class FlightService {
 
   /**
    * Calcular retraso en minutos
-   * @param {string} scheduled - Scheduled time ISO string
-   * @param {string} actual - Actual time ISO string
+   * @param {string} scheduledTimeLocal - Scheduled time in format "2025-09-10 09:30-06:00"
+   * @param {string} revisedTimeLocal - Revised time in format "2025-09-10 09:30-06:00"
    * @return {number} Delay in minutes
    */
-  calculateDelay(scheduled, actual) {
-    if (!scheduled || !actual) return 0;
+  calculateDelay(scheduledTimeLocal, revisedTimeLocal) {
+    if (!scheduledTimeLocal || !revisedTimeLocal) return 0;
+
     try {
-      const scheduledTime = new Date(scheduled);
-      const actualTime = new Date(actual);
-      return Math.round((actualTime - scheduledTime) / (1000 * 60));
-    } catch {
+      // Parsear tiempos en formato "2025-09-10 09:30-06:00"
+      const scheduled = new Date(scheduledTimeLocal.replace(/[-+]\d{2}:\d{2}$/, ""));
+      const revised = new Date(revisedTimeLocal.replace(/[-+]\d{2}:\d{2}$/, ""));
+
+      const delayMs = revised.getTime() - scheduled.getTime();
+      return Math.round(delayMs / (1000 * 60)); // Minutos
+    } catch (error) {
+      console.error("Error calculando retraso:", error.message);
       return 0;
     }
   }
