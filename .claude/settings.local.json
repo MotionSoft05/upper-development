@@ -7,7 +7,8 @@
       "Bash(firebase deploy:*)",
       "Bash(firebase functions:shell:*)",
       "Bash(curl:*)",
-      "Bash(firebase functions:log:*)"
+      "Bash(firebase functions:log:*)",
+      "Bash(npm run build:*)"
     ],
     "deny": [],
     "ask": []

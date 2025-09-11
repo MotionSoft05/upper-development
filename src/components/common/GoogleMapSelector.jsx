@@ -33,7 +33,7 @@ const GoogleMapSelector = ({
     }, 100);
 
     return () => clearTimeout(timer);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // UseEffect para aplicar ubicaciones pendientes cuando el mapa esté listo
   useEffect(() => {
@@ -213,7 +213,7 @@ const GoogleMapSelector = ({
       setError('Error cargando el mapa. Verifique su conexión.');
       setIsLoading(false);
     }
-  };
+  }; // eslint-disable-line react-hooks/exhaustive-deps
 
   const updateMapLocation = (lat, lng, shouldZoom = false) => {
     // console.log('🎯 updateMapLocation llamado con:', { lat, lng, shouldZoom });
