@@ -336,6 +336,7 @@
     "rate": "Rate Information",
     "promotion": "Screen Promotions",
     "flightScreens": "Flight Screens",
+    "dynamicMessages": "Dynamic Messages",
     "rateScreen": "Rate Screens"
   },
   "monitorScreen": {
@@ -1302,6 +1303,7 @@
     "bilingual": "Spanish/English",
     "distanceConfig": "Distance Configuration",
     "showTravelTime": "Show travel time to airport",
+    "hotelLocation": "Hotel Location",
     "hotelAddress": "Hotel Address",
     "apiInfo": "API Information",
     "usingAeroDataBox": "Using AeroDataBox API for real-time flight data",
@@ -1340,6 +1342,40 @@
     "reset": "Reset",
     "save": "Save",
     "cancel": "Cancel",
-    "saveConfig": "Save Configuration"
+    "saveConfig": "Save Configuration",
+    "fieldConfiguration": "Field Configuration",
+    "requiredFields": "Required Fields (Always Visible)",
+    "optionalFields": "Optional Fields (Configurable)",
+    "fieldDescriptions": {
+      "terminal": "Show departure/arrival terminal",
+      "gate": "Show boarding/arrival gate",
+      "aircraft": "Aircraft model (eg: Boeing 737)",
+      "estimatedTime": "Revised time when different from scheduled",
+      "delay": "Show delay/advance minutes",
+      "checkInDesk": "Check-in desk (departures only)",
+      "baggage": "Baggage belt (arrivals only)",
+      "airlineCode": "IATA code (AM, DL, etc.)",
+      "destinationCode": "Airport code (ATL, DFW, etc.)"
+    },
+    "restoreDefaults": "Restore Defaults",
+    "selectScreenToConfig": "Select a screen to configure the fields to display"
+  },
+  "dynamicMessages": {
+    "title": "Dynamic Messages",
+    "description": "Manage messages displayed on flight screens",
+    "company": "Company",
+    "saveChanges": "Save Changes",
+    "messageConfiguration": "Message Configuration",
+    "addMessage": "Add Message",
+    "noMessages": "No messages configured",
+    "message": "Message",
+    "enabled": "Enabled",
+    "delete": "Delete",
+    "textSpanish": "Spanish Text",
+    "textEnglish": "English Text",
+    "spanishPlaceholder": "Mensaje en español...",
+    "englishPlaceholder": "Message in English...",
+    "displayDuration": "Display Duration (seconds)",
+    "unsavedChanges": "⚠️ You have unsaved changes"
   }
 }

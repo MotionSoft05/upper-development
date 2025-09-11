@@ -118,18 +118,6 @@ function PantallasVuelos() {
     }
   });
 
-  // Mensajes dinámicos
-  const [dynamicMessages, setDynamicMessages] = useState([
-    {
-      id: "shuttle",
-      text: {
-        es: "🚐 Shuttle al aeropuerto cada hora - Contacte Concierge",
-        en: "🚐 Airport shuttle every hour - Contact Concierge",
-      },
-      enabled: true,
-      displayDuration: 10,
-    },
-  ]);
 
   // Configuración de Distance Matrix
   const [distanceConfig, setDistanceConfig] = useState({
@@ -248,8 +236,16 @@ function PantallasVuelos() {
         const templateData = templateVuelosSnapshot.docs[0].data();
         setSelectedLanguage(templateData.idioma || "es");
         setPantallaSettings(templateData.pantallasConfig || {});
-        setDynamicMessages(templateData.dynamicMessages || dynamicMessages);
-        setDistanceConfig(templateData.distanceConfig || distanceConfig);
+        // Crear configuración limpia desde los datos de Firebase
+        const loadedDistanceConfig = templateData.distanceConfig || {};
+        setDistanceConfig({
+          enabled: loadedDistanceConfig.enabled || false,
+          hotelLocation: {
+            lat: loadedDistanceConfig.hotelLocation?.lat || null,
+            lng: loadedDistanceConfig.hotelLocation?.lng || null,
+            address: loadedDistanceConfig.hotelLocation?.address || ""
+          }
+        });
       }
 
     } catch (error) {
@@ -430,7 +426,6 @@ function PantallasVuelos() {
         empresa: empresaToUpdate,
         idioma: selectedLanguage,
         pantallasConfig: pantallaSettings,
-        dynamicMessages: dynamicMessages,
         distanceConfig: distanceConfig,
         updatedAt: serverTimestamp(),
         updatedBy: authUser.email || ""
@@ -467,31 +462,6 @@ function PantallasVuelos() {
     }
   };
 
-  // Funciones para manejar mensajes dinámicos
-  const addDynamicMessage = () => {
-    const newMessage = {
-      id: `msg_${Date.now()}`,
-      text: { es: "", en: "" },
-      enabled: true,
-      displayDuration: 10,
-    };
-    setDynamicMessages([...dynamicMessages, newMessage]);
-    setHasUnsavedChanges(true);
-  };
-
-  const removeDynamicMessage = (messageId) => {
-    setDynamicMessages(dynamicMessages.filter((msg) => msg.id !== messageId));
-    setHasUnsavedChanges(true);
-  };
-
-  const updateDynamicMessage = (messageId, field, value) => {
-    setDynamicMessages(
-      dynamicMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, [field]: value } : msg
-      )
-    );
-    setHasUnsavedChanges(true);
-  };
 
   // Función para actualizar configuración de pantalla específica
   const updatePantallaConfig = (field, value) => {
@@ -640,19 +610,6 @@ function PantallasVuelos() {
             {t("flightScreens.screens")}
           </button>
 
-          <button
-            onClick={() => setActiveTab("messages")}
-            className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
-              activeTab === "messages"
-                ? "text-blue-600 border-b-2 border-blue-500"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <span className="hidden sm:inline">
-              {t("flightScreens.dynamicMessages")}
-            </span>
-            <span className="sm:hidden">Mensajes</span>
-          </button>
 
           {selectedPantalla && (
             <button
@@ -773,39 +730,81 @@ function PantallasVuelos() {
                         {t("flightScreens.hotelLocation")}
                       </label>
                       
+                      
                       {/* Mapa interactivo con GoogleMapSelector */}
                       <div className="relative">
                         <GoogleMapSelector
                           location={{
                             lat: distanceConfig.hotelLocation.lat,
-                            lng: distanceConfig.hotelLocation.lng
+                            lng: distanceConfig.hotelLocation.lng,
+                            address: distanceConfig.hotelLocation.address
                           }}
                           onLocationChange={(coords) => {
-                            setDistanceConfig({
-                              ...distanceConfig,
+                            setDistanceConfig(prevConfig => ({
+                              ...prevConfig,
                               hotelLocation: {
-                                ...distanceConfig.hotelLocation,
+                                ...prevConfig.hotelLocation,
                                 lat: coords.lat,
                                 lng: coords.lng
+                                // Preservamos la dirección existente
                               }
-                            });
+                            }));
                             setHasUnsavedChanges(true);
                           }}
                           onAddressChange={(address) => {
-                            setDistanceConfig({
-                              ...distanceConfig,
+                            setDistanceConfig(prevConfig => ({
+                              ...prevConfig,
                               hotelLocation: {
-                                ...distanceConfig.hotelLocation,
+                                ...prevConfig.hotelLocation,
                                 address: address
                               }
-                            });
+                            }));
                             setHasUnsavedChanges(true);
+                          }}
+                          onConfirmAddress={async () => {
+                            if (!distanceConfig.hotelLocation.lat || !distanceConfig.hotelLocation.lng) {
+                              Swal.fire({
+                                icon: 'warning',
+                                title: 'Ubicación requerida',
+                                text: 'Por favor selecciona una ubicación en el mapa primero'
+                              });
+                              return;
+                            }
+                            
+                            try {
+                              console.log('🔄 Intentando guardar configuración...', distanceConfig);
+                              await guardarConfiguracion();
+                              Swal.fire({
+                                icon: 'success',
+                                title: 'Ubicación guardada',
+                                text: 'La ubicación del hotel se ha guardado correctamente',
+                                showConfirmButton: false,
+                                timer: 2000
+                              });
+                            } catch (error) {
+                              console.error('❌ Error detallado al guardar:', error);
+                              Swal.fire({
+                                icon: 'error',
+                                title: 'Error al guardar',
+                                text: `Error: ${error.message || error}`,
+                                showConfirmButton: true
+                              });
+                            }
                           }}
                           height="320px"
                           placeholder="Buscar hotel o dirección..."
                         />
                       </div>
 
+                      {/* Estado de la ubicación */}
+                      <div className="mt-3 text-sm text-gray-600">
+                        {distanceConfig.hotelLocation.address && (
+                          <span>📍 Ubicación guardada: {distanceConfig.hotelLocation.address}</span>
+                        )}
+                        {!distanceConfig.hotelLocation.address && (
+                          <span>📍 No hay ubicación guardada</span>
+                        )}
+                      </div>
 
                       {/* Instrucciones simplificadas */}
                       <div className="mt-3 p-3 bg-gray-100 rounded-md">
@@ -813,6 +812,7 @@ function PantallasVuelos() {
                         <ul className="text-xs text-gray-600 space-y-1">
                           <li>• Use el buscador o haga clic directamente en el mapa</li>
                           <li>• La ubicación se usará para mostrar tiempos de viaje a aeropuertos</li>
+                          <li>• <strong>Presiona "Confirmar Dirección"</strong> para guardar la dirección</li>
                         </ul>
                       </div>
                     </div>
@@ -1043,124 +1043,6 @@ function PantallasVuelos() {
             </div>
           )}
 
-          {/* TAB: Mensajes Dinámicos */}
-          {activeTab === "messages" && (
-            <div className="space-y-6">
-              <div className="flex justify-between items-center border-b pb-2">
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {t("flightScreens.dynamicMessages")}
-                </h2>
-                <button
-                  onClick={addDynamicMessage}
-                  className="inline-flex items-center px-3 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700"
-                >
-                  {t("flightScreens.addMessage")}
-                </button>
-              </div>
-
-              {dynamicMessages.length === 0 ? (
-                <div className="text-center p-8 bg-gray-50 rounded-lg">
-                  <p className="text-gray-500">
-                    {t("flightScreens.noMessages")}
-                  </p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {dynamicMessages.map((message, index) => (
-                    <div key={message.id} className="bg-gray-50 p-4 rounded-lg">
-                      <div className="flex justify-between items-start mb-4">
-                        <h3 className="text-md font-medium text-gray-900">
-                          {t("flightScreens.message")} {index + 1}
-                        </h3>
-                        <div className="flex items-center space-x-2">
-                          <label className="flex items-center">
-                            <input
-                              type="checkbox"
-                              checked={message.enabled}
-                              onChange={(e) =>
-                                updateDynamicMessage(
-                                  message.id,
-                                  "enabled",
-                                  e.target.checked
-                                )
-                              }
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">
-                              {t("flightScreens.enabled")}
-                            </span>
-                          </label>
-                          <button
-                            onClick={() => removeDynamicMessage(message.id)}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            {t("flightScreens.remove")}
-                          </button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t("flightScreens.textSpanish")}
-                          </label>
-                          <textarea
-                            value={message.text.es}
-                            onChange={(e) =>
-                              updateDynamicMessage(message.id, "text", {
-                                ...message.text,
-                                es: e.target.value,
-                              })
-                            }
-                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            rows={2}
-                            placeholder="Mensaje en español..."
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 mb-1">
-                            {t("flightScreens.textEnglish")}
-                          </label>
-                          <textarea
-                            value={message.text.en}
-                            onChange={(e) =>
-                              updateDynamicMessage(message.id, "text", {
-                                ...message.text,
-                                en: e.target.value,
-                              })
-                            }
-                            className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                            rows={2}
-                            placeholder="Message in English..."
-                          />
-                        </div>
-                      </div>
-
-                      <div className="mt-4">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          {t("flightScreens.displayDuration")} (segundos)
-                        </label>
-                        <input
-                          type="number"
-                          min="5"
-                          max="60"
-                          value={message.displayDuration}
-                          onChange={(e) =>
-                            updateDynamicMessage(
-                              message.id,
-                              "displayDuration",
-                              parseInt(e.target.value)
-                            )
-                          }
-                          className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                        />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
 
 
           {/* TAB: Configuración de Pantalla Específica */}

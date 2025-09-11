@@ -27,6 +27,7 @@ import {
   faImages,
   faTv, // Nuevo icono para Android TV
   faPlane,
+  faComments,
 } from "@fortawesome/free-solid-svg-icons";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import { Tooltip } from "react-tooltip";
@@ -97,7 +98,7 @@ const Ediciondeempresa = () => {
                 tablero: permisoAntiguo > 0,
                 altaEventos: permisoAntiguo > 0,
                 consultaEventos: permisoAntiguo > 0,
-                informacionTarifas: permisoAntiguo > 0,
+                mensajesDinamicos: permisoAntiguo > 0,
                 pantallasSalon: permisoAntiguo === 3,
                 pantallasDirectorio: permisoAntiguo === 3,
                 pantallasPromociones: permisoAntiguo === 3,
@@ -263,9 +264,9 @@ const Ediciondeempresa = () => {
           icon: faClipboardQuestion,
         },
         {
-          id: "informacionTarifas",
-          nombre: "Información de Tarifas",
-          icon: faCashRegister,
+          id: "mensajesDinamicos",
+          nombre: "Mensajes Dinámicos",
+          icon: faComments,
         },
       ],
     },

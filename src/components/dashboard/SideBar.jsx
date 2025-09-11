@@ -21,6 +21,7 @@ import {
   faAd,
   faImages,
   faPlane,
+  faComments,
 
   // Iconos para más información
   faIdCard,
@@ -55,6 +56,7 @@ function Sidebar(props) {
     props.setShowMonitorScreen(false);
     props.setShowPantallaTarifario(false);
     props.setShowInformacionTarifa(false);
+    props.setShowMensajesDinamicos && props.setShowMensajesDinamicos(false);
     // Agregar los nuevos estados de Android TV
     props.setShowDevicesList && props.setShowDevicesList(false);
     props.setShowDeviceLinker && props.setShowDeviceLinker(false);
@@ -292,28 +294,28 @@ function Sidebar(props) {
             </div>
           )}
 
-          {/* Información de Tarifas - Cambio a faReceipt que representa mejor las tarifas */}
-          {tienePermiso("informacionTarifas") && (
+          {/* Mensajes Dinámicos */}
+          {tienePermiso("mensajesDinamicos") && (
             <div className="mb-1">
               <button
                 className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
-                  isActive(props.showInformacionTarifa)
+                  isActive(props.showMensajesDinamicos)
                     ? "bg-white shadow-md text-blue-700 font-medium"
                     : "text-blue-100 hover:bg-blue-700/50"
                 }`}
-                onClick={() => changePanel("setShowInformacionTarifa")}
+                onClick={() => changePanel("setShowMensajesDinamicos")}
               >
                 <span
                   className={`flex-shrink-0 ${
-                    isActive(props.showInformacionTarifa)
+                    isActive(props.showMensajesDinamicos)
                       ? "text-blue-600"
                       : "text-blue-200 group-hover:text-white"
                   }`}
                 >
-                  <FontAwesomeIcon icon={faReceipt} className="w-5 h-5" />
+                  <FontAwesomeIcon icon={faComments} className="w-5 h-5" />
                 </span>
-                <span className="ml-3">{t("sidebar.rate")}</span>
-                {isActive(props.showInformacionTarifa) && (
+                <span className="ml-3">Mensajes Dinámicos</span>
+                {isActive(props.showMensajesDinamicos) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon
                       icon={faChevronRight}

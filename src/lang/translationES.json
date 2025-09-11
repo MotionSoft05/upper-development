@@ -336,6 +336,7 @@
     "rate": "Información de Tarifas",
     "promotion": "pantalla Promociones",
     "flightScreens": "Pantallas de Vuelos",
+    "dynamicMessages": "Mensajes Dinámicos",
     "rateScreen": "Pantallas Tarifario"
   },
   "monitorScreen": {
@@ -1300,6 +1301,7 @@
     "bilingual": "Español/Inglés",
     "distanceConfig": "Configuración de Distancia",
     "showTravelTime": "Mostrar tiempo de viaje al aeropuerto",
+    "hotelLocation": "Ubicación del Hotel",
     "hotelAddress": "Dirección del Hotel",
     "apiInfo": "Información de la API",
     "usingAeroDataBox": "Utilizando AeroDataBox API para datos de vuelos en tiempo real",
@@ -1355,5 +1357,23 @@
     },
     "restoreDefaults": "Restaurar Defaults",
     "selectScreenToConfig": "Seleccione una pantalla para configurar los campos a mostrar"
+  },
+  "dynamicMessages": {
+    "title": "Mensajes Dinámicos",
+    "description": "Gestiona los mensajes que se muestran en las pantallas de vuelos",
+    "company": "Empresa",
+    "saveChanges": "Guardar Cambios",
+    "messageConfiguration": "Configuración de Mensajes",
+    "addMessage": "Agregar Mensaje",
+    "noMessages": "No hay mensajes configurados",
+    "message": "Mensaje",
+    "enabled": "Habilitado",
+    "delete": "Eliminar",
+    "textSpanish": "Texto en Español",
+    "textEnglish": "Texto en Inglés",
+    "spanishPlaceholder": "Mensaje en español...",
+    "englishPlaceholder": "Message in English...",
+    "displayDuration": "Duración de visualización (segundos)",
+    "unsavedChanges": "⚠️ Tienes cambios sin guardar"
   }
 }

@@ -19,6 +19,7 @@ import PantallasTarifario from "@/components/dashboard/pantallasTarifario";
 import EditInformacionTarifa from "@/components/dashboard/EditInformacionTarifa";
 import PantallasPromociones from "@/components/dashboard/PantallasPromociones";
 import PantallasVuelos from "@/components/dashboard/PantallasVuelos";
+import MensajesDinamicos from "@/components/dashboard/MensajesDinamicos";
 
 // Nuevos imports para Android TV
 import DevicesList from "@/components/DevicesList";
@@ -54,6 +55,7 @@ function DashBoard() {
   const [showPublicidad, setShowPublicidad] = useState(false);
   const [showPantallaPromociones, setShowPantallaPromociones] = useState(false);
   const [showPantallasVuelos, setShowPantallasVuelos] = useState(false);
+  const [showMensajesDinamicos, setShowMensajesDinamicos] = useState(false);
 
   const [showlicencia, setShowlicencia] = useState(false);
   const [showGuia, setShowGuia] = useState(false);
@@ -134,6 +136,8 @@ function DashBoard() {
           showPantallaPromociones={showPantallaPromociones}
           setShowPantallasVuelos={setShowPantallasVuelos}
           showPantallasVuelos={showPantallasVuelos}
+          setShowMensajesDinamicos={setShowMensajesDinamicos}
+          showMensajesDinamicos={showMensajesDinamicos}
           setShowPublicidad={setShowPublicidad}
           showPublicidad={showPublicidad}
           setShowlicencia={setShowlicencia}
@@ -194,6 +198,7 @@ function DashBoard() {
           {/* Componentes de Tarifario */}
           {showPantallaTarifario && <PantallasTarifario />}
           {showInformacionTarifa && <EditInformacionTarifa />}
+          {showMensajesDinamicos && <MensajesDinamicos />}
           {showPublicidad && <Publicidad />}
 
           {/* NUEVAS SECCIONES - Android TV Devices */}
