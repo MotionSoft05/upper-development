@@ -21,6 +21,7 @@ import {
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
+import GoogleMapSelector from '../common/GoogleMapSelector';
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -134,8 +135,8 @@ function PantallasVuelos() {
   const [distanceConfig, setDistanceConfig] = useState({
     enabled: false,
     hotelLocation: {
-      lat: 19.4326, // CDMX centro por defecto
-      lng: -99.1332,
+      lat: null,
+      lng: null,
       address: "",
     },
   });
@@ -772,86 +773,37 @@ function PantallasVuelos() {
                         {t("flightScreens.hotelLocation")}
                       </label>
                       
-                      {/* Mapa interactivo con buscador */}
-                      <div className="space-y-4">
-                        {/* Campo de búsqueda */}
-                        <div className="relative">
-                          <input
-                            type="text"
-                            placeholder="Buscar hotel o dirección..."
-                            className="block w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                            value={distanceConfig.hotelLocation.address || ''}
-                            onChange={(e) => {
-                              setDistanceConfig({
-                                ...distanceConfig,
-                                hotelLocation: {
-                                  ...distanceConfig.hotelLocation,
-                                  address: e.target.value
-                                }
-                              });
-                              setHasUnsavedChanges(true);
-                            }}
-                          />
-                          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
-                          </div>
-                        </div>
-
-                        {/* Mapa interactivo principal */}
-                        <div className="relative">
-                          <div className="h-80 bg-gradient-to-br from-blue-50 to-gray-100 rounded-lg border-2 border-dashed border-blue-200 flex items-center justify-center">
-                            <div className="text-center p-6">
-                              <div className="w-16 h-16 mx-auto mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                </svg>
-                              </div>
-                              <h3 className="text-lg font-semibold text-gray-700 mb-2">Google Maps</h3>
-                              <p className="text-sm text-gray-600 mb-3">Haga clic en el mapa para seleccionar la ubicación exacta</p>
-                              <div className="text-xs text-gray-500">
-                                O use el buscador arriba para encontrar un lugar específico
-                              </div>
-                            </div>
-                          </div>
-                          
-                          {/* Overlay con información si ya hay ubicación seleccionada */}
-                          {distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng && (
-                            <div className="absolute top-4 left-4 right-4">
-                              <div className="bg-white rounded-lg shadow-lg p-4 border-l-4 border-green-500">
-                                <div className="flex items-center">
-                                  <div className="flex-shrink-0">
-                                    <svg className="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                    </svg>
-                                  </div>
-                                  <div className="ml-3 flex-1">
-                                    <h4 className="text-sm font-semibold text-green-900">Ubicación Confirmada</h4>
-                                    <p className="text-sm text-green-700 truncate">
-                                      {distanceConfig.hotelLocation.placeName || distanceConfig.hotelLocation.address || 'Ubicación personalizada'}
-                                    </p>
-                                  </div>
-                                  <button
-                                    onClick={() => {
-                                      setDistanceConfig({
-                                        ...distanceConfig,
-                                        hotelLocation: { lat: 19.4326, lng: -99.1332, address: '' }
-                                      });
-                                      setHasUnsavedChanges(true);
-                                    }}
-                                    className="ml-3 text-green-600 hover:text-green-800 transition-colors"
-                                  >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                      {/* Mapa interactivo con GoogleMapSelector */}
+                      <div className="relative">
+                        <GoogleMapSelector
+                          location={{
+                            lat: distanceConfig.hotelLocation.lat,
+                            lng: distanceConfig.hotelLocation.lng
+                          }}
+                          onLocationChange={(coords) => {
+                            setDistanceConfig({
+                              ...distanceConfig,
+                              hotelLocation: {
+                                ...distanceConfig.hotelLocation,
+                                lat: coords.lat,
+                                lng: coords.lng
+                              }
+                            });
+                            setHasUnsavedChanges(true);
+                          }}
+                          onAddressChange={(address) => {
+                            setDistanceConfig({
+                              ...distanceConfig,
+                              hotelLocation: {
+                                ...distanceConfig.hotelLocation,
+                                address: address
+                              }
+                            });
+                            setHasUnsavedChanges(true);
+                          }}
+                          height="320px"
+                          placeholder="Buscar hotel o dirección..."
+                        />
                       </div>
 
 
@@ -1593,8 +1545,8 @@ function PantallasVuelos() {
                     setDistanceConfig({
                       enabled: false,
                       hotelLocation: {
-                        lat: 19.4326,
-                        lng: -99.1332,
+                        lat: null,
+                        lng: null,
                         address: "",
                       },
                     });
