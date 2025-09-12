@@ -8,7 +8,8 @@
       "Bash(firebase functions:shell:*)",
       "Bash(curl:*)",
       "Bash(firebase functions:log:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

@@ -1301,6 +1301,8 @@
     "spanish": "Spanish",
     "english": "English",
     "bilingual": "Spanish/English",
+    "weatherCity": "Select City (Weather)",
+    "weatherCityDescription": "The selected city will be used to display weather information on the screen.",
     "distanceConfig": "Distance Configuration",
     "showTravelTime": "Show travel time to airport",
     "hotelLocation": "Hotel Location",

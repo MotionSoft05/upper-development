@@ -47,6 +47,39 @@ function PantallasVuelos() {
   const [pantallaSettings, setPantallaSettings] = useState({});
   const [pv, setPv] = useState(0); // Cantidad de pantallas de vuelos licenciadas
 
+  // Lista de ciudades para el clima (igual que en promociones)
+  const [cityOptions, setCityOptions] = useState([
+    { value: "Ciudad de México", label: "Ciudad de México, Ciudad de México" },
+    { value: "Ecatepec", label: "Ecatepec, Estado de México" },
+    { value: "Guadalajara", label: "Guadalajara, Jalisco" },
+    { value: "Monterrey", label: "Monterrey, Nuevo León" },
+    { value: "Puebla", label: "Puebla, Puebla" },
+    { value: "Tijuana", label: "Tijuana, Baja California" },
+    { value: "León", label: "León, Guanajuato" },
+    { value: "Zapopan", label: "Zapopan, Jalisco" },
+    { value: "Ciudad Juárez", label: "Ciudad Juárez, Chihuahua" },
+    { value: "Nezahualcóyotl", label: "Nezahualcóyotl, Estado de México" },
+    { value: "Mexicali", label: "Mexicali, Baja California" },
+    { value: "Mérida", label: "Mérida, Yucatán" },
+    { value: "San Luis Potosí", label: "San Luis Potosí, San Luis Potosí" },
+    { value: "Querétaro", label: "Querétaro, Querétaro" },
+    { value: "Aguascalientes", label: "Aguascalientes, Aguascalientes" },
+    { value: "Hermosillo", label: "Hermosillo, Sonora" },
+    { value: "Saltillo", label: "Saltillo, Coahuila" },
+    { value: "Morelia", label: "Morelia, Michoacán" },
+    { value: "Culiacán", label: "Culiacán, Sinaloa" },
+    { value: "Chihuahua", label: "Chihuahua, Chihuahua" },
+    { value: "Toluca", label: "Toluca, Estado de México" },
+    { value: "Cancún", label: "Cancún, Quintana Roo" },
+    { value: "Acapulco", label: "Acapulco, Guerrero" },
+    { value: "Oaxaca", label: "Oaxaca, Oaxaca" },
+  ]);
+
+  // Ordenar alfabéticamente
+  cityOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+  const [selectedCity, setSelectedCity] = useState(null);
+
   // Configuración de aeropuertos disponibles
   const [availableAirports] = useState([
     {
@@ -236,6 +269,12 @@ function PantallasVuelos() {
         const templateData = templateVuelosSnapshot.docs[0].data();
         setSelectedLanguage(templateData.idioma || "es");
         setPantallaSettings(templateData.pantallasConfig || {});
+        
+        // Cargar ciudad seleccionada para el clima
+        if (templateData.selectedCity) {
+          setSelectedCity(templateData.selectedCity);
+        }
+        
         // Crear configuración limpia desde los datos de Firebase
         const loadedDistanceConfig = templateData.distanceConfig || {};
         setDistanceConfig({
@@ -256,6 +295,11 @@ function PantallasVuelos() {
   // Función para manejar cambios de configuración general
   const handleLanguageChange = (e) => {
     setSelectedLanguage(e.target.value);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleCityChange = (selectedOption) => {
+    setSelectedCity(selectedOption);
     setHasUnsavedChanges(true);
   };
 
@@ -426,6 +470,7 @@ function PantallasVuelos() {
         empresa: empresaToUpdate,
         idioma: selectedLanguage,
         pantallasConfig: pantallaSettings,
+        selectedCity: selectedCity,
         distanceConfig: distanceConfig,
         updatedAt: serverTimestamp(),
         updatedBy: authUser.email || ""
@@ -693,6 +738,25 @@ function PantallasVuelos() {
                     </label>
                   </div>
                 </div>
+              </div>
+
+              {/* Ciudad para el clima */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  {t("flightScreens.weatherCity")}
+                </label>
+                <Select
+                  options={cityOptions}
+                  value={selectedCity}
+                  onChange={handleCityChange}
+                  placeholder="Seleccione una ciudad para mostrar el clima"
+                  className="w-full"
+                  isSearchable
+                  isClearable={true}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  {t("flightScreens.weatherCityDescription")}
+                </p>
               </div>
 
               {/* Configuración Distance Matrix */}
@@ -1412,6 +1476,7 @@ function PantallasVuelos() {
                   if (result.isConfirmed) {
                     // Reset logic
                     setSelectedLanguage("es");
+                    setSelectedCity(null);
                     setPantallaSettings({});
                     setDynamicMessages([
                       {

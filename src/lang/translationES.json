@@ -1299,6 +1299,8 @@
     "spanish": "Español",
     "english": "Inglés",
     "bilingual": "Español/Inglés",
+    "weatherCity": "Seleccionar Ciudad (Clima)",
+    "weatherCityDescription": "La ciudad seleccionada se utilizará para mostrar la información del clima en la pantalla.",
     "distanceConfig": "Configuración de Distancia",
     "showTravelTime": "Mostrar tiempo de viaje al aeropuerto",
     "hotelLocation": "Ubicación del Hotel",
