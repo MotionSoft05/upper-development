@@ -40,7 +40,6 @@ const MensajesDinamicos = () => {
         en: "🚐 Airport shuttle every hour - Contact Concierge",
       },
       enabled: true,
-      displayDuration: 10,
     },
     {
       id: "checkin",
@@ -49,7 +48,6 @@ const MensajesDinamicos = () => {
         en: "✈️ Online check-in available 24h before flight",
       },
       enabled: true,
-      displayDuration: 8,
     },
     {
       id: "baggage",
@@ -58,7 +56,6 @@ const MensajesDinamicos = () => {
         en: "🧳 Check baggage limits with your airline",
       },
       enabled: false,
-      displayDuration: 12,
     },
   ]);
 
@@ -94,15 +91,15 @@ const MensajesDinamicos = () => {
     if (!empresa) return;
 
     try {
-      const templateMensajesRef = collection(db, "templateMensajesDinamicos");
-      const templateMensajesQuery = query(
-        templateMensajesRef,
+      const templateVuelosRef = collection(db, "TemplateVuelos");
+      const templateVuelosQuery = query(
+        templateVuelosRef,
         where("empresa", "==", empresa)
       );
-      const templateMensajesSnapshot = await getDocs(templateMensajesQuery);
+      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
-      if (!templateMensajesSnapshot.empty) {
-        const templateData = templateMensajesSnapshot.docs[0].data();
+      if (!templateVuelosSnapshot.empty) {
+        const templateData = templateVuelosSnapshot.docs[0].data();
         setDynamicMessages(templateData.dynamicMessages || dynamicMessages);
       }
     } catch (error) {
@@ -121,27 +118,30 @@ const MensajesDinamicos = () => {
     }
 
     try {
-      const templateMensajesRef = collection(db, "templateMensajesDinamicos");
-      const templateMensajesQuery = query(
-        templateMensajesRef,
+      const templateVuelosRef = collection(db, "TemplateVuelos");
+      const templateVuelosQuery = query(
+        templateVuelosRef,
         where("empresa", "==", userCompany)
       );
-      const templateMensajesSnapshot = await getDocs(templateMensajesQuery);
+      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
-      const templateData = {
-        empresa: userCompany,
-        dynamicMessages: dynamicMessages,
-        updatedAt: serverTimestamp(),
-        updatedBy: authUser.email || ""
-      };
-
-      if (!templateMensajesSnapshot.empty) {
-        // Actualizar documento existente
-        const templateMensajesDocRef = templateMensajesSnapshot.docs[0].ref;
-        await updateDoc(templateMensajesDocRef, templateData);
+      if (!templateVuelosSnapshot.empty) {
+        // Actualizar documento existente - solo actualizar dynamicMessages
+        const templateVuelosDocRef = templateVuelosSnapshot.docs[0].ref;
+        await updateDoc(templateVuelosDocRef, {
+          dynamicMessages: dynamicMessages,
+          updatedAt: serverTimestamp(),
+          updatedBy: authUser.email || ""
+        });
       } else {
-        // Crear nuevo documento
-        await addDoc(templateMensajesRef, templateData);
+        // Crear nuevo documento con la estructura completa
+        const templateData = {
+          empresa: userCompany,
+          dynamicMessages: dynamicMessages,
+          updatedAt: serverTimestamp(),
+          updatedBy: authUser.email || ""
+        };
+        await addDoc(templateVuelosRef, templateData);
       }
 
       Swal.fire({
@@ -170,7 +170,6 @@ const MensajesDinamicos = () => {
       id: `msg_${Date.now()}`,
       text: { es: "", en: "" },
       enabled: true,
-      displayDuration: 10,
     };
     setDynamicMessages([...dynamicMessages, newMessage]);
     setHasUnsavedChanges(true);
@@ -325,26 +324,6 @@ const MensajesDinamicos = () => {
                           placeholder={t("dynamicMessages.englishPlaceholder")}
                         />
                       </div>
-                    </div>
-
-                    <div className="mt-4">
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t("dynamicMessages.displayDuration")}
-                      </label>
-                      <input
-                        type="number"
-                        min="5"
-                        max="60"
-                        value={message.displayDuration}
-                        onChange={(e) =>
-                          updateDynamicMessage(
-                            message.id,
-                            "displayDuration",
-                            parseInt(e.target.value)
-                          )
-                        }
-                        className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      />
                     </div>
                   </div>
                 ))}
