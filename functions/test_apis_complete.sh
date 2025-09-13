@@ -44,7 +44,7 @@ async function testFlights() {
   console.log('📡 Testing OpenSky Network + AviationStack...');
   console.log('');
   
-  const airports = ['MEX', 'TLC', 'NLU'];
+  const airports = ['MEX', 'GDL', 'CUN'];
   let totalSuccess = 0;
   let totalTests = airports.length;
   
@@ -163,20 +163,20 @@ echo ""
 echo "⏳ Esperando 3 segundos..."
 sleep 3
 
-# 2.2 Test de múltiples rutas (Centro CDMX → MEX, TLC, NLU)
+# 2.2 Test de múltiples rutas (Centro CDMX → MEX, GDL, CUN)
 node -e "
 require('dotenv').config();
 const distanceService = require('./services/distanceService');
 
 async function testMultipleRoutes() {
-  console.log('🔍 Testing multiple routes: Centro CDMX → MEX, TLC, NLU...');
+  console.log('🔍 Testing multiple routes: Centro CDMX → MEX, GDL, CUN...');
   console.log('');
-  
+
   try {
     const startTime = Date.now();
     const result = await distanceService.calculateMultipleRoutes(
-      {lat: 19.4326, lng: -99.1332, address: 'Centro CDMX'}, 
-      ['MEX', 'TLC', 'NLU']
+      {lat: 19.4326, lng: -99.1332, address: 'Centro CDMX'},
+      ['MEX', 'GDL', 'CUN']
     );
     const duration = Date.now() - startTime;
     

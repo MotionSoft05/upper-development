@@ -88,14 +88,14 @@ function PantallasVuelos() {
       name: "Aeropuerto Internacional Ciudad de México",
     },
     {
-      value: "TLC",
-      label: "Toluca",
-      name: "Aeropuerto Internacional de Toluca",
+      value: "GDL",
+      label: "Guadalajara (GDL)",
+      name: "Aeropuerto Internacional de Guadalajara",
     },
     {
-      value: "NLU",
-      label: "Felipe Ángeles",
-      name: "Aeropuerto Internacional Felipe Ángeles",
+      value: "CUN",
+      label: "Cancún (CUN)",
+      name: "Aeropuerto Internacional de Cancún",
     },
   ]);
 
@@ -894,8 +894,8 @@ function PantallasVuelos() {
                 </p>
                 <div className="text-xs text-gray-500">
                   <p>
-                    • {t("flightScreens.supportedAirports")}: CDMX (MEX), Toluca
-                    (TLC), Felipe Ángeles (NLU)
+                    • {t("flightScreens.supportedAirports")}: CDMX (MEX), Guadalajara
+                    (GDL), Cancún (CUN)
                   </p>
                   <p>• {t("flightScreens.updateFrequency")}: 2-5 minutos</p>
                   <p>
@@ -1157,8 +1157,8 @@ function PantallasVuelos() {
                   <h4 className="text-xs font-medium text-blue-800 mb-2">💡 Casos de uso comunes:</h4>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-blue-700">
                     <div>• <strong>Lobby principal</strong> → AICM (MEX)</div>
-                    <div>• <strong>Área shuttle</strong> → Toluca (TLC)</div>
-                    <div>• <strong>Info turística</strong> → Felipe Ángeles (NLU)</div>
+                    <div>• <strong>Área shuttle</strong> → Guadalajara (GDL)</div>
+                    <div>• <strong>Info turística</strong> → Cancún (CUN)</div>
                   </div>
                 </div>
               </div>

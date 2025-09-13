@@ -47,7 +47,7 @@ async function testFlightService() {
   // Verificar configuración de APIs
   await testAPIConfiguration();
 
-  const airports = ["MEX", "TLC", "NLU"];
+  const airports = ["MEX", "GDL", "CUN"];
   const results = [];
 
   for (const airport of airports) {

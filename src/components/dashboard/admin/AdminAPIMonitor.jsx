@@ -209,7 +209,7 @@ function AdminAPIMonitor() {
     setIsExecutingManual(true);
     
     try {
-      const airports = ['MEX', 'TLC', 'NLU'];
+      const airports = ['MEX', 'GDL', 'CUN'];
       const results = [];
       
       for (const airport of airports) {
@@ -228,7 +228,22 @@ function AdminAPIMonitor() {
           error: result.error
         });
       }
-      
+
+      // AGREGAR ESTE CÓDIGO NUEVO: Activar Google Distance Matrix
+      console.log('🗺️ Activando Google Distance Matrix...');
+      try {
+        const distanceResponse = await fetch(
+          `${FUNCTION_URLS.testFlightUpdate}?airport=MEX&force=true&includeDistance=true`,
+          { method: 'GET' }
+        );
+
+        if (distanceResponse.ok) {
+          console.log('✅ Google Distance Matrix activado');
+        }
+      } catch (error) {
+        console.error('❌ Error activando Distance Matrix:', error);
+      }
+
       // Mostrar resultado
       const successful = results.filter(r => r.success).length;
       const failed = results.filter(r => !r.success).length;
@@ -660,8 +675,8 @@ function AdminAPIMonitor() {
                       className="block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     >
                       <option value="MEX">Ciudad de México (MEX)</option>
-                      <option value="TLC">Toluca (TLC)</option>
-                      <option value="NLU">Felipe Ángeles (NLU)</option>
+                      <option value="GDL">Guadalajara (GDL)</option>
+                      <option value="CUN">Cancún (CUN)</option>
                     </select>
                   </div>
 
@@ -828,7 +843,7 @@ function AdminAPIMonitor() {
                         <div className="text-sm text-blue-700 mt-1 space-y-1">
                           <p>• Frecuencia: Cada 15 minutos</p>
                           <p>• APIs: OpenSky Network (OAuth2) + AviationStack (backup)</p>
-                          <p>• Aeropuertos: MEX, TLC, NLU</p>
+                          <p>• Aeropuertos: MEX, GDL, CUN</p>
                           <p>• Costo estimado: ~$5/mes máximo</p>
                         </div>
                       </div>

@@ -83,7 +83,7 @@ exports.updateFlightData = onSchedule({
 
   console.log("🛫 Ejecutando actualización automática de vuelos...");
 
-  const airports = ["MEX", "TLC", "NLU"];
+  const airports = ["MEX", "GDL", "CUN"];
   const results = [];
 
   for (const airport of airports) {
@@ -174,7 +174,7 @@ exports.testFlightUpdate = onRequest({
     console.log(`🧪 Test manual para aeropuerto: ${airport}`);
 
     // Verificar si el aeropuerto es válido
-    const validAirports = ["MEX", "TLC", "NLU"];
+    const validAirports = ["MEX", "GDL", "CUN"];
     if (!validAirports.includes(airport.toUpperCase())) {
       return res.status(400).json({
         success: false,
@@ -352,7 +352,7 @@ exports.getFlightStats = onRequest({
   }
 
   try {
-    const airports = ["MEX", "TLC", "NLU"];
+    const airports = ["MEX", "GDL", "CUN"];
     const stats = {};
 
     for (const airport of airports) {
@@ -507,7 +507,7 @@ exports.calculateMultipleRoutes = onRequest({
       });
     }
 
-    const airports = airportCodes || ["MEX", "TLC", "NLU"];
+    const airports = airportCodes || ["MEX", "GDL", "CUN"];
     const result = await distanceService.calculateMultipleRoutes(
         hotelLocation, airports, options || {});
 

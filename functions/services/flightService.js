@@ -35,17 +35,17 @@ class FlightService {
         iata: "MEX",
         icao: "MMMX",
       },
-      TLC: {
-        lat1: 19.33, lon1: -99.57, lat2: 19.37, lon2: -99.53,
-        name: "Aeropuerto Internacional de Toluca",
-        iata: "TLC",
-        icao: "MMTO",
+      GDL: {
+        lat1: 20.51, lon1: -103.32, lat2: 20.53, lon2: -103.30,
+        name: "Aeropuerto Internacional de Guadalajara",
+        iata: "GDL",
+        icao: "MMGL",
       },
-      NLU: {
-        lat1: 19.73, lon1: -99.02, lat2: 19.77, lon2: -98.98,
-        name: "Aeropuerto Internacional Felipe Ángeles",
-        iata: "NLU",
-        icao: "MMSM",
+      CUN: {
+        lat1: 21.03, lon1: -86.88, lat2: 21.04, lon2: -86.86,
+        name: "Aeropuerto Internacional de Cancún",
+        iata: "CUN",
+        icao: "MMUN",
       },
     };
 
@@ -465,7 +465,7 @@ class FlightService {
 
         const params = new URLSearchParams({
           offsetMinutes: -30, // Comenzar 30 min antes (vs -180 default)
-          durationMinutes: 120, // Duración 2 horas (vs 720 default)
+          durationMinutes: 1440, // Ventana total de 24 horas (sin límite práctico)
           direction: "Both",
           withLeg: "true",
           withCancelled: "true",
