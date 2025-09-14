@@ -78,20 +78,56 @@ function AdminAPIMonitor() {
     testFlightUpdate: "https://testflightupdate-wsvcv36oca-uc.a.run.app",
   };
 
+  // 🔧 FUNCIÓN OPTIMIZADA: Una sola llamada para todos los datos
+  const loadAllSystemData = async () => {
+    try {
+      const response = await fetch(`${FUNCTION_URLS.systemHealth}`);
+      if (response.ok) {
+        const health = await response.json();
+
+        // Distribuir datos a todos los estados
+        setSystemStatus({
+          healthy: health.success,
+          flightUpdates: health.flightUpdates,
+          distanceMatrix: health.distanceMatrix,
+          apiHealth: health.apiHealth,
+          timestamp: health.timestamp,
+        });
+
+        setApiStats({
+          totalRequests: health.recentLogs?.length || 0,
+          successfulRequests: health.recentLogs?.filter(log => log.level !== 'error').length || 0,
+          failedRequests: health.recentErrors?.length || 0,
+          lastUpdate: new Date(health.timestamp),
+        });
+
+        setCronStatus({
+          enabled: health.cronJobs?.enabled || false,
+          lastRun: health.cronJobs?.lastRun || null,
+          lastAction: health.cronJobs?.lastAction || 'unknown',
+          status: health.cronJobs?.status || 'inactive',
+        });
+
+        // Cargar logs recientes también
+        if (health.recentLogs) {
+          setRecentLogs(health.recentLogs.slice(0, 10));
+        }
+      }
+    } catch (error) {
+      console.error("Error loading system data:", error);
+      setSystemStatus({ healthy: false, error: error.message });
+    }
+  };
+
   // Cargar datos iniciales
   useEffect(() => {
-    loadSystemStatus();
-    loadRecentLogs();
-    loadAPIStats();
-    loadCronStatus();
+    loadAllSystemData();
   }, []);
 
-  // Auto-refresh cada 30 segundos
+  // Auto-refresh cada 30 segundos (UNA SOLA LLAMADA)
   useEffect(() => {
     const interval = setInterval(() => {
-      loadSystemStatus();
-      loadAPIStats();
-      loadCronStatus();
+      loadAllSystemData();
     }, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -229,15 +265,17 @@ function AdminAPIMonitor() {
         });
       }
 
-      // AGREGAR ESTE CÓDIGO NUEVO: Activar Google Distance Matrix
+      // 🗺️ OPTIMIZADO: Activar Distance Matrix sin requests extra
       console.log('🗺️ Activando Google Distance Matrix...');
       try {
-        const distanceResponse = await fetch(
-          `${FUNCTION_URLS.testFlightUpdate}?airport=MEX&force=true&includeDistance=true`,
-          { method: 'GET' }
-        );
+        // Usar la función de reinicio del cron para activar todo el sistema
+        const cronResponse = await fetch(`${FUNCTION_URLS.cronControl}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'restart' })
+        });
 
-        if (distanceResponse.ok) {
+        if (cronResponse.ok) {
           console.log('✅ Google Distance Matrix activado');
         }
       } catch (error) {
@@ -261,9 +299,8 @@ function AdminAPIMonitor() {
         timer: 5000,
       });
       
-      // Recargar estado del sistema
-      await loadSystemStatus();
-      await loadAPIStats();
+      // Recargar estado del sistema (OPTIMIZADO)
+      await loadAllSystemData();
       
     } catch (error) {
       console.error('Error en ejecución manual:', error);
@@ -418,8 +455,8 @@ function AdminAPIMonitor() {
           timer: 2000,
         });
         
-        // Recargar estado del sistema
-        loadSystemStatus();
+        // Recargar estado del sistema (OPTIMIZADO)
+        loadAllSystemData();
       } else {
         throw new Error(result.error);
       }

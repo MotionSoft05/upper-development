@@ -11,7 +11,9 @@
       "Bash(npm run build:*)",
       "Bash(find:*)",
       "Bash(chmod:*)",
-      "Bash(./test_apis_complete.sh:*)"
+      "Bash(./test_apis_complete.sh:*)",
+      "Bash(npx eslint:*)",
+      "Bash(dos2unix:*)"
     ],
     "deny": [],
     "ask": []

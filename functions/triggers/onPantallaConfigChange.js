@@ -18,7 +18,7 @@ const db = admin.firestore();
  */
 async function onFlightScreenConfigChange(change, context) {
   try {
-    const { companyId } = context.params;
+    const {companyId} = context.params;
 
     // Ignorar eliminaciones
     if (!change.after.exists) {
@@ -42,7 +42,8 @@ async function onFlightScreenConfigChange(change, context) {
     console.log(`📍 Cambio relevante detectado, procesando actualización...`);
 
     // Detectar aeropuertos activos para este hotel
-    const activeAirports = await hotelDistanceService.detectActiveAirports(companyId);
+    const activeAirports = await hotelDistanceService
+        .detectActiveAirports(companyId);
 
     // Obtener ubicación del hotel desde la configuración
     const hotelLocation = await getHotelLocationFromConfig(companyId, newData);
@@ -58,16 +59,16 @@ async function onFlightScreenConfigChange(change, context) {
 
       console.log(`📍 Usando ubicación por defecto para ${companyId}: ${defaultLocation.address}`);
       await hotelDistanceService.updateHotelDistanceConfig(
-        companyId,
-        defaultLocation,
-        activeAirports
+          companyId,
+          defaultLocation,
+          activeAirports,
       );
     } else {
       // Actualizar configuración con ubicación real
       await hotelDistanceService.updateHotelDistanceConfig(
-        companyId,
-        hotelLocation,
-        activeAirports
+          companyId,
+          hotelLocation,
+          activeAirports,
       );
     }
 
@@ -89,11 +90,11 @@ async function onFlightScreenConfigChange(change, context) {
 function isRelevantChangeForDistances(newData, previousData) {
   // Campos relevantes que afectan distancias
   const relevantFields = [
-    'selectedAirport',
-    'airports',
-    'flightConfig.airports',
-    'isActive',
-    'hotelLocation',
+    "selectedAirport",
+    "airports",
+    "flightConfig.airports",
+    "isActive",
+    "hotelLocation",
   ];
 
   for (const field of relevantFields) {
@@ -118,7 +119,7 @@ function isRelevantChangeForDistances(newData, previousData) {
  * @return {any} Valor encontrado
  */
 function getNestedValue(obj, path) {
-  return path.split('.').reduce((current, key) => {
+  return path.split(".").reduce((current, key) => {
     return current && current[key] !== undefined ? current[key] : undefined;
   }, obj);
 }
@@ -161,9 +162,9 @@ async function getHotelLocationFromConfig(companyId, screenData) {
 
     // Buscar en configuración existente de hotelDistanceConfig
     const existingConfigDoc = await db
-      .collection("hotelDistanceConfig")
-      .doc(companyId)
-      .get();
+        .collection("hotelDistanceConfig")
+        .doc(companyId)
+        .get();
 
     if (existingConfigDoc.exists) {
       const existingConfig = existingConfigDoc.data();
@@ -186,7 +187,7 @@ async function getHotelLocationFromConfig(companyId, screenData) {
  */
 async function onCompanyConfigChange(change, context) {
   try {
-    const { companyId } = context.params;
+    const {companyId} = context.params;
 
     // Ignorar eliminaciones
     if (!change.after.exists) {
@@ -205,16 +206,18 @@ async function onCompanyConfigChange(change, context) {
 
       if (newLocation && newLocation.lat && newLocation.lng) {
         // Detectar aeropuertos activos
-        const activeAirports = await hotelDistanceService.detectActiveAirports(companyId);
+        const activeAirports = await hotelDistanceService
+            .detectActiveAirports(companyId);
 
         // Actualizar configuración de distancias
         await hotelDistanceService.updateHotelDistanceConfig(
-          companyId,
-          newLocation,
-          activeAirports
+            companyId,
+            newLocation,
+            activeAirports,
         );
 
-        console.log(`✅ Configuración de distancias actualizada para nueva ubicación`);
+        console.log("✅ Configuración de distancias actualizada " +
+            "para nueva ubicación");
       }
     }
 

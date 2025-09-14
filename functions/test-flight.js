@@ -142,7 +142,7 @@ async function testHotelDistanceService() {
   console.log("🏨 Iniciando pruebas del servicio de distancias de hotel...\n");
 
   try {
-    const hotelDistanceService = require("./services/hotelDistanceService");
+    // const hotelDistanceService = require("./services/hotelDistanceService");
     const distanceService = require("./services/distanceService");
 
     // Ubicación base para tests: Sheraton María Isabel Hotel
@@ -158,7 +158,7 @@ async function testHotelDistanceService() {
 
     // Test 1: Detectar aeropuertos activos (simulado)
     console.log("🔍 Test 1: Detección de aeropuertos activos...");
-    const testCompanyId = "test-sheraton-hotel";
+    // const testCompanyId = "test-sheraton-hotel";
     const activeAirports = ["MEX", "GDL"]; // Simular que usa MEX y GDL
 
     console.log(`✅ Aeropuertos activos simulados: ${activeAirports.join(", ")}`);
@@ -172,9 +172,9 @@ async function testHotelDistanceService() {
       try {
         console.log(`   Calculando distancia a ${airport}...`);
         const result = await distanceService.calculateTravelTime(
-          sheratonLocation,
-          airport,
-          { trafficModel: "best_guess" }
+            sheratonLocation,
+            airport,
+            {trafficModel: "best_guess"},
         );
 
         if (result.success) {
@@ -182,20 +182,24 @@ async function testHotelDistanceService() {
           if (result.data.durationInTraffic) {
             console.log(`      Con tráfico: ${result.data.durationInTraffic.minutes}min (${result.data.trafficConditions})`);
           }
-          distanceResults.push({ airport, success: true, data: result.data });
+          distanceResults.push({airport, success: true, data: result.data});
         } else {
           console.log(`   ❌ ${airport}: ${result.error}`);
-          distanceResults.push({ airport, success: false, error: result.error });
+          distanceResults.push({airport, success: false, error: result.error});
         }
       } catch (error) {
         console.log(`   ❌ ${airport}: ${error.message}`);
-        distanceResults.push({ airport, success: false, error: error.message });
+        distanceResults.push({
+          airport, success: false, error: error.message,
+        });
       }
     }
 
-    const successfulCalculations = distanceResults.filter(r => r.success).length;
+    const successfulCalculations = distanceResults
+        .filter((r) => r.success).length;
     console.log("");
-    console.log(`📊 Resultados: ${successfulCalculations}/${activeAirports.length} cálculos exitosos`);
+    console.log(`📊 Resultados: ${successfulCalculations}/` +
+        `${activeAirports.length} cálculos exitosos`);
 
     // Test 3: Verificar costo optimizado
     console.log("");
@@ -224,16 +228,15 @@ async function testHotelDistanceService() {
         failed: activeAirports.length - successfulCalculations,
         totalTests: activeAirports.length,
         optimized: true,
-        baseLocation: sheratonLocation
-      }
+        baseLocation: sheratonLocation,
+      },
     };
-
   } catch (error) {
     console.error("❌ Error en pruebas de distancia:", error);
     return {
       success: false,
       error: error.message,
-      results: []
+      results: [],
     };
   }
 }
@@ -250,7 +253,7 @@ async function runAllTests() {
   const results = {
     flightService: null,
     hotelDistanceService: null,
-    overall: { success: false, errors: [] }
+    overall: {success: false, errors: []},
   };
 
   try {
@@ -270,17 +273,20 @@ async function runAllTests() {
     console.log("");
     console.log("📋 RESUMEN FINAL");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-    console.log(`🛫 Vuelos: ${results.flightService.success ? "✅ PASS" : "❌ FAIL"}`);
-    console.log(`🏨 Distancias: ${results.hotelDistanceService.success ? "✅ PASS" : "❌ FAIL"}`);
+    console.log(`🛫 Vuelos: ` +
+        `${results.flightService.success ? "✅ PASS" : "❌ FAIL"}`);
+    console.log(`🏨 Distancias: ` +
+        `${results.hotelDistanceService.success ? "✅ PASS" : "❌ FAIL"}`);
 
-    const overallSuccess = results.flightService.success && results.hotelDistanceService.success;
+    const overallSuccess = results.flightService.success &&
+        results.hotelDistanceService.success;
     results.overall.success = overallSuccess;
 
     console.log("");
-    console.log(`🎯 RESULTADO GENERAL: ${overallSuccess ? "✅ TODOS LOS TESTS PASARON" : "❌ ALGUNOS TESTS FALLARON"}`);
+    console.log(`🎯 RESULTADO GENERAL: ` +
+        `${overallSuccess ? "✅ TODOS LOS TESTS PASARON" : "❌ ALGUNOS TESTS FALLARON"}`);
 
     return results;
-
   } catch (error) {
     console.error("💥 Error ejecutando suite de pruebas:", error);
     results.overall.errors.push(error.message);
