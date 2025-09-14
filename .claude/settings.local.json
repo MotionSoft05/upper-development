@@ -9,7 +9,9 @@
       "Bash(curl:*)",
       "Bash(firebase functions:log:*)",
       "Bash(npm run build:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(chmod:*)",
+      "Bash(./test_apis_complete.sh:*)"
     ],
     "deny": [],
     "ask": []

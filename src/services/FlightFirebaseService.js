@@ -17,7 +17,7 @@ export class FlightFirebaseService {
 
   /**
    * Suscribirse a actualizaciones en tiempo real de datos de vuelos
-   * @param {string} airport - Código del aeropuerto (MEX, TLC, NLU)
+   * @param {string} airport - Código del aeropuerto (MEX, GDL, CUN)
    * @param {function} callback - Función callback para recibir los datos
    * @param {function} errorCallback - Función callback para manejar errores
    * @returns {function} - Función para desuscribirse
@@ -108,8 +108,8 @@ export class FlightFirebaseService {
     const lastUpdate = rawData.serverTimestamp?.toDate() || new Date(rawData.lastUpdate);
     const ageInMinutes = (now - lastUpdate.getTime()) / (1000 * 60);
     
-    // Determinar si los datos están "frescos"
-    const isStale = ageInMinutes > 20; // Considerar obsoletos después de 20 minutos
+    // Determinar si los datos están "frescos" (actualización cada 20 minutos)
+    const isStale = ageInMinutes > 25; // Considerar obsoletos después de 25 minutos
     const isVeryStale = ageInMinutes > 60; // Muy obsoletos después de 1 hora
     
     return {
@@ -330,6 +330,146 @@ export class FlightFirebaseService {
     } catch (error) {
       console.error('❌ Sin conectividad con Firebase:', error);
       return false;
+    }
+  }
+
+  /**
+   * Obtener datos de distancia de hotel para un companyId específico
+   * Integra con el nuevo sistema optimizado de Distance Matrix
+   * @param {string} companyId - ID de la compañía/hotel
+   * @returns {Promise<Object>} - Datos de distancia del hotel
+   */
+  async getHotelDistanceData(companyId) {
+    try {
+      console.log(`🏨 Obteniendo datos de distancia para hotel: ${companyId}`);
+
+      // Primero intentar obtener desde Firebase
+      const configDocRef = doc(this.db, 'hotelDistanceConfig', companyId);
+      const configSnap = await getDoc(configDocRef);
+
+      if (configSnap.exists()) {
+        const configData = configSnap.data();
+
+        console.log(`✅ Datos de distancia encontrados en Firebase para ${companyId}`);
+
+        return {
+          success: true,
+          source: 'firebase',
+          hotelLocation: configData.hotelLocation || {},
+          activeAirports: configData.activeAirports || [],
+          distanceData: configData.distanceData || {},
+          lastUpdate: configData.lastDistanceUpdate?.toDate?.()?.toISOString() || null,
+          calculationStats: configData.calculationStats || {},
+          needsRecalculation: configData.needsDistanceRecalculation || false
+        };
+      }
+
+      // Si no hay datos en Firebase, intentar desde Cloud Function
+      console.log(`📡 No hay datos en Firebase, consultando Cloud Function...`);
+
+      try {
+        const response = await fetch(`https://gethoteldistancedata-wsvcv36oca-uc.a.run.app?companyId=${companyId}`);
+
+        if (response.ok) {
+          const cloudData = await response.json();
+          console.log(`✅ Datos obtenidos desde Cloud Function para ${companyId}`);
+
+          return {
+            success: true,
+            source: 'cloud_function',
+            ...cloudData
+          };
+        } else {
+          console.warn(`⚠️ Cloud Function respondió con error: ${response.status}`);
+        }
+      } catch (cloudError) {
+        console.error('❌ Error consultando Cloud Function:', cloudError);
+      }
+
+      // Fallback: Datos por defecto con ubicación Sheraton María Isabel
+      console.log(`📍 Usando datos por defecto para ${companyId}`);
+
+      return {
+        success: true,
+        source: 'default',
+        hotelLocation: {
+          address: "Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico",
+          lat: 19.427940,
+          lng: -99.167127,
+          lastUpdated: new Date().toISOString()
+        },
+        activeAirports: ['MEX', 'GDL', 'CUN'],
+        distanceData: {},
+        lastUpdate: null,
+        calculationStats: {},
+        needsRecalculation: true,
+        message: 'Datos por defecto - configurar ubicación del hotel'
+      };
+
+    } catch (error) {
+      console.error(`❌ Error obteniendo datos de distancia para ${companyId}:`, error);
+
+      return {
+        success: false,
+        source: 'error',
+        error: error.message,
+        hotelLocation: {},
+        activeAirports: [],
+        distanceData: {},
+        lastUpdate: null
+      };
+    }
+  }
+
+  /**
+   * Combinar datos de vuelos con datos de distancia del hotel
+   * @param {Object} flightData - Datos de vuelos obtenidos
+   * @param {string} companyId - ID de la compañía/hotel
+   * @returns {Promise<Object>} - Datos combinados
+   */
+  async getFlightDataWithDistances(airport, companyId) {
+    try {
+      console.log(`🔄 Obteniendo datos combinados para ${airport} (hotel: ${companyId})`);
+
+      // Obtener datos de vuelos
+      const flightData = await this.getFlightData(airport);
+
+      // Obtener datos de distancia del hotel
+      const distanceData = await this.getHotelDistanceData(companyId);
+
+      // Combinar los datos
+      const combinedData = {
+        ...flightData,
+        hotelDistance: {
+          configured: distanceData.success && distanceData.hotelLocation.lat,
+          hotelLocation: distanceData.hotelLocation,
+          distanceToAirport: distanceData.distanceData[airport] || null,
+          lastDistanceUpdate: distanceData.lastUpdate,
+          distanceSource: distanceData.source
+        }
+      };
+
+      console.log(`✅ Datos combinados preparados para ${airport} (hotel: ${companyId})`);
+
+      return combinedData;
+
+    } catch (error) {
+      console.error(`❌ Error combinando datos para ${airport}:`, error);
+
+      // Fallback: solo datos de vuelos sin distancia
+      const flightData = await this.getFlightData(airport);
+
+      return {
+        ...flightData,
+        hotelDistance: {
+          configured: false,
+          error: error.message,
+          hotelLocation: {},
+          distanceToAirport: null,
+          lastDistanceUpdate: null,
+          distanceSource: 'error'
+        }
+      };
     }
   }
 }

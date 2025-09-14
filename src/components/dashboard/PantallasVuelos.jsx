@@ -156,9 +156,9 @@ function PantallasVuelos() {
   const [distanceConfig, setDistanceConfig] = useState({
     enabled: false,
     hotelLocation: {
-      lat: null,
-      lng: null,
-      address: "",
+      lat: 19.427940, // Sheraton María Isabel Hotel
+      lng: -99.167127,
+      address: "Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico",
     },
   });
 
@@ -483,6 +483,34 @@ function PantallasVuelos() {
       } else {
         // Crear nuevo documento
         await addDoc(templateVuelosRef, templateData);
+      }
+
+      // 3. ACTUALIZAR SISTEMA DISTANCE MATRIX OPTIMIZADO
+      if (distanceConfig.enabled && distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng) {
+        try {
+          console.log(`🗺️ Actualizando configuración de distancias para hotel: ${empresaToUpdate}`);
+
+          const response = await fetch('https://updatehotelairportusage-wsvcv36oca-uc.a.run.app', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              companyId: empresaToUpdate,
+              hotelLocation: distanceConfig.hotelLocation
+            })
+          });
+
+          if (response.ok) {
+            const result = await response.json();
+            console.log(`✅ Sistema de distancias actualizado:`, result);
+          } else {
+            console.warn(`⚠️ No se pudo actualizar sistema de distancias: ${response.status}`);
+          }
+        } catch (error) {
+          console.error('❌ Error actualizando sistema de distancias:', error);
+          // No fallar la operación completa si esto falla
+        }
       }
 
 

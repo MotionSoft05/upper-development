@@ -188,9 +188,9 @@ function AdminAPIMonitor() {
     const now = new Date();
     const next = new Date(now);
     
-    // El cron job se ejecuta cada 15 minutos: 0, 15, 30, 45
+    // El cron job se ejecuta cada 20 minutos: 0, 20, 40
     const currentMinutes = now.getMinutes();
-    const nextMinutes = Math.ceil((currentMinutes + 1) / 15) * 15;
+    const nextMinutes = Math.ceil((currentMinutes + 1) / 20) * 20;
     
     if (nextMinutes >= 60) {
       next.setHours(next.getHours() + 1, 0, 0, 0);
@@ -720,7 +720,7 @@ function AdminAPIMonitor() {
                       <div>
                         <p className="text-sm font-medium text-yellow-800">Nota Importante</p>
                         <p className="text-sm text-yellow-700 mt-1">
-                          Las actualizaciones automáticas continúan ejecutándose cada 15 minutos independientemente de estos tests manuales.
+                          Las actualizaciones automáticas continúan ejecutándose cada 20 minutos independientemente de estos tests manuales.
                         </p>
                       </div>
                     </div>
@@ -791,7 +791,7 @@ function AdminAPIMonitor() {
               <div className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900">Control de Actualizaciones Automáticas</h3>
-                  <p className="text-sm text-gray-600 mt-1">Gestiona las actualizaciones programadas cada 15 minutos</p>
+                  <p className="text-sm text-gray-600 mt-1">Gestiona las actualizaciones programadas cada 20 minutos</p>
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -841,7 +841,7 @@ function AdminAPIMonitor() {
                       <div>
                         <p className="text-sm font-medium text-blue-800">Información del Sistema</p>
                         <div className="text-sm text-blue-700 mt-1 space-y-1">
-                          <p>• Frecuencia: Cada 15 minutos</p>
+                          <p>• Frecuencia: Cada 20 minutos</p>
                           <p>• APIs: OpenSky Network (OAuth2) + AviationStack (backup)</p>
                           <p>• Aeropuertos: MEX, GDL, CUN</p>
                           <p>• Costo estimado: ~$5/mes máximo</p>

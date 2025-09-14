@@ -163,19 +163,24 @@ echo ""
 echo "⏳ Esperando 3 segundos..."
 sleep 3
 
-# 2.2 Test de múltiples rutas (Centro CDMX → MEX, GDL, CUN)
+# 2.2 Test de múltiples rutas (Sheraton María Isabel → MEX, GDL, CUN)
 node -e "
 require('dotenv').config();
 const distanceService = require('./services/distanceService');
 
 async function testMultipleRoutes() {
-  console.log('🔍 Testing multiple routes: Centro CDMX → MEX, GDL, CUN...');
+  console.log('🔍 Testing multiple routes: Sheraton María Isabel → MEX, GDL, CUN...');
   console.log('');
 
   try {
     const startTime = Date.now();
+    const sheratonLocation = {
+      lat: 19.427940,
+      lng: -99.167127,
+      address: 'Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico'
+    };
     const result = await distanceService.calculateMultipleRoutes(
-      {lat: 19.4326, lng: -99.1332, address: 'Centro CDMX'},
+      sheratonLocation,
       ['MEX', 'GDL', 'CUN']
     );
     const duration = Date.now() - startTime;
@@ -222,10 +227,117 @@ testMultipleRoutes().catch(error => {
 
 echo ""
 
-# PASO 3: Test de Conectividad General
+# PASO 3: Testing Hotel Distance Matrix Optimizado
 # ========================================
 
-echo "🌐 PASO 3: Testing general connectivity..."
+echo "🏨 PASO 3: Testing Hotel Distance Matrix Optimizado..."
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+# 3.1 Test con ubicación Sheraton María Isabel
+node -e "
+require('dotenv').config();
+
+async function testOptimizedDistanceMatrix() {
+  console.log('🏨 Testing optimized distance matrix with Sheraton María Isabel...');
+  console.log('');
+
+  // Ubicación base para tests
+  const sheratonLocation = {
+    address: 'Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico',
+    lat: 19.427940,
+    lng: -99.167127,
+  };
+
+  console.log(\`📍 Base location: \${sheratonLocation.address}\`);
+  console.log(\`   Coordinates: \${sheratonLocation.lat}, \${sheratonLocation.lng}\`);
+  console.log('');
+
+  // Test detección aeropuertos activos (simulado)
+  console.log('🔍 Testing active airport detection...');
+  const testHotel = 'test-sheraton-hotel';
+  const activeAirports = ['MEX', 'GDL']; // Simulado: hotel usa solo MEX y GDL
+
+  console.log(\`   Hotel: \${testHotel}\`);
+  console.log(\`   Active airports (simulated): \${activeAirports.join(', ')}\`);
+  console.log(\`   ✅ Optimization: calculating only \${activeAirports.length}/3 airports\`);
+  console.log('');
+
+  // Test cálculo selectivo
+  console.log('🗺️ Testing selective distance calculation...');
+
+  try {
+    const distanceService = require('./services/distanceService');
+    let successfulCalculations = 0;
+    let totalTime = 0;
+
+    for (const airport of activeAirports) {
+      try {
+        console.log(\`   Calculating route to \${airport}...\`);
+        const startTime = Date.now();
+
+        const result = await distanceService.calculateTravelTime(
+          sheratonLocation,
+          airport,
+          { trafficModel: 'best_guess' }
+        );
+
+        const duration = Date.now() - startTime;
+        totalTime += duration;
+
+        if (result.success) {
+          console.log(\`   ✅ \${airport}: \${result.data.distance.km}km, \${result.data.duration.minutes}min (\${duration}ms)\`);
+          if (result.data.durationInTraffic) {
+            console.log(\`      With traffic: \${result.data.durationInTraffic.minutes}min (\${result.data.trafficConditions})\`);
+          }
+          successfulCalculations++;
+        } else {
+          console.log(\`   ❌ \${airport}: \${result.error}\`);
+        }
+
+        // Pausa entre requests para evitar rate limits
+        await new Promise(resolve => setTimeout(resolve, 500));
+
+      } catch (error) {
+        console.log(\`   ❌ \${airport}: \${error.message}\`);
+      }
+    }
+
+    console.log('');
+    console.log(\`📊 Results: \${successfulCalculations}/\${activeAirports.length} successful calculations\`);
+    console.log(\`⏱️  Total time: \${totalTime}ms\`);
+    console.log('');
+
+    // Análisis de optimización
+    console.log('💰 Cost optimization analysis:');
+    console.log(\`   Calculations performed: \${activeAirports.length} (optimized)\`);
+    console.log(\`   Calculations without optimization: 3 (naive: MEX, GDL, CUN)\`);
+    console.log(\`   Savings per hotel: \${3 - activeAirports.length} requests\`);
+    console.log(\`   Daily requests per hotel (20min freq): \${Math.ceil(24 * 60 / 20)} requests\`);
+    console.log(\`   Monthly savings (20 hotels): ~\${((3 - activeAirports.length) * 20 * Math.ceil(24 * 60 / 20) * 30)} requests\`);
+    console.log('');
+
+    if (successfulCalculations > 0) {
+      console.log('✅ OPTIMIZED DISTANCE MATRIX - SUCCESS');
+    } else {
+      console.log('❌ OPTIMIZED DISTANCE MATRIX - FAILED');
+    }
+
+  } catch (error) {
+    console.log(\`❌ OPTIMIZED DISTANCE MATRIX - ERROR: \${error.message}\`);
+  }
+}
+
+testOptimizedDistanceMatrix().catch(error => {
+  console.log('❌ ERROR CRÍTICO en test optimizado:', error.message);
+});
+"
+
+echo ""
+
+# PASO 4: Test de Conectividad General
+# ========================================
+
+echo "🌐 PASO 4: Testing general connectivity..."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
 # 3.1 Test de conectividad a OpenSky

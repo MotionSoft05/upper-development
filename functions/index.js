@@ -1,9 +1,12 @@
 const {onSchedule} = require("firebase-functions/v2/scheduler");
 const {onRequest} = require("firebase-functions/v2/https");
+const {onDocumentWritten} = require("firebase-functions/v2/firestore");
 const {setGlobalOptions} = require("firebase-functions/v2");
 const admin = require("firebase-admin");
 const flightService = require("./services/flightService");
 const distanceService = require("./services/distanceService");
+const hotelDistanceService = require("./services/hotelDistanceService");
+const {onFlightScreenConfigChange, onCompanyConfigChange} = require("./triggers/onPantallaConfigChange");
 
 // Configurar opciones globales
 setGlobalOptions({
@@ -44,14 +47,14 @@ function cleanUndefinedValues(obj) {
 }
 
 /**
- * Función que se ejecuta cada 15 minutos para actualizar datos de vuelos
+ * Función unificada que se ejecuta cada 20 minutos para actualizar vuelos y distancias
  */
-exports.updateFlightData = onSchedule({
-  schedule: "every 15 minutes",
+exports.updateFlightsAndDistances = onSchedule({
+  schedule: "every 20 minutes",
   timeZone: "America/Mexico_City",
   memory: "512MiB",
 }, async (event) => {
-  console.log("🛫 Iniciando verificación de actualización automática...");
+  console.log("🚀 Iniciando actualización unificada (vuelos + distancias)...");
 
   // 🛡️ SEGURIDAD CRÍTICA: Verificar si los cron jobs están habilitados
   const cronDoc = await db.collection("systemConfig").doc("cronJobs").get();
@@ -81,10 +84,11 @@ exports.updateFlightData = onSchedule({
     enabled: true,
   }, {merge: true});
 
-  console.log("🛫 Ejecutando actualización automática de vuelos...");
+  // PARTE 1: Actualizar datos de vuelos
+  console.log("🛫 Paso 1/2: Actualizando datos de vuelos...");
 
   const airports = ["MEX", "GDL", "CUN"];
-  const results = [];
+  const flightResults = [];
 
   for (const airport of airports) {
     try {
@@ -106,7 +110,7 @@ exports.updateFlightData = onSchedule({
             `✅ Datos actualizados para ${airport}: ` +
                 `${flightData.totalFlights} vuelos`,
         );
-        results.push({
+        flightResults.push({
           airport,
           success: true,
           flights: flightData.totalFlights,
@@ -114,7 +118,7 @@ exports.updateFlightData = onSchedule({
         });
       } else {
         console.warn(`⚠️ No se pudieron obtener datos para ${airport}`);
-        results.push({
+        flightResults.push({
           airport,
           success: false,
           error: "No data available",
@@ -122,7 +126,7 @@ exports.updateFlightData = onSchedule({
       }
     } catch (error) {
       console.error(`❌ Error actualizando ${airport}:`, error.message);
-      results.push({
+      flightResults.push({
         airport,
         success: false,
         error: error.message,
@@ -138,16 +142,53 @@ exports.updateFlightData = onSchedule({
     }
   }
 
-  // Guardar log de la actualización
-  await db.collection("flightUpdateLogs").add({
+  // PARTE 2: Actualizar distancias de hoteles
+  console.log("🏨 Paso 2/2: Actualizando distancias de hoteles...");
+
+  let distanceResults = {};
+  try {
+    distanceResults = await hotelDistanceService.updateAllHotelDistances();
+    console.log(`✅ Distancias actualizadas: ${distanceResults.processed} hoteles procesados`);
+  } catch (error) {
+    console.error("❌ Error en actualización de distancias:", error);
+    distanceResults = { success: false, error: error.message, processed: 0 };
+  }
+
+  // Guardar log de la actualización unificada
+  await db.collection("unifiedUpdateLogs").add({
     timestamp: admin.firestore.FieldValue.serverTimestamp(),
-    results: results,
-    totalAirports: airports.length,
-    successfulUpdates: results.filter((r) => r.success).length,
+    flightResults: flightResults,
+    distanceResults: distanceResults,
+    summary: {
+      flightAirports: airports.length,
+      flightSuccessful: flightResults.filter((r) => r.success).length,
+      hotelsProcessed: distanceResults.processed || 0,
+      distanceSuccessful: distanceResults.successful || 0,
+    },
   });
 
-  console.log("🏁 Actualización de vuelos completada:", results);
-  return results;
+  // También guardar en el log tradicional para compatibilidad
+  await db.collection("flightUpdateLogs").add({
+    timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    results: flightResults,
+    totalAirports: airports.length,
+    successfulUpdates: flightResults.filter((r) => r.success).length,
+  });
+
+  console.log("🏁 Actualización unificada completada:");
+  console.log("   🛫 Vuelos:", flightResults);
+  console.log("   🏨 Distancias:", distanceResults);
+
+  return {
+    flightResults,
+    distanceResults,
+    summary: {
+      flightAirports: airports.length,
+      flightSuccessful: flightResults.filter((r) => r.success).length,
+      hotelsProcessed: distanceResults.processed || 0,
+      distanceSuccessful: distanceResults.successful || 0,
+    }
+  };
 });
 
 /**
@@ -236,7 +277,7 @@ exports.getFlightData = onRequest({
   }
 
   const airport = req.query.airport || "MEX";
-  const maxAge = parseInt(req.query.maxAge) || 900; // 15 minutos por defecto
+  const maxAge = parseInt(req.query.maxAge) || 1200; // 20 minutos por defecto
 
   try {
     console.log(`📱 Solicitud de datos para: ${airport}`);
@@ -669,7 +710,7 @@ exports.cronControl = onRequest({
       case "enable":
         enabled = true;
         message = "Cron jobs activados - Las actualizaciones " +
-            "se ejecutarán cada 15 minutos";
+            "se ejecutarán cada 20 minutos";
         break;
       case "disable":
         enabled = false;
@@ -797,3 +838,216 @@ exports.systemHealth = onRequest({
     });
   }
 });
+
+// ========================================
+// NUEVAS FUNCIONES: DISTANCE MATRIX OPTIMIZADO
+// ========================================
+
+/**
+ * HTTP Endpoint: Actualizar aeropuertos activos de un hotel
+ */
+exports.updateHotelAirportUsage = onRequest({
+  cors: {
+    origin: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  },
+  memory: "512MiB",
+}, async (req, res) => {
+  try {
+    const { companyId, hotelLocation } = req.body;
+
+    if (!companyId) {
+      return res.status(400).json({
+        success: false,
+        error: "companyId es requerido"
+      });
+    }
+
+    // Detectar aeropuertos activos
+    const activeAirports = await hotelDistanceService.detectActiveAirports(companyId);
+
+    // Usar ubicación por defecto si no se proporciona
+    const location = hotelLocation || {
+      address: "Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico",
+      lat: 19.427940,
+      lng: -99.167127,
+    };
+
+    // Actualizar configuración
+    const updateResult = await hotelDistanceService.updateHotelDistanceConfig(
+      companyId,
+      location,
+      activeAirports
+    );
+
+    console.log(`✅ Configuración actualizada para ${companyId}`);
+
+    res.json({
+      success: true,
+      companyId,
+      hotelLocation: location,
+      activeAirports,
+      updated: updateResult.updated,
+      changes: {
+        airportsChanged: updateResult.airportsChanged,
+        locationChanged: updateResult.locationChanged,
+      }
+    });
+  } catch (error) {
+    console.error("❌ Error actualizando configuración de hotel:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * HTTP Endpoint: Obtener datos de distancia de un hotel
+ */
+exports.getHotelDistanceData = onRequest({
+  cors: {
+    origin: true,
+    methods: ["GET", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  },
+  memory: "512MiB",
+}, async (req, res) => {
+  try {
+    const companyId = req.query.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({
+        success: false,
+        error: "companyId es requerido como query parameter"
+      });
+    }
+
+    const distanceData = await hotelDistanceService.getHotelDistanceData(companyId);
+
+    res.json({
+      success: true,
+      companyId,
+      ...distanceData,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error(`❌ Error obteniendo datos de distancia para ${companyId}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * HTTP Endpoint: Calcular distancias para un hotel específico
+ */
+exports.calculateHotelDistances = onRequest({
+  cors: {
+    origin: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  },
+  memory: "512MiB",
+}, async (req, res) => {
+  try {
+    const companyId = req.query.companyId || req.body.companyId;
+
+    if (!companyId) {
+      return res.status(400).json({
+        success: false,
+        error: "companyId es requerido"
+      });
+    }
+
+    console.log(`🗺️ Calculando distancias para hotel: ${companyId}`);
+
+    const result = await hotelDistanceService.calculateHotelDistances(companyId);
+
+    res.json({
+      success: true,
+      timestamp: new Date().toISOString(),
+      ...result,
+    });
+  } catch (error) {
+    console.error(`❌ Error calculando distancias para ${companyId}:`, error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// ========================================
+// FIREBASE TRIGGERS
+// ========================================
+
+/**
+ * Trigger: Detectar cambios en configuración de pantallas de vuelos
+ */
+exports.onFlightScreenConfigChange = onDocumentWritten({
+  document: "flightScreens/{screenId}",
+  memory: "512MiB",
+}, async (event) => {
+  try {
+    // Extraer companyId desde el documento
+    const afterData = event.data?.after?.data();
+    const beforeData = event.data?.before?.data();
+
+    if (!afterData && !beforeData) {
+      console.log("❌ No se pudo obtener datos del documento");
+      return;
+    }
+
+    const companyId = afterData?.companyId || beforeData?.companyId;
+
+    if (!companyId) {
+      console.log("❌ No se encontró companyId en el documento");
+      return;
+    }
+
+    console.log(`🔄 Trigger activado para configuración de pantallas: ${companyId}`);
+
+    // Usar el handler del trigger
+    await onFlightScreenConfigChange(event, { params: { companyId } });
+
+    return null;
+  } catch (error) {
+    console.error("❌ Error en trigger de configuración de pantallas:", error);
+    return null;
+  }
+});
+
+/**
+ * Trigger: Detectar cambios en configuración de compañía
+ */
+exports.onCompanyConfigChange = onDocumentWritten({
+  document: "companies/{companyId}",
+  memory: "512MiB",
+}, async (event) => {
+  try {
+    const companyId = event.params.companyId;
+
+    console.log(`🔄 Trigger activado para configuración de compañía: ${companyId}`);
+
+    // Usar el handler del trigger
+    await onCompanyConfigChange(event, { params: { companyId } });
+
+    return null;
+  } catch (error) {
+    console.error("❌ Error en trigger de configuración de compañía:", error);
+    return null;
+  }
+});
+
+// ========================================
+// MANTENER COMPATIBILIDAD: updateFlightData (deprecated)
+// ========================================
+
+/**
+ * DEPRECATED: Función de compatibilidad
+ * Usar updateFlightsAndDistances en su lugar
+ */
+exports.updateFlightData = exports.updateFlightsAndDistances;

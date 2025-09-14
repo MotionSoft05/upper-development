@@ -19,17 +19,17 @@ const AIRPORTS = {
     lng: -99.0721,
     code: "MEX",
   },
-  "TLC": {
-    name: "Aeropuerto Internacional de Toluca",
-    lat: 19.3371,
-    lng: -99.5660,
-    code: "TLC",
+  "GDL": {
+    name: "Aeropuerto Internacional de Guadalajara",
+    lat: 20.5218,
+    lng: -103.311,
+    code: "GDL",
   },
-  "NLU": {
-    name: "Aeropuerto Internacional Felipe Ángeles",
-    lat: 19.7417,
-    lng: -99.0186,
-    code: "NLU",
+  "CUN": {
+    name: "Aeropuerto Internacional de Cancún",
+    lat: 21.0365,
+    lng: -86.8771,
+    code: "CUN",
   },
 };
 
@@ -43,7 +43,7 @@ if (!GOOGLE_MAPS_API_KEY) {
 /**
  * Calcula distancia y tiempo de viaje entre hotel y aeropuerto
  * @param {Object} hotelLocation - {lat, lng, address}
- * @param {string} airportCode - Código del aeropuerto (MEX, TLC, NLU)
+ * @param {string} airportCode - Código del aeropuerto (MEX, GDL, CUN)
  * @param {Object} options - Opciones adicionales
  * @return {Promise<Object>} Resultado con distancia, tiempo y detalles
  */
@@ -165,7 +165,7 @@ async function calculateTravelTime(hotelLocation, airportCode, options = {}) {
  * @param {Array} airportCodes - Lista de códigos de aeropuertos
  * @param {Object} options - Opciones adicionales
  */
-async function calculateMultipleRoutes(hotelLocation, airportCodes = ["MEX", "TLC", "NLU"], options = {}) {
+async function calculateMultipleRoutes(hotelLocation, airportCodes = ["MEX", "GDL", "CUN"], options = {}) {
   try {
     console.log(`🗺️ Calculando ${airportCodes.length} rutas desde hotel...`);
 
