@@ -21,7 +21,7 @@ import {
 import Swal from "sweetalert2";
 import Select from "react-select";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
-import GoogleMapSelector from '../common/GoogleMapSelector';
+import GoogleMapSelector from "../common/GoogleMapSelector";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -40,7 +40,6 @@ function PantallasVuelos() {
   const [selectedLanguage, setSelectedLanguage] = useState("es");
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
   const [empresas, setEmpresas] = useState([]);
-  const [isAdmin, setIsAdmin] = useState(false);
 
   // Estados específicos de vuelos
   const [nombrePantallasVuelos, setNombrePantallasVuelos] = useState([]);
@@ -119,66 +118,78 @@ function PantallasVuelos() {
   const [availableFields] = useState({
     // Campos obligatorios (no se pueden desactivar)
     required: {
-      flightNumber: { label: 'Número de Vuelo', always: true },
-      airline: { label: 'Aerolínea', always: true },
-      destination: { label: 'Destino/Origen', always: true },
-      scheduledTime: { label: 'Hora Programada', always: true },
-      status: { label: 'Estado', always: true }
+      flightNumber: { label: "Número de Vuelo", always: true },
+      airline: { label: "Aerolínea", always: true },
+      destination: { label: "Destino/Origen", always: true },
+      scheduledTime: { label: "Hora Programada", always: true },
+      status: { label: "Estado", always: true },
     },
-    
+
     // Campos opcionales (configurables por usuario)
     optional: {
-      terminal: { 
-        label: 'Terminal', 
-        description: 'Mostrar terminal de salida/llegada',
-        defaultEnabled: true 
+      terminal: {
+        label: "Terminal",
+        description: "Mostrar terminal de salida/llegada",
+        defaultEnabled: true,
       },
-      gate: { 
-        label: 'Puerta', 
-        description: 'Mostrar puerta de embarque/llegada',
-        defaultEnabled: true 
+      gate: {
+        label: "Puerta",
+        description: "Mostrar puerta de embarque/llegada",
+        defaultEnabled: true,
       },
-      estimatedTime: { 
-        label: 'Hora Estimada', 
-        description: 'Hora revisada cuando difiere de programada',
-        defaultEnabled: true 
+      estimatedTime: {
+        label: "Hora Estimada",
+        description: "Hora revisada cuando difiere de programada",
+        defaultEnabled: true,
       },
-      delay: { 
-        label: 'Retraso (minutos)', 
-        description: 'Mostrar minutos de retraso/adelanto',
-        defaultEnabled: true 
-      }
-    }
+      delay: {
+        label: "Retraso (minutos)",
+        description: "Mostrar minutos de retraso/adelanto",
+        defaultEnabled: true,
+      },
+    },
   });
-
 
   // Configuración de Distance Matrix
   const [distanceConfig, setDistanceConfig] = useState({
     enabled: false,
     hotelLocation: {
-      lat: 19.427940, // Sheraton María Isabel Hotel
+      lat: 19.42794, // Sheraton María Isabel Hotel
       lng: -99.167127,
-      address: "Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico",
+      address:
+        "Sheraton María Isabel Hotel, Avenida Paseo de la Reforma, Colonia Cuauhtémoc, Mexico City, CDMX, Mexico",
     },
   });
 
-
   // useEffect para cargar datos iniciales (siguiendo patrón existente)
+  useEffect(() => {
+    const obtenerEmpresas = async () => {
+      try {
+        const usuariosRef = firebase.firestore().collection("usuarios");
+        const usuariosSnapshot = await usuariosRef.get();
+
+        const empresasArray = [];
+        usuariosSnapshot.forEach((doc) => {
+          const empresa = doc.data().empresa;
+          if (empresa && !empresasArray.includes(empresa)) {
+            empresasArray.push(empresa);
+          }
+        });
+
+        setEmpresas(empresasArray);
+      } catch (error) {
+        console.error("Error al obtener empresas:", error);
+      }
+    };
+
+    obtenerEmpresas();
+  }, []);
+
   useEffect(() => {
     const loadInitialData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
         if (!authUser) return;
-
-        // Verificar si es admin
-        const adminEmails = ["admin@upperds.com", "soporte@upperds.com"];
-        const isUserAdmin = adminEmails.includes(authUser.email);
-        setIsAdmin(isUserAdmin);
-
-        // Cargar empresas si es admin
-        if (isUserAdmin) {
-          await loadEmpresas();
-        }
 
         // Cargar configuración de pantallas de vuelos
         await loadFlightScreensConfig();
@@ -190,78 +201,85 @@ function PantallasVuelos() {
     loadInitialData();
   }, []);
 
-  // Función para cargar empresas (solo admin)
-  const loadEmpresas = async () => {
-    try {
-      const usuariosSnapshot = await getDocs(collection(db, "usuarios"));
-      const empresasSet = new Set();
-      usuariosSnapshot.forEach((doc) => {
-        const empresa = doc.data().empresa;
-        if (empresa) empresasSet.add(empresa);
-      });
-      setEmpresas(Array.from(empresasSet));
-    } catch (error) {
-      console.error("Error loading empresas:", error);
-    }
-  };
+  // Recargar configuración cuando cambie la empresa seleccionada
+  useEffect(() => {
+    const reloadConfigForSelectedCompany = async () => {
+      if (empresaSeleccionada) {
+        // Limpiar estado anterior
+        setSelectedPantalla(null);
+        setActiveTab("general");
+        setNombrePantallasVuelos([]);
+        setPantallaSettings({});
+        setPv(0);
+
+        // Cargar nueva configuración
+        await loadFlightScreensConfig();
+      }
+    };
+
+    reloadConfigForSelectedCompany();
+  }, [empresaSeleccionada]);
+
+  const usuarioAutorizado =
+    firebase.auth().currentUser &&
+    [
+      "uppermex10@gmail.com",
+      "ulises.jacobo@hotmail.com",
+      "contacto@upperds.mx",
+    ].includes(firebase.auth().currentUser.email);
 
   // Función para cargar configuración de pantallas de vuelos (siguiendo patrón de promociones)
   const loadFlightScreensConfig = async () => {
     try {
       const authUser = firebase.auth().currentUser;
-      let empresa = empresaSeleccionada;
+      if (!authUser) return;
 
-      // Obtener empresa del usuario
-      if (!empresa && !isAdmin) {
-        const usuariosQuery = query(
+      // Obtener empresa del usuario autenticado
+      const usuariosQuery = query(
+        collection(db, "usuarios"),
+        where("email", "==", authUser.email)
+      );
+      const usuariosSnapshot = await getDocs(usuariosQuery);
+      let empresa = "";
+
+      if (!usuariosSnapshot.empty) {
+        empresa = usuariosSnapshot.docs[0].data().empresa || "";
+      }
+
+      // Determinar qué empresa usar para cargar datos (igual que en PantallasPromociones)
+      const empresaToUse = empresaSeleccionada || empresa;
+
+      if (empresaToUse) {
+        // Cargar datos de usuario de la empresa a usar
+        const usuariosEmpresaQuery = query(
           collection(db, "usuarios"),
-          where("email", "==", authUser.email)
+          where("empresa", "==", empresaToUse)
         );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-        if (!usuariosSnapshot.empty) {
-          const userData = usuariosSnapshot.docs[0].data();
-          empresa = userData.empresa || "";
-          
-          // CARGAR LICENCIAS desde usuarios (no desde licencias)
+        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+
+        if (!usuariosEmpresaSnapshot.empty) {
+          const userData = usuariosEmpresaSnapshot.docs[0].data();
+
+          // CARGAR LICENCIAS desde usuarios
           setPv(parseInt(userData.pv) || 0);
-          
+
           // CARGAR NOMBRES desde usuarios
           if (userData.nombrePantallasVuelos) {
-            const nombresArray = Array.isArray(userData.nombrePantallasVuelos) 
-              ? userData.nombrePantallasVuelos 
+            const nombresArray = Array.isArray(userData.nombrePantallasVuelos)
+              ? userData.nombrePantallasVuelos
               : Object.values(userData.nombrePantallasVuelos);
-            setNombrePantallasVuelos(nombresArray);
-          }
-        }
-      } else if (empresa) {
-        // Para admin, cargar licencias de la empresa seleccionada
-        const usuariosQuery = query(
-          collection(db, "usuarios"),
-          where("empresa", "==", empresa)
-        );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
-
-        if (!usuariosSnapshot.empty) {
-          const usuarioData = usuariosSnapshot.docs[0].data();
-          setPv(parseInt(usuarioData.pv) || 0);
-          
-          // CARGAR NOMBRES desde usuarios
-          if (usuarioData.nombrePantallasVuelos) {
-            const nombresArray = Array.isArray(usuarioData.nombrePantallasVuelos) 
-              ? usuarioData.nombrePantallasVuelos 
-              : Object.values(usuarioData.nombrePantallasVuelos);
             setNombrePantallasVuelos(nombresArray);
           }
         }
       }
 
-      if (!empresa) return;
+      if (!empresaToUse) return;
 
-      // Cargar configuración desde TemplateVuelos (no desde flightScreens)
+      // Cargar configuración desde TemplateVuelos usando empresaToUse
       const templateVuelosRef = collection(db, "TemplateVuelos");
       const templateVuelosQuery = query(
         templateVuelosRef,
-        where("empresa", "==", empresa)
+        where("empresa", "==", empresaToUse)
       );
       const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
@@ -269,12 +287,12 @@ function PantallasVuelos() {
         const templateData = templateVuelosSnapshot.docs[0].data();
         setSelectedLanguage(templateData.idioma || "es");
         setPantallaSettings(templateData.pantallasConfig || {});
-        
+
         // Cargar ciudad seleccionada para el clima
         if (templateData.selectedCity) {
           setSelectedCity(templateData.selectedCity);
         }
-        
+
         // Crear configuración limpia desde los datos de Firebase
         const loadedDistanceConfig = templateData.distanceConfig || {};
         setDistanceConfig({
@@ -282,11 +300,10 @@ function PantallasVuelos() {
           hotelLocation: {
             lat: loadedDistanceConfig.hotelLocation?.lat || null,
             lng: loadedDistanceConfig.hotelLocation?.lng || null,
-            address: loadedDistanceConfig.hotelLocation?.address || ""
-          }
+            address: loadedDistanceConfig.hotelLocation?.address || "",
+          },
         });
       }
-
     } catch (error) {
       console.error("Error loading flight screens config:", error);
     }
@@ -341,16 +358,16 @@ function PantallasVuelos() {
         refreshInterval: 900,
         language: selectedLanguage,
       },
-      
+
       // NUEVA SECCIÓN: Configuración de campos
       displayFields: {
         // Campos opcionales habilitados (los required siempre están activos)
         terminal: true,
         gate: true,
         estimatedTime: true,
-        delay: true
+        delay: true,
       },
-      
+
       airlineFilters: {
         enabled: false,
         selectedAirlines: [],
@@ -473,7 +490,7 @@ function PantallasVuelos() {
         selectedCity: selectedCity,
         distanceConfig: distanceConfig,
         updatedAt: serverTimestamp(),
-        updatedBy: authUser.email || ""
+        updatedBy: authUser.email || "",
       };
 
       if (!templateVuelosSnapshot.empty) {
@@ -486,33 +503,43 @@ function PantallasVuelos() {
       }
 
       // 3. ACTUALIZAR SISTEMA DISTANCE MATRIX OPTIMIZADO
-      if (distanceConfig.enabled && distanceConfig.hotelLocation.lat && distanceConfig.hotelLocation.lng) {
+      if (
+        distanceConfig.enabled &&
+        distanceConfig.hotelLocation.lat &&
+        distanceConfig.hotelLocation.lng
+      ) {
         try {
-          console.log(`🗺️ Actualizando configuración de distancias para hotel: ${empresaToUpdate}`);
+          console.log(
+            `🗺️ Actualizando configuración de distancias para hotel: ${empresaToUpdate}`
+          );
 
-          const response = await fetch('https://updatehotelairportusage-wsvcv36oca-uc.a.run.app', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              companyId: empresaToUpdate,
-              hotelLocation: distanceConfig.hotelLocation
-            })
-          });
+          const response = await fetch(
+            "https://updatehotelairportusage-wsvcv36oca-uc.a.run.app",
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                companyId: empresaToUpdate,
+                hotelLocation: distanceConfig.hotelLocation,
+              }),
+            }
+          );
 
           if (response.ok) {
             const result = await response.json();
             console.log(`✅ Sistema de distancias actualizado:`, result);
           } else {
-            console.warn(`⚠️ No se pudo actualizar sistema de distancias: ${response.status}`);
+            console.warn(
+              `⚠️ No se pudo actualizar sistema de distancias: ${response.status}`
+            );
           }
         } catch (error) {
-          console.error('❌ Error actualizando sistema de distancias:', error);
+          console.error("❌ Error actualizando sistema de distancias:", error);
           // No fallar la operación completa si esto falla
         }
       }
-
 
       Swal.fire({
         icon: "success",
@@ -523,7 +550,6 @@ function PantallasVuelos() {
 
       setHasUnsavedChanges(false);
       return true;
-
     } catch (error) {
       console.error("Error al guardar configuración:", error);
       Swal.fire({
@@ -534,7 +560,6 @@ function PantallasVuelos() {
       return false;
     }
   };
-
 
   // Función para actualizar configuración de pantalla específica
   const updatePantallaConfig = (field, value) => {
@@ -555,14 +580,17 @@ function PantallasVuelos() {
     if (field === "displaySettings.maxFlights") {
       // Límites dinámicos según si muestra salidas, llegadas o ambos
       const currentSettings = selectedPantalla.config.displaySettings;
-      const showsBoth = currentSettings?.showDepartures && currentSettings?.showArrivals;
+      const showsBoth =
+        currentSettings?.showDepartures && currentSettings?.showArrivals;
       const maxLimit = showsBoth ? 12 : 20; // Menos vuelos si muestra ambos tipos
-      
+
       if (value < 4 || value > maxLimit) {
         Swal.fire({
           icon: "warning",
           title: "Valor inválido",
-          text: `El máximo de vuelos debe estar entre 4 y ${maxLimit}${showsBoth ? ' (reducido porque muestra salidas y llegadas)' : ''}`,
+          text: `El máximo de vuelos debe estar entre 4 y ${maxLimit}${
+            showsBoth ? " (reducido porque muestra salidas y llegadas)" : ""
+          }`,
         });
         return;
       }
@@ -623,39 +651,47 @@ function PantallasVuelos() {
     setHasUnsavedChanges(true);
   };
 
-
-
-
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">
-        {t("flightScreens.title")}
-      </h1>
+    <div className="px-4 sm:px-6 lg:px-8 py-6 bg-gray-50 min-h-screen">
+      {/* Cabecera con título y descripción */}
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
+            {t("flightScreens.title")}
+          </h1>
+          <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
+            {t("flightScreens.description")}
+          </p>
+        </div>
 
-      {/* Selector de empresa para admin */}
-      {isAdmin && (
-        <div className="mb-6 bg-blue-50 p-4 rounded-lg">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t("admin.selectCompany")}
-              </label>
-              <select
-                value={empresaSeleccionada}
-                onChange={(e) => setEmpresaSeleccionada(e.target.value)}
-                className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+        {/* Selector de empresa para usuarios autorizados */}
+        {usuarioAutorizado && (
+          <div className="max-w-3xl mx-auto mb-6 bg-white p-4 rounded-lg shadow-sm">
+            <div className="flex flex-col sm:flex-row justify-between items-center">
+              <label
+                htmlFor="empresa"
+                className="text-gray-700 font-medium mb-2 sm:mb-0"
               >
-                <option value="">Seleccionar...</option>
-                {empresas.map((empresa) => (
-                  <option key={empresa} value={empresa}>
-                    {empresa}
-                  </option>
-                ))}
-              </select>
+                Empresa:
+              </label>
+              <div className="w-full sm:w-2/3">
+                <select
+                  id="empresa"
+                  value={empresaSeleccionada}
+                  onChange={(e) => setEmpresaSeleccionada(e.target.value)}
+                  className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                >
+                  <option value="">Seleccionar...</option>
+                  {empresas.map((empresa) => (
+                    <option key={empresa} value={empresa}>
+                      {empresa}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Contenido principal */}
       <div className="max-w-5xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
@@ -682,7 +718,6 @@ function PantallasVuelos() {
           >
             {t("flightScreens.screens")}
           </button>
-
 
           {selectedPantalla && (
             <button
@@ -821,65 +856,73 @@ function PantallasVuelos() {
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         {t("flightScreens.hotelLocation")}
                       </label>
-                      
-                      
+
                       {/* Mapa interactivo con GoogleMapSelector */}
                       <div className="relative">
                         <GoogleMapSelector
                           location={{
                             lat: distanceConfig.hotelLocation.lat,
                             lng: distanceConfig.hotelLocation.lng,
-                            address: distanceConfig.hotelLocation.address
+                            address: distanceConfig.hotelLocation.address,
                           }}
                           onLocationChange={(coords) => {
-                            setDistanceConfig(prevConfig => ({
+                            setDistanceConfig((prevConfig) => ({
                               ...prevConfig,
                               hotelLocation: {
                                 ...prevConfig.hotelLocation,
                                 lat: coords.lat,
-                                lng: coords.lng
+                                lng: coords.lng,
                                 // Preservamos la dirección existente
-                              }
+                              },
                             }));
                             setHasUnsavedChanges(true);
                           }}
                           onAddressChange={(address) => {
-                            setDistanceConfig(prevConfig => ({
+                            setDistanceConfig((prevConfig) => ({
                               ...prevConfig,
                               hotelLocation: {
                                 ...prevConfig.hotelLocation,
-                                address: address
-                              }
+                                address: address,
+                              },
                             }));
                             setHasUnsavedChanges(true);
                           }}
                           onConfirmAddress={async () => {
-                            if (!distanceConfig.hotelLocation.lat || !distanceConfig.hotelLocation.lng) {
+                            if (
+                              !distanceConfig.hotelLocation.lat ||
+                              !distanceConfig.hotelLocation.lng
+                            ) {
                               Swal.fire({
-                                icon: 'warning',
-                                title: 'Ubicación requerida',
-                                text: 'Por favor selecciona una ubicación en el mapa primero'
+                                icon: "warning",
+                                title: "Ubicación requerida",
+                                text: "Por favor selecciona una ubicación en el mapa primero",
                               });
                               return;
                             }
-                            
+
                             try {
-                              console.log('🔄 Intentando guardar configuración...', distanceConfig);
+                              console.log(
+                                "🔄 Intentando guardar configuración...",
+                                distanceConfig
+                              );
                               await guardarConfiguracion();
                               Swal.fire({
-                                icon: 'success',
-                                title: 'Ubicación guardada',
-                                text: 'La ubicación del hotel se ha guardado correctamente',
+                                icon: "success",
+                                title: "Ubicación guardada",
+                                text: "La ubicación del hotel se ha guardado correctamente",
                                 showConfirmButton: false,
-                                timer: 2000
+                                timer: 2000,
                               });
                             } catch (error) {
-                              console.error('❌ Error detallado al guardar:', error);
+                              console.error(
+                                "❌ Error detallado al guardar:",
+                                error
+                              );
                               Swal.fire({
-                                icon: 'error',
-                                title: 'Error al guardar',
+                                icon: "error",
+                                title: "Error al guardar",
                                 text: `Error: ${error.message || error}`,
-                                showConfirmButton: true
+                                showConfirmButton: true,
                               });
                             }
                           }}
@@ -891,7 +934,10 @@ function PantallasVuelos() {
                       {/* Estado de la ubicación */}
                       <div className="mt-3 text-sm text-gray-600">
                         {distanceConfig.hotelLocation.address && (
-                          <span>📍 Ubicación guardada: {distanceConfig.hotelLocation.address}</span>
+                          <span>
+                            📍 Ubicación guardada:{" "}
+                            {distanceConfig.hotelLocation.address}
+                          </span>
                         )}
                         {!distanceConfig.hotelLocation.address && (
                           <span>📍 No hay ubicación guardada</span>
@@ -900,37 +946,27 @@ function PantallasVuelos() {
 
                       {/* Instrucciones simplificadas */}
                       <div className="mt-3 p-3 bg-gray-100 rounded-md">
-                        <h4 className="text-xs font-medium text-gray-700 mb-1">💡 Cómo usar:</h4>
+                        <h4 className="text-xs font-medium text-gray-700 mb-1">
+                          💡 Cómo usar:
+                        </h4>
                         <ul className="text-xs text-gray-600 space-y-1">
-                          <li>• Use el buscador o haga clic directamente en el mapa</li>
-                          <li>• La ubicación se usará para mostrar tiempos de viaje a aeropuertos</li>
-                          <li>• <strong>Presiona "Confirmar Dirección"</strong> para guardar la dirección</li>
+                          <li>
+                            • Use el buscador o haga clic directamente en el
+                            mapa
+                          </li>
+                          <li>
+                            • La ubicación se usará para mostrar tiempos de
+                            viaje a aeropuertos
+                          </li>
+                          <li>
+                            • <strong>Presiona "Confirmar Dirección"</strong>{" "}
+                            para guardar la dirección
+                          </li>
                         </ul>
                       </div>
                     </div>
                   </div>
                 )}
-              </div>
-
-              {/* Información de la API */}
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h3 className="text-md font-medium text-gray-900 mb-2">
-                  {t("flightScreens.apiInfo")}
-                </h3>
-                <p className="text-sm text-gray-600 mb-2">
-                  {t("flightScreens.usingAeroDataBox")}
-                </p>
-                <div className="text-xs text-gray-500">
-                  <p>
-                    • {t("flightScreens.supportedAirports")}: CDMX (MEX), Guadalajara
-                    (GDL), Cancún (CUN)
-                  </p>
-                  <p>• {t("flightScreens.updateFrequency")}: 2-5 minutos</p>
-                  <p>
-                    • {t("flightScreens.dataProvided")}: Estados de vuelos,
-                    terminales, puertas, horarios
-                  </p>
-                </div>
               </div>
             </div>
           )}
@@ -1005,18 +1041,22 @@ function PantallasVuelos() {
                                   htmlFor={`toggle-portrait-${index}`}
                                   className={`
                                     relative inline-flex h-6 w-11 items-center rounded-full cursor-pointer transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-                                    ${pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical" 
-                                      ? 'bg-blue-600' 
-                                      : 'bg-gray-200'
+                                    ${
+                                      pantallaSettings[`vuelo${index + 1}`]
+                                        ?.orientation === "vertical"
+                                        ? "bg-blue-600"
+                                        : "bg-gray-200"
                                     }
                                   `}
                                 >
                                   <span
                                     className={`
                                       inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ease-in-out
-                                      ${pantallaSettings[`vuelo${index + 1}`]?.orientation === "vertical" 
-                                        ? 'translate-x-6' 
-                                        : 'translate-x-1'
+                                      ${
+                                        pantallaSettings[`vuelo${index + 1}`]
+                                          ?.orientation === "vertical"
+                                          ? "translate-x-6"
+                                          : "translate-x-1"
                                       }
                                     `}
                                   />
@@ -1135,8 +1175,6 @@ function PantallasVuelos() {
             </div>
           )}
 
-
-
           {/* TAB: Configuración de Pantalla Específica */}
           {activeTab === "pantalla" && selectedPantalla && (
             <div className="space-y-6">
@@ -1151,8 +1189,18 @@ function PantallasVuelos() {
               <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-4 rounded-lg border-l-4 border-blue-500">
                 <div className="flex items-center mb-3">
                   <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                    <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    <svg
+                      className="w-4 h-4 text-blue-600"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                      />
                     </svg>
                   </div>
                   <div>
@@ -1179,16 +1227,6 @@ function PantallasVuelos() {
                   placeholder={t("flightScreens.selectAirport")}
                   className="w-full"
                 />
-                
-                {/* Casos de uso sugeridos */}
-                <div className="mt-3 p-3 bg-white bg-opacity-60 rounded-md">
-                  <h4 className="text-xs font-medium text-blue-800 mb-2">💡 Casos de uso comunes:</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-xs text-blue-700">
-                    <div>• <strong>Lobby principal</strong> → AICM (MEX)</div>
-                    <div>• <strong>Área shuttle</strong> → Guadalajara (GDL)</div>
-                    <div>• <strong>Info turística</strong> → Cancún (CUN)</div>
-                  </div>
-                </div>
               </div>
 
               {/* Configuraciones de Visualización */}
@@ -1275,17 +1313,21 @@ function PantallasVuelos() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       {t("flightScreens.maxFlights")}
                       {(() => {
-                        const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
-                                         selectedPantalla.config.displaySettings?.showArrivals;
-                        return showsBoth ? ' (máx. 12)' : ' (máx. 20)';
+                        const showsBoth =
+                          selectedPantalla.config.displaySettings
+                            ?.showDepartures &&
+                          selectedPantalla.config.displaySettings?.showArrivals;
+                        return showsBoth ? " (máx. 12)" : " (máx. 20)";
                       })()}
                     </label>
                     <input
                       type="number"
                       min="4"
                       max={(() => {
-                        const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
-                                         selectedPantalla.config.displaySettings?.showArrivals;
+                        const showsBoth =
+                          selectedPantalla.config.displaySettings
+                            ?.showDepartures &&
+                          selectedPantalla.config.displaySettings?.showArrivals;
                         return showsBoth ? 12 : 20;
                       })()}
                       value={
@@ -1300,8 +1342,10 @@ function PantallasVuelos() {
                       className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
                     />
                     {(() => {
-                      const showsBoth = selectedPantalla.config.displaySettings?.showDepartures && 
-                                       selectedPantalla.config.displaySettings?.showArrivals;
+                      const showsBoth =
+                        selectedPantalla.config.displaySettings
+                          ?.showDepartures &&
+                        selectedPantalla.config.displaySettings?.showArrivals;
                       if (showsBoth) {
                         return (
                           <p className="text-xs text-amber-600 mt-1">
@@ -1406,7 +1450,8 @@ function PantallasVuelos() {
                   Configuración de Información Mostrada
                 </h3>
                 <p className="text-sm text-gray-600 mb-4">
-                  Seleccione qué información desea mostrar en esta pantalla. Los campos obligatorios siempre serán visibles.
+                  Seleccione qué información desea mostrar en esta pantalla. Los
+                  campos obligatorios siempre serán visibles.
                 </p>
 
                 {/* Campos obligatorios (solo informativo) */}
@@ -1416,17 +1461,24 @@ function PantallasVuelos() {
                   </h4>
                   <div className="bg-white rounded-lg p-3 border">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {Object.entries(availableFields.required).map(([key, field]) => (
-                        <div key={key} className="flex items-center space-x-2">
-                          <input
-                            type="checkbox"
-                            checked={true}
-                            disabled={true}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded opacity-50"
-                          />
-                          <span className="text-sm text-gray-600">{field.label}</span>
-                        </div>
-                      ))}
+                      {Object.entries(availableFields.required).map(
+                        ([key, field]) => (
+                          <div
+                            key={key}
+                            className="flex items-center space-x-2"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={true}
+                              disabled={true}
+                              className="h-4 w-4 text-blue-600 border-gray-300 rounded opacity-50"
+                            />
+                            <span className="text-sm text-gray-600">
+                              {field.label}
+                            </span>
+                          </div>
+                        )
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1437,30 +1489,41 @@ function PantallasVuelos() {
                     Campos Opcionales (Configurables)
                   </h4>
                   <div className="space-y-3">
-                    {Object.entries(availableFields.optional).map(([key, field]) => (
-                      <div key={key} className="flex items-start space-x-3 p-3 bg-white border border-gray-200 rounded-lg">
-                        <input
-                          type="checkbox"
-                          id={`field-${key}`}
-                          checked={selectedPantalla.config.displayFields?.[key] ?? field.defaultEnabled}
-                          onChange={(e) => {
-                            updatePantallaConfig(`displayFields.${key}`, e.target.checked);
-                          }}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
-                        />
-                        <div className="flex-1">
-                          <label 
-                            htmlFor={`field-${key}`}
-                            className="block text-sm font-medium text-gray-700 cursor-pointer"
-                          >
-                            {field.label}
-                          </label>
-                          <p className="text-xs text-gray-500 mt-1">
-                            {field.description}
-                          </p>
+                    {Object.entries(availableFields.optional).map(
+                      ([key, field]) => (
+                        <div
+                          key={key}
+                          className="flex items-start space-x-3 p-3 bg-white border border-gray-200 rounded-lg"
+                        >
+                          <input
+                            type="checkbox"
+                            id={`field-${key}`}
+                            checked={
+                              selectedPantalla.config.displayFields?.[key] ??
+                              field.defaultEnabled
+                            }
+                            onChange={(e) => {
+                              updatePantallaConfig(
+                                `displayFields.${key}`,
+                                e.target.checked
+                              );
+                            }}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
+                          />
+                          <div className="flex-1">
+                            <label
+                              htmlFor={`field-${key}`}
+                              className="block text-sm font-medium text-gray-700 cursor-pointer"
+                            >
+                              {field.label}
+                            </label>
+                            <p className="text-xs text-gray-500 mt-1">
+                              {field.description}
+                            </p>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      )
+                    )}
                   </div>
                 </div>
 
@@ -1472,9 +1535,12 @@ function PantallasVuelos() {
                         terminal: true,
                         gate: true,
                         estimatedTime: true,
-                        delay: true
+                        delay: true,
                       };
-                      updatePantallaConfig("displayFields", defaultDisplayFields);
+                      updatePantallaConfig(
+                        "displayFields",
+                        defaultDisplayFields
+                      );
                     }}
                     className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"
                   >
@@ -1498,7 +1564,7 @@ function PantallasVuelos() {
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                     confirmButtonText: "Sí, restablecer",
-                    cancelButtonText: "Cancelar"
+                    cancelButtonText: "Cancelar",
                   });
 
                   if (result.isConfirmed) {
@@ -1526,12 +1592,12 @@ function PantallasVuelos() {
                       },
                     });
                     setHasUnsavedChanges(true);
-                    
+
                     Swal.fire({
                       title: "Configuración restablecida",
                       text: "No olvide guardar los cambios",
                       icon: "success",
-                      timer: 2000
+                      timer: 2000,
                     });
                   }
                 }}
@@ -1576,6 +1642,7 @@ function PantallasVuelos() {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );

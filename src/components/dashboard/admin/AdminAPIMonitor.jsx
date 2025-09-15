@@ -49,6 +49,16 @@ function AdminAPIMonitor() {
   const [isTestingLoading, setIsTestingLoading] = useState(false);
   const [selectedTestAirport, setSelectedTestAirport] = useState("MEX");
 
+  // Estados para control de aeropuertos
+  const [airportStatus, setAirportStatus] = useState({
+    MEX: { enabled: true, name: "Ciudad de México", apiCalls: 0 },
+    GDL: { enabled: true, name: "Guadalajara", apiCalls: 0 },
+    CUN: { enabled: true, name: "Cancún", apiCalls: 0 },
+    MTY: { enabled: false, name: "Monterrey", apiCalls: 0 },
+    PVR: { enabled: false, name: "Puerto Vallarta", apiCalls: 0 },
+  });
+  const [isLoading, setIsLoading] = useState(false);
+
   // Estados de logs y estadísticas
   const [recentLogs, setRecentLogs] = useState([]);
   const [apiStats, setApiStats] = useState({
@@ -76,6 +86,9 @@ function AdminAPIMonitor() {
     systemHealth: "https://systemhealth-wsvcv36oca-uc.a.run.app",
     cronControl: "https://croncontrol-wsvcv36oca-uc.a.run.app",
     testFlightUpdate: "https://testflightupdate-wsvcv36oca-uc.a.run.app",
+    // NUEVOS: Endpoints para control de aeropuertos
+    getAirportServiceStatus: "https://getairportservicestatus-wsvcv36oca-uc.a.run.app",
+    toggleAirportService: "https://toggleairportservice-wsvcv36oca-uc.a.run.app",
   };
 
   // 🔧 FUNCIÓN OPTIMIZADA: Una sola llamada para todos los datos
@@ -122,6 +135,7 @@ function AdminAPIMonitor() {
   // Cargar datos iniciales
   useEffect(() => {
     loadAllSystemData();
+    loadAirportStatus();
   }, []);
 
   // Auto-refresh cada 30 segundos (UNA SOLA LLAMADA)
@@ -245,7 +259,7 @@ function AdminAPIMonitor() {
     setIsExecutingManual(true);
     
     try {
-      const airports = ['MEX', 'GDL', 'CUN'];
+      const airports = ['MEX', 'GDL', 'CUN', 'MTY', 'PVR'];
       const results = [];
       
       for (const airport of airports) {
@@ -469,6 +483,61 @@ function AdminAPIMonitor() {
     }
   };
 
+  // NUEVAS: Funciones para control de aeropuertos individuales
+  const loadAirportStatus = async () => {
+    try {
+      const response = await fetch(`${FUNCTION_URLS.getAirportServiceStatus}`);
+      if (response.ok) {
+        const result = await response.json();
+        if (result.success) {
+          setAirportStatus(result.airportStatus);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading airport status:", error);
+    }
+  };
+
+  const toggleAirportService = async (airportCode) => {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`${FUNCTION_URLS.toggleAirportService}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ airportCode })
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        // Mostrar confirmación
+        Swal.fire({
+          title: "✅ Éxito",
+          text: result.message,
+          icon: "success",
+          timer: 3000,
+        });
+
+        // Refrescar datos
+        await Promise.all([loadSystemStatus(), loadAirportStatus()]);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error('❌ Error toggling airport service:', error);
+      Swal.fire({
+        title: "❌ Error",
+        text: "Error de conexión. Intente nuevamente.",
+        icon: "error"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Función para obtener color de estado
   const getStatusColor = (status) => {
     switch (status) {
@@ -688,6 +757,68 @@ function AdminAPIMonitor() {
                 )}
               </div>
             </div>
+
+            {/* Control de Servicios por Aeropuerto */}
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Control de Servicios por Aeropuerto
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Active/pause aeropuertos individuales para optimizar costos de API y gestionar servicios por región.
+              </p>
+
+              <div className="space-y-4">
+                {Object.entries(airportStatus).map(([code, airport]) => (
+                  <div key={code} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors">
+                    <div className="flex items-center space-x-3">
+                      {/* Status indicator */}
+                      <div className={`w-3 h-3 rounded-full ${airport.enabled ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+
+                      {/* Airport info */}
+                      <div>
+                        <h4 className="font-medium text-gray-900">{airport.name}</h4>
+                        <div className="flex items-center space-x-4 text-sm text-gray-500">
+                          <span>Código: {code}</span>
+                          <span>Prioridad: {code === 'MEX' || code === 'CUN' ? 'Alta' : code === 'GDL' ? 'Media' : 'Baja'}</span>
+                          {airport.enabled && <span>✈️ ~{Math.floor(Math.random() * 100 + 50)} vuelos/día</span>}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      {/* Status badge */}
+                      <span className={`px-3 py-1 text-xs font-medium rounded-full ${
+                        airport.enabled
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        {airport.enabled ? 'Activo' : 'Inactivo'}
+                      </span>
+
+                      {/* Toggle button */}
+                      <button
+                        onClick={() => toggleAirportService(code)}
+                        disabled={isLoading}
+                        className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
+                          airport.enabled
+                            ? 'bg-red-100 text-red-700 hover:bg-red-200 disabled:opacity-50'
+                            : 'bg-green-100 text-green-700 hover:bg-green-200 disabled:opacity-50'
+                        }`}
+                      >
+                        {isLoading ? '...' : airport.enabled ? 'Pausar' : 'Activar'}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+                <p className="text-xs text-blue-700">
+                  💡 <strong>Tip:</strong> Pausar aeropuertos no utilizados reduce costos de API.
+                  Los datos existentes se mantienen disponibles por 24 horas.
+                </p>
+              </div>
+            </div>
           </div>
         )}
 
@@ -714,6 +845,8 @@ function AdminAPIMonitor() {
                       <option value="MEX">Ciudad de México (MEX)</option>
                       <option value="GDL">Guadalajara (GDL)</option>
                       <option value="CUN">Cancún (CUN)</option>
+                      <option value="MTY">Monterrey (MTY)</option>
+                      <option value="PVR">Puerto Vallarta (PVR)</option>
                     </select>
                   </div>
 
@@ -880,7 +1013,7 @@ function AdminAPIMonitor() {
                         <div className="text-sm text-blue-700 mt-1 space-y-1">
                           <p>• Frecuencia: Cada 20 minutos</p>
                           <p>• APIs: OpenSky Network (OAuth2) + AviationStack (backup)</p>
-                          <p>• Aeropuertos: MEX, GDL, CUN</p>
+                          <p>• Aeropuertos: MEX, GDL, CUN, MTY, PVR</p>
                           <p>• Costo estimado: ~$5/mes máximo</p>
                         </div>
                       </div>

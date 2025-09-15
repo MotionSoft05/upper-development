@@ -22,6 +22,7 @@ import {
   faImages,
   faPlane,
   faComments,
+  faInfoCircle,
 
   // Iconos para más información
   faIdCard,
@@ -316,6 +317,39 @@ function Sidebar(props) {
                 </span>
                 <span className="ml-3">Mensajes Dinámicos</span>
                 {isActive(props.showMensajesDinamicos) && (
+                  <span className="ml-auto">
+                    <FontAwesomeIcon
+                      icon={faChevronRight}
+                      className="w-3 h-3"
+                    />
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
+          {/* Información de Tarifas */}
+          {tienePermiso("informacionTarifas") && (
+            <div className="mb-1">
+              <button
+                className={`w-full flex items-center px-4 py-2.5 text-sm rounded-lg transition-all duration-200 group ${
+                  isActive(props.showInformacionTarifa)
+                    ? "bg-white shadow-md text-blue-700 font-medium"
+                    : "text-blue-100 hover:bg-blue-700/50"
+                }`}
+                onClick={() => changePanel("setShowInformacionTarifa")}
+              >
+                <span
+                  className={`flex-shrink-0 ${
+                    isActive(props.showInformacionTarifa)
+                      ? "text-blue-600"
+                      : "text-blue-200 group-hover:text-white"
+                  }`}
+                >
+                  <FontAwesomeIcon icon={faInfoCircle} className="w-5 h-5" />
+                </span>
+                <span className="ml-3">{t("sidebar.rateInformation")}</span>
+                {isActive(props.showInformacionTarifa) && (
                   <span className="ml-auto">
                     <FontAwesomeIcon
                       icon={faChevronRight}

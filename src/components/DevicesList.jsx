@@ -9,6 +9,7 @@ import db from "@/firebase/firestore";
 import DeviceConfiguration from "./DeviceConfiguration";
 import DeviceLinkingModal from "./DeviceLinkingModal";
 import { deleteDevice } from "@/utils/deviceManager";
+import { useTranslation } from "react-i18next";
 import {
   ComputerDesktopIcon,
   Cog6ToothIcon,
@@ -26,6 +27,8 @@ import {
 import Swal from "sweetalert2";
 
 const DevicesList = () => {
+  const { t } = useTranslation();
+
   // ✅ NUEVO: Estados para manejo de empresa
   const [empresas, setEmpresas] = useState([]);
   const [empresaSeleccionada, setEmpresaSeleccionada] = useState("");
@@ -122,16 +125,16 @@ const DevicesList = () => {
     switch (status) {
       case "online":
         return lastSeenTime.getTime() > fiveMinutesAgo
-          ? "En línea"
-          : "Desconectado recientemente";
+          ? t("myTvScreens.online")
+          : t("myTvScreens.recentlyDisconnected");
       case "configured":
       case "linked":
-        return "Vinculado";
+        return t("myTvScreens.linked");
       case "waiting":
-        return "Esperando vinculación";
+        return t("myTvScreens.waitingLink");
       case "offline":
       default:
-        return "Desconectado";
+        return t("myTvScreens.disconnected");
     }
   };
 
@@ -195,30 +198,30 @@ const DevicesList = () => {
     switch (screenType) {
       case "salon":
         return (
-          userData.nombrePantallas?.[index] || `Pantalla Salón ${screenNumber}`
+          userData.nombrePantallas?.[index] || `${t("myTvScreens.salonScreen")} ${screenNumber}`
         );
       case "directorio":
         return (
           userData.nombrePantallasDirectorio?.[index] ||
-          `Pantalla Directorio ${screenNumber}`
+          `${t("myTvScreens.directoryScreen")} ${screenNumber}`
         );
       case "tarifario":
         return (
           userData.nombrePantallasTarifario?.[index] ||
-          `Pantalla Tarifario ${screenNumber}`
+          `${t("myTvScreens.rateScreen")} ${screenNumber}`
         );
       case "promociones":
         return (
           userData.nombrePantallasPromociones?.[index] ||
-          `Pantalla Promociones ${screenNumber}`
+          `${t("myTvScreens.promotionScreen")} ${screenNumber}`
         );
       case "vuelos":
         return (
           userData.nombrePantallasVuelos?.[index] ||
-          `Pantalla Vuelos ${screenNumber}`
+          `${t("myTvScreens.flightScreen")} ${screenNumber}`
         );
       default:
-        return `Pantalla ${screenNumber}`;
+        return `${t("myTvScreens.screen")} ${screenNumber}`;
     }
   };
 
@@ -256,14 +259,14 @@ const DevicesList = () => {
 
     const deviceName = device.configuration?.screenName || deviceCode;
     const result = await Swal.fire({
-      title: "¿Eliminar dispositivo?",
-      text: `¿Estás seguro de que quieres eliminar el dispositivo ${deviceName}? Esta acción no se puede deshacer.`,
+      title: t("myTvScreens.deleteDeviceQuestion"),
+      text: `${t("myTvScreens.sureDeleteDevice")} ${deviceName}? ${t("myTvScreens.actionCannotBeUndone")}`,
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#dc2626",
       cancelButtonColor: "#6b7280",
-      confirmButtonText: "Sí, eliminar",
-      cancelButtonText: "Cancelar",
+      confirmButtonText: t("myTvScreens.yesDelete"),
+      cancelButtonText: t("myTvScreens.cancel"),
     });
 
     if (result.isConfirmed) {
@@ -351,16 +354,16 @@ const DevicesList = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isAdmin ? "Gestión de Dispositivos" : "Mis Dispositivos TV"}
+              {isAdmin ? t("myTvScreens.deviceManagement") : t("myTvScreens.title")}
             </h1>
             <p className="text-gray-600">
               {isAdmin
-                ? `Administra dispositivos Android TV${
+                ? `${t("myTvScreens.deviceManagement")} Android TV${
                     empresaSeleccionada
                       ? ` de ${empresaSeleccionada}`
                       : " de todas las empresas"
                   }`
-                : "Gestiona y monitorea tus dispositivos Android TV"}
+                : t("myTvScreens.deviceManagement")}
             </p>
           </div>
 
@@ -369,7 +372,7 @@ const DevicesList = () => {
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
           >
             <PlusIcon className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-            Vincular dispositivo
+            {t("myTvScreens.addDevice")}
           </button>
         </div>
       </div>
@@ -382,7 +385,7 @@ const DevicesList = () => {
               htmlFor="empresa"
               className="text-gray-700 font-medium mb-2 sm:mb-0"
             >
-              Empresa:
+              {t("myTvScreens.company")}:
             </label>
             <div className="w-full sm:w-1/2">
               <select
@@ -391,7 +394,7 @@ const DevicesList = () => {
                 onChange={(e) => setEmpresaSeleccionada(e.target.value)}
                 className="block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
               >
-                <option value="">Seleccionar empresa...</option>
+                <option value="">{t("myTvScreens.selectCompany")}...</option>
                 {empresas.map((empresa) => (
                   <option key={empresa} value={empresa}>
                     {empresa}
@@ -402,7 +405,7 @@ const DevicesList = () => {
           </div>
           {!empresaSeleccionada && (
             <p className="mt-2 text-sm text-gray-500">
-              Selecciona una empresa para ver sus dispositivos vinculados
+              {t("myTvScreens.selectCompany")} para ver sus dispositivos vinculados
             </p>
           )}
         </div>
@@ -415,11 +418,10 @@ const DevicesList = () => {
           <div className="p-12 text-center">
             <ComputerDesktopIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
-              Selecciona una empresa
+              {t("myTvScreens.selectCompany")}
             </h3>
             <p className="text-gray-500">
-              Elige una empresa del selector superior para ver sus dispositivos
-              vinculados
+              {t("myTvScreens.chooseCompany")}
             </p>
           </div>
         ) : filteredDevices.length === 0 ? (
@@ -428,17 +430,17 @@ const DevicesList = () => {
             <ComputerDesktopIcon className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {devices.length === 0
-                ? "No hay dispositivos vinculados"
-                : "No hay dispositivos que coincidan con el filtro"}
+                ? t("myTvScreens.noDevices")
+                : t("myTvScreens.noFilteredDevices")}
             </h3>
             <p className="text-gray-500 mb-4">
               {devices.length === 0
-                ? `Comienza vinculando tu primer dispositivo Android TV${
+                ? `${t("myTvScreens.startLinking")}${
                     isAdmin && empresaSeleccionada
                       ? ` para ${empresaSeleccionada}`
                       : ""
                   }`
-                : `Intenta cambiar el filtro para ver otros dispositivos${
+                : `${t("myTvScreens.tryChangeFilter")}${
                     isAdmin && empresaSeleccionada
                       ? ` de ${empresaSeleccionada}`
                       : ""
@@ -450,7 +452,7 @@ const DevicesList = () => {
                 className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
               >
                 <PlusIcon className="-ml-1 mr-2 h-5 w-5" />
-                Vincular dispositivo
+                {t("myTvScreens.linkDevice")}
               </button>
             )}
           </div>
@@ -489,7 +491,7 @@ const DevicesList = () => {
                               </span>
                               {/* ✅ NUEVO: Badge para mostrar que está configurado */}
                               <span className="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                Configurado
+                                {t("myTvScreens.configured")}
                               </span>
                             </>
                           ) : (
@@ -577,7 +579,7 @@ const DevicesList = () => {
                     <button
                       onClick={() => handleDeleteDevice(device)}
                       className="p-2 text-red-600 hover:text-red-800 rounded-full hover:bg-red-50"
-                      title="Eliminar"
+                      title={t("myTvScreens.delete")}
                     >
                       <TrashIcon className="h-5 w-5" />
                     </button>
@@ -591,12 +593,12 @@ const DevicesList = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                       <div>
                         <h4 className="font-medium text-gray-900 mb-2">
-                          Información del dispositivo
+                          {t("myTvScreens.deviceInformation")}
                         </h4>
                         <dl className="space-y-1">
                           {device.code && device.id !== device.code && (
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">ID documento:</dt>
+                              <dt className="text-gray-500">{t("myTvScreens.documentId")}:</dt>
                               <dd className="text-gray-900 font-mono text-xs">
                                 {device.id}
                               </dd>
@@ -605,7 +607,7 @@ const DevicesList = () => {
 
                           {device.createdAt && (
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">Creado:</dt>
+                              <dt className="text-gray-500">{t("myTvScreens.created")}:</dt>
                               <dd className="text-gray-900">
                                 {formatDate(device.createdAt)}
                               </dd>
@@ -617,26 +619,26 @@ const DevicesList = () => {
                       {device.userData && (
                         <div>
                           <h4 className="font-medium text-gray-900 mb-2">
-                            Propietario
+                            {t("myTvScreens.owner")}
                           </h4>
                           <dl className="space-y-1">
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">Nombre:</dt>
+                              <dt className="text-gray-500">{t("myTvScreens.name")}:</dt>
                               <dd className="text-gray-900">
                                 {device.userData.nombre}{" "}
                                 {device.userData.apellido}
                               </dd>
                             </div>
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">Email:</dt>
+                              <dt className="text-gray-500">{t("myTvScreens.email")}:</dt>
                               <dd className="text-gray-900">
                                 {device.userData.email}
                               </dd>
                             </div>
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">Empresa:</dt>
+                              <dt className="text-gray-500">{t("myTvScreens.company")}:</dt>
                               <dd className="text-gray-900">
-                                {device.empresa || "No asignada"}
+                                {device.empresa || t("myTvScreens.notAssigned")}
                               </dd>
                             </div>
                           </dl>

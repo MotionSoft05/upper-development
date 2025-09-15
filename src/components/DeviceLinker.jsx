@@ -536,7 +536,7 @@ const DeviceLinker = ({ onDeviceLinked }) => {
               • El código se genera automáticamente al abrir la app en tu TV
             </p>
             <p>• Si no aparece el código, reinicia la aplicación en la TV</p>
-            <p>• Cada código expira después de 10 minutos por seguridad</p>
+
             <p>
               • Una vez vinculado, todos los usuarios de tu empresa podrán
               usarlo

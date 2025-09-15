@@ -89,7 +89,9 @@ exports.updateFlightsAndDistances = onSchedule({
   // PARTE 1: Actualizar datos de vuelos
   console.log("🛫 Paso 1/2: Actualizando datos de vuelos...");
 
-  const airports = ["MEX", "GDL", "CUN"];
+  // ⭐ NUEVO: Obtener solo aeropuertos activos
+  const airports = await getActiveAirports();
+  console.log(`📡 Procesando aeropuertos activos: ${airports.join(", ")}`);
   const flightResults = [];
 
   for (const airport of airports) {
@@ -1142,3 +1144,188 @@ exports.onCompanyConfigChange = onDocumentWritten({
  * Usar updateFlightsAndDistances en su lugar
  */
 exports.updateFlightData = exports.updateFlightsAndDistances;
+
+// ========================================
+// NUEVO: SISTEMA DE CONTROL INDIVIDUAL DE AEROPUERTOS
+// ========================================
+
+/**
+ * Obtener aeropuertos activos desde configuración
+ */
+async function getActiveAirports() {
+  try {
+    const snapshot = await db
+      .collection("airportServiceConfig")
+      .where("enabled", "==", true)
+      .get();
+
+    const activeAirports = [];
+    snapshot.forEach((doc) => {
+      activeAirports.push(doc.id);
+    });
+
+    // Si no hay configuración, usar defaults
+    if (activeAirports.length === 0) {
+      console.log("⚠️ No hay configuración de aeropuertos, usando defaults");
+      return ["MEX", "GDL", "CUN", "MTY", "PVR"]; // Top 5 aeropuertos de México
+    }
+
+    console.log(`✅ Aeropuertos activos: ${activeAirports.join(", ")}`);
+    return activeAirports;
+  } catch (error) {
+    console.error("❌ Error obteniendo aeropuertos activos:", error);
+    // Fallback a defaults
+    return ["MEX", "GDL", "CUN", "MTY", "PVR"];
+  }
+}
+
+/**
+ * Endpoint para toggle individual de aeropuertos
+ * POST /toggleAirportService
+ * Body: { airportCode: "MEX" }
+ */
+exports.toggleAirportService = onRequest({
+  cors: true,
+  memory: "256MiB",
+}, async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    const {airportCode} = req.body;
+
+    if (!airportCode) {
+      return res.status(400).json({
+        success: false,
+        error: "airportCode es requerido",
+      });
+    }
+
+    // Validar aeropuerto
+    const validAirports = ["MEX", "GDL", "CUN", "MTY", "PVR"];
+    if (!validAirports.includes(airportCode.toUpperCase())) {
+      return res.status(400).json({
+        success: false,
+        error: `Aeropuerto ${airportCode} no es válido`,
+      });
+    }
+
+    const airport = airportCode.toUpperCase();
+    const configRef = db.collection("airportServiceConfig").doc(airport);
+    const configDoc = await configRef.get();
+
+    // Estado actual (default: false para nuevos aeropuertos)
+    const currentState = configDoc.exists ? configDoc.data().enabled : false;
+    const newState = !currentState;
+
+    // Actualizar configuración
+    await configRef.set({
+      enabled: newState,
+      name: getAirportName(airport),
+      lastToggled: admin.firestore.FieldValue.serverTimestamp(),
+      toggledBy: "admin_panel",
+      apiCalls: configDoc.exists ? configDoc.data().apiCalls || 0 : 0,
+    }, {merge: true});
+
+    // Log del cambio
+    await db.collection("systemLogs").add({
+      level: "info",
+      message: `Aeropuerto ${airport} ${newState ? "activado" : "pausado"} por administrador`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      context: "airport_service_toggle",
+      data: {airport, previousState: currentState, newState},
+    });
+
+    console.log(`✅ ${airport} ${newState ? "activado" : "pausado"} exitosamente`);
+
+    res.json({
+      success: true,
+      airport: airport,
+      previousState: currentState,
+      newState: newState,
+      message: `Aeropuerto ${airport} ${newState ? "activado" : "pausado"} exitosamente`,
+    });
+  } catch (error) {
+    console.error("❌ Error en toggle de aeropuerto:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+/**
+ * Endpoint para obtener estado de todos los aeropuertos
+ * GET /getAirportServiceStatus
+ */
+exports.getAirportServiceStatus = onRequest({
+  cors: true,
+  memory: "256MiB",
+}, async (req, res) => {
+  res.set("Access-Control-Allow-Origin", "*");
+  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    res.status(204).send("");
+    return;
+  }
+
+  try {
+    const snapshot = await db.collection("airportServiceConfig").get();
+    const airportStatus = {};
+
+    // Estados por defecto
+    const defaultAirports = {
+      "MEX": {enabled: true, name: "Ciudad de México"},
+      "GDL": {enabled: true, name: "Guadalajara"},
+      "CUN": {enabled: true, name: "Cancún"},
+      "MTY": {enabled: false, name: "Monterrey"},
+      "PVR": {enabled: false, name: "Puerto Vallarta"},
+    };
+
+    // Combinar con estados guardados
+    Object.keys(defaultAirports).forEach((airport) => {
+      airportStatus[airport] = defaultAirports[airport];
+    });
+
+    snapshot.forEach((doc) => {
+      if (defaultAirports[doc.id]) {
+        airportStatus[doc.id] = {
+          ...airportStatus[doc.id],
+          ...doc.data(),
+        };
+      }
+    });
+
+    res.json({
+      success: true,
+      airportStatus,
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("❌ Error obteniendo estado de aeropuertos:", error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+});
+
+// Función helper para nombres de aeropuertos
+function getAirportName(code) {
+  const names = {
+    "MEX": "Ciudad de México",
+    "GDL": "Guadalajara",
+    "CUN": "Cancún",
+    "MTY": "Monterrey",
+    "PVR": "Puerto Vallarta",
+  };
+  return names[code] || code;
+}

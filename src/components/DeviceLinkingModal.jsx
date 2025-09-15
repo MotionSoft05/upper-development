@@ -15,9 +15,11 @@ import {
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
 import { linkDevice } from "@/utils/deviceManager";
+import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 
 const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
+  const { t } = useTranslation();
   const [user, loading, error] = useAuthState(auth);
   const [deviceCode, setDeviceCode] = useState("");
   const [linking, setLinking] = useState(false);
@@ -92,8 +94,8 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
       if (querySnapshot.empty) {
         console.log(`❌ No se encontró dispositivo con código: ${deviceCode}`);
         setDeviceInfo({
-          error: "Dispositivo no encontrado",
-          message: "Verifica que el código sea correcto.",
+          error: t("myTvScreens.deviceNotFound"),
+          message: t("myTvScreens.verifyCode"),
         });
         return;
       }
@@ -117,8 +119,8 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
         deviceData.empresa !== userData?.empresa
       ) {
         setDeviceInfo({
-          error: "Dispositivo ya vinculado",
-          message: `Este dispositivo ya está vinculado a otra empresa${
+          error: t("myTvScreens.deviceAlreadyLinked"),
+          message: `${t("myTvScreens.deviceLinkedToOtherCompany")}${
             deviceData.empresa ? ` (${deviceData.empresa})` : ""
           }.`,
         });
@@ -127,8 +129,8 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
 
       if (deviceData.status === "linked" && deviceData.ownerId === user?.uid) {
         setDeviceInfo({
-          error: "Ya es tuyo",
-          message: "Este dispositivo ya está vinculado a tu cuenta.",
+          error: t("myTvScreens.alreadyYours"),
+          message: t("myTvScreens.deviceAlreadyYourAccount"),
           isOwned: true,
         });
         return;
@@ -140,8 +142,8 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
         deviceData.empresa === userData?.empresa
       ) {
         setDeviceInfo({
-          error: "Ya vinculado a tu empresa",
-          message: `Este dispositivo ya está vinculado a ${userData?.empresa}.`,
+          error: t("myTvScreens.alreadyLinkedToCompany"),
+          message: `${t("myTvScreens.deviceLinkedToSameCompany")} ${userData?.empresa}.`,
           isSameCompany: true,
         });
         return;
@@ -152,13 +154,13 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
         success: true,
         status: deviceData.status,
         createdAt: deviceData.createdAt,
-        message: "Dispositivo disponible para vincular",
+        message: t("myTvScreens.deviceAvailableToLink"),
       });
     } catch (error) {
       console.error("Error validando dispositivo:", error);
       setDeviceInfo({
-        error: "Error de conexión",
-        message: "No se pudo verificar el dispositivo. Inténtalo de nuevo.",
+        error: t("myTvScreens.connectionError"),
+        message: t("myTvScreens.couldNotVerifyDevice"),
       });
     } finally {
       setValidating(false);
@@ -176,7 +178,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
       // ✅ ACTUALIZADO: Mensaje de éxito con empresa
       Swal.fire({
         icon: "success",
-        title: "¡Dispositivo vinculado!",
+        title: t("myTvScreens.deviceLinkedSuccess"),
         html: `
           <div class="text-left">
             <p><strong>Dispositivo:</strong> ${deviceCode}</p>
@@ -199,16 +201,16 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
     } catch (error) {
       console.error("Error vinculando dispositivo:", error);
 
-      let errorMessage = "No se pudo vincular el dispositivo.";
+      let errorMessage = t("myTvScreens.couldNotLinkDevice");
       if (error.message.includes("ya está vinculado")) {
-        errorMessage = "Este dispositivo ya está vinculado a otra empresa.";
+        errorMessage = t("myTvScreens.deviceLinkedOtherCompanyError");
       } else if (error.message.includes("no encontrado")) {
-        errorMessage = "Dispositivo no encontrado. Verifica el código.";
+        errorMessage = t("myTvScreens.deviceNotFoundError");
       }
 
       Swal.fire({
         icon: "error",
-        title: "Error al vincular",
+        title: t("myTvScreens.errorLinking"),
         text: errorMessage,
       });
     } finally {
@@ -253,7 +255,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"
                   >
-                    Vincular Dispositivo
+                    {t("myTvScreens.linkDeviceModal")}
                   </Dialog.Title>
                   <button
                     onClick={onClose}
@@ -267,13 +269,13 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                   {/* Instrucciones */}
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h3 className="text-sm font-medium text-blue-800 mb-2">
-                      📺 Instrucciones
+                      📺 {t("myTvScreens.instructions")}
                     </h3>
                     <div className="text-xs text-blue-700 space-y-1">
-                      <p>1. Abre la aplicación en tu Android TV</p>
-                      <p>2. El código aparecerá en pantalla automáticamente</p>
-                      <p>3. Ingresa el código de 6 caracteres aquí</p>
-                      <p>4. El dispositivo se vinculará a tu empresa</p>
+                      <p>1. {t("myTvScreens.step1")}</p>
+                      <p>2. {t("myTvScreens.step2")}</p>
+                      <p>3. {t("myTvScreens.step3")}</p>
+                      <p>4. {t("myTvScreens.step4")}</p>
                     </div>
                   </div>
 
@@ -283,19 +285,19 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                       htmlFor="deviceCode"
                       className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                      Código del dispositivo
+                      {t("myTvScreens.deviceCode")}
                     </label>
                     <input
                       type="text"
                       id="deviceCode"
                       value={deviceCode}
                       onChange={handleCodeChange}
-                      placeholder="Ej: ABC123"
+                      placeholder={t("myTvScreens.codeExample")}
                       className="block w-full px-3 py-3 text-center text-lg font-mono uppercase tracking-wider border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       maxLength={6}
                     />
                     <p className="mt-1 text-xs text-gray-500">
-                      El código se muestra en la pantalla de tu Android TV
+                      {t("myTvScreens.codeDisplaysOnTV")}
                     </p>
                   </div>
 
@@ -304,7 +306,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                     <div className="flex items-center justify-center py-4">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
                       <span className="ml-2 text-sm text-gray-600">
-                        Validando dispositivo...
+                        {t("myTvScreens.validatingDevice")}
                       </span>
                     </div>
                   )}
@@ -361,17 +363,17 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                   {userData && deviceInfo?.success && (
                     <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                       <h3 className="text-sm font-medium text-gray-900 mb-3">
-                        🏢 Este dispositivo se vinculará a:
+                        🏢 {t("myTvScreens.deviceWillBeLinkedTo")}
                       </h3>
                       <div className="space-y-2 text-sm text-gray-600">
                         <div className="flex justify-between">
-                          <span>Empresa:</span>
+                          <span>{t("myTvScreens.company")}:</span>
                           <span className="font-medium text-blue-600">
                             {userData.empresa}
                           </span>
                         </div>
                         <div className="flex justify-between">
-                          <span>Usuario responsable:</span>
+                          <span>{t("myTvScreens.responsibleUser")}:</span>
                           <span className="font-medium">
                             {userData.nombre} {userData.apellido}
                           </span>
@@ -401,7 +403,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                         <hr className="my-2" />
                         <div className="text-xs text-gray-500">
                           <strong>
-                            Licencias disponibles para {userData.empresa}:
+                            {t("myTvScreens.availableLicenses")} {userData.empresa}:
                           </strong>
                           <div className="grid grid-cols-2 gap-2 mt-1">
                             <span>🎭 Salón: {userData.ps || 0}</span>
@@ -437,7 +439,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                           </div>
                           <div className="ml-3">
                             <h3 className="text-sm font-medium text-yellow-800">
-                              ⚠️ Sin licencias activas
+                              ⚠️ {t("myTvScreens.noActiveLicenses")}
                             </h3>
                             <p className="text-sm text-yellow-700 mt-1">
                               Puedes vincular el dispositivo, pero tu empresa
@@ -458,7 +460,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                       className="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                       onClick={onClose}
                     >
-                      Cancelar
+                      {t("myTvScreens.cancel")}
                     </button>
                     <button
                       type="button"
@@ -473,10 +475,10 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                       {linking ? (
                         <>
                           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                          Vinculando...
+                          {t("myTvScreens.linking")}
                         </>
                       ) : (
-                        `Vincular a ${userData?.empresa || "empresa"}`
+                        `${t("myTvScreens.linkTo")} ${userData?.empresa || t("myTvScreens.company")}`
                       )}
                     </button>
                   </div>
@@ -484,23 +486,20 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                   {/* Información adicional */}
                   <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
                     <h3 className="text-xs font-medium text-gray-700 mb-2">
-                      💡 Consejos
+                      💡 {t("myTvScreens.tips")}
                     </h3>
                     <div className="text-xs text-gray-600 space-y-1">
                       <p>
-                        • El código se genera automáticamente al abrir la app en
-                        tu TV
+                        • {t("myTvScreens.codeGeneratedAutomatically")}
                       </p>
                       <p>
-                        • Si no aparece el código, reinicia la aplicación en la
-                        TV
+                        • {t("myTvScreens.restartAppIfNoCode")}
                       </p>
                       <p>
-                        • Cada código expira después de 10 minutos por seguridad
+                        • {t("myTvScreens.codeExpires")}
                       </p>
                       <p>
-                        • Una vez vinculado, todos los usuarios de tu empresa
-                        podrán usarlo
+                        • {t("myTvScreens.onceLinkedAllUsersCanUse")}
                       </p>
                     </div>
                   </div>
