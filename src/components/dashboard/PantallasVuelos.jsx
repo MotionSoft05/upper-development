@@ -324,7 +324,6 @@ function PantallasVuelos() {
         showArrivals: true,
         timeWindow: 5,
         maxFlights: 8,
-        refreshInterval: 600,
         language: selectedLanguage,
       },
 
@@ -554,16 +553,6 @@ function PantallasVuelos() {
       }
     }
 
-    if (field === "displaySettings.refreshInterval") {
-      if (value !== 300 && value !== 600) {
-        Swal.fire({
-          icon: "warning",
-          title: "Valor inválido",
-          text: "El intervalo debe ser 5 o 10 minutos",
-        });
-        return;
-      }
-    }
 
     // Validar que al menos una opción esté habilitada
     if (
@@ -1335,28 +1324,6 @@ function PantallasVuelos() {
                       })()}
                     </div>
 
-                    {/* Intervalo de Actualización */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        {t("flightScreens.refreshInterval")}
-                      </label>
-                      <select
-                        value={
-                          selectedPantalla.config.displaySettings
-                            ?.refreshInterval || 600
-                        }
-                        onChange={(e) =>
-                          updatePantallaConfig(
-                            "displaySettings.refreshInterval",
-                            parseInt(e.target.value)
-                          )
-                        }
-                        className="block w-32 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value={300}>5 minutos</option>
-                        <option value={600}>10 minutos</option>
-                      </select>
-                    </div>
                   </div>
                 </div>
 
