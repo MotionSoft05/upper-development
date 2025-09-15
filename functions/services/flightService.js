@@ -458,14 +458,14 @@ class FlightService {
 
       // PASO 1: Intentar TIER 2 completo primero
       try {
-        console.log(`📡 Intentando TIER 2 con timerange primero...`);
+        console.log(`📡 Intentando TIER 2 con ventana de 10 horas (desde -30min hasta +570min)...`);
 
-        // Usar endpoint relativo con parámetros optimizados para reducir de 512 a ~85 vuelos
+        // Usar endpoint relativo con parámetros optimizados para 10 horas (reducir carga API)
         const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}`;
 
         const params = new URLSearchParams({
           offsetMinutes: -30, // Comenzar 30 min antes (vs -180 default)
-          durationMinutes: 1440, // Ventana total de 24 horas (sin límite práctico)
+          durationMinutes: 600, // ACTUALIZADO: Ventana de 10 horas (600 minutos)
           direction: "Both",
           withLeg: "true",
           withCancelled: "true",
@@ -859,6 +859,8 @@ class FlightService {
 
       // Parámetros MUY limitados para plan gratuito
       const params = new URLSearchParams({
+        offsetMinutes: -30, // Comenzar 30 min antes
+        durationMinutes: 600, // NUEVO: Ventana de 10 horas (600 minutos)
         withLeg: "false", // Reducir complejidad
         withCancelled: "false", // Solo vuelos activos
         withCodeshared: "false", // Sin codeshare
@@ -867,7 +869,7 @@ class FlightService {
         direction: "Both", // Obtener salidas Y llegadas
       });
 
-      console.log(`📡 Intentando FIDS limitado: ${fidsUrl}?${params}`);
+      console.log(`📡 Intentando FIDS con ventana de 10 horas: ${fidsUrl}?${params}`);
 
       const response = await axios.get(`${fidsUrl}?${params}`, {
         headers: {
