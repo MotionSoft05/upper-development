@@ -1155,9 +1155,9 @@ exports.updateFlightData = exports.updateFlightsAndDistances;
 async function getActiveAirports() {
   try {
     const snapshot = await db
-      .collection("airportServiceConfig")
-      .where("enabled", "==", true)
-      .get();
+        .collection("airportServiceConfig")
+        .where("enabled", "==", true)
+        .get();
 
     const activeAirports = [];
     snapshot.forEach((doc) => {
@@ -1188,12 +1188,14 @@ exports.toggleAirportService = onRequest({
   cors: true,
   memory: "256MiB",
 }, async (req, res) => {
+  // CORS headers más completos
   res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "POST, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With");
+  res.set("Access-Control-Max-Age", "3600");
 
   if (req.method === "OPTIONS") {
-    res.status(204).send("");
+    res.status(200).send("");
     return;
   }
 
@@ -1268,12 +1270,14 @@ exports.getAirportServiceStatus = onRequest({
   cors: true,
   memory: "256MiB",
 }, async (req, res) => {
+  // CORS headers más completos
   res.set("Access-Control-Allow-Origin", "*");
-  res.set("Access-Control-Allow-Methods", "GET, OPTIONS");
-  res.set("Access-Control-Allow-Headers", "Content-Type");
+  res.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization, X-Requested-With");
+  res.set("Access-Control-Max-Age", "3600");
 
   if (req.method === "OPTIONS") {
-    res.status(204).send("");
+    res.status(200).send("");
     return;
   }
 
