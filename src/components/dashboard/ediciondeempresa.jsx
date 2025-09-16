@@ -28,6 +28,7 @@ import {
   faTv, // Nuevo icono para Android TV
   faPlane,
   faComments,
+  faEdit,
 } from "@fortawesome/free-solid-svg-icons";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import { Tooltip } from "react-tooltip";
@@ -103,6 +104,7 @@ const Ediciondeempresa = () => {
                 pantallasDirectorio: permisoAntiguo === 3,
                 pantallasPromociones: permisoAntiguo === 3,
                 pantallasTarifario: permisoAntiguo === 3,
+                editInformacionTarifa: permisoAntiguo === 3, // Nueva sección para editar información de tarifas
                 pantallasvuelos: permisoAntiguo === 3,
                 monitoreo: permisoAntiguo === 3,
                 publicidad: permisoAntiguo === 3,
@@ -267,6 +269,11 @@ const Ediciondeempresa = () => {
           id: "mensajesDinamicos",
           nombre: "Mensajes Dinámicos",
           icon: faComments,
+        },
+        {
+          id: "editInformacionTarifa",
+          nombre: "Información Tarifas",
+          icon: faEdit,
         },
       ],
     },

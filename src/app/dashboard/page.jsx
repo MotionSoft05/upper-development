@@ -64,7 +64,7 @@ function DashBoard() {
 
   // Estados para componentes de tarifario
   const [showPantallaTarifario, setShowPantallaTarifario] = useState(false);
-  const [showInformacionTarifa, setShowInformacionTarifa] = useState(false);
+  const [showEditInformacionTarifa, setShowEditInformacionTarifa] = useState(false);
 
   // NUEVOS ESTADOS para Android TV
   const [showDevicesList, setShowDevicesList] = useState(false);
@@ -151,8 +151,8 @@ function DashBoard() {
           // Propiedades para componentes de tarifario
           setShowPantallaTarifario={setShowPantallaTarifario}
           showPantallaTarifario={showPantallaTarifario}
-          setShowInformacionTarifa={setShowInformacionTarifa}
-          showInformacionTarifa={showInformacionTarifa}
+          setShowEditInformacionTarifa={setShowEditInformacionTarifa}
+          showEditInformacionTarifa={showEditInformacionTarifa}
           // NUEVAS PROPIEDADES para Android TV
           setShowDevicesList={setShowDevicesList}
           showDevicesList={showDevicesList}
@@ -197,7 +197,7 @@ function DashBoard() {
 
           {/* Componentes de Tarifario */}
           {showPantallaTarifario && <PantallasTarifario />}
-          {showInformacionTarifa && <EditInformacionTarifa />}
+          {showEditInformacionTarifa && <EditInformacionTarifa />}
           {showMensajesDinamicos && <MensajesDinamicos />}
           {showPublicidad && <Publicidad />}
 
