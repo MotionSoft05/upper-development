@@ -154,39 +154,119 @@ function PantallasVuelos() {
     obtenerEmpresas();
   }, []);
 
+  // Cargar datos del usuario (siguiendo patrón de PantallasPromociones)
   useEffect(() => {
-    const loadInitialData = async () => {
+    const fetchUserData = async () => {
       try {
         const authUser = firebase.auth().currentUser;
-        if (!authUser) return;
 
-        // Cargar configuración de pantallas de vuelos
-        await loadFlightScreensConfig();
+        if (authUser) {
+          const usuariosRef = collection(db, "usuarios");
+          let usuariosQuery;
+
+          if (empresaSeleccionada) {
+            usuariosQuery = query(
+              usuariosRef,
+              where("empresa", "==", empresaSeleccionada)
+            );
+          } else {
+            usuariosQuery = query(
+              usuariosRef,
+              where("email", "==", authUser.email)
+            );
+          }
+
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+
+          if (!usuariosSnapshot.empty) {
+            const user = usuariosSnapshot.docs[0].data();
+            const numberOfScreens = user.pv || 0;
+
+            const nombresPantallasColeccion =
+              user.nombrePantallasVuelos || [];
+
+            const namesArray = Array.from(
+              { length: numberOfScreens },
+              (_, index) =>
+                nombresPantallasColeccion[index] || `Vuelos ${index + 1}`
+            );
+
+            setNombrePantallasVuelos(namesArray);
+            setPv(numberOfScreens);
+          }
+        }
       } catch (error) {
-        console.error("Error loading initial data:", error);
+        console.error("Error al obtener datos del usuario:", error);
       }
     };
 
-    loadInitialData();
-  }, []);
+    fetchUserData();
+  }, [empresaSeleccionada]);
 
-  // Recargar configuración cuando cambie la empresa seleccionada
+  // Cargar datos de personalización (siguiendo patrón de PantallasPromociones)
   useEffect(() => {
-    const reloadConfigForSelectedCompany = async () => {
-      if (empresaSeleccionada) {
-        // Limpiar estado anterior
-        setSelectedPantalla(null);
-        setActiveTab("general");
-        setNombrePantallasVuelos([]);
-        setPantallaSettings({});
-        setPv(0);
+    const cargarDatosPersonalizacion = async () => {
+      try {
+        const authUser = firebase.auth().currentUser;
 
-        // Cargar nueva configuración
-        await loadFlightScreensConfig();
+        if (authUser) {
+          const usuariosRef = collection(db, "usuarios");
+          const usuariosQuery = query(
+            usuariosRef,
+            where("email", "==", authUser.email)
+          );
+
+          const usuariosSnapshot = await getDocs(usuariosQuery);
+          let empresa = "";
+
+          if (!usuariosSnapshot.empty) {
+            empresa = usuariosSnapshot.docs[0].data().empresa || "";
+          }
+
+          // Determinar qué empresa usar para cargar datos
+          const empresaToUse = empresaSeleccionada || empresa;
+
+          if (empresaToUse) {
+            // Buscar configuración en la colección TemplateVuelos
+            const templateVuelosRef = collection(db, "TemplateVuelos");
+            const templateVuelosQuery = query(
+              templateVuelosRef,
+              where("empresa", "==", empresaToUse)
+            );
+
+            const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
+
+            if (!templateVuelosSnapshot.empty) {
+              const templateVuelosData = templateVuelosSnapshot.docs[0].data();
+
+              // Cargar configuración básica
+              setSelectedLanguage(templateVuelosData.idioma || "es");
+              setPantallaSettings(templateVuelosData.pantallasConfig || {});
+
+              // Cargar ciudad seleccionada para el clima
+              if (templateVuelosData.selectedCity) {
+                setSelectedCity(templateVuelosData.selectedCity);
+              }
+
+              // Cargar configuración Distance Matrix
+              const loadedDistanceConfig = templateVuelosData.distanceConfig || {};
+              setDistanceConfig({
+                enabled: loadedDistanceConfig.enabled || false,
+                hotelLocation: {
+                  lat: loadedDistanceConfig.hotelLocation?.lat || null,
+                  lng: loadedDistanceConfig.hotelLocation?.lng || null,
+                  address: loadedDistanceConfig.hotelLocation?.address || "",
+                },
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Error al cargar datos de personalización:", error);
       }
     };
 
-    reloadConfigForSelectedCompany();
+    cargarDatosPersonalizacion();
   }, [empresaSeleccionada]);
 
   const usuarioAutorizado =
@@ -197,86 +277,6 @@ function PantallasVuelos() {
       "contacto@upperds.mx",
     ].includes(firebase.auth().currentUser.email);
 
-  // Función para cargar configuración de pantallas de vuelos (siguiendo patrón de promociones)
-  const loadFlightScreensConfig = async () => {
-    try {
-      const authUser = firebase.auth().currentUser;
-      if (!authUser) return;
-
-      // Obtener empresa del usuario autenticado
-      const usuariosQuery = query(
-        collection(db, "usuarios"),
-        where("email", "==", authUser.email)
-      );
-      const usuariosSnapshot = await getDocs(usuariosQuery);
-      let empresa = "";
-
-      if (!usuariosSnapshot.empty) {
-        empresa = usuariosSnapshot.docs[0].data().empresa || "";
-      }
-
-      // Determinar qué empresa usar para cargar datos (igual que en PantallasPromociones)
-      const empresaToUse = empresaSeleccionada || empresa;
-
-      if (empresaToUse) {
-        // Cargar datos de usuario de la empresa a usar
-        const usuariosEmpresaQuery = query(
-          collection(db, "usuarios"),
-          where("empresa", "==", empresaToUse)
-        );
-        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
-
-        if (!usuariosEmpresaSnapshot.empty) {
-          const userData = usuariosEmpresaSnapshot.docs[0].data();
-
-          // CARGAR LICENCIAS desde usuarios
-          setPv(parseInt(userData.pv) || 0);
-
-          // CARGAR NOMBRES desde usuarios
-          if (userData.nombrePantallasVuelos) {
-            const nombresArray = Array.isArray(userData.nombrePantallasVuelos)
-              ? userData.nombrePantallasVuelos
-              : Object.values(userData.nombrePantallasVuelos);
-            setNombrePantallasVuelos(nombresArray);
-          }
-        }
-      }
-
-      if (!empresaToUse) return;
-
-      // Cargar configuración desde TemplateVuelos usando empresaToUse
-      const templateVuelosRef = collection(db, "TemplateVuelos");
-      const templateVuelosQuery = query(
-        templateVuelosRef,
-        where("empresa", "==", empresaToUse)
-      );
-      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
-
-      if (!templateVuelosSnapshot.empty) {
-        const templateData = templateVuelosSnapshot.docs[0].data();
-        setSelectedLanguage(templateData.idioma || "es");
-        setPantallaSettings(templateData.pantallasConfig || {});
-
-        // Cargar ciudad seleccionada para el clima
-        if (templateData.selectedCity) {
-          setSelectedCity(templateData.selectedCity);
-        }
-
-        // Crear configuración limpia desde los datos de Firebase
-        const loadedDistanceConfig = templateData.distanceConfig || {};
-        setDistanceConfig({
-          enabled: loadedDistanceConfig.enabled || false,
-          hotelLocation: {
-            lat: loadedDistanceConfig.hotelLocation?.lat || null,
-            lng: loadedDistanceConfig.hotelLocation?.lng || null,
-            address: loadedDistanceConfig.hotelLocation?.address || "",
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Error loading flight screens config:", error);
-    }
-  };
 
   // Función para manejar cambios de configuración general
   const handleLanguageChange = (e) => {
@@ -365,7 +365,7 @@ function PantallasVuelos() {
     setActiveTab("pantalla");
   };
 
-  // Función para guardar configuración (siguiendo patrón de promociones)
+  // Función para guardar configuración (siguiendo patrón exacto de PantallasPromociones)
   const guardarConfiguracion = async () => {
     try {
       const authUser = firebase.auth().currentUser;
@@ -386,115 +386,113 @@ function PantallasVuelos() {
         return;
       }
 
-      // Obtener la empresa a actualizar
-      let empresaToUpdate = empresaSeleccionada;
+      // Obtener empresa del usuario autenticado
+      const usuariosQuery = query(
+        collection(db, "usuarios"),
+        where("email", "==", authUser.email)
+      );
+      const usuariosSnapshot = await getDocs(usuariosQuery);
+      let empresa = "";
 
-      if (!empresaToUpdate) {
+      if (!usuariosSnapshot.empty) {
+        empresa = usuariosSnapshot.docs[0].data().empresa || "";
+      }
+
+      // Determinar qué empresa usar para guardar datos
+      const empresaToUse = empresaSeleccionada || empresa;
+
+      if (empresaToUse) {
+        // 1. ACTUALIZAR NOMBRES EN USUARIOS
         const usuariosRef = collection(db, "usuarios");
-        const usuariosQuery = query(
+        const usuariosEmpresaQuery = query(
           usuariosRef,
-          where("email", "==", authUser.email)
+          where("empresa", "==", empresaToUse)
         );
-        const usuariosSnapshot = await getDocs(usuariosQuery);
+        const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
 
-        if (!usuariosSnapshot.empty) {
-          empresaToUpdate = usuariosSnapshot.docs[0].data().empresa || "";
-        } else {
-          console.error("No se encontró la empresa del usuario autenticado");
-          return;
-        }
-      }
+        const updateNombrePantallasPromises = [];
 
-      // 1. ACTUALIZAR NOMBRES EN USUARIOS (esto es lo que faltaba)
-      const usuariosRef = collection(db, "usuarios");
-      const usuariosEmpresaQuery = query(
-        usuariosRef,
-        where("empresa", "==", empresaToUpdate)
-      );
-      const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
+        usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
+          const usuarioRef = usuarioDoc.ref;
+          const usuarioData = usuarioDoc.data();
 
-      const updateNombrePantallasPromises = [];
-
-      usuariosEmpresaSnapshot.forEach((usuarioDoc) => {
-        const usuarioRef = usuarioDoc.ref;
-        const usuarioData = usuarioDoc.data();
-
-        if (usuarioRef && usuarioData) {
-          const nombrePantallasObject = {};
-          nombrePantallasVuelos.forEach((nombre, index) => {
-            nombrePantallasObject[`nombrePantallasVuelos.${index}`] = nombre;
-          });
-          updateNombrePantallasPromises.push(
-            updateDoc(usuarioRef, nombrePantallasObject)
-          );
-        }
-      });
-
-      await Promise.all(updateNombrePantallasPromises);
-
-      // 2. GUARDAR EN TEMPLATE VUELOS (igual que promociones)
-      const templateVuelosRef = collection(db, "TemplateVuelos");
-      const templateVuelosQuery = query(
-        templateVuelosRef,
-        where("empresa", "==", empresaToUpdate)
-      );
-      const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
-
-      const templateData = {
-        empresa: empresaToUpdate,
-        idioma: selectedLanguage,
-        pantallasConfig: pantallaSettings,
-        selectedCity: selectedCity,
-        distanceConfig: distanceConfig,
-        updatedAt: serverTimestamp(),
-        updatedBy: authUser.email || "",
-      };
-
-      if (!templateVuelosSnapshot.empty) {
-        // Actualizar documento existente
-        const templateVuelosDocRef = templateVuelosSnapshot.docs[0].ref;
-        await updateDoc(templateVuelosDocRef, templateData);
-      } else {
-        // Crear nuevo documento
-        await addDoc(templateVuelosRef, templateData);
-      }
-
-      // 3. ACTUALIZAR SISTEMA DISTANCE MATRIX OPTIMIZADO
-      if (
-        distanceConfig.enabled &&
-        distanceConfig.hotelLocation.lat &&
-        distanceConfig.hotelLocation.lng
-      ) {
-        try {
-          console.log(
-            `🗺️ Actualizando configuración de distancias para hotel: ${empresaToUpdate}`
-          );
-
-          const response = await fetch(
-            "https://updatehotelairportusage-wsvcv36oca-uc.a.run.app",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                companyId: empresaToUpdate,
-                hotelLocation: distanceConfig.hotelLocation,
-              }),
-            }
-          );
-
-          if (response.ok) {
-            const result = await response.json();
-            console.log(`✅ Sistema de distancias actualizado:`, result);
-          } else {
-            console.warn(
-              `⚠️ No se pudo actualizar sistema de distancias: ${response.status}`
+          if (usuarioRef && usuarioData) {
+            const nombrePantallasObject = {};
+            nombrePantallasVuelos.forEach((nombre, index) => {
+              nombrePantallasObject[`nombrePantallasVuelos.${index}`] = nombre;
+            });
+            updateNombrePantallasPromises.push(
+              updateDoc(usuarioRef, nombrePantallasObject)
             );
           }
-        } catch (error) {
-          console.error("❌ Error actualizando sistema de distancias:", error);
-          // No fallar la operación completa si esto falla
+        });
+
+        await Promise.all(updateNombrePantallasPromises);
+
+        // 2. GUARDAR EN TEMPLATE VUELOS
+        const templateVuelosRef = collection(db, "TemplateVuelos");
+        const templateVuelosQuery = query(
+          templateVuelosRef,
+          where("empresa", "==", empresaToUse)
+        );
+        const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
+
+        const templateData = {
+          empresa: empresaToUse,
+          idioma: selectedLanguage,
+          pantallasConfig: pantallaSettings,
+          selectedCity: selectedCity,
+          distanceConfig: distanceConfig,
+          updatedAt: serverTimestamp(),
+          updatedBy: authUser.email || "",
+        };
+
+        if (!templateVuelosSnapshot.empty) {
+          // Actualizar documento existente
+          const templateVuelosDocRef = templateVuelosSnapshot.docs[0].ref;
+          await updateDoc(templateVuelosDocRef, templateData);
+        } else {
+          // Crear nuevo documento
+          await addDoc(templateVuelosRef, templateData);
+        }
+
+        // 3. ACTUALIZAR SISTEMA DISTANCE MATRIX (opcional)
+        if (
+          distanceConfig.enabled &&
+          distanceConfig.hotelLocation.lat &&
+          distanceConfig.hotelLocation.lng
+        ) {
+          try {
+            console.log(
+              `🗺️ Actualizando configuración de distancias para hotel: ${empresaToUse}`
+            );
+
+            const response = await fetch(
+              "https://updatehotelairportusage-wsvcv36oca-uc.a.run.app",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  companyId: empresaToUse,
+                  hotelLocation: distanceConfig.hotelLocation,
+                }),
+              }
+            );
+
+            if (response.ok) {
+              const result = await response.json();
+              console.log(`✅ Sistema de distancias actualizado:`, result);
+            } else {
+              console.warn(
+                `⚠️ No se pudo actualizar sistema de distancias: ${response.status}`
+              );
+            }
+          } catch (error) {
+            console.error("❌ Error actualizando sistema de distancias:", error);
+            // No fallar la operación completa si esto falla
+          }
         }
       }
 
