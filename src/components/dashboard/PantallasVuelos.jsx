@@ -98,7 +98,6 @@ function PantallasVuelos() {
     },
   ]);
 
-
   // Configuración de campos disponibles
   const [availableFields] = useState({
     // Campos obligatorios (no se pueden desactivar)
@@ -182,8 +181,7 @@ function PantallasVuelos() {
             const user = usuariosSnapshot.docs[0].data();
             const numberOfScreens = user.pv || 0;
 
-            const nombresPantallasColeccion =
-              user.nombrePantallasVuelos || [];
+            const nombresPantallasColeccion = user.nombrePantallasVuelos || [];
 
             const namesArray = Array.from(
               { length: numberOfScreens },
@@ -249,7 +247,8 @@ function PantallasVuelos() {
               }
 
               // Cargar configuración Distance Matrix
-              const loadedDistanceConfig = templateVuelosData.distanceConfig || {};
+              const loadedDistanceConfig =
+                templateVuelosData.distanceConfig || {};
               setDistanceConfig({
                 enabled: loadedDistanceConfig.enabled || false,
                 hotelLocation: {
@@ -276,7 +275,6 @@ function PantallasVuelos() {
       "ulises.jacobo@hotmail.com",
       "contacto@upperds.mx",
     ].includes(firebase.auth().currentUser.email);
-
 
   // Función para manejar cambios de configuración general
   const handleLanguageChange = (e) => {
@@ -490,7 +488,10 @@ function PantallasVuelos() {
               );
             }
           } catch (error) {
-            console.error("❌ Error actualizando sistema de distancias:", error);
+            console.error(
+              "❌ Error actualizando sistema de distancias:",
+              error
+            );
             // No fallar la operación completa si esto falla
           }
         }
@@ -551,7 +552,6 @@ function PantallasVuelos() {
       }
     }
 
-
     // Validar que al menos una opción esté habilitada
     if (
       field === "displaySettings.showDepartures" ||
@@ -604,9 +604,6 @@ function PantallasVuelos() {
           <h1 className="text-3xl font-extrabold text-gray-900 sm:text-4xl">
             {t("flightScreens.title")}
           </h1>
-          <p className="mt-3 max-w-2xl mx-auto text-base text-gray-500 sm:text-lg">
-            {t("flightScreens.description")}
-          </p>
         </div>
 
         {/* Selector de empresa para usuarios autorizados */}
@@ -1321,10 +1318,8 @@ function PantallasVuelos() {
                         return null;
                       })()}
                     </div>
-
                   </div>
                 </div>
-
 
                 {/* Configuración de Campos Visibles */}
                 <div className="bg-gray-50 p-4 rounded-lg">
