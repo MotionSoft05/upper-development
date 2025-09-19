@@ -79,22 +79,37 @@ function PantallasVuelos() {
 
   const [selectedCity, setSelectedCity] = useState(null);
 
-  // Configuración de aeropuertos disponibles
-  const [availableAirports] = useState([
+  // Configuración de aeropuertos disponibles y su estado
+  const [availableAirports, setAvailableAirports] = useState([
     {
       value: "MEX",
       label: "Ciudad de México (AICM)",
       name: "Aeropuerto Internacional Ciudad de México",
+      enabled: true, // Se actualizará desde Firestore
     },
     {
       value: "GDL",
       label: "Guadalajara (GDL)",
       name: "Aeropuerto Internacional de Guadalajara",
+      enabled: true,
     },
     {
       value: "CUN",
       label: "Cancún (CUN)",
       name: "Aeropuerto Internacional de Cancún",
+      enabled: true,
+    },
+    {
+      value: "MTY",
+      label: "Monterrey (MTY)",
+      name: "Aeropuerto Internacional de Monterrey",
+      enabled: true,
+    },
+    {
+      value: "PVR",
+      label: "Puerto Vallarta (PVR)",
+      name: "Aeropuerto Internacional de Puerto Vallarta",
+      enabled: true,
     },
   ]);
 
@@ -267,6 +282,41 @@ function PantallasVuelos() {
 
     cargarDatosPersonalizacion();
   }, [empresaSeleccionada]);
+
+  // 🔄 NUEVO: Cargar estado de aeropuertos desde configuración del admin
+  useEffect(() => {
+    const loadAirportStatus = async () => {
+      try {
+        console.log("🔄 Cargando estado de aeropuertos desde admin...");
+
+        const airportConfigSnapshot = await getDocs(
+          collection(db, "airportServiceConfig")
+        );
+
+        // Crear mapa de estados de aeropuertos
+        const airportStatusMap = {};
+        airportConfigSnapshot.forEach((doc) => {
+          airportStatusMap[doc.id] = doc.data().enabled;
+        });
+
+        console.log("📡 Estado de aeropuertos:", airportStatusMap);
+
+        // Actualizar la lista de aeropuertos disponibles con el estado real
+        setAvailableAirports(prevAirports =>
+          prevAirports.map(airport => ({
+            ...airport,
+            enabled: airportStatusMap[airport.value] === true // Solo habilitado si explícitamente está en true
+          }))
+        );
+
+      } catch (error) {
+        console.error("❌ Error cargando estado de aeropuertos:", error);
+        // En caso de error, mantener todos habilitados por seguridad
+      }
+    };
+
+    loadAirportStatus();
+  }, []); // Solo cargar una vez al montar el componente
 
   const usuarioAutorizado =
     firebase.auth().currentUser &&
@@ -1165,7 +1215,10 @@ function PantallasVuelos() {
                     </div>
                   </div>
                   <Select
-                    options={availableAirports}
+                    options={availableAirports.map(airport => ({
+                      ...airport,
+                      isDisabled: !airport.enabled, // Deshabilitar si el admin lo desactivó
+                    }))}
                     value={availableAirports.find(
                       (airport) =>
                         airport.value === selectedPantalla.config.airport?.code
@@ -1178,6 +1231,26 @@ function PantallasVuelos() {
                     }
                     placeholder={t("flightScreens.selectAirport")}
                     className="w-full"
+                    styles={{
+                      option: (provided, state) => ({
+                        ...provided,
+                        color: state.data.enabled ? '#1f2937' : '#9ca3af', // Gris si está deshabilitado
+                        backgroundColor: state.data.enabled
+                          ? (state.isSelected ? '#3b82f6' : (state.isFocused ? '#eff6ff' : 'white'))
+                          : (state.isFocused ? '#f3f4f6' : '#f9fafb'), // Fondo gris claro si está deshabilitado
+                        cursor: state.data.enabled ? 'pointer' : 'not-allowed',
+                        opacity: state.data.enabled ? 1 : 0.6,
+                      }),
+                      singleValue: (provided, state) => ({
+                        ...provided,
+                        color: state.data?.enabled !== false ? '#1f2937' : '#9ca3af',
+                      }),
+                    }}
+                    formatOptionLabel={(option) => (
+                      <span className={option.enabled ? 'text-gray-900' : 'text-gray-400'}>
+                        {option.label}
+                      </span>
+                    )}
                   />
                 </div>
 

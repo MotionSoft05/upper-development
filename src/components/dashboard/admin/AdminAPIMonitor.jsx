@@ -25,7 +25,6 @@ import {
   faCheckCircle,
   faExclamationTriangle,
   faTimesCircle,
-  faChartLine,
   faCog,
   faServer,
   faPlane,
@@ -78,8 +77,6 @@ function AdminAPIMonitor() {
   // Nuevos estados para mejoras
   const [nextExecution, setNextExecution] = useState(null);
   const [isExecutingManual, setIsExecutingManual] = useState(false);
-  const [detailedLogs, setDetailedLogs] = useState([]);
-  const [showLogsModal, setShowLogsModal] = useState(false);
 
   // URLs específicas de Firebase Functions v2
   const FUNCTION_URLS = {
@@ -310,33 +307,6 @@ function AdminAPIMonitor() {
     }
   };
 
-  // NUEVA: Función para obtener logs detallados
-  const fetchDetailedLogs = async () => {
-    try {
-      const response = await fetch(`${FUNCTION_URLS.systemHealth}`);
-      const data = await response.json();
-      
-      // Procesar logs para mostrar errores detallados
-      const errorLogs = data.recentLogs?.filter(log => 
-        log.level === 'error' || 
-        log.context?.includes('error') || 
-        log.message?.toLowerCase().includes('error') ||
-        log.message?.toLowerCase().includes('timeout') ||
-        log.message?.toLowerCase().includes('failed')
-      ) || [];
-      
-      setDetailedLogs(errorLogs);
-      setShowLogsModal(true);
-      
-    } catch (error) {
-      console.error('Error obteniendo logs:', error);
-      Swal.fire({
-        title: "❌ Error",
-        text: "Error obteniendo logs detallados",
-        icon: "error"
-      });
-    }
-  };
 
   // Función para cargar estado de cron jobs
   const loadCronStatus = async () => {
@@ -591,17 +561,6 @@ function AdminAPIMonitor() {
             Control de Servicios
           </button>
 
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={`flex items-center px-6 py-3 text-sm font-medium whitespace-nowrap ${
-              activeTab === "stats"
-                ? "border-b-2 border-blue-500 text-blue-600"
-                : "text-gray-500 hover:text-gray-700"
-            }`}
-          >
-            <FontAwesomeIcon icon={faChartLine} className="mr-2" />
-            Estadísticas
-          </button>
         </div>
 
         {/* TAB: Estado del Sistema */}
@@ -694,52 +653,6 @@ function AdminAPIMonitor() {
               </div>
             </div>
 
-            {/* Recent Logs */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b border-gray-200">
-                <div className="flex justify-between items-center">
-                  <h3 className="text-lg font-semibold text-gray-900">Logs Recientes</h3>
-                  <button
-                    onClick={loadRecentLogs}
-                    className="text-blue-600 hover:text-blue-800 text-sm"
-                  >
-                    <FontAwesomeIcon icon={faSync} className="mr-1" />
-                    Actualizar
-                  </button>
-                </div>
-              </div>
-              <div className="p-6">
-                {recentLogs.length > 0 ? (
-                  <div className="space-y-3">
-                    {recentLogs.map((log) => (
-                      <div key={log.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <div className={`mt-1 ${
-                          log.level === 'error' ? 'text-red-500' : 
-                          log.level === 'warning' ? 'text-yellow-500' : 'text-green-500'
-                        }`}>
-                          <FontAwesomeIcon 
-                            icon={log.level === 'error' ? faTimesCircle : 
-                                 log.level === 'warning' ? faExclamationTriangle : faCheckCircle} 
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-900">{log.message}</p>
-                          <p className="text-xs text-gray-500">
-                            {log.timestamp?.toDate?.()?.toLocaleString() || new Date(log.timestamp).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-500">
-                    <FontAwesomeIcon icon={faServer} className="text-4xl mb-4" />
-                    <p>No hay logs disponibles</p>
-                  </div>
-                )}
-              </div>
-            </div>
-
             {/* Control de Servicios por Aeropuerto */}
             <div className="bg-white p-6 rounded-lg shadow">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -801,6 +714,52 @@ function AdminAPIMonitor() {
                 </p>
               </div>
             </div>
+
+            {/* Recent Logs */}
+            <div className="bg-white rounded-lg shadow-sm border">
+              <div className="p-6 border-b border-gray-200">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-900">Logs Recientes</h3>
+                  <button
+                    onClick={loadRecentLogs}
+                    className="text-blue-600 hover:text-blue-800 text-sm"
+                  >
+                    <FontAwesomeIcon icon={faSync} className="mr-1" />
+                    Actualizar
+                  </button>
+                </div>
+              </div>
+              <div className="p-6">
+                {recentLogs.length > 0 ? (
+                  <div className="space-y-3">
+                    {recentLogs.map((log) => (
+                      <div key={log.id} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <div className={`mt-1 ${
+                          log.level === 'error' ? 'text-red-500' :
+                          log.level === 'warning' ? 'text-yellow-500' : 'text-green-500'
+                        }`}>
+                          <FontAwesomeIcon
+                            icon={log.level === 'error' ? faTimesCircle :
+                                 log.level === 'warning' ? faExclamationTriangle : faCheckCircle}
+                          />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-900">{log.message}</p>
+                          <p className="text-xs text-gray-500">
+                            {log.timestamp?.toDate?.()?.toLocaleString() || new Date(log.timestamp).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FontAwesomeIcon icon={faServer} className="text-4xl mb-4" />
+                    <p>No hay logs disponibles</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
@@ -811,8 +770,8 @@ function AdminAPIMonitor() {
               {/* Panel de Control */}
               <div className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6 border-b border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900">Panel de Testing</h3>
-                  <p className="text-sm text-gray-600 mt-1">Prueba las APIs de vuelos manualmente</p>
+                  <h3 className="text-lg font-semibold text-gray-900">Testing de Conectividad</h3>
+                  <p className="text-sm text-gray-600 mt-1">Verifica la conectividad con APIs individuales sin guardar datos</p>
                 </div>
                 <div className="p-6 space-y-4">
                   <div>
@@ -832,11 +791,11 @@ function AdminAPIMonitor() {
                     </select>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="w-full">
                     <button
                       onClick={() => runAPITest(selectedTestAirport, false)}
                       disabled={isTestingLoading}
-                      className="flex items-center justify-center px-4 py-3 border border-blue-300 text-blue-700 rounded-md hover:bg-blue-50 disabled:opacity-50 transition-colors"
+                      className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
                     >
                       {isTestingLoading ? (
                         <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
@@ -846,33 +805,18 @@ function AdminAPIMonitor() {
                       ) : (
                         <FontAwesomeIcon icon={faPlane} className="mr-2" />
                       )}
-                      Solo Consultar
-                    </button>
-
-                    <button
-                      onClick={() => runAPITest(selectedTestAirport, true)}
-                      disabled={isTestingLoading}
-                      className="flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                    >
-                      {isTestingLoading ? (
-                        <svg className="animate-spin h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                      ) : (
-                        <FontAwesomeIcon icon={faServer} className="mr-2" />
-                      )}
-                      Consultar y Guardar
+                      🔍 Probar Conectividad API
                     </button>
                   </div>
 
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start">
-                      <FontAwesomeIcon icon={faExclamationTriangle} className="text-yellow-500 mt-0.5 mr-3" />
+                      <FontAwesomeIcon icon={faPlane} className="text-blue-500 mt-0.5 mr-3" />
                       <div>
-                        <p className="text-sm font-medium text-yellow-800">Nota Importante</p>
-                        <p className="text-sm text-yellow-700 mt-1">
-                          Las actualizaciones automáticas continúan ejecutándose cada 20 minutos independientemente de estos tests manuales.
+                        <p className="text-sm font-medium text-blue-800">Función de Testing</p>
+                        <p className="text-sm text-blue-700 mt-1">
+                          Esta prueba solo verifica la conectividad con las APIs y NO guarda datos en Firestore.
+                          Para actualizaciones reales, usa "Prueba Manual de APIs" en Control de Servicios.
                         </p>
                       </div>
                     </div>
@@ -987,6 +931,37 @@ function AdminAPIMonitor() {
                     </button>
                   </div>
 
+                  {/* Botón de Prueba Manual */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div>
+                        <h4 className="font-medium text-gray-900">Prueba Manual de APIs</h4>
+                        <p className="text-sm text-gray-600">Ejecuta una prueba inmediata sin afectar el cronograma automático</p>
+                      </div>
+                      <button
+                        onClick={executeManualUpdate}
+                        disabled={isExecutingManual}
+                        className={`px-6 py-3 rounded-lg text-white font-medium transition-colors ${
+                          isExecutingManual
+                            ? 'bg-gray-400 cursor-not-allowed'
+                            : 'bg-purple-600 hover:bg-purple-700'
+                        }`}
+                      >
+                        {isExecutingManual ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                            </svg>
+                            Ejecutando prueba...
+                          </>
+                        ) : (
+                          '🧪 Prueba Manual de APIs'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div className="flex items-start">
                       <FontAwesomeIcon icon={faCog} className="text-blue-500 mt-0.5 mr-3" />
@@ -1038,206 +1013,6 @@ function AdminAPIMonitor() {
           </div>
         )}
 
-        {/* TAB: Estadísticas */}
-        {activeTab === "stats" && (
-          <div className="space-y-6">
-            {/* Stats Cards con botón ejecutar ahora */}
-            <div className="mb-6 flex justify-between items-center">
-              <h3 className="text-xl font-semibold text-gray-900">📈 Estadísticas de APIs</h3>
-              <div className="flex flex-col items-end">
-                <button
-                  onClick={executeManualUpdate}
-                  disabled={isExecutingManual}
-                  className={`px-6 py-3 rounded-lg text-white font-medium transition-colors ${
-                    isExecutingManual
-                      ? 'bg-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 hover:bg-blue-700'
-                  }`}
-                >
-                  {isExecutingManual ? (
-                    <>
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                      </svg>
-                      Ejecutando...
-                    </>
-                  ) : (
-                    '🚀 Ejecutar Ahora'
-                  )}
-                </button>
-                <p className="text-xs text-gray-500 mt-1">Sin afectar el cronograma automático</p>
-              </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">{apiStats.totalRequests}</p>
-                  <p className="text-sm text-gray-600 mt-1">Total de Peticiones</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">{apiStats.successfulRequests}</p>
-                  <p className="text-sm text-gray-600 mt-1">Exitosas</p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-red-600">{apiStats.failedRequests}</p>
-                  <p className="text-sm text-gray-600 mt-1">Fallidas</p>
-                  {apiStats.failedRequests > 0 && (
-                    <button
-                      onClick={fetchDetailedLogs}
-                      className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
-                    >
-                      Ver detalles
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              <div className="bg-white rounded-lg p-6 shadow-sm border">
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-purple-600">
-                    {apiStats.totalRequests > 0 ? 
-                      Math.round((apiStats.successfulRequests / apiStats.totalRequests) * 100) : 0}%
-                  </p>
-                  <p className="text-sm text-gray-600 mt-1">Tasa de Éxito</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Información adicional */}
-            <div className="bg-white rounded-lg shadow-sm border">
-              <div className="p-6 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900">Resumen de APIs</h3>
-              </div>
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900">OpenSky Network</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Estado:</span>
-                        <span className="text-green-600">✅ OAuth2 Activo</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Client ID:</span>
-                        <span className="font-mono text-xs">kevinbarrios05-api-client</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Límite diario:</span>
-                        <span>4000-8000 créditos</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-4">
-                    <h4 className="font-semibold text-gray-900">AviationStack (Backup)</h4>
-                    <div className="space-y-2 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Estado:</span>
-                        <span className="text-blue-600">🔄 Standby</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">API Key:</span>
-                        <span className="font-mono text-xs">ce631...810503</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-gray-600">Límite mensual:</span>
-                        <span>1000 requests</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* NUEVO: Modal de Logs Detallados */}
-            {showLogsModal && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
-                  <div className="flex justify-between items-center p-6 border-b">
-                    <h3 className="text-lg font-semibold">🔍 Logs Detallados de Errores</h3>
-                    <button
-                      onClick={() => setShowLogsModal(false)}
-                      className="text-gray-400 hover:text-gray-600"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                  
-                  <div className="p-6 overflow-y-auto max-h-[60vh]">
-                    {detailedLogs.length > 0 ? (
-                      <div className="space-y-4">
-                        {detailedLogs.map((log, index) => (
-                          <div key={index} className="bg-red-50 border border-red-200 rounded-lg p-4">
-                            <div className="flex justify-between items-start mb-2">
-                              <span className="text-sm font-medium text-red-800">
-                                {log.timestamp ? new Date(log.timestamp).toLocaleString() : 'Sin timestamp'}
-                              </span>
-                              <span className="text-xs bg-red-100 text-red-700 px-2 py-1 rounded">
-                                {log.context || log.level || 'Error'}
-                              </span>
-                            </div>
-                            <p className="text-sm text-red-700 font-mono mb-2">
-                              {log.message || 'Sin mensaje de error'}
-                            </p>
-                            {log.details && (
-                              <pre className="mt-2 text-xs bg-red-100 p-2 rounded overflow-x-auto">
-                                {JSON.stringify(log.details, null, 2)}
-                              </pre>
-                            )}
-                            {log.error && (
-                              <div className="mt-2 text-xs bg-red-100 p-2 rounded">
-                                <strong>Error:</strong> {log.error}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-center py-8">
-                        <FontAwesomeIcon icon={faCheckCircle} className="text-4xl text-green-500 mb-4" />
-                        <p className="text-gray-500 font-medium">No se encontraron logs de errores recientes.</p>
-                        <p className="text-sm text-gray-400 mt-2">
-                          Esto significa que las APIs están funcionando correctamente.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="p-6 border-t bg-gray-50">
-                    <div className="flex justify-between items-center">
-                      <p className="text-sm text-gray-600">
-                        Mostrando errores de las últimas 24 horas
-                      </p>
-                      <div className="space-x-3">
-                        <button
-                          onClick={fetchDetailedLogs}
-                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          🔄 Actualizar
-                        </button>
-                        <button
-                          onClick={() => setShowLogsModal(false)}
-                          className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
-                        >
-                          Cerrar
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     </div>
   );
