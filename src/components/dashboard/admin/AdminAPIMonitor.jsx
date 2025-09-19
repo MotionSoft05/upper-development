@@ -86,6 +86,7 @@ function AdminAPIMonitor() {
     systemHealth: "https://systemhealth-wsvcv36oca-uc.a.run.app",
     cronControl: "https://croncontrol-wsvcv36oca-uc.a.run.app",
     testFlightUpdate: "https://testflightupdate-wsvcv36oca-uc.a.run.app",
+    executeManualUpdate: "https://executemanualupdate-wsvcv36oca-uc.a.run.app",
     // NUEVOS: Endpoints para control de aeropuertos
     getAirportServiceStatus: "https://getairportservicestatus-wsvcv36oca-uc.a.run.app",
     toggleAirportService: "https://toggleairportservice-wsvcv36oca-uc.a.run.app",
@@ -254,70 +255,51 @@ function AdminAPIMonitor() {
     return `En ${diffMinutes} minutos (${next.toLocaleTimeString()})`;
   };
 
-  // NUEVA: Función para ejecutar actualización manual
+  // 🔧 FIX: Función para ejecutar actualización manual SIN afectar el CRON
   const executeManualUpdate = async () => {
     setIsExecutingManual(true);
-    
+
     try {
-      const airports = ['MEX', 'GDL', 'CUN', 'MTY', 'PVR'];
-      const results = [];
-      
-      for (const airport of airports) {
-        console.log(`🚀 Ejecutando actualización manual para ${airport}...`);
-        
-        const response = await fetch(
-          `${FUNCTION_URLS.testFlightUpdate}?airport=${airport}&force=true`,
-          { method: 'GET' }
-        );
-        
-        const result = await response.json();
-        results.push({
-          airport,
-          success: result.success,
-          data: result.data,
-          error: result.error
-        });
-      }
+      console.log('🚀 Ejecutando actualización manual independiente...');
 
-      // 🗺️ OPTIMIZADO: Activar Distance Matrix sin requests extra
-      console.log('🗺️ Activando Google Distance Matrix...');
-      try {
-        // Usar la función de reinicio del cron para activar todo el sistema
-        const cronResponse = await fetch(`${FUNCTION_URLS.cronControl}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'restart' })
-        });
-
-        if (cronResponse.ok) {
-          console.log('✅ Google Distance Matrix activado');
-        }
-      } catch (error) {
-        console.error('❌ Error activando Distance Matrix:', error);
-      }
-
-      // Mostrar resultado
-      const successful = results.filter(r => r.success).length;
-      const failed = results.filter(r => !r.success).length;
-      
-      Swal.fire({
-        title: "✅ Ejecución manual completada",
-        html: `
-          <div class="text-left">
-            <p><strong>Exitosos:</strong> ${successful}/${airports.length}</p>
-            <p><strong>Fallidos:</strong> ${failed}/${airports.length}</p>
-            ${failed > 0 ? '<p class="text-red-600 mt-2">Ver logs detallados para más información.</p>' : '<p class="text-green-600 mt-2">Todos los aeropuertos actualizados correctamente.</p>'}
-          </div>
-        `,
-        icon: "success",
-        timer: 5000,
+      // 🔧 FIX: Usar la nueva función executeManualUpdate que NO activa el cron
+      const response = await fetch(`${FUNCTION_URLS.executeManualUpdate}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({}) // No se necesitan parámetros
       });
-      
-      // Recargar estado del sistema (OPTIMIZADO)
+
+      const result = await response.json();
+
+      if (result.success) {
+        const { summary } = result;
+
+        Swal.fire({
+          title: "✅ Ejecución manual completada",
+          html: `
+            <div class="text-left">
+              <p><strong>Aeropuertos procesados:</strong> ${summary.flightAirports}</p>
+              <p><strong>Vuelos exitosos:</strong> ${summary.flightSuccessful}/${summary.flightAirports}</p>
+              <p><strong>Hoteles procesados:</strong> ${summary.hotelsProcessed}</p>
+              <p><strong>Tiempo de ejecución:</strong> ${(summary.executionTime / 1000).toFixed(1)}s</p>
+              <p class="text-green-600 mt-2">✅ Estado del CRON sin cambios</p>
+              <p class="text-sm text-gray-500 mt-2">Solo se ejecutaron las APIs - el cronograma automático no fue afectado</p>
+            </div>
+          `,
+          icon: "success",
+          timer: 6000,
+        });
+
+        console.log('✅ Actualización manual exitosa:', result.summary);
+      } else {
+        throw new Error(result.error || 'Error desconocido');
+      }
+
+      // Recargar estado del sistema
       await loadAllSystemData();
-      
+
     } catch (error) {
-      console.error('Error en ejecución manual:', error);
+      console.error('❌ Error en ejecución manual:', error);
       Swal.fire({
         title: "❌ Error en ejecución manual",
         text: error.message,
@@ -1062,27 +1044,30 @@ function AdminAPIMonitor() {
             {/* Stats Cards con botón ejecutar ahora */}
             <div className="mb-6 flex justify-between items-center">
               <h3 className="text-xl font-semibold text-gray-900">📈 Estadísticas de APIs</h3>
-              <button
-                onClick={executeManualUpdate}
-                disabled={isExecutingManual}
-                className={`px-6 py-3 rounded-lg text-white font-medium transition-colors ${
-                  isExecutingManual 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                {isExecutingManual ? (
-                  <>
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                    </svg>
-                    Ejecutando...
-                  </>
-                ) : (
-                  '🚀 Ejecutar Ahora'
-                )}
-              </button>
+              <div className="flex flex-col items-end">
+                <button
+                  onClick={executeManualUpdate}
+                  disabled={isExecutingManual}
+                  className={`px-6 py-3 rounded-lg text-white font-medium transition-colors ${
+                    isExecutingManual
+                      ? 'bg-gray-400 cursor-not-allowed'
+                      : 'bg-blue-600 hover:bg-blue-700'
+                  }`}
+                >
+                  {isExecutingManual ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+                      </svg>
+                      Ejecutando...
+                    </>
+                  ) : (
+                    '🚀 Ejecutar Ahora'
+                  )}
+                </button>
+                <p className="text-xs text-gray-500 mt-1">Sin afectar el cronograma automático</p>
+              </div>
             </div>
 
             {/* Stats Cards */}

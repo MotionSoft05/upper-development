@@ -721,22 +721,32 @@ exports.cronControl = onRequest({
         message = "Cron jobs pausados - No se realizarán " +
             "actualizaciones automáticas";
         break;
-      case "restart":
-        enabled = true;
-        message = "Cron jobs reiniciados - Forzando actualización inmediata";
+      case "restart": {
+        // 🔧 FIX: No cambiar el estado del cron en restart
+        // Solo obtener el estado actual
+        const currentCronDoc = await db.collection("systemConfig")
+            .doc("cronJobs").get();
+        const currentCronState = currentCronDoc.exists ?
+            currentCronDoc.data() : {enabled: false};
+        enabled = currentCronState.enabled; // Mantener estado actual
+        message = "Ejecutando actualización manual - " +
+            "Estado del cron sin cambios";
         break;
+      }
     }
 
-    // Actualizar configuración
-    const cronStatus = {
-      enabled: enabled,
-      lastAction: action,
-      lastActionAt: admin.firestore.FieldValue.serverTimestamp(),
-      controlledBy: "admin_panel",
-    };
+    // Actualizar configuración solo si no es restart
+    if (action !== "restart") {
+      const cronStatus = {
+        enabled: enabled,
+        lastAction: action,
+        lastActionAt: admin.firestore.FieldValue.serverTimestamp(),
+        controlledBy: "admin_panel",
+      };
 
-    await db.collection("systemConfig").doc("cronJobs")
-        .set(cronStatus, {merge: true});
+      await db.collection("systemConfig").doc("cronJobs")
+          .set(cronStatus, {merge: true});
+    }
 
     // Log de la acción
     await db.collection("systemLogs").add({
@@ -755,8 +765,9 @@ exports.cronControl = onRequest({
         // Ejecutar la misma lógica que el cron job
         const startTime = Date.now();
 
-        // Actualizar vuelos (mismo código del cron job)
-        const airports = ["MEX", "GDL", "CUN"];
+        // 🔧 FIX: Usar getActiveAirports() igual que el cron automático
+        const airports = await getActiveAirports();
+        console.log(`📡 Procesando aeropuertos activos: ${airports.join(", ")}`);
         const flightResults = [];
 
         for (const airport of airports) {
@@ -764,9 +775,13 @@ exports.cronControl = onRequest({
             console.log(`📡 Actualizando vuelos para ${airport}...`);
             const flightData = await flightService.getFlightData(airport);
 
+            // Limpiar datos antes de guardar
+            const cleanFlightData = cleanUndefinedValues(flightData);
+
             await db.collection("flightData").doc(airport).set({
-              ...flightData,
+              ...cleanFlightData,
               serverTimestamp: admin.firestore.FieldValue.serverTimestamp(),
+              updatedVia: "manual_restart",
             });
 
             flightResults.push({
@@ -912,6 +927,153 @@ exports.systemHealth = onRequest({
       distanceMatrix: "error",
       cronJobs: "error",
       apiHealth: "error",
+    });
+  }
+});
+
+/**
+ * 🚀 ENDPOINT PARA EJECUCIÓN MANUAL SIN AFECTAR CRON
+ * Ejecuta las APIs manualmente sin cambiar el estado del cron job
+ */
+exports.executeManualUpdate = onRequest({
+  cors: {
+    origin: true,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+  },
+  memory: "512MiB",
+}, async (req, res) => {
+  try {
+    console.log("🚀 Ejecutando actualización manual independiente...");
+
+    const startTime = Date.now();
+
+    // 🔧 FIX: Usar getActiveAirports() igual que el cron automático
+    const airports = await getActiveAirports();
+    console.log(`📡 Procesando aeropuertos activos: ${airports.join(", ")}`);
+    const flightResults = [];
+
+    for (const airport of airports) {
+      try {
+        console.log(`📡 Actualizando vuelos para ${airport}...`);
+        const flightData = await flightService.getFlightData(airport);
+
+        // Limpiar datos antes de guardar
+        const cleanFlightData = cleanUndefinedValues(flightData);
+
+        await db.collection("flightData").doc(airport).set({
+          ...cleanFlightData,
+          serverTimestamp: admin.firestore.FieldValue.serverTimestamp(),
+          updatedVia: "manual_button",
+        });
+
+        flightResults.push({
+          airport,
+          success: true,
+          totalFlights: flightData.totalFlights,
+          source: flightData.source,
+        });
+
+        console.log(`✅ ${airport}: ${flightData.totalFlights} vuelos (${flightData.source})`);
+      } catch (error) {
+        console.error(`❌ Error actualizando ${airport}:`, error.message);
+        flightResults.push({
+          airport,
+          success: false,
+          error: error.message,
+        });
+
+        // Guardar error en Firestore para debugging
+        await db.collection("flightErrors").add({
+          airport,
+          error: error.message,
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+          context: "manual_execution",
+        });
+      }
+    }
+
+    // Actualizar distancias de hoteles
+    let distanceResults = {};
+    try {
+      distanceResults = await hotelDistanceService.updateAllHotelDistances();
+      console.log(`✅ Distancias actualizadas: ${distanceResults.processed} hoteles procesados`);
+    } catch (error) {
+      console.error("❌ Error en actualización de distancias:", error);
+      distanceResults = {success: false, error: error.message, processed: 0};
+    }
+
+    const endTime = Date.now();
+    const executionTime = endTime - startTime;
+
+    const flightSummary = {
+      success: flightResults.filter((r) => r.success).length > 0,
+      processed: airports.length,
+      successful: flightResults.filter((r) => r.success).length,
+    };
+
+    // Guardar log de la actualización manual
+    await db.collection("manualUpdateLogs").add({
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      flightResults: flightResults,
+      distanceResults: distanceResults,
+      summary: {
+        flightAirports: airports.length,
+        flightSuccessful: flightResults.filter((r) => r.success).length,
+        hotelsProcessed: distanceResults.processed || 0,
+        distanceSuccessful: distanceResults.successful || 0,
+      },
+      executionTime: executionTime,
+      triggeredBy: "admin_panel_button",
+    });
+
+    // Log del resultado
+    await db.collection("systemLogs").add({
+      level: "info",
+      message: `Actualización manual (botón): vuelos ${flightSummary.success ? "OK" : "ERROR"}, ` +
+          `distancias ${distanceResults.success ? "OK" : "ERROR"}`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      context: "manual_execution_button",
+      executionTime: executionTime,
+      flightResults: flightSummary,
+      distanceResults: distanceResults,
+    });
+
+    console.log(`✅ Actualización manual completada en ${executionTime}ms`);
+    console.log(`📊 Vuelos: ${flightSummary.successful}/${airports.length} exitosos`);
+    console.log(`🏨 Distancias: ${distanceResults.success ? "OK" : "ERROR"}`);
+
+    res.json({
+      success: true,
+      message: "Actualización manual completada sin afectar el estado del cron",
+      summary: {
+        flightAirports: airports.length,
+        flightSuccessful: flightResults.filter((r) => r.success).length,
+        hotelsProcessed: distanceResults.processed || 0,
+        distanceSuccessful: distanceResults.successful || 0,
+        executionTime: executionTime,
+      },
+      results: {
+        flights: flightResults,
+        distances: distanceResults,
+      },
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error("❌ Error en ejecución manual:", error);
+
+    // Log del error
+    await db.collection("systemLogs").add({
+      level: "error",
+      message: `Error en ejecución manual (botón): ${error.message}`,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      context: "manual_execution_button_error",
+    });
+
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      timestamp: new Date().toISOString(),
     });
   }
 });

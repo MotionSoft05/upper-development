@@ -275,7 +275,7 @@ async function calculateHotelDistances(companyId) {
           durationInTraffic: result.data.durationInTraffic,
           recommendations: result.data.recommendations,
           trafficConditions: result.data.trafficConditions,
-          lastCalculated: admin.firestore.FieldValue.serverTimestamp(),
+          lastCalculated: new Date().toISOString(),
         };
         successfulCalculations++;
         console.log(`  ✅ ${airport}: ${result.data.distance.km}km, ${result.data.duration.minutes}min`);
