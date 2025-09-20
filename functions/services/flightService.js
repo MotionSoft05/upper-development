@@ -464,8 +464,8 @@ class FlightService {
         const url = `https://aerodatabox.p.rapidapi.com/flights/airports/iata/${airport}`;
 
         const params = new URLSearchParams({
-          offsetMinutes: -30, // Comenzar 30 min antes (vs -180 default)
-          durationMinutes: 600, // ACTUALIZADO: Ventana de 10 horas (600 minutos)
+          offsetMinutes: 0, // Comenzar desde la hora actual (no incluir vuelos pasados)
+          durationMinutes: 600, // Ventana de 10 horas hacia adelante
           direction: "Both",
           withLeg: "true",
           withCancelled: "true",
@@ -859,8 +859,8 @@ class FlightService {
 
       // Parámetros MUY limitados para plan gratuito
       const params = new URLSearchParams({
-        offsetMinutes: -30, // Comenzar 30 min antes
-        durationMinutes: 600, // NUEVO: Ventana de 10 horas (600 minutos)
+        offsetMinutes: 0, // Comenzar desde la hora actual (no incluir vuelos pasados)
+        durationMinutes: 600, // Ventana de 10 horas hacia adelante
         withLeg: "false", // Reducir complejidad
         withCancelled: "false", // Solo vuelos activos
         withCodeshared: "false", // Sin codeshare

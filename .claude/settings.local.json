@@ -13,7 +13,8 @@
       "Bash(chmod:*)",
       "Bash(./test_apis_complete.sh:*)",
       "Bash(npx eslint:*)",
-      "Bash(dos2unix:*)"
+      "Bash(dos2unix:*)",
+      "Bash(firebase functions:list:*)"
     ],
     "deny": [],
     "ask": []
