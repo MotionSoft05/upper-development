@@ -158,7 +158,7 @@ export class FlightFirebaseService {
       aircraft: flight.aircraft || null,
       // Información adicional para mostrar en pantalla
       displayInfo: this.getFlightDisplayInfo(flight, type)
-    })).slice(0, 20); // Limitar a 20 vuelos máximo
+    })).slice(0, 23); // Limitar a 23 vuelos máximo
   }
 
   /**

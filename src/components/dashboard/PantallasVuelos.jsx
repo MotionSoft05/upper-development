@@ -588,7 +588,7 @@ function PantallasVuelos() {
       const currentSettings = selectedPantalla.config.displaySettings;
       const showsBoth =
         currentSettings?.showDepartures && currentSettings?.showArrivals;
-      const maxLimit = showsBoth ? 11 : 20; // Menos vuelos si muestra ambos tipos
+      const maxLimit = showsBoth ? 11 : 23; // Menos vuelos si muestra ambos tipos
 
       if (value < 4 || value > maxLimit) {
         Swal.fire({
@@ -1347,7 +1347,7 @@ function PantallasVuelos() {
                               ?.showDepartures &&
                             selectedPantalla.config.displaySettings
                               ?.showArrivals;
-                          return showsBoth ? " (máx. 11)" : " (máx. 20)";
+                          return showsBoth ? " (máx. 11)" : " (máx. 23)";
                         })()}
                       </label>
                       <input
@@ -1359,7 +1359,7 @@ function PantallasVuelos() {
                               ?.showDepartures &&
                             selectedPantalla.config.displaySettings
                               ?.showArrivals;
-                          return showsBoth ? 11 : 20;
+                          return showsBoth ? 11 : 23;
                         })()}
                         value={
                           selectedPantalla.config.displaySettings?.maxFlights ||
