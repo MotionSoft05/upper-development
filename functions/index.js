@@ -49,10 +49,10 @@ function cleanUndefinedValues(obj) {
 }
 
 /**
- * Función unificada que se ejecuta cada 20 minutos para actualizar vuelos y distancias
+ * Función unificada que se ejecuta cada 40 minutos para actualizar vuelos y distancias
  */
 exports.updateFlightsAndDistances = onSchedule({
-  schedule: "every 20 minutes",
+  schedule: "0,40 * * * *",
   timeZone: "America/Mexico_City",
   memory: "512MiB",
 }, async (event) => {
@@ -281,7 +281,7 @@ exports.getFlightData = onRequest({
   }
 
   const airport = req.query.airport || "MEX";
-  const maxAge = parseInt(req.query.maxAge) || 1200; // 20 minutos por defecto
+  const maxAge = parseInt(req.query.maxAge) || 2400; // 40 minutos por defecto
 
   try {
     console.log(`📱 Solicitud de datos para: ${airport}`);
@@ -714,7 +714,7 @@ exports.cronControl = onRequest({
       case "enable":
         enabled = true;
         message = "Cron jobs activados - Las actualizaciones " +
-            "se ejecutarán cada 20 minutos";
+            "se ejecutarán cada 40 minutos";
         break;
       case "disable":
         enabled = false;

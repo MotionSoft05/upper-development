@@ -3,7 +3,7 @@
  *
  * Sistema inteligente para calcular distancias hotel-aeropuerto que:
  * - Solo calcula aeropuertos que cada hotel realmente usa
- * - Se actualiza cada 20 minutos (sincronizado con vuelos)
+ * - Se actualiza cada 40 minutos (sincronizado con vuelos)
  * - Escala eficientemente con 15-20 hoteles iniciales
  * - Costo mínimo: ~$0.50 USD/mes vs ~$50 naive
  */
@@ -363,7 +363,7 @@ async function getHotelsNeedingDistanceUpdate() {
 
 /**
  * Proceso principal para actualizar distancias de todos los hoteles activos
- * Se ejecuta cada 20 minutos junto con la actualización de vuelos
+ * Se ejecuta cada 40 minutos junto con la actualización de vuelos
  * @return {Promise<Object>} Resumen de la ejecución
  */
 async function updateAllHotelDistances() {

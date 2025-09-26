@@ -80,13 +80,13 @@ function AdminAPIMonitor() {
 
   // URLs específicas de Firebase Functions v2
   const FUNCTION_URLS = {
-    systemHealth: "https://systemhealth-wsvcv36oca-uc.a.run.app",
-    cronControl: "https://croncontrol-wsvcv36oca-uc.a.run.app",
-    testFlightUpdate: "https://testflightupdate-wsvcv36oca-uc.a.run.app",
-    executeManualUpdate: "https://executemanualupdate-wsvcv36oca-uc.a.run.app",
+    systemHealth: "https://us-central1-upper-8c817.cloudfunctions.net/systemHealth",
+    cronControl: "https://us-central1-upper-8c817.cloudfunctions.net/cronControl",
+    testFlightUpdate: "https://us-central1-upper-8c817.cloudfunctions.net/testFlightUpdate",
+    executeManualUpdate: "https://us-central1-upper-8c817.cloudfunctions.net/executeManualUpdate",
     // NUEVOS: Endpoints para control de aeropuertos
-    getAirportServiceStatus: "https://getairportservicestatus-wsvcv36oca-uc.a.run.app",
-    toggleAirportService: "https://toggleairportservice-wsvcv36oca-uc.a.run.app",
+    getAirportServiceStatus: "https://us-central1-upper-8c817.cloudfunctions.net/getAirportServiceStatus",
+    toggleAirportService: "https://us-central1-upper-8c817.cloudfunctions.net/toggleAirportService",
   };
 
   // 🔧 FUNCIÓN OPTIMIZADA: Una sola llamada para todos los datos
@@ -113,7 +113,7 @@ function AdminAPIMonitor() {
         });
 
         setCronStatus({
-          enabled: health.cronJobs?.enabled || false,
+          enabled: health.cronJobs?.enabled || health.cronJobs?.status === 'active' || false,
           lastRun: health.cronJobs?.lastRun || null,
           lastAction: health.cronJobs?.lastAction || 'unknown',
           status: health.cronJobs?.status || 'inactive',
@@ -146,6 +146,11 @@ function AdminAPIMonitor() {
 
   // Actualizar próxima ejecución cada minuto
   useEffect(() => {
+    // Calcular inmediatamente cuando cambie el cronStatus
+    const nextExec = calculateNextExecution(cronStatus.lastRun, cronStatus.enabled);
+    setNextExecution(nextExec);
+
+    // Actualizar cada minuto si está habilitado
     if (cronStatus.enabled) {
       const interval = setInterval(() => {
         const nextExec = calculateNextExecution(cronStatus.lastRun, cronStatus.enabled);
@@ -231,24 +236,27 @@ function AdminAPIMonitor() {
 
   // NUEVA: Función para calcular próxima ejecución
   const calculateNextExecution = (lastExecution, isEnabled) => {
-    if (!isEnabled) return "Sistema pausado";
-    
+    if (!isEnabled) return "En espera (sistema pausado)";
+
     const now = new Date();
     const next = new Date(now);
-    
-    // El cron job se ejecuta cada 20 minutos: 0, 20, 40
+
+    // El cron job se ejecuta en minutos específicos: 0 y 40
     const currentMinutes = now.getMinutes();
-    const nextMinutes = Math.ceil((currentMinutes + 1) / 20) * 20;
-    
-    if (nextMinutes >= 60) {
-      next.setHours(next.getHours() + 1, 0, 0, 0);
+    let nextMinutes;
+
+    if (currentMinutes < 40) {
+      // Si es antes del minuto 40, la próxima ejecución es en el minuto 40 de esta hora
+      nextMinutes = 40;
+      next.setMinutes(40, 0, 0);
     } else {
-      next.setMinutes(nextMinutes, 0, 0);
+      // Si es después del minuto 40, la próxima ejecución es en el minuto 0 de la próxima hora
+      next.setHours(next.getHours() + 1, 0, 0, 0);
     }
-    
+
     const diffMinutes = Math.round((next - now) / (1000 * 60));
-    
-    if (diffMinutes <= 1) return "En menos de 1 minuto";
+
+    if (diffMinutes <= 1) return "Calculando próxima ejecución...";
     return `En ${diffMinutes} minutos (${next.toLocaleTimeString()})`;
   };
 
@@ -628,7 +636,7 @@ function AdminAPIMonitor() {
                   </div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  {cronStatus.enabled ? 'Ejecutándose cada 15 min' : 'Pausado manualmente'}
+                  {cronStatus.enabled ? 'Ejecutándose cada 40 min' : 'Pausado manualmente'}
                 </p>
               </div>
 
@@ -887,7 +895,7 @@ function AdminAPIMonitor() {
               <div className="bg-white rounded-lg shadow-sm border">
                 <div className="p-6 border-b border-gray-200">
                   <h3 className="text-lg font-semibold text-gray-900">Control de Actualizaciones Automáticas</h3>
-                  <p className="text-sm text-gray-600 mt-1">Gestiona las actualizaciones programadas cada 20 minutos</p>
+                  <p className="text-sm text-gray-600 mt-1">Gestiona las actualizaciones programadas cada 40 minutos</p>
                 </div>
                 <div className="p-6 space-y-4">
                   <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -968,10 +976,9 @@ function AdminAPIMonitor() {
                       <div>
                         <p className="text-sm font-medium text-blue-800">Información del Sistema</p>
                         <div className="text-sm text-blue-700 mt-1 space-y-1">
-                          <p>• Frecuencia: Cada 20 minutos</p>
-                          <p>• APIs: OpenSky Network (OAuth2) + AviationStack (backup)</p>
+                          <p>• Frecuencia: Cada 40 minutos</p>
+                          <p>• APIs: AviationStack</p>
                           <p>• Aeropuertos: MEX, GDL, CUN, MTY, PVR</p>
-                          <p>• Costo estimado: ~$5/mes máximo</p>
                         </div>
                       </div>
                     </div>
@@ -989,13 +996,17 @@ function AdminAPIMonitor() {
                     <div className="flex justify-between items-center py-3 border-b border-gray-100">
                       <span className="text-gray-600">Última ejecución</span>
                       <span className="font-medium">
-                        {cronStatus.lastRun ? new Date(cronStatus.lastRun).toLocaleString() : 'N/A'}
+                        {cronStatus.lastRun ? (
+                          cronStatus.lastRun._seconds ?
+                            new Date(cronStatus.lastRun._seconds * 1000).toLocaleString() :
+                            new Date(cronStatus.lastRun).toLocaleString()
+                        ) : 'N/A'}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-gray-100">
                       <span className="text-gray-600">Próxima ejecución</span>
                       <span className="font-medium text-blue-600">
-                        {nextExecution || 'Calculando...'}
+                        {nextExecution || (cronStatus.enabled ? 'Calculando próxima ejecución...' : 'En espera (sistema pausado)')}
                       </span>
                     </div>
                     <div className="flex justify-between items-center py-3 border-b border-gray-100">
