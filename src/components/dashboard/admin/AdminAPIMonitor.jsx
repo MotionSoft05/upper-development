@@ -234,24 +234,25 @@ function AdminAPIMonitor() {
     }
   };
 
-  // NUEVA: Función para calcular próxima ejecución
+  // NUEVA: Función para calcular próxima ejecución (cada 40 minutos)
   const calculateNextExecution = (lastExecution, isEnabled) => {
     if (!isEnabled) return "En espera (sistema pausado)";
 
     const now = new Date();
     const next = new Date(now);
 
-    // El cron job se ejecuta en minutos específicos: 0 y 40
+    // El cron job se ejecuta cada 40 minutos: 00:00, 00:40, 01:20, 02:00, etc.
     const currentMinutes = now.getMinutes();
-    let nextMinutes;
 
-    if (currentMinutes < 40) {
-      // Si es antes del minuto 40, la próxima ejecución es en el minuto 40 de esta hora
-      nextMinutes = 40;
-      next.setMinutes(40, 0, 0);
+    // Calcular el próximo múltiplo de 40 minutos
+    const nextMinutes = Math.ceil((currentMinutes + 1) / 40) * 40;
+
+    if (nextMinutes >= 60) {
+      // Si pasa de 60, va a la próxima hora
+      next.setHours(next.getHours() + 1, nextMinutes - 60, 0, 0);
     } else {
-      // Si es después del minuto 40, la próxima ejecución es en el minuto 0 de la próxima hora
-      next.setHours(next.getHours() + 1, 0, 0, 0);
+      // Establecer en la misma hora
+      next.setMinutes(nextMinutes, 0, 0);
     }
 
     const diffMinutes = Math.round((next - now) / (1000 * 60));

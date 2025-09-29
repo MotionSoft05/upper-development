@@ -50,9 +50,10 @@ function cleanUndefinedValues(obj) {
 
 /**
  * Función unificada que se ejecuta cada 40 minutos para actualizar vuelos y distancias
+ * NUEVA VERSION - Cada 40 minutos exactos
  */
-exports.updateFlightsAndDistances = onSchedule({
-  schedule: "0,40 * * * *",
+exports.updateFlights40Min = onSchedule({
+  schedule: "*/40 * * * *", // ✅ DEFINITIVO - Cada 40 minutos exactos
   timeZone: "America/Mexico_City",
   memory: "512MiB",
 }, async (event) => {
@@ -1302,10 +1303,10 @@ exports.onCompanyConfigChange = onDocumentWritten({
 // ========================================
 
 /**
- * DEPRECATED: Función de compatibilidad
+ * DEPRECATED: Función de compatibilidad eliminada para evitar duplicados
  * Usar updateFlightsAndDistances en su lugar
  */
-exports.updateFlightData = exports.updateFlightsAndDistances;
+// exports.updateFlightData = exports.updateFlightsAndDistances; // ❌ ELIMINADO - causaba ejecuciones duplicadas
 
 // ========================================
 // NUEVO: SISTEMA DE CONTROL INDIVIDUAL DE AEROPUERTOS
