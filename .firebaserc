@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "upper-8c817"
+    "default": "upper-8c817",
+    "development": "upper-8c817",
+    "production": "upper-b0be3"
   }
 }

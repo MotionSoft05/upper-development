@@ -14,7 +14,8 @@
       "Bash(./test_apis_complete.sh:*)",
       "Bash(npx eslint:*)",
       "Bash(dos2unix:*)",
-      "Bash(firebase functions:list:*)"
+      "Bash(firebase functions:list:*)",
+      "Bash(gcloud scheduler jobs list:*)"
     ],
     "deny": [],
     "ask": []

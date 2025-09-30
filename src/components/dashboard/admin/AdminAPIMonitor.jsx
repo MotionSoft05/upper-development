@@ -79,14 +79,15 @@ function AdminAPIMonitor() {
   const [isExecutingManual, setIsExecutingManual] = useState(false);
 
   // URLs específicas de Firebase Functions v2
+  const PROJECT_ID = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || "upper-8c817";
   const FUNCTION_URLS = {
-    systemHealth: "https://us-central1-upper-8c817.cloudfunctions.net/systemHealth",
-    cronControl: "https://us-central1-upper-8c817.cloudfunctions.net/cronControl",
-    testFlightUpdate: "https://us-central1-upper-8c817.cloudfunctions.net/testFlightUpdate",
-    executeManualUpdate: "https://us-central1-upper-8c817.cloudfunctions.net/executeManualUpdate",
+    systemHealth: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/systemHealth`,
+    cronControl: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/cronControl`,
+    testFlightUpdate: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/testFlightUpdate`,
+    executeManualUpdate: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/executeManualUpdate`,
     // NUEVOS: Endpoints para control de aeropuertos
-    getAirportServiceStatus: "https://us-central1-upper-8c817.cloudfunctions.net/getAirportServiceStatus",
-    toggleAirportService: "https://us-central1-upper-8c817.cloudfunctions.net/toggleAirportService",
+    getAirportServiceStatus: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/getAirportServiceStatus`,
+    toggleAirportService: `https://us-central1-${PROJECT_ID}.cloudfunctions.net/toggleAirportService`,
   };
 
   // 🔧 FUNCIÓN OPTIMIZADA: Una sola llamada para todos los datos
