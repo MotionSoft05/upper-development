@@ -326,7 +326,7 @@ class FlightService {
     const departures = (departuresData.data || []).map((flight) => ({
       flightNumber: flight.flight?.iata || flight.flight?.icao || "N/A",
       airline: flight.airline?.name || "Aerolínea desconocida",
-      destination: flight.arrival?.airport || "Destino desconocido",
+      destination: this.correctAirportName(flight.arrival?.airport) || "Destino desconocido",
       origin: airport,
       scheduledTime: flight.departure?.scheduled || new Date().toISOString(),
       estimatedTime: flight.departure?.estimated || null,
@@ -342,7 +342,7 @@ class FlightService {
     const arrivals = (arrivalsData.data || []).map((flight) => ({
       flightNumber: flight.flight?.iata || flight.flight?.icao || "N/A",
       airline: flight.airline?.name || "Aerolínea desconocida",
-      origin: flight.departure?.airport || "Origen desconocido",
+      origin: this.correctAirportName(flight.departure?.airport) || "Origen desconocido",
       destination: airport,
       scheduledTime: flight.arrival?.scheduled || new Date().toISOString(),
       estimatedTime: flight.arrival?.estimated || null,
@@ -539,7 +539,7 @@ class FlightService {
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
-        destination: flight.arrival?.airport?.name || "Unknown",
+        destination: this.correctAirportName(flight.arrival?.airport?.name) || "Unknown",
         destinationCode: flight.arrival?.airport?.iata || "",
 
         // HORARIOS usando función corregida
@@ -579,7 +579,7 @@ class FlightService {
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
         airlineCode: flight.airline?.iata || flight.airline?.icao || "",
-        origin: flight.departure?.airport?.name || "Unknown",
+        origin: this.correctAirportName(flight.departure?.airport?.name) || "Unknown",
         originCode: flight.departure?.airport?.iata || "",
 
         // HORARIOS usando función corregida
@@ -712,6 +712,23 @@ class FlightService {
       console.error("Error extrayendo tiempo:", error.message, "Input:", timeObj);
       return "";
     }
+  }
+
+  /**
+   * Corregir nombres de aeropuertos problemáticos de las APIs
+   * @param {string} airportName - Airport name from API
+   * @return {string} Corrected airport name
+   */
+  correctAirportName(airportName) {
+    if (!airportName) return "Unknown";
+
+    // Corregir nombre específico de NLU/AIFA
+    if (airportName.toLowerCase().includes("reyes acozac") ||
+        airportName.toLowerCase().includes("acozac")) {
+      return "Mexico City AIFA";
+    }
+
+    return airportName;
   }
 
   /**
@@ -927,7 +944,7 @@ class FlightService {
       processed.departures = data.departures.map((flight) => ({
         flightNumber: flight.number || "N/A",
         airline: flight.airline?.name || "Unknown",
-        destination: flight.movement?.airport?.name || "Unknown",
+        destination: this.correctAirportName(flight.movement?.airport?.name) || "Unknown",
         scheduledTime: this.extractTime(flight.movement?.scheduledTimeLocal),
         status: this.mapAeroDataBoxStatus(flight.status),
         terminal: flight.movement?.terminal || "",
