@@ -63,7 +63,7 @@ const DeviceConfiguration = ({
 
     const screenTypes = [];
 
-    // Pantallas Salón - BLOQUEADO
+    // Pantallas Salón - BLOQUEADO TEMPORALMENTE
     screenTypes.push({
       type: "salon",
       name: "Pantallas Salón",
@@ -74,7 +74,7 @@ const DeviceConfiguration = ({
       disabledReason: "Próximamente disponible",
     });
 
-    // Pantallas Directorio - BLOQUEADO
+    // Pantallas Directorio - BLOQUEADO TEMPORALMENTE
     screenTypes.push({
       type: "directorio",
       name: "Pantallas Directorio",
@@ -85,7 +85,7 @@ const DeviceConfiguration = ({
       disabledReason: "Próximamente disponible",
     });
 
-    // Pantallas Tarifario - BLOQUEADO
+    // Pantallas Tarifario - BLOQUEADO TEMPORALMENTE
     screenTypes.push({
       type: "tarifario",
       name: "Pantallas Tarifario",
@@ -219,6 +219,77 @@ const DeviceConfiguration = ({
     }
   };
 
+  const handleRemoveConfiguration = async () => {
+    if (!device || !device.id) {
+      Swal.fire({
+        icon: "error",
+        title: "Error de dispositivo",
+        text: "No se pudo identificar el dispositivo.",
+      });
+      return;
+    }
+
+    // Confirmar acción
+    const result = await Swal.fire({
+      title: "¿Quitar configuración?",
+      html: `
+        <p>¿Estás seguro que deseas quitar la configuración de este dispositivo?</p>
+        <p class="text-sm text-gray-600 mt-2">El dispositivo volverá a la pantalla de espera.</p>
+      `,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, quitar configuración",
+      cancelButtonText: "Cancelar",
+    });
+
+    if (!result.isConfirmed) return;
+
+    setLoading(true);
+
+    try {
+      console.log(`🗑️ Quitando configuración del dispositivo ID: ${device.id}`);
+
+      const deviceRef = doc(db, "devices", device.id);
+
+      // Actualizar status a "linked" y remover configuración
+      await updateDoc(deviceRef, {
+        status: "linked",
+        configuration: null,
+        lastUpdated: serverTimestamp(),
+      });
+
+      console.log(`✅ Configuración removida del dispositivo ${device.code || device.id}`);
+
+      Swal.fire({
+        icon: "success",
+        title: "Configuración eliminada",
+        text: "El dispositivo ha vuelto a la pantalla de espera.",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+
+      // Notificar al componente padre
+      if (onConfigurationSaved) {
+        onConfigurationSaved(device.code || device.id, null);
+      }
+
+      // Cerrar modal
+      onClose();
+    } catch (error) {
+      console.error("❌ Error quitando configuración:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "No se pudo quitar la configuración. Inténtalo de nuevo.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSaveConfiguration = async () => {
     // Validaciones
     if (!selectedScreenType) {
@@ -268,10 +339,7 @@ const DeviceConfiguration = ({
         lastUpdated: serverTimestamp(),
       };
 
-      // Agregar orientación solo para directorio
-      if (selectedScreenType === "directorio") {
-        configuration.orientation = orientation;
-      }
+      // Orientación removida - ya no se usa para directorio
 
       // 🆕 NUEVA ARQUITECTURA: Usar device.id en lugar de device.code
       const deviceRef = doc(db, "devices", device.id);
@@ -507,71 +575,55 @@ const DeviceConfiguration = ({
                       </div>
                     )}
 
-                  {/* Orientación (solo para directorio) */}
-                  {selectedScreenType === "directorio" && (
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
-                        Orientación
-                      </label>
-                      <div className="grid grid-cols-2 gap-3">
-                        <div
-                          className={`p-3 border rounded-lg cursor-pointer text-center ${
-                            orientation === "landscape"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-300 hover:border-gray-400"
-                          }`}
-                          onClick={() => setOrientation("landscape")}
-                        >
-                          <div className="text-lg mb-1">📱</div>
-                          <div className="text-sm font-medium">Horizontal</div>
-                        </div>
-                        <div
-                          className={`p-3 border rounded-lg cursor-pointer text-center ${
-                            orientation === "portrait"
-                              ? "border-blue-500 bg-blue-50 text-blue-700"
-                              : "border-gray-300 hover:border-gray-400"
-                          }`}
-                          onClick={() => setOrientation("portrait")}
-                        >
-                          <div className="text-lg mb-1">📱</div>
-                          <div className="text-sm font-medium">Vertical</div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Footer */}
-                <div className="mt-8 flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
-                    onClick={onClose}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveConfiguration}
-                    disabled={
-                      loading ||
-                      !selectedScreenType ||
-                      !selectedScreenNumber ||
-                      getAvailableScreenTypes().find(
-                        (t) => t.type === selectedScreenType
-                      )?.disabled
-                    }
-                    className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      loading ||
-                      !selectedScreenType ||
-                      !selectedScreenNumber ||
-                      getAvailableScreenTypes().find(
-                        (t) => t.type === selectedScreenType
-                      )?.disabled
-                        ? "bg-gray-300 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700"
-                    }`}
-                  >
+                <div className="mt-8 flex justify-between items-center">
+                  {/* Botón de quitar configuración - solo si hay configuración existente */}
+                  {device.configuration && (
+                    <button
+                      type="button"
+                      onClick={handleRemoveConfiguration}
+                      disabled={loading}
+                      className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      🗑️ Quitar Configuración
+                    </button>
+                  )}
+
+                  {/* Espacio flexible para empujar botones a la derecha cuando no hay configuración */}
+                  {!device.configuration && <div></div>}
+
+                  <div className="flex space-x-3">
+                    <button
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-transparent rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                      onClick={onClose}
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSaveConfiguration}
+                      disabled={
+                        loading ||
+                        !selectedScreenType ||
+                        !selectedScreenNumber ||
+                        getAvailableScreenTypes().find(
+                          (t) => t.type === selectedScreenType
+                        )?.disabled
+                      }
+                      className={`px-4 py-2 text-sm font-medium text-white border border-transparent rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                        loading ||
+                        !selectedScreenType ||
+                        !selectedScreenNumber ||
+                        getAvailableScreenTypes().find(
+                          (t) => t.type === selectedScreenType
+                        )?.disabled
+                          ? "bg-gray-300 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700"
+                      }`}
+                    >
                     {loading ? (
                       <div className="flex items-center">
                         <svg
@@ -599,7 +651,8 @@ const DeviceConfiguration = ({
                     ) : (
                       "Guardar Configuración"
                     )}
-                  </button>
+                    </button>
+                  </div>
                 </div>
               </Dialog.Panel>
             </Transition.Child>

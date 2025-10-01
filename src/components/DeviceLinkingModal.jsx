@@ -410,6 +410,7 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                             <span>📋 Directorio: {userData.pd || 0}</span>
                             <span>💰 Tarifario: {userData.pt || 0}</span>
                             <span>📢 Promociones: {userData.pp || 0}</span>
+                            <span>✈️ Vuelos: {userData.pv || 0}</span>
                           </div>
                         </div>
                       </div>
@@ -421,7 +422,8 @@ const DeviceLinkingModal = ({ isOpen, onClose, onDeviceLinked }) => {
                     !userData.ps &&
                     !userData.pd &&
                     !userData.pt &&
-                    !userData.pp && (
+                    !userData.pp &&
+                    !userData.pv && (
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div className="flex">
                           <div className="flex-shrink-0">
