@@ -220,7 +220,7 @@ exports.testFlightUpdate = onRequest({
     console.log(`🧪 Test manual para aeropuerto: ${airport}`);
 
     // Verificar si el aeropuerto es válido
-    const validAirports = ["MEX", "GDL", "CUN"];
+    const validAirports = ["MEX", "GDL", "CUN", "MTY", "PVR"];
     if (!validAirports.includes(airport.toUpperCase())) {
       return res.status(400).json({
         success: false,
@@ -398,7 +398,7 @@ exports.getFlightStats = onRequest({
   }
 
   try {
-    const airports = ["MEX", "GDL", "CUN"];
+    const airports = ["MEX", "GDL", "CUN", "MTY", "PVR"];
     const stats = {};
 
     for (const airport of airports) {

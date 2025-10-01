@@ -47,6 +47,18 @@ class FlightService {
         iata: "CUN",
         icao: "MMUN",
       },
+      MTY: {
+        lat1: 25.76, lon1: -100.12, lat2: 25.79, lon2: -100.09,
+        name: "Aeropuerto Internacional de Monterrey",
+        iata: "MTY",
+        icao: "MMMY",
+      },
+      PVR: {
+        lat1: 20.67, lon1: -105.26, lat2: 20.69, lon2: -105.24,
+        name: "Aeropuerto Internacional de Puerto Vallarta",
+        iata: "PVR",
+        icao: "MMPR",
+      },
     };
 
     // Mapeo de aerolíneas
