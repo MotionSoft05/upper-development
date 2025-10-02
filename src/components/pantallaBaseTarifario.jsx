@@ -250,6 +250,7 @@ const PantallaBaseTarifario = ({ id }) => {
   };
 
   // Configurar suscripción al template si no hay pantallas
+  // NOTA: Solo para retrocompatibilidad temporal - TemplateTarifario será eliminado
   const setupTemplateSubscription = (empresaParam, unsubscribes) => {
     const templateRef = query(
       collection(db, "TemplateTarifario"),

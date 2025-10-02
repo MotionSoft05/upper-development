@@ -159,49 +159,6 @@ function EditInformacionTarifa() {
             if (docData.leyendaExtras) setLeyendaExtras(docData.leyendaExtras);
             if (docData.checkIn) setCheckIn(docData.checkIn);
             if (docData.checkOut) setCheckOut(docData.checkOut);
-          } else {
-            // Si no hay datos en la colección Tarifarios, buscar en TemplateTarifario (para migración)
-            const templateTarifarioRef = collection(db, "TemplateTarifario");
-            const templateTarifarioQuery = query(
-              templateTarifarioRef,
-              where("empresa", "==", empresa)
-            );
-            const templateTarifarioSnapshot = await getDocs(
-              templateTarifarioQuery
-            );
-
-            if (!templateTarifarioSnapshot.empty) {
-              const templateData = templateTarifarioSnapshot.docs[0].data();
-
-              // Cargar datos desde el template antiguo
-              if (templateData.tarifas && templateData.tarifas.length > 0) {
-                setTarifas(templateData.tarifas);
-              }
-              if (templateData.gerente) setGerente(templateData.gerente);
-              if (templateData.tipoCambio)
-                setTipoCambio(templateData.tipoCambio);
-
-              // Actualizar correctamente el estado de las monedas activas
-              if (templateData.monedaActiva) {
-                const newMonedasActivas = {
-                  usd:
-                    templateData.monedaActiva === "usd" ||
-                    templateData.monedaActiva === "ambos",
-                  eur:
-                    templateData.monedaActiva === "eur" ||
-                    templateData.monedaActiva === "ambos",
-                };
-                setMonedasActivas(newMonedasActivas);
-              }
-
-              // Cargar las nuevas propiedades
-              if (templateData.leyendaTarifas)
-                setLeyendaTarifas(templateData.leyendaTarifas);
-              if (templateData.leyendaExtras)
-                setLeyendaExtras(templateData.leyendaExtras);
-              if (templateData.checkIn) setCheckIn(templateData.checkIn);
-              if (templateData.checkOut) setCheckOut(templateData.checkOut);
-            }
           }
         }
       } catch (error) {
@@ -679,66 +636,7 @@ function EditInformacionTarifa() {
         return;
       }
 
-      // PASO 2: Actualizar TemplateTarifario
-      try {
-        const templateData = {
-          tarifarioId: tarifarioId, // Referencia al documento en Tarifarios
-          empresa: empresaToUpdate,
-          tarifas: tarifas,
-          gerente: gerente,
-          tituloCambio: tituloCambio, // Aquí está correctamente
-          // Actualizar para guardar solo la moneda activa igual que en tarifarioData
-          tipoCambio: {
-            usd: monedasActivas.usd ? tipoCambio.usd : "",
-            eur: monedasActivas.eur ? tipoCambio.eur : "",
-          },
-          monedaActiva:
-            monedasActivas.usd && monedasActivas.eur
-              ? "ambos"
-              : monedasActivas.usd
-              ? "usd"
-              : "eur",
-          leyendaTarifas: leyendaTarifas,
-          leyendaExtras: leyendaExtras,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          templateColor: "#444444",
-          fontColor: "#333333",
-          fontStyle: "Arial, sans-serif",
-          ultimaActualizacion: serverTimestamp(),
-        };
-
-        const templateTarifarioRef = collection(db, "TemplateTarifario");
-        const templateTarifarioQuery = query(
-          templateTarifarioRef,
-          where("empresa", "==", empresaToUpdate)
-        );
-        const templateTarifarioSnapshot = await getDocs(templateTarifarioQuery);
-
-        if (!templateTarifarioSnapshot.empty) {
-          const templateTarifarioDocRef = templateTarifarioSnapshot.docs[0].ref;
-          console.log(
-            "Actualizando TemplateTarifario:",
-            templateTarifarioDocRef.id
-          );
-          await updateDoc(templateTarifarioDocRef, templateData);
-        } else {
-          // Si no hay documento, crear uno básico
-          console.log("Creando nuevo TemplateTarifario");
-          await addDoc(templateTarifarioRef, {
-            ...templateData,
-            template: 1,
-            orientacion: "vertical",
-            timestamp: serverTimestamp(),
-          });
-        }
-        console.log("Éxito guardando en TemplateTarifario");
-      } catch (error) {
-        console.error("Error guardando en TemplateTarifario:", error);
-        // Continuar aunque haya error, ya tenemos los datos en Tarifarios
-      }
-
-      // PASO 3: Actualizar pantallasTarifario
+      // PASO 2: Actualizar pantallasTarifario
       try {
         // Actualizar todas las pantallas de tarifario existentes para añadir la referencia
         const pantallasTarifarioRef = collection(db, "pantallasTarifario");
@@ -822,7 +720,7 @@ function EditInformacionTarifa() {
         console.log("Éxito guardando en pantallasTarifario");
       } catch (error) {
         console.error("Error guardando en pantallasTarifario:", error);
-        // Continuar aunque haya error, ya tenemos los datos en Tarifarios y TemplateTarifario
+        // Continuar aunque haya error, ya tenemos los datos en Tarifarios
       }
 
       // PASO 4: Registrar cambios en la colección HistorialCambios

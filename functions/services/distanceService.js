@@ -31,6 +31,18 @@ const AIRPORTS = {
     lng: -86.8771,
     code: "CUN",
   },
+  "MTY": {
+    name: "Aeropuerto Internacional de Monterrey",
+    lat: 25.7785,
+    lng: -100.1069,
+    code: "MTY",
+  },
+  "PVR": {
+    name: "Aeropuerto Internacional de Puerto Vallarta",
+    lat: 20.6801,
+    lng: -105.2544,
+    code: "PVR",
+  },
 };
 
 // Google Maps API Key usando variables de entorno

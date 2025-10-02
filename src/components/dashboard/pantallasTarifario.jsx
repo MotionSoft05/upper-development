@@ -706,52 +706,52 @@ function PantallasTarifario() {
           console.log("Empresa a cargar configuración:", empresaToLoad);
 
           if (empresaToLoad) {
-            // Buscar documento en TemplateTarifario
-            const templateTarifarioRef = collection(db, "TemplateTarifario");
-            const templateTarifarioQuery = query(
-              templateTarifarioRef,
+            // Buscar documento en pantallasTarifario para cargar configuración
+            const pantallasTarifarioRef = collection(db, "pantallasTarifario");
+            const pantallasTarifarioQuery = query(
+              pantallasTarifarioRef,
               where("empresa", "==", empresaToLoad)
             );
-            const templateTarifarioSnapshot = await getDocs(
-              templateTarifarioQuery
+            const pantallasTarifarioSnapshot = await getDocs(
+              pantallasTarifarioQuery
             );
             console.log(
-              "Template snapshot empty?",
-              templateTarifarioSnapshot.empty
+              "Pantallas snapshot empty?",
+              pantallasTarifarioSnapshot.empty
             );
 
-            if (!templateTarifarioSnapshot.empty) {
-              const templateData = templateTarifarioSnapshot.docs[0].data();
-              console.log("Template data:", templateData);
+            if (!pantallasTarifarioSnapshot.empty) {
+              const pantallaData = pantallasTarifarioSnapshot.docs[0].data();
+              console.log("Pantalla data:", pantallaData);
 
-              // Establecer datos de configuración
-              setSelectedTemplate(templateData.template || 1);
-              setFontColor(templateData.fontColor || "#000000");
-              setTemplateColor(templateData.templateColor || "#D1D5DB");
-              setOrientacion(templateData.orientacion || "horizontal");
-              setDireccionRotacion(templateData.direccionRotacion || "derecha");
+              // Establecer datos de configuración desde pantallasTarifario
+              setSelectedTemplate(pantallaData.template || 1);
+              setFontColor(pantallaData.fontColor || "#000000");
+              setTemplateColor(pantallaData.templateColor || "#D1D5DB");
+              setOrientacion(pantallaData.orientacion || "horizontal");
+              setDireccionRotacion(pantallaData.direccionRotacion || "derecha");
 
               // Establecer ciudad si existe
-              if (templateData.ciudad) {
+              if (pantallaData.ciudad) {
                 const selectedCityOption = cityOptions.find(
-                  (option) => option.value === templateData.ciudad
+                  (option) => option.value === pantallaData.ciudad
                 );
                 setSelectedCity(selectedCityOption || null);
               }
 
               // Establecer fuente
               const selectedFontStyleOption = fontStyleOptions.find(
-                (option) => option.value === templateData.fontStyle
+                (option) => option.value === pantallaData.fontStyle
               );
               setSelectedFontStyle(
                 selectedFontStyleOption || fontStyleOptions[0]
               );
 
               // Establecer logo
-              setSelectedLogo(templateData.logo || null);
+              setSelectedLogo(pantallaData.logo || null);
 
               // Establecer idioma
-              setSelectedLanguage(templateData.idioma || "es");
+              setSelectedLanguage(pantallaData.idioma || "es");
             } else {
               console.log(
                 "No hay configuración guardada para la empresa:",
@@ -1028,7 +1028,7 @@ function PantallasTarifario() {
 
       await Promise.all(updateNombrePantallasPromises);
 
-      // Datos a guardar en TemplateTarifariof
+      // Datos de configuración a guardar
       const configuracionData = {
         template: selectedTemplate,
         fontColor: fontColor,
@@ -1043,25 +1043,6 @@ function PantallasTarifario() {
         ciudad: selectedCity ? selectedCity.value : null,
         timestamp: serverTimestamp(),
       };
-
-      // Buscar el documento existente en TemplateTarifario
-      const templateTarifarioRef = collection(db, "TemplateTarifario");
-      const templateTarifarioQuery = query(
-        templateTarifarioRef,
-        where("empresa", "==", empresaToUpdate)
-      );
-      const templateTarifarioSnapshot = await getDocs(templateTarifarioQuery);
-
-      // Actualizar o crear documento en TemplateTarifario
-      if (!templateTarifarioSnapshot.empty) {
-        const templateTarifarioDocRef = templateTarifarioSnapshot.docs[0].ref;
-        await updateDoc(templateTarifarioDocRef, configuracionData);
-        console.log("Documento actualizado en TemplateTarifario");
-      } else {
-        // Si no hay documento existente para esta empresa, crear uno nuevo
-        await addDoc(templateTarifarioRef, configuracionData);
-        console.log("Nuevo documento creado en TemplateTarifario");
-      }
 
       // Actualizar la colección de pantallasTarifario
       const tarifarioRef = collection(db, "pantallasTarifario");
