@@ -15,7 +15,7 @@
     "test:flight": "node test-flight.js"
   },
   "engines": {
-    "node": "18"
+    "node": "20"
   },
   "dependencies": {
     "axios": "^1.11.0",

@@ -501,7 +501,9 @@
     "saveSuccess": "¡Cambios guardados correctamente!",
     "close": "Cerrar",
     "selectTemplate": "Seleccionar Template",
-    "templatePreview": "Vista previa del Template"
+    "templatePreview": "Vista previa del Template",
+    "showHeaderInFullscreen": "Mostrar Header en Pantalla Completa",
+    "showHeaderInFullscreenDescription": "Si se activa, el encabezado (Logo y Hora) permanecerá visible incluso cuando un evento esté en modo pantalla completa."
   },
   "screensDirectory": {
     "title": "AJUSTES DE PANTALLAS DIRECTORIO",

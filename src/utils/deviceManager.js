@@ -19,7 +19,7 @@ import db from "@/firebase/firestore";
 export const linkDevice = async (deviceCode, userId, userData) => {
   try {
     console.log(
-      `🔗 Vinculando dispositivo código: ${deviceCode} al usuario: ${userId}`
+      `🔗 Vinculando dispositivo código: ${deviceCode} al usuario: ${userId}`,
     );
 
     // ✅ CORREGIDO: Buscar por campo 'code' no por ID de documento
@@ -63,7 +63,7 @@ export const linkDevice = async (deviceCode, userId, userData) => {
     await updateDoc(deviceRef, updateData);
 
     console.log(
-      `✅ Dispositivo ${deviceCode} (${deviceId}) vinculado exitosamente a empresa ${userData.empresa}`
+      `✅ Dispositivo ${deviceCode} (${deviceId}) vinculado exitosamente a empresa ${userData.empresa}`,
     );
     return updateData;
   } catch (error) {
@@ -88,7 +88,7 @@ export const subscribeToCompanyDevices = (empresa, callback) => {
     (error) => {
       console.error("Error en subscripción de dispositivos de empresa:", error);
       callback([]);
-    }
+    },
   );
 };
 
@@ -108,10 +108,10 @@ export const subscribeToUserDevices = (userId, callback) => {
     (error) => {
       console.error(
         "Error en subscripción de dispositivos del usuario:",
-        error
+        error,
       );
       callback([]);
-    }
+    },
   );
 };
 
@@ -135,7 +135,7 @@ export const getCompanyDevices = async (empresa) => {
         status: d.status,
         empresa: d.empresa,
         ownerId: d.ownerId,
-      }))
+      })),
     );
 
     return devices;
@@ -146,10 +146,10 @@ export const getCompanyDevices = async (empresa) => {
 };
 
 // Desvincular dispositivo - ACTUALIZADO para empresa y búsqueda por código
-export const unlinkDevice = async (deviceCode, userId) => {
+export const unlinkDevice = async (deviceCode, userId, isAdmin = false) => {
   try {
     console.log(
-      `🔗 Intentando desvincular dispositivo: ${deviceCode} para usuario: ${userId}`
+      `🔗 Intentando desvincular dispositivo: ${deviceCode} para usuario: ${userId} (Admin: ${isAdmin})`,
     );
 
     // ✅ CORREGIDO: Buscar por campo 'code' no por ID de documento
@@ -174,12 +174,17 @@ export const unlinkDevice = async (deviceCode, userId) => {
       code: deviceCode,
     });
 
-    // Verificar permisos - permitir si es el propietario O si el dispositivo está en waiting
-    if (deviceData.ownerId !== userId && deviceData.status !== "waiting") {
+    // Verificar permisos - permitir si es el propietario O si el dispositivo está en waiting O si es admin
+    if (
+      !isAdmin &&
+      deviceData.ownerId !== userId &&
+      deviceData.status !== "waiting"
+    ) {
       console.error("❌ Error de permisos:", {
         deviceOwnerId: deviceData.ownerId,
         requestingUserId: userId,
         match: deviceData.ownerId === userId,
+        isAdmin,
       });
       throw new Error("No tienes permisos para desvincular este dispositivo");
     }
@@ -200,7 +205,7 @@ export const unlinkDevice = async (deviceCode, userId) => {
     const deviceRef = doc(db, "devices", deviceId);
     await updateDoc(deviceRef, resetData);
     console.log(
-      `✅ Dispositivo ${deviceCode} (${deviceId}) desvinculado exitosamente`
+      `✅ Dispositivo ${deviceCode} (${deviceId}) desvinculado exitosamente`,
     );
   } catch (error) {
     console.error("❌ Error desvinculando dispositivo:", error);
@@ -209,10 +214,10 @@ export const unlinkDevice = async (deviceCode, userId) => {
 };
 
 // Eliminar dispositivo completamente - ACTUALIZADO para empresa y búsqueda por código
-export const deleteDevice = async (deviceCode, userId) => {
+export const deleteDevice = async (deviceCode, userId, isAdmin = false) => {
   try {
     console.log(
-      `🗑️ Intentando eliminar dispositivo: ${deviceCode} para usuario: ${userId}`
+      `🗑️ Intentando eliminar dispositivo: ${deviceCode} para usuario: ${userId} (Admin: ${isAdmin})`,
     );
 
     // ✅ CORREGIDO: Buscar por campo 'code' no por ID de documento
@@ -235,14 +240,20 @@ export const deleteDevice = async (deviceCode, userId) => {
       status: deviceData.status,
       empresa: deviceData.empresa,
       code: deviceCode,
+      isAdmin,
     });
 
-    // Verificar permisos - permitir si es el propietario O si el dispositivo está en waiting
-    if (deviceData.ownerId !== userId && deviceData.status !== "waiting") {
+    // Verificar permisos - permitir si es el propietario O si el dispositivo está en waiting O si es admin
+    if (
+      !isAdmin &&
+      deviceData.ownerId !== userId &&
+      deviceData.status !== "waiting"
+    ) {
       console.error("❌ Error de permisos para eliminar:", {
         deviceOwnerId: deviceData.ownerId,
         requestingUserId: userId,
         match: deviceData.ownerId === userId,
+        isAdmin,
       });
       throw new Error("No tienes permisos para eliminar este dispositivo");
     }
@@ -251,7 +262,7 @@ export const deleteDevice = async (deviceCode, userId) => {
     const deviceRef = doc(db, "devices", deviceId);
     await deleteDoc(deviceRef);
     console.log(
-      `✅ Dispositivo ${deviceCode} (${deviceId}) eliminado exitosamente`
+      `✅ Dispositivo ${deviceCode} (${deviceId}) eliminado exitosamente`,
     );
   } catch (error) {
     console.error("❌ Error eliminando dispositivo:", error);
@@ -279,7 +290,7 @@ export const getUserDevices = async (userId) => {
         status: d.status,
         ownerId: d.ownerId,
         empresa: d.empresa,
-      }))
+      })),
     );
 
     return devices;
@@ -297,13 +308,13 @@ export const syncUserDataToCompanyDevices = async (empresa, userData) => {
     const q = query(
       collection(db, "devices"),
       where("empresa", "==", empresa),
-      where("status", "==", "linked")
+      where("status", "==", "linked"),
     );
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
       console.log(
-        `📱 No hay dispositivos vinculados para la empresa ${empresa}`
+        `📱 No hay dispositivos vinculados para la empresa ${empresa}`,
       );
       return;
     }
@@ -322,19 +333,23 @@ export const syncUserDataToCompanyDevices = async (empresa, userData) => {
 
     await batch.commit();
     console.log(
-      `✅ ${updateCount} dispositivos de empresa ${empresa} sincronizados`
+      `✅ ${updateCount} dispositivos de empresa ${empresa} sincronizados`,
     );
   } catch (error) {
     console.error(
       `❌ Error sincronizando dispositivos de empresa ${empresa}:`,
-      error
+      error,
     );
     throw error;
   }
 };
 
 // Función para verificar permisos de dispositivo - ACTUALIZADA para empresa y búsqueda por código
-export const checkDevicePermissions = async (deviceCode, userId) => {
+export const checkDevicePermissions = async (
+  deviceCode,
+  userId,
+  isAdmin = false,
+) => {
   try {
     // ✅ CORREGIDO: Buscar por campo 'code' no por ID de documento
     const q = query(collection(db, "devices"), where("code", "==", deviceCode));
@@ -352,7 +367,9 @@ export const checkDevicePermissions = async (deviceCode, userId) => {
     // El usuario tiene permisos si:
     // 1. Es el propietario del dispositivo
     // 2. El dispositivo está en estado "waiting" (sin propietario)
+    // 3. Es administrador
     const hasPermission =
+      isAdmin ||
       deviceData.ownerId === userId ||
       deviceData.status === "waiting" ||
       !deviceData.ownerId;
@@ -410,7 +427,7 @@ export const generateUniqueDeviceCode = async () => {
 
   if (!isUnique) {
     throw new Error(
-      "No se pudo generar un código único después de varios intentos"
+      "No se pudo generar un código único después de varios intentos",
     );
   }
 
@@ -445,31 +462,37 @@ export const createDevice = async (code) => {
 };
 
 // ✅ NUEVA FUNCIÓN: Enviar comando remoto a dispositivo
-export const sendRemoteCommand = async (deviceId, screenType, screenId, assignedBy) => {
+export const sendRemoteCommand = async (
+  deviceId,
+  screenType,
+  screenId,
+  assignedBy,
+) => {
   try {
-    console.log(`📡 Enviando comando remoto: ${screenType} ${screenId} a dispositivo ${deviceId}`);
-    
-    const deviceRef = doc(db, 'devices', deviceId);
+    console.log(
+      `📡 Enviando comando remoto: ${screenType} ${screenId} a dispositivo ${deviceId}`,
+    );
+
+    const deviceRef = doc(db, "devices", deviceId);
     await updateDoc(deviceRef, {
       configuration: {
         type: screenType,
-        screenId: screenId.toString(), 
+        screenId: screenId.toString(),
         assignedAt: serverTimestamp(),
         assignedBy: assignedBy,
-        
+
         // Mantener compatibilidad con estructura actual
         screenType: screenType,
         screenNumber: parseInt(screenId),
         screenName: `${screenType} ${screenId}`,
         autoStart: true,
         configuredAt: serverTimestamp(),
-        lastUpdated: serverTimestamp()
-      }
+        lastUpdated: serverTimestamp(),
+      },
     });
-    
+
     console.log(`✅ Comando remoto enviado exitosamente`);
     return true;
-    
   } catch (error) {
     console.error("❌ Error enviando comando remoto:", error);
     throw error;
@@ -484,13 +507,13 @@ export const syncUserDataToDevices = async (userId, userData) => {
     const q = query(
       collection(db, "devices"),
       where("ownerId", "==", userId),
-      where("status", "==", "linked")
+      where("status", "==", "linked"),
     );
     const querySnapshot = await getDocs(q);
 
     if (querySnapshot.empty) {
       console.log(
-        `📱 No hay dispositivos vinculados para el usuario ${userId}`
+        `📱 No hay dispositivos vinculados para el usuario ${userId}`,
       );
       return;
     }
@@ -518,7 +541,7 @@ export const syncUserDataToDevices = async (userId, userData) => {
   } catch (error) {
     console.error(
       `❌ Error sincronizando dispositivos del usuario ${userId}:`,
-      error
+      error,
     );
     throw error;
   }

@@ -501,7 +501,9 @@
     "saveSuccess": "Changes saved successfully!",
     "close": "Close",
     "selectTemplate": "Select Template",
-    "templatePreview": "Template Preview"
+    "templatePreview": "Template Preview",
+    "showHeaderInFullscreen": "Show Header in Fullscreen",
+    "showHeaderInFullscreenDescription": "If enabled, the header (Logo and Time) will remain visible even when an event is in fullscreen mode."
   },
   "screensDirectory": {
     "title": "DIRECTORY SCREENS SETTINGS",

@@ -3,7 +3,13 @@
 import React, { useState, useEffect } from "react";
 import { useDeviceSync } from "@/hook/useDeviceSync";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { collection, getDocs, updateDoc, doc, serverTimestamp } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  updateDoc,
+  doc,
+  serverTimestamp,
+} from "firebase/firestore";
 import auth from "@/firebase/auth";
 import db from "@/firebase/firestore";
 import DeviceConfiguration from "./DeviceConfiguration";
@@ -198,7 +204,8 @@ const DevicesList = () => {
     switch (screenType) {
       case "salon":
         return (
-          userData.nombrePantallas?.[index] || `${t("myTvScreens.salonScreen")} ${screenNumber}`
+          userData.nombrePantallas?.[index] ||
+          `${t("myTvScreens.salonScreen")} ${screenNumber}`
         );
       case "directorio":
         return (
@@ -271,7 +278,7 @@ const DevicesList = () => {
 
     if (result.isConfirmed) {
       try {
-        await deleteDevice(deviceCode, currentUser.uid);
+        await deleteDevice(deviceCode, currentUser.uid, isAdmin);
         Swal.fire({
           title: "¡Eliminado!",
           text: `El dispositivo ${deviceName} ha sido eliminado.`,
@@ -306,7 +313,6 @@ const DevicesList = () => {
     }
     setExpandedDevices(newExpanded);
   };
-
 
   // Función para manejar dispositivos vinculados exitosamente
   const handleDeviceLinked = (deviceCode, userData) => {
@@ -354,7 +360,9 @@ const DevicesList = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {isAdmin ? t("myTvScreens.deviceManagement") : t("myTvScreens.title")}
+              {isAdmin
+                ? t("myTvScreens.deviceManagement")
+                : t("myTvScreens.title")}
             </h1>
             <p className="text-gray-600">
               {isAdmin
@@ -405,7 +413,8 @@ const DevicesList = () => {
           </div>
           {!empresaSeleccionada && (
             <p className="mt-2 text-sm text-gray-500">
-              {t("myTvScreens.selectCompany")} para ver sus dispositivos vinculados
+              {t("myTvScreens.selectCompany")} para ver sus dispositivos
+              vinculados
             </p>
           )}
         </div>
@@ -420,9 +429,7 @@ const DevicesList = () => {
             <h3 className="text-lg font-medium text-gray-900 mb-2">
               {t("myTvScreens.selectCompany")}
             </h3>
-            <p className="text-gray-500">
-              {t("myTvScreens.chooseCompany")}
-            </p>
+            <p className="text-gray-500">{t("myTvScreens.chooseCompany")}</p>
           </div>
         ) : filteredDevices.length === 0 ? (
           /* Lista vacía */
@@ -469,14 +476,16 @@ const DevicesList = () => {
                           ? device.configuration.screenType === "salon"
                             ? "🎭"
                             : device.configuration.screenType === "directorio"
-                            ? "📋"
-                            : device.configuration.screenType === "promociones"
-                            ? "📢"
-                            : device.configuration.screenType === "tarifario"
-                            ? "💰"
-                            : device.configuration.screenType === "vuelos"
-                            ? "✈️"
-                            : "📺"
+                              ? "📋"
+                              : device.configuration.screenType ===
+                                  "promociones"
+                                ? "📢"
+                                : device.configuration.screenType ===
+                                    "tarifario"
+                                  ? "💰"
+                                  : device.configuration.screenType === "vuelos"
+                                    ? "✈️"
+                                    : "📺"
                           : "📺"}
                       </div>
                     </div>
@@ -509,16 +518,16 @@ const DevicesList = () => {
                             "green"
                               ? "bg-green-100 text-green-800"
                               : getStatusColor(
-                                  device.status,
-                                  device.lastSeen
-                                ) === "blue"
-                              ? "bg-blue-100 text-blue-800"
-                              : getStatusColor(
-                                  device.status,
-                                  device.lastSeen
-                                ) === "yellow"
-                              ? "bg-yellow-100 text-yellow-800"
-                              : "bg-red-100 text-red-800"
+                                    device.status,
+                                    device.lastSeen,
+                                  ) === "blue"
+                                ? "bg-blue-100 text-blue-800"
+                                : getStatusColor(
+                                      device.status,
+                                      device.lastSeen,
+                                    ) === "yellow"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : "bg-red-100 text-red-800"
                           }`}
                         >
                           {getStatusText(device.status, device.lastSeen)}
@@ -547,7 +556,7 @@ const DevicesList = () => {
                             {/* ✅ ACTUALIZADO: Mostrar nombre real de la pantalla */}
                             {getScreenName(
                               device.configuration.screenType,
-                              device.configuration.screenNumber
+                              device.configuration.screenNumber,
                             )}
                           </span>
                         )}
@@ -586,7 +595,6 @@ const DevicesList = () => {
                   </div>
                 </div>
 
-
                 {/* Detalles expandidos */}
                 {expandedDevices.has(device.id) && (
                   <div className="mt-4 pl-14 border-l-2 border-gray-200">
@@ -598,7 +606,9 @@ const DevicesList = () => {
                         <dl className="space-y-1">
                           {device.code && device.id !== device.code && (
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">{t("myTvScreens.documentId")}:</dt>
+                              <dt className="text-gray-500">
+                                {t("myTvScreens.documentId")}:
+                              </dt>
                               <dd className="text-gray-900 font-mono text-xs">
                                 {device.id}
                               </dd>
@@ -607,7 +617,9 @@ const DevicesList = () => {
 
                           {device.createdAt && (
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">{t("myTvScreens.created")}:</dt>
+                              <dt className="text-gray-500">
+                                {t("myTvScreens.created")}:
+                              </dt>
                               <dd className="text-gray-900">
                                 {formatDate(device.createdAt)}
                               </dd>
@@ -623,20 +635,26 @@ const DevicesList = () => {
                           </h4>
                           <dl className="space-y-1">
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">{t("myTvScreens.name")}:</dt>
+                              <dt className="text-gray-500">
+                                {t("myTvScreens.name")}:
+                              </dt>
                               <dd className="text-gray-900">
                                 {device.userData.nombre}{" "}
                                 {device.userData.apellido}
                               </dd>
                             </div>
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">{t("myTvScreens.email")}:</dt>
+                              <dt className="text-gray-500">
+                                {t("myTvScreens.email")}:
+                              </dt>
                               <dd className="text-gray-900">
                                 {device.userData.email}
                               </dd>
                             </div>
                             <div className="flex justify-between">
-                              <dt className="text-gray-500">{t("myTvScreens.company")}:</dt>
+                              <dt className="text-gray-500">
+                                {t("myTvScreens.company")}:
+                              </dt>
                               <dd className="text-gray-900">
                                 {device.empresa || t("myTvScreens.notAssigned")}
                               </dd>
@@ -671,7 +689,7 @@ const DevicesList = () => {
           userData={userData}
           onConfigurationSaved={() => {
             console.log(
-              "✅ Configuración guardada - lista se actualizará automáticamente"
+              "✅ Configuración guardada - lista se actualizará automáticamente",
             );
           }}
         />

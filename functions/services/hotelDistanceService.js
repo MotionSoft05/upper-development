@@ -32,9 +32,9 @@ async function detectActiveAirports(companyId) {
 
     // 🔄 ACTUALIZADO: Leer desde TemplateVuelos (colección real)
     const templatesQuery = await db
-        .collection("TemplateVuelos")
-        .where("empresa", "==", companyId)
-        .get();
+      .collection("TemplateVuelos")
+      .where("empresa", "==", companyId)
+      .get();
 
     const activeAirports = new Set();
 
@@ -51,25 +51,24 @@ async function detectActiveAirports(companyId) {
       // Extraer aeropuertos desde el template (estructura real)
       // Por ahora, asumimos que usan los 3 aeropuertos principales
       // Esto se puede mejorar cuando sepamos cómo se almacenan los aeropuertos
-      if (templateData.distanceConfig?.enabled) {
-        // Agregar aeropuertos por defecto para hoteles activos
-        ["MEX", "GDL", "CUN"].forEach((airport) => {
-          activeAirports.add(airport);
-        });
-      }
-
-      // TODO: Mejorar detección específica de aeropuertos
-      // cuando sepamos dónde se almacenan en TemplateVuelos
+      // 🔄 FORCE UPDATE: El usuario solicitó habilitar explícitamente todos los aeropuertos
+      // para evitar problemas con la detección de configuración.
+      ["MEX", "GDL", "CUN", "MTY", "PVR"].forEach((airport) => {
+        activeAirports.add(airport);
+      });
     });
 
     const activeAirportsList = Array.from(activeAirports);
-    console.log(`✅ Aeropuertos detectados para ${companyId}:`, activeAirportsList);
+    console.log(
+      `✅ Aeropuertos detectados para ${companyId}:`,
+      activeAirportsList,
+    );
 
     return activeAirportsList;
   } catch (error) {
     console.error(`❌ Error detectando aeropuertos para ${companyId}:`, error);
     // Fallback: devolver todos los aeropuertos disponibles
-    return ["MEX", "GDL", "CUN"];
+    return ["MEX", "GDL", "CUN", "MTY", "PVR"];
   }
 }
 
@@ -80,8 +79,11 @@ async function detectActiveAirports(companyId) {
  * @param {Array} activeAirports - Lista de aeropuertos activos
  * @return {Promise<Object>} Resultado de la actualización
  */
-async function updateHotelDistanceConfig(companyId, hotelLocation,
-    activeAirports) {
+async function updateHotelDistanceConfig(
+  companyId,
+  hotelLocation,
+  activeAirports,
+) {
   try {
     const docRef = db.collection("hotelDistanceConfig").doc(companyId);
 
@@ -91,16 +93,18 @@ async function updateHotelDistanceConfig(companyId, hotelLocation,
     const previousAirports = previousData.activeAirports || [];
 
     // Verificar si hay cambios
-    const airportsChanged = JSON.stringify(activeAirports.sort()) !==
-        JSON.stringify(previousAirports.sort());
+    const airportsChanged =
+      JSON.stringify(activeAirports.sort()) !==
+      JSON.stringify(previousAirports.sort());
 
-    const locationChanged = !previousData.hotelLocation ||
-        previousData.hotelLocation.lat !== hotelLocation.lat ||
-        previousData.hotelLocation.lng !== hotelLocation.lng;
+    const locationChanged =
+      !previousData.hotelLocation ||
+      previousData.hotelLocation.lat !== hotelLocation.lat ||
+      previousData.hotelLocation.lng !== hotelLocation.lng;
 
     if (!airportsChanged && !locationChanged) {
       console.log(`✓ No hay cambios en configuración para ${companyId}`);
-      return {updated: false, reason: "no_changes"};
+      return { updated: false, reason: "no_changes" };
     }
 
     // Preparar datos para actualizar
@@ -127,13 +131,15 @@ async function updateHotelDistanceConfig(companyId, hotelLocation,
       configUpdate.distanceData = cleanedDistanceData;
     }
 
-    await docRef.set(configUpdate, {merge: true});
+    await docRef.set(configUpdate, { merge: true });
 
     // Actualizar índice de uso de aeropuertos
     await updateAirportUsageIndex(companyId, activeAirports, previousAirports);
 
-    console.log(`✅ Configuración actualizada para ${companyId}:`,
-        `${activeAirports.length} aeropuertos activos`);
+    console.log(
+      `✅ Configuración actualizada para ${companyId}:`,
+      `${activeAirports.length} aeropuertos activos`,
+    );
 
     return {
       updated: true,
@@ -153,14 +159,18 @@ async function updateHotelDistanceConfig(companyId, hotelLocation,
  * @param {Array} newAirports - Nuevos aeropuertos activos
  * @param {Array} previousAirports - Aeropuertos anteriores
  */
-async function updateAirportUsageIndex(companyId, newAirports,
-    previousAirports) {
+async function updateAirportUsageIndex(
+  companyId,
+  newAirports,
+  previousAirports,
+) {
   try {
     const batch = db.batch();
 
     // Remover hotel de aeropuertos que ya no usa
-    const removedAirports = previousAirports.filter((airport) =>
-      !newAirports.includes(airport));
+    const removedAirports = previousAirports.filter(
+      (airport) => !newAirports.includes(airport),
+    );
 
     for (const airport of removedAirports) {
       const airportRef = db.collection("airportUsageIndex").doc(airport);
@@ -168,8 +178,9 @@ async function updateAirportUsageIndex(companyId, newAirports,
 
       if (airportDoc.exists) {
         const data = airportDoc.data();
-        const updatedHotels = (data.hotelsUsingThisAirport || [])
-            .filter((id) => id !== companyId);
+        const updatedHotels = (data.hotelsUsingThisAirport || []).filter(
+          (id) => id !== companyId,
+        );
 
         batch.update(airportRef, {
           hotelsUsingThisAirport: updatedHotels,
@@ -180,8 +191,9 @@ async function updateAirportUsageIndex(companyId, newAirports,
     }
 
     // Agregar hotel a aeropuertos nuevos
-    const addedAirports = newAirports.filter((airport) =>
-      !previousAirports.includes(airport));
+    const addedAirports = newAirports.filter(
+      (airport) => !previousAirports.includes(airport),
+    );
 
     for (const airport of addedAirports) {
       const airportRef = db.collection("airportUsageIndex").doc(airport);
@@ -231,34 +243,43 @@ async function calculateHotelDistances(companyId) {
     const activeAirports = await detectActiveAirports(companyId);
 
     if (!hotelLocation) {
-      throw new Error(`No se encontró ubicación para hotel ${companyId} en TemplateVuelos`);
+      throw new Error(
+        `No se encontró ubicación para hotel ${companyId} en TemplateVuelos`,
+      );
     }
 
     if (!activeAirports || activeAirports.length === 0) {
-      throw new Error(`No se encontraron aeropuertos activos para hotel ${companyId}`);
+      throw new Error(
+        `No se encontraron aeropuertos activos para hotel ${companyId}`,
+      );
     }
 
-    console.log(`📍 Calculando ${activeAirports.length} rutas desde:`,
-        `${hotelLocation.address} (${hotelLocation.lat}, ${hotelLocation.lng})`);
+    console.log(
+      `📍 Calculando ${activeAirports.length} rutas desde:`,
+      `${hotelLocation.address} (${hotelLocation.lat}, ${hotelLocation.lng})`,
+    );
 
     // Obtener configuración existente para mantener datos anteriores
     const existingConfigDoc = await db
-        .collection("hotelDistanceConfig").doc(companyId).get();
-    const existingConfig = existingConfigDoc.exists ?
-        existingConfigDoc.data() : {};
+      .collection("hotelDistanceConfig")
+      .doc(companyId)
+      .get();
+    const existingConfig = existingConfigDoc.exists
+      ? existingConfigDoc.data()
+      : {};
 
     // Calcular distancias solo para aeropuertos activos
     const distancePromises = activeAirports.map(async (airport) => {
       const result = await distanceService.calculateTravelTime(
-          hotelLocation,
-          airport,
-          {
-            trafficModel: "best_guess",
-            departureTime: Math.floor(Date.now() / 1000),
-          },
+        hotelLocation,
+        airport,
+        {
+          trafficModel: "best_guess",
+          departureTime: Math.floor(Date.now() / 1000),
+        },
       );
 
-      return {airport, result};
+      return { airport, result };
     });
 
     const distanceResults = await Promise.all(distancePromises);
@@ -267,7 +288,7 @@ async function calculateHotelDistances(companyId) {
     const distanceData = {};
     let successfulCalculations = 0;
 
-    distanceResults.forEach(({airport, result}) => {
+    distanceResults.forEach(({ airport, result }) => {
       if (result.success) {
         distanceData[airport] = {
           distance: result.data.distance,
@@ -278,35 +299,47 @@ async function calculateHotelDistances(companyId) {
           lastCalculated: new Date().toISOString(),
         };
         successfulCalculations++;
-        console.log(`  ✅ ${airport}: ${result.data.distance.km}km, ${result.data.duration.minutes}min`);
+        console.log(
+          `  ✅ ${airport}: ${result.data.distance.km}km, ${result.data.duration.minutes}min`,
+        );
       } else {
         console.error(`  ❌ ${airport}: ${result.error}`);
         // Mantener datos anteriores si existen
-        if (existingConfig.distanceData &&
-            existingConfig.distanceData[airport]) {
+        if (
+          existingConfig.distanceData &&
+          existingConfig.distanceData[airport]
+        ) {
           distanceData[airport] = existingConfig.distanceData[airport];
         }
       }
     });
 
     // Actualizar o crear base de datos - CORREGIDO: usar set en lugar de update
-    await db.collection("hotelDistanceConfig").doc(companyId).set({
-      hotelLocation: hotelLocation,
-      activeAirports: activeAirports,
-      distanceData: distanceData,
-      lastDistanceUpdate: admin.firestore.FieldValue.serverTimestamp(),
-      lastConfigUpdate: admin.firestore.FieldValue.serverTimestamp(),
-      needsDistanceRecalculation: false,
-      calculationStats: {
-        totalAirports: activeAirports.length,
-        successful: successfulCalculations,
-        failed: activeAirports.length - successfulCalculations,
-        lastCalculationAt: admin.firestore.FieldValue.serverTimestamp(),
-      },
-    }, {merge: true});
+    await db
+      .collection("hotelDistanceConfig")
+      .doc(companyId)
+      .set(
+        {
+          hotelLocation: hotelLocation,
+          activeAirports: activeAirports,
+          distanceData: distanceData,
+          lastDistanceUpdate: admin.firestore.FieldValue.serverTimestamp(),
+          lastConfigUpdate: admin.firestore.FieldValue.serverTimestamp(),
+          needsDistanceRecalculation: false,
+          calculationStats: {
+            totalAirports: activeAirports.length,
+            successful: successfulCalculations,
+            failed: activeAirports.length - successfulCalculations,
+            lastCalculationAt: admin.firestore.FieldValue.serverTimestamp(),
+          },
+        },
+        { merge: true },
+      );
 
-    console.log(`✅ Distancias calculadas para ${companyId}: ` +
-               `${successfulCalculations}/${activeAirports.length} exitosas`);
+    console.log(
+      `✅ Distancias calculadas para ${companyId}: ` +
+        `${successfulCalculations}/${activeAirports.length} exitosas`,
+    );
 
     return {
       success: true,
@@ -335,10 +368,10 @@ async function getHotelsNeedingDistanceUpdate() {
 
     // 🔄 ACTUALIZADO: Leer desde TemplateVuelos (datos reales)
     const templatesQuery = await db
-        .collection("TemplateVuelos")
-        .where("distanceConfig.enabled", "==", true)
-        .limit(50) // Procesar máximo 50 hoteles por lote
-        .get();
+      .collection("TemplateVuelos")
+      .where("distanceConfig.enabled", "==", true)
+      .limit(50) // Procesar máximo 50 hoteles por lote
+      .get();
 
     const hotelIds = [];
 
@@ -348,11 +381,15 @@ async function getHotelsNeedingDistanceUpdate() {
 
       if (empresa && templateData.distanceConfig?.enabled) {
         hotelIds.push(empresa);
-        console.log(`✅ Hotel activo encontrado: ${empresa} (template: ${doc.id})`);
+        console.log(
+          `✅ Hotel activo encontrado: ${empresa} (template: ${doc.id})`,
+        );
       }
     });
 
-    console.log(`🏨 Encontrados ${hotelIds.length} hoteles activos con Distance Matrix habilitado`);
+    console.log(
+      `🏨 Encontrados ${hotelIds.length} hoteles activos con Distance Matrix habilitado`,
+    );
 
     return [...new Set(hotelIds)]; // Eliminar duplicados
   } catch (error) {
@@ -368,7 +405,9 @@ async function getHotelsNeedingDistanceUpdate() {
  */
 async function updateAllHotelDistances() {
   try {
-    console.log("🏨 Iniciando actualización masiva de distancias de hoteles...");
+    console.log(
+      "🏨 Iniciando actualización masiva de distancias de hoteles...",
+    );
 
     const startTime = Date.now();
     const hotelIds = await getHotelsNeedingDistanceUpdate();
@@ -388,10 +427,13 @@ async function updateAllHotelDistances() {
 
     for (let i = 0; i < hotelIds.length; i += batchSize) {
       const batch = hotelIds.slice(i, i + batchSize);
-      console.log(`📦 Procesando lote ${Math.floor(i/batchSize) + 1}: ${batch.length} hoteles`);
+      console.log(
+        `📦 Procesando lote ${Math.floor(i / batchSize) + 1}: ${batch.length} hoteles`,
+      );
 
       const batchPromises = batch.map((companyId) =>
-        calculateHotelDistances(companyId));
+        calculateHotelDistances(companyId),
+      );
       const batchResults = await Promise.all(batchPromises);
 
       results.push(...batchResults);
@@ -434,7 +476,10 @@ async function updateAllHotelDistances() {
  */
 async function getHotelDistanceData(companyId) {
   try {
-    const configDoc = await db.collection("hotelDistanceConfig").doc(companyId).get();
+    const configDoc = await db
+      .collection("hotelDistanceConfig")
+      .doc(companyId)
+      .get();
 
     if (!configDoc.exists) {
       return {
@@ -454,7 +499,10 @@ async function getHotelDistanceData(companyId) {
       calculationStats: config.calculationStats,
     };
   } catch (error) {
-    console.error(`❌ Error obteniendo datos de distancia para ${companyId}:`, error);
+    console.error(
+      `❌ Error obteniendo datos de distancia para ${companyId}:`,
+      error,
+    );
     return {
       success: false,
       error: error.message,
@@ -479,12 +527,14 @@ module.exports = {
  */
 async function getHotelLocationFromTemplates(companyId) {
   try {
-    console.log(`🏨 Buscando ubicación del hotel en TemplateVuelos para: ${companyId}`);
+    console.log(
+      `🏨 Buscando ubicación del hotel en TemplateVuelos para: ${companyId}`,
+    );
 
     const templatesQuery = await db
-        .collection("TemplateVuelos")
-        .where("empresa", "==", companyId)
-        .get();
+      .collection("TemplateVuelos")
+      .where("empresa", "==", companyId)
+      .get();
 
     if (templatesQuery.empty) {
       console.log(`⚠️ No se encontraron templates para empresa: ${companyId}`);
@@ -495,8 +545,10 @@ async function getHotelLocationFromTemplates(companyId) {
     for (const doc of templatesQuery.docs) {
       const templateData = doc.data();
 
-      if (templateData.distanceConfig?.enabled &&
-          templateData.distanceConfig?.hotelLocation) {
+      if (
+        templateData.distanceConfig?.enabled &&
+        templateData.distanceConfig?.hotelLocation
+      ) {
         const location = templateData.distanceConfig.hotelLocation;
 
         if (location.lat && location.lng) {
@@ -517,7 +569,9 @@ async function getHotelLocationFromTemplates(companyId) {
       }
     }
 
-    console.log(`⚠️ No se encontró ubicación válida en templates para: ${companyId}`);
+    console.log(
+      `⚠️ No se encontró ubicación válida en templates para: ${companyId}`,
+    );
     return null;
   } catch (error) {
     console.error(`❌ Error obteniendo ubicación del hotel:`, error);

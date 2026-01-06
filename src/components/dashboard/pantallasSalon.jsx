@@ -66,6 +66,7 @@ function PantallasSalon() {
   const [nombreEmpresa, setNombreEmpresa] = useState(null);
   const [activeTab, setActiveTab] = useState("general"); // Para controlar las pestañas
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [showHeaderInFullscreen, setShowHeaderInFullscreen] = useState(true);
   useEffect(() => {
     const obtenerEmpresas = async () => {
       try {
@@ -158,7 +159,7 @@ function PantallasSalon() {
   ];
 
   const [selectedFontStyle, setSelectedFontStyle] = useState(
-    fontStyleOptions[0]
+    fontStyleOptions[0],
   );
 
   useEffect(() => {
@@ -167,66 +168,66 @@ function PantallasSalon() {
         const authUser = firebase.auth().currentUser;
         console.log(
           "🚀 ~ pantallasSalon.jsx:167 ~ fetchUserData ~ authUser:",
-          authUser
+          authUser,
         );
 
         if (authUser) {
           const usuariosRef = collection(db, "usuarios");
           console.log(
             "🚀 ~ pantallasSalon.jsx:174 ~ fetchUserData ~ usuariosRef:",
-            usuariosRef
+            usuariosRef,
           );
           let usuariosQuery;
           console.log(
             "🚀 ~ pantallasSalon.jsx:239 ~ fetchUserData ~ usuariosQuery:",
-            usuariosQuery
+            usuariosQuery,
           );
           // Cambio aquí: Si hay una empresa seleccionada, buscar usuarios con esa empresa
           if (empresaSeleccionada) {
             usuariosQuery = query(
               usuariosRef,
-              where("empresa", "==", empresaSeleccionada)
+              where("empresa", "==", empresaSeleccionada),
             );
           } else {
             // Si no hay una empresa seleccionada, buscar usuarios por correo electrónico
             usuariosQuery = query(
               usuariosRef,
-              where("email", "==", authUser.email)
+              where("email", "==", authUser.email),
             );
           }
 
           const usuariosSnapshot = await getDocs(usuariosQuery);
           console.log(
             "🚀 ~ pantallasSalon.jsx:191 ~ fetchUserData ~ usuariosSnapshot:",
-            usuariosSnapshot
+            usuariosSnapshot,
           );
 
           if (!usuariosSnapshot.empty) {
             const user = usuariosSnapshot.docs[0].data();
             console.log(
               "🚀 ~ pantallasSalon.jsx:198 ~ fetchUserData ~ user:",
-              user
+              user,
             );
             const numberOfScreens = user.ps || 0;
             console.log(
               "🚀 ~ pantallasSalon.jsx:217 ~ fetchUserData ~ numberOfScreens:",
-              numberOfScreens
+              numberOfScreens,
             );
             // Cambio aquí: Usar los nombres de pantallas de la colección
             const nombresPantallasColeccion = user.nombrePantallas || [];
             console.log(
               "🚀 ~ pantallasSalon.jsx:217 ~ fetchUserData ~ nombresPantallasColeccion:",
-              nombresPantallasColeccion
+              nombresPantallasColeccion,
             );
             // Asegurarnos de que tengamos suficientes nombres para el número de pantallas
             const namesArray = Array.from(
               { length: numberOfScreens },
               (_, index) =>
-                nombresPantallasColeccion[index] || `Pantalla ${index + 1}`
+                nombresPantallasColeccion[index] || `Pantalla ${index + 1}`,
             );
             console.log(
               "🚀 ~ pantallasSalon.jsx:206 ~ fetchUserData ~ namesArray:",
-              namesArray
+              namesArray,
             );
             setNombreEmpresa(user);
             setNombrePantallas(namesArray);
@@ -250,11 +251,11 @@ function PantallasSalon() {
           const usuariosRef = collection(db, "usuarios");
           const usuariosQuery = query(
             usuariosRef,
-            where("email", "==", authUser.email)
+            where("email", "==", authUser.email),
           );
           console.log(
             "🚀 ~ pantallasSalon.jsx:246 ~ cargarDatosPersonalizacion ~ authUser:",
-            authUser
+            authUser,
           );
           const usuariosSnapshot = await getDocs(usuariosQuery);
 
@@ -270,7 +271,7 @@ function PantallasSalon() {
             const templateSalonesRef = collection(db, "TemplateSalones");
             const templateSalonesQuery = query(
               templateSalonesRef,
-              where("empresa", "==", empresa)
+              where("empresa", "==", empresa),
             );
             const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -282,16 +283,16 @@ function PantallasSalon() {
               setSelectedTemplate(templateSalonesDocData.template || 1);
               setFontColor(templateSalonesDocData.fontColor || "#000000");
               setTemplateColor(
-                templateSalonesDocData.templateColor || "#D1D5DB"
+                templateSalonesDocData.templateColor || "#D1D5DB",
               );
 
               // Manejar la lógica para establecer la fuente, si es necesario
               // Puedes modificar esto según tus necesidades específicas
               const selectedFontStyleOption = fontStyleOptions.find(
-                (option) => option.value === templateSalonesDocData.fontStyle
+                (option) => option.value === templateSalonesDocData.fontStyle,
               );
               setSelectedFontStyle(
-                selectedFontStyleOption || fontStyleOptions[0]
+                selectedFontStyleOption || fontStyleOptions[0],
               );
 
               // Establecer el logo
@@ -299,13 +300,18 @@ function PantallasSalon() {
 
               // Establecer el idioma
               setSelectedLanguage(templateSalonesDocData.idioma || "es");
+
+              // Establecer configuración de header en pantalla completa
+              setShowHeaderInFullscreen(
+                templateSalonesDocData.showHeaderInFullscreen !== false,
+              );
             }
           } else {
             // Si hay una empresa seleccionada, cargar los datos de personalización para esa empresa específica
             const templateSalonesRef = collection(db, "TemplateSalones");
             const templateSalonesQuery = query(
               templateSalonesRef,
-              where("empresa", "==", empresaSeleccionada)
+              where("empresa", "==", empresaSeleccionada),
             );
             const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -317,22 +323,26 @@ function PantallasSalon() {
               setSelectedTemplate(templateSalonesDocData.template || 1);
               setFontColor(templateSalonesDocData.fontColor || "#000000");
               setTemplateColor(
-                templateSalonesDocData.templateColor || "#D1D5DB"
+                templateSalonesDocData.templateColor || "#D1D5DB",
               );
 
               // Manejar la lógica para establecer la fuente, si es necesario
               // Puedes modificar esto según tus necesidades específicas
               const selectedFontStyleOption = fontStyleOptions.find(
-                (option) => option.value === templateSalonesDocData.fontStyle
+                (option) => option.value === templateSalonesDocData.fontStyle,
               );
               setSelectedFontStyle(
-                selectedFontStyleOption || fontStyleOptions[0]
+                selectedFontStyleOption || fontStyleOptions[0],
               );
 
               // Establecer el logo
               setSelectedLogo(templateSalonesDocData.logo || null);
               // Establecer el idioma
               setSelectedLanguage(templateSalonesDocData.idioma || "es");
+              // Establecer configuración de header en pantalla completa
+              setShowHeaderInFullscreen(
+                templateSalonesDocData.showHeaderInFullscreen !== false,
+              );
             }
           }
         }
@@ -403,7 +413,7 @@ function PantallasSalon() {
       // Crear una referencia única para la imagen
       const storageRef = ref(
         storage,
-        `pantallaSalonLogos/${Date.now()}-${file.name}`
+        `pantallaSalonLogos/${Date.now()}-${file.name}`,
       );
 
       // Subir el archivo
@@ -542,6 +552,7 @@ function PantallasSalon() {
         fontStyle: selectedFontStyle.value,
         logo: selectedLogo,
         idioma: selectedLanguage,
+        showHeaderInFullscreen: showHeaderInFullscreen,
         empresa: "",
       };
 
@@ -553,7 +564,7 @@ function PantallasSalon() {
         const usuariosRef = collection(db, "usuarios");
         const usuariosQuery = query(
           usuariosRef,
-          where("email", "==", authUser.email)
+          where("email", "==", authUser.email),
         );
         const usuariosSnapshot = await getDocs(usuariosQuery);
 
@@ -569,7 +580,7 @@ function PantallasSalon() {
       const usuariosRef = collection(db, "usuarios");
       const usuariosEmpresaQuery = query(
         usuariosRef,
-        where("empresa", "==", empresaToUpdate)
+        where("empresa", "==", empresaToUpdate),
       );
       const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
 
@@ -586,7 +597,7 @@ function PantallasSalon() {
             nombrePantallasObject[`nombrePantallas.${index}`] = nombre;
           });
           updateNombrePantallasPromises.push(
-            updateDoc(usuarioRef, nombrePantallasObject)
+            updateDoc(usuarioRef, nombrePantallasObject),
           );
         } else {
           console.error("Documento de usuario no válido:", usuarioDoc.id);
@@ -599,7 +610,7 @@ function PantallasSalon() {
       const templateSalonesRef = collection(db, "TemplateSalones");
       const templateSalonesQuery = query(
         templateSalonesRef,
-        where("empresa", "==", empresaToUpdate)
+        where("empresa", "==", empresaToUpdate),
       );
       const templateSalonesSnapshot = await getDocs(templateSalonesQuery);
 
@@ -613,6 +624,7 @@ function PantallasSalon() {
           logo: selectedLogo,
           empresa: empresaToUpdate,
           idioma: selectedLanguage,
+          showHeaderInFullscreen: showHeaderInFullscreen,
           timestamp: serverTimestamp(),
         });
       } else {
@@ -625,6 +637,7 @@ function PantallasSalon() {
           fontStyle: selectedFontStyle.value,
           logo: selectedLogo,
           idioma: selectedLanguage,
+          showHeaderInFullscreen: showHeaderInFullscreen,
           timestamp: serverTimestamp(),
         });
       }
@@ -644,7 +657,7 @@ function PantallasSalon() {
       const eventosRef = collection(db, "eventos");
       const eventosQuery = query(
         eventosRef,
-        where("userId", "==", authUser.uid)
+        where("userId", "==", authUser.uid),
       );
       const eventosSnapshot = await getDocs(eventosQuery);
 
@@ -658,7 +671,7 @@ function PantallasSalon() {
           updatePromises.push(
             updateDoc(eventoRef, {
               personalizacionTemplate: personalizacionTemplate,
-            })
+            }),
           );
         } else {
           // "Referencia de evento no válida:"
@@ -957,6 +970,37 @@ function PantallasSalon() {
                     </div>
                   </div>
                 </div>
+
+                {/* Configuración de Header en Pantalla Completa */}
+                <div className="pt-4 border-t border-gray-200">
+                  <div className="flex items-start">
+                    <div className="flex items-center h-5">
+                      <input
+                        id="showHeaderInFullscreen"
+                        name="showHeaderInFullscreen"
+                        type="checkbox"
+                        checked={showHeaderInFullscreen}
+                        onChange={(e) =>
+                          setShowHeaderInFullscreen(e.target.checked)
+                        }
+                        className="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded"
+                      />
+                    </div>
+                    <div className="ml-3 text-sm">
+                      <label
+                        htmlFor="showHeaderInFullscreen"
+                        className="font-medium text-gray-700"
+                      >
+                        {t("screenSalon.showHeaderInFullscreen") ||
+                          "Mostrar Header en Pantalla Completa"}
+                      </label>
+                      <p className="text-gray-500">
+                        {t("screenSalon.showHeaderInFullscreenDescription") ||
+                          "Si se activa, el encabezado (Logo y Hora) permanecerá visible incluso cuando un evento esté en modo pantalla completa."}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -988,7 +1032,7 @@ function PantallasSalon() {
                                 const enteredValue = e.target.value;
                                 const truncatedValue = enteredValue.slice(
                                   0,
-                                  50
+                                  50,
                                 );
                                 const updatedNombres = [...nombrePantallas];
                                 updatedNombres[index] = truncatedValue;
@@ -1244,7 +1288,7 @@ function PantallasSalon() {
                   if (
                     window.confirm(
                       t("screenSalon.resetConfirm") ||
-                        "¿Está seguro que desea restablecer todos los valores?"
+                        "¿Está seguro que desea restablecer todos los valores?",
                     )
                   ) {
                     setTemplateColor("#D1D5DB");
