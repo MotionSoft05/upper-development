@@ -89,7 +89,7 @@ function QrDinamic({ searchQuery }) {
   // Calcular eventos por slide
   const eventosPorSlide = chunkArray(
     eventosEnCurso,
-    templateData[0]?.setPortrait ? 5 : 8
+    templateData[0]?.setPortrait ? 5 : 8,
   );
 
   // Uso de eventosPorSlide en useKeenSlider
@@ -148,7 +148,7 @@ function QrDinamic({ searchQuery }) {
             const eventosRef = collection(firestore, "eventos");
             const eventosQuery = query(
               eventosRef,
-              where("empresa", "==", userCompany)
+              where("empresa", "==", userCompany),
             ); //! revisar antes era ("userId", "==", user)
             const querySnapshot = await getDocs(eventosQuery);
 
@@ -158,7 +158,7 @@ function QrDinamic({ searchQuery }) {
               const devicesEvento = evento.devices || [];
 
               const pantallaCoincidente = devicesEvento.find((device) =>
-                Object.keys(pantallasNumeradas).includes(device)
+                Object.keys(pantallasNumeradas).includes(device),
               );
 
               if (pantallaCoincidente) {
@@ -170,7 +170,7 @@ function QrDinamic({ searchQuery }) {
                   // Agregar el filtro para eventos del día en curso
 
                   const fechaInicio = new Date(
-                    `${evento.fechaInicio}T00:00:00`
+                    `${evento.fechaInicio}T00:00:00`,
                   );
                   fechaInicio.setDate(fechaInicio.getDate()); // Sumar 1 día
 
@@ -204,7 +204,7 @@ function QrDinamic({ searchQuery }) {
             const templateRef = collection(firestore, "TemplateDirectorios");
             const templateQuery = query(
               templateRef,
-              where("empresa", "==", userCompany) //! revisar antes era ("userId", "==", user)
+              where("empresa", "==", userCompany), //! revisar antes era ("userId", "==", user)
             );
             console.log("🚀 ~ obtenerUsuario ~ searchQuery:", searchQuery);
             const templateSnapshot = await getDocs(templateQuery);
@@ -223,7 +223,7 @@ function QrDinamic({ searchQuery }) {
             } else {
               console.log(
                 // "No se encontró información en TemplateDirectorios para este usuario."
-                t("qrPage.templateDirectoryNotFound")
+                t("qrPage.templateDirectoryNotFound"),
               );
             }
             // Filtrar por fecha y hora los eventos filtrados por pantalla
@@ -283,7 +283,7 @@ function QrDinamic({ searchQuery }) {
         const publicidadesRef = collection(firestore, "Publicidad");
         const publicidadesQuery = query(
           publicidadesRef,
-          where("userId", "==", searchQuery) //! revisar antes era ("userId", "==", user)
+          where("userId", "==", searchQuery), //! revisar antes era ("userId", "==", user)
         );
 
         getDocs(publicidadesQuery)
@@ -346,7 +346,7 @@ function QrDinamic({ searchQuery }) {
 
     const changeImage = () => {
       setCurrentImageIndex(
-        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length
+        (prevIndex) => (prevIndex + 1) % publicidadesUsuario.length,
       );
     };
 
@@ -390,10 +390,32 @@ function QrDinamic({ searchQuery }) {
   // console.log("templateData", templateData);
   const templateActual = templateData[0]; // Obtener el primer evento de la lista
 
-  const screenWidth = window.innerWidth;
-  const screenHeight = window.innerHeight;
+  const [dimensions, setDimensions] = useState({
+    width: 0,
+    height: 0,
+  });
 
-  // console.log("screenWidth", screenWidth);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      });
+
+      const handleResize = () => {
+        setDimensions({
+          width: window.innerWidth,
+          height: window.innerHeight,
+        });
+      };
+
+      window.addEventListener("resize", handleResize);
+      return () => window.removeEventListener("resize", handleResize);
+    }
+  }, []);
+
+  const screenWidth = dimensions.width;
+  const screenHeight = dimensions.height;
   //   console.log("templateData[0]?.setPortrait", templateData[0]?.setPortrait);
   return (
     <section className="relative w-full  bg-white overflow-y-auto">
