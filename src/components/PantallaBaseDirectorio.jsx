@@ -57,7 +57,7 @@ const retryOperation = async (operation, retries = MAX_RETRIES) => {
     } catch (error) {
       if (i === retries - 1) throw error;
       await new Promise((resolve) =>
-        setTimeout(resolve, RETRY_DELAY * Math.pow(2, i))
+        setTimeout(resolve, RETRY_DELAY * Math.pow(2, i)),
       );
     }
   }
@@ -72,6 +72,13 @@ export default function BaseDirectorioClient({ id, empresa }) {
   const [initialLoading, setInitialLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isPortrait, setIsPortrait] = useState(false);
+  const [isClient, setIsClient] = useState(false); // New state for client-side check
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null; // Skip rendering on server/build
   const [countdown, setCountdown] = useState(COUNTDOWN_DURATION);
   const [qrCodeUrl, setQrCodeUrl] = useState("");
   const isMounted = useRef(true);
@@ -80,7 +87,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
   const [rotationDirection, setRotationDirection] = useState(-90);
   console.log(
     "🚀 ~ PantallaBaseDirectorio.jsx:82 ~ BaseDirectorioClient ~ rotationDirection:",
-    rotationDirection
+    rotationDirection,
   );
   const [screenData, setScreenData] = useState({
     events: [],
@@ -91,7 +98,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
   });
   console.log(
     "🚀 ~ PantallaBaseDirectorio.jsx:86 ~ BaseDirectorioClient ~ screenData:",
-    screenData
+    screenData,
   );
 
   // Memoized values
@@ -99,7 +106,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
   const templates = useMemo(() => screenData.templates, [screenData.templates]);
   const weatherData = useMemo(
     () => screenData.weatherData,
-    [screenData.weatherData]
+    [screenData.weatherData],
   );
 
   // Callbacks
@@ -107,9 +114,9 @@ export default function BaseDirectorioClient({ id, empresa }) {
     debounce(
       () =>
         setScreenData((prev) => ({ ...prev, currentTime: getCurrentTime() })),
-      1000
+      1000,
     ),
-    []
+    [],
   );
 
   // Respaldo de detección de orientación
@@ -131,7 +138,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       const expectedOrientation = currentIsPortrait ? "vertical" : "horizontal";
 
       console.log(
-        `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}, orientación: ${expectedOrientation}`
+        `Filtrando anuncios para pantalla: ${screenName}, nombre: ${screenDisplayName}, orientación: ${expectedOrientation}`,
       );
 
       return ads.filter((ad) => {
@@ -146,7 +153,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
           orientationMatches = adOrientation === expectedOrientation;
 
           console.log(
-            `Ad ${ad.nombre}: orientación anuncio: ${adOrientation}, orientación pantalla: ${expectedOrientation}, coincide: ${orientationMatches}`
+            `Ad ${ad.nombre}: orientación anuncio: ${adOrientation}, orientación pantalla: ${expectedOrientation}, coincide: ${orientationMatches}`,
           );
 
           // Si la orientación no coincide, descartamos inmediatamente
@@ -159,7 +166,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         // Si es "todas", mostrar en todas las pantallas (ya verificamos orientación)
         if (ad.destino === "todas") {
           console.log(
-            `Ad ${ad.nombre}: destino 'todas', orientación correcta: ${orientationMatches}`
+            `Ad ${ad.nombre}: destino 'todas', orientación correcta: ${orientationMatches}`,
           );
           return true;
         }
@@ -171,8 +178,8 @@ export default function BaseDirectorioClient({ id, empresa }) {
             `Ad ${
               ad.nombre
             }: destino 'especificas', está asignado: ${isAssigned}, pantalla actual: ${screenName}, pantallas asignadas: ${JSON.stringify(
-              ad.pantallasAsignadas
-            )}`
+              ad.pantallasAsignadas,
+            )}`,
           );
           return isAssigned;
         }
@@ -180,7 +187,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         return false;
       });
     },
-    []
+    [],
   );
 
   // Obtiene la configuración de orientación para esta pantalla específica
@@ -190,7 +197,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       if (templateData && typeof templateData === "object") {
         console.log(
           "Buscando configuración de orientación para pantalla:",
-          screenNumber
+          screenNumber,
         );
 
         // Opción 1: Buscar en screenSettings si existe
@@ -206,7 +213,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               !!templateData.screenSettings[screenNumber].setPortrait;
             console.log(
               `Encontrada orientación específica para pantalla ${screenNumber}:`,
-              orientation
+              orientation,
             );
 
             // También obtener la dirección de rotación si está definida
@@ -219,7 +226,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               setRotationDirection(rotation);
               console.log(
                 `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
-                rotation
+                rotation,
               );
             }
 
@@ -240,7 +247,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               !!templateData.pantallasSettings[screenNumber].setPortrait;
             console.log(
               `Encontrada orientación específica para pantalla ${screenNumber}:`,
-              orientation
+              orientation,
             );
 
             // También obtener la dirección de rotación si está definida
@@ -253,7 +260,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               setRotationDirection(rotation);
               console.log(
                 `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
-                rotation
+                rotation,
               );
             }
 
@@ -274,7 +281,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               !!templateData.pantallaSettings[screenNumber - 1].isPortrait;
             console.log(
               `Encontrada orientación específica para pantalla ${screenNumber}:`,
-              orientation
+              orientation,
             );
 
             // También obtener la dirección de rotación si está definida
@@ -288,7 +295,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               setRotationDirection(rotation);
               console.log(
                 `Encontrada dirección de rotación para pantalla ${screenNumber}:`,
-                rotation
+                rotation,
               );
             }
 
@@ -300,7 +307,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         if (typeof templateData.setPortrait !== "undefined") {
           console.log(
             "Usando configuración de orientación global:",
-            templateData.setPortrait
+            templateData.setPortrait,
           );
           return !!templateData.setPortrait;
         }
@@ -310,11 +317,11 @@ export default function BaseDirectorioClient({ id, empresa }) {
       const defaultOrientation = window.innerHeight > window.innerWidth;
       console.log(
         "No se encontró configuración de orientación, usando detección automática:",
-        defaultOrientation
+        defaultOrientation,
       );
       return defaultOrientation;
     },
-    [screenNumber]
+    [screenNumber],
   );
 
   // Función para verificar eventos basado en el tiempo actual (filtrado en memoria)
@@ -346,7 +353,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       // Date validation - usando fecha local en lugar de UTC
       const today = new Date();
       const formattedToday = `${today.getFullYear()}-${String(
-        today.getMonth() + 1
+        today.getMonth() + 1,
       ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
       // Comparar strings directamente con el formato correcto
@@ -379,7 +386,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
       const hasNotEnded = nowMinutes < endMinutes;
       // Device validation
       const hasValidDevice = event.devices?.some(
-        (device) => userScreenNames[screenNumber - 1] === device
+        (device) => userScreenNames[screenNumber - 1] === device,
       );
 
       // Company validation
@@ -465,8 +472,8 @@ export default function BaseDirectorioClient({ id, empresa }) {
       const timeUntilNextMinute = calculateTimeUntilNextMinute();
       console.log(
         `⏱️ Próxima actualización en ${Math.round(
-          timeUntilNextMinute / 1000
-        )} segundos`
+          timeUntilNextMinute / 1000,
+        )} segundos`,
       );
 
       const timerId = setTimeout(() => {
@@ -508,7 +515,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
 
       try {
         const userDoc = await retryOperation(() =>
-          getDoc(doc(db, "usuarios", user.uid))
+          getDoc(doc(db, "usuarios", user.uid)),
         );
 
         if (!userDoc.exists()) {
@@ -548,7 +555,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         // Events subscription - Almacenamos todos los eventos que coinciden con la empresa
         const eventsRef = query(
           collection(db, "eventos"),
-          where("empresa", "==", userCompany)
+          where("empresa", "==", userCompany),
         );
 
         const eventsUnsubscribe = onSnapshot(eventsRef, (snapshot) => {
@@ -576,7 +583,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
             // Date validation - usando fecha local en lugar de UTC
             const today = new Date();
             const formattedToday = `${today.getFullYear()}-${String(
-              today.getMonth() + 1
+              today.getMonth() + 1,
             ).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
             // Comparar strings directamente con el formato correcto
@@ -599,15 +606,15 @@ export default function BaseDirectorioClient({ id, empresa }) {
               startMinutes = 0;
               endMinutes = 24 * 60 - 1; // 23:59
               console.log(
-                `Evento de todo el día detectado: ${event.nombreEvento}`
+                `Evento de todo el día detectado: ${event.nombreEvento}`,
               );
             } else {
               // Evento con horas específicas
               startMinutes = convertTimeToMinutes(
-                event.horaInicialSalon || "00:00"
+                event.horaInicialSalon || "00:00",
               );
               endMinutes = convertTimeToMinutes(
-                event.horaFinalSalon || "23:59"
+                event.horaFinalSalon || "23:59",
               );
             }
 
@@ -615,7 +622,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
             const hasNotEnded = nowMinutes < endMinutes;
             // Device validation
             const hasValidDevice = event.devices?.some(
-              (device) => screenNames[screenNumber - 1] === device
+              (device) => screenNames[screenNumber - 1] === device,
             );
 
             // Company validation
@@ -642,7 +649,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         // Templates subscription
         const templatesRef = query(
           collection(db, "TemplateDirectorios"),
-          where("empresa", "==", userCompany)
+          where("empresa", "==", userCompany),
         );
 
         const templatesUnsubscribe = onSnapshot(templatesRef, (snapshot) => {
@@ -663,7 +670,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               "Orientación para pantalla",
               screenNumber,
               ":",
-              screenOrientation
+              screenOrientation,
             );
             // Asegurarnos de que las publicidades estén bien definidas en el template
             // Añadir propiedades de respaldo si alguna publicidad no está definida
@@ -692,13 +699,13 @@ export default function BaseDirectorioClient({ id, empresa }) {
                 .catch((error) => {
                   console.error(
                     "Error al obtener clima para " + templates.ciudad + ":",
-                    error
+                    error,
                   );
                   console.error(t("errors.weather"), error);
                 });
             } else {
               console.log(
-                "No se encontró ciudad en el template para obtener el clima"
+                "No se encontró ciudad en el template para obtener el clima",
               );
               setScreenData((prev) => ({
                 ...prev,
@@ -714,7 +721,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
         const adsRef = query(
           collection(db, "Publicidad"),
           where("empresa", "==", userCompany),
-          where("tipo", "==", "directorio")
+          where("tipo", "==", "directorio"),
         );
 
         const adsUnsubscribe = onSnapshot(
@@ -736,11 +743,11 @@ export default function BaseDirectorioClient({ id, empresa }) {
               allAds,
               screenNumber,
               screenNames,
-              currentOrientation
+              currentOrientation,
             );
 
             console.log(
-              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`
+              `Anuncios totales: ${allAds.length}, Filtrados para pantalla ${screenNumber}: ${filteredAds.length}`,
             );
 
             setScreenData((prev) => ({
@@ -756,7 +763,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
               console.error("Error en la suscripción de publicidades:", error);
               setError(t("errors.ads", { error: error.message }));
             }
-          }
+          },
         );
 
         unsubscribers.push(adsUnsubscribe);
@@ -867,7 +874,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
     "Renderizando pantalla",
     screenNumber,
     "con orientación:",
-    isPortrait ? "Vertical" : "Horizontal"
+    isPortrait ? "Vertical" : "Horizontal",
   );
 
   // Render appropriate content
@@ -890,7 +897,7 @@ export default function BaseDirectorioClient({ id, empresa }) {
             : templates.publicidadLandscape
         }
         nombrePantallasDirectorio={Object.values(
-          screenData.usuario?.nombrePantallasDirectorio || {}
+          screenData.usuario?.nombrePantallasDirectorio || {},
         )}
       />
       {process.env.NODE_ENV === "development" && (

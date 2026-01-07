@@ -1,4 +1,8 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
+"use client";
+import { initializeApp, getApps, getApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
 
 export const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -10,9 +14,11 @@ export const firebaseConfig = {
   measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
+// TODO Luego deberia quedar asi para verificar antes de iniciar app: >>>
+const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 
-// TODO Luego deberia quedar asi para verificar antes de iniciar app: >>>  
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp(); // Antes de inicializar verifica que no este inicializado anteriormente 
-// const app = initializeApp(firebaseConfig)
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export default app;

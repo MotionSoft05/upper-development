@@ -8,11 +8,13 @@ export default function LayoutWrapper({ children }) {
   const pathname = usePathname();
 
   // Lista de rutas donde no queremos mostrar el header y footer
+  // Lista de rutas donde no queremos mostrar el header y footer
   const hideLayoutRoutes = [
     "/paginasAleatorias",
     "/pantallaDeServicio",
     "/pantallaDirec1",
     "/pantallaTarifario",
+    "/", // Landing Page tiene su propia estructura
   ];
 
   // Verifica si la ruta actual está en la lista de exclusión o coincide con el patrón de pantallas
@@ -22,7 +24,7 @@ export default function LayoutWrapper({ children }) {
 
     // Verifica si la ruta coincide exactamente con alguna en la lista de exclusión
     const exactMatch = hideLayoutRoutes.some(
-      (route) => sanitizedPathname === route
+      (route) => sanitizedPathname === route,
     );
 
     // Verifica patrones de URL que deberían excluir el layout

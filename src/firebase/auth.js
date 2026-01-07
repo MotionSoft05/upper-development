@@ -1,3 +1,4 @@
+"use client";
 import {
   getAuth,
   createUserWithEmailAndPassword,
@@ -14,7 +15,7 @@ export const loginUser = async (email, password) => {
     const userCredential = await signInWithEmailAndPassword(
       auth,
       email,
-      password
+      password,
     );
     return userCredential;
   } catch (error) {
@@ -27,7 +28,7 @@ export const registerUser = async (email, password) => {
     const userCredential = await createUserWithEmailAndPassword(
       auth,
       email,
-      password
+      password,
     );
     return userCredential;
   } catch (error) {

@@ -20,11 +20,15 @@ const db = getFirestore(app);
 
 const PantallaBaseTarifario = ({ id }) => {
   const [pantalla, setPantalla] = useState(null);
-  console.log(
-    "🚀 ~ pantallaBaseTarifario.jsx:22 ~ PantallaBaseTarifario ~ pantalla:",
-    pantalla
-  );
+  console.log(pantalla);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null; // Prevent SSR/Build errors
   const [error, setError] = useState(null);
   const [empresa, setEmpresa] = useState(null);
   const [tarifarioData, setTarifarioData] = useState(null);
@@ -113,14 +117,14 @@ const PantallaBaseTarifario = ({ id }) => {
       // 1. Suscripción a pantallasTarifario para actualizaciones en tiempo real
       const pantallasTarifarioRef = query(
         collection(db, "pantallasTarifario"),
-        where("empresa", "==", empresaParam)
+        where("empresa", "==", empresaParam),
       );
 
       const unsubscribePantallas = onSnapshot(
         pantallasTarifarioRef,
         async (querySnapshot) => {
           console.log(
-            `Se encontraron ${querySnapshot.docs.length} pantallas (tiempo real)`
+            `Se encontraron ${querySnapshot.docs.length} pantallas (tiempo real)`,
           );
 
           if (querySnapshot.empty) {
@@ -139,7 +143,7 @@ const PantallaBaseTarifario = ({ id }) => {
           } else {
             // Si el índice no es válido, tomamos el primer documento
             console.log(
-              `Índice ${idNum} fuera de rango, usando el primer documento`
+              `Índice ${idNum} fuera de rango, usando el primer documento`,
             );
             pantallaDoc = querySnapshot.docs[0];
           }
@@ -150,7 +154,7 @@ const PantallaBaseTarifario = ({ id }) => {
           if (pantallaData.ciudad) {
             console.log(
               "Obteniendo datos del clima para:",
-              pantallaData.ciudad
+              pantallaData.ciudad,
             );
 
             fetchWeatherData(pantallaData.ciudad)
@@ -181,12 +185,12 @@ const PantallaBaseTarifario = ({ id }) => {
               .catch((error) => {
                 console.error(
                   "Error al obtener clima para " + pantallaData.ciudad + ":",
-                  error
+                  error,
                 );
               });
           } else {
             console.log(
-              "No se encontró ciudad en el template para obtener el clima"
+              "No se encontró ciudad en el template para obtener el clima",
             );
           }
           // Guardar los datos de la pantalla
@@ -232,7 +236,7 @@ const PantallaBaseTarifario = ({ id }) => {
           console.error("Error en suscripción a pantallasTarifario:", error);
           setError(`Error en la suscripción: ${error.message}`);
           setLoading(false);
-        }
+        },
       );
 
       unsubscribes.push(unsubscribePantallas);
@@ -254,7 +258,7 @@ const PantallaBaseTarifario = ({ id }) => {
   const setupTemplateSubscription = (empresaParam, unsubscribes) => {
     const templateRef = query(
       collection(db, "TemplateTarifario"),
-      where("empresa", "==", empresaParam)
+      where("empresa", "==", empresaParam),
     );
 
     const unsubscribeTemplate = onSnapshot(
@@ -288,12 +292,12 @@ const PantallaBaseTarifario = ({ id }) => {
             .catch((error) => {
               console.error(
                 "Error al obtener clima para " + templateData.ciudad + ":",
-                error
+                error,
               );
             });
         } else {
           console.log(
-            "No se encontró ciudad en el template para obtener el clima"
+            "No se encontró ciudad en el template para obtener el clima",
           );
         }
 
@@ -343,7 +347,7 @@ const PantallaBaseTarifario = ({ id }) => {
         console.error("Error en suscripción a TemplateTarifario:", error);
         setError(`Error en la suscripción: ${error.message}`);
         setLoading(false);
-      }
+      },
     );
 
     unsubscribes.push(unsubscribeTemplate);
@@ -384,7 +388,7 @@ const PantallaBaseTarifario = ({ id }) => {
       },
       (error) => {
         console.error("Error en suscripción a Tarifarios:", error);
-      }
+      },
     );
 
     unsubscribes.push(unsubscribeTarifario);
@@ -394,7 +398,7 @@ const PantallaBaseTarifario = ({ id }) => {
   const setupGenericTarifarioSubscription = (empresaParam, unsubscribes) => {
     const tarifarioQuery = query(
       collection(db, "Tarifarios"),
-      where("empresa", "==", empresaParam)
+      where("empresa", "==", empresaParam),
     );
 
     const unsubscribeTarifarios = onSnapshot(
@@ -402,7 +406,7 @@ const PantallaBaseTarifario = ({ id }) => {
       (querySnapshot) => {
         if (querySnapshot.empty) {
           console.log(
-            "No se encontraron documentos en Tarifarios para esta empresa"
+            "No se encontraron documentos en Tarifarios para esta empresa",
           );
           return;
         }
@@ -411,7 +415,7 @@ const PantallaBaseTarifario = ({ id }) => {
         const docData = querySnapshot.docs[0].data();
         console.log(
           "Tarifarios generales actualizados (tiempo real):",
-          docData
+          docData,
         );
         setTarifarioData(docData);
 
@@ -433,7 +437,7 @@ const PantallaBaseTarifario = ({ id }) => {
       },
       (error) => {
         console.error("Error en suscripción genérica a Tarifarios:", error);
-      }
+      },
     );
 
     unsubscribes.push(unsubscribeTarifarios);

@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 import auth, { loginUser } from "@/firebase/auth";
 import { doc, updateDoc, getDoc, getFirestore } from "firebase/firestore";
 import { sendPasswordResetEmail, sendEmailVerification } from "firebase/auth";
+import GoogleLoginButton from "@/components/landing/GoogleLoginButton";
 
 // Esta función enviará un correo electrónico utilizando Email.js
 const sendEmail = async (userID) => {
@@ -174,7 +175,27 @@ function LogIn() {
               <h2 className="text-3xl font-bold text-gray-800">
                 {t("login.loginTitle")}
               </h2>
-              <p className="text-gray-600 mt-2">{t("login.welcomeBack")}</p>
+              <p className="text-gray-600 mt-2 text-sm">
+                {t("login.welcomeBack")}
+              </p>
+
+              <div className="mt-6">
+                <GoogleLoginButton
+                  variant="default"
+                  text="Continuar con Google"
+                  className="w-full justify-center"
+                />
+                <div className="relative my-6">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-200"></div>
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="px-2 bg-white text-gray-500">
+                      O ingresa con tu email
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {error && (
