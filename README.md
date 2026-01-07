@@ -1,34 +1,140 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Upper Digital Signage
 
-## Getting Started
+> B2B SaaS platform for managing digital signage across hotels, restaurants, offices, and venues.
 
-First, run the development server:
+## 📖 Documentation
+
+**Full documentation is available in the `/docs` folder.** Start with the [Documentation Index](./docs/DOCUMENTATION-INDEX.md).
+
+### Quick Links
+
+| Document                                                              | Description                 |
+| --------------------------------------------------------------------- | --------------------------- |
+| [Architecture Overview](./docs/architecture/ARCHITECTURE-OVERVIEW.md) | Tech stack, system diagrams |
+| [Dashboard](./docs/dashboard/DASHBOARD-OVERVIEW.md)                   | Admin panel structure       |
+| [Sidebar Navigation](./docs/dashboard/SIDEBAR-NAVIGATION.md)          | Sidebar nav & permissions   |
+| [Screen Types](./docs/screens/SCREEN-TYPES.md)                        | All 5 screen types          |
+| [Template System](./docs/templates/TEMPLATE-SYSTEM.md)                | Template rendering          |
+| [Firebase Integration](./docs/technical/FIREBASE-INTEGRATION.md)      | Firestore collections       |
+| [Cloud Functions](./docs/technical/CLOUD-FUNCTIONS.md)                | Backend functions           |
+| [Flight System](./docs/flights/FLIGHT-SYSTEM.md)                      | Flight API integration      |
+| [Secure Deployment](./docs/deployment/SECURE-DEPLOYMENT.md)           | Deployment safety           |
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Firebase CLI (`npm install -g firebase-tools`)
+
+### Installation
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
+# Clone the repository
+git clone <repo-url>
+cd upper-development
+
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your Firebase config
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+```bash
+# Start development server
+npm run dev
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+# Open http://localhost:3000
+```
 
-## Learn More
+### Production Build
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# Build for production
+npm run build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Static export to /out folder
+npm run export
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Firebase Functions
 
-## Deploy on Vercel
+```bash
+# Navigate to functions
+cd functions
+npm install
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+# Local testing
+npm run serve
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+# Deploy to Firebase
+firebase deploy --only functions
+```
+
+## 📁 Project Structure
+
+```
+upper-development/
+├── src/
+│   ├── app/              # Next.js App Router pages
+│   │   ├── dashboard/    # Admin dashboard
+│   │   ├── pantalla/     # Salon screens (1-300)
+│   │   ├── pantallaDirec/# Directory screens
+│   │   └── ...
+│   ├── components/       # React components
+│   │   ├── dashboard/    # Dashboard panels
+│   │   └── templates/    # Screen templates
+│   ├── firebase/         # Firebase config
+│   ├── lang/             # i18n translations
+│   └── utils/            # Utilities
+├── functions/            # Firebase Cloud Functions
+├── docs/                 # Documentation
+└── public/               # Static assets
+```
+
+## 🖥️ Screen Types
+
+| Type        | Route                     | Purpose              |
+| ----------- | ------------------------- | -------------------- |
+| Salon       | `/pantalla/[id]`          | Event displays       |
+| Directory   | `/pantallaDirec/[id]`     | Building directories |
+| Tarifario   | `/pantallaTarifario/[id]` | Rate boards          |
+| Vuelos      | `/pantallaVuelos`         | Flight monitors      |
+| Promociones | `/pantallaPromociones`    | Promotional content  |
+
+## 🔧 Tech Stack
+
+- **Frontend**: Next.js 14, React, Tailwind CSS
+- **Backend**: Firebase (Auth, Firestore, Storage, Functions)
+- **i18n**: react-i18next (ES/EN)
+- **APIs**: WeatherAPI, AeroDataBox, Google Maps
+
+## 📋 Key Features
+
+- ✅ 300+ pre-generated static screen routes
+- ✅ Real-time content updates via Firebase
+- ✅ Multi-tenancy with company scoping
+- ✅ Permission-based dashboard access
+- ✅ Android TV device management
+- ✅ Automatic flight data updates (40 min intervals)
+- ✅ Weather integration
+- ✅ Advertisement management
+
+## 📚 Additional Resources
+
+- [Next.js Documentation](https://nextjs.org/docs)
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [Tailwind CSS](https://tailwindcss.com/docs)
+
+## 🤝 Contributing
+
+See the documentation for architecture patterns and code guidelines.
+
+## 📄 License
+
+Private project - Upper Digital Signage
