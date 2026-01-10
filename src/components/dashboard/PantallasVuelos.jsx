@@ -22,6 +22,7 @@ import Swal from "sweetalert2";
 import Select from "react-select";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 import GoogleMapSelector from "../common/GoogleMapSelector";
+import MensajesDinamicos from "./MensajesDinamicos";
 
 if (!firebase.apps.length) {
   firebase.initializeApp(firebaseConfig);
@@ -237,12 +238,12 @@ function PantallasVuelos() {
           if (empresaSeleccionada) {
             usuariosQuery = query(
               usuariosRef,
-              where("empresa", "==", empresaSeleccionada)
+              where("empresa", "==", empresaSeleccionada),
             );
           } else {
             usuariosQuery = query(
               usuariosRef,
-              where("email", "==", authUser.email)
+              where("email", "==", authUser.email),
             );
           }
 
@@ -257,7 +258,7 @@ function PantallasVuelos() {
             const namesArray = Array.from(
               { length: numberOfScreens },
               (_, index) =>
-                nombresPantallasColeccion[index] || `Vuelos ${index + 1}`
+                nombresPantallasColeccion[index] || `Vuelos ${index + 1}`,
             );
 
             setNombrePantallasVuelos(namesArray);
@@ -282,7 +283,7 @@ function PantallasVuelos() {
           const usuariosRef = collection(db, "usuarios");
           const usuariosQuery = query(
             usuariosRef,
-            where("email", "==", authUser.email)
+            where("email", "==", authUser.email),
           );
 
           const usuariosSnapshot = await getDocs(usuariosQuery);
@@ -300,7 +301,7 @@ function PantallasVuelos() {
             const templateVuelosRef = collection(db, "TemplateVuelos");
             const templateVuelosQuery = query(
               templateVuelosRef,
-              where("empresa", "==", empresaToUse)
+              where("empresa", "==", empresaToUse),
             );
 
             const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
@@ -346,7 +347,7 @@ function PantallasVuelos() {
         console.log("🔄 Cargando estado de aeropuertos desde admin...");
 
         const airportConfigSnapshot = await getDocs(
-          collection(db, "airportServiceConfig")
+          collection(db, "airportServiceConfig"),
         );
 
         // Crear mapa de estados de aeropuertos
@@ -358,13 +359,12 @@ function PantallasVuelos() {
         console.log("📡 Estado de aeropuertos:", airportStatusMap);
 
         // Actualizar la lista de aeropuertos disponibles con el estado real
-        setAvailableAirports(prevAirports =>
-          prevAirports.map(airport => ({
+        setAvailableAirports((prevAirports) =>
+          prevAirports.map((airport) => ({
             ...airport,
-            enabled: airportStatusMap[airport.value] === true // Solo habilitado si explícitamente está en true
-          }))
+            enabled: airportStatusMap[airport.value] === true, // Solo habilitado si explícitamente está en true
+          })),
         );
-
       } catch (error) {
         console.error("❌ Error cargando estado de aeropuertos:", error);
         // En caso de error, mantener todos habilitados por seguridad
@@ -493,7 +493,7 @@ function PantallasVuelos() {
       // Obtener empresa del usuario autenticado
       const usuariosQuery = query(
         collection(db, "usuarios"),
-        where("email", "==", authUser.email)
+        where("email", "==", authUser.email),
       );
       const usuariosSnapshot = await getDocs(usuariosQuery);
       let empresa = "";
@@ -510,7 +510,7 @@ function PantallasVuelos() {
         const usuariosRef = collection(db, "usuarios");
         const usuariosEmpresaQuery = query(
           usuariosRef,
-          where("empresa", "==", empresaToUse)
+          where("empresa", "==", empresaToUse),
         );
         const usuariosEmpresaSnapshot = await getDocs(usuariosEmpresaQuery);
 
@@ -526,7 +526,7 @@ function PantallasVuelos() {
               nombrePantallasObject[`nombrePantallasVuelos.${index}`] = nombre;
             });
             updateNombrePantallasPromises.push(
-              updateDoc(usuarioRef, nombrePantallasObject)
+              updateDoc(usuarioRef, nombrePantallasObject),
             );
           }
         });
@@ -537,7 +537,7 @@ function PantallasVuelos() {
         const templateVuelosRef = collection(db, "TemplateVuelos");
         const templateVuelosQuery = query(
           templateVuelosRef,
-          where("empresa", "==", empresaToUse)
+          where("empresa", "==", empresaToUse),
         );
         const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
@@ -568,7 +568,7 @@ function PantallasVuelos() {
         ) {
           try {
             console.log(
-              `🗺️ Actualizando configuración de distancias para hotel: ${empresaToUse}`
+              `🗺️ Actualizando configuración de distancias para hotel: ${empresaToUse}`,
             );
 
             const response = await fetch(
@@ -582,7 +582,7 @@ function PantallasVuelos() {
                   companyId: empresaToUse,
                   hotelLocation: distanceConfig.hotelLocation,
                 }),
-              }
+              },
             );
 
             if (response.ok) {
@@ -590,13 +590,13 @@ function PantallasVuelos() {
               console.log(`✅ Sistema de distancias actualizado:`, result);
             } else {
               console.warn(
-                `⚠️ No se pudo actualizar sistema de distancias: ${response.status}`
+                `⚠️ No se pudo actualizar sistema de distancias: ${response.status}`,
               );
             }
           } catch (error) {
             console.error(
               "❌ Error actualizando sistema de distancias:",
-              error
+              error,
             );
             // No fallar la operación completa si esto falla
           }
@@ -765,6 +765,17 @@ function PantallasVuelos() {
               }`}
             >
               {t("flightScreens.screens")}
+            </button>
+
+            <button
+              onClick={() => setActiveTab("dynamic_messages")}
+              className={`flex-1 min-w-0 py-4 px-2 sm:px-4 text-center font-medium text-xs sm:text-sm md:text-base ${
+                activeTab === "dynamic_messages"
+                  ? "text-blue-600 border-b-2 border-blue-500"
+                  : "text-gray-500 hover:text-gray-700"
+              }`}
+            >
+              Mensajes Dinámicos
             </button>
 
             {selectedPantalla && (
@@ -951,7 +962,7 @@ function PantallasVuelos() {
                               try {
                                 console.log(
                                   "🔄 Intentando guardar configuración...",
-                                  distanceConfig
+                                  distanceConfig,
                                 );
                                 await guardarConfiguracion();
                                 Swal.fire({
@@ -964,7 +975,7 @@ function PantallasVuelos() {
                               } catch (error) {
                                 console.error(
                                   "❌ Error detallado al guardar:",
-                                  error
+                                  error,
                                 );
                                 Swal.fire({
                                   icon: "error",
@@ -1047,7 +1058,7 @@ function PantallasVuelos() {
                               className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                               value={(nombrePantallasVuelos[index] || "").slice(
                                 0,
-                                50
+                                50,
                               )}
                               onChange={(e) => {
                                 const updatedNombres = [
@@ -1232,6 +1243,16 @@ function PantallasVuelos() {
               </div>
             )}
 
+            {/* TAB: Mensajes Dinámicos */}
+            {activeTab === "dynamic_messages" && (
+              <div className="space-y-6">
+                <MensajesDinamicos
+                  overrideCompany={empresaSeleccionada}
+                  isEmbedded={true}
+                />
+              </div>
+            )}
+
             {/* TAB: Configuración de Pantalla Específica */}
             {activeTab === "pantalla" && selectedPantalla && (
               <div className="space-y-6">
@@ -1271,13 +1292,13 @@ function PantallasVuelos() {
                     </div>
                   </div>
                   <Select
-                    options={availableAirports.map(airport => ({
+                    options={availableAirports.map((airport) => ({
                       ...airport,
                       isDisabled: !airport.enabled, // Deshabilitar si el admin lo desactivó
                     }))}
                     value={availableAirports.find(
                       (airport) =>
-                        airport.value === selectedPantalla.config.airport?.code
+                        airport.value === selectedPantalla.config.airport?.code,
                     )}
                     onChange={(option) =>
                       updatePantallaConfig("airport", {
@@ -1290,20 +1311,31 @@ function PantallasVuelos() {
                     styles={{
                       option: (provided, state) => ({
                         ...provided,
-                        color: state.data.enabled ? '#1f2937' : '#9ca3af', // Gris si está deshabilitado
+                        color: state.data.enabled ? "#1f2937" : "#9ca3af", // Gris si está deshabilitado
                         backgroundColor: state.data.enabled
-                          ? (state.isSelected ? '#3b82f6' : (state.isFocused ? '#eff6ff' : 'white'))
-                          : (state.isFocused ? '#f3f4f6' : '#f9fafb'), // Fondo gris claro si está deshabilitado
-                        cursor: state.data.enabled ? 'pointer' : 'not-allowed',
+                          ? state.isSelected
+                            ? "#3b82f6"
+                            : state.isFocused
+                              ? "#eff6ff"
+                              : "white"
+                          : state.isFocused
+                            ? "#f3f4f6"
+                            : "#f9fafb", // Fondo gris claro si está deshabilitado
+                        cursor: state.data.enabled ? "pointer" : "not-allowed",
                         opacity: state.data.enabled ? 1 : 0.6,
                       }),
                       singleValue: (provided, state) => ({
                         ...provided,
-                        color: state.data?.enabled !== false ? '#1f2937' : '#9ca3af',
+                        color:
+                          state.data?.enabled !== false ? "#1f2937" : "#9ca3af",
                       }),
                     }}
                     formatOptionLabel={(option) => (
-                      <span className={option.enabled ? 'text-gray-900' : 'text-gray-400'}>
+                      <span
+                        className={
+                          option.enabled ? "text-gray-900" : "text-gray-400"
+                        }
+                      >
                         {option.label}
                       </span>
                     )}
@@ -1329,7 +1361,7 @@ function PantallasVuelos() {
                         onChange={(e) =>
                           updatePantallaConfig(
                             "displaySettings.showDepartures",
-                            e.target.checked
+                            e.target.checked,
                           )
                         }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -1354,7 +1386,7 @@ function PantallasVuelos() {
                         onChange={(e) =>
                           updatePantallaConfig(
                             "displaySettings.showArrivals",
-                            e.target.checked
+                            e.target.checked,
                           )
                         }
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
@@ -1383,7 +1415,7 @@ function PantallasVuelos() {
                         onChange={(e) =>
                           updatePantallaConfig(
                             "displaySettings.timeWindow",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value),
                           )
                         }
                         className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -1424,7 +1456,7 @@ function PantallasVuelos() {
                         onChange={(e) =>
                           updatePantallaConfig(
                             "displaySettings.maxFlights",
-                            parseInt(e.target.value)
+                            parseInt(e.target.value),
                           )
                         }
                         className="block w-24 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
@@ -1483,7 +1515,7 @@ function PantallasVuelos() {
                                 {field.label}
                               </span>
                             </div>
-                          )
+                          ),
                         )}
                       </div>
                     </div>
@@ -1511,7 +1543,7 @@ function PantallasVuelos() {
                               onChange={(e) => {
                                 updatePantallaConfig(
                                   `displayFields.${key}`,
-                                  e.target.checked
+                                  e.target.checked,
                                 );
                               }}
                               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mt-1"
@@ -1528,7 +1560,7 @@ function PantallasVuelos() {
                               </p>
                             </div>
                           </div>
-                        )
+                        ),
                       )}
                     </div>
                   </div>
@@ -1542,7 +1574,7 @@ function PantallasVuelos() {
                         };
                         updatePantallaConfig(
                           "displayFields",
-                          defaultDisplayFields
+                          defaultDisplayFields,
                         );
                       }}
                       className="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50"

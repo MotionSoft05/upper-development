@@ -20,6 +20,16 @@
 | [Dashboard Overview](./dashboard/DASHBOARD-OVERVIEW.md) | Admin panel structure          |
 | [Sidebar Navigation](./dashboard/SIDEBAR-NAVIGATION.md) | Navigation, permissions, state |
 
+### Dashboard Redesign (2026)
+
+| Document                                                                   | Description               |
+| -------------------------------------------------------------------------- | ------------------------- |
+| [Redesign README](./dashboard/redesign/README.md)                          | Project overview & status |
+| [Implementation Plan](./dashboard/redesign/IMPLEMENTATION-PLAN.md)         | Technical architecture    |
+| [TODO List](./dashboard/redesign/TODO.md)                                  | Task checklist            |
+| [Competitor Research](./dashboard/redesign/COMPETITOR-RESEARCH.md)         | Industry analysis         |
+| [Firebase Schema Changes](./dashboard/redesign/FIREBASE-SCHEMA-CHANGES.md) | TV App compatibility log  |
+
 ### Screens & Templates
 
 | Document                                          | Description                 |

@@ -49,15 +49,10 @@ export default function LayoutWrapper({ children }) {
     return children;
   }
 
-  // Si es la página del dashboard, aplicamos una estructura especial
+  // Si es la página del dashboard, no aplicamos Navigation/Footer
+  // porque DashboardLayout ya tiene su propio header/footer
   if (isDashboard) {
-    return (
-      <div className="flex flex-col min-h-screen">
-        <Navigation />
-        <div className="flex-grow">{children}</div>
-        <Footer />
-      </div>
-    );
+    return children;
   }
 
   // De lo contrario, renderiza el layout completo estándar

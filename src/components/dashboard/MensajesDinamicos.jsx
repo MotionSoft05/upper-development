@@ -22,7 +22,7 @@ import {
 import Swal from "sweetalert2";
 import { firebaseConfig } from "@/firebase/firebaseConfig";
 
-const MensajesDinamicos = () => {
+const MensajesDinamicos = ({ overrideCompany = null, isEmbedded = false }) => {
   const { t } = useTranslation();
 
   // Estados principales
@@ -71,11 +71,18 @@ const MensajesDinamicos = () => {
       if (user) {
         setAuthUser(user);
         try {
-          const userDoc = await getDoc(doc(db, "usuarios", user.uid));
-          if (userDoc.exists()) {
-            const userData = userDoc.data();
-            setUserCompany(userData.empresa || "");
-            await loadConfig(userData.empresa);
+          // If overrideCompany is provided, use it directly (admin mode)
+          if (overrideCompany) {
+            setUserCompany(overrideCompany);
+            await loadConfig(overrideCompany);
+          } else {
+            // Otherwise verify user's own company
+            const userDoc = await getDoc(doc(db, "usuarios", user.uid));
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              setUserCompany(userData.empresa || "");
+              await loadConfig(userData.empresa);
+            }
           }
         } catch (error) {
           console.error("Error loading user data:", error);
@@ -84,8 +91,14 @@ const MensajesDinamicos = () => {
       setLoading(false);
     });
 
+    // Re-run if overrideCompany changes
+    if (overrideCompany && authUser) {
+      setUserCompany(overrideCompany);
+      loadConfig(overrideCompany);
+    }
+
     return () => unsubscribe();
-  }, [db]);
+  }, [db, overrideCompany]); // Added overrideCompany dependency
 
   const loadConfig = async (empresa) => {
     if (!empresa) return;
@@ -94,13 +107,15 @@ const MensajesDinamicos = () => {
       const templateVuelosRef = collection(db, "TemplateVuelos");
       const templateVuelosQuery = query(
         templateVuelosRef,
-        where("empresa", "==", empresa)
+        where("empresa", "==", empresa),
       );
       const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
       if (!templateVuelosSnapshot.empty) {
         const templateData = templateVuelosSnapshot.docs[0].data();
-        setDynamicMessages(templateData.dynamicMessages || dynamicMessages);
+        if (templateData.dynamicMessages) {
+          setDynamicMessages(templateData.dynamicMessages);
+        }
       }
     } catch (error) {
       console.error("Error loading dynamic messages config:", error);
@@ -121,7 +136,7 @@ const MensajesDinamicos = () => {
       const templateVuelosRef = collection(db, "TemplateVuelos");
       const templateVuelosQuery = query(
         templateVuelosRef,
-        where("empresa", "==", userCompany)
+        where("empresa", "==", userCompany),
       );
       const templateVuelosSnapshot = await getDocs(templateVuelosQuery);
 
@@ -131,7 +146,7 @@ const MensajesDinamicos = () => {
         await updateDoc(templateVuelosDocRef, {
           dynamicMessages: dynamicMessages,
           updatedAt: serverTimestamp(),
-          updatedBy: authUser.email || ""
+          updatedBy: authUser.email || "",
         });
       } else {
         // Crear nuevo documento con la estructura completa
@@ -139,7 +154,7 @@ const MensajesDinamicos = () => {
           empresa: userCompany,
           dynamicMessages: dynamicMessages,
           updatedAt: serverTimestamp(),
-          updatedBy: authUser.email || ""
+          updatedBy: authUser.email || "",
         };
         await addDoc(templateVuelosRef, templateData);
       }
@@ -153,7 +168,6 @@ const MensajesDinamicos = () => {
 
       setHasUnsavedChanges(false);
       return true;
-
     } catch (error) {
       console.error("Error al guardar configuración:", error);
       Swal.fire({
@@ -183,8 +197,8 @@ const MensajesDinamicos = () => {
   const updateDynamicMessage = (messageId, field, value) => {
     setDynamicMessages(
       dynamicMessages.map((msg) =>
-        msg.id === messageId ? { ...msg, [field]: value } : msg
-      )
+        msg.id === messageId ? { ...msg, [field]: value } : msg,
+      ),
     );
     setHasUnsavedChanges(true);
   };
@@ -216,7 +230,7 @@ const MensajesDinamicos = () => {
                 </p>
               )}
             </div>
-            
+
             <div className="flex space-x-3">
               <button
                 onClick={handleSaveConfig}
@@ -271,7 +285,7 @@ const MensajesDinamicos = () => {
                               updateDynamicMessage(
                                 message.id,
                                 "enabled",
-                                e.target.checked
+                                e.target.checked,
                               )
                             }
                             className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
